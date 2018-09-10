@@ -1,0 +1,262 @@
+<!--Copyright (c) 2016-%CurrentYear% Swiss Agency for Development and Cooperation (SDC)
+
+The program users must agree to the following terms:
+
+Copyright notices
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU AGPL v3 License as published by the 
+Free Software Foundation, version 3 of the License.
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of 
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU AGPL v3 License for more details www.gnu.org.
+
+Disclaimer of Warranty
+There is no warranty for the program, to the extent permitted by applicable law; except when otherwise stated in writing the copyright 
+holders and/or other parties provide the program "as is" without warranty of any kind, either expressed or implied, including, but not 
+limited to, the implied warranties of merchantability and fitness for a particular purpose. The entire risk as to the quality and 
+performance of the program is with you. Should the program prove defective, you assume the cost of all necessary servicing, repair or correction.
+
+Limitation of Liability 
+In no event unless required by applicable law or agreed to in writing will any copyright holder, or any other party who modifies and/or 
+conveys the program as permitted above, be liable to you for damages, including any general, special, incidental or consequential damages 
+arising out of the use or inability to use the program (including but not limited to loss of data or data being rendered inaccurate or losses 
+sustained by you or third parties or a failure of the program to operate with any other programs), even if such holder or other party has been 
+advised of the possibility of such damages.
+
+In case of dispute arising out or in relation to the use of the program, it is subject to the public law of Switzerland. The place of jurisdiction is Berne.-->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add/Edit Policy</title>
+    <link href="../CSS/Style.CSS" rel="stylesheet" type="text/css"/>
+    <script src="../JS/jquery-3.2.1.min.js"></script>
+    <script src="../JS/exact.js"></script>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" charset="utf-8"/>
+
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+
+
+        document.title = Android.getString('AddEditPolicy');
+
+            var LocationId =parseInt(queryString("l"));
+            var FamilyId = parseInt(queryString("f"));
+            var strOfficerLocation = Android.getOfficerLocation();
+            var $Locations = $.parseJSON(strOfficerLocation);
+            var RegionId =  parseInt($Locations[0]["RegionId"]);
+            var DistrictId = parseInt($Locations[0]["DistrictId"]);
+            var policyId = parseInt(queryString("p"));
+
+            var HasCycle = null;
+            var fStartDate = null;
+            $("#txtEffectiveDate").prop('disabled', true);
+
+             $("#Officer").hide();
+             var OfficerId =  Android.getOfficerId();
+             $("#ddlOfficer").val(parseInt(OfficerId));
+
+             //LoadOfficers(LocationId, null);
+             LoadProduct(RegionId,DistrictId,null);
+
+
+           if (policyId != 0){
+
+                var strPolicy = Android.getPolicy(policyId);
+                var $Policy = $.parseJSON(strPolicy);
+                $("#ddlProduct").val($Policy[0]["ProdId"]);
+                $("#ddlOfficer").val($Policy[0]["OfficerId"]);
+                var PolicyStage = $Policy[0]["PolicyStage"];
+                var StartDate = $Policy[0]["StartDate"];
+                var EnrolmentDate =$Policy[0]["EnrollDate"];
+                var ExpiryDate =$Policy[0]["ExpiryDate"];
+                var ProdId = parseInt($Policy[0]["ProdId"]);
+                var CurrentPolicyValue = $Policy[0]["PolicyValue"];
+                var isOffline = parseInt($Policy[0]["isOffline"]);
+                bindDataFromDatafield(strPolicy);
+
+                $('#txtStartDate').val((StartDate));
+                $('#txtExpiryDate').val(ExpiryDate);
+
+                var HSCycle = false;
+                 if($('#hfHasCycle').val()) HSCycle = true;
+
+                var NewPolicyValue = Android.getPolicyValue(EnrolmentDate,ProdId,FamilyId,$('#hffStartDate').val(),HSCycle,parseInt(policyId),PolicyStage,isOffline);
+                var PolicyStatusValue = $("#hfPolicyStatus").val();
+
+             if (NewPolicyValue != CurrentPolicyValue){
+                var Vdate = new Date(EnrolmentDate);  //or your date here
+                var NewDate = ((Vdate.getMonth() + 1) + '/' + Vdate.getDate() + '/' +  Vdate.getFullYear());
+                Android.ShowDialog(Android.getString('PolicyValueChange') + NewDate + ' '+ Android.getString('Changed'));
+
+                }
+
+                     $("#txtEnrolmentDate").prop('disabled', false);
+                     $("#ddlProduct").prop('disabled', false);
+                     $("#txtStartDate").prop('disabled', true);
+                     if(PolicyStatusValue == 1){
+                        $("#txtExpiryDate").prop('disabled', false);
+                     }else{
+                        $("#txtExpiryDate").prop('disabled', true);
+                     }
+
+
+            }
+
+            $('#txtEnrolmentDate').change(function(){
+              var EnrolmentDate = $('#txtEnrolmentDate').val();
+              LoadProduct(RegionId,DistrictId,EnrolmentDate);
+              //LoadOfficers(LocationId, EnrolmentDate);
+
+            });
+
+
+           $('#txtEnrolmentDate, #ddlProduct').change(function(){
+                var EnrolmentDate = $('#txtEnrolmentDate').val();
+                var ProdId = $('#ddlProduct').val();
+                getPolicyPeriod(EnrolmentDate,parseInt(ProdId),parseInt(FamilyId),parseInt(policyId));
+
+           });
+
+
+
+            $('#btnSave').click(function(){
+            var passed = isFormValidated();
+            var jsonPolicy = createJSONString();
+                if (passed == true){
+                         var PPolicyId = Android.SavePolicy(jsonPolicy, parseInt(FamilyId),parseInt(policyId));
+                          window.open('FamilyPolicies.html?f=' + FamilyId + '&l='+ LocationId + '&r='+ RegionId  + '&d='+ DistrictId , "_self");
+                    $('#btnSave').attr("disabled", "disabled")
+                }
+                else{
+                    Android.ShowDialog(Android.getString('FieldRequired'));
+                }
+           });
+
+               $('#txtStartDate').change(function(){
+                    var txtStartDate = $('#txtStartDate').val();
+                    var ProdId = $('#ddlProduct').val();
+                    getPolicyPeriod(txtStartDate,parseInt(ProdId),parseInt(FamilyId),parseInt(policyId));
+               });
+        });
+
+        function getPolicyPeriod(EnrolmentDate,ProdId,FamilyId,policyId){
+
+         if (EnrolmentDate.length == 0 || ProdId == 0)
+                    return false;
+
+                var Period = $.parseJSON(Android.getPolicyPeriod(parseInt(ProdId),EnrolmentDate));
+
+                var StartDate = new Date(Period[0]["StartDate"]);
+                var ExpiryDate = new Date(Period[0]["ExpiryDate"]);
+                   HasCycle = Period[0]["HasCycle"];
+
+
+
+
+                $('#txtStartDate').val(getDateForJS(StartDate));
+                $('#txtExpiryDate').val(getDateForJS(ExpiryDate));
+
+
+                $("#txtStartDate").prop('disabled', HasCycle);
+
+                  fStartDate = getDateForJS(StartDate)
+                    //fStartDate = moment(fStartDate).toDate();
+                var isOffline =  $('#hfOffline').val();
+                var PolicyValue = Android.getPolicyValue(EnrolmentDate,parseInt(ProdId),FamilyId,fStartDate,HasCycle,0,"N",isOffline);
+
+                $('#spPolicyValue').text(PolicyValue);
+                $('#hfPolicyValue').val(PolicyValue);
+
+                 $('#hfHasCycle').val(HasCycle);
+                 $('#hffStartDate').val(fStartDate);
+        }
+        function LoadOfficers(LocationId, EnrolmentDate){
+
+                 var OfficerId =  Android.getOfficerId();
+
+            var $Officers = Android.getOfficers(LocationId, EnrolmentDate);
+            bindDropdown('ddlOfficer', $Officers, 'OfficerId', 'Code',0,  Android.getString('SelectOfficer'));
+
+             $("#ddlOfficer").val(parseInt(OfficerId));
+             $("#ddlOfficer").prop('disabled', true);
+             $("#ddlOfficer").css('display', 'none');
+
+        }
+        function LoadProduct(RegionId,DistrictId, EnrolmentDate){
+
+                var $Products = Android.getProducts(parseInt(RegionId),parseInt(DistrictId), EnrolmentDate);
+                bindDropdown('ddlProduct', $Products, 'ProdId', 'ProductCode', 0,  Android.getString('SelectProduct'));
+
+
+        }
+
+        function createJSONString(){
+                var jsonPolicy = getControlsValuesJSON('li');
+                return jsonPolicy;
+            }
+
+
+    </script>
+</head>
+<body>
+
+<div>
+    <ul class="ulEntry">
+        <li>
+            <input datafield="HasCycle" type="hidden" value="0" id="hfHasCycle"/>
+            <input datafield="StartDate" type="hidden" value="0" id="hffStartDate"/>
+            <input datafield="PolicyValue" type="hidden" value="0" id="hfPolicyValue"/>
+            <input datafield="PolicyStatusValue" type="hidden" value="1" id="hfPolicyStatus"/>
+            <input datafield="isOffline" type="hidden" value="1" id="hfOffline"/>
+            <span  strName="EnrolmentDate">Enrolment date</span>
+            <input datafield="EnrollDate"  type="date" id="txtEnrolmentDate" required/>
+        </li>
+        <li id="Product">
+            <span strName="Product">Product</span>
+            <select datafield="ProdId" id="ddlProduct" required></select>
+        </li>
+        <li>
+            <span strName="EffectiveDate">Effective date</span>
+            <input datafield="EffectiveDate" type="date" id="txtEffectiveDate" />
+        </li>
+
+        <li>
+            <span strName="StartDate">Start date</span>
+            <input datafield="StartDate" type="date" id="txtStartDate" required/>
+
+        </li>
+        <li>
+            <span strName="ExpireDate">Expire date</span>
+            <input datafield="ExpiryDate" type="date" id="txtExpiryDate" required/>
+        </li>
+        <li id="Officer">
+            <span strName="Officer">Officer</span>
+<!--            <select datafield="OfficerId" id="ddlOfficer" required>
+
+            </select>-->
+            <input type='hidden' datafield="OfficerId" type="date" id="ddlOfficer" required/>
+        </li>
+
+        <li>
+            <span strName="PolicyStatus">Policy Status :</span>
+            <span datafield="PolicyStatus" type="text" id="txtPolicyStatus"></span>
+        </li>
+        <li>
+            <span strName="PolicyValue">Policy Value :</span>
+            <span datafield="PolicyValue" type="text" id="spPolicyValue">0</span>
+
+        </li>
+
+        <li>
+            <span strName="Contribution">Contribution :</span>
+            <span datafield="Contribution" type="text" id="spContribution">0</span>
+            <span strName="Balance">Balance : </span>
+            <span datafield="Balance" type="text" id="spBalance">0</span>
+        </li>
+
+    </ul>
+</div>
+<div class="footer">
+    <input type="submit" id="btnSave" strName="Save" value="Save">
+</div>
+</body>
+</html>

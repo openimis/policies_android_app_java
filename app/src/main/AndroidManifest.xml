@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="tz.co.exact.imis"
+    android:versionCode="1"
+    android:versionName="0.1">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.FLASHLIGHT" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    android:hardwareAccelerated="true"
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="true" />
+
+    <application
+        android:name=".Global"
+        android:allowBackup="true"
+        android:fullBackupContent="@xml/backup_descriptor"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme"
+        tools:ignore="GoogleAppIndexingWarning"
+        tools:replace="android:icon">
+        <activity
+            android:name=".MainActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".Enquire"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:label="@string/Enquire"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".RenewList"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:label="@string/Renewal"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Renewal"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:label="@string/Renewal"
+            android:parentActivityName=".RenewList"
+            android:screenOrientation="portrait"
+            tools:targetApi="jelly_bean" />
+        <activity
+            android:name=".FeedbackList"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Feedback"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:parentActivityName=".FeedbackList"
+            android:screenOrientation="portrait"
+            tools:targetApi="jelly_bean" />
+        <activity
+            android:name=".Statistics"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Acquire"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:label="@string/Acquire"
+            android:screenOrientation="portrait" />
+        <activity android:name=".Reports"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:label="@string/Reports"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".SnapshotIndicators"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:label="@string/SnapshotIndicators"
+            android:screenOrientation="portrait" />
+
+        <activity android:name=".CummulativeIndicators"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:label="@string/CummulativeIndicators"
+            android:screenOrientation="portrait" />
+    </application>
+
+</manifest>

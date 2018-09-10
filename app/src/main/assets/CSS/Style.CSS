@@ -1,0 +1,324 @@
+body{
+    /*background:rgb(207,231,250);*/
+    font-size:1em;
+}
+:required{
+    border:1px solid red;
+}
+.topPanel{
+      display:block;
+      position:sticky;
+      top:0;
+      padding:3px;
+      box-shadow:0px 4px 5px grey;
+      background-color:white;
+}
+textarea{
+    width:100%;
+    height:100px;
+}
+select, input, button{
+    height:2.5em;
+    font-size:1em;
+    line-height:1.25em;
+}
+button, input[type=submit]{
+    min-width:150px;
+    font-size:1em;
+    color:brown;
+    font-weight:bold;
+    font-family:arial;
+}
+.plusButton{
+    height:8vh;
+}
+.ulEntry{
+    list-style:none;
+    padding:0;
+    margin:0;
+}
+.ulEntry li{
+    display:block;
+    margin-bottom:5px;
+}
+.ulEntry li span{
+    padding:3px 0px;
+}
+
+.ulEntry li input, select{
+    width:100%;
+}
+
+.footer{
+    margin-top:10px;
+    text-align:center;
+}
+.ulList{
+    list-style:none;
+    padding:0;
+    margin:0;
+}
+.ulList li{
+    background-color:#f6f6f6;
+    border-radius:4px;
+    margin:10px 0;
+    padding:0 2px;
+    box-shadow:0 0 6px #777;
+    -webkit-box-shadow:0 0 6px #777;
+}
+.ulList li:nth-child(even){
+    background-color:white;
+}
+
+.ulList li h3{
+    margin:4px 0;
+    color:#d25151;
+    letter-spacing:4px;
+}
+.ulList li h4{
+    margin:2px 0;
+    color:#4949c3;
+}
+.ulList li span{
+    font-size:smaller;
+    color:#808080;
+}
+
+
+
+.family-location {
+    border: px solid #000;
+    padding-left: 3px;
+    padding-right: 3px;
+    width: 100% !important;
+    height: auto;
+
+}
+
+
+.overview-top ul li {
+     width: 45%;
+     display: inline-block;
+    font-size: 1.2em;
+}
+.family-location li{
+    border-radius:4px;
+    border:px solid blue;
+    padding:5px 2px;
+    display: block;
+    margin: 0px;
+
+}
+.lft{
+    text-align: left;
+}
+.rght{
+    text-align: right;
+}
+
+.plus-label{
+float:left;
+}
+.Policy-label{
+    float:right;
+    padding: 0px !important;
+    width: 100px;
+    left: 0px;
+    font-weight: 900;
+    font-size: 1.5em;
+    text-align: center;
+    font-family: monospace;
+}
+.Overview-policy{
+    width:100%;
+    padding:2px;
+    display: inline-block;
+    background:#f6f6f6;
+}
+.plus-label{
+   padding: 0px !important;
+    width: 50px;
+    font-weight: 900;
+    font-size: 1.5em;
+    color: #259b24;
+    text-align: center;
+    font-family: monospace;
+}
+
+.hidden{
+    display:none;
+}
+.PolicyFamilyTop{
+    display: flow-root;
+}
+.left{
+    float:left;
+}
+.right{
+    float:right;
+    font-size: 1em !important
+}
+p{
+    margin: 0.2em 0;
+}
+.spLabel{
+    font-weight:900;
+    color: #000;
+}
+
+#imgDiv{
+    width:100%;
+    height:200px;
+    position:relative;
+}
+#imgDiv img{
+    position:absolute;
+    max-height:100%;
+    max-width:100%;
+    width:auto;
+    height:auto;
+    top:0;
+    bottom:0;
+    left:0;
+    right:0;
+    margin:auto;
+}
+.premium-dots:after {
+  content: '\2807';
+  font-size: 25px;
+  font-weight:900;
+  float: right;
+  padding: 10px 20px;
+    }
+
+.clearFix{
+    content: "";
+    display: table;
+    clear: both;
+}
+
+
+.dropdown {
+    position: relative;
+    <!--display: inline-block;-->
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    padding: 2px;
+    overflow: auto;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+   right: 60px;
+
+
+}
+
+.dropdown-content ul li {
+    color: black;
+    padding: 10px 10px;
+    text-decoration: none;
+    display: block;
+    margin: 5px 0px !important;
+}
+
+.dropdown a:hover {background-color: #f1f1f1}
+
+.show {display:block;}
+.premium-dots:after {
+  content: '\2807';
+  font-size: 25px;
+  font-weight:900;
+  float: right;
+  padding: 10px 20px;
+
+  }
+  .ulMenu{
+    padding :3px !important;
+  }
+
+
+#divProgress{
+    background-image:initial;
+    background-attachment:initial;
+    height:1000px;
+    width:100%;
+    background-color:rgba(205, 216, 222, 0.7);
+    position:absolute;
+    z-index:5000;
+    display:none;
+    top:0;
+    left:0;
+}
+#divProgress img{
+    position:absolute;
+    margin:auto;
+    top:0;
+    bottom:0;
+    left:0;
+    right:0;
+    max-height:20%;
+    max-width:20%;
+    z-index:6000;
+
+}
+#divProgress span{
+    font-weight:900;
+    font-size: 1.5em;
+    position:fixed;
+    color:#280c74;
+    width:100%;
+    top:70%;
+    text-align:center;
+}
+
+.infoOnly li{
+    padding:1em 0.5em;
+}
+.infoOnly li .lbl{
+    color:blue;
+    font-size:large;
+
+}
+.infoOnly li .info{
+    font-size:medium;
+    float:right;
+}
+.header{
+    background-color:white !important;
+    box-shadow:none  !important;
+}
+.header h1{
+    text-align:center;
+    margin:0;
+    color:blue;
+    text-shadow:2px 2px 5px;
+    letter-spacing:5px;
+}
+@keyframes slideInFromLeft {
+    0% {
+      transform: translateY(-100%);
+    }
+    100% {
+      transform: translateY(0);
+    }
+}
+
+li {
+    /* This section calls the slideInFromLeft animation we defined above
+    animation: 1s ease-out 0s 1 slideInFromLeft;*/
+
+}
+@keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+
+.fade-in {
+  opacity:0;  /* make things invisible upon start */
+  animation:fadeIn ease-in 1; /* call our keyframe named fadeIn, use animattion ease-in and repeat it only 1 time */
+
+  animation-fill-mode:forwards;  /* this makes sure that after animation is done we remain at the last keyframe value (opacity: 1)*/
+
+  animation-duration:2s;
+  animation-delay: 3.5s
+}

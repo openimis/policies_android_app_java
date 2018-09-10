@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="tz.co.exact.imis.SnapshotIndicators"
+    android:orientation="vertical">
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp">
+
+        <Button
+            android:id="@+id/btnPick"
+            android:clickable="true"
+            android:layout_width="100dp"
+            android:layout_height="50dp"
+            android:text="Pick Date"/>
+        <TextView
+            android:id="@+id/tvDate"
+            android:layout_width="160dp"
+            android:layout_height="50dp"
+            android:textAlignment="center"
+            android:textSize="20sp"
+            android:gravity="center"
+            android:textColor="@color/white"
+            android:layout_toRightOf="@+id/btnPick"
+            android:background="@color/DarkBlue"/>
+        <Button
+            android:id="@+id/btnGet"
+            android:layout_width="60dp"
+            android:layout_height="50dp"
+            android:layout_toRightOf="@+id/tvDate"
+            android:text="Get"/>
+
+    </RelativeLayout>
+
+
+    <RelativeLayout
+        android:id="@+id/snapshotReport"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/FAP"
+            android:layout_width="270dp"
+            android:layout_height="50dp"
+            android:textSize="15sp"
+            android:textColor="@color/Black"
+            android:layout_marginBottom="10dp"
+            android:gravity="left"
+            android:text="@string/NumberOfFAP"/>
+        <TextView
+            android:id="@+id/FAPC"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:textSize="15sp"
+            android:textColor="@color/LightBlue"
+            android:layout_marginBottom="10dp"
+            android:layout_toRightOf="@+id/FAP"
+            android:text="20"
+            android:layout_toEndOf="@+id/FAP" />
+        <TextView
+            android:id="@+id/FEP"
+            android:layout_width="270dp"
+            android:layout_height="50dp"
+            android:textSize="15sp"
+            android:textColor="@color/Black"
+            android:layout_marginBottom="10dp"
+            android:layout_below="@+id/FAP"
+            android:text="@string/NumberOfFEP"/>
+        <TextView
+            android:id="@+id/FEPC"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:textSize="15sp"
+            android:textColor="@color/LightBlue"
+            android:layout_marginBottom="10dp"
+            android:layout_below="@+id/FAPC"
+            android:layout_toRightOf="@+id/FEP"
+            android:text="20"
+            android:layout_toEndOf="@+id/FEP" />
+        <TextView
+            android:id="@+id/FIP"
+            android:layout_width="270dp"
+            android:layout_height="50dp"
+            android:textSize="15sp"
+            android:textColor="@color/Black"
+            android:layout_marginBottom="10dp"
+            android:layout_below="@+id/FEP"
+            android:text="@string/NumberOfFIP"/>
+        <TextView
+            android:id="@+id/FIPC"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:textSize="15sp"
+            android:textColor="@color/LightBlue"
+            android:layout_marginBottom="10dp"
+            android:layout_below="@+id/FEPC"
+            android:layout_toRightOf="@+id/FIP"
+            android:text="20"
+            android:layout_toEndOf="@+id/FIP" />
+        <TextView
+            android:id="@+id/FSP"
+            android:layout_width="270dp"
+            android:layout_height="50dp"
+            android:textSize="15sp"
+            android:textColor="@color/Black"
+            android:layout_marginBottom="10dp"
+            android:layout_below="@+id/FIP"
+            android:text="@string/NumberOfFSP"/>
+        <TextView
+            android:id="@+id/FSPC"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:textSize="15sp"
+            android:textColor="@color/LightBlue"
+            android:layout_marginBottom="10dp"
+            android:layout_below="@+id/FIPC"
+            android:layout_toRightOf="@+id/FSP"
+            android:text="20"
+            android:layout_toEndOf="@+id/FSP" />
+
+    </RelativeLayout>
+
+
+</LinearLayout>

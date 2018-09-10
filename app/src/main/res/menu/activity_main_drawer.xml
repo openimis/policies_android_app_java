@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+
+    >
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_home"
+            android:icon="@drawable/ic_home"
+            android:title="@string/Home" />
+
+        <item
+            android:id="@+id/nav_enquire"
+            android:icon="@drawable/ic_enquire"
+            android:title="@string/Enquire" />
+
+        <item
+            android:id="@+id/nav_acquire"
+            android:icon="@android:drawable/ic_menu_camera"
+            android:title="@string/Acquire" />
+
+        <item
+            android:id="@+id/nav_enrolment"
+            android:icon="@drawable/ic_enroll"
+            android:title="@string/Enrolment" />
+        <item
+            android:id="@+id/nav_modify_family"
+            android:icon="@android:drawable/ic_menu_edit"
+            android:title="@string/ModifyFamily" />
+
+        <!--<item-->
+            <!--android:id="@+id/nav_login"-->
+            <!--android:icon="@android:drawable/ic_partial_secure"-->
+            <!--android:title="@string/Login" />-->
+        <item
+            android:id="@+id/nav_renewal"
+            android:icon="@drawable/ic_renew"
+            android:title="@string/Renewal" />
+
+        <item
+            android:id="@+id/nav_feedback"
+            android:icon="@drawable/ic_feedback"
+            android:title="@string/Feedback" />
+        <item
+            android:id="@+id/nav_reports"
+            android:icon="@drawable/ic_enroll"
+            android:title="@string/Reports" />
+
+        <item
+            android:id="@+id/nav_sync"
+            android:icon="@drawable/ic_sync"
+            android:title="@string/Sync" />
+
+
+    </group>
+
+    <item
+        android:id="@+id/nav_quit"
+        android:icon="@drawable/ic_quit"
+        android:title="@string/Quit" />
+    <item
+        android:id="@+id/nav_about"
+        android:icon="@drawable/ic_about"
+        android:title="@string/About" />
+
+</menu>
