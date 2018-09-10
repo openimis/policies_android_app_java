@@ -1,8 +1,8 @@
 # openIMIS - IMIS Android Application
 
 The openIMIS IMIS Android Application is the mobile client used by
-the Enrollment Officers to easily enter and register new insurees 
-from anywhere online or offline.
+the Enrollment Officers to easily enter and register, renew and manage 
+insurees from anywhere online or offline.
 
 ## Getting Started
 
@@ -20,7 +20,7 @@ on your local machine, you first need to install:
 * [openIMIS Web Services](https://github.com/openimis/web_service_vb)
 
 
-### Installing
+### Installation
 
 To make a copy of this project on your local machine, please clone
 the repository.
@@ -29,7 +29,7 @@ the repository.
 git clone https://github.com/openimis/imis_android_app_java
 ```
 
-### Configuring
+### Configuration
 
 In order to run the openIMIS IMIS Android Application, you need to
 know the openIMIS Web Services domain (DNS or IP address) and to 
@@ -42,7 +42,7 @@ private static String _Domain = "http://132.148.151.32/";
 For demo purposes, the default Web Services domain is set to the openIMIS
 demo server: demo.openimis.org (IP: 132.148.151.32).  
 
-### Running
+### Running the app
 
 After configuring the application, you can then compile and execute
 on Android operated mobile devices.
