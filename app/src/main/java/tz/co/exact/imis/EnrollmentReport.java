@@ -9,10 +9,6 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
-/**
- * Created by Hiren on 4/4/2018.
- */
-
  public class EnrollmentReport extends RecyclerView.Adapter {
     private ArrayList<String> msg;
     //Constructor

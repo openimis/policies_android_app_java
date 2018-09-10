@@ -25,10 +25,6 @@
 
 package tz.co.exact.imis;
 
-/**
- * Created by Hiren on 24/04/2017.
- */
-
 public class UserException extends Exception {
 
     public UserException(String message) {

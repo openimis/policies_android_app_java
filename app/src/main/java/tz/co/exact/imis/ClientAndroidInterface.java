@@ -106,10 +106,6 @@ import net.lingala.zip4j.core.ZipFile;
 import static android.database.sqlite.SQLiteDatabase.openOrCreateDatabase;
 import static java.lang.Math.abs;
 
-/**
- * Created by Hiren on 18/04/2017.
- */
-
 public class ClientAndroidInterface {
     private Context mContext;
 

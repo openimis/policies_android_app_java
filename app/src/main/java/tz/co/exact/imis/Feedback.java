@@ -54,10 +54,6 @@ import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
-/**
- * Created by HP on 05/17/2017.
- */
-
 public class Feedback extends AppCompatActivity {
     private General _General = new General(AppInformation.DomainInfo.getDomain());
 

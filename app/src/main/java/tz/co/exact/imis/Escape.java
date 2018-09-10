@@ -25,10 +25,6 @@
 
 package tz.co.exact.imis;
 
-/**
- * Created by Hiren on 12/05/2017.
- */
-
 public class Escape {
     public int CheckInsuranceNumber(String InsuranceNumber){
 

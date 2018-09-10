@@ -59,10 +59,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 
-/**
- * Created by HP on 05/16/2017.
- */
-
 public class Statistics extends AppCompatActivity {
     private EditText etFromDate;
     private EditText etToDate;

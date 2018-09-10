@@ -34,10 +34,6 @@ import android.widget.AdapterView;
 import android.widget.CursorAdapter;
 import android.widget.TextView;
 
-/**
- * Created by Hiren on 29/11/2016.
- */
-
 public class PayerAdapter extends CursorAdapter implements AdapterView.OnItemClickListener {
     private ClientAndroidInterface ca;
     private String LocationId ="1";

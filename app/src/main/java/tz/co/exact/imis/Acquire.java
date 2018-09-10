@@ -74,11 +74,6 @@ import java.util.Calendar;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 
-
-/**
- * Created by HP on 15/09/2017.
- */
-
 public class Acquire extends AppCompatActivity {
     /**
      * Called when the activity is first created.

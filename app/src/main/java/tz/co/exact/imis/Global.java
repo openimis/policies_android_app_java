@@ -27,10 +27,6 @@ package tz.co.exact.imis;
 
 import android.app.Application;
 
-/**
- * Created by HP on 05/16/2017.
- */
-
 public class Global extends Application {
     private String OfficerCode;
     private String OfficerName;

@@ -7,10 +7,6 @@ import net.lingala.zip4j.util.Zip4jConstants;
 import java.io.File;
 import java.util.ArrayList;
 
-/**
- * Created by Hiren on 5/14/2018.
- */
-
 public class Compressor {
     public static void zip(ArrayList<File> targetPath, String destinationFilePath, String password) {
         try {

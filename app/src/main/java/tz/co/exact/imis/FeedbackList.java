@@ -69,10 +69,6 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-/**
- * Created by HP on 05/16/2017.
- */
-
 public class FeedbackList extends AppCompatActivity {
     private ListView lv;
     private SwipeRefreshLayout swipe;

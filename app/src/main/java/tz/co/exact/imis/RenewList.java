@@ -69,10 +69,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 
-/**
- * Created by HP on 05/16/2017.
- */
-
 public class RenewList extends AppCompatActivity {
     private General _general = new General(AppInformation.DomainInfo.getDomain());
     String aBuffer = "";
