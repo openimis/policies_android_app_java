@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    >
+    <item android:id="@+id/mnuStatistics"
+        android:icon="@drawable/ic_statistics"
+        android:showAsAction="ifRoom"
+        android:title="@string/Statistics"
+        tools:ignore="AppCompatResource">
+    </item>
+</menu>

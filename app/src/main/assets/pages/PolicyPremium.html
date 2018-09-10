@@ -1,0 +1,146 @@
+<!--Copyright (c) 2016-%CurrentYear% Swiss Agency for Development and Cooperation (SDC)
+
+The program users must agree to the following terms:
+
+Copyright notices
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU AGPL v3 License as published by the 
+Free Software Foundation, version 3 of the License.
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of 
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU AGPL v3 License for more details www.gnu.org.
+
+Disclaimer of Warranty
+There is no warranty for the program, to the extent permitted by applicable law; except when otherwise stated in writing the copyright 
+holders and/or other parties provide the program "as is" without warranty of any kind, either expressed or implied, including, but not 
+limited to, the implied warranties of merchantability and fitness for a particular purpose. The entire risk as to the quality and 
+performance of the program is with you. Should the program prove defective, you assume the cost of all necessary servicing, repair or correction.
+
+Limitation of Liability 
+In no event unless required by applicable law or agreed to in writing will any copyright holder, or any other party who modifies and/or 
+conveys the program as permitted above, be liable to you for damages, including any general, special, incidental or consequential damages 
+arising out of the use or inability to use the program (including but not limited to loss of data or data being rendered inaccurate or losses 
+sustained by you or third parties or a failure of the program to operate with any other programs), even if such holder or other party has been 
+advised of the possibility of such damages.
+
+In case of dispute arising out or in relation to the use of the program, it is subject to the public law of Switzerland. The place of jurisdiction is Berne.-->
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head>
+    <title>Policy Premium</title>
+    <link href="../CSS/Style.CSS" rel="stylesheet" type="text/css" />
+    <script src="../JS/jquery-3.2.1.min.js"></script>
+    <script src="../JS/exact.js"></script>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" charset="utf-8" />
+
+
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+
+            document.title = Android.getString('Premiums');
+
+            var policyId =  parseInt(queryString("p"));
+            var LocationId =  parseInt(queryString("l"));
+            var PremiumId = 0;
+            var RegionId =  parseInt(queryString("r"));
+            var DistrictId =  parseInt(queryString("d"));
+            var FamilyId =  parseInt(queryString("f"));
+
+            var url = 'FamilyPolicies.html?f=' + FamilyId + '&l='+ LocationId + '&r='+ RegionId  + '&d='+ DistrictId;
+            Android.SetUrl(url);
+
+            LoadPremiums(policyId);
+
+            $(".plusButton").click(function(){
+                window.open('Premium.html?p=' + policyId + '&f=' + FamilyId  + '&l=' + LocationId +'&pr=' + PremiumId + '&r='+ RegionId  + '&d='+ DistrictId,  '_self');
+            });
+
+
+             $('.ulList li').click(function(){
+                  PremiumId = parseInt($(this).find('#hfPremiumId').val());
+                     <!--window.open('Premium.html?p=' + policyId + '&l=' + LocationId +'&pr=' + PremiumId + '&r='+ RegionId  + '&d='+ DistrictId,  '_self');-->
+                });
+
+
+                AssignDotClass();
+             contextMenu.createContextMenu([Android.getString('Edit'), Android.getString('Delete')], function(){
+                 var clicked = $(this).text();
+
+                 if (clicked == Android.getString('Edit')){
+                        var url = 'PolicyPremium.html?p=' + policyId + '&f=' + FamilyId + '&l=' + LocationId + '&r='+ RegionId  + '&d='+ DistrictId;
+                        Android.SetUrl(url);
+                        window.open('Premium.html?p=' + policyId + '&f=' + FamilyId  + '&l=' + LocationId +'&pr=' + PremiumId + '&r='+ RegionId  + '&d='+ DistrictId,  '_self');
+
+                 }
+                 else if(clicked == Android.getString('Delete')){
+                    var isOffline = $('#hfIsOffline').val();
+                    var deletedSuccess = -1;
+                    if(isOffline == 0 || isOffline == 2){
+                      deletedSuccess =   parseInt(Android.DeleteOnlineData(PremiumId, 'PR'));
+                        }
+                     else{
+                        deletedSuccess =  parseInt(Android.DeletePremium(PremiumId,policyId));
+                        }
+
+                    if(deletedSuccess == 1 ){
+                       Android.ShowDialog(Android.getString('PremiumDeleted'));
+                       window.open("PolicyPremium.html?p=" + policyId + "&f=" + FamilyId + "&l=" + LocationId + '&r='+ RegionId  + '&d='+ DistrictId, "_self");
+                      }
+                     else if(deletedSuccess == -1 ){
+                     Android.ShowDialog(Android.getString('LoginToDeleteOnlineData'));
+                     }
+                 }
+              });
+
+        });
+
+        function LoadPremiums(PolicyId){
+            var Premiums = Android.getPremiums(PolicyId);
+            var ctls = ["hfPremiumId", "Amount", "PayDate", "PayType","IsOffline","IsPhotoFee","Receipt","PremiumId","hfIsOffline"];
+            var Columns = ["PremiumId","Amount","PayDate","PayType","isOffline","IsPhotoFee","Receipt" , "PremiumId","isOffline"];
+            LoadList(Premiums, '.ulList', ctls, Columns);
+        }
+
+        function AssignDotClass(){
+           var $lis = $(".ulList li");
+            $lis.addClass("dot-side-menu");
+        }
+    </script>
+
+
+
+</head>
+<body>
+
+<div class="topPanel">
+    <img src="../images/plus.png" alt="New" class="plusButton"/>
+</div>
+
+<div>
+    <ul class="ulList" type="1" id="policyid">
+
+        <li>
+            <input type="hidden" id="hfIsOffline" value="1"/>
+            <input type="hidden" id="hfPremiumId" value="0">
+            <div class="PremiumPolicyTop">
+                <h3 class="left" id="PayDate"> </h3>
+                <h3 class="right"   id="PayType"> </h3>
+
+
+                <div class="clearFix"></div>
+            </div>
+
+            <div>
+                <h4 class="" id="Amount"></h4>
+                <p>
+                    <span class="spLabel" strName="ReceiptNo"></span>
+                    <span class="spLabelValue" id="Receipt"></span>
+                </p>
+            </div>
+        </li>
+    </ul>
+</div>
+<div class="footer">
+
+</div>
+</body>
+</html>

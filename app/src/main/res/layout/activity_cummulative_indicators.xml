@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="tz.co.exact.imis.CummulativeIndicators"
+    android:orientation="vertical">
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp">
+
+        <Button
+            android:id="@+id/DateFrom"
+            android:clickable="true"
+            android:layout_width="120dp"
+            android:layout_height="50dp"
+            android:text="Date From"/>
+        <Button
+            android:id="@+id/DateTo"
+            android:clickable="true"
+            android:layout_width="120dp"
+            android:layout_height="50dp"
+            android:layout_toRightOf="@+id/DateFrom"
+            android:text="Date To"/>
+
+        <Button
+            android:id="@+id/btnGet"
+            android:layout_width="60dp"
+            android:layout_height="50dp"
+            android:layout_toRightOf="@+id/DateTo"
+            android:text="Get"/>
+
+    </RelativeLayout>
+
+
+    <RelativeLayout
+        android:id="@+id/CommulativeReport"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/NP"
+            android:layout_width="200dp"
+            android:layout_height="50dp"
+            android:textSize="15sp"
+            android:textColor="@color/Black"
+            android:layout_marginBottom="10dp"
+            android:gravity="left"
+            android:text="@string/NumberOfNP"/>
+        <TextView
+            android:id="@+id/NPC"
+            android:layout_width="150dp"
+            android:layout_height="50dp"
+            android:textSize="15sp"
+            android:textColor="@color/LightBlue"
+            android:layout_marginBottom="10dp"
+            android:layout_toRightOf="@+id/NP"
+            android:text="20"
+            android:gravity="end"
+            android:layout_toEndOf="@+id/NP" />
+        <TextView
+            android:id="@+id/EP"
+            android:layout_width="200dp"
+            android:layout_height="50dp"
+            android:textSize="15sp"
+            android:textColor="@color/Black"
+            android:layout_marginBottom="10dp"
+            android:layout_below="@+id/NP"
+            android:text="@string/NumberOfEP"/>
+        <TextView
+            android:id="@+id/EPC"
+            android:layout_width="150dp"
+            android:layout_height="50dp"
+            android:textSize="15sp"
+            android:textColor="@color/LightBlue"
+            android:layout_marginBottom="10dp"
+            android:layout_below="@+id/NPC"
+            android:layout_toRightOf="@+id/EP"
+            android:text="20"
+            android:gravity="end"
+            android:layout_toEndOf="@+id/EP" />
+        <TextView
+            android:id="@+id/RP"
+            android:layout_width="200dp"
+            android:layout_height="50dp"
+            android:textSize="15sp"
+            android:textColor="@color/Black"
+            android:layout_marginBottom="10dp"
+            android:layout_below="@+id/EP"
+            android:text="@string/NumberOfRP"/>
+        <TextView
+            android:id="@+id/RPC"
+            android:layout_width="150dp"
+            android:layout_height="50dp"
+            android:textSize="15sp"
+            android:textColor="@color/LightBlue"
+            android:layout_marginBottom="10dp"
+            android:layout_below="@+id/EPC"
+            android:layout_toRightOf="@+id/RP"
+            android:text="20"
+            android:gravity="end"
+            android:layout_toEndOf="@+id/RP" />
+        <TextView
+        android:id="@+id/SP"
+        android:layout_width="200dp"
+        android:layout_height="50dp"
+        android:textSize="15sp"
+        android:textColor="@color/Black"
+        android:layout_marginBottom="10dp"
+        android:layout_below="@+id/RP"
+        android:text="@string/NumberOfSP"/>
+        <TextView
+            android:id="@+id/SPC"
+            android:layout_width="150dp"
+            android:layout_height="50dp"
+            android:textSize="15sp"
+            android:textColor="@color/LightBlue"
+            android:layout_marginBottom="10dp"
+            android:layout_below="@+id/RPC"
+            android:layout_toRightOf="@+id/SP"
+            android:text="20"
+            android:gravity="end"
+            android:layout_toEndOf="@+id/SP" />
+        <TextView
+            android:id="@+id/CC"
+            android:layout_width="200dp"
+            android:layout_height="50dp"
+            android:textSize="15sp"
+            android:textColor="@color/Black"
+            android:layout_marginBottom="10dp"
+            android:layout_below="@+id/SP"
+            android:text="@string/AmountCC"/>
+        <TextView
+            android:id="@+id/CCC"
+            android:layout_width="150dp"
+            android:layout_height="50dp"
+            android:textSize="15sp"
+            android:textColor="@color/LightBlue"
+            android:layout_marginBottom="10dp"
+            android:layout_below="@+id/SPC"
+            android:layout_toRightOf="@+id/CC"
+            android:text="20"
+            android:gravity="end"
+            android:layout_toEndOf="@+id/SP" />
+
+    </RelativeLayout>
+
+
+</LinearLayout>

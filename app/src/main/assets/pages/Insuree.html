@@ -1,0 +1,492 @@
+<!--Copyright (c) 2016-%CurrentYear% Swiss Agency for Development and Cooperation (SDC)
+
+The program users must agree to the following terms:
+
+Copyright notices
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU AGPL v3 License as published by the 
+Free Software Foundation, version 3 of the License.
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of 
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU AGPL v3 License for more details www.gnu.org.
+
+Disclaimer of Warranty
+There is no warranty for the program, to the extent permitted by applicable law; except when otherwise stated in writing the copyright 
+holders and/or other parties provide the program "as is" without warranty of any kind, either expressed or implied, including, but not 
+limited to, the implied warranties of merchantability and fitness for a particular purpose. The entire risk as to the quality and 
+performance of the program is with you. Should the program prove defective, you assume the cost of all necessary servicing, repair or correction.
+
+Limitation of Liability 
+In no event unless required by applicable law or agreed to in writing will any copyright holder, or any other party who modifies and/or 
+conveys the program as permitted above, be liable to you for damages, including any general, special, incidental or consequential damages 
+arising out of the use or inability to use the program (including but not limited to loss of data or data being rendered inaccurate or losses 
+sustained by you or third parties or a failure of the program to operate with any other programs), even if such holder or other party has been 
+advised of the possibility of such damages.
+
+In case of dispute arising out or in relation to the use of the program, it is subject to the public law of Switzerland. The place of jurisdiction is Berne.-->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add/Edit Insuree</title>
+    <link href="../CSS/Style.CSS" rel="stylesheet" type="text/css"/>
+    <script src="../JS/jquery-3.2.1.min.js"></script>
+    <script src="../JS/exact.js"></script>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" charset="utf-8"/>
+
+
+    <script type="text/javascript">
+
+
+        $(document).ready(function(){
+            
+            //Hide the relationship if the insuree is the HOF
+            if(sessionStorage.getItem("FamilyData") !== null){
+                $("#Relationship").hide();
+                $("#ddlRelationship").prop("required", false);
+            }
+
+
+            document.title = Android.getString('AddEditInsuree');
+            Android.shutDownProgress();
+        
+
+          var FSPDistrictCss=   $('#FSPDistrict').css('display');
+          if(FSPDistrictCss == 'none')  $('#FSPRegion').css("display", "none");
+
+           var CurrentDistrictCss=   $('#CurrentDistrict').css('display');
+           if(CurrentDistrictCss == 'none')  $('#CurrentRegion').css("display", "none");
+
+            fillDropdowns();
+
+            $('#ddlCurrentRegion').change(function(){
+               fillCurrentDistricts(parseInt($(this).val()));
+            });
+
+            $('#ddlFSPRegion').change(function(){
+                fillFSPDistricts($(this).val());
+            });
+
+            $('#ddlCurrentDistrict').change(function(){
+                fillCurrentWards(parseInt($(this).val()));
+            });
+
+             $('#ddlCurrentMunicipality').change(function(){
+                fillCurrentVillages(parseInt($(this).val()));
+            });
+
+            $('#ddlFSPDistrict, #ddlFSPCategory').change(function(){
+                var DistrictId = $('#ddlFSPDistrict').val();
+                var FSPCategory = $('#ddlFSPCategory').val();
+                    fillFSP(DistrictId, FSPCategory);
+            });
+
+             $('#txtInsuranceNumber').change(function(){
+                 var Ins = $('#txtInsuranceNumber').val();
+                 var ans = Android.isValidInsuranceNumber(Ins);
+                 if(ans != true){
+                    $('#txtInsuranceNumber').val("");
+                    $('#txtInsuranceNumber').focus();
+                 }
+                var ImagePath = Android.GetListOfImagesContain(Ins);
+
+                if(ImagePath.length > 0){
+                    $('#imgInsuree').attr('src', 'file://' +ImagePath);
+                }else{
+                    $('#imgInsuree').attr('src', '');
+                    $("#hfNewPhotoPath").val("");
+                }
+
+             });
+
+
+            $('#spPleaseWait').text(Android.getString('saving'));
+
+            $('#btnSave').click(function(){
+                $("#divProgress").show();
+
+                getImage();
+
+                var passed = isFormValidated();
+
+                if (passed == true){
+
+                    Android.clearInsuranceNo();
+                    var jsonInsuree = createJSONString();
+
+                    if(sessionStorage.getItem("FamilyData") !== null){
+                        var FamilyId = Android.SaveFamily(sessionStorage.getItem("FamilyData"), jsonInsuree);
+
+                        if(FamilyId > 0){
+                            sessionStorage.removeItem("FamilyData");
+                            $(this).attr("disabled","disabled");
+
+                            window.open("FamilyAndInsurees.html?f=" + FamilyId, "_self");
+
+                        }
+
+                    }else{
+                        var FamilyId = parseInt(queryString('f'));
+                        var FamilyPolicy = Android.getFamilyPolicy(FamilyId);
+                        var $Policy = $.parseJSON(FamilyPolicy);
+                        var MemberCount = parseInt($Policy[0]["MemberCount"]);
+                        var Threshold = parseInt($Policy[0]["Threshold"]);
+                        var TotalIns  = parseInt($Policy[0]["Ins"]);
+                        var PolicyId  = parseInt($Policy[0]["PolicyId"]);
+                        var IsNewIns = parseInt($("#hfInsureeId").val());
+                        var MemberDialog = -1;
+                        var ExceedThreshold = -1;
+
+                        if(PolicyId > 0 && IsNewIns == 0 ){
+                            var PolicyStatus = Android.getPolicyStatus(PolicyId);
+                            if ( TotalIns >= MemberCount){
+                                ExceedThreshold = 0;
+                                Android.ShowDialog(Android.getString('ExceedMemberCount'));
+                            }else if(TotalIns >= Threshold ){
+                                ExceedThreshold =1;
+                            }else if(PolicyStatus == 2){
+                                ExceedThreshold = 0;
+                            }
+
+                        }
+                        var InsureeId = Android.SaveInsuree(jsonInsuree, FamilyId, 0,parseInt(ExceedThreshold), PolicyId);
+                        if(InsureeId == 7 || InsureeId == 6){
+                            $("#divProgress").hide();
+                        }else{
+                            $("#divProgress").hide();
+                            window.open("FamilyAndInsurees.html?f=" + FamilyId, "_self");
+                        }
+                    }
+                }else{
+                    $("#divProgress").hide();
+                    Android.ShowDialog(Android.getString('FieldRequired'));
+                }
+
+            });
+
+
+
+
+
+           $(window).bind("onbeforeunload", function(){
+                Android.showDialog('bye');
+           });
+
+            window.onunload = function() {
+                sessionStorage.removeItem("FamilyData");
+            }
+
+            //if insureeid is passed load the insuree
+            var InsureeId = queryString("i");
+            var FamilyId = queryString("f");
+
+            $('#btnScan').attr('src', '../images/scan.png');
+
+            if(parseInt(InsureeId) > 0 || parseInt(InsureeId) < 0){
+                var Insuree = Android.getInsuree(parseInt(InsureeId));
+                bindDataFromDatafield(Insuree);
+                 var PhotoPath =  $.parseJSON(Insuree)[0]["PhotoPath"];
+                 var IsOffline = parseInt($.parseJSON(Insuree)[0]["isOffline"]);
+                 if($.parseJSON(Insuree)[0]["isHead"] == "true" || $.parseJSON(Insuree)[0]["isHead"] == "false"){
+                     if($.parseJSON(Insuree)[0]["isHead"] == "true"){
+                        $("#Relationship").hide();
+                     }
+                 }else{
+                    var head = parseInt($.parseJSON(Insuree)[0]["isHead"]);
+                    if(head == 1){
+                        $("#Relationship").hide();
+                    }
+                 }
+
+
+                 var Ins =  $('#txtInsuranceNumber').val();
+                 if(PhotoPath.length == 0){
+                   PhotoPath = Android.GetListOfImagesContain(Ins);
+
+                 }
+
+                if(PhotoPath.length > 0){
+                    var photoFolder = Android.GetSystemImageFolder();
+                    if(PhotoPath.indexOf(photoFolder) == -1){
+                        PhotoPath = photoFolder + PhotoPath;
+                    }
+                }
+
+                $("#imgInsuree").attr('src', PhotoPath);
+
+                $('#hfIsOffline').val(IsOffline);
+                $('#ddlCurrentRegion').val($.parseJSON(Insuree)[0]["CurRegion"]).trigger("change");
+                $('#ddlCurrentDistrict').val($.parseJSON(Insuree)[0]["CurDistrict"]).trigger("change");
+                $('#ddlCurrentMunicipality').val($.parseJSON(Insuree)[0]["CurWard"]).trigger("change");
+                $('#ddlCurrentVillage').val($.parseJSON(Insuree)[0]["CurVillage"]);
+                $('#ddlFSPRegion').val($.parseJSON(Insuree)[0]["FSPRegion"]).trigger("change");
+    
+                try{
+                    $('#ddlFSPDistrict').val($.parseJSON(Insuree)[0]["FSPDistrict"]).trigger("change");
+                }catch(e){
+                    console.log(e);
+                }
+                $('#ddlFSP').val($.parseJSON(Insuree)[0]["HFID"]);
+
+            }else{
+                $("#hfInsureeId").val(0);
+            }
+
+            $("#imgInsuree").click(function(){
+                var imagePath = Android.selectPicture();
+                if (imagePath != ""){
+                    $("#hfNewPhotoPath").val(imagePath);
+                    $(this).attr('src', imagePath);
+                }
+            });
+
+
+            $('#btnScan').click(function (){
+               var InsuranceNo = Android.getScannedNumber();
+                if(InsuranceNo > 0){
+                    $('#txtInsuranceNumber').val(InsuranceNo);
+                    getImage();
+                }
+            });
+
+            if($('#hfIsOffline').val() == "0"){
+                $('#txtInsuranceNumber').attr("disabled", true);
+                $('#btnScan').hide();
+            }
+
+        });
+
+
+        function fillDropdowns(){
+            fillRelationship();
+            fillGender();
+            fillMaritalStatus();
+            fillBeneficiaryCard();
+            fillCurrentRegion();
+            //fillCurrentDistricts();
+            fillProfessions();
+            fillEducations();
+            fillIdentificationTypes();
+            fillFSPRegions();
+            fillFSPDistricts();
+            fillFSPCategory();
+
+        }
+
+        function fillRelationship(){
+            var $Relations = Android.getRelationships();
+            bindDropdown('ddlRelationship', $Relations, 'RelationId', 'Relation',0, Android.getString('SelectRelationship'));
+        }
+
+        function fillGender(){
+            var $Gender = Android.getGender();
+            bindDropdown('ddlGender', $Gender, 'Code', 'Gender',null, Android.getString('SelectGender'));
+        }
+
+        function fillMaritalStatus(){
+            var $MaritalStatus = Android.getMaritalStatus();
+            bindDropdown('ddlMaritalStatus', $MaritalStatus, 'Code', 'Status', null, null);
+        }
+
+        function fillBeneficiaryCard(){
+            var $YesNo = Android.getYesNo();
+            bindDropdown('ddlBeneficiaryCard', $YesNo, 'value', 'key',null, Android.getString('SelectBeneficiary'));
+        }
+
+        function fillCurrentRegion(){
+        var $Regions = Android.getRegionsWO();
+        bindDropdown('ddlCurrentRegion', $Regions, 'LocationId', 'LocationName',0, Android.getString('SelectRegion'));
+        }
+
+        function fillFSPRegions(){
+            var $Regions = Android.getRegionsWO();
+            bindDropdown('ddlFSPRegion', $Regions, 'LocationId', 'LocationName',0, Android.getString('SelectRegion'));
+        }
+
+        function fillCurrentDistricts(RegionId){
+            var $Districts = Android.getDistrictsWO(RegionId);
+            bindDropdown('ddlCurrentDistrict', $Districts, 'LocationId', 'LocationName',0, Android.getString('SelectDistrict'));
+        }
+
+        function fillCurrentWards(DistrictId){
+            var $Wards = Android.getWards(parseInt(DistrictId));
+            bindDropdown('ddlCurrentMunicipality', $Wards, 'LocationId', 'LocationName',0, Android.getString('SelectWard'));
+
+        }
+
+        function fillCurrentVillages(WardId){
+            var $Villages = Android.getVillages(parseInt(WardId));
+            bindDropdown('ddlCurrentVillage', $Villages, 'LocationId', 'LocationName',0, Android.getString('SelectVillage'));
+        }
+
+        function fillProfessions(){
+            var $Professions = Android.getProfessions();
+            bindDropdown('ddlProfession', $Professions, 'ProfessionId', 'Profession',0, Android.getString('SelectProfession'));
+        }
+
+        function fillEducations(){
+            var $Educations = Android.getEducations();
+            bindDropdown('ddlEducation', $Educations, 'EducationId', 'Education',0, Android.getString('SelectEducation'));
+        }
+
+        function fillIdentificationTypes(){
+            var $idTypes = Android.getIdentificationTypes();
+            bindDropdown('ddlIdentificationType', $idTypes, 'IdentificationCode', 'IdentificationTypes',"", Android.getString('SelectIdentificationType'));
+        }
+
+        function fillFSPDistricts(RegionId){
+           var $Districts = Android.getDistrictsWO(parseInt(RegionId));
+            bindDropdown('ddlFSPDistrict', $Districts, 'LocationId', 'LocationName',0, Android.getString('SelectDistrict'));
+        }
+
+        function fillFSPCategory(){
+            var $HFLevels = Android.getHFLevels();
+            bindDropdown('ddlFSPCategory', $HFLevels, 'Code', 'HFLevel',null, null);
+        }
+
+        function fillFSP(DistrictId, HFLevel){
+            var $HF = Android.getHF(parseInt(DistrictId), HFLevel);
+            bindDropdown('ddlFSP', $HF, 'HFID', 'HF',0, Android.getString('SelectHF'));
+        }
+
+        function createJSONString(){
+            var jsonInsuree = getControlsValuesJSON('li');
+            return jsonInsuree;
+        }
+
+        function getImage(){
+            var Ins = $('#txtInsuranceNumber').val();
+            var ImagePath = Android.GetListOfImagesContain(Ins);
+
+            if(ImagePath.length > 0){
+                $('#imgInsuree').attr('src', 'file://' +ImagePath);
+            }else{
+                $('#imgInsuree').attr('src', '');
+            }
+            $("#hfImagePath").val($('#imgInsuree').attr('src'));
+
+        }
+
+
+
+
+
+    </script>
+
+
+</head>
+<body>
+<div id="divProgress">
+    <span id="spPleaseWait"></span>
+</div>
+<div>
+    <ul class="ulEntry">
+        <li id="Relationship">
+            <span strName="Relation">Relation</span>
+            <select id="ddlRelationship" dataField="Relationship"></select>
+        </li>
+        <li>
+            <input type="hidden" datafield="InsureeId" id="hfInsureeId" value="0"/>
+            <input type="hidden" datafld="isOffline" id="hfIsOffline" value="."/>
+            <input type="hidden" datafield="isHead" id="hfisHead" value="-1"/>
+            <span strName="InsuranceNumber">Insurance Number</span>
+            <div style="display:flex">
+            <input type="text" maxlength="12" id="txtInsuranceNumber" dataField="CHFID" onkeyup="getImage()" min="0" required />
+            <img src="" alt="Scan" id="btnScan" style="width:50px !important"  />
+            </div>
+        </li>
+        <li>
+            <span strName="OtherNames">Other Names</span>
+            <input type="text" maxlength="50" id="txtOtherNames" dataField="OtherNames" required/>
+        </li>
+        <li>
+            <span strName="LastName">Last Name</span>
+            <input type="text" maxlength="50" id="txtLastName" dataField="LastName" required/>
+        </li>
+        <li>
+            <input type="hidden" id="hfImagePath" datafield="PhotoPath" />
+            <input type="hidden" id="hfNewPhotoPath" datafield="PhotoPath" />
+            <div id="imgDiv">
+                <img src="" alt="Image" onerror="noImage(this);" id="imgInsuree"/>
+            </div>
+        </li>
+        <li>
+            <span strName="BirthDate">Birth date</span>
+            <input type="date" id="txtBirthDate" dataField="DOB" required/>
+        </li>
+        <li>
+            <span strName="Gender">Gender</span>
+            <select id="ddlGender" datafield="Gender" required></select>
+        </li>
+        <li id="MaritalStatus">
+            <span strName="MaritalStatus">Marital Status</span>
+            <select id="ddlMaritalStatus" datafield="Marital"></select>
+        </li>
+        <li id="BeneficiaryCard">
+            <span strName="BeneficiaryCard">Beneficiary Card</span>
+            <select id="ddlBeneficiaryCard" datafield="CardIssued"></select>
+        </li>
+        <li id="CurrentRegion">
+            <span strName="CurrentRegion">Current Region</span>
+            <select id="ddlCurrentRegion" datafield="CurRegion"></select>
+        </li>
+        <li id="CurrentDistrict">
+            <span strName="CurrentDistrict">Current District</span>
+            <select id="ddlCurrentDistrict" datafield="CurDistrict"></select>
+        </li>
+        <li id="CurrentMunicipality">
+            <span strName="CurrentMunicipality">Current Municipality</span>
+            <select id="ddlCurrentMunicipality" datafield="CurWard"></select>
+        </li>
+        <li id="CurrentVillage">
+            <span strName="CurrentVillage">Current Village</span>
+            <select id="ddlCurrentVillage" datafield="CurVillage"></select>
+        </li>
+        <li id="CurrentAddress">
+            <span strName="CurrentAddress">Current Address</span>
+            <textarea id="txtCurrentAddress" maxlength="200" datafield="CurrentAddress"></textarea>
+        </li>
+        <li id="Profession">
+            <span strName="Profession">Profession</span>
+            <select id="ddlProfession" datafield="Profession"></select>
+        </li>
+        <li id="Education">
+            <span strName="Education">Education</span>
+            <select id="ddlEducation" datafield="Education"></select>
+        </li>
+        <li>
+            <span strName="PhoneNumber">Phone number</span>
+            <input type="number" id="txtPhoneNumber" datafield="Phone" maxlength="50"/>
+        </li>
+        <li id="InsureeEmail">
+            <span strName="Email">Email</span>
+            <input type="email" maxlength="200" id="txtEmail" datafield="Email"/>
+        </li>
+        <li id="IdentificationType">
+            <span strName="IdentificationType">Identification Type</span>
+            <select id="ddlIdentificationType" datafield="TypeOfId"></select>
+        </li>
+        <li id="IdentificationNumber">
+            <span strName="IdentificationNumber">Identification Number</span>
+            <input type="text" id="txtIdentificationNumber" maxlength="50" datafield="IdentificationNumber"/>
+        </li>
+        <li id="FSPRegion">
+            <span strName="FSPRegion"></span>
+            <select id="ddlFSPRegion" datafield="FSPRegion"></select>
+        </li>
+        <li id="FSPDistrict">
+            <span strName="FSPDistrict">District of FSP</span>
+            <select id="ddlFSPDistrict" datafield="FSPDistrict"></select>
+        </li>
+        <li id="FSPCategory">
+            <span strName="FSPCategory">Level of FSP</span>
+            <select id="ddlFSPCategory" datafield="FSPCategory"></select>
+        </li>
+        <li id="FSP">
+            <span strName="FSP">First Service Point</span>
+            <select id="ddlFSP" datafield="HFID"></select>
+        </li>
+    </ul>
+</div>
+<div class="footer">
+    <input type="submit" id="btnSave" strName="Save" value="Save">
+</div>
+</body>
+</html>

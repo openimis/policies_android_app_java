@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+	android:layout_height="wrap_content"
+	android:orientation="vertical"
+	android:paddingBottom="5dp">
+
+	<LinearLayout
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:orientation="horizontal">
+
+		<TextView
+			android:id="@+id/tvHeading"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:padding="5dp"
+			android:textColor="@android:color/white"
+			android:textSize="20sp"></TextView>
+
+
+		<TextView
+			android:id="@+id/tvHeading1"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:layout_gravity="left"
+			android:gravity="right"
+			android:padding="5dp"
+			android:textColor="@android:color/white"
+			android:textSize="20sp"
+            tools:ignore="RtlHardcoded">
+
+		</TextView>
+	</LinearLayout>
+
+	<TextView
+		android:id="@+id/tvSubItem1"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:paddingLeft="10dp"
+		android:paddingRight="10dp"
+		android:textAppearance="?android:attr/textAppearanceSmall"
+		android:textColor="@android:color/white"
+        tools:ignore="RtlHardcoded"></TextView>
+
+	<TextView
+		android:id="@+id/tvSubItem2"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+		android:textAppearance="?android:attr/textAppearanceSmall"
+		android:textColor="@android:color/white"
+        tools:ignore="RtlHardcoded"></TextView>
+
+	<TextView
+		android:id="@+id/tvSubItem3"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+		android:textAppearance="?android:attr/textAppearanceSmall"
+		android:textColor="@android:color/white"
+        tools:ignore="RtlHardcoded"></TextView>
+</LinearLayout>
