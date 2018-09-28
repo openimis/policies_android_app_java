@@ -1,0 +1,112 @@
+<!--Copyright (c) 2016-%CurrentYear% Swiss Agency for Development and Cooperation (SDC)
+
+The program users must agree to the following terms:
+
+Copyright notices
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU AGPL v3 License as published by the 
+Free Software Foundation, version 3 of the License.
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of 
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU AGPL v3 License for more details www.gnu.org.
+
+Disclaimer of Warranty
+There is no warranty for the program, to the extent permitted by applicable law; except when otherwise stated in writing the copyright 
+holders and/or other parties provide the program "as is" without warranty of any kind, either expressed or implied, including, but not 
+limited to, the implied warranties of merchantability and fitness for a particular purpose. The entire risk as to the quality and 
+performance of the program is with you. Should the program prove defective, you assume the cost of all necessary servicing, repair or correction.
+
+Limitation of Liability 
+In no event unless required by applicable law or agreed to in writing will any copyright holder, or any other party who modifies and/or 
+conveys the program as permitted above, be liable to you for damages, including any general, special, incidental or consequential damages 
+arising out of the use or inability to use the program (including but not limited to loss of data or data being rendered inaccurate or losses 
+sustained by you or third parties or a failure of the program to operate with any other programs), even if such holder or other party has been 
+advised of the possibility of such damages.
+
+In case of dispute arising out or in relation to the use of the program, it is subject to the public law of Switzerland. The place of jurisdiction is Berne.-->
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Login </title>
+    <link href="../CSS/Style.CSS" rel="stylesheet" type="text/css"/>
+    <script src="../JS/jquery-3.2.1.min.js"></script>
+    <script src="../JS/exact.js"></script>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" charset="utf-8"/>
+
+
+    <script type="text/javascript">
+
+       $(document).ready(function(){
+        document.title = Android.getString('Login');
+           var isSearch =parseInt(queryString("s"));
+         if(sessionStorage.getItem("UserData") != null && isSearch == 2 ){
+             sessionStorage.removeItem("UserData");
+             sessionStorage.setItem("user","out");
+             Android.isValidLogin('','');
+                window.open("Enrollment.html", "_self");
+
+         }
+
+        if(sessionStorage.getItem("UserData") != null){
+           window.open("Enrollment.html", "_self");
+         }
+
+
+           $('#spPleaseWait').text(Android.getString('PleaseWait'));
+           $('#btnLogin').click(function() {
+
+            var passed = isFormValidated();
+            if(passed){
+             var Username = $('#txtLoginName').val();
+             var Password = $('#txtPassword').val();
+              sessionStorage.setItem("user","in");
+            $("#divProgress").show();
+            setTimeout(function(){
+                var LoggedIn =  Android.isValidLogin(Username, Password);
+                  if(LoggedIn > 0){
+                        SaveUserLoggedIn();
+                        if(isSearch == 0)window.open('Sync.html', '_self');
+                        else if(isSearch == 1) window.open('Search.html', '_self');
+                        else if(isSearch == 2) window.open('Enrollment.html', '_self');
+                    }
+                    else
+                        Android.ShowDialog(Android.getString('LoginFail'));
+              $("#divProgress").hide();
+            }, 500)
+        }
+        else
+           Android.ShowDialog(Android.getString('FieldRequired'));
+  });
+
+   });
+    function SaveUserLoggedIn(){
+          var jsonUser = getControlsValuesJSON('li');
+           sessionStorage.setItem("UserData", jsonUser);
+        }
+
+
+
+    </script>
+
+
+</head>
+<body>
+<div id="divProgress">
+       <span id="spPleaseWait"></span>
+</div>
+<div>
+    <ul class="ulEntry">
+        <li>
+            <span strName="LoginName">Login Name :</span>
+            <input type="name" id="txtLoginName" required/>
+        </li>
+        <li>
+            <span strName="Password">Password :</span>
+            <input type="password" id="txtPassword" required/>
+        </li>
+
+    </ul>
+</div>
+<div class="footer">
+    <input type="submit" id="btnLogin" strName="Login" value="Next">
+</div>
+</body>
+</html>

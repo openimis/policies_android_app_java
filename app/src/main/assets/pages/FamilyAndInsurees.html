@@ -1,0 +1,226 @@
+<!--Copyright (c) 2016-%CurrentYear% Swiss Agency for Development and Cooperation (SDC)
+
+The program users must agree to the following terms:
+
+Copyright notices
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU AGPL v3 License as published by the 
+Free Software Foundation, version 3 of the License.
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of 
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU AGPL v3 License for more details www.gnu.org.
+
+Disclaimer of Warranty
+There is no warranty for the program, to the extent permitted by applicable law; except when otherwise stated in writing the copyright 
+holders and/or other parties provide the program "as is" without warranty of any kind, either expressed or implied, including, but not 
+limited to, the implied warranties of merchantability and fitness for a particular purpose. The entire risk as to the quality and 
+performance of the program is with you. Should the program prove defective, you assume the cost of all necessary servicing, repair or correction.
+
+Limitation of Liability 
+In no event unless required by applicable law or agreed to in writing will any copyright holder, or any other party who modifies and/or 
+conveys the program as permitted above, be liable to you for damages, including any general, special, incidental or consequential damages 
+arising out of the use or inability to use the program (including but not limited to loss of data or data being rendered inaccurate or losses 
+sustained by you or third parties or a failure of the program to operate with any other programs), even if such holder or other party has been 
+advised of the possibility of such damages.
+
+In case of dispute arising out or in relation to the use of the program, it is subject to the public law of Switzerland. The place of jurisdiction is Berne.-->
+<!DOCTYPE html>
+<!--suppress ALL -->
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Family And Insurees</title>
+    <link href="../CSS/Style.CSS" rel="stylesheet" type="text/css"/>
+    <script src="../JS/jquery-3.2.1.min.js"></script>
+    <script src="../JS/exact.js"></script>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" charset="utf-8"/>
+    <script type="text/javascript" language="JavaScript" >
+        $(document).ready(function(){
+
+            document.title = Android.getString('FamilyAndInsurees');
+
+            var FamilyId = queryString("f");
+            var LocationId = null;
+            var RegionId = null;
+            var DistrictId = null;
+            var InsureeId = null;
+            var Action = null;
+
+            var url = 'Enrollment.html?f=' + FamilyId;
+            Android.SetUrl(url);
+
+                if (FamilyId != 0){
+                    LoadFamilyHeader(parseInt(FamilyId))
+                    LoadInsurees(parseInt(FamilyId));
+                }
+
+            $(".family-location").click(function(){
+                window.open('Family.html?f=' + FamilyId);
+                });
+
+           $('#btnNewInsuree').click(function(){
+                var url = 'FamilyAndInsurees.html?f=' + FamilyId;
+                Android.SetUrl(url);
+                window.open('Insuree.html?f=' + FamilyId, '_self');
+                });
+
+
+            $('.ulList li').click(function(){
+              InsureeId = parseInt($(this).find('#hfInsureeId').val());
+              //window.open("Insuree.html?i=" + InsureeId + "&f=" + FamilyId, "_self");
+
+              });
+
+             $('.Policy-label').click(function(){
+                   LocationId = $('#hfLocationId').val();
+                   RegionId = $('#hfRegionId').val();
+                   DistrictId = $('#hfDistrictId').val();
+
+                 window.open('FamilyPolicies.html?f=' + FamilyId + '&l='+ LocationId + '&r='+ RegionId  + '&d='+ DistrictId , '_self');
+            });
+
+
+                AssignDotClass();
+             contextMenu.createContextMenu([Android.getString('Edit'), Android.getString('Delete')], function(){
+                var clicked = $(this).text();
+                 if (clicked == Android.getString('Edit')){
+                        var url = 'FamilyAndInsurees.html?f=' + FamilyId;
+                        Android.SetUrl(url);
+                         window.open("Insuree.html?i=" + InsureeId + "&f=" + FamilyId, "_self");
+                 }
+                 else if(clicked == Android.getString('Delete')){
+                    //$("#divProgress").show();
+                  var isOffline = $('#hfIsOffline').val();
+                  var deletedSuccess = null;
+                  $('#spPleaseWait').text(Android.getString('Deleting'));
+					if(isOffline == 0 || isOffline == 2){
+					
+                        $("#divProgress").show();
+                    
+                        deletedSuccess = parseInt(Android.DeleteOnlineData(InsureeId, 'I'));
+                        
+
+                      }
+					else{
+
+						deletedSuccess = Android.DeleteInsuree(InsureeId);
+					  }
+					
+                    if(deletedSuccess == 1){
+                
+                        $("#divProgress").hide();
+                        //Android.ShowDialog(Android.getString('InsureeDeleted'));
+                        window.open('FamilyAndInsurees.html?f=' + FamilyId  + '&l='+ LocationId + '&r='+ RegionId  + '&d='+ DistrictId, '_self');
+						}
+                    else if(deletedSuccess == 2){
+                        $("#divProgress").hide();
+                        Android.ShowDialog(Android.getString('IsHeadDelete'));
+                    }else if(deletedSuccess== -1){
+                        $("#divProgress").hide();
+                        Android.ShowDialog(Android.getString('LoginToDeleteOnlineData'));
+                    }else{
+                        $("#divProgress").hide();
+                        
+					    Android.ShowDialog(Android.getString('InsureeNotDeleted'));
+					 }
+
+                 }
+              });
+
+        });
+
+    function LoadInsurees(FamilyId){
+        var Insurees = Android.getInsureesForFamily(FamilyId);
+        var ctls = ["CHFID", "InsureeName", "hfInsureeId", "spDOB","spGender","hfIsHead","InsureeId","hfIsOffline"];
+        var Columns = ["CHFID","InsureeName","InsureeId","DOB","Gender","isHead","InsureeId","isOffline"];
+        LoadList(Insurees, '.ulList', ctls, Columns);
+
+        HighlightHOF();
+
+        }
+      function LoadFamilyHeader(FamilyId){
+            var FamilyHeader = Android.getFamilyHeader(FamilyId);
+            bindDataFromDatafield(FamilyHeader);
+      }
+ function AssignDotClass(){
+        var $lis = $(".ulList li");
+            $lis.addClass("dot-side-menu");
+        }
+
+
+        function HighlightHOF(){
+            var $li = $(".ulList li");
+
+            $.each($li, function (index, obj) {
+                var $childObj = ($(obj).children());
+                $.each($childObj, function (index, cObj) {
+                    if ($(cObj).attr("id") == "hfIsHead" && $(cObj).val() == "1") {
+                        $(obj).css({ "border" : "1px solid blue"});
+                    }
+                });
+            })
+        }
+
+    </script>
+    <style>
+        .spGender{
+            float: Right;
+            Color: red;
+            font-weight: 900;
+        }
+
+    </style>
+
+</head>
+<body>
+<div id="divProgress">
+    <span id="spPleaseWait"></span>
+</div>
+<div class="container">
+    <div class="overview-top">
+            <input type="hidden" id="hfLocationId" datafield="LocationId"/>
+            <input type="hidden" id="hfRegionId" datafield="RegionId"/>
+            <input type="hidden" id="hfDistrictId" datafield="DistrictId"/>
+        <ul class="family-location">
+            <li id="RegionName" class='lft' style="font-size: 12px;"><span dataField="RegionName"></span></li>
+            <li id="DistrictName" class='rght' style="font-size: 12px;"><span dataField="DistrictName"></span></li>
+            <li id="WardName" class='lft' style="font-size: 12px;"><span dataField="WardName"></span></li>
+            <li id="VillageName" class='rght' style="font-size: 12px;"><span dataField="VillageName"></span></li>
+        </ul>
+    </div>
+    <div class="Overview-policy">
+        <img src="../images/plus.png" alt="New" class="plusButton" id="btnNewInsuree"/>
+        <p class="Policy-label">
+            Policy
+        </p>
+    </div>
+
+    <div class="Overview-middle">
+        <ul class="ulList" id="ulList">
+            <li class="dot-side-menu" >
+                <input type="hidden" id="hfIsOffline" datafield="isOffline"/>
+                <input type="hidden" id="hfInsureeId" value="0"/>
+                <input type="hidden" id="hfIsHead" value="0"/>
+               <div>
+                   <h3  class="left" id="CHFID"></h3>
+                   <!--<h3 class="right" id="spGender"></h3>-->
+                   <div class="clearFix"></div>
+               </div>
+
+               <div>
+                   <h4 id="InsureeName"></h4>
+                   <span id=spDOB></span>
+               </div>
+
+                <!--<span id="spGender" class="spGender"></span>-->
+            </li>
+        </ul>
+    </div>
+</div>
+<div class="footer">
+
+</div>
+</body>
+</html>
+
+
+
+
+
