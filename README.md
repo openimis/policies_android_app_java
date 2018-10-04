@@ -26,7 +26,7 @@ To make a copy of this project on your local machine, please clone
 the repository.
 
 ```
-git clone https://github.com/openimis/imis_android_app_java
+git clone https://github.com/openimis/openimis_android_app_java
 ```
 
 ### Configuration
@@ -36,11 +36,11 @@ know the openIMIS Web Services domain (DNS or IP address) and to
 configure it in the tz.co.exact.imis.AppInformation java file.
 
 ```
-private static String _Domain = "http://132.148.151.32/";
+private static String _Domain = "http://demo.openimis.org/";
 ```
 
 For demo purposes, the default Web Services domain is set to the openIMIS
-demo server: demo.openimis.org (IP: 132.148.151.32).  
+demo server: demo.openimis.org.  
 
 ### Running the app
 
@@ -54,7 +54,7 @@ and to build the APK. Manual deployment is required on each mobile device.
 
 ## Versioning
 
-We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/openimis/imis_android_app_java/tags).
+We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/openimis/openimis_android_app_java/tags).
 
 ## License
 
