@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">IMIS</string>
+    <string name="app_name">openIMIS</string>
 
     <string name="navigation_drawer_open">Ouvrir le menu de navigation</string>
     <string name="navigation_drawer_close">Fermer le menu de navigation</string>
@@ -8,7 +8,7 @@
 
     <string name="Pleasewait">Veuillez patienter...</string>
     <string name="PageLoading">La page se charge...</string>
-    <string name="HeaderTitle">IMIS</string>
+    <string name="HeaderTitle">openIMIS</string>
     <string name="HeaderEmail">admin@imis.com</string>
     <string name="Home">Accueil</string>
     <string name="Enrolment">Adhesion</string>
@@ -133,7 +133,7 @@
     <string name="Scan">Scanner</string>
     <string name="InsureeName">Nom d\'assuré</string>
     <string name="ReadOnly">La carte SD est en mode lecture seule. Veuillez régler le mode de lecture/écriture et redémarrer l\'application.</string>
-    <string name="NoSDCard">IMIS a besoin d\'une carte mémoire externe pour fonctionner. Veuillez insérer la carte mémoire et redémarrer l\'application.</string>
+    <string name="NoSDCard">openIMIS a besoin d\'une carte mémoire externe pour fonctionner. Veuillez insérer la carte mémoire et redémarrer l\'application.</string>
     <string name="ForceClose">Fermeture forcée</string>
     <string name="MissingInsuranceNumber">Veuillez entrer le numéro d\'assurance</string>
     <string name="InvalidInsuranceNumber">Invalid Insurance number</string>
@@ -221,7 +221,7 @@
     <string name="AddEditPolicy">Ajouter/Modifier le contrat</string>
     <string name="Premiums">Contributions</string>
     <string name="AddEditPremium">Ajouter/Modifier la contribution</string>
-    <string name="QuitAppQuestion">Voulez-vous quitter IMIS ?</string>
+    <string name="QuitAppQuestion">Voulez-vous quitter openIMIS ?</string>
     <string name="Go">OK</string>
     <string name="Insuree">Assuré</string>
     <string name="DuplicateHOF">Une famille avec ce numéro d\'assurance existe déjà.</string>
@@ -272,7 +272,7 @@
     <string name="Confirm">Supprimer</string>
     <string name="Logout">Déconnexion</string>
     <string name="FamilyExists">La famille existe déjà dans le téléphone</string>
-    <string name="ContentTitle">La nouvelle version du IMIS est maintenant disponible.</string>
+    <string name="ContentTitle">La nouvelle version du openIMIS est maintenant disponible.</string>
     <string name="ContentText">Cliquez ici pour télécharger.</string>
     <string name="saving">Enregistrement...</string>
     <string name="Interuption">Le processus a été interrompu. Veuillez vérifier votre connexion Internet.</string>

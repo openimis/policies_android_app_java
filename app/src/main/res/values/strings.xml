@@ -1,11 +1,11 @@
 <resources>
-    <string name="app_name">IMIS</string>
+    <string name="app_name">openIMIS</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="action_settings">Settings</string>
     <string name="Pleasewait">Please wait…</string>
     <string name="PageLoading">Page is loading…</string>
-    <string name="HeaderTitle">IMIS</string>
+    <string name="HeaderTitle">openIMIS</string>
     <string name="HeaderEmail">admin@imis.com</string>
     <string name="Home">Home</string>
     <string name="Enrolment">Enrol</string>
@@ -129,7 +129,7 @@
     <string name="Scan">Scan</string>
     <string name="InsureeName">Insuree Name</string>
     <string name="ReadOnly">SD Card is set to readonly mode. Please set the mode to read/write and restart the application.</string>
-    <string name="NoSDCard">IMIS needs external memory card to run. Please insert memory card and restart the application.</string>
+    <string name="NoSDCard">openIMIS needs external memory card to run. Please insert memory card and restart the application.</string>
     <string name="ForceClose">Force Close</string>
     <string name="MissingInsuranceNumber">Please enter Insurance number</string>
     <string name="InvalidInsuranceNumber">Invalid Insurance number</string>
@@ -224,7 +224,7 @@
     <string name="AddEditPolicy">Add/Edit Policy</string>
     <string name="Premiums">Contributions</string>
     <string name="AddEditPremium">Add/Edit Contribution</string>
-    <string name="QuitAppQuestion">Do you want to quit IMIS?</string>
+    <string name="QuitAppQuestion">Do you want to quit openIMIS?</string>
     <string name="UploadFailureReport">Upload report</string>
     <string name="Go">Go</string>
     <string name="Insuree">Insuree</string>
@@ -274,7 +274,7 @@
     <string name="Confirm">Delete</string>
     <string name="Logout">Logout</string>
     <string name="FamilyExists">Family already exists in phone</string>
-    <string name="ContentTitle">New release of IMIS is now available.</string>
+    <string name="ContentTitle">New release of openIMIS is now available.</string>
     <string name="ContentText">Click here to download.</string>
     <string name="saving">Saving...</string>
     <string name="Interuption">Process has been Interuption please check your internet connection</string>
