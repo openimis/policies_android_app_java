@@ -38,6 +38,7 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -48,6 +49,7 @@ import android.widget.EditText;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
+import android.widget.TextView;
 import android.widget.Toast;
 
 
@@ -117,7 +119,16 @@ public class RenewList extends AppCompatActivity {
                     @Override
                     public void run() {
                         try {
-                            RefreshRenewals();
+                            Global global = new Global();
+                            global = (Global) RenewList.this.getApplicationContext();
+
+                            int userid = global.getUserId();
+                            if(userid > 0){
+                                RefreshRenewals();
+                            }else{
+                                LoginDialogBox("Renewals");
+                            }
+
 
                             // FetchPayers();
                         } catch (IOException | XmlPullParserException e) {
@@ -517,6 +528,86 @@ public class RenewList extends AppCompatActivity {
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    public void LoginDialogBox(final String page){
+
+        final int[] userid = {0};
+
+        Global global = (Global) RenewList.this.getApplicationContext();
+        // get prompts.xml view
+        LayoutInflater li = LayoutInflater.from(this);
+        View promptsView = li.inflate(R.layout.login_dialog, null);
+
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+
+        // set prompts.xml to alertdialog builder
+        alertDialogBuilder.setView(promptsView);
+
+        final TextView username = (TextView) promptsView.findViewById(R.id.UserName);
+        final TextView password = (TextView) promptsView.findViewById(R.id.Password);
+
+        username.setText(global.getOfficerCode().toString());
+
+        // set dialog message
+        alertDialogBuilder
+                .setCancelable(false)
+                .setPositiveButton(R.string.Ok,
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog,int id) {
+                                if(!username.getText().toString().equals("") && !password.getText().toString().equals("")){
+
+                                    new Thread() {
+                                        public void run() {
+                                            CallSoap callSoap = new CallSoap();
+                                            callSoap.setFunctionName("isValidLogin");
+                                            userid[0] = callSoap.isUserLoggedIn(username.getText().toString(),password.getText().toString());
+
+                                            Global global = new Global();
+                                            global = (Global) RenewList.this.getApplicationContext();
+                                            global.setUserId(userid[0]);
+
+                                            runOnUiThread(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    if(userid[0] > 0){
+                                                        if(page.equals("Renewals")){
+                                                            finish();
+                                                            Intent intent = new Intent(RenewList.this, RenewList.class);
+                                                            startActivity(intent);
+                                                            Toast.makeText(RenewList.this,RenewList.this.getResources().getString(R.string.Login_Successful),Toast.LENGTH_LONG).show();
+                                                        }
+
+                                                    }else{
+                                                        Toast.makeText(RenewList.this,RenewList.this.getResources().getString(R.string.LoginFail),Toast.LENGTH_LONG).show();
+                                                        LoginDialogBox(page);
+                                                        //ca.ShowDialog(RenewList.this.getResources().getString(R.string.LoginFail));
+                                                    }
+                                                }
+                                            });
+
+                                        }
+                                    }.start();
+
+
+                                }else{
+                                    Toast.makeText(RenewList.this,RenewList.this.getResources().getString(R.string.Enter_Credentials), Toast.LENGTH_LONG).show();
+                                    LoginDialogBox(page);
+                                }
+                            }
+                        })
+                .setNegativeButton(R.string.Cancel,
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog,int id) {
+                                dialog.cancel();
+                            }
+                        });
+
+        // create alert dialog
+        AlertDialog alertDialog = alertDialogBuilder.create();
+
+        // show it
+        alertDialog.show();
     }
 
 }

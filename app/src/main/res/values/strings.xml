@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">IMIS</string>
+    <string name="app_name">IMIS POLICIES</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="action_settings">Settings</string>
@@ -312,5 +312,10 @@
     <string name="DoubleHeadInServer">Double head of family found on server, Please contact your IT manager</string>
     <string name="UnlistedRenewalPolicies">Unlisted Renewal Policies</string>
     <string name="RenewYourPolicy">Renew Your Policy</string>
+    <string name="user_name">User name</string>
+    <string name="claim_code">Claim Code</string>
+    <string name="type_here">Type here</string>
+    <string name="Enter_Credentials">Please enter user name and password</string>
+    <string name="Login_Successful">Login Successful</string>
 
 </resources>

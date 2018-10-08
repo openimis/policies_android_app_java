@@ -28,6 +28,7 @@ package tz.co.exact.imis;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.ActionBar;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -49,6 +50,9 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.NotificationCompat;
+import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -69,6 +73,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.exact.CallSoap.CallSoap;
 import com.exact.general.General;
 
 import org.json.JSONArray;
@@ -844,8 +849,17 @@ public class MainActivity extends AppCompatActivity
             }).create().show();
 
         } else if (id == R.id.nav_enquire) {
-            Intent intent = new Intent(this, Enquire.class);
-            startActivity(intent);
+            Global global = new Global();
+            global = (Global) MainActivity.this.getApplicationContext();
+            int userid = global.getUserId();
+            if(userid > 0){
+                Intent intent = new Intent(this, Enquire.class);
+                startActivity(intent);
+            }else{
+                LoginDialogBox("Enquire");
+            }
+
+
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -1003,5 +1017,71 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
+    public void LoginDialogBox(final String page){
 
+        final int[] userid = {0};
+
+        Global global = (Global) MainActivity.this.getApplicationContext();
+        // get prompts.xml view
+        LayoutInflater li = LayoutInflater.from(this);
+        View promptsView = li.inflate(R.layout.login_dialog, null);
+
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+
+        // set prompts.xml to alertdialog builder
+        alertDialogBuilder.setView(promptsView);
+
+        final TextView username = (TextView) promptsView.findViewById(R.id.UserName);
+        final TextView password = (TextView) promptsView.findViewById(R.id.Password);
+
+        // set dialog message
+        alertDialogBuilder
+                .setCancelable(false)
+                .setPositiveButton("OK",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog,int id) {
+                                if(!username.getText().toString().equals("") && !password.getText().toString().equals("")){
+
+                                    new Thread() {
+                                        public void run() {
+                                            CallSoap callSoap = new CallSoap();
+                                            callSoap.setFunctionName("isValidLogin");
+                                            userid[0] = callSoap.isUserLoggedIn(username.getText().toString(),password.getText().toString());
+
+                                            Global global = new Global();
+                                            global = (Global) MainActivity.this.getApplicationContext();
+                                            global.setUserId(userid[0]);
+
+                                            runOnUiThread(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    if(userid[0] > 0){
+                                                        if(page.equals("Enquire")){
+                                                            Intent intent = new Intent(MainActivity.this, Enquire.class);
+                                                            startActivity(intent);
+                                                            Toast.makeText(MainActivity.this,MainActivity.this.getResources().getString(R.string.Login_Successful),Toast.LENGTH_LONG).show();
+                                                        }
+
+                                                    }else{
+                                                        ca.ShowDialog(MainActivity.this.getResources().getString(R.string.LoginFail));
+                                                    }
+                                                }
+                                            });
+
+                                        }
+                                    }.start();
+
+
+                                }else{
+                                    Toast.makeText(MainActivity.this,MainActivity.this.getResources().getString(R.string.Enter_Credentials), Toast.LENGTH_LONG).show();
+                                }
+                            }
+                        });
+
+        // create alert dialog
+        AlertDialog alertDialog = alertDialogBuilder.create();
+
+        // show it
+        alertDialog.show();
+    }
 }

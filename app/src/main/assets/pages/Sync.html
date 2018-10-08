@@ -54,7 +54,8 @@ In case of dispute arising out or in relation to the use of the program, it is s
                     var action = $(this).attr("id");
                     switch(action){
                         case "liUploadEnrolment":
-                             if(sessionStorage.getItem("UserData") == null){
+                             var userid = Android.getUserId();
+                             if(sessionStorage.getItem("UserData") == null && userid <= 0){
                                 window.open("Login.html?s=0", "_self");
                              }else{
                                 Android.uploadEnrolment();
@@ -65,7 +66,8 @@ In case of dispute arising out or in relation to the use of the program, it is s
 
                         break;
                     case "liUploadRenewals":
-                             if(sessionStorage.getItem("UserData") == null){
+                             var userid = Android.getUserId();
+                             if(sessionStorage.getItem("UserData") == null && userid <= 0){
                                 window.open("Login.html?s=0", "_self");
                              }else{
                                 Android.UploadOfflineFeedbackRenewal('renewal');
@@ -76,7 +78,8 @@ In case of dispute arising out or in relation to the use of the program, it is s
                          Android.zipFeedBackRenewal('Renewal');
                         break;
                     case "liUploadFeedback":
-                             if(sessionStorage.getItem("UserData") == null){
+                             var userid = Android.getUserId();
+                             if(sessionStorage.getItem("UserData") == null && userid <= 0){
                                 window.open("Login.html?s=0", "_self");
                              }else{
                                 Android.UploadOfflineFeedbackRenewal('feedback');
@@ -96,7 +99,8 @@ In case of dispute arising out or in relation to the use of the program, it is s
 
                             break;
                     case "liUploadPhoto":
-                             if(sessionStorage.getItem("UserData") == null){
+                             var userid = Android.getUserId();
+                             if(sessionStorage.getItem("UserData") == null && userid <= 0){
                                 window.open("Login.html?s=0", "_self");
                              }
                           Android.UploadPhotos();

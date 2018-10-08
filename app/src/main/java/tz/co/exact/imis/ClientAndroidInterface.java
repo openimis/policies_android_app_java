@@ -3703,6 +3703,21 @@ public void zipFile(){
         return UserId;
     }
 
+    public int Login(final String Username, final String Password) throws InterruptedException {
+        global = (Global) mContext.getApplicationContext();
+        CallSoap cs = new CallSoap();
+        cs.setFunctionName("isValidLogin");
+        UserId = cs.isUserLoggedIn(Username, Password);
+        global.setUserId(UserId);
+        ((Activity) mContext).runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                MainActivity.SetLogedIn(mContext.getResources().getString(R.string.Login), mContext.getResources().getString(R.string.Logout));
+            }
+        });
+        return UserId;
+    }
+
     public String GetSnapshotIndicators() {
         String snapshot= null;
         global = (Global) mContext.getApplicationContext();
@@ -5640,6 +5655,79 @@ public void zipFile(){
             e.printStackTrace();
         }
         return rule;
+    }
+
+    public void LoginDialogBox(final String page){
+
+        ((Activity) mContext).runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                // get prompts.xml view
+                LayoutInflater li = LayoutInflater.from(mContext);
+                View promptsView = li.inflate(R.layout.login_dialog, null);
+
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(mContext);
+
+                // set prompts.xml to alertdialog builder
+                alertDialogBuilder.setView(promptsView);
+
+                final TextView username = (TextView) promptsView.findViewById(R.id.UserName);
+                final TextView password = (TextView) promptsView.findViewById(R.id.Password);
+
+                // set dialog message
+                alertDialogBuilder
+                        .setCancelable(false)
+                        .setPositiveButton("OK",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog,int id) {
+                                        if(!username.getText().toString().equals("") || !password.getText().toString().equals("")){
+                                            int userid = 0;
+                                            userid = 1;//isValidLogin(username.getText().toString(),password.getText().toString());
+                                            if(userid > 0){
+                                                if(page.equals("Enquire")){
+                                                    ((Enquire) mContext).finish();
+                                                    Intent intent = new Intent(mContext, Enquire.class);
+                                                    mContext.startActivity(intent);
+                                                }
+                                                if(page.equals("Renewals")){
+                                                    ((RenewList) mContext).finish();
+                                                    Intent intent = new Intent(mContext, RenewList.class);
+                                                    mContext.startActivity(intent);
+                                                }
+                                                if(page.equals("Feedbacks")){
+                                                    ((FeedbackList) mContext).finish();
+                                                    Intent intent = new Intent(mContext, FeedbackList.class);
+                                                    mContext.startActivity(intent);
+                                                }
+
+                                            }else{
+                                                ShowDialog(mContext.getResources().getString(R.string.LoginFail));
+                                            }
+                                        }else{
+                                            Toast.makeText(mContext,"Please enter user name and password", Toast.LENGTH_LONG).show();
+                                        }
+                                    }
+                                });
+
+                // create alert dialog
+                AlertDialog alertDialog = alertDialogBuilder.create();
+
+                // show it
+                alertDialog.show();
+            }
+        });
+
+    }
+
+    @JavascriptInterface
+    public String getOfficerCode(){
+        global = (Global) mContext.getApplicationContext();
+        return  global.getOfficerCode();
+    }
+    @JavascriptInterface
+    public int getUserId(){
+        global = (Global) mContext.getApplicationContext();
+        return  global.getUserId();
     }
 
 
