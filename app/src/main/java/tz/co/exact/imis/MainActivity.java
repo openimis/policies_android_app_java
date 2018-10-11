@@ -207,7 +207,7 @@ public class MainActivity extends AppCompatActivity
         else{//if user cancels
             ClientAndroidInterface.inProgress = false;
             this.InsureeNumber = null;
-            this.ImagePath = "";
+            this.ImagePath = null;
         }
 
     }
