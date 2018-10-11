@@ -2055,6 +2055,13 @@ public class ClientAndroidInterface {
         JSONArray Premiums = sqlHandler.getResult(Query, arg);
         return Premiums.toString();
     }
+    public String getRecordedPolicies(int RenewalId) {
+        String Query = "SELECT RenewalId, PolicyId, OfficerId, OfficerCode , InsuranceNumber, LastName,OtherNames,ProductCode,ProductName \n" +
+                "RenewalPromptDate, isDone, LocationId, PolicyValue, UploadedDate, ControlRequestDate FROM tblRecordedPolicies WHERE RenewalId=?";
+        String arg[] = {String.valueOf(RenewalId)};
+        JSONArray RecordedPolicies = sqlHandler.getResult(Query, arg);
+        return RecordedPolicies.toString();
+    }
     @JavascriptInterface
     public boolean IsReceiptNumberUnique(String ReceiptNo, int FamilyId) {
         String CHFID = "";
@@ -2344,11 +2351,23 @@ public class ClientAndroidInterface {
         sqlHandler.deleteData(TableName, Where, WhereArg);
         try {
             sqlHandler.insertData(TableName, Columns, Result, "");
+            InsertRecordedPolicies(Result);
         } catch (JSONException e) {
             e.printStackTrace();
             return String.valueOf(0);
         }
         return String.valueOf(1);
+    }
+    public String InsertRecordedPolicies(String Result) {
+        String TableName = "tblRecordedPolicies";
+        String[] Columns = {"RenewalId", "PolicyId", "OfficerId", "OfficerCode", "InsuranceNumber", "LastName", "OtherNames", "ProductCode", "ProductName", "RenewalPromptDate", "LocationId", "PolicyValue","UploadedDate","ControlRequestDate"};
+        try {
+            sqlHandler.insertData(TableName, Columns, Result, "");
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return "0";
+        }
+        return "1";
     }
 
     public int DeleteRenewalOfflineRow(Integer RenewalId) {
@@ -2433,7 +2452,16 @@ public class ClientAndroidInterface {
         }
         return true;//Update Success
     }
-
+    public boolean UpdateRecordedPolicies(int RenewalId, String col, String val) {
+        ContentValues values = new ContentValues();
+        values.put(col, val);
+        try {
+            sqlHandler.updateData("tblRecordedPolicies", values, "RenewalId = ?", new String[]{String.valueOf(RenewalId)});
+        } catch (UserException e) {
+            e.printStackTrace();
+        }
+        return true;//Update Success
+    }
     private void DeleteFeedBackRenewal() {
         String Query = "DELETE FROM tblFeedbacks WHERE isDone = 'Y'; DELETE FROM tblRenewals WHERE isDone = 'Y' ";
         sqlHandler.getResult(Query, null);
@@ -5730,6 +5758,11 @@ public void zipFile(){
         return  global.getUserId();
     }
 
+    @JavascriptInterface
+    public void launchControlNumbers(){
+        Intent intent = new Intent(mContext, ControlNumbers.class);
+        mContext.startActivity(intent);
+    }
 
 
 }

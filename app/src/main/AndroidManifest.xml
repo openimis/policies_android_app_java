@@ -80,7 +80,8 @@
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/Acquire"
             android:screenOrientation="portrait" />
-        <activity android:name=".Reports"
+        <activity
+            android:name=".Reports"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/Reports"
             android:screenOrientation="portrait" />
@@ -89,11 +90,21 @@
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/SnapshotIndicators"
             android:screenOrientation="portrait" />
-
-        <activity android:name=".CummulativeIndicators"
+        <activity
+            android:name=".CummulativeIndicators"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/CummulativeIndicators"
             android:screenOrientation="portrait" />
+        <activity android:name=".ControlNumbers" />
+        <activity
+            android:name=".OverViewPolicies"
+            android:label="@string/title_activity_overview_policies"
+            android:theme="@style/AppTheme.NoActionBar">
+
+            <meta-data android:name="android.app.searchable"
+                android:resource="@xml/searchable" />
+
+        </activity>
     </application>
 
 </manifest>

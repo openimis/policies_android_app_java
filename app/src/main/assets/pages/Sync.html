@@ -46,6 +46,7 @@ In case of dispute arising out or in relation to the use of the program, it is s
               $('#CreateFeedbackXML').text(Android.getString('CreateFeedbackXML'));
               $('#UploadPhoto').text(Android.getString('UploadPhoto'));
               $('#DownloadMaster').text(Android.getString('DownloadMaster'));
+              $('#ControlNumbers').text(Android.getString('ControlNumbers'));
 
 
 
@@ -105,6 +106,10 @@ In case of dispute arising out or in relation to the use of the program, it is s
                              }
                           Android.UploadPhotos();
                          break;
+
+                    case "liControlNumbers":
+                          Android.launchControlNumbers();
+                          break;
                     }
                 }catch(e){
                     Android.ShowDialog(e.message);
@@ -155,6 +160,9 @@ In case of dispute arising out or in relation to the use of the program, it is s
         </li>
         <li id="liCreateFeedbackXML">
             <span id="CreateFeedbackXML">Create Feedback XML</span>
+        </li>
+        <li id="liControlNumbers">
+            <span id="ControlNumbers">Control Numbers</span>
         </li>
         <li id="liUploadPhoto" style="display:none;">
             <span id="UploadPhoto">Upload Photo</span>

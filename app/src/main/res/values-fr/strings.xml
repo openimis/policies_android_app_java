@@ -321,4 +321,8 @@
     <string name="type_here">Type here</string>
     <string name="Enter_Credentials">Please enter user name and password</string>
     <string name="Login_Successful">Login Successful</string>
+    <string name="control_numbers">Control Numbers</string>
+    <string name="OverViewPolicies">Overview Policies</string>
+    <string name="OverViewControlNumber">Overview Control Number</string>
+    <string name="ControlNumbers">Control Numbers</string>
 </resources>
