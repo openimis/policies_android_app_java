@@ -14,4 +14,12 @@
     <color name="DarkBlue">#09578e</color>
     <color name="white">#FFF</color>
     <color name="Black">#000000</color>
+
+    <color name="orange">#ffae4c</color>
+    <color name="orange_dark">#b66200</color>
+    <color name="silver">#dcdcdc</color>
+    <color name="grey">#737373</color>
+    <color name="blue">#0032d6</color>
+    <color name="red">#ff000d</color>
+    <color name="black">#080808</color>
 </resources>

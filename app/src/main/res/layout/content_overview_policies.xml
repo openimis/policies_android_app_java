@@ -8,9 +8,10 @@
     tools:context="tz.co.exact.imis.OverViewPolicies"
     tools:showIn="@layout/activity_overview_policies">
 
-<TextView
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:text="@string/large_text"/>
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/listofpolicies"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white"/>
 
 </android.support.v4.widget.NestedScrollView>

@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/layout_root"
+    android:padding="20dp">
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/LabelInsuranceNo"
+            android:layout_width="wrap_content"
+            android:layout_height="44dp"
+            android:text="Insurance No."
+            android:textColor="@color/white"
+            android:background="@color/colorPrimaryDark"
+            android:typeface="monospace"
+            android:fontFamily="sans-serif-light"
+            android:padding="11dp"
+            android:textSize="14sp"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+        <TextView
+            android:id="@+id/InsuranceNumber"
+            android:layout_width="wrap_content"
+            android:layout_height="44dp"
+            android:layout_toRightOf="@id/LabelInsuranceNo"
+            android:layout_alignParentRight="true"
+            android:gravity="end"
+            android:textAlignment="textEnd"
+            android:typeface="monospace"
+            android:fontFamily="sans-serif-light"
+            android:padding="15dp"
+            android:textSize="12sp"
+            android:textColor="@color/white"
+            android:background="@color/colorPrimaryDark"
+            android:text="30040034"/>
+
+    </RelativeLayout>
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="1dp"
+        android:typeface="monospace"
+        android:fontFamily="sans-serif-light"
+        android:background="@color/black"/>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/RenewalLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/black"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:typeface="monospace"
+            android:fontFamily="sans-serif-light"
+            android:text="Renewal:" />
+        <TextView
+            android:id="@+id/isDone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/colorPrimaryDark"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:layout_toRightOf="@id/RenewalLabel"
+            android:layout_alignParentRight="true"
+            android:gravity="end"
+            android:textAlignment="textEnd"
+            android:typeface="monospace"
+            android:fontFamily="sans-serif-light"
+            android:text="Yes" />
+
+        <TextView
+            android:id="@+id/NamesLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/black"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:typeface="monospace"
+            android:fontFamily="sans-serif-light"
+            android:layout_below="@id/RenewalLabel"
+            android:text="Names:" />
+        <TextView
+            android:id="@+id/Names"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/colorPrimaryDark"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:typeface="monospace"
+            android:layout_toRightOf="@id/NamesLabel"
+            android:layout_alignParentRight="true"
+            android:layout_below="@id/isDone"
+            android:gravity="end"
+            android:textAlignment="textEnd"
+            android:fontFamily="sans-serif-light"
+            android:text="Herman Gideon Lukindo" />
+        <TextView
+            android:id="@+id/ProductCodeLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/black"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:typeface="monospace"
+            android:fontFamily="sans-serif-light"
+            android:layout_below="@id/NamesLabel"
+            android:text="ProductCode:" />
+        <TextView
+            android:id="@+id/ProductCode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/red"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:typeface="monospace"
+            android:layout_toRightOf="@id/ProductCodeLabel"
+            android:layout_alignParentRight="true"
+            android:layout_below="@id/Names"
+            android:gravity="end"
+            android:textAlignment="textEnd"
+            android:fontFamily="sans-serif-light"
+            android:text="X00012" />
+        <TextView
+            android:id="@+id/ProductNameLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/black"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:typeface="monospace"
+            android:fontFamily="sans-serif-light"
+            android:layout_below="@id/ProductCodeLabel"
+            android:text="ProductName:" />
+        <TextView
+            android:id="@+id/ProductName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/red"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:typeface="monospace"
+            android:layout_toRightOf="@id/ProductNameLabel"
+            android:layout_alignParentRight="true"
+            android:layout_below="@id/ProductCode"
+            android:gravity="end"
+            android:textAlignment="textEnd"
+            android:fontFamily="sans-serif-light"
+            android:text="National Free" />
+
+    </RelativeLayout>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="0.1dp"
+        android:typeface="monospace"
+        android:fontFamily="sans-serif-thin"
+        android:background="@color/black"/>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/UploadedLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/black"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:typeface="monospace"
+            android:fontFamily="sans-serif-light"
+            android:text="Uploaded Date:" />
+        <TextView
+            android:id="@+id/UploadedDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/orange"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:layout_toRightOf="@id/UploadedLabel"
+            android:layout_alignParentRight="true"
+            android:gravity="end"
+            android:textAlignment="textEnd"
+            android:typeface="monospace"
+            android:fontFamily="sans-serif-light"
+            android:text="20/10/2018" />
+
+        <TextView
+            android:id="@+id/RequestedLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/black"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:typeface="monospace"
+            android:fontFamily="sans-serif-light"
+            android:layout_below="@id/UploadedLabel"
+            android:text="Requested Date:" />
+        <TextView
+            android:id="@+id/RequestedDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/blue"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:typeface="monospace"
+            android:layout_toRightOf="@id/RequestedLabel"
+            android:layout_alignParentRight="true"
+            android:layout_below="@id/UploadedDate"
+            android:gravity="end"
+            android:textAlignment="textEnd"
+            android:fontFamily="sans-serif-light"
+            android:text="17/08/2017" />
+
+    </RelativeLayout>
+    <TextView
+        android:id="@+id/order_status"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAlignment="center"
+        android:typeface="monospace"
+        android:fontFamily="sans-serif-condensed"
+        android:textColor="@color/orange"
+        android:textSize="17dp"
+        android:visibility="gone"
+        android:text="Coming..."/>
+
+</LinearLayout>

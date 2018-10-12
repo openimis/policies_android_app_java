@@ -1738,6 +1738,8 @@ public class ClientAndroidInterface {
                 rtPolicyId = MaxPolicyId;
                 InsertPolicyInsuree(rtPolicyId, 1);
 
+                //InsertRecordedPolicies("new",String.valueOf(FamilyId),data.get("ddlProduct"),data.get("hfPolicyValue"),MaxPolicyId);
+
             } else {
                 int Online = 2;
                 if (isOffline == 0 || isOffline == 2) {
@@ -2055,7 +2057,13 @@ public class ClientAndroidInterface {
         JSONArray Premiums = sqlHandler.getResult(Query, arg);
         return Premiums.toString();
     }
-    public String getRecordedPolicies(int RenewalId) {
+    public JSONArray getRecordedPolicies() {
+        String Query = "SELECT RenewalId, PolicyId, OfficerId, OfficerCode , InsuranceNumber, LastName,OtherNames,ProductCode,ProductName \n" +
+                "RenewalPromptDate, isDone, LocationId, PolicyValue, UploadedDate, ControlRequestDate FROM tblRecordedPolicies";
+        JSONArray RecordedPolicies = sqlHandler.getResult(Query, null);
+        return RecordedPolicies;
+    }
+    public String getRecordedPoliciesById(int RenewalId) {
         String Query = "SELECT RenewalId, PolicyId, OfficerId, OfficerCode , InsuranceNumber, LastName,OtherNames,ProductCode,ProductName \n" +
                 "RenewalPromptDate, isDone, LocationId, PolicyValue, UploadedDate, ControlRequestDate FROM tblRecordedPolicies WHERE RenewalId=?";
         String arg[] = {String.valueOf(RenewalId)};
@@ -2351,24 +2359,42 @@ public class ClientAndroidInterface {
         sqlHandler.deleteData(TableName, Where, WhereArg);
         try {
             sqlHandler.insertData(TableName, Columns, Result, "");
-            InsertRecordedPolicies(Result);
         } catch (JSONException e) {
             e.printStackTrace();
             return String.valueOf(0);
         }
         return String.valueOf(1);
     }
-    public String InsertRecordedPolicies(String Result) {
-        String TableName = "tblRecordedPolicies";
-        String[] Columns = {"RenewalId", "PolicyId", "OfficerId", "OfficerCode", "InsuranceNumber", "LastName", "OtherNames", "ProductCode", "ProductName", "RenewalPromptDate", "LocationId", "PolicyValue","UploadedDate","ControlRequestDate"};
-        try {
-            sqlHandler.insertData(TableName, Columns, Result, "");
-        } catch (JSONException e) {
-            e.printStackTrace();
-            return "0";
+    /*public void InsertRecordedPolicies(String WhitchPolicy, String FamilyId, String ProdId, String PolicyValue, int PolicyId) {
+
+        String InsuranceNumber = getInsuranceNumber(FamilyId);
+        String LastName = getLastName(FamilyId);
+        String OtherNames = getOtherNames(FamilyId);
+
+        ContentValues values = new ContentValues();
+        // isOffline = getFamilyStatus(FamilyId);
+
+        values.put("PolicyId", PolicyId);
+        values.put("InsuranceNumber", InsuranceNumber);
+        values.put("LastName", LastName);
+        values.put("OtherNames", OtherNames);
+        values.put("ProductCode", ProductCode);
+        values.put("ProductName", ProductName);
+        if(WhitchPolicy.equals("new")){
+            values.put("isDone", "No");
+        }else{
+            values.put("isDone", "Yes");
         }
-        return "1";
-    }
+        values.put("PolicyValue", PolicyValue);
+        values.put("UploadedDate", "");
+        values.put("ControlRequestDate", "");
+
+        try {
+            sqlHandler.insertData("tblRecordedPolicies", values);
+        } catch (UserException e) {
+            e.printStackTrace();
+        }
+    }*/
 
     public int DeleteRenewalOfflineRow(Integer RenewalId) {
         String Query = "DELETE FROM tblRenewals WHERE RenewalId=?";

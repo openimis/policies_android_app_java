@@ -468,12 +468,21 @@ public class Renewal extends AppCompatActivity {
                 e.printStackTrace();
             }
 
+
         }catch (IllegalStateException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         } catch (JSONException e) {
             e.printStackTrace();
         }
+/*        int PolicyId = getPolicyId(RenewalId);
+        String LastName = getLastName(RenewalId);
+        String OtherName = getOtherName(RenewalId);
+        String InsuranceNumber = etCHFID.getText().toString();
+        String Code = etProductCode.getText().toString();
+        String PolicyValue = etAmount.getText().toString();
+
+        ca.InsertRecordedPolicies("Renew","1",etProductCode.getText().toString(),etAmount.getText().toString());*/
 
         return FullObject.toString();
     }
