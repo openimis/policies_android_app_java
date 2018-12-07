@@ -40,7 +40,7 @@ public class OverViewPolicies extends AppCompatActivity {
         actionBar.setTitle(getResources().getString(R.string.OverViewPolicies));
 
         clientAndroidInterface = new ClientAndroidInterface(this);
-        //fillRecordedPolicies();
+        fillRecordedPolicies();
 
     }
 

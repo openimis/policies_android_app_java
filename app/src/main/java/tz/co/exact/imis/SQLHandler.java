@@ -54,7 +54,7 @@ public class SQLHandler extends SQLiteOpenHelper {
 
     public static final String DBNAME = "IMIS.db3";
     private static final String OFFLINEDBNAME = "ImisData.db3";
-    public   Boolean isPrivate = true;
+    public Boolean isPrivate = true;
     private Context mContext;
     private SQLiteDatabase mDatabase;
     private static final int DATABASE_VERSION = 2;

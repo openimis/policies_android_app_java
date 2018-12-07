@@ -299,7 +299,7 @@ public class ClientAndroidInterface {
 
 
     @JavascriptInterface
-    public String getRegions() {
+    public String getRegions() {//There is a problem here please check it was working before
         global = (Global) mContext.getApplicationContext();
         String Query = "SELECT LocationId, LocationName FROM tblLocations WHERE LocationId = (SELECT L.ParentLocationId LocationId FROM tblLocations L\n" +
                 "INNER JOIN tblOfficer O ON L.LocationId = O.LocationId\n" +
@@ -1738,7 +1738,7 @@ public class ClientAndroidInterface {
                 rtPolicyId = MaxPolicyId;
                 InsertPolicyInsuree(rtPolicyId, 1);
 
-                //InsertRecordedPolicies("new",String.valueOf(FamilyId),data.get("ddlProduct"),data.get("hfPolicyValue"),MaxPolicyId);
+                InsertRecordedPolicies("new",String.valueOf(FamilyId),data.get("ddlProduct"),data.get("hfPolicyValue"),MaxPolicyId);
 
             } else {
                 int Online = 2;
@@ -2365,11 +2365,27 @@ public class ClientAndroidInterface {
         }
         return String.valueOf(1);
     }
-    /*public void InsertRecordedPolicies(String WhitchPolicy, String FamilyId, String ProdId, String PolicyValue, int PolicyId) {
+    public void InsertRecordedPolicies(String WhitchPolicy, String FamilyId, String ProdId, String PolicyValue, int PolicyId) throws JSONException {
+        JSONObject O;
+        JSONArray InsuranceNumberArray = getInsuranceNumber(FamilyId);
+        O = InsuranceNumberArray.getJSONObject(0);
+        String InsuranceNumber = O.getString("CHFID");
 
-        String InsuranceNumber = getInsuranceNumber(FamilyId);
-        String LastName = getLastName(FamilyId);
-        String OtherNames = getOtherNames(FamilyId);
+        JSONArray LastNameArray = getLastName(FamilyId);
+        O = LastNameArray.getJSONObject(0);
+        String LastName = O.getString("LastName");
+
+        JSONArray OtherNamesArray = getOtherNames(FamilyId);
+        O = OtherNamesArray.getJSONObject(0);
+        String OtherNames = O.getString("OtherNames");
+
+        JSONArray ProductCodeArray = getProductCode(ProdId);
+        O = ProductCodeArray.getJSONObject(0);
+        String ProductCode = O.getString("ProductCode");
+
+        JSONArray ProductNameArray = getProductName(ProdId);
+        O = ProductNameArray.getJSONObject(0);
+        String ProductName = O.getString("ProductName");
 
         ContentValues values = new ContentValues();
         // isOffline = getFamilyStatus(FamilyId);
@@ -2394,7 +2410,53 @@ public class ClientAndroidInterface {
         } catch (UserException e) {
             e.printStackTrace();
         }
-    }*/
+    }
+
+    private JSONArray getProductName(String prodId) {
+        String Query = "SELECT ProductName " +
+                "FROM  tblProduct WHERE prodId = ? ";
+        String arg[] = {prodId};
+        JSONArray ProductName = sqlHandler.getResult(Query, arg);
+        return ProductName;
+    }
+
+    private JSONArray getProductCode(String prodId) {
+        String Query = "SELECT ProductCode " +
+                "FROM  tblProduct WHERE prodId = ? ";
+        String arg[] = {prodId};
+        JSONArray ProductCode = sqlHandler.getResult(Query, arg);
+        return ProductCode;
+    }
+
+    private JSONArray getOtherNames(String familyId) {
+        String Query = "SELECT OtherNames " +
+                "FROM  tblInsuree WHERE FamilyId = ? AND isHead = 1 ";
+        String arg[] = {familyId};
+        JSONArray OtherNames = sqlHandler.getResult(Query, arg);
+        return OtherNames;
+    }
+
+    private JSONArray getLastName(String familyId) {
+        String Query = "SELECT LastName " +
+                "FROM  tblInsuree WHERE FamilyId = ? AND isHead = 1 ";
+        String arg[] = {familyId};
+        JSONArray LastName = sqlHandler.getResult(Query, arg);
+        return LastName;
+    }
+
+    private JSONArray getInsuranceNumber(String familyId) {
+        JSONArray InsuranceNumber = null;
+        String Query = "SELECT CHFID " +
+                "FROM  tblInsuree WHERE FamilyId = ? AND isHead  = 1";
+        String arg[] = {familyId};
+        try {
+            InsuranceNumber = sqlHandler.getResult(Query, arg);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+        return InsuranceNumber;
+    }
 
     public int DeleteRenewalOfflineRow(Integer RenewalId) {
         String Query = "DELETE FROM tblRenewals WHERE RenewalId=?";
