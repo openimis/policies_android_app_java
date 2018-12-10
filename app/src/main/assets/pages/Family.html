@@ -122,7 +122,6 @@ In case of dispute arising out or in relation to the use of the program, it is s
 
         function getRegions(){
             var $Regions = Android.getRegions();
-            alert($Regions);
             var SelectText = Android.getString('SelectRegion');
             var rows = JSON.parse($Regions).length;
             if(rows == 1 )SelectText = null;
