@@ -299,7 +299,7 @@ public class ClientAndroidInterface {
 
 
     @JavascriptInterface
-    public String getRegions() {//There is a problem here please check it was working before
+    public String getRegions() {
         global = (Global) mContext.getApplicationContext();
         String Query = "SELECT LocationId, LocationName FROM tblLocations WHERE LocationId = (SELECT L.ParentLocationId LocationId FROM tblLocations L\n" +
                 "INNER JOIN tblOfficer O ON L.LocationId = O.LocationId\n" +
@@ -2058,8 +2058,7 @@ public class ClientAndroidInterface {
         return Premiums.toString();
     }
     public JSONArray getRecordedPolicies() {
-        String Query = "SELECT RenewalId, PolicyId, OfficerId, OfficerCode , InsuranceNumber, LastName,OtherNames,ProductCode,ProductName \n" +
-                "RenewalPromptDate, isDone, LocationId, PolicyValue, UploadedDate, ControlRequestDate FROM tblRecordedPolicies";
+        String Query = "SELECT * FROM tblRecordedPolicies";
         JSONArray RecordedPolicies = sqlHandler.getResult(Query, null);
         return RecordedPolicies;
     }

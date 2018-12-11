@@ -372,7 +372,7 @@ public class MainActivity extends AppCompatActivity
             OfficerName.setText(global.getOfficerName());
     }
 
-    public static final void SetLogedIn(String Lg, String Lo){
+    public static final void  SetLogedIn(String Lg, String Lo){
         if(global.getUserId() > 0)
         { Login.setText(Lo);
 
@@ -1051,6 +1051,14 @@ public class MainActivity extends AppCompatActivity
                                             Global global = new Global();
                                             global = (Global) MainActivity.this.getApplicationContext();
                                             global.setUserId(userid[0]);
+
+                                            runOnUiThread(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    SetLogedIn(MainActivity.this.getResources().getString(R.string.Login), MainActivity.this.getResources().getString(R.string.Logout));
+
+                                                }
+                                            });
 
                                             runOnUiThread(new Runnable() {
                                                 @Override
