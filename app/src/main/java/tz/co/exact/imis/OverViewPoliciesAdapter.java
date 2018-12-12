@@ -1,22 +1,29 @@
 package tz.co.exact.imis;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Hiren on 10/12/2018.
  */
 
 public class OverViewPoliciesAdapter extends RecyclerView.Adapter {
+    List<String> num = new ArrayList<>();
     private JSONArray policies;
 
     String InsuranceNumber = null;
@@ -27,6 +34,9 @@ public class OverViewPoliciesAdapter extends RecyclerView.Adapter {
     String ProductName = null;
     String UploadedDate = null;
     String RequestedDate = null;
+
+    private int focusedItem = 0;
+
     //Constructor
     Context _context;
     public OverViewPoliciesAdapter(Context rContext, JSONArray _policies){
@@ -84,16 +94,37 @@ public class OverViewPoliciesAdapter extends RecyclerView.Adapter {
         public TextView UploadedDate;
         public TextView RequestedDate;
 
-        public Reportmsg(View itemView) {
+        public Reportmsg(final View itemView) {
             super(itemView);
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     String InsNo = InsuranceNumber.getText().toString();
+                    if(num.size() == 0){
+                        num.add(String.valueOf(getLayoutPosition()));
+                        itemView.setBackgroundColor(Color.GRAY);
+                    }else{
+                        int ans = 0;
+                        for (int i=0; i<num.size(); i++){
+                            if(num.get(i).equals(String.valueOf(getLayoutPosition()))){
+                                ans = 1;
+                                num.remove(i);
+                                itemView.setBackgroundColor(Color.WHITE);
+                                break;
+                            }
+                            ans = 0;
+                        }
+                        if(ans == 0){
+                            num.add(String.valueOf(getLayoutPosition()));
+                            itemView.setBackgroundColor(Color.GRAY);
+                        }
+                    }
+
                     //trackBox(No,qty,price,coins,tarehe);
                 }
             });
+
 
             InsuranceNumber = (TextView) itemView.findViewById(R.id.InsuranceNumber);
             isDone = (TextView) itemView.findViewById(R.id.isDone);
