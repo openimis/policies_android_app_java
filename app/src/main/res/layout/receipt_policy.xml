@@ -23,10 +23,9 @@
             android:textAppearance="?android:attr/textAppearanceLarge" />
         <TextView
             android:id="@+id/InsuranceNumber"
-            android:layout_width="wrap_content"
+            android:layout_width="130dp"
             android:layout_height="44dp"
             android:layout_toRightOf="@id/LabelInsuranceNo"
-            android:layout_alignParentRight="true"
             android:gravity="end"
             android:textAlignment="textEnd"
             android:typeface="monospace"
@@ -36,6 +35,17 @@
             android:textColor="@color/white"
             android:background="@color/colorPrimaryDark"
             android:text="30040034"/>
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="44dp"
+            android:layout_toRightOf="@id/InsuranceNumber"
+            android:layout_alignParentRight="true"
+            android:gravity="end"
+            android:textAlignment="textEnd"
+            android:typeface="monospace"
+            android:fontFamily="sans-serif-light"
+            android:textSize="12sp"
+            android:background="@color/colorPrimaryDark"/>
 
     </RelativeLayout>
 
