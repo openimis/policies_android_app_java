@@ -1,6 +1,7 @@
 package tz.co.exact.imis;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
@@ -9,6 +10,7 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -24,7 +26,7 @@ import java.util.List;
  */
 
 public class OverViewPoliciesAdapter <VH extends TrackSelectionAdapter.ViewHolder> extends RecyclerView.Adapter {
-    List<String> num = new ArrayList<>();
+    OverViewPolicies overViewPolicies = new OverViewPolicies();
     private JSONArray policies;
 
     String InsuranceNumber = null;
@@ -134,6 +136,7 @@ public class OverViewPoliciesAdapter <VH extends TrackSelectionAdapter.ViewHolde
         public TextView ProductName;
         public TextView UploadedDate;
         public TextView RequestedDate;
+        public CheckBox checkbox1;
 
         public Reportmsg(final View itemView) {
             super(itemView);
@@ -141,32 +144,32 @@ public class OverViewPoliciesAdapter <VH extends TrackSelectionAdapter.ViewHolde
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    String InsNo = InsuranceNumber.getText().toString();
+                    //String InsNo = InsuranceNumber.getText().toString();
+
                     // Redraw the old selection and the new
-/*                    notifyItemChanged(focusedItem);
-                    focusedItem = getLayoutPosition();
-                    notifyItemChanged(focusedItem);*/
-/*                    if(num.size() == 0){
-                        num.add(String.valueOf(getLayoutPosition()));
-                        itemView.setBackgroundColor(Color.GRAY);
+                    if(overViewPolicies.num.size() == 0){
+                        overViewPolicies.num.add(String.valueOf(getLayoutPosition()));
+                        //itemView.setBackgroundColor(Color.GRAY);
+                        checkbox1.setChecked(true);
                     }else{
                         int ans = 0;
-                        for (int i=0; i<num.size(); i++){
-                            if(num.get(i).equals(String.valueOf(getLayoutPosition()))){
+                        for (int i=0; i<overViewPolicies.num.size(); i++){
+                            if(overViewPolicies.num.get(i).equals(String.valueOf(getLayoutPosition()))){
                                 ans = 1;
-                                num.remove(i);
-                                itemView.setBackgroundColor(Color.WHITE);
+                                overViewPolicies.num.remove(i);
+                                //itemView.setBackgroundColor(Color.WHITE);
+                                checkbox1.setChecked(false);
                                 break;
                             }
                             ans = 0;
                         }
                         if(ans == 0){
-                            num.add(String.valueOf(getLayoutPosition()));
-                            itemView.setBackgroundColor(Color.GRAY);
+                            overViewPolicies.num.add(String.valueOf(getLayoutPosition()));
+                            //itemView.setBackgroundColor(Color.GRAY);
+                            checkbox1.setChecked(true);
                         }
-                    }*/
+                    }
 
-                    //trackBox(No,qty,price,coins,tarehe);
                 }
             });
 
@@ -178,58 +181,9 @@ public class OverViewPoliciesAdapter <VH extends TrackSelectionAdapter.ViewHolde
             ProductName = (TextView) itemView.findViewById(R.id.ProductName);
             UploadedDate = (TextView) itemView.findViewById(R.id.UploadedDate);
             RequestedDate = (TextView) itemView.findViewById(R.id.RequestedDate);
+            checkbox1 = (CheckBox) itemView.findViewById(R.id.checkbox1);
         }
     }
 
-/*    public void trackBox(String Number, String qty, String price, String coins, String tarehe){
-        // get prompts.xml view
-        LayoutInflater li = LayoutInflater.from(_context);
-        View promptsView = li.inflate(R.layout.trackorder, null);
 
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
-                _context);
-
-        // set prompts.xml to alertdialog builder
-        alertDialogBuilder.setView(promptsView);
-
-        final TextView OrderNo = (TextView) promptsView.findViewById(R.id.OrderNo);
-        final TextView trackDate = (TextView) promptsView.findViewById(R.id.trackDate);
-        final TextView ChapooValue = (TextView) promptsView.findViewById(R.id.ChapooValue);
-        final TextView AmountValue = (TextView) promptsView.findViewById(R.id.AmountValue);
-        final TextView CoinsValue = (TextView) promptsView.findViewById(R.id.CoinsValue);
-        final TextView CurrentLocationName = (TextView) promptsView.findViewById(R.id.CurrentLocationName);
-        final TextView TimeRemaining = (TextView) promptsView.findViewById(R.id.TimeRemaining);
-        final TextView order_status = (TextView) promptsView.findViewById(R.id.order_status);
-
-
-        OrderNo.setText(Number);
-        ChapooValue.setText(qty);
-        AmountValue.setText(price);
-        CoinsValue.setText(coins);
-        trackDate.setText(tarehe);
-
-        //order_status.setTextColor(ContextCompat.getColor(_context, R.color.colorPrimary));
-
-        // set dialog message
-        alertDialogBuilder
-                .setCancelable(false)
-                .setPositiveButton("Go Back",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog,int id) {
-                                dialog.cancel();
-                            }
-                        })
-                .setNegativeButton("Abort",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog,int id) {
-                                dialog.cancel();
-                            }
-                        });
-
-        // create alert dialog
-        AlertDialog alertDialog = alertDialogBuilder.create();
-
-        // show it
-        alertDialog.show();
-    }*/
 }
