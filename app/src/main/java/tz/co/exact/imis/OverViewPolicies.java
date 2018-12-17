@@ -1,5 +1,6 @@
 package tz.co.exact.imis;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.SearchManager;
 import android.content.Context;
@@ -20,12 +21,29 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.SearchView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 public class OverViewPolicies extends AppCompatActivity {
@@ -34,8 +52,21 @@ public class OverViewPolicies extends AppCompatActivity {
     RecyclerView PolicyRecyclerView;
     OverViewPoliciesAdapter overViewPoliciesAdapter;
 
+    private ProgressBar spinner;
+
 
     public static List<String> num = new ArrayList<>();
+
+    public static JSONArray paymentDetails = new JSONArray();
+
+    public static int PolicyValueToSend = 0;
+    public static JSONObject getControlNumber = new JSONObject();
+
+    @SuppressLint("SimpleDateFormat")
+    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+    Calendar cal = Calendar.getInstance();
+    String dt = format.format(cal.getTime());
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,18 +79,33 @@ public class OverViewPolicies extends AppCompatActivity {
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setTitle(getResources().getString(R.string.OverViewPolicies));
 
+        spinner = (ProgressBar)findViewById(R.id.progressBar1);
+        spinner.setVisibility(View.GONE);
+
         final String[] n = {""};
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-/*                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();*/
+
+                Global global = new Global();
+
+                try {
+                    getControlNumber.put("phoneNumber", "");
+                    getControlNumber.put("requestDate", dt);
+                    getControlNumber.put("officerCode", global.getOfficerCode());
+                    getControlNumber.put("paymentDetails",paymentDetails);
+                    getControlNumber.put("amount",PolicyValueToSend);
+
                     n[0] = "";
-                for(int i=0; i<num.size(); i++){
-                    n[0] += num.get(i)+"\n";
+                    for(int i=0; i<num.size(); i++){
+                        n[0] += num.get(i)+"\n";
+                    }
+                    trackBox(getControlNumber,String.valueOf(PolicyValueToSend));
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
-                trackBox(n[0]);
             }
         });
 
@@ -106,7 +152,7 @@ public class OverViewPolicies extends AppCompatActivity {
         PolicyRecyclerView.setAdapter(overViewPoliciesAdapter);
     }
 
-    public void trackBox(String Number){
+    public void trackBox(final JSONObject policies, String Number){
         // get prompts.xml view
         LayoutInflater li = LayoutInflater.from(this);
         View promptsView = li.inflate(R.layout.controls, null);
@@ -117,9 +163,12 @@ public class OverViewPolicies extends AppCompatActivity {
         // set prompts.xml to alertdialog builder
         alertDialogBuilder.setView(promptsView);
 
-        final TextView display = (TextView) promptsView.findViewById(R.id.display);
+        final EditText amount = (EditText) promptsView.findViewById(R.id.display);
+        final EditText phoneNumber = (EditText) promptsView.findViewById(R.id.phonenumber);
 
-        display.setText(Number);
+        amount.setText(Number);
+
+        final EditText finalAmount = (EditText) promptsView.findViewById(R.id.display);
 
 
         // set dialog message
@@ -128,7 +177,15 @@ public class OverViewPolicies extends AppCompatActivity {
                 .setPositiveButton("Get Control Number",
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog,int id) {
-                                dialog.cancel();
+                                try {
+                                    policies.put("phoneNumber",phoneNumber.getText().toString());
+                                    policies.put("amount",finalAmount.getText().toString());
+                                    getControlNumber(policies);
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
                             }
                         })
                 .setNegativeButton("Cancel",
@@ -144,4 +201,74 @@ public class OverViewPolicies extends AppCompatActivity {
         // show it
         alertDialog.show();
     }
+
+    private int getControlNumber(final JSONObject order) throws IOException {
+
+        Thread thread = new Thread(){
+            public void run() {
+                HttpClient httpClient = new DefaultHttpClient();
+                HttpPost httpPost = new HttpPost("http://dev.chf-imis.or.tz/restapi/api/GetControlNumber");
+// Request parameters and other properties.
+                try {
+                    StringEntity postingString = new StringEntity(order.toString());
+                    httpPost.setEntity(postingString);
+                    httpPost.setHeader("Content-type", "application/json");
+                } catch (UnsupportedEncodingException e) {
+                    // writing error to Log
+                    e.printStackTrace();
+                }
+/*
+ * Execute the HTTP Request
+ */
+                try {
+                    runOnUiThread(new Runnable() {
+                        public void run() {
+                            spinner.setVisibility(View.VISIBLE);
+                        }
+                    });
+
+                    //Send Request Here
+                    HttpResponse response = httpClient.execute(httpPost);
+                    HttpEntity respEntity = response.getEntity();
+
+                    if (respEntity != null) {
+                        // EntityUtils to get the response content
+                        final String content = EntityUtils.toString(respEntity);
+                        if(!content.equals("{\"Message\":\"An error occurred while processing your request.\"}")){
+                            runOnUiThread(new Runnable() {
+                                public void run() {
+                                    spinner.setVisibility(View.GONE);
+                                    View view = findViewById(R.id.actv);
+                                    Snackbar.make(view, "Success", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+                                }
+                            });
+                        }else{
+                            runOnUiThread(new Runnable() {
+                                public void run() {
+                                    spinner.setVisibility(View.GONE);
+                                    View view = findViewById(R.id.actv);
+                                    Snackbar.make(view, "Failed", Snackbar.LENGTH_LONG)
+                                            .setAction("Action", null).show();
+                                }
+                            });
+
+                        }
+
+                    }
+
+
+                } catch (IOException e) {
+                    // writing exception to log
+                    e.printStackTrace();
+                }
+            }
+        };
+
+
+        thread.start();
+
+        return 0;
+    }
+
 }

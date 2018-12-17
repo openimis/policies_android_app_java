@@ -15,12 +15,37 @@
         android:text="REQUEST CONTROL NUMBER"
         />
     <TextView
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:text="Total Amount"
+        android:textColor="@color/Black"
+        android:layout_margin="10dp"
+        android:textSize="25dp"
+        android:textAlignment="center"
+        android:typeface="monospace"/>
+
+    <EditText
         android:id="@+id/display"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="50dp"
         android:layout_margin="10dp"
+        android:padding="10dp"
         android:textColor="@color/Black"
         android:typeface="monospace"
+        android:inputType="number"
+        android:background="@drawable/corner"
+        />
+    <EditText
+        android:id="@+id/phonenumber"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_margin="10dp"
+        android:padding="10dp"
+        android:textColor="@color/Black"
+        android:typeface="monospace"
+        android:inputType="number"
+        android:hint="@string/PhoneNumber"
+        android:background="@drawable/corner"
         />
 
 

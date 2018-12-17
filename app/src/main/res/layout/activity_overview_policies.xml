@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
+    android:id="@+id/actv"
     tools:context="tz.co.exact.imis.OverViewPolicies">
 
     <android.support.design.widget.AppBarLayout
@@ -37,6 +38,15 @@
     </android.support.design.widget.AppBarLayout>
 
     <include layout="@layout/content_overview_policies" />
+    <ProgressBar
+        android:id="@+id/progressBar1"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="100dp"
+        android:layout_height="20dp"
+        android:layout_margin="10dp"
+        android:layout_gravity="center_vertical|center_horizontal"
+        android:gravity="center_vertical|center_horizontal"
+        android:layout_centerHorizontal="true" />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"
