@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.Filter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,6 +31,7 @@ public class OverViewPoliciesAdapter <VH extends TrackSelectionAdapter.ViewHolde
     OverViewPolicies overViewPolicies = new OverViewPolicies();
     private JSONArray policies;
 
+    String PolicyId = null;
     String InsuranceNumber = null;
     String isDone = null;
     String PolicyValue = null;
@@ -107,6 +109,7 @@ public class OverViewPoliciesAdapter <VH extends TrackSelectionAdapter.ViewHolde
         holder.itemView.setSelected(focusedItem == position);
         try {
             JSONObject object = policies.getJSONObject(position);
+            PolicyId = object.getString("PolicyId");
             InsuranceNumber = object.getString("InsuranceNumber");
             LastName = object.getString("LastName");
             OtherNames = object.getString("OtherNames");
@@ -121,6 +124,7 @@ public class OverViewPoliciesAdapter <VH extends TrackSelectionAdapter.ViewHolde
             e.printStackTrace();
         }
 
+        ((Reportmsg) holder).PolicyId.setText(PolicyId);
         ((Reportmsg) holder).InsuranceNumber.setText(InsuranceNumber);
         ((Reportmsg) holder).isDone.setText(isDone);
         ((Reportmsg) holder).Names.setText(OtherNames + " " + LastName);
@@ -136,8 +140,47 @@ public class OverViewPoliciesAdapter <VH extends TrackSelectionAdapter.ViewHolde
         return policies.length();
     }
 
+
+    public Filter getFilter() {
+        return new Filter() {
+            @Override
+            protected FilterResults performFiltering(CharSequence charSequence) {
+                String query = charSequence.toString();
+
+                JSONArray filtered = new JSONArray();
+
+                if (query.isEmpty()) {
+                    filtered = policies;
+                } else {
+                    for(int i=0; i<=policies.length();i++){
+                        try {
+                            if (policies.getString(i).toLowerCase().contains(query.toLowerCase())) {
+                                filtered.put(policies.getString(i));
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+
+                FilterResults results = new FilterResults();
+                results.count = filtered.length();
+                results.values = filtered;
+                return results;
+            }
+
+            @Override
+            protected void publishResults(CharSequence charSequence, FilterResults results) {
+                //policies = results.values;
+                policies = (JSONArray) results.values;
+                notifyDataSetChanged();
+            }
+        };
+    }
+
     public class Reportmsg extends RecyclerView.ViewHolder{
 
+        public TextView PolicyId;
         public TextView InsuranceNumber;
         public TextView isDone;
         public TextView Names;
@@ -167,9 +210,14 @@ public class OverViewPoliciesAdapter <VH extends TrackSelectionAdapter.ViewHolde
                         try {
                             paymentObject = new JSONObject();
                             paymentObject.put("Id",String.valueOf(getLayoutPosition()));
+                            paymentObject.put("PolicyId",String.valueOf(PolicyId.getText()));
                             paymentObject.put("insureeNumber",String.valueOf(InsuranceNumber.getText()));
                             paymentObject.put("productCode",String.valueOf(ProductCode.getText()));
-                            paymentObject.put("paymentType",String.valueOf(isDone.getText()));
+                            if(String.valueOf(isDone.getText()).equals("N")){
+                                paymentObject.put("paymentType","0");
+                            }else{
+                                paymentObject.put("paymentType","1");
+                            }
                             paymentDetails.put(paymentObject);
                             overViewPolicies.paymentDetails = paymentDetails;
 
@@ -217,9 +265,14 @@ public class OverViewPoliciesAdapter <VH extends TrackSelectionAdapter.ViewHolde
                             try {
                                 paymentObject = new JSONObject();
                                 paymentObject.put("Id",String.valueOf(getLayoutPosition()));
+                                paymentObject.put("PolicyId",String.valueOf(PolicyId.getText()));
                                 paymentObject.put("insureeNumber",String.valueOf(InsuranceNumber.getText()));
                                 paymentObject.put("productCode",String.valueOf(ProductCode.getText()));
-                                paymentObject.put("paymentType",String.valueOf(isDone.getText()));
+                                if(String.valueOf(isDone.getText()).equals("N")){
+                                    paymentObject.put("paymentType","0");
+                                }else{
+                                    paymentObject.put("paymentType","1");
+                                }
                                 paymentDetails.put(paymentObject);
                                 overViewPolicies.paymentDetails = paymentDetails;
 
@@ -235,6 +288,7 @@ public class OverViewPoliciesAdapter <VH extends TrackSelectionAdapter.ViewHolde
 
 
             InsuranceNumber = (TextView) itemView.findViewById(R.id.InsuranceNumber);
+            PolicyId = (TextView) itemView.findViewById(R.id.PolicyId);
             isDone = (TextView) itemView.findViewById(R.id.isDone);
             Names = (TextView) itemView.findViewById(R.id.Names);
             ProductCode = (TextView) itemView.findViewById(R.id.ProductCode);

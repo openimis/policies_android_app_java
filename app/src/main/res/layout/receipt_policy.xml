@@ -35,6 +35,11 @@
             android:textColor="@color/white"
             android:background="@color/colorPrimaryDark"
             android:text="30040034"/>
+        <TextView
+            android:id="@+id/PolicyId"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone"/>
         <CheckBox
             android:id="@+id/checkbox1"
             android:layout_width="wrap_content"

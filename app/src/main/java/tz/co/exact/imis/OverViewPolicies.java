@@ -16,6 +16,7 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -24,6 +25,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.SearchView;
+import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -89,6 +91,7 @@ public class OverViewPolicies extends AppCompatActivity {
             public void onClick(View view) {
 
                 Global global = new Global();
+                global = (Global) getApplicationContext();
 
                 try {
                     getControlNumber.put("phoneNumber", "");
@@ -114,6 +117,7 @@ public class OverViewPolicies extends AppCompatActivity {
 
     }
 
+
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -129,8 +133,25 @@ public class OverViewPolicies extends AppCompatActivity {
                 searchManager.getSearchableInfo(getComponentName()));
 
 
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+
+            @Override
+            public boolean onQueryTextSubmit(String s) {
+
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String s) {
+                overViewPoliciesAdapter.getFilter().filter(s);
+                return true;
+            }
+        });
+
         return true;
     }
+
+
 
     public boolean onOptionsItemSelected(MenuItem item){
         onBackPressed();
@@ -207,7 +228,7 @@ public class OverViewPolicies extends AppCompatActivity {
         Thread thread = new Thread(){
             public void run() {
                 HttpClient httpClient = new DefaultHttpClient();
-                HttpPost httpPost = new HttpPost("http://dev.chf-imis.or.tz/restapi/api/GetControlNumber");
+                HttpPost httpPost = new HttpPost("http://imis-mv.swisstph-mis.ch/restapi/api/GetControlNumber");
 // Request parameters and other properties.
                 try {
                     StringEntity postingString = new StringEntity(order.toString());
@@ -239,7 +260,7 @@ public class OverViewPolicies extends AppCompatActivity {
                                 public void run() {
                                     spinner.setVisibility(View.GONE);
                                     View view = findViewById(R.id.actv);
-                                    Snackbar.make(view, "Success", Snackbar.LENGTH_LONG)
+                                    Snackbar.make(view, content, Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
                                 }
                             });
@@ -248,7 +269,7 @@ public class OverViewPolicies extends AppCompatActivity {
                                 public void run() {
                                     spinner.setVisibility(View.GONE);
                                     View view = findViewById(R.id.actv);
-                                    Snackbar.make(view, "Failed", Snackbar.LENGTH_LONG)
+                                    Snackbar.make(view, content, Snackbar.LENGTH_LONG)
                                             .setAction("Action", null).show();
                                 }
                             });
