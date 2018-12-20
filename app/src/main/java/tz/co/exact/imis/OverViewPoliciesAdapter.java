@@ -26,10 +26,11 @@ import java.util.List;
 /**
  * Created by Hiren on 10/12/2018.
  */
-
+//Please see newPolicies and query to check Insuaree numbers
 public class OverViewPoliciesAdapter <VH extends TrackSelectionAdapter.ViewHolder> extends RecyclerView.Adapter {
     OverViewPolicies overViewPolicies = new OverViewPolicies();
     private JSONArray policies;
+    private JSONArray newPolicies;
 
     String PolicyId = null;
     String InsuranceNumber = null;
@@ -50,12 +51,16 @@ public class OverViewPoliciesAdapter <VH extends TrackSelectionAdapter.ViewHolde
     public JSONObject paymentObject;
 
 
+
     //Constructor
     Context _context;
     public OverViewPoliciesAdapter(Context rContext, JSONArray _policies){
         _context = rContext;
         policies = _policies;
+
     }
+
+
 
     @Override
     public void onAttachedToRecyclerView(final RecyclerView recyclerView) {
@@ -104,11 +109,51 @@ public class OverViewPoliciesAdapter <VH extends TrackSelectionAdapter.ViewHolde
         return view;
     }
 
+    //Please see newPolicies and query to check Insuaree numbers
+    public Filter getFilter() {
+        return new Filter() {
+            @Override
+            protected FilterResults performFiltering(CharSequence charSequence) {
+                String query = charSequence.toString();
+
+
+
+                if (query.isEmpty()) {
+                    newPolicies = policies;
+                } else {
+                    for(int i=0; i<=policies.length();i++){
+                        try {
+                            if (policies.getString(i).toLowerCase().contains(query.toLowerCase())) {
+                                newPolicies.put(policies.getString(i));//Please see newPolicies and query to check Insuaree numbers
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+
+                FilterResults results = new FilterResults();
+                results.count = newPolicies.length();
+                results.values = newPolicies;
+                return results;
+            }
+
+            @Override
+            protected void publishResults(CharSequence charSequence, FilterResults results) {
+                //policies = results.values;
+                newPolicies = (JSONArray) results.values;
+                notifyDataSetChanged();
+            }
+        };
+    }
+
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         holder.itemView.setSelected(focusedItem == position);
+        newPolicies = policies;
+
         try {
-            JSONObject object = policies.getJSONObject(position);
+            JSONObject object = newPolicies.getJSONObject(position);
             PolicyId = object.getString("PolicyId");
             InsuranceNumber = object.getString("InsuranceNumber");
             LastName = object.getString("LastName");
@@ -133,6 +178,7 @@ public class OverViewPoliciesAdapter <VH extends TrackSelectionAdapter.ViewHolde
         ((Reportmsg) holder).UploadedDate.setText(UploadedDate);
         ((Reportmsg) holder).RequestedDate.setText(RequestedDate);
 
+
     }
 
     @Override
@@ -141,41 +187,8 @@ public class OverViewPoliciesAdapter <VH extends TrackSelectionAdapter.ViewHolde
     }
 
 
-    public Filter getFilter() {
-        return new Filter() {
-            @Override
-            protected FilterResults performFiltering(CharSequence charSequence) {
-                String query = charSequence.toString();
-
-                JSONArray filtered = new JSONArray();
-
-                if (query.isEmpty()) {
-                    filtered = policies;
-                } else {
-                    for(int i=0; i<=policies.length();i++){
-                        try {
-                            if (policies.getString(i).toLowerCase().contains(query.toLowerCase())) {
-                                filtered.put(policies.getString(i));
-                            }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-
-                FilterResults results = new FilterResults();
-                results.count = filtered.length();
-                results.values = filtered;
-                return results;
-            }
-
-            @Override
-            protected void publishResults(CharSequence charSequence, FilterResults results) {
-                //policies = results.values;
-                policies = (JSONArray) results.values;
-                notifyDataSetChanged();
-            }
-        };
+    public int getCount(){
+        return getItemCount();
     }
 
     public class Reportmsg extends RecyclerView.ViewHolder{
@@ -194,12 +207,10 @@ public class OverViewPoliciesAdapter <VH extends TrackSelectionAdapter.ViewHolde
         public Reportmsg(final View itemView) {
             super(itemView);
 
+
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    String InsNo = null;
-                    String ProdCode = null;
-                    String IsRenewal = null;
 
                     // Redraw the old selection and the new
                     if(overViewPolicies.num.size() == 0){

@@ -2364,6 +2364,18 @@ public class ClientAndroidInterface {
         }
         return String.valueOf(1);
     }
+    public Boolean deleteRecodedPolicy(String Result) {
+        String TableName = "tblRecordedPolicies";
+        String Where = "PolicyId = ?";
+        String[] WhereArg = {Result};
+        try {
+            sqlHandler.deleteData(TableName, Where, WhereArg);
+        }catch (Exception e){
+            return false;
+        }
+
+        return true;
+    }
     public void InsertRecordedPolicies(String WhitchPolicy, String FamilyId, String ProdId, String PolicyValue, int PolicyId) throws JSONException {
         JSONObject O;
         JSONArray InsuranceNumberArray = getInsuranceNumber(FamilyId);

@@ -54,9 +54,9 @@ public class OverViewPolicies extends AppCompatActivity {
     RecyclerView PolicyRecyclerView;
     OverViewPoliciesAdapter overViewPoliciesAdapter;
 
+    public static int search_count = 0;
+
     private ProgressBar spinner;
-
-
     public static List<String> num = new ArrayList<>();
 
     public static JSONArray paymentDetails = new JSONArray();
@@ -79,7 +79,7 @@ public class OverViewPolicies extends AppCompatActivity {
 
         final ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setTitle(getResources().getString(R.string.OverViewPolicies));
+        actionBar.setTitle("View Policies " + "( "+search_count+" )");//getResources().getString(R.string.OverViewPolicies)
 
         spinner = (ProgressBar)findViewById(R.id.progressBar1);
         spinner.setVisibility(View.GONE);
@@ -112,10 +112,53 @@ public class OverViewPolicies extends AppCompatActivity {
             }
         });
 
+        FloatingActionButton fab2 = (FloatingActionButton) findViewById(R.id.fab2);
+        fab2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (paymentDetails.length()>0){
+                    for(int i=0; i<paymentDetails.length(); i++){
+
+                        try {
+
+                            JSONObject payment = paymentDetails.getJSONObject(0);
+                            String policyid = payment.getString("PolicyId");
+                            clientAndroidInterface.deleteRecodedPolicy(policyid);
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    runOnUiThread(new Runnable() {
+                        public void run() {
+                            spinner.setVisibility(View.GONE);
+                            View view = findViewById(R.id.actv);
+                            Snackbar.make(view, "Data deleted successfully", Snackbar.LENGTH_LONG)
+                                    .setAction("Action", null).show();
+                        }
+                    });
+                }else{
+                    runOnUiThread(new Runnable() {
+                        public void run() {
+                            spinner.setVisibility(View.GONE);
+                            View view = findViewById(R.id.actv);
+                            Snackbar.make(view, "No Data to delete", Snackbar.LENGTH_LONG)
+                                    .setAction("Action", null).show();
+                        }
+                    });
+
+                }
+
+            }
+        });
+
         clientAndroidInterface = new ClientAndroidInterface(this);
         fillRecordedPolicies();
 
+        search_count = overViewPoliciesAdapter.getCount();
+
     }
+
 
 
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
@@ -137,7 +180,6 @@ public class OverViewPolicies extends AppCompatActivity {
 
             @Override
             public boolean onQueryTextSubmit(String s) {
-
                 return false;
             }
 

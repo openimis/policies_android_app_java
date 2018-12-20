@@ -412,5 +412,6 @@
         "when a user tries to pick up one of cards.\n\n"
     </string>
     <string name="title_activity_floating">floating</string>
+    <string name="title_activity_over_view_control_numbers">OverViewControlNumbers</string>
 
 </resources>
