@@ -2079,7 +2079,7 @@ public class ClientAndroidInterface {
     }
     public int getMaxId() {
         int id = 0;
-        String Query = "SELECT Max(Id) As Id FROM tblControlNumber";
+        String Query = "SELECT Max(Id) As Id FROM tblRecordedPolicies";
         JSONArray ID = sqlHandler.getResult(Query, null);
         try {
             JSONObject JmaxIdOb = ID.getJSONObject(0);

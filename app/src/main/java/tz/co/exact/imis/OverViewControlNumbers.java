@@ -83,7 +83,7 @@ public class OverViewControlNumbers extends AppCompatActivity {
     }
 
     public void fillRecordedPolicies(){
-        policy = clientAndroidInterface.getRecordedPolicies();//OrderArray;
+        policy = clientAndroidInterface.getPolicyRequestedControlNumber();//OrderArray;
         LayoutInflater li = LayoutInflater.from(OverViewControlNumbers.this);
         View promptsView = li.inflate(R.layout.activity_over_view_control_numbers, null);
         PolicyRecyclerView = (RecyclerView) findViewById(R.id.listofpolicies2);

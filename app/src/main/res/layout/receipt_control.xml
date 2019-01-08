@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+
+    <TextView
+        android:id="@+id/req_date"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@color/blue"
+        android:typeface="monospace"
+        android:fontFamily="sans-serif-light"
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        android:paddingTop="15dp"
+        android:paddingLeft="10dp"
+        android:text="@string/PhoneNumber"/>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+        android:id="@+id/lblAmountCalculated"
+        android:layout_width="wrap_content"
+        android:layout_height="30dp"
+        android:typeface="monospace"
+        android:fontFamily="sans-serif-light"
+        android:textColor="@color/black"
+        android:textSize="16sp"
+        android:paddingLeft="10dp"
+        android:layout_margin="5dp"
+        android:text="Amount Calculated"/>
+
+        <TextView
+            android:id="@+id/AmountCalculated"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:typeface="monospace"
+            android:fontFamily="sans-serif-light"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            android:textAlignment="textEnd"
+            android:paddingRight="10dp"
+            android:layout_margin="5dp"
+            android:layout_toRightOf="@+id/lblAmountCalculated"
+            android:text="100000"
+            android:gravity="end" />
+
+        <TextView
+            android:id="@+id/lblAmountConfirmed"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:typeface="monospace"
+            android:fontFamily="sans-serif-light"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            android:paddingLeft="10dp"
+            android:layout_margin="5dp"
+            android:layout_below="@+id/lblAmountCalculated"
+            android:text="Amount Confirmed"/>
+
+        <TextView
+            android:id="@+id/AmountConfirmed"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:typeface="monospace"
+            android:fontFamily="sans-serif-light"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            android:textAlignment="textEnd"
+            android:paddingRight="10dp"
+            android:layout_margin="5dp"
+            android:layout_below="@+id/AmountCalculated"
+            android:layout_toRightOf="@+id/lblAmountCalculated"
+            android:text="200000"
+            android:gravity="end" />
+
+    </RelativeLayout>
+
+
+
+
+</LinearLayout>

@@ -10,6 +10,11 @@
         android:layout_height="wrap_content">
 
         <TextView
+            android:id="@+id/Id"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"/>
+        <TextView
             android:id="@+id/LabelInsuranceNo"
             android:layout_width="wrap_content"
             android:layout_height="44dp"

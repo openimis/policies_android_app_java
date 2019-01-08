@@ -33,6 +33,7 @@ public class OverViewPoliciesAdapter <VH extends TrackSelectionAdapter.ViewHolde
     private JSONArray newPolicies;
 
     String PolicyId = null;
+    String Id = null;
     String InsuranceNumber = null;
     String isDone = null;
     String PolicyValue = null;
@@ -154,6 +155,7 @@ public class OverViewPoliciesAdapter <VH extends TrackSelectionAdapter.ViewHolde
 
         try {
             JSONObject object = newPolicies.getJSONObject(position);
+            Id = object.getString("Id");
             PolicyId = object.getString("PolicyId");
             InsuranceNumber = object.getString("InsuranceNumber");
             LastName = object.getString("LastName");
@@ -169,6 +171,7 @@ public class OverViewPoliciesAdapter <VH extends TrackSelectionAdapter.ViewHolde
             e.printStackTrace();
         }
 
+        ((Reportmsg) holder).Id.setText(Id);
         ((Reportmsg) holder).PolicyId.setText(PolicyId);
         ((Reportmsg) holder).InsuranceNumber.setText(InsuranceNumber);
         ((Reportmsg) holder).isDone.setText(isDone);
@@ -193,6 +196,7 @@ public class OverViewPoliciesAdapter <VH extends TrackSelectionAdapter.ViewHolde
 
     public class Reportmsg extends RecyclerView.ViewHolder{
 
+        public TextView Id;
         public TextView PolicyId;
         public TextView InsuranceNumber;
         public TextView isDone;
@@ -220,7 +224,7 @@ public class OverViewPoliciesAdapter <VH extends TrackSelectionAdapter.ViewHolde
 
                         try {
                             paymentObject = new JSONObject();
-                            paymentObject.put("Id",String.valueOf(getLayoutPosition()));
+                            paymentObject.put("Id",String.valueOf(Id.getText()));
                             paymentObject.put("PolicyId",String.valueOf(PolicyId.getText()));
                             paymentObject.put("insureeNumber",String.valueOf(InsuranceNumber.getText()));
                             paymentObject.put("productCode",String.valueOf(ProductCode.getText()));
@@ -275,7 +279,7 @@ public class OverViewPoliciesAdapter <VH extends TrackSelectionAdapter.ViewHolde
 
                             try {
                                 paymentObject = new JSONObject();
-                                paymentObject.put("Id",String.valueOf(getLayoutPosition()));
+                                paymentObject.put("Id",String.valueOf(Id.getText()));
                                 paymentObject.put("PolicyId",String.valueOf(PolicyId.getText()));
                                 paymentObject.put("insureeNumber",String.valueOf(InsuranceNumber.getText()));
                                 paymentObject.put("productCode",String.valueOf(ProductCode.getText()));
@@ -299,6 +303,7 @@ public class OverViewPoliciesAdapter <VH extends TrackSelectionAdapter.ViewHolde
 
 
             InsuranceNumber = (TextView) itemView.findViewById(R.id.InsuranceNumber);
+            Id = (TextView) itemView.findViewById(R.id.Id);
             PolicyId = (TextView) itemView.findViewById(R.id.PolicyId);
             isDone = (TextView) itemView.findViewById(R.id.isDone);
             Names = (TextView) itemView.findViewById(R.id.Names);

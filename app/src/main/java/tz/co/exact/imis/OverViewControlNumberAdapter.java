@@ -103,7 +103,7 @@ public class OverViewControlNumberAdapter <VH extends TrackSelectionAdapter.View
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View row = LayoutInflater.from(parent.getContext()).inflate(R.layout.receipt_policy,parent,false);
+        View row = LayoutInflater.from(parent.getContext()).inflate(R.layout.receipt_control,parent,false);
 
         Reportmsg view = new Reportmsg(row);
         return view;

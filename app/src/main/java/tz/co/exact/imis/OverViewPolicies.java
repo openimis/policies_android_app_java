@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.RequiresApi;
@@ -300,6 +301,10 @@ public class OverViewPolicies extends AppCompatActivity {
                                 spinner.setVisibility(View.GONE);
                                 int id = insertAfterRequest(AmountCalculated,amountConfirmed);
                                 updateAfterRequest(id);
+
+                                finish();
+                                Intent i = new Intent(OverViewPolicies.this, OverViewPolicies.class);
+                                startActivity(i);
 
                                 View view = findViewById(R.id.actv);
                                 Snackbar.make(view, content, Snackbar.LENGTH_LONG)
