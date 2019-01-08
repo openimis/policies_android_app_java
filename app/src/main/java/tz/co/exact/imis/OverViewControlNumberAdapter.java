@@ -27,7 +27,7 @@ import java.util.List;
  * Created by Hiren on 10/12/2018.
  */
 //Please see newPolicies and query to check Insuaree numbers
-public class OverViewPoliciesAdapter <VH extends TrackSelectionAdapter.ViewHolder> extends RecyclerView.Adapter {
+public class OverViewControlNumberAdapter <VH extends TrackSelectionAdapter.ViewHolder> extends RecyclerView.Adapter {
     OverViewPolicies overViewPolicies = new OverViewPolicies();
     private JSONArray policies;
     private JSONArray newPolicies;
@@ -54,7 +54,7 @@ public class OverViewPoliciesAdapter <VH extends TrackSelectionAdapter.ViewHolde
 
     //Constructor
     Context _context;
-    public OverViewPoliciesAdapter(Context rContext, JSONArray _policies){
+    public OverViewControlNumberAdapter(Context rContext, JSONArray _policies){
         _context = rContext;
         policies = _policies;
 
@@ -225,9 +225,9 @@ public class OverViewPoliciesAdapter <VH extends TrackSelectionAdapter.ViewHolde
                             paymentObject.put("insureeNumber",String.valueOf(InsuranceNumber.getText()));
                             paymentObject.put("productCode",String.valueOf(ProductCode.getText()));
                             if(String.valueOf(isDone.getText()).equals("N")){
-                                paymentObject.put("renewal","0");
+                                paymentObject.put("paymentType","0");
                             }else{
-                                paymentObject.put("renewal","1");
+                                paymentObject.put("paymentType","1");
                             }
                             paymentDetails.put(paymentObject);
                             overViewPolicies.paymentDetails = paymentDetails;
@@ -280,9 +280,9 @@ public class OverViewPoliciesAdapter <VH extends TrackSelectionAdapter.ViewHolde
                                 paymentObject.put("insureeNumber",String.valueOf(InsuranceNumber.getText()));
                                 paymentObject.put("productCode",String.valueOf(ProductCode.getText()));
                                 if(String.valueOf(isDone.getText()).equals("N")){
-                                    paymentObject.put("renewal","0");
+                                    paymentObject.put("paymentType","0");
                                 }else{
-                                    paymentObject.put("renewal","1");
+                                    paymentObject.put("paymentType","1");
                                 }
                                 paymentDetails.put(paymentObject);
                                 overViewPolicies.paymentDetails = paymentDetails;

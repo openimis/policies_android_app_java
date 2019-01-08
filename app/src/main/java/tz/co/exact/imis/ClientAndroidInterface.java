@@ -30,7 +30,6 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.content.ActivityNotFoundException;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -90,18 +89,10 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Locale;
-import java.util.logging.XMLFormatter;
 import java.util.regex.Pattern;
 import java.util.Formatter;
-import org.json.*;
+
 import org.xmlpull.v1.XmlSerializer;
-
-import net.lingala.zip4j.exception.ZipException;
-import net.lingala.zip4j.core.ZipFile;
-
-import net.lingala.zip4j.model.ZipParameters;
-import net.lingala.zip4j.util.Zip4jConstants;
-import net.lingala.zip4j.core.ZipFile;
 
 import static android.database.sqlite.SQLiteDatabase.openOrCreateDatabase;
 import static java.lang.Math.abs;
@@ -2058,7 +2049,12 @@ public class ClientAndroidInterface {
         return Premiums.toString();
     }
     public JSONArray getRecordedPolicies() {
-        String Query = "SELECT * FROM tblRecordedPolicies";
+        String Query = "SELECT * FROM tblRecordedPolicies WHERE Code = 'N'";
+        JSONArray RecordedPolicies = sqlHandler.getResult(Query, null);
+        return RecordedPolicies;
+    }
+    public JSONArray getPolicyRequestedControlNumber() {
+        String Query = "SELECT * FROM tblRecordedPolicies WHERE Code != 'N'";
         JSONArray RecordedPolicies = sqlHandler.getResult(Query, null);
         return RecordedPolicies;
     }
@@ -2069,6 +2065,46 @@ public class ClientAndroidInterface {
         JSONArray RecordedPolicies = sqlHandler.getResult(Query, arg);
         return RecordedPolicies.toString();
     }
+    public int insertRecordedPolicy(String amountCalculated, String amountConfirmed){
+        ContentValues values = new ContentValues();
+        values.put("AmountCalculated", String.valueOf(amountCalculated));
+        values.put("AmountConfirmed", String.valueOf(amountConfirmed));
+        try {//Update to new policy value
+            sqlHandler.insertData("tblControlNumber", values);
+
+        } catch (UserException e) {
+            e.printStackTrace();
+        }
+        return getMaxId();
+    }
+    public int getMaxId() {
+        int id = 0;
+        String Query = "SELECT Max(Id) As Id FROM tblControlNumber";
+        JSONArray ID = sqlHandler.getResult(Query, null);
+        try {
+            JSONObject JmaxIdOb = ID.getJSONObject(0);
+            id = JmaxIdOb.getInt("Id");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return id;
+    }
+
+
+    public void updateRecordedPolicy(int Id, int Code){
+        @SuppressLint("SimpleDateFormat") SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy-HH");
+        Calendar cal = Calendar.getInstance();
+        String d = format.format(cal.getTime());
+        ContentValues values = new ContentValues();
+        values.put("Code", Code);
+        values.put("ControlRequestDate", d);
+        try {
+            sqlHandler.updateData("tblRecordedPolicies", values, "Id = ?", new String[]{String.valueOf(Id)});
+        } catch (UserException e) {
+            e.printStackTrace();
+        }
+    }
+
     @JavascriptInterface
     public boolean IsReceiptNumberUnique(String ReceiptNo, int FamilyId) {
         String CHFID = "";

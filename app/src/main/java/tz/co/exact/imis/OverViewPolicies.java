@@ -16,7 +16,6 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.text.Editable;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -25,14 +24,10 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.SearchView;
-import android.widget.SimpleAdapter;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -68,6 +63,8 @@ public class OverViewPolicies extends AppCompatActivity {
     SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
     Calendar cal = Calendar.getInstance();
     String dt = format.format(cal.getTime());
+    private String AmountCalculated;
+    private String amountConfirmed;
 
 
     @Override
@@ -104,6 +101,7 @@ public class OverViewPolicies extends AppCompatActivity {
                     for(int i=0; i<num.size(); i++){
                         n[0] += num.get(i)+"\n";
                     }
+                    AmountCalculated = String.valueOf(PolicyValueToSend);
                     trackBox(getControlNumber,String.valueOf(PolicyValueToSend));
 
                 } catch (JSONException e) {
@@ -233,7 +231,6 @@ public class OverViewPolicies extends AppCompatActivity {
 
         final EditText finalAmount = (EditText) promptsView.findViewById(R.id.display);
 
-
         // set dialog message
         alertDialogBuilder
                 .setCancelable(false)
@@ -243,6 +240,7 @@ public class OverViewPolicies extends AppCompatActivity {
                                 try {
                                     policies.put("phoneNumber",phoneNumber.getText().toString());
                                     policies.put("amount",finalAmount.getText().toString());
+                                    amountConfirmed = finalAmount.getText().toString();
                                     getControlNumber(policies);
                                 } catch (JSONException e) {
                                     e.printStackTrace();
@@ -283,48 +281,46 @@ public class OverViewPolicies extends AppCompatActivity {
 /*
  * Execute the HTTP Request
  */
-                try {
-                    runOnUiThread(new Runnable() {
-                        public void run() {
-                            spinner.setVisibility(View.VISIBLE);
-                        }
-                    });
+                runOnUiThread(new Runnable() {
+                    public void run() {
+                        spinner.setVisibility(View.VISIBLE);
+                    }
+                });
 
-                    //Send Request Here
-                    HttpResponse response = httpClient.execute(httpPost);
-                    HttpEntity respEntity = response.getEntity();
+                //Send Request Here
+                //HttpResponse response = httpClient.execute(httpPost);
+                //HttpEntity respEntity = response.getEntity();
 
-                    if (respEntity != null) {
-                        // EntityUtils to get the response content
-                        final String content = EntityUtils.toString(respEntity);
-                        if(!content.equals("{\"Message\":\"An error occurred while processing your request.\"}")){
-                            runOnUiThread(new Runnable() {
-                                public void run() {
-                                    spinner.setVisibility(View.GONE);
-                                    View view = findViewById(R.id.actv);
-                                    Snackbar.make(view, content, Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-                                }
-                            });
-                        }else{
-                            runOnUiThread(new Runnable() {
-                                public void run() {
-                                    spinner.setVisibility(View.GONE);
-                                    View view = findViewById(R.id.actv);
-                                    Snackbar.make(view, content, Snackbar.LENGTH_LONG)
-                                            .setAction("Action", null).show();
-                                }
-                            });
+                if ("s" != null) {
+                    // EntityUtils to get the response content
+                    final String content = "l0";//EntityUtils.toString(respEntity);
+                    if(!content.equals("{\"Message\":\"An error occurred while processing your request.\"}")){
+                        runOnUiThread(new Runnable() {
+                            public void run() {
+                                spinner.setVisibility(View.GONE);
+                                int id = insertAfterRequest(AmountCalculated,amountConfirmed);
+                                updateAfterRequest(id);
 
-                        }
+                                View view = findViewById(R.id.actv);
+                                Snackbar.make(view, content, Snackbar.LENGTH_LONG)
+                    .setAction("Action", null).show();
+                            }
+                        });
+                    }else{
+                        runOnUiThread(new Runnable() {
+                            public void run() {
+                                spinner.setVisibility(View.GONE);
+                                View view = findViewById(R.id.actv);
+                                Snackbar.make(view, content, Snackbar.LENGTH_LONG)
+                                        .setAction("Action", null).show();
+                            }
+                        });
 
                     }
 
-
-                } catch (IOException e) {
-                    // writing exception to log
-                    e.printStackTrace();
                 }
+
+
             }
         };
 
@@ -332,6 +328,23 @@ public class OverViewPolicies extends AppCompatActivity {
         thread.start();
 
         return 0;
+    }
+
+    private void updateAfterRequest(int Code) {
+        JSONObject ob = null;
+        for(int j = 0;j < paymentDetails.length();j++){
+            try {
+                ob = paymentDetails.getJSONObject(j);
+                int Id = Integer.parseInt(ob.getString("Id"));
+                clientAndroidInterface.updateRecordedPolicy(Id,Code);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private int insertAfterRequest(String amountCalculated, String amountConfirmed) {
+        return clientAndroidInterface.insertRecordedPolicy(amountCalculated,amountConfirmed);
     }
 
 }

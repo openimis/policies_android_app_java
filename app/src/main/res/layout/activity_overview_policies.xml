@@ -40,8 +40,6 @@
     <include layout="@layout/content_overview_policies" />
     <ProgressBar
         android:id="@+id/progressBar1"
-
-
         style="?android:attr/progressBarStyleLarge"
         android:layout_width="100dp"
         android:layout_height="20dp"

@@ -31,7 +31,13 @@ public class ControlNumbers extends AppCompatActivity {
                 startActivity(intent);
             }
         });
-
+        OverViewControlNumber.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(ControlNumbers.this, OverViewControlNumbers.class);
+                startActivity(intent);
+            }
+        });
 
 
     }
