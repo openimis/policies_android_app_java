@@ -104,10 +104,9 @@
                 android:name="android.app.searchable"
                 android:resource="@xml/searchable" />
         </activity>
-        <activity
-            android:name=".OverViewControlNumbers"
-            android:label="@string/title_activity_over_view_control_numbers"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+        <activity android:name=".SearchOverViewPolicies" />
+        <activity android:name=".OverViewPolicies1" />
+        <activity android:name=".OverViewControlNumbers"></activity>
     </application>
 
 </manifest>

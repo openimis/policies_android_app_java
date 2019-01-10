@@ -28,7 +28,7 @@ import java.util.List;
  */
 //Please see newPolicies and query to check Insuaree numbers
 public class OverViewPoliciesAdapter <VH extends TrackSelectionAdapter.ViewHolder> extends RecyclerView.Adapter {
-    OverViewPolicies overViewPolicies = new OverViewPolicies();
+    OverViewPolicies1 overViewPolicies = new OverViewPolicies1();
     private JSONArray policies;
     private JSONArray newPolicies;
 

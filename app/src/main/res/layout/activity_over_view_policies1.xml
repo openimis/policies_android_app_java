@@ -6,8 +6,9 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:id="@+id/actv"
-    tools:context="tz.co.exact.imis.OverViewControlNumbers">
-
+    tools:context="tz.co.exact.imis.OverViewPolicies1">
+    
+    
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="100dp">
@@ -51,7 +52,7 @@
     <android.support.v7.widget.RecyclerView
         android:id="@+id/listofpolicies"
         android:layout_width="match_parent"
-        android:layout_height="200dp"
+        android:layout_height="300dp"
         android:background="@color/white"/>
 
     <ProgressBar
@@ -86,6 +87,8 @@
             app:srcCompat="@android:drawable/ic_menu_send" />
 
     </LinearLayout>
+
+
 
 
 </LinearLayout>

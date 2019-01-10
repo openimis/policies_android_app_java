@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="10dp"
+    android:orientation="vertical"
+    tools:context="tz.co.exact.imis.SearchOverViewPolicies">
+
+    <EditText
+        android:id="@+id/search1"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginTop="5dp"
+        android:hint="Renewal/insurance Number/Names"
+        android:paddingLeft="10dp"
+        android:background="@drawable/corner"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:typeface="monospace"
+        android:fontFamily="sans-serif-light"
+        android:textColor="@color/black"
+        android:textSize="20sp"
+        android:text="Product"
+        />
+    <EditText
+        android:id="@+id/search2"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginTop="5dp"
+        android:paddingLeft="10dp"
+        android:typeface="monospace"
+        android:fontFamily="sans-serif-light"
+        android:textColor="@color/black"
+        android:hint="Code/Poduct name"
+        android:background="@drawable/corner"/>
+    <ListView
+        android:id="@+id/lv1"
+        android:layout_width="match_parent"
+        android:layout_height="150dp"
+        android:layout_marginTop="5dp"
+        android:typeface="monospace"
+        android:fontFamily="sans-serif-light"
+        android:textColor="@color/black"
+        android:visibility="gone"
+        android:paddingLeft="10dp"
+        android:background="@drawable/corner">
+    </ListView>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <Button
+            android:id="@+id/from_date"
+            android:layout_width="150dp"
+            android:layout_height="50dp"
+            android:layout_marginTop="5dp"
+            android:typeface="monospace"
+            android:fontFamily="sans-serif-light"
+            android:textColor="@color/black"
+            android:text="Uploaded From"/>
+         <TextView
+             android:id="@+id/lblTo"
+             android:layout_width="50dp"
+             android:layout_height="50dp"
+             android:typeface="monospace"
+             android:fontFamily="sans-serif-light"
+             android:textColor="@color/black"
+             android:layout_toRightOf="@+id/from_date"
+             android:textAlignment="center"
+             android:paddingTop="20dp"
+             android:text="TO"/>
+
+        <Button
+            android:id="@+id/To_date"
+            android:layout_width="150dp"
+            android:layout_height="50dp"
+            android:layout_marginTop="5dp"
+            android:typeface="monospace"
+            android:fontFamily="sans-serif-light"
+            android:textColor="@color/black"
+            android:layout_toRightOf="@+id/lblTo"
+            android:text="Uploaded To"/>
+
+    </RelativeLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:typeface="monospace"
+        android:fontFamily="sans-serif-light"
+        android:textColor="@color/black"
+        android:text="Requested"
+        />
+    <RadioGroup
+        android:id="@+id/radio_group1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="5dp">
+        <RadioButton android:id="@+id/radio_yes"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/Yes" />
+        <RadioButton android:id="@+id/radio_no"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/No" />
+    </RadioGroup>
+    
+    <Button
+        android:id="@+id/btnSearch"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:typeface="monospace"
+        android:fontFamily="sans-serif-light"
+        android:textColor="@color/black"
+        android:text="@string/Search"
+        />
+
+
+</LinearLayout>

@@ -1685,6 +1685,22 @@ public class ClientAndroidInterface {
         JSONArray Products = sqlHandler.getResult(ProductQuery, null);
         return Products.toString();
     }
+    public String getProducts() {
+
+        @SuppressLint("SimpleDateFormat") SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        Calendar cal = Calendar.getInstance();
+        String dt = format.format(cal.getTime());
+
+        String ProductQuery = "SELECT P.ProductName ProductName\n" +
+                " FROM tblProduct P \n"+
+                " LEFT OUTER JOIN  tblLocations L ON (P.LocationId = L.LocationId) \n" +
+                " WHERE  (P.LocationId ='null' OR P.LocationId ='' OR P.LocationId = L.ParentLocationId) AND " +
+                "( '" + dt + "'  BETWEEN P.DateFrom AND P.Dateto )  \n" +
+                " ORDER BY  L.LocationId DESC";
+
+        JSONArray Products = sqlHandler.getResult(ProductQuery, null);
+        return Products.toString();
+    }
 
     @JavascriptInterface
     public int SavePolicy(String PolicyData, int FamilyId, int PolicyId) throws Exception {
@@ -2053,8 +2069,18 @@ public class ClientAndroidInterface {
         JSONArray RecordedPolicies = sqlHandler.getResult(Query, null);
         return RecordedPolicies;
     }
+    public JSONArray getRecordedPolicies(String search_string) {
+        String Query = "SELECT * FROM tblRecordedPolicies WHERE InsuranceNumber LIKE '%"+search_string+"%' OR LastName LIKE '%"+search_string+"%' OR OtherNames LIKE '%"+search_string+"%' OR ProductName LIKE '%"+search_string+"%'";
+        JSONArray RecordedPolicies = sqlHandler.getResult(Query, null);
+        return RecordedPolicies;
+    }
+    public JSONArray getRecordedPolicies(String from, String To) {
+        String Query = "SELECT * FROM tblRecordedPolicies WHERE Code = 'N'";
+        JSONArray RecordedPolicies = sqlHandler.getResult(Query, null);
+        return RecordedPolicies;
+    }
     public JSONArray getPolicyRequestedControlNumber() {
-        String Query = "SELECT * FROM tblRecordedPolicies WHERE Code != 'N'";
+        String Query = "SELECT * FROM tblRecordedPolicies RP LEFT JOIN tblControlNumber WHERE Code != 'N'";
         JSONArray RecordedPolicies = sqlHandler.getResult(Query, null);
         return RecordedPolicies;
     }

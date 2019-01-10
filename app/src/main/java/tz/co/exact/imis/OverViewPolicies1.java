@@ -42,12 +42,12 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-public class OverViewControlNumbers extends AppCompatActivity {
+public class OverViewPolicies1 extends AppCompatActivity {
 
     JSONArray policy;
     ClientAndroidInterface clientAndroidInterface;
     RecyclerView PolicyRecyclerView;
-    OverViewControlNumberAdapter overViewControlNumberAdapter;
+    OverViewPoliciesAdapter overViewPoliciesAdapter;
 
     TextView ValueNumberOfPolices;
     TextView ValueAmountOfContribution;
@@ -73,11 +73,11 @@ public class OverViewControlNumbers extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_over_view_control_numbers);
+        setContentView(R.layout.activity_over_view_policies1);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         final ActionBar actionBar = getSupportActionBar();
-        actionBar.setTitle("OverViewControlNumber");
+        actionBar.setTitle("OverViewPolicies");
 
 
         ValueNumberOfPolices = (TextView) findViewById(R.id.ValueNumberOfPolices);
@@ -162,7 +162,7 @@ public class OverViewControlNumbers extends AppCompatActivity {
 
         clientAndroidInterface = new ClientAndroidInterface(this);
         String search_string = getIntent().getStringExtra("SEARCH_STRING");
-        fillRecordedPolicies();
+        fillRecordedPolicies(search_string);
 
         int PolicyValue = 0;
         JSONObject ob = null;
@@ -176,7 +176,7 @@ public class OverViewControlNumbers extends AppCompatActivity {
             }
         }
 
-        search_count = overViewControlNumberAdapter.getCount();
+        search_count = overViewPoliciesAdapter.getCount();
         ValueNumberOfPolices.setText(String.valueOf(search_count));
         ValueAmountOfContribution.setText(String.valueOf(PolicyValue)+"/=");
     }
@@ -224,15 +224,15 @@ public class OverViewControlNumbers extends AppCompatActivity {
         super.onBackPressed();
     }
 
-    public void fillRecordedPolicies(){
-        policy = clientAndroidInterface.getPolicyRequestedControlNumber();//OrderArray;
-        LayoutInflater li = LayoutInflater.from(OverViewControlNumbers.this);
-        View promptsView = li.inflate(R.layout.activity_over_view_control_numbers, null);
+    public void fillRecordedPolicies(String search_string){
+        policy = clientAndroidInterface.getRecordedPolicies(search_string);//OrderArray;
+        LayoutInflater li = LayoutInflater.from(OverViewPolicies1.this);
+        View promptsView = li.inflate(R.layout.activity_over_view_policies1, null);
         PolicyRecyclerView = (RecyclerView) findViewById(R.id.listofpolicies);
-        overViewControlNumberAdapter = new OverViewControlNumberAdapter(this,policy);
+        overViewPoliciesAdapter = new OverViewPoliciesAdapter(this,policy);
         PolicyRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         PolicyRecyclerView.addItemDecoration(new DividerItemDecoration(this,DividerItemDecoration.VERTICAL));
-        PolicyRecyclerView.setAdapter(overViewControlNumberAdapter);
+        PolicyRecyclerView.setAdapter(overViewPoliciesAdapter);
     }
 
     public void trackBox(final JSONObject policies, String Number){
@@ -324,7 +324,7 @@ public class OverViewControlNumbers extends AppCompatActivity {
                                 updateAfterRequest(id);
 
                                 finish();
-                                Intent i = new Intent(OverViewControlNumbers.this, OverViewPolicies.class);
+                                Intent i = new Intent(OverViewPolicies1.this, OverViewPolicies.class);
                                 startActivity(i);
 
                                 View view = findViewById(R.id.actv);
@@ -373,4 +373,3 @@ public class OverViewControlNumbers extends AppCompatActivity {
         return clientAndroidInterface.insertRecordedPolicy(amountCalculated,amountConfirmed);
     }
 }
-

@@ -152,7 +152,8 @@ public class OverViewPolicies extends AppCompatActivity {
         });
 
         clientAndroidInterface = new ClientAndroidInterface(this);
-        fillRecordedPolicies();
+        String search_string = getIntent().getStringExtra("SEARCH_STRING");
+        fillRecordedPolicies(search_string);
 
         search_count = overViewPoliciesAdapter.getCount();
 
@@ -184,7 +185,7 @@ public class OverViewPolicies extends AppCompatActivity {
 
             @Override
             public boolean onQueryTextChange(String s) {
-                overViewPoliciesAdapter.getFilter().filter(s);
+                //overViewPoliciesAdapter.getFilter().filter(s);
                 return true;
             }
         });
@@ -203,8 +204,8 @@ public class OverViewPolicies extends AppCompatActivity {
         super.onBackPressed();
     }
 
-    public void fillRecordedPolicies(){
-        policy = clientAndroidInterface.getRecordedPolicies();//OrderArray;
+    public void fillRecordedPolicies(String search_string){
+        policy = clientAndroidInterface.getRecordedPolicies(search_string);//OrderArray;
         LayoutInflater li = LayoutInflater.from(OverViewPolicies.this);
         View promptsView = li.inflate(R.layout.activity_overview_policies, null);
         PolicyRecyclerView = (RecyclerView) findViewById(R.id.listofpolicies);

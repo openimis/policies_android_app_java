@@ -16,7 +16,15 @@
         android:textSize="16sp"
         android:paddingTop="15dp"
         android:paddingLeft="10dp"
-        android:text="@string/PhoneNumber"/>
+        android:text="Date"/>
+    <CheckBox
+        android:id="@+id/checkbox1"
+        android:layout_width="wrap_content"
+        android:layout_height="44dp"
+        android:typeface="monospace"
+        android:fontFamily="sans-serif-light"
+        android:textSize="12sp"
+        android:layout_margin="10dp" />
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -79,8 +87,6 @@
             android:gravity="end" />
 
     </RelativeLayout>
-
-
 
 
 </LinearLayout>

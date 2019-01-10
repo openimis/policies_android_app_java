@@ -27,7 +27,7 @@ public class ControlNumbers extends AppCompatActivity {
         OverViewPolicies.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(ControlNumbers.this, OverViewPolicies.class);
+                Intent intent = new Intent(ControlNumbers.this, SearchOverViewPolicies.class);
                 startActivity(intent);
             }
         });

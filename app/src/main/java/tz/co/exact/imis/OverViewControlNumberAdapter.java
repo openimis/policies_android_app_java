@@ -28,20 +28,13 @@ import java.util.List;
  */
 //Please see newPolicies and query to check Insuaree numbers
 public class OverViewControlNumberAdapter <VH extends TrackSelectionAdapter.ViewHolder> extends RecyclerView.Adapter {
-    OverViewPolicies overViewPolicies = new OverViewPolicies();
+    OverViewControlNumbers overViewPolicies = new OverViewControlNumbers();
     private JSONArray policies;
     private JSONArray newPolicies;
 
-    String PolicyId = null;
-    String InsuranceNumber = null;
-    String isDone = null;
-    String PolicyValue = null;
-    String LastName = null;
-    String OtherNames = null;
-    String ProductCode = null;
-    String ProductName = null;
-    String UploadedDate = null;
-    String RequestedDate = null;
+    String req_date = null;
+    String AmountCalculated = null;
+    String AmountConfirmed = null;
 
     private int focusedItem = 0;
     private int policyvalue = 0;
@@ -154,29 +147,17 @@ public class OverViewControlNumberAdapter <VH extends TrackSelectionAdapter.View
 
         try {
             JSONObject object = newPolicies.getJSONObject(position);
-            PolicyId = object.getString("PolicyId");
-            InsuranceNumber = object.getString("InsuranceNumber");
-            LastName = object.getString("LastName");
-            OtherNames = object.getString("OtherNames");
-            ProductCode = object.getString("ProductCode");
-            ProductName = object.getString("ProductName");
-            isDone = object.getString("isDone");
-            PolicyValue = object.getString("PolicyValue");
-            UploadedDate = object.getString("UploadedDate");
-            RequestedDate = object.getString("ControlRequestDate");
+            req_date = object.getString("ControlRequestDate");
+            AmountConfirmed = object.getString("AmountConfirmed");
+            AmountCalculated = object.getString("AmountCalculated");
 
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
-        ((Reportmsg) holder).PolicyId.setText(PolicyId);
-        ((Reportmsg) holder).InsuranceNumber.setText(InsuranceNumber);
-        ((Reportmsg) holder).isDone.setText(isDone);
-        ((Reportmsg) holder).Names.setText(OtherNames + " " + LastName);
-        ((Reportmsg) holder).ProductCode.setText(ProductCode);
-        ((Reportmsg) holder).ProductName.setText(ProductName);
-        ((Reportmsg) holder).UploadedDate.setText(UploadedDate);
-        ((Reportmsg) holder).RequestedDate.setText(RequestedDate);
+        ((Reportmsg) holder).ControlRequestedDate.setText(req_date);
+        ((Reportmsg) holder).AmountConfirmed.setText(AmountConfirmed);
+        ((Reportmsg) holder).AmountCalculated.setText(AmountCalculated);
 
 
     }
@@ -193,15 +174,9 @@ public class OverViewControlNumberAdapter <VH extends TrackSelectionAdapter.View
 
     public class Reportmsg extends RecyclerView.ViewHolder{
 
-        public TextView PolicyId;
-        public TextView InsuranceNumber;
-        public TextView isDone;
-        public TextView Names;
-        public TextView ProductCode;
-        public TextView ProductName;
-        public TextView UploadedDate;
-        public TextView RequestedDate;
-        public CheckBox checkbox1;
+        public TextView ControlRequestedDate;
+        public TextView AmountConfirmed;
+        public TextView AmountCalculated;
 
 
         public Reportmsg(final View itemView) {
@@ -213,7 +188,7 @@ public class OverViewControlNumberAdapter <VH extends TrackSelectionAdapter.View
                 public void onClick(View view) {
 
                     // Redraw the old selection and the new
-                    if(overViewPolicies.num.size() == 0){
+/*                    if(overViewPolicies.num.size() == 0){
                         overViewPolicies.num.add(String.valueOf(getLayoutPosition()));
                         //itemView.setBackgroundColor(Color.GRAY);
                         checkbox1.setChecked(true);
@@ -292,21 +267,15 @@ public class OverViewControlNumberAdapter <VH extends TrackSelectionAdapter.View
                             }
                             overViewPolicies.PolicyValueToSend += Integer.parseInt(PolicyValue);
                         }
-                    }
+                    }*/
 
                 }
             });
 
 
-            InsuranceNumber = (TextView) itemView.findViewById(R.id.InsuranceNumber);
-            PolicyId = (TextView) itemView.findViewById(R.id.PolicyId);
-            isDone = (TextView) itemView.findViewById(R.id.isDone);
-            Names = (TextView) itemView.findViewById(R.id.Names);
-            ProductCode = (TextView) itemView.findViewById(R.id.ProductCode);
-            ProductName = (TextView) itemView.findViewById(R.id.ProductName);
-            UploadedDate = (TextView) itemView.findViewById(R.id.UploadedDate);
-            RequestedDate = (TextView) itemView.findViewById(R.id.RequestedDate);
-            checkbox1 = (CheckBox) itemView.findViewById(R.id.checkbox1);
+            ControlRequestedDate = (TextView) itemView.findViewById(R.id.req_date);
+            AmountCalculated = (TextView) itemView.findViewById(R.id.AmountCalculated);
+            AmountConfirmed = (TextView) itemView.findViewById(R.id.AmountConfirmed);
         }
     }
 
