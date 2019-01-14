@@ -32,9 +32,11 @@ public class OverViewControlNumberAdapter <VH extends TrackSelectionAdapter.View
     private JSONArray policies;
     private JSONArray newPolicies;
 
+    String Code = null;
     String req_date = null;
     String AmountCalculated = null;
     String AmountConfirmed = null;
+    String InternalIdentifier = null;
 
     private int focusedItem = 0;
     private int policyvalue = 0;
@@ -147,17 +149,21 @@ public class OverViewControlNumberAdapter <VH extends TrackSelectionAdapter.View
 
         try {
             JSONObject object = newPolicies.getJSONObject(position);
+            Code = object.getString("Code");
             req_date = object.getString("ControlRequestDate");
             AmountConfirmed = object.getString("AmountConfirmed");
             AmountCalculated = object.getString("AmountCalculated");
+            //InternalIdentifier = object.getString("InternalIdentifier");
 
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
+        ((Reportmsg) holder).Code.setText(Code);
         ((Reportmsg) holder).ControlRequestedDate.setText(req_date);
         ((Reportmsg) holder).AmountConfirmed.setText(AmountConfirmed);
         ((Reportmsg) holder).AmountCalculated.setText(AmountCalculated);
+        //((Reportmsg) holder).InternalIdentifier.setText(InternalIdentifier);
 
 
     }
@@ -174,9 +180,11 @@ public class OverViewControlNumberAdapter <VH extends TrackSelectionAdapter.View
 
     public class Reportmsg extends RecyclerView.ViewHolder{
 
+        public TextView Code;
         public TextView ControlRequestedDate;
         public TextView AmountConfirmed;
         public TextView AmountCalculated;
+        public CheckBox checkbox1;
 
 
         public Reportmsg(final View itemView) {
@@ -188,7 +196,7 @@ public class OverViewControlNumberAdapter <VH extends TrackSelectionAdapter.View
                 public void onClick(View view) {
 
                     // Redraw the old selection and the new
-/*                    if(overViewPolicies.num.size() == 0){
+                    if(overViewPolicies.num.size() == 0){
                         overViewPolicies.num.add(String.valueOf(getLayoutPosition()));
                         //itemView.setBackgroundColor(Color.GRAY);
                         checkbox1.setChecked(true);
@@ -196,21 +204,15 @@ public class OverViewControlNumberAdapter <VH extends TrackSelectionAdapter.View
                         try {
                             paymentObject = new JSONObject();
                             paymentObject.put("Id",String.valueOf(getLayoutPosition()));
-                            paymentObject.put("PolicyId",String.valueOf(PolicyId.getText()));
-                            paymentObject.put("insureeNumber",String.valueOf(InsuranceNumber.getText()));
-                            paymentObject.put("productCode",String.valueOf(ProductCode.getText()));
-                            if(String.valueOf(isDone.getText()).equals("N")){
-                                paymentObject.put("paymentType","0");
-                            }else{
-                                paymentObject.put("paymentType","1");
-                            }
+                            paymentObject.put("Code",String.valueOf(Code.getText()));
+                            paymentObject.put("AmountCalculated",String.valueOf(AmountCalculated.getText()));
                             paymentDetails.put(paymentObject);
                             overViewPolicies.paymentDetails = paymentDetails;
 
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
-                        overViewPolicies.PolicyValueToSend += Integer.parseInt(PolicyValue);
+                        //overViewPolicies.PolicyValueToSend += Integer.parseInt(PolicyValue);
 
                     }else{
                         int ans = 0;
@@ -237,7 +239,7 @@ public class OverViewControlNumberAdapter <VH extends TrackSelectionAdapter.View
                                 }
 
                                 overViewPolicies.paymentDetails = paymentDetails;
-                                overViewPolicies.PolicyValueToSend -= Integer.parseInt(PolicyValue);
+                                //overViewPolicies.PolicyValueToSend -= Integer.parseInt(PolicyValue);
 
                                 break;
                             }
@@ -251,31 +253,28 @@ public class OverViewControlNumberAdapter <VH extends TrackSelectionAdapter.View
                             try {
                                 paymentObject = new JSONObject();
                                 paymentObject.put("Id",String.valueOf(getLayoutPosition()));
-                                paymentObject.put("PolicyId",String.valueOf(PolicyId.getText()));
-                                paymentObject.put("insureeNumber",String.valueOf(InsuranceNumber.getText()));
-                                paymentObject.put("productCode",String.valueOf(ProductCode.getText()));
-                                if(String.valueOf(isDone.getText()).equals("N")){
-                                    paymentObject.put("paymentType","0");
-                                }else{
-                                    paymentObject.put("paymentType","1");
-                                }
+                                paymentObject.put("Code",String.valueOf(Code.getText()));
+                                paymentObject.put("AmountCalculated",String.valueOf(AmountCalculated.getText()));
                                 paymentDetails.put(paymentObject);
                                 overViewPolicies.paymentDetails = paymentDetails;
 
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
-                            overViewPolicies.PolicyValueToSend += Integer.parseInt(PolicyValue);
+                            //overViewPolicies.PolicyValueToSend += Integer.parseInt(PolicyValue);
                         }
-                    }*/
+                    }
 
                 }
             });
 
 
+            Code = (TextView) itemView.findViewById(R.id.Code);
             ControlRequestedDate = (TextView) itemView.findViewById(R.id.req_date);
             AmountCalculated = (TextView) itemView.findViewById(R.id.AmountCalculated);
             AmountConfirmed = (TextView) itemView.findViewById(R.id.AmountConfirmed);
+            checkbox1 = (CheckBox) itemView.findViewById(R.id.checkbox1);
+            //InternalIdentifier = (TextView) itemView.findViewById(R.id.InternalIdentifier);
         }
     }
 

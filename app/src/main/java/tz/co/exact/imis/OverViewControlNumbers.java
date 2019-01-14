@@ -26,10 +26,13 @@ import android.widget.ProgressBar;
 import android.widget.SearchView;
 import android.widget.TextView;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -95,11 +98,7 @@ public class OverViewControlNumbers extends AppCompatActivity {
                 global = (Global) getApplicationContext();
 
                 try {
-                    getControlNumber.put("phoneNumber", "");
-                    getControlNumber.put("requestDate", dt);
-                    getControlNumber.put("officerCode", global.getOfficerCode());
-                    getControlNumber.put("paymentDetails",paymentDetails);
-                    getControlNumber.put("amount",PolicyValueToSend);
+                    getControlNumber.put("internalIdentifier",PolicyValueToSend);
 
                     n[0] = "";
                     for(int i=0; i<num.size(); i++){
@@ -107,7 +106,7 @@ public class OverViewControlNumbers extends AppCompatActivity {
                     }
                     AmountCalculated = String.valueOf(PolicyValueToSend);
                     if(num.size() != 0){
-                        trackBox(getControlNumber,String.valueOf(PolicyValueToSend));
+                        trackBox(paymentDetails);
                     }else{
                         View view1 = findViewById(R.id.actv);
                         Snackbar.make(view1, "Please select a policy/policies to request", Snackbar.LENGTH_LONG)
@@ -235,10 +234,10 @@ public class OverViewControlNumbers extends AppCompatActivity {
         PolicyRecyclerView.setAdapter(overViewControlNumberAdapter);
     }
 
-    public void trackBox(final JSONObject policies, String Number){
+    public void trackBox(final JSONArray policies){
         // get prompts.xml view
         LayoutInflater li = LayoutInflater.from(this);
-        View promptsView = li.inflate(R.layout.controls, null);
+        View promptsView = li.inflate(R.layout.assigncontrolnumber, null);
 
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
                 this);
@@ -246,12 +245,6 @@ public class OverViewControlNumbers extends AppCompatActivity {
         // set prompts.xml to alertdialog builder
         alertDialogBuilder.setView(promptsView);
 
-        final EditText amount = (EditText) promptsView.findViewById(R.id.display);
-        final EditText phoneNumber = (EditText) promptsView.findViewById(R.id.phonenumber);
-
-        amount.setText(Number);
-
-        final EditText finalAmount = (EditText) promptsView.findViewById(R.id.display);
 
         // set dialog message
         alertDialogBuilder
@@ -260,12 +253,7 @@ public class OverViewControlNumbers extends AppCompatActivity {
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog,int id) {
                                 try {
-                                    policies.put("phoneNumber",phoneNumber.getText().toString());
-                                    policies.put("amount",finalAmount.getText().toString());
-                                    amountConfirmed = finalAmount.getText().toString();
                                     getControlNumber(policies);
-                                } catch (JSONException e) {
-                                    e.printStackTrace();
                                 } catch (IOException e) {
                                     e.printStackTrace();
                                 }
@@ -285,12 +273,12 @@ public class OverViewControlNumbers extends AppCompatActivity {
         alertDialog.show();
     }
 
-    private int getControlNumber(final JSONObject order) throws IOException {
+    private int getControlNumber(final JSONArray order) throws IOException {
 
         Thread thread = new Thread(){
             public void run() {
                 HttpClient httpClient = new DefaultHttpClient();
-                HttpPost httpPost = new HttpPost("http://imis-mv.swisstph-mis.ch/restapi/api/GetControlNumber");
+                HttpPost httpPost = new HttpPost("http://imis-mv.swisstph-mis.ch/restapi/api/GetAssignedControlNumbers");
 // Request parameters and other properties.
                 try {
                     StringEntity postingString = new StringEntity(order.toString());
@@ -310,40 +298,55 @@ public class OverViewControlNumbers extends AppCompatActivity {
                 });
 
                 //Send Request Here
-                //HttpResponse response = httpClient.execute(httpPost);
-                //HttpEntity respEntity = response.getEntity();
+                HttpResponse response = null;
+                try {
+                    response = httpClient.execute(httpPost);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                HttpEntity respEntity = response.getEntity();
 
-                if ("s" != null) {
+                if (respEntity != null) {
+                    final String[] internal_Identifier = {null};
+                    final String[] control_number = {null};
                     // EntityUtils to get the response content
-                    final String content = "l0";//EntityUtils.toString(respEntity);
-                    if(!content.equals("{\"Message\":\"An error occurred while processing your request.\"}")){
-                        runOnUiThread(new Runnable() {
-                            public void run() {
-                                spinner.setVisibility(View.GONE);
-                                int id = insertAfterRequest(AmountCalculated,amountConfirmed);
-                                updateAfterRequest(id);
-
-                                finish();
-                                Intent i = new Intent(OverViewControlNumbers.this, OverViewPolicies.class);
-                                startActivity(i);
-
-                                View view = findViewById(R.id.actv);
-                                Snackbar.make(view, content, Snackbar.LENGTH_LONG)
-                                        .setAction("Action", null).show();
-                            }
-                        });
-                    }else{
-                        runOnUiThread(new Runnable() {
-                            public void run() {
-                                spinner.setVisibility(View.GONE);
-                                View view = findViewById(R.id.actv);
-                                Snackbar.make(view, content, Snackbar.LENGTH_LONG)
-                                        .setAction("Action", null).show();
-                            }
-                        });
-
+                    String content = null;
+                    try {
+                        content = EntityUtils.toString(respEntity);
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
+                    try {
+                        JSONArray res = new JSONArray(content);
+                        JSONObject ob = null;
+                        for(int j = 0;j < res.length();j++){
+                            try {
+                                ob = res.getJSONObject(j);
+                                internal_Identifier[0] = ob.getString("internal_Identifier");
+                                control_number[0] = ob.getString("control_number");
 
+                                runOnUiThread(new Runnable() {
+                                    public void run() {
+                                        spinner.setVisibility(View.GONE);
+                                        updateAfterRequest(internal_Identifier[0], control_number[0]);
+
+                                        finish();
+                                        Intent i = new Intent(OverViewControlNumbers.this, OverViewControlNumbers.class);
+                                        startActivity(i);
+
+                                        View view = findViewById(R.id.actv);
+                                        Snackbar.make(view, "Success", Snackbar.LENGTH_LONG)
+                                                .setAction("Action", null).show();
+                                    }
+                                });
+
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                 }
 
 
@@ -356,21 +359,9 @@ public class OverViewControlNumbers extends AppCompatActivity {
         return 0;
     }
 
-    private void updateAfterRequest(int Code) {
-        JSONObject ob = null;
-        for(int j = 0;j < paymentDetails.length();j++){
-            try {
-                ob = paymentDetails.getJSONObject(j);
-                int Id = Integer.parseInt(ob.getString("Id"));
-                clientAndroidInterface.updateRecordedPolicy(Id,Code);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
+    private void updateAfterRequest(String InternalIdentifier, String ControlNumber) {
+        clientAndroidInterface.assignControlNumber(InternalIdentifier, ControlNumber);
     }
 
-    private int insertAfterRequest(String amountCalculated, String amountConfirmed) {
-        return clientAndroidInterface.insertRecordedPolicy(amountCalculated,amountConfirmed);
-    }
 }
 

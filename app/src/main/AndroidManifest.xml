@@ -96,14 +96,6 @@
             android:label="@string/CummulativeIndicators"
             android:screenOrientation="portrait" />
         <activity android:name=".ControlNumbers" />
-        <activity
-            android:name=".OverViewPolicies"
-            android:label="@string/title_activity_overview_policies"
-            android:theme="@style/AppTheme.NoActionBar">
-            <meta-data
-                android:name="android.app.searchable"
-                android:resource="@xml/searchable" />
-        </activity>
         <activity android:name=".SearchOverViewPolicies" />
         <activity android:name=".OverViewPolicies1" />
         <activity android:name=".OverViewControlNumbers"></activity>

@@ -10,20 +10,22 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="100dp">
+        android:layout_height="70dp"
+        android:background="@color/silver">
 
         <TextView
             android:id="@+id/lblNumberOfPolices"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp"
+            android:layout_margin="5dp"
             android:text="Number of found policies"/>
         <TextView
             android:id="@+id/ValueNumberOfPolices"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp"
+            android:layout_margin="5dp"
             android:textAlignment="textEnd"
+            android:textStyle="bold"
             android:layout_toRightOf="@+id/lblNumberOfPolices"
             android:text="0"
             android:gravity="end" />
@@ -41,6 +43,7 @@
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
             android:textAlignment="textEnd"
+            android:textStyle="bold"
             android:layout_below="@+id/ValueNumberOfPolices"
             android:layout_toRightOf="@+id/lblAmountOfContribution"
             android:text="0"
@@ -51,8 +54,9 @@
     <android.support.v7.widget.RecyclerView
         android:id="@+id/listofpolicies"
         android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:background="@color/white"/>
+        android:layout_height="330dp"
+        android:background="@color/white"
+        android:layout_margin="20dp"/>
 
     <ProgressBar
         android:id="@+id/progressBar1"
@@ -67,7 +71,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:elevation="10dp">
 
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/fab2"

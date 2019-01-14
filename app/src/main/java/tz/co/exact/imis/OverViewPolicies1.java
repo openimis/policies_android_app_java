@@ -26,6 +26,8 @@ import android.widget.ProgressBar;
 import android.widget.SearchView;
 import android.widget.TextView;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
@@ -310,25 +312,55 @@ public class OverViewPolicies1 extends AppCompatActivity {
                 });
 
                 //Send Request Here
-                //HttpResponse response = httpClient.execute(httpPost);
-                //HttpEntity respEntity = response.getEntity();
+                HttpResponse response = null;
+                try {
+                    response = httpClient.execute(httpPost);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                HttpEntity respEntity = response.getEntity();
 
-                if ("s" != null) {
+                if (respEntity != null) {
+                    final String[] code = {null};
+                    final String[] error_occured = {null};
+                    final String[] error_message = {null};
+                    final String[] internal_Identifier = {null};
+                    final String[] control_number = {null};
                     // EntityUtils to get the response content
                     final String content = "l0";//EntityUtils.toString(respEntity);
-                    if(!content.equals("{\"Message\":\"An error occurred while processing your request.\"}")){
+                    try {
+                        JSONArray res = new JSONArray(content);
+                        JSONObject ob = null;
+                        for(int j = 0;j < res.length();j++){
+                            try {
+                                ob = res.getJSONObject(j);
+                                code[0] = ob.getString("code");
+                                error_occured[0] = ob.getString("error_occured");
+                                error_message[0] = ob.getString("error_message");
+                                internal_Identifier[0] = ob.getString("internal_Identifier");
+                                control_number[0] = ob.getString("control_number");
+
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    if(code[0].equals("0")){
                         runOnUiThread(new Runnable() {
                             public void run() {
                                 spinner.setVisibility(View.GONE);
-                                int id = insertAfterRequest(AmountCalculated,amountConfirmed);
+
+                                int id = insertAfterRequest(amountConfirmed, control_number[0], internal_Identifier[0]);
                                 updateAfterRequest(id);
 
                                 finish();
-                                Intent i = new Intent(OverViewPolicies1.this, OverViewPolicies.class);
+                                Intent i = new Intent(OverViewPolicies1.this, OverViewPolicies1.class);
                                 startActivity(i);
 
                                 View view = findViewById(R.id.actv);
-                                Snackbar.make(view, content, Snackbar.LENGTH_LONG)
+                                Snackbar.make(view, "Success", Snackbar.LENGTH_LONG)
                                         .setAction("Action", null).show();
                             }
                         });
@@ -337,7 +369,7 @@ public class OverViewPolicies1 extends AppCompatActivity {
                             public void run() {
                                 spinner.setVisibility(View.GONE);
                                 View view = findViewById(R.id.actv);
-                                Snackbar.make(view, content, Snackbar.LENGTH_LONG)
+                                Snackbar.make(view, error_message[0], Snackbar.LENGTH_LONG)
                                         .setAction("Action", null).show();
                             }
                         });
@@ -369,7 +401,7 @@ public class OverViewPolicies1 extends AppCompatActivity {
         }
     }
 
-    private int insertAfterRequest(String amountCalculated, String amountConfirmed) {
-        return clientAndroidInterface.insertRecordedPolicy(amountCalculated,amountConfirmed);
+    private int insertAfterRequest(String amountCalculated, String control_number, String InternalIdentifier) {
+        return clientAndroidInterface.insertRecordedPolicy(amountCalculated,amountConfirmed, control_number, InternalIdentifier);
     }
 }

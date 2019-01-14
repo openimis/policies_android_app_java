@@ -2091,10 +2091,12 @@ public class ClientAndroidInterface {
         JSONArray RecordedPolicies = sqlHandler.getResult(Query, arg);
         return RecordedPolicies.toString();
     }
-    public int insertRecordedPolicy(String amountCalculated, String amountConfirmed){
+    public int insertRecordedPolicy(String amountCalculated, String amountConfirmed, String control_number, String InternalIdentifier){
         ContentValues values = new ContentValues();
         values.put("AmountCalculated", String.valueOf(amountCalculated));
         values.put("AmountConfirmed", String.valueOf(amountConfirmed));
+        values.put("ControlNumber", String.valueOf(control_number));
+        values.put("InternalIdentifier", String.valueOf(InternalIdentifier));
         try {//Update to new policy value
             sqlHandler.insertData("tblControlNumber", values);
 
@@ -2126,6 +2128,18 @@ public class ClientAndroidInterface {
         values.put("ControlRequestDate", d);
         try {
             sqlHandler.updateData("tblRecordedPolicies", values, "Id = ?", new String[]{String.valueOf(Id)});
+        } catch (UserException e) {
+            e.printStackTrace();
+        }
+    }
+    public void assignControlNumber(String InternalIdentifier, String ControlNumber){
+        @SuppressLint("SimpleDateFormat") SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy-HH");
+        Calendar cal = Calendar.getInstance();
+        String d = format.format(cal.getTime());
+        ContentValues values = new ContentValues();
+        values.put("ControlNumber", ControlNumber);
+        try {
+            sqlHandler.updateData("tblRecordedPolicies", values, "InternalIdentifier = ?", new String[]{String.valueOf(InternalIdentifier)});
         } catch (UserException e) {
             e.printStackTrace();
         }
