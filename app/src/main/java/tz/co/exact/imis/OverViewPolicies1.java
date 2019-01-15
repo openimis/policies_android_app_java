@@ -32,6 +32,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -163,8 +164,15 @@ public class OverViewPolicies1 extends AppCompatActivity {
         });
 
         clientAndroidInterface = new ClientAndroidInterface(this);
-        String search_string = getIntent().getStringExtra("SEARCH_STRING");
-        fillRecordedPolicies(search_string);
+        if(getIntent().getStringExtra("SEARCH_STRING") != null){
+            String search_string = getIntent().getStringExtra("SEARCH_STRING");
+            fillRecordedPolicies(search_string);
+        }else if(getIntent().getStringExtra("FROMDATE") != null || getIntent().getStringExtra("TODATE") != null){
+            String fromdate = getIntent().getStringExtra("FROMDATE");
+            String todate = getIntent().getStringExtra("TODATE");
+            fillRecordedPolicies(fromdate, todate);
+        }
+
 
         int PolicyValue = 0;
         JSONObject ob = null;
@@ -228,6 +236,17 @@ public class OverViewPolicies1 extends AppCompatActivity {
 
     public void fillRecordedPolicies(String search_string){
         policy = clientAndroidInterface.getRecordedPolicies(search_string);//OrderArray;
+        LayoutInflater li = LayoutInflater.from(OverViewPolicies1.this);
+        View promptsView = li.inflate(R.layout.activity_over_view_policies1, null);
+        PolicyRecyclerView = (RecyclerView) findViewById(R.id.listofpolicies);
+        overViewPoliciesAdapter = new OverViewPoliciesAdapter(this,policy);
+        PolicyRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        PolicyRecyclerView.addItemDecoration(new DividerItemDecoration(this,DividerItemDecoration.VERTICAL));
+        PolicyRecyclerView.setAdapter(overViewPoliciesAdapter);
+    }
+
+    public void fillRecordedPolicies(String from, String to){
+        policy = clientAndroidInterface.getRecordedPolicies(from, to);//OrderArray;
         LayoutInflater li = LayoutInflater.from(OverViewPolicies1.this);
         View promptsView = li.inflate(R.layout.activity_over_view_policies1, null);
         PolicyRecyclerView = (RecyclerView) findViewById(R.id.listofpolicies);
@@ -319,7 +338,7 @@ public class OverViewPolicies1 extends AppCompatActivity {
                     e.printStackTrace();
                 }
                 HttpEntity respEntity = response.getEntity();
-
+                String content = null;
                 if (respEntity != null) {
                     final String[] code = {null};
                     final String[] error_occured = {null};
@@ -327,32 +346,30 @@ public class OverViewPolicies1 extends AppCompatActivity {
                     final String[] internal_Identifier = {null};
                     final String[] control_number = {null};
                     // EntityUtils to get the response content
-                    final String content = "l0";//EntityUtils.toString(respEntity);
-                    try {
-                        JSONArray res = new JSONArray(content);
-                        JSONObject ob = null;
-                        for(int j = 0;j < res.length();j++){
-                            try {
-                                ob = res.getJSONObject(j);
-                                code[0] = ob.getString("code");
-                                error_occured[0] = ob.getString("error_occured");
-                                error_message[0] = ob.getString("error_message");
-                                internal_Identifier[0] = ob.getString("internal_Identifier");
-                                control_number[0] = ob.getString("control_number");
 
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }
+                    try {
+                        content = EntityUtils.toString(respEntity);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    JSONObject ob = null;
+                    try {
+                        ob = new JSONObject(content);
+                        code[0] = ob.getString("code");
+                        error_occured[0] = ob.getString("error_occured");
+                        error_message[0] = ob.getString("error_message");
+                        internal_Identifier[0] = ob.getString("internal_Identifier");
+                        control_number[0] = ob.getString("control_number");
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-                    if(code[0].equals("0")){
+
+                    if(code[0].equals("5")){
                         runOnUiThread(new Runnable() {
                             public void run() {
                                 spinner.setVisibility(View.GONE);
 
-                                int id = insertAfterRequest(amountConfirmed, control_number[0], internal_Identifier[0]);
+                                int id = insertAfterRequest(amountConfirmed, control_number[0], code[0]);
                                 updateAfterRequest(id);
 
                                 finish();

@@ -32,10 +32,10 @@ public class OverViewControlNumberAdapter <VH extends TrackSelectionAdapter.View
     private JSONArray policies;
     private JSONArray newPolicies;
 
-    String Code = null;
     String req_date = null;
     String AmountCalculated = null;
     String AmountConfirmed = null;
+    String controlNumber = null;
     String InternalIdentifier = null;
 
     private int focusedItem = 0;
@@ -149,20 +149,21 @@ public class OverViewControlNumberAdapter <VH extends TrackSelectionAdapter.View
 
         try {
             JSONObject object = newPolicies.getJSONObject(position);
-            Code = object.getString("Code");
+            InternalIdentifier = object.getString("InternalIdentifier");
             req_date = object.getString("ControlRequestDate");
             AmountConfirmed = object.getString("AmountConfirmed");
             AmountCalculated = object.getString("AmountCalculated");
-            //InternalIdentifier = object.getString("InternalIdentifier");
+            controlNumber = object.getString("controlNumber");
 
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
-        ((Reportmsg) holder).Code.setText(Code);
+        ((Reportmsg) holder).InternalIdentifier.setText(InternalIdentifier);
         ((Reportmsg) holder).ControlRequestedDate.setText(req_date);
         ((Reportmsg) holder).AmountConfirmed.setText(AmountConfirmed);
         ((Reportmsg) holder).AmountCalculated.setText(AmountCalculated);
+        ((Reportmsg) holder).controlNumber.setText(controlNumber);
         //((Reportmsg) holder).InternalIdentifier.setText(InternalIdentifier);
 
 
@@ -180,10 +181,11 @@ public class OverViewControlNumberAdapter <VH extends TrackSelectionAdapter.View
 
     public class Reportmsg extends RecyclerView.ViewHolder{
 
-        public TextView Code;
+        public TextView InternalIdentifier;
         public TextView ControlRequestedDate;
         public TextView AmountConfirmed;
         public TextView AmountCalculated;
+        public TextView controlNumber;
         public CheckBox checkbox1;
 
 
@@ -203,9 +205,8 @@ public class OverViewControlNumberAdapter <VH extends TrackSelectionAdapter.View
 
                         try {
                             paymentObject = new JSONObject();
-                            paymentObject.put("Id",String.valueOf(getLayoutPosition()));
-                            paymentObject.put("Code",String.valueOf(Code.getText()));
-                            paymentObject.put("AmountCalculated",String.valueOf(AmountCalculated.getText()));
+                            //paymentObject.put("Id",String.valueOf(getLayoutPosition()));
+                            paymentObject.put("InternalIdentifier",String.valueOf(InternalIdentifier.getText()));
                             paymentDetails.put(paymentObject);
                             overViewPolicies.paymentDetails = paymentDetails;
 
@@ -252,9 +253,8 @@ public class OverViewControlNumberAdapter <VH extends TrackSelectionAdapter.View
 
                             try {
                                 paymentObject = new JSONObject();
-                                paymentObject.put("Id",String.valueOf(getLayoutPosition()));
-                                paymentObject.put("Code",String.valueOf(Code.getText()));
-                                paymentObject.put("AmountCalculated",String.valueOf(AmountCalculated.getText()));
+                                //paymentObject.put("Id",String.valueOf(getLayoutPosition()));
+                                paymentObject.put("InternalIdentifier",String.valueOf(InternalIdentifier.getText()));
                                 paymentDetails.put(paymentObject);
                                 overViewPolicies.paymentDetails = paymentDetails;
 
@@ -269,12 +269,12 @@ public class OverViewControlNumberAdapter <VH extends TrackSelectionAdapter.View
             });
 
 
-            Code = (TextView) itemView.findViewById(R.id.Code);
+            InternalIdentifier = (TextView) itemView.findViewById(R.id.InternalIdentifier);
             ControlRequestedDate = (TextView) itemView.findViewById(R.id.req_date);
             AmountCalculated = (TextView) itemView.findViewById(R.id.AmountCalculated);
             AmountConfirmed = (TextView) itemView.findViewById(R.id.AmountConfirmed);
+            controlNumber = (TextView) itemView.findViewById(R.id.controlNumber);
             checkbox1 = (CheckBox) itemView.findViewById(R.id.checkbox1);
-            //InternalIdentifier = (TextView) itemView.findViewById(R.id.InternalIdentifier);
         }
     }
 

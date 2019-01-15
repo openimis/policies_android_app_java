@@ -31,11 +31,14 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Locale;
 
-public class SearchOverViewPolicies extends AppCompatActivity {
+public class SearchOverViewControlNumber extends AppCompatActivity {
 
     Button btnSearch;
     Button from_date;
     Button to_date;
+    Button requested_from;
+    Button requested_to;
+
     EditText search1;
     EditText search2;
     RadioButton radio_yes;
@@ -44,6 +47,8 @@ public class SearchOverViewPolicies extends AppCompatActivity {
 
     Calendar myCalendar;
     Calendar myCalendar1;
+    Calendar myCalendarReqFrom;
+    Calendar myCalendarReqTo;
 
     ClientAndroidInterface clientAndroidInterface;
 
@@ -55,7 +60,7 @@ public class SearchOverViewPolicies extends AppCompatActivity {
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_search_over_view_policies);
+        setContentView(R.layout.activity_search_over_view_control_number);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         clientAndroidInterface = new ClientAndroidInterface(this);
@@ -65,8 +70,12 @@ public class SearchOverViewPolicies extends AppCompatActivity {
         btnSearch = (Button) findViewById(R.id.btnSearch);
         from_date = (Button) findViewById(R.id.from_date);
         to_date = (Button) findViewById(R.id.To_date);
+        requested_from = (Button) findViewById(R.id.requested_from);
+        requested_to = (Button) findViewById(R.id.requested_to);
+
         search1 = (EditText) findViewById(R.id.search1);
         search2 = (EditText) findViewById(R.id.search2);
+
         radio_yes = (RadioButton) findViewById(R.id.radio_yes);
         radio_no = (RadioButton) findViewById(R.id.radio_no);
         radio_group1 = (RadioGroup) findViewById(R.id.radio_group1);
@@ -100,11 +109,11 @@ public class SearchOverViewPolicies extends AppCompatActivity {
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 lv1.setVisibility(View.VISIBLE);
                 ((SimpleAdapter) adapter).getFilter().filter(s);
-              //  HashMap<String, String> Payer = new HashMap<>();
-               // String searchString = etOfficer.getText().toString();
-               // int LocID = ca.getLocationId(searchString);
+                //  HashMap<String, String> Payer = new HashMap<>();
+                // String searchString = etOfficer.getText().toString();
+                // int LocID = ca.getLocationId(searchString);
                 //BindSpinnerPayersXXXX(LocID);
-               // BindSpinnerProduct(LocID);
+                // BindSpinnerProduct(LocID);
             }
 
             @Override
@@ -163,7 +172,7 @@ public class SearchOverViewPolicies extends AppCompatActivity {
                 String todate = to_date.getText().toString();
 
                 if(!fromdate.equals("") || !todate.equals("")){
-                    Intent intent = new Intent(SearchOverViewPolicies.this, OverViewPolicies1.class);
+                    Intent intent = new Intent(SearchOverViewControlNumber.this, OverViewControlNumbers.class);
                     intent.putExtra("FROMDATE", fromdate);
                     intent.putExtra("TODATE", todate);
                     startActivity(intent);
@@ -173,7 +182,7 @@ public class SearchOverViewPolicies extends AppCompatActivity {
                         search_2 = "";
                     }
                     String search = search_1+search_2+search_3;
-                    Intent intent = new Intent(SearchOverViewPolicies.this, OverViewPolicies1.class);
+                    Intent intent = new Intent(SearchOverViewControlNumber.this, OverViewControlNumbers.class);
                     intent.putExtra("SEARCH_STRING", search);
                     startActivity(intent);
                 }
@@ -183,6 +192,8 @@ public class SearchOverViewPolicies extends AppCompatActivity {
 
         myCalendar = Calendar.getInstance();
         myCalendar1 = Calendar.getInstance();
+        myCalendarReqFrom = Calendar.getInstance();
+        myCalendarReqTo = Calendar.getInstance();
 
         from_date.setOnClickListener(new View.OnClickListener() {
 
@@ -192,7 +203,7 @@ public class SearchOverViewPolicies extends AppCompatActivity {
                 search1.setText("");
                 search2.setText("");
                 // TODO Auto-generated method stub
-                new DatePickerDialog(SearchOverViewPolicies.this, date, myCalendar
+                new DatePickerDialog(SearchOverViewControlNumber.this, date, myCalendar
                         .get(Calendar.YEAR), myCalendar.get(Calendar.MONTH),
                         myCalendar.get(Calendar.DAY_OF_MONTH)).show();
             }
@@ -203,9 +214,35 @@ public class SearchOverViewPolicies extends AppCompatActivity {
                 search1.setText("");
                 search2.setText("");
                 // TODO Auto-generated method stub
-                new DatePickerDialog(SearchOverViewPolicies.this, date1, myCalendar1
+                new DatePickerDialog(SearchOverViewControlNumber.this, date1, myCalendar1
                         .get(Calendar.YEAR), myCalendar1.get(Calendar.MONTH),
                         myCalendar1.get(Calendar.DAY_OF_MONTH)).show();
+            }
+        });
+
+
+        requested_from.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+
+                search1.setText("");
+                search2.setText("");
+                // TODO Auto-generated method stub
+                new DatePickerDialog(SearchOverViewControlNumber.this, dateFrom, myCalendarReqFrom
+                        .get(Calendar.YEAR), myCalendarReqFrom.get(Calendar.MONTH),
+                        myCalendarReqFrom.get(Calendar.DAY_OF_MONTH)).show();
+            }
+        });
+        requested_to.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                search1.setText("");
+                search2.setText("");
+                // TODO Auto-generated method stub
+                new DatePickerDialog(SearchOverViewControlNumber.this, dateTo, myCalendarReqTo
+                        .get(Calendar.YEAR), myCalendarReqTo.get(Calendar.MONTH),
+                        myCalendarReqTo.get(Calendar.DAY_OF_MONTH)).show();
             }
         });
 
@@ -245,7 +282,7 @@ public class SearchOverViewPolicies extends AppCompatActivity {
                     FeedbackList.add(feedback);
                 }
 
-                adapter = new SimpleAdapter(SearchOverViewPolicies.this, FeedbackList, R.layout.txtviewproduct,
+                adapter = new SimpleAdapter(SearchOverViewControlNumber.this, FeedbackList, R.layout.txtviewproduct,
                         new String[]{"ProductName"},
                         new int[]{R.id.tv});
 
@@ -264,6 +301,10 @@ public class SearchOverViewPolicies extends AppCompatActivity {
         @Override
         public void onDateSet(DatePicker view, int year, int monthOfYear,
                               int dayOfMonth) {
+
+            requested_from.setText("");
+            requested_to.setText("");
+
             // TODO Auto-generated method stub
             myCalendar.set(Calendar.YEAR, year);
             myCalendar.set(Calendar.MONTH, monthOfYear);
@@ -278,6 +319,10 @@ public class SearchOverViewPolicies extends AppCompatActivity {
         @Override
         public void onDateSet(DatePicker view, int year, int monthOfYear,
                               int dayOfMonth) {
+
+            requested_from.setText("");
+            requested_to.setText("");
+
             // TODO Auto-generated method stub
             myCalendar1.set(Calendar.YEAR, year);
             myCalendar1.set(Calendar.MONTH, monthOfYear);
@@ -287,6 +332,42 @@ public class SearchOverViewPolicies extends AppCompatActivity {
 
     };
 
+
+    DatePickerDialog.OnDateSetListener dateFrom = new DatePickerDialog.OnDateSetListener() {
+
+        @Override
+        public void onDateSet(DatePicker view, int year, int monthOfYear,
+                              int dayOfMonth) {
+
+            from_date.setText("");
+            to_date.setText("");
+
+            // TODO Auto-generated method stub
+            myCalendarReqFrom.set(Calendar.YEAR, year);
+            myCalendarReqFrom.set(Calendar.MONTH, monthOfYear);
+            myCalendarReqFrom.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+            updateLabelReqFrom();
+        }
+
+    };
+
+    DatePickerDialog.OnDateSetListener dateTo = new DatePickerDialog.OnDateSetListener() {
+
+        @Override
+        public void onDateSet(DatePicker view, int year, int monthOfYear,
+                              int dayOfMonth) {
+
+            from_date.setText("");
+            to_date.setText("");
+
+            // TODO Auto-generated method stub
+            myCalendarReqTo.set(Calendar.YEAR, year);
+            myCalendarReqTo.set(Calendar.MONTH, monthOfYear);
+            myCalendarReqTo.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+            updateLabelReqTo();
+        }
+
+    };
 
     private void updateLabel() {
         String myFormat = "yyyy-MM-dd"; //In which you need put here
@@ -300,4 +381,19 @@ public class SearchOverViewPolicies extends AppCompatActivity {
 
         to_date.setText(String.valueOf(sdf.format(myCalendar1.getTime())));
     }
+
+    private void updateLabelReqFrom() {
+        String myFormat = "yyyy-MM-dd"; //In which you need put here
+        SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
+
+        requested_from.setText(String.valueOf(sdf.format(myCalendarReqFrom.getTime())));
+    }
+
+    private void updateLabelReqTo() {
+        String myFormat = "yyyy-MM-dd"; //In which you need put here
+        SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
+
+        requested_to.setText(String.valueOf(sdf.format(myCalendarReqTo.getTime())));
+    }
 }
+

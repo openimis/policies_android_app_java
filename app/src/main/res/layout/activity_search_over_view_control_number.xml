@@ -6,12 +6,12 @@
     android:layout_height="match_parent"
     android:layout_margin="10dp"
     android:orientation="vertical"
-    tools:context="tz.co.exact.imis.SearchOverViewPolicies">
+    tools:context="tz.co.exact.imis.SearchOverViewControlNumber">
 
     <EditText
         android:id="@+id/search1"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
+        android:layout_height="40dp"
         android:layout_marginTop="5dp"
         android:hint="Renewal/insurance Number/Names"
         android:paddingLeft="10dp"
@@ -30,7 +30,7 @@
     <EditText
         android:id="@+id/search2"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
+        android:layout_height="40dp"
         android:layout_marginTop="5dp"
         android:paddingLeft="10dp"
         android:typeface="monospace"
@@ -41,7 +41,7 @@
     <ListView
         android:id="@+id/lv1"
         android:layout_width="match_parent"
-        android:layout_height="150dp"
+        android:layout_height="100dp"
         android:layout_marginTop="5dp"
         android:typeface="monospace"
         android:fontFamily="sans-serif-light"
@@ -64,17 +64,17 @@
             android:fontFamily="sans-serif-light"
             android:textColor="@color/black"
             android:text="Uploaded From"/>
-         <TextView
-             android:id="@+id/lblTo"
-             android:layout_width="50dp"
-             android:layout_height="50dp"
-             android:typeface="monospace"
-             android:fontFamily="sans-serif-light"
-             android:textColor="@color/black"
-             android:layout_toRightOf="@+id/from_date"
-             android:textAlignment="center"
-             android:paddingTop="20dp"
-             android:text="TO"/>
+        <TextView
+            android:id="@+id/lblTo"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:typeface="monospace"
+            android:fontFamily="sans-serif-light"
+            android:textColor="@color/black"
+            android:layout_toRightOf="@+id/from_date"
+            android:textAlignment="center"
+            android:paddingTop="20dp"
+            android:text="TO"/>
 
         <Button
             android:id="@+id/To_date"
@@ -86,6 +86,28 @@
             android:textColor="@color/black"
             android:layout_toRightOf="@+id/lblTo"
             android:text="Uploaded To"/>
+
+        <Button
+            android:id="@+id/requested_from"
+            android:layout_width="150dp"
+            android:layout_height="50dp"
+            android:layout_marginTop="5dp"
+            android:typeface="monospace"
+            android:fontFamily="sans-serif-light"
+            android:layout_below="@+id/from_date"
+            android:textColor="@color/black"
+            android:text="Requested From"/>
+        <Button
+            android:id="@+id/requested_to"
+            android:layout_width="150dp"
+            android:layout_height="50dp"
+            android:layout_marginTop="5dp"
+            android:typeface="monospace"
+            android:fontFamily="sans-serif-light"
+            android:layout_below="@+id/To_date"
+            android:layout_toRightOf="@+id/lblTo"
+            android:textColor="@color/black"
+            android:text="Requested To"/>
 
     </RelativeLayout>
 
@@ -113,7 +135,7 @@
             android:layout_height="wrap_content"
             android:text="N" />
     </RadioGroup>
-    
+
     <Button
         android:id="@+id/btnSearch"
         android:layout_width="match_parent"
@@ -126,3 +148,4 @@
 
 
 </LinearLayout>
+

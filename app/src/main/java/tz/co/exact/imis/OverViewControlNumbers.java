@@ -160,8 +160,14 @@ public class OverViewControlNumbers extends AppCompatActivity {
         });
 
         clientAndroidInterface = new ClientAndroidInterface(this);
-        String search_string = getIntent().getStringExtra("SEARCH_STRING");
-        fillRecordedPolicies();
+        if(getIntent().getStringExtra("SEARCH_STRING") != null){
+            String search_string = getIntent().getStringExtra("SEARCH_STRING");
+            fillRecordedPolicies(search_string);
+        }else if(getIntent().getStringExtra("FROMDATE") != null || getIntent().getStringExtra("TODATE") != null){
+            String fromdate = getIntent().getStringExtra("FROMDATE");
+            String todate = getIntent().getStringExtra("TODATE");
+            fillRecordedPolicies(fromdate, todate);
+        }
 
         int PolicyValue = 0;
         JSONObject ob = null;
@@ -223,8 +229,28 @@ public class OverViewControlNumbers extends AppCompatActivity {
         super.onBackPressed();
     }
 
-    public void fillRecordedPolicies(){
-        policy = clientAndroidInterface.getPolicyRequestedControlNumber();//OrderArray;
+    public void fillRecordedPolicies(String s){
+        policy = clientAndroidInterface.getPolicyRequestedControlNumber(s);//OrderArray;
+        LayoutInflater li = LayoutInflater.from(OverViewControlNumbers.this);
+        View promptsView = li.inflate(R.layout.activity_over_view_control_numbers, null);
+        PolicyRecyclerView = (RecyclerView) findViewById(R.id.listofpolicies);
+        overViewControlNumberAdapter = new OverViewControlNumberAdapter(this,policy);
+        PolicyRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        PolicyRecyclerView.addItemDecoration(new DividerItemDecoration(this,DividerItemDecoration.VERTICAL));
+        PolicyRecyclerView.setAdapter(overViewControlNumberAdapter);
+    }
+    public void fillRecordedPolicies(String from, String to){
+        policy = clientAndroidInterface.getPolicyRequestedControlNumber(from, to);//OrderArray;
+        LayoutInflater li = LayoutInflater.from(OverViewControlNumbers.this);
+        View promptsView = li.inflate(R.layout.activity_over_view_control_numbers, null);
+        PolicyRecyclerView = (RecyclerView) findViewById(R.id.listofpolicies);
+        overViewControlNumberAdapter = new OverViewControlNumberAdapter(this,policy);
+        PolicyRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        PolicyRecyclerView.addItemDecoration(new DividerItemDecoration(this,DividerItemDecoration.VERTICAL));
+        PolicyRecyclerView.setAdapter(overViewControlNumberAdapter);
+    }
+    public void fillRecordedPolicies(String from, String to, String i){
+        policy = clientAndroidInterface.getPolicyRequestedControlNumber(from, to, i);//OrderArray;
         LayoutInflater li = LayoutInflater.from(OverViewControlNumbers.this);
         View promptsView = li.inflate(R.layout.activity_over_view_control_numbers, null);
         PolicyRecyclerView = (RecyclerView) findViewById(R.id.listofpolicies);

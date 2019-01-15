@@ -2070,17 +2070,29 @@ public class ClientAndroidInterface {
         return RecordedPolicies;
     }
     public JSONArray getRecordedPolicies(String search_string) {
-        String Query = "SELECT * FROM tblRecordedPolicies WHERE InsuranceNumber LIKE '%"+search_string+"%' OR LastName LIKE '%"+search_string+"%' OR OtherNames LIKE '%"+search_string+"%' OR ProductName LIKE '%"+search_string+"%'";
+        String Query = "SELECT * FROM tblRecordedPolicies WHERE InsuranceNumber LIKE '%"+search_string+"%' OR LastName LIKE '%"+search_string+"%' OR OtherNames LIKE '%"+search_string+"%' OR ProductName LIKE '%"+search_string+"%' OR isDone LIKE '%"+search_string+"%'";
         JSONArray RecordedPolicies = sqlHandler.getResult(Query, null);
         return RecordedPolicies;
     }
-    public JSONArray getRecordedPolicies(String from, String To) {
-        String Query = "SELECT * FROM tblRecordedPolicies WHERE Code = 'N'";
+    public JSONArray getRecordedPolicies(String From, String To) {
+        String Query = "SELECT * FROM tblRecordedPolicies WHERE UploadedDate BETWEEN '"+From+"' AND '"+To+"'";
         JSONArray RecordedPolicies = sqlHandler.getResult(Query, null);
         return RecordedPolicies;
     }
-    public JSONArray getPolicyRequestedControlNumber() {
-        String Query = "SELECT * FROM tblRecordedPolicies RP LEFT JOIN tblControlNumber WHERE Code != 'N'";
+    public JSONArray getPolicyRequestedControlNumber(String search_string) {
+        String Query = "SELECT * FROM tblRecordedPolicies RP LEFT JOIN tblControlNumber WHERE RP.InsuranceNumber LIKE '%"+search_string+"%' OR RP.LastName LIKE '%"+search_string+"%' OR RP.OtherNames LIKE '%"+search_string+"%' OR RP.ProductName LIKE '%"+search_string+"%' OR RP.isDone LIKE '%"+search_string+"%'";
+        JSONArray RecordedPolicies = sqlHandler.getResult(Query, null);
+        return RecordedPolicies;
+    }
+
+    public JSONArray getPolicyRequestedControlNumber(String From, String To) {
+        String Query = "SELECT * FROM tblRecordedPolicies RP LEFT JOIN tblControlNumber RP.UploadedDate BETWEEN '"+From+"' AND '"+To+"'";
+        JSONArray RecordedPolicies = sqlHandler.getResult(Query, null);
+        return RecordedPolicies;
+    }
+
+    public JSONArray getPolicyRequestedControlNumber(String From, String To, String i) {
+        String Query = "SELECT * FROM tblRecordedPolicies RP LEFT JOIN tblControlNumber RP.ControlRequestDate BETWEEN '"+From+"' AND '"+To+"'";
         JSONArray RecordedPolicies = sqlHandler.getResult(Query, null);
         return RecordedPolicies;
     }
@@ -2107,7 +2119,7 @@ public class ClientAndroidInterface {
     }
     public int getMaxId() {
         int id = 0;
-        String Query = "SELECT Max(Id) As Id FROM tblRecordedPolicies";
+        String Query = "SELECT Max(Id) As Id FROM tblControlNumber";
         JSONArray ID = sqlHandler.getResult(Query, null);
         try {
             JSONObject JmaxIdOb = ID.getJSONObject(0);
@@ -2139,7 +2151,7 @@ public class ClientAndroidInterface {
         ContentValues values = new ContentValues();
         values.put("ControlNumber", ControlNumber);
         try {
-            sqlHandler.updateData("tblRecordedPolicies", values, "InternalIdentifier = ?", new String[]{String.valueOf(InternalIdentifier)});
+            sqlHandler.updateData("tblControlNumber", values, "InternalIdentifier = ?", new String[]{String.valueOf(InternalIdentifier)});
         } catch (UserException e) {
             e.printStackTrace();
         }
@@ -2484,9 +2496,9 @@ public class ClientAndroidInterface {
         values.put("ProductCode", ProductCode);
         values.put("ProductName", ProductName);
         if(WhitchPolicy.equals("new")){
-            values.put("isDone", "No");
+            values.put("isDone", "N");
         }else{
-            values.put("isDone", "Yes");
+            values.put("isDone", "Y");
         }
         values.put("PolicyValue", PolicyValue);
         values.put("UploadedDate", "");
