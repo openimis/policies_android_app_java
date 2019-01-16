@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Build;
 import android.support.v7.widget.RecyclerView;
@@ -13,6 +14,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.Filter;
+import android.widget.ListAdapter;
+import android.widget.ListView;
+import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -21,6 +25,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -31,6 +36,7 @@ public class OverViewControlNumberAdapter <VH extends TrackSelectionAdapter.View
     OverViewControlNumbers overViewPolicies = new OverViewControlNumbers();
     private JSONArray policies;
     private JSONArray newPolicies;
+
 
     String req_date = null;
     String AmountCalculated = null;
@@ -206,7 +212,7 @@ public class OverViewControlNumberAdapter <VH extends TrackSelectionAdapter.View
                         try {
                             paymentObject = new JSONObject();
                             //paymentObject.put("Id",String.valueOf(getLayoutPosition()));
-                            paymentObject.put("InternalIdentifier",String.valueOf(InternalIdentifier.getText()));
+                            paymentObject.put("internal_identifier",String.valueOf(InternalIdentifier.getText()));
                             paymentDetails.put(paymentObject);
                             overViewPolicies.paymentDetails = paymentDetails;
 
@@ -254,7 +260,7 @@ public class OverViewControlNumberAdapter <VH extends TrackSelectionAdapter.View
                             try {
                                 paymentObject = new JSONObject();
                                 //paymentObject.put("Id",String.valueOf(getLayoutPosition()));
-                                paymentObject.put("InternalIdentifier",String.valueOf(InternalIdentifier.getText()));
+                                paymentObject.put("internal_identifier",String.valueOf(InternalIdentifier.getText()));
                                 paymentDetails.put(paymentObject);
                                 overViewPolicies.paymentDetails = paymentDetails;
 
@@ -268,6 +274,17 @@ public class OverViewControlNumberAdapter <VH extends TrackSelectionAdapter.View
                 }
             });
 
+            itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View view) {
+                    Context context = view.getContext();
+                    Intent intent = new Intent(context, ViewPolicies.class);
+                    intent.putExtra("IDENTIFIER", String.valueOf(InternalIdentifier.getText()));
+                    context.startActivity(intent);
+                    return false;
+                }
+            });
+
 
             InternalIdentifier = (TextView) itemView.findViewById(R.id.InternalIdentifier);
             ControlRequestedDate = (TextView) itemView.findViewById(R.id.req_date);
@@ -277,6 +294,8 @@ public class OverViewControlNumberAdapter <VH extends TrackSelectionAdapter.View
             checkbox1 = (CheckBox) itemView.findViewById(R.id.checkbox1);
         }
     }
+
+
 
 
 }

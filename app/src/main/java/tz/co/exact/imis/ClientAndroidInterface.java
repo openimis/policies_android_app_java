@@ -2069,6 +2069,26 @@ public class ClientAndroidInterface {
         JSONArray RecordedPolicies = sqlHandler.getResult(Query, null);
         return RecordedPolicies;
     }
+    public JSONArray getRecordedPoliciesWithIdentifier(String InternalIdentifier) {
+        String code = getCode(InternalIdentifier);
+        String Query = "SELECT * FROM tblRecordedPolicies WHERE Code = '"+code+"'";
+        JSONArray RecordedPolicies = sqlHandler.getResult(Query, null);
+        return RecordedPolicies;
+    }
+
+    public String getCode(String InternalIdentifier) {
+        String code = "";
+        String Query = "SELECT * FROM tblControlNumber WHERE InternalIdentifier = '"+InternalIdentifier+"'";
+        JSONArray RecordedPolicies = sqlHandler.getResult(Query, null);
+        try {
+            JSONObject JmaxIdOb = RecordedPolicies.getJSONObject(0);
+            code = JmaxIdOb.getString("Id");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return code;
+    }
+
     public JSONArray getRecordedPolicies(String search_string) {
         String Query = "SELECT * FROM tblRecordedPolicies WHERE InsuranceNumber LIKE '%"+search_string+"%' OR LastName LIKE '%"+search_string+"%' OR OtherNames LIKE '%"+search_string+"%' OR ProductName LIKE '%"+search_string+"%' OR isDone LIKE '%"+search_string+"%'";
         JSONArray RecordedPolicies = sqlHandler.getResult(Query, null);
@@ -2080,19 +2100,19 @@ public class ClientAndroidInterface {
         return RecordedPolicies;
     }
     public JSONArray getPolicyRequestedControlNumber(String search_string) {
-        String Query = "SELECT * FROM tblRecordedPolicies RP LEFT JOIN tblControlNumber WHERE RP.InsuranceNumber LIKE '%"+search_string+"%' OR RP.LastName LIKE '%"+search_string+"%' OR RP.OtherNames LIKE '%"+search_string+"%' OR RP.ProductName LIKE '%"+search_string+"%' OR RP.isDone LIKE '%"+search_string+"%'";
+        String Query = "SELECT * FROM tblRecordedPolicies RP LEFT OUTER JOIN tblControlNumber CN on RP.Code = CN.Id WHERE RP.InsuranceNumber LIKE '%"+search_string+"%' OR RP.LastName LIKE '%"+search_string+"%' OR RP.OtherNames LIKE '%"+search_string+"%' OR RP.ProductName LIKE '%"+search_string+"%' OR RP.isDone LIKE '%"+search_string+"%'";
         JSONArray RecordedPolicies = sqlHandler.getResult(Query, null);
         return RecordedPolicies;
     }
 
     public JSONArray getPolicyRequestedControlNumber(String From, String To) {
-        String Query = "SELECT * FROM tblRecordedPolicies RP LEFT JOIN tblControlNumber RP.UploadedDate BETWEEN '"+From+"' AND '"+To+"'";
+        String Query = "SELECT * FROM tblRecordedPolicies RP LEFT OUTER JOIN tblControlNumber CN on RP.Code = CN.Id WHERE RP.UploadedDate BETWEEN '"+From+"' AND '"+To+"'";
         JSONArray RecordedPolicies = sqlHandler.getResult(Query, null);
         return RecordedPolicies;
     }
 
     public JSONArray getPolicyRequestedControlNumber(String From, String To, String i) {
-        String Query = "SELECT * FROM tblRecordedPolicies RP LEFT JOIN tblControlNumber RP.ControlRequestDate BETWEEN '"+From+"' AND '"+To+"'";
+        String Query = "SELECT * FROM tblRecordedPolicies RP LEFT OUTER JOIN tblControlNumber CN on RP.Code = CN.Id WHERE RP.ControlRequestDate BETWEEN '"+From+"' AND '"+To+"'";
         JSONArray RecordedPolicies = sqlHandler.getResult(Query, null);
         return RecordedPolicies;
     }
@@ -2132,7 +2152,7 @@ public class ClientAndroidInterface {
 
 
     public void updateRecordedPolicy(int Id, int Code){
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy-HH");
+        @SuppressLint("SimpleDateFormat") SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
         Calendar cal = Calendar.getInstance();
         String d = format.format(cal.getTime());
         ContentValues values = new ContentValues();
@@ -2145,7 +2165,7 @@ public class ClientAndroidInterface {
         }
     }
     public void assignControlNumber(String InternalIdentifier, String ControlNumber){
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy-HH");
+        @SuppressLint("SimpleDateFormat") SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
         Calendar cal = Calendar.getInstance();
         String d = format.format(cal.getTime());
         ContentValues values = new ContentValues();

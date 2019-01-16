@@ -22,9 +22,13 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ListAdapter;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.SearchView;
+import android.widget.SimpleAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -43,9 +47,12 @@ import java.security.Policy;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
 
 public class OverViewControlNumbers extends AppCompatActivity {
+    public SQLHandler sqlHandler;
+
 
     JSONArray policy;
     ClientAndroidInterface clientAndroidInterface;
@@ -81,7 +88,6 @@ public class OverViewControlNumbers extends AppCompatActivity {
 
         final ActionBar actionBar = getSupportActionBar();
         actionBar.setTitle("OverViewControlNumber");
-
 
         ValueNumberOfPolices = (TextView) findViewById(R.id.ValueNumberOfPolices);
         ValueAmountOfContribution = (TextView) findViewById(R.id.ValueAmountOfContribution);
@@ -163,27 +169,37 @@ public class OverViewControlNumbers extends AppCompatActivity {
         if(getIntent().getStringExtra("SEARCH_STRING") != null){
             String search_string = getIntent().getStringExtra("SEARCH_STRING");
             fillRecordedPolicies(search_string);
-        }else if(getIntent().getStringExtra("FROMDATE") != null || getIntent().getStringExtra("TODATE") != null){
+        }else if(!getIntent().getStringExtra("FROMDATE").equals("Uploaded From") || !getIntent().getStringExtra("TODATE").equals("Uploaded To")){
             String fromdate = getIntent().getStringExtra("FROMDATE");
             String todate = getIntent().getStringExtra("TODATE");
             fillRecordedPolicies(fromdate, todate);
+        }else if(!getIntent().getStringExtra("REQFROM").equals("Requested From") || !getIntent().getStringExtra("REQTO").equals("Requested To")){
+            String fromdate = getIntent().getStringExtra("REQFROM");
+            String todate = getIntent().getStringExtra("REQTO");
+            fillRecordedPolicies(fromdate, todate, "");
         }
 
         int PolicyValue = 0;
         JSONObject ob = null;
-        for(int j = 0; j < policy.length(); j++){
-            try {
-                ob = policy.getJSONObject(j);
-                PolicyValue += Integer.parseInt(ob.getString("PolicyValue"));
+        if(policy != null){
+            for(int j = 0; j < policy.length(); j++){
+                try {
+                    ob = policy.getJSONObject(j);
+                    PolicyValue += Integer.parseInt(ob.getString("PolicyValue"));
 
-            } catch (JSONException e) {
-                e.printStackTrace();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
+
+            search_count = overViewControlNumberAdapter.getCount();
+            ValueNumberOfPolices.setText(String.valueOf(search_count));
+            ValueAmountOfContribution.setText(String.valueOf(PolicyValue)+"/=");
+        }else{
+            ValueNumberOfPolices.setText("0");
+            ValueAmountOfContribution.setText("0/=");
         }
 
-        search_count = overViewControlNumberAdapter.getCount();
-        ValueNumberOfPolices.setText(String.valueOf(search_count));
-        ValueAmountOfContribution.setText(String.valueOf(PolicyValue)+"/=");
     }
 
 /*    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
@@ -260,6 +276,7 @@ public class OverViewControlNumbers extends AppCompatActivity {
         PolicyRecyclerView.setAdapter(overViewControlNumberAdapter);
     }
 
+
     public void trackBox(final JSONArray policies){
         // get prompts.xml view
         LayoutInflater li = LayoutInflater.from(this);
@@ -299,15 +316,21 @@ public class OverViewControlNumbers extends AppCompatActivity {
         alertDialog.show();
     }
 
-    private int getControlNumber(final JSONArray order) throws IOException {
 
+    private int getControlNumber(final JSONArray order) throws IOException {
+        final JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("requests",order);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         Thread thread = new Thread(){
             public void run() {
                 HttpClient httpClient = new DefaultHttpClient();
                 HttpPost httpPost = new HttpPost("http://imis-mv.swisstph-mis.ch/restapi/api/GetAssignedControlNumbers");
 // Request parameters and other properties.
                 try {
-                    StringEntity postingString = new StringEntity(order.toString());
+                    StringEntity postingString = new StringEntity(jsonObject.toString());
                     httpPost.setEntity(postingString);
                     httpPost.setHeader("Content-type", "application/json");
                 } catch (UnsupportedEncodingException e) {
@@ -333,6 +356,8 @@ public class OverViewControlNumbers extends AppCompatActivity {
                 HttpEntity respEntity = response.getEntity();
 
                 if (respEntity != null) {
+                    final String[] error_occured = {null};
+                    final String[] error_message = {null};
                     final String[] internal_Identifier = {null};
                     final String[] control_number = {null};
                     // EntityUtils to get the response content
@@ -348,8 +373,14 @@ public class OverViewControlNumbers extends AppCompatActivity {
                         for(int j = 0;j < res.length();j++){
                             try {
                                 ob = res.getJSONObject(j);
-                                internal_Identifier[0] = ob.getString("internal_Identifier");
-                                control_number[0] = ob.getString("control_number");
+
+                                error_occured[0] = ob.getString("error_occured");
+                                if(error_occured[0].equals("true")){
+                                    error_message[0] = ob.getString("error_message");
+                                }else{
+                                    internal_Identifier[0] = ob.getString("internal_identifier");
+                                    control_number[0] = ob.getString("control_number");
+                                }
 
                                 runOnUiThread(new Runnable() {
                                     public void run() {
@@ -360,9 +391,6 @@ public class OverViewControlNumbers extends AppCompatActivity {
                                         Intent i = new Intent(OverViewControlNumbers.this, OverViewControlNumbers.class);
                                         startActivity(i);
 
-                                        View view = findViewById(R.id.actv);
-                                        Snackbar.make(view, "Success", Snackbar.LENGTH_LONG)
-                                                .setAction("Action", null).show();
                                     }
                                 });
 
@@ -370,6 +398,9 @@ public class OverViewControlNumbers extends AppCompatActivity {
                                 e.printStackTrace();
                             }
                         }
+                        View view = findViewById(R.id.actv);
+                        Snackbar.make(view, "Proccess Complete", Snackbar.LENGTH_LONG)
+                                .setAction("Action", null).show();
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -388,6 +419,7 @@ public class OverViewControlNumbers extends AppCompatActivity {
     private void updateAfterRequest(String InternalIdentifier, String ControlNumber) {
         clientAndroidInterface.assignControlNumber(InternalIdentifier, ControlNumber);
     }
+
 
 }
 

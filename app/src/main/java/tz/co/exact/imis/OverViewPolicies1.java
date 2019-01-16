@@ -85,7 +85,7 @@ public class OverViewPolicies1 extends AppCompatActivity {
 
         ValueNumberOfPolices = (TextView) findViewById(R.id.ValueNumberOfPolices);
         ValueAmountOfContribution = (TextView) findViewById(R.id.ValueAmountOfContribution);
-        spinner = (ProgressBar)findViewById(R.id.progressBar1);
+        spinner = (ProgressBar) findViewById(R.id.progressBar1);
         spinner.setVisibility(View.GONE);
 
         final String[] n = {""};
@@ -98,20 +98,20 @@ public class OverViewPolicies1 extends AppCompatActivity {
                 global = (Global) getApplicationContext();
 
                 try {
-                    getControlNumber.put("phoneNumber", "");
-                    getControlNumber.put("requestDate", dt);
-                    getControlNumber.put("officerCode", global.getOfficerCode());
-                    getControlNumber.put("paymentDetails",paymentDetails);
-                    getControlNumber.put("amount",PolicyValueToSend);
+                    getControlNumber.put("phone_number", "");
+                    getControlNumber.put("request_date", dt);
+                    getControlNumber.put("enrolment_officer_code", global.getOfficerCode());
+                    getControlNumber.put("policies", paymentDetails);
+                    getControlNumber.put("amount_to_be_paid", PolicyValueToSend);
 
                     n[0] = "";
-                    for(int i=0; i<num.size(); i++){
-                        n[0] += num.get(i)+"\n";
+                    for (int i = 0; i < num.size(); i++) {
+                        n[0] += num.get(i) + "\n";
                     }
                     AmountCalculated = String.valueOf(PolicyValueToSend);
-                    if(num.size() != 0){
-                        trackBox(getControlNumber,String.valueOf(PolicyValueToSend));
-                    }else{
+                    if (num.size() != 0) {
+                        trackBox(getControlNumber, String.valueOf(PolicyValueToSend));
+                    } else {
                         View view1 = findViewById(R.id.actv);
                         Snackbar.make(view1, "Please select a policy/policies to request", Snackbar.LENGTH_LONG)
                                 .setAction("Action", null).show();
@@ -127,8 +127,8 @@ public class OverViewPolicies1 extends AppCompatActivity {
         fab2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (paymentDetails.length()>0){
-                    for(int i=0; i<paymentDetails.length(); i++){
+                if (paymentDetails.length() > 0) {
+                    for (int i = 0; i < paymentDetails.length(); i++) {
 
                         try {
 
@@ -148,7 +148,7 @@ public class OverViewPolicies1 extends AppCompatActivity {
                                     .setAction("Action", null).show();
                         }
                     });
-                }else{
+                } else {
                     runOnUiThread(new Runnable() {
                         public void run() {
                             spinner.setVisibility(View.GONE);
@@ -164,10 +164,10 @@ public class OverViewPolicies1 extends AppCompatActivity {
         });
 
         clientAndroidInterface = new ClientAndroidInterface(this);
-        if(getIntent().getStringExtra("SEARCH_STRING") != null){
+        if (getIntent().getStringExtra("SEARCH_STRING") != null) {
             String search_string = getIntent().getStringExtra("SEARCH_STRING");
             fillRecordedPolicies(search_string);
-        }else if(getIntent().getStringExtra("FROMDATE") != null || getIntent().getStringExtra("TODATE") != null){
+        } else if (getIntent().getStringExtra("FROMDATE") != null || getIntent().getStringExtra("TODATE") != null) {
             String fromdate = getIntent().getStringExtra("FROMDATE");
             String todate = getIntent().getStringExtra("TODATE");
             fillRecordedPolicies(fromdate, todate);
@@ -176,19 +176,25 @@ public class OverViewPolicies1 extends AppCompatActivity {
 
         int PolicyValue = 0;
         JSONObject ob = null;
-        for(int j = 0; j < policy.length(); j++){
-            try {
-                ob = policy.getJSONObject(j);
-                PolicyValue += Integer.parseInt(ob.getString("PolicyValue"));
+        if (policy != null) {
+            for (int j = 0; j < policy.length(); j++) {
+                try {
+                    ob = policy.getJSONObject(j);
+                    PolicyValue += Integer.parseInt(ob.getString("PolicyValue"));
 
-            } catch (JSONException e) {
-                e.printStackTrace();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
-        }
 
-        search_count = overViewPoliciesAdapter.getCount();
-        ValueNumberOfPolices.setText(String.valueOf(search_count));
-        ValueAmountOfContribution.setText(String.valueOf(PolicyValue)+"/=");
+
+            search_count = overViewPoliciesAdapter.getCount();
+            ValueNumberOfPolices.setText(String.valueOf(search_count));
+            ValueAmountOfContribution.setText(String.valueOf(PolicyValue) + "/=");
+        }else{
+            ValueNumberOfPolices.setText("0");
+            ValueAmountOfContribution.setText("0/=");
+        }
     }
 
 /*    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
@@ -281,8 +287,8 @@ public class OverViewPolicies1 extends AppCompatActivity {
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog,int id) {
                                 try {
-                                    policies.put("phoneNumber",phoneNumber.getText().toString());
-                                    policies.put("amount",finalAmount.getText().toString());
+                                    policies.put("phone_number",phoneNumber.getText().toString());
+                                    policies.put("amount_to_be_paid",finalAmount.getText().toString());
                                     amountConfirmed = finalAmount.getText().toString();
                                     getControlNumber(policies);
                                 } catch (JSONException e) {
@@ -358,18 +364,18 @@ public class OverViewPolicies1 extends AppCompatActivity {
                         code[0] = ob.getString("code");
                         error_occured[0] = ob.getString("error_occured");
                         error_message[0] = ob.getString("error_message");
-                        internal_Identifier[0] = ob.getString("internal_Identifier");
+                        internal_Identifier[0] = ob.getString("internal_identifier");
                         control_number[0] = ob.getString("control_number");
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
 
-                    if(code[0].equals("5")){
+                    if(code[0].equals("0")){
                         runOnUiThread(new Runnable() {
                             public void run() {
                                 spinner.setVisibility(View.GONE);
 
-                                int id = insertAfterRequest(amountConfirmed, control_number[0], code[0]);
+                                int id = insertAfterRequest(amountConfirmed, control_number[0], internal_Identifier[0]);
                                 updateAfterRequest(id);
 
                                 finish();

@@ -154,25 +154,24 @@ public class SearchOverViewPolicies extends AppCompatActivity {
             public void onClick(View view) {
                 String search_1 = search1.getText().toString();
                 String search_2 = search2.getText().toString();
+                String search_3 = "";
 
-                int selectedId = radio_group1.getCheckedRadioButtonId();
-                radioButton = (RadioButton) findViewById(selectedId);
-                String search_3 = radioButton.getText().toString();
+                if(radio_no.isChecked() || radio_yes.isChecked()){
+                    int selectedId = radio_group1.getCheckedRadioButtonId();
+                    radioButton = (RadioButton) findViewById(selectedId);
+                    search_3 = radioButton.getText().toString();
+                }
+                String search = search_1+search_2+search_3;
 
                 String fromdate = from_date.getText().toString();
                 String todate = to_date.getText().toString();
 
-                if(!fromdate.equals("") || !todate.equals("")){
+                if(!fromdate.equals("Uploaded From") || !todate.equals("Uploaded To")){
                     Intent intent = new Intent(SearchOverViewPolicies.this, OverViewPolicies1.class);
                     intent.putExtra("FROMDATE", fromdate);
                     intent.putExtra("TODATE", todate);
                     startActivity(intent);
-                }else{
-                    if(!search_3.equals("")){
-                        search_1 = "";
-                        search_2 = "";
-                    }
-                    String search = search_1+search_2+search_3;
+                }else if(!search.equals("")){
                     Intent intent = new Intent(SearchOverViewPolicies.this, OverViewPolicies1.class);
                     intent.putExtra("SEARCH_STRING", search);
                     startActivity(intent);

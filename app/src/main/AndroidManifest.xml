@@ -99,7 +99,8 @@
         <activity android:name=".SearchOverViewPolicies" />
         <activity android:name=".OverViewPolicies1" />
         <activity android:name=".OverViewControlNumbers" />
-        <activity android:name=".SearchOverViewControlNumber"></activity>
+        <activity android:name=".SearchOverViewControlNumber" />
+        <activity android:name=".ViewPolicies"></activity>
     </application>
 
 </manifest>
