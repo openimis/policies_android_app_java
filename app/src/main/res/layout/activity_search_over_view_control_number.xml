@@ -8,143 +8,197 @@
     android:orientation="vertical"
     tools:context="tz.co.exact.imis.SearchOverViewControlNumber">
 
-    <EditText
-        android:id="@+id/search1"
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:layout_marginTop="5dp"
-        android:hint="Renewal/insurance Number/Names"
-        android:paddingLeft="10dp"
-        android:background="@drawable/corner"/>
-
-    <TextView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
-        android:typeface="monospace"
-        android:fontFamily="sans-serif-light"
-        android:textColor="@color/black"
-        android:textSize="20sp"
-        android:text="Product"
-        />
-    <EditText
-        android:id="@+id/search2"
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:layout_marginTop="5dp"
-        android:paddingLeft="10dp"
-        android:typeface="monospace"
-        android:fontFamily="sans-serif-light"
-        android:textColor="@color/black"
-        android:hint="Code/Poduct name"
-        android:background="@drawable/corner"/>
-    <ListView
-        android:id="@+id/lv1"
-        android:layout_width="match_parent"
-        android:layout_height="100dp"
-        android:layout_marginTop="5dp"
-        android:typeface="monospace"
-        android:fontFamily="sans-serif-light"
-        android:textColor="@color/black"
-        android:visibility="gone"
-        android:paddingLeft="10dp"
-        android:background="@drawable/corner">
-    </ListView>
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:orientation="horizontal"
+        android:gravity="right">
 
         <Button
-            android:id="@+id/from_date"
-            android:layout_width="150dp"
-            android:layout_height="50dp"
-            android:layout_marginTop="5dp"
+            android:id="@+id/btnClear"
+            android:layout_width="100dp"
+            android:layout_height="60dp"
             android:typeface="monospace"
             android:fontFamily="sans-serif-light"
             android:textColor="@color/black"
-            android:text="Uploaded From"/>
-        <TextView
-            android:id="@+id/lblTo"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:typeface="monospace"
-            android:fontFamily="sans-serif-light"
-            android:textColor="@color/black"
-            android:layout_toRightOf="@+id/from_date"
-            android:textAlignment="center"
-            android:paddingTop="20dp"
-            android:text="TO"/>
-
+            android:text="Clear" />
         <Button
-            android:id="@+id/To_date"
-            android:layout_width="150dp"
-            android:layout_height="50dp"
-            android:layout_marginTop="5dp"
+            android:id="@+id/btnSearch"
+            android:layout_width="100dp"
+            android:layout_height="60dp"
             android:typeface="monospace"
             android:fontFamily="sans-serif-light"
             android:textColor="@color/black"
-            android:layout_toRightOf="@+id/lblTo"
-            android:text="Uploaded To"/>
+            android:text="@string/Search" />
 
-        <Button
-            android:id="@+id/requested_from"
-            android:layout_width="150dp"
-            android:layout_height="50dp"
-            android:layout_marginTop="5dp"
-            android:typeface="monospace"
-            android:fontFamily="sans-serif-light"
-            android:layout_below="@+id/from_date"
-            android:textColor="@color/black"
-            android:text="Requested From"/>
-        <Button
-            android:id="@+id/requested_to"
-            android:layout_width="150dp"
-            android:layout_height="50dp"
-            android:layout_marginTop="5dp"
-            android:typeface="monospace"
-            android:fontFamily="sans-serif-light"
-            android:layout_below="@+id/To_date"
-            android:layout_toRightOf="@+id/lblTo"
-            android:textColor="@color/black"
-            android:text="Requested To"/>
+    </LinearLayout>
 
-    </RelativeLayout>
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
-        android:typeface="monospace"
-        android:fontFamily="sans-serif-light"
-        android:textColor="@color/black"
-        android:text="Renewal"
-        />
-    <RadioGroup
-        android:id="@+id/radio_group1"
+
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_marginTop="5dp">
-        <RadioButton android:id="@+id/radio_yes"
-            android:layout_width="wrap_content"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Y" />
-        <RadioButton android:id="@+id/radio_no"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="N" />
-    </RadioGroup>
+            android:orientation="vertical">
 
-    <Button
-        android:id="@+id/btnSearch"
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:typeface="monospace"
-        android:fontFamily="sans-serif-light"
-        android:textColor="@color/black"
-        android:text="@string/Search"
-        />
+            <EditText
+                android:id="@+id/insurance_number"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginTop="5dp"
+                android:hint="Insurance Number"
+                android:paddingLeft="10dp"
+                android:background="@drawable/corner"/>
+            <EditText
+                android:id="@+id/other_names"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginTop="5dp"
+                android:hint="Other names"
+                android:paddingLeft="10dp"
+                android:background="@drawable/corner"/>
+
+            <EditText
+                android:id="@+id/last_name"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginTop="5dp"
+                android:hint="Last names"
+                android:paddingLeft="10dp"
+                android:background="@drawable/corner"/>
+
+            <EditText
+                android:id="@+id/insurance_product"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginTop="5dp"
+                android:paddingLeft="10dp"
+                android:typeface="monospace"
+                android:fontFamily="sans-serif-light"
+                android:textColor="@color/black"
+                android:hint="Insurance product"
+                android:background="@drawable/corner"/>
+            <ListView
+                android:id="@+id/lv1"
+                android:layout_width="match_parent"
+                android:layout_height="150dp"
+                android:layout_marginTop="5dp"
+                android:typeface="monospace"
+                android:fontFamily="sans-serif-light"
+                android:textColor="@color/black"
+                android:visibility="gone"
+                android:paddingLeft="10dp"
+                android:background="@drawable/corner">
+            </ListView>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/uploaded_from"
+                    android:layout_width="150dp"
+                    android:layout_height="50dp"
+                    android:layout_marginTop="5dp"
+                    android:paddingLeft="10dp"
+                    android:paddingTop="15dp"
+                    android:typeface="monospace"
+                    android:fontFamily="sans-serif-light"
+                    android:textColor="@color/black"
+                    android:background="@drawable/corner"
+                    android:hint="Uploaded From"/>
+                <TextView
+                    android:id="@+id/lblTo"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:typeface="monospace"
+                    android:fontFamily="sans-serif-light"
+                    android:textColor="@color/black"
+                    android:layout_toRightOf="@+id/uploaded_from"
+                    android:textAlignment="center"
+                    android:paddingTop="20dp"
+                    android:text="TO"/>
+
+                <TextView
+                    android:id="@+id/uploaded_to"
+                    android:layout_width="150dp"
+                    android:layout_height="50dp"
+                    android:layout_marginTop="5dp"
+                    android:typeface="monospace"
+                    android:fontFamily="sans-serif-light"
+                    android:textColor="@color/black"
+                    android:layout_toRightOf="@+id/lblTo"
+                    android:paddingLeft="10dp"
+                    android:paddingTop="15dp"
+                    android:background="@drawable/corner"
+                    android:hint="Uploaded To"/>
+
+                <TextView
+                    android:id="@+id/requested_from"
+                    android:layout_width="150dp"
+                    android:layout_height="50dp"
+                    android:layout_marginTop="5dp"
+                    android:typeface="monospace"
+                    android:fontFamily="sans-serif-light"
+                    android:textColor="@color/black"
+                    android:layout_below="@id/uploaded_from"
+                    android:paddingLeft="10dp"
+                    android:paddingTop="15dp"
+                    android:background="@drawable/corner"
+                    android:hint="Requested From"/>
+
+                <TextView
+                    android:id="@+id/requested_to"
+                    android:layout_width="150dp"
+                    android:layout_height="50dp"
+                    android:layout_marginTop="5dp"
+                    android:typeface="monospace"
+                    android:fontFamily="sans-serif-light"
+                    android:textColor="@color/black"
+                    android:layout_toRightOf="@id/lblTo"
+                    android:layout_below="@id/uploaded_to"
+                    android:paddingLeft="10dp"
+                    android:paddingTop="15dp"
+                    android:background="@drawable/corner"
+                    android:hint="Requested To"/>
+
+            </RelativeLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:typeface="monospace"
+                android:fontFamily="sans-serif-light"
+                android:textColor="@color/black"
+                android:text="Renewal"
+                />
+            <RadioGroup
+                android:id="@+id/radio_renewal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="5dp">
+                <RadioButton android:id="@+id/renewal_yes"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Y" />
+                <RadioButton android:id="@+id/renewal_no"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="N" />
+            </RadioGroup>
+
+
+        </LinearLayout>
+
+
+
+    </ScrollView>
+
 
 
 </LinearLayout>

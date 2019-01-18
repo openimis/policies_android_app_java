@@ -10,7 +10,7 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="70dp"
+        android:layout_height="wrap_content"
         android:background="@color/silver">
 
         <TextView
@@ -47,6 +47,17 @@
             android:layout_below="@+id/ValueNumberOfPolices"
             android:layout_toRightOf="@+id/lblAmountOfContribution"
             android:text="0"
+            android:gravity="end" />
+        <TextView
+            android:id="@+id/NothingFound"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:textAlignment="textEnd"
+            android:layout_toRightOf="@id/lblAmountOfContribution"
+            android:layout_below="@+id/ValueAmountOfContribution"
+            android:text="@string/NoDataAvailable"
+            android:visibility="gone"
             android:gravity="end" />
 
     </RelativeLayout>

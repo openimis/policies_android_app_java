@@ -34,13 +34,21 @@ import java.util.Locale;
 public class SearchOverViewPolicies extends AppCompatActivity {
 
     Button btnSearch;
-    Button from_date;
-    Button to_date;
-    EditText search1;
-    EditText search2;
-    RadioButton radio_yes;
-    RadioButton radio_no;
-    RadioGroup radio_group1;
+    Button btnClear;
+    EditText Insurance_Number;
+    EditText Other_Names;
+    EditText Last_Name;
+    EditText Insurance_Product;
+    TextView Uploaded_From;
+    TextView Uploaded_To;
+
+    RadioButton Renewal_Yes;
+    RadioButton Renewal_No;
+    RadioGroup Radio_Renewal;
+
+    RadioButton Requested_Yes;
+    RadioButton Requested_No;
+    RadioGroup Radio_Requested;
 
     Calendar myCalendar;
     Calendar myCalendar1;
@@ -50,7 +58,8 @@ public class SearchOverViewPolicies extends AppCompatActivity {
     ListView lv1;
     ListAdapter adapter;
     ArrayList<HashMap<String, String>> FeedbackList = new ArrayList<HashMap<String, String>>();
-    private RadioButton radioButton;
+    private RadioButton radioButtonRenewal;
+    private RadioButton radioButtonRequested;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -63,34 +72,23 @@ public class SearchOverViewPolicies extends AppCompatActivity {
         fillProducts();
 
         btnSearch = (Button) findViewById(R.id.btnSearch);
-        from_date = (Button) findViewById(R.id.from_date);
-        to_date = (Button) findViewById(R.id.To_date);
-        search1 = (EditText) findViewById(R.id.search1);
-        search2 = (EditText) findViewById(R.id.search2);
-        radio_yes = (RadioButton) findViewById(R.id.radio_yes);
-        radio_no = (RadioButton) findViewById(R.id.radio_no);
-        radio_group1 = (RadioGroup) findViewById(R.id.radio_group1);
+        btnClear = (Button) findViewById(R.id.btnClear);
+
+        Uploaded_From = (TextView) findViewById(R.id.uploaded_from);
+        Uploaded_To = (TextView) findViewById(R.id.uploaded_to);
+        Insurance_Number = (EditText) findViewById(R.id.insurance_number);
+        Insurance_Product = (EditText) findViewById(R.id.insurance_product);
+        Other_Names = (EditText) findViewById(R.id.other_names);
+        Last_Name = (EditText) findViewById(R.id.last_name);
+        Renewal_Yes = (RadioButton) findViewById(R.id.renewal_yes);
+        Renewal_No = (RadioButton) findViewById(R.id.renewal_yes);
+        Radio_Renewal = (RadioGroup) findViewById(R.id.radio_renewal);
+        Requested_Yes = (RadioButton) findViewById(R.id.requested_yes);
+        Requested_No = (RadioButton) findViewById(R.id.requested_no);
+        Radio_Requested = (RadioGroup) findViewById(R.id.radio_requested);
 
 
-        search1.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View view, boolean b) {
-                search2.setText("");
-                from_date.setText("Uploaded From");
-                to_date.setText("Uploaded To");
-                radio_group1.clearCheck();
-            }
-        });
-        search2.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View view, boolean b) {
-                search1.setText("");
-                from_date.setText("Uploaded From");
-                to_date.setText("Uploaded To");
-                radio_group1.clearCheck();
-            }
-        });
-        search2.addTextChangedListener(new TextWatcher() {
+        Insurance_Product.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
@@ -100,11 +98,11 @@ public class SearchOverViewPolicies extends AppCompatActivity {
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 lv1.setVisibility(View.VISIBLE);
                 ((SimpleAdapter) adapter).getFilter().filter(s);
-              //  HashMap<String, String> Payer = new HashMap<>();
-               // String searchString = etOfficer.getText().toString();
-               // int LocID = ca.getLocationId(searchString);
+                //  HashMap<String, String> Payer = new HashMap<>();
+                // String searchString = etOfficer.getText().toString();
+                // int LocID = ca.getLocationId(searchString);
                 //BindSpinnerPayersXXXX(LocID);
-               // BindSpinnerProduct(LocID);
+                // BindSpinnerProduct(LocID);
             }
 
             @Override
@@ -116,91 +114,85 @@ public class SearchOverViewPolicies extends AppCompatActivity {
         lv1.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                search1.setText("");
-                from_date.setText("Uploaded From");
-                to_date.setText("Uploaded To");
-
                 HashMap<String, String> oItem;
                 //noinspection unchecked
                 oItem = (HashMap<String, String>) parent.getItemAtPosition(position);
-                search2.setText(oItem.get("ProductName").toString());
-
+                Insurance_Product.setText(oItem.get("ProductName").toString());
+                lv1.setVisibility(View.GONE);
 
             }
         });
 
-        radio_yes.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                search1.setText("");
-                search2.setText("");
-                from_date.setText("Uploaded From");
-                to_date.setText("Uploaded To");
-            }
-        });
-
-        radio_no.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                search1.setText("");
-                search2.setText("");
-                from_date.setText("Uploaded From");
-                to_date.setText("Uploaded To");
-            }
-        });
 
         btnSearch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String search_1 = search1.getText().toString();
-                String search_2 = search2.getText().toString();
-                String search_3 = "";
+                String InsuranceNumber = Insurance_Number.getText().toString();
+                String OtherNames = Other_Names.getText().toString();
+                String LastName = Last_Name.getText().toString();
+                String InsuranceProduct = Insurance_Product.getText().toString();
+                String UploadedFrom = Uploaded_From.getText().toString();
+                String UploadedTo = Uploaded_To.getText().toString();
+                String RadioRenewal = "";
+                String RadioRequested = "";
 
-                if(radio_no.isChecked() || radio_yes.isChecked()){
-                    int selectedId = radio_group1.getCheckedRadioButtonId();
-                    radioButton = (RadioButton) findViewById(selectedId);
-                    search_3 = radioButton.getText().toString();
-                }
-                String search = search_1+search_2+search_3;
-
-                String fromdate = from_date.getText().toString();
-                String todate = to_date.getText().toString();
-
-                if(!fromdate.equals("Uploaded From") || !todate.equals("Uploaded To")){
-                    Intent intent = new Intent(SearchOverViewPolicies.this, OverViewPolicies1.class);
-                    intent.putExtra("FROMDATE", fromdate);
-                    intent.putExtra("TODATE", todate);
-                    startActivity(intent);
-                }else if(!search.equals("")){
-                    Intent intent = new Intent(SearchOverViewPolicies.this, OverViewPolicies1.class);
-                    intent.putExtra("SEARCH_STRING", search);
-                    startActivity(intent);
+                if(Renewal_Yes.isChecked() || Renewal_No.isChecked()){
+                    int selectedId = Radio_Renewal.getCheckedRadioButtonId();
+                    radioButtonRenewal = (RadioButton) findViewById(selectedId);
+                    RadioRenewal = radioButtonRenewal.getText().toString();
                 }
 
+                if(Requested_Yes.isChecked() || Requested_No.isChecked()){
+                    int selectedId = Radio_Requested.getCheckedRadioButtonId();
+                    radioButtonRequested = (RadioButton) findViewById(selectedId);
+                    RadioRequested = radioButtonRequested.getText().toString();
+                }
+
+
+                Intent intent = new Intent(SearchOverViewPolicies.this, OverViewPolicies1.class);
+                intent.putExtra("RENEWAL", RadioRenewal);
+                intent.putExtra("INSURANCE_NUMBER", InsuranceNumber);
+                intent.putExtra("OTHER_NAMES", OtherNames);
+                intent.putExtra("LAST_NAME", LastName);
+                intent.putExtra("INSURANCE_PRODUCT", InsuranceProduct);
+                intent.putExtra("UPLOADED_FROM", UploadedFrom);
+                intent.putExtra("UPLOADED_TO", UploadedTo);
+                intent.putExtra("REQUESTED_YES_NO", RadioRequested);
+                startActivity(intent);
+
+            }
+        });
+        btnClear.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Uploaded_From.setText("");
+                Uploaded_To.setText("");
+                Insurance_Number.setText("");
+                Insurance_Product.setText("");
+                Other_Names.setText("");
+                Last_Name.setText("");
+                Radio_Renewal.clearCheck();
+                Radio_Requested.clearCheck();
+                lv1.setVisibility(View.GONE);
             }
         });
 
         myCalendar = Calendar.getInstance();
         myCalendar1 = Calendar.getInstance();
 
-        from_date.setOnClickListener(new View.OnClickListener() {
+        Uploaded_From.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
-
-                search1.setText("");
-                search2.setText("");
                 // TODO Auto-generated method stub
                 new DatePickerDialog(SearchOverViewPolicies.this, date, myCalendar
                         .get(Calendar.YEAR), myCalendar.get(Calendar.MONTH),
                         myCalendar.get(Calendar.DAY_OF_MONTH)).show();
             }
         });
-        to_date.setOnClickListener(new View.OnClickListener() {
+        Uploaded_To.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                search1.setText("");
-                search2.setText("");
                 // TODO Auto-generated method stub
                 new DatePickerDialog(SearchOverViewPolicies.this, date1, myCalendar1
                         .get(Calendar.YEAR), myCalendar1.get(Calendar.MONTH),
@@ -291,12 +283,12 @@ public class SearchOverViewPolicies extends AppCompatActivity {
         String myFormat = "yyyy-MM-dd"; //In which you need put here
         SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
 
-        from_date.setText(String.valueOf(sdf.format(myCalendar.getTime())));
+        Uploaded_From.setText(String.valueOf(sdf.format(myCalendar.getTime())));
     }
     private void updateLabel1() {
         String myFormat = "yyyy-MM-dd"; //In which you need put here
         SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
 
-        to_date.setText(String.valueOf(sdf.format(myCalendar1.getTime())));
+        Uploaded_To.setText(String.valueOf(sdf.format(myCalendar1.getTime())));
     }
 }

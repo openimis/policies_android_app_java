@@ -54,6 +54,7 @@ public class OverViewPolicies1 extends AppCompatActivity {
 
     TextView ValueNumberOfPolices;
     TextView ValueAmountOfContribution;
+    TextView NothingFound;
 
     public static int search_count = 0;
 
@@ -72,6 +73,16 @@ public class OverViewPolicies1 extends AppCompatActivity {
     private String AmountCalculated;
     private String amountConfirmed;
 
+    String InsuranceNumber = "";
+    String OtherNames = "";
+    String LastName = "";
+    String InsuranceProduct = "";
+    String UploadedFrom = "";
+    String UploadedTo = "";
+    String RadioRenewal = "";
+    String RadioRequested = "";
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,6 +98,8 @@ public class OverViewPolicies1 extends AppCompatActivity {
         ValueAmountOfContribution = (TextView) findViewById(R.id.ValueAmountOfContribution);
         spinner = (ProgressBar) findViewById(R.id.progressBar1);
         spinner.setVisibility(View.GONE);
+
+        NothingFound = (TextView) findViewById(R.id.NothingFound);
 
         final String[] n = {""};
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -162,17 +175,18 @@ public class OverViewPolicies1 extends AppCompatActivity {
 
             }
         });
-
         clientAndroidInterface = new ClientAndroidInterface(this);
-        if (getIntent().getStringExtra("SEARCH_STRING") != null) {
-            String search_string = getIntent().getStringExtra("SEARCH_STRING");
-            fillRecordedPolicies(search_string);
-        } else if (getIntent().getStringExtra("FROMDATE") != null || getIntent().getStringExtra("TODATE") != null) {
-            String fromdate = getIntent().getStringExtra("FROMDATE");
-            String todate = getIntent().getStringExtra("TODATE");
-            fillRecordedPolicies(fromdate, todate);
-        }
 
+
+        InsuranceNumber = getIntent().getStringExtra("INSURANCE_NUMBER");
+        OtherNames = getIntent().getStringExtra("OTHER_NAMES");
+        LastName = getIntent().getStringExtra("LAST_NAME");
+        InsuranceProduct = getIntent().getStringExtra("INSURANCE_PRODUCT");
+        UploadedFrom = getIntent().getStringExtra("UPLOADED_FROM");
+        UploadedTo = getIntent().getStringExtra("UPLOADED_TO");
+        RadioRenewal = getIntent().getStringExtra("RENEWAL");
+        RadioRequested = getIntent().getStringExtra("REQUESTED_YES_NO");
+        fillRecordedPolicies();
 
         int PolicyValue = 0;
         JSONObject ob = null;
@@ -189,11 +203,14 @@ public class OverViewPolicies1 extends AppCompatActivity {
 
 
             search_count = overViewPoliciesAdapter.getCount();
+            if(search_count == 0){
+                NothingFound.setVisibility(View.VISIBLE);
+            }
             ValueNumberOfPolices.setText(String.valueOf(search_count));
-            ValueAmountOfContribution.setText(String.valueOf(PolicyValue) + "/=");
+            ValueAmountOfContribution.setText(String.valueOf(PolicyValue));
         }else{
             ValueNumberOfPolices.setText("0");
-            ValueAmountOfContribution.setText("0/=");
+            ValueAmountOfContribution.setText("0");
         }
     }
 
@@ -240,8 +257,8 @@ public class OverViewPolicies1 extends AppCompatActivity {
         super.onBackPressed();
     }
 
-    public void fillRecordedPolicies(String search_string){
-        policy = clientAndroidInterface.getRecordedPolicies(search_string);//OrderArray;
+    public void fillRecordedPolicies(){
+        policy = clientAndroidInterface.getRecordedPolicies(InsuranceNumber,OtherNames,LastName,InsuranceProduct,UploadedFrom,UploadedTo,RadioRenewal,RadioRequested);//OrderArray;
         LayoutInflater li = LayoutInflater.from(OverViewPolicies1.this);
         View promptsView = li.inflate(R.layout.activity_over_view_policies1, null);
         PolicyRecyclerView = (RecyclerView) findViewById(R.id.listofpolicies);
@@ -251,16 +268,6 @@ public class OverViewPolicies1 extends AppCompatActivity {
         PolicyRecyclerView.setAdapter(overViewPoliciesAdapter);
     }
 
-    public void fillRecordedPolicies(String from, String to){
-        policy = clientAndroidInterface.getRecordedPolicies(from, to);//OrderArray;
-        LayoutInflater li = LayoutInflater.from(OverViewPolicies1.this);
-        View promptsView = li.inflate(R.layout.activity_over_view_policies1, null);
-        PolicyRecyclerView = (RecyclerView) findViewById(R.id.listofpolicies);
-        overViewPoliciesAdapter = new OverViewPoliciesAdapter(this,policy);
-        PolicyRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        PolicyRecyclerView.addItemDecoration(new DividerItemDecoration(this,DividerItemDecoration.VERTICAL));
-        PolicyRecyclerView.setAdapter(overViewPoliciesAdapter);
-    }
 
     public void trackBox(final JSONObject policies, String Number){
         // get prompts.xml view
@@ -379,7 +386,7 @@ public class OverViewPolicies1 extends AppCompatActivity {
                                 updateAfterRequest(id);
 
                                 finish();
-                                Intent i = new Intent(OverViewPolicies1.this, OverViewPolicies1.class);
+                                Intent i = new Intent(OverViewPolicies1.this, SearchOverViewPolicies.class);
                                 startActivity(i);
 
                                 View view = findViewById(R.id.actv);

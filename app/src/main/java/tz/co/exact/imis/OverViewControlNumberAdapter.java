@@ -159,7 +159,7 @@ public class OverViewControlNumberAdapter <VH extends TrackSelectionAdapter.View
             req_date = object.getString("ControlRequestDate");
             AmountConfirmed = object.getString("AmountConfirmed");
             AmountCalculated = object.getString("AmountCalculated");
-            controlNumber = object.getString("controlNumber");
+            controlNumber = object.getString("ControlNumber");
 
         } catch (JSONException e) {
             e.printStackTrace();

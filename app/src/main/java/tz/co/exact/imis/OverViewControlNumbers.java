@@ -78,7 +78,17 @@ public class OverViewControlNumbers extends AppCompatActivity {
     String dt = format.format(cal.getTime());
     private String AmountCalculated;
     private String amountConfirmed;
+    TextView NothingFound;
 
+    String InsuranceNumber = "";
+    String OtherNames = "";
+    String LastName = "";
+    String InsuranceProduct = "";
+    String UploadedFrom = "";
+    String UploadedTo = "";
+    String RequestedFrom = "";
+    String RequestedTo = "";
+    String RadioRenewal = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,6 +103,8 @@ public class OverViewControlNumbers extends AppCompatActivity {
         ValueAmountOfContribution = (TextView) findViewById(R.id.ValueAmountOfContribution);
         spinner = (ProgressBar)findViewById(R.id.progressBar1);
         spinner.setVisibility(View.GONE);
+
+        NothingFound = (TextView) findViewById(R.id.NothingFound);
 
         final String[] n = {""};
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -166,18 +178,18 @@ public class OverViewControlNumbers extends AppCompatActivity {
         });
 
         clientAndroidInterface = new ClientAndroidInterface(this);
-        if(getIntent().getStringExtra("SEARCH_STRING") != null){
-            String search_string = getIntent().getStringExtra("SEARCH_STRING");
-            fillRecordedPolicies(search_string);
-        }else if(!getIntent().getStringExtra("FROMDATE").equals("Uploaded From") || !getIntent().getStringExtra("TODATE").equals("Uploaded To")){
-            String fromdate = getIntent().getStringExtra("FROMDATE");
-            String todate = getIntent().getStringExtra("TODATE");
-            fillRecordedPolicies(fromdate, todate);
-        }else if(!getIntent().getStringExtra("REQFROM").equals("Requested From") || !getIntent().getStringExtra("REQTO").equals("Requested To")){
-            String fromdate = getIntent().getStringExtra("REQFROM");
-            String todate = getIntent().getStringExtra("REQTO");
-            fillRecordedPolicies(fromdate, todate, "");
-        }
+
+        InsuranceNumber = getIntent().getStringExtra("INSURANCE_NUMBER");
+        OtherNames = getIntent().getStringExtra("OTHER_NAMES");
+        LastName = getIntent().getStringExtra("LAST_NAME");
+        InsuranceProduct = getIntent().getStringExtra("INSURANCE_PRODUCT");
+        UploadedFrom = getIntent().getStringExtra("UPLOADED_FROM");
+        UploadedTo = getIntent().getStringExtra("UPLOADED_TO");
+        UploadedTo = getIntent().getStringExtra("REQUESTED_FROM");
+        UploadedTo = getIntent().getStringExtra("REQUESTED_TO");
+        RadioRenewal = getIntent().getStringExtra("RENEWAL");
+
+        fillRecordedPolicies();
 
         int PolicyValue = 0;
         JSONObject ob = null;
@@ -193,6 +205,9 @@ public class OverViewControlNumbers extends AppCompatActivity {
             }
 
             search_count = overViewControlNumberAdapter.getCount();
+            if(search_count == 0){
+                NothingFound.setVisibility(View.VISIBLE);
+            }
             ValueNumberOfPolices.setText(String.valueOf(search_count));
             ValueAmountOfContribution.setText(String.valueOf(PolicyValue)+"/=");
         }else{
@@ -245,28 +260,8 @@ public class OverViewControlNumbers extends AppCompatActivity {
         super.onBackPressed();
     }
 
-    public void fillRecordedPolicies(String s){
-        policy = clientAndroidInterface.getPolicyRequestedControlNumber(s);//OrderArray;
-        LayoutInflater li = LayoutInflater.from(OverViewControlNumbers.this);
-        View promptsView = li.inflate(R.layout.activity_over_view_control_numbers, null);
-        PolicyRecyclerView = (RecyclerView) findViewById(R.id.listofpolicies);
-        overViewControlNumberAdapter = new OverViewControlNumberAdapter(this,policy);
-        PolicyRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        PolicyRecyclerView.addItemDecoration(new DividerItemDecoration(this,DividerItemDecoration.VERTICAL));
-        PolicyRecyclerView.setAdapter(overViewControlNumberAdapter);
-    }
-    public void fillRecordedPolicies(String from, String to){
-        policy = clientAndroidInterface.getPolicyRequestedControlNumber(from, to);//OrderArray;
-        LayoutInflater li = LayoutInflater.from(OverViewControlNumbers.this);
-        View promptsView = li.inflate(R.layout.activity_over_view_control_numbers, null);
-        PolicyRecyclerView = (RecyclerView) findViewById(R.id.listofpolicies);
-        overViewControlNumberAdapter = new OverViewControlNumberAdapter(this,policy);
-        PolicyRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        PolicyRecyclerView.addItemDecoration(new DividerItemDecoration(this,DividerItemDecoration.VERTICAL));
-        PolicyRecyclerView.setAdapter(overViewControlNumberAdapter);
-    }
-    public void fillRecordedPolicies(String from, String to, String i){
-        policy = clientAndroidInterface.getPolicyRequestedControlNumber(from, to, i);//OrderArray;
+    public void fillRecordedPolicies(){
+        policy = clientAndroidInterface.getRecordedPolicies(InsuranceNumber,OtherNames,LastName,InsuranceProduct,UploadedFrom,UploadedTo,RadioRenewal,RequestedFrom,RequestedTo);//OrderArray;
         LayoutInflater li = LayoutInflater.from(OverViewControlNumbers.this);
         View promptsView = li.inflate(R.layout.activity_over_view_control_numbers, null);
         PolicyRecyclerView = (RecyclerView) findViewById(R.id.listofpolicies);
@@ -368,36 +363,43 @@ public class OverViewControlNumbers extends AppCompatActivity {
                         e.printStackTrace();
                     }
                     try {
-                        JSONArray res = new JSONArray(content);
+                        JSONObject res = new JSONObject(content);
                         JSONObject ob = null;
-                        for(int j = 0;j < res.length();j++){
-                            try {
-                                ob = res.getJSONObject(j);
 
-                                error_occured[0] = ob.getString("error_occured");
-                                if(error_occured[0].equals("true")){
-                                    error_message[0] = ob.getString("error_message");
-                                }else{
+                        String erroroccured = res.getString("error_occured");
+                        String assignedcontrolnumbers = res.getString("assigned_control_numbers");
+
+                        if(erroroccured.equals("true")){
+                            error_message[0] = res.getString("error_message");
+                        }else {
+                            JSONArray arr = new JSONArray(assignedcontrolnumbers);
+                            for(int j = 0;j < arr.length();j++){
+                                try {
+                                    ob = arr.getJSONObject(j);
+
                                     internal_Identifier[0] = ob.getString("internal_identifier");
                                     control_number[0] = ob.getString("control_number");
+
+
+                                    runOnUiThread(new Runnable() {
+                                        public void run() {
+                                            spinner.setVisibility(View.GONE);
+                                            updateAfterRequest(internal_Identifier[0], control_number[0]);
+
+                                            finish();
+                                            Intent i = new Intent(OverViewControlNumbers.this, SearchOverViewControlNumber.class);
+                                            startActivity(i);
+
+                                        }
+                                    });
+
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
                                 }
-
-                                runOnUiThread(new Runnable() {
-                                    public void run() {
-                                        spinner.setVisibility(View.GONE);
-                                        updateAfterRequest(internal_Identifier[0], control_number[0]);
-
-                                        finish();
-                                        Intent i = new Intent(OverViewControlNumbers.this, OverViewControlNumbers.class);
-                                        startActivity(i);
-
-                                    }
-                                });
-
-                            } catch (JSONException e) {
-                                e.printStackTrace();
                             }
                         }
+
+
                         View view = findViewById(R.id.actv);
                         Snackbar.make(view, "Proccess Complete", Snackbar.LENGTH_LONG)
                                 .setAction("Action", null).show();

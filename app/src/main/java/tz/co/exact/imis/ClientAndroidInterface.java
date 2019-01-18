@@ -95,7 +95,6 @@ import java.util.Formatter;
 import org.xmlpull.v1.XmlSerializer;
 
 import static android.database.sqlite.SQLiteDatabase.openOrCreateDatabase;
-import static java.lang.Math.abs;
 
 /**
  * Created by Hiren on 18/04/2017.
@@ -1113,10 +1112,10 @@ public class ClientAndroidInterface {
 //            outputStream.close();
 
             OutputStream outputStream = ResizeImage(selectedPath, outputFileName, 400);
-                assert outputStream != null;
-                outputStream.flush();
-                outputStream.close();
-                return outputFileName;
+            assert outputStream != null;
+            outputStream.flush();
+            outputStream.close();
+            return outputFileName;
 
 
         } catch (IOException e) {
@@ -1723,7 +1722,7 @@ public class ClientAndroidInterface {
 
             HashMap<String, String> data = jsonToTable(PolicyData);
             ContentValues values = new ContentValues();
-           // isOffline = getFamilyStatus(FamilyId);
+            // isOffline = getFamilyStatus(FamilyId);
 
             values.put("FamilyId", FamilyId);
             values.put("EnrollDate", data.get("txtEnrolmentDate"));
@@ -1837,7 +1836,7 @@ public class ClientAndroidInterface {
                 startDate = o.getString("StartDate");
                 HasCycle =  o.getBoolean("HasCycle");
                 //Cycle affect start date
-                 NewPolicyValue = getPolicyValue(enrollDate,ProductId,FamilyId,startDate,HasCycle,PolicyId,PolicyStage,IsOffline);
+                NewPolicyValue = getPolicyValue(enrollDate,ProductId,FamilyId,startDate,HasCycle,PolicyId,PolicyStage,IsOffline);
                 Double doublePolicyValue = Double.valueOf(PolicyValue);
                 Double doubleNewPolicyValue = Double.valueOf(NewPolicyValue);
                 if(!doublePolicyValue.equals(doubleNewPolicyValue)){
@@ -1964,7 +1963,7 @@ public class ClientAndroidInterface {
             }
 
 
-          //  isOffline = getFamilyStatus(FamilyId);
+            //  isOffline = getFamilyStatus(FamilyId);
             if (isOffline == 2) isOffline = 0;
 
             HashMap<String, String> data = jsonToTable(PremiumData);
@@ -2002,18 +2001,18 @@ public class ClientAndroidInterface {
                     final int FinalFamilyId = FamilyId;
                     final int FinalPremium = rtPremiumId;
                     //new Thread() {
-                        //public void run() {
-                            try {
+                    //public void run() {
+                    try {
 
-                                rtPremiumId = Enrol(FinalFamilyId, 0, 0, FinalPremium, 0);
-                                inProgress = false;
-                            } catch (UserException e) {
-                                e.printStackTrace();
-                            }
+                        rtPremiumId = Enrol(FinalFamilyId, 0, 0, FinalPremium, 0);
+                        inProgress = false;
+                    } catch (UserException e) {
+                        e.printStackTrace();
+                    }
 
-                            pd.dismiss();
-                       // }
-                   // }.start();
+                    pd.dismiss();
+                    // }
+                    // }.start();
                 }
 
             } else {
@@ -2069,6 +2068,65 @@ public class ClientAndroidInterface {
         JSONArray RecordedPolicies = sqlHandler.getResult(Query, null);
         return RecordedPolicies;
     }
+    //This Query
+    public JSONArray getRecordedPolicies(String insuranceNumber, String otherNames, String lastName, String insuranceProduct, String uploadedFrom, String uploadedTo, String radioRenewal, String radioRequested) {
+        String renewal = "";
+        String requested = "";
+        String upload = "";
+        if(!radioRenewal.equals("")){
+            renewal = " AND isDone == '"+radioRenewal+"'";
+        }
+        if(radioRequested.equals("N")){
+            requested = " AND Code == 'N'";
+        }
+        if(radioRequested.equals("Y")){
+            requested = " AND typeof(Code) = 'integer'";
+        }
+        if(!uploadedFrom.equals("") && !uploadedTo.equals("")){
+            upload = " AND UploadedDate BETWEEN '"+uploadedFrom+"' AND '"+ uploadedTo+"'";
+        }else if(!uploadedFrom.equals("") && uploadedTo.equals("")){
+            upload = " AND UploadedDate = '"+uploadedFrom+"'";
+        }else if(uploadedFrom.equals("") && !uploadedTo.equals("")){
+            upload = " AND UploadedDate = '"+uploadedTo+"'";
+        }else{
+            upload = "";
+        }
+        String Query = "SELECT * FROM tblRecordedPolicies WHERE InsuranceNumber LIKE '%"+insuranceNumber+"%' AND LastName LIKE '%"+lastName+"%' AND OtherNames LIKE '%"+otherNames+"%' AND ProductName LIKE '%"+insuranceProduct+"%'"+renewal+""+requested+""+upload+"";
+        JSONArray RecordedPolicies = sqlHandler.getResult(Query, null);
+        return RecordedPolicies;
+    }
+    public JSONArray getRecordedPolicies(String insuranceNumber, String otherNames, String lastName, String insuranceProduct, String uploadedFrom, String uploadedTo, String radioRenewal, String requestedFrom, String requestedTo) {
+        String renewal = "";
+        String request = "";
+        String upload = "";
+        if(!radioRenewal.equals("")){
+            renewal = " AND RP.isDone == '"+radioRenewal+"'";
+        }
+        //Uploaded date filter
+        if(!uploadedFrom.equals("") && !uploadedTo.equals("")){
+            upload = " AND RP.UploadedDate BETWEEN '"+uploadedFrom+"' AND '"+ uploadedTo+"'";
+        }
+        if(!uploadedFrom.equals("") && uploadedTo.equals("")){
+            upload = " AND RP.UploadedDate = '"+uploadedFrom+"'";
+        }
+        if(uploadedFrom.equals("") && !uploadedTo.equals("")){
+            upload = " AND RP.UploadedDate = '"+uploadedTo+"'";
+        }
+        //Requested date filter
+        if(!requestedFrom.equals("") && !requestedTo.equals("")){
+            request = " AND RP.UploadedDate BETWEEN '"+requestedFrom+"' AND '"+ requestedTo+"'";
+        }
+        if(!requestedFrom.equals("") && requestedTo.equals("")){
+            request = " AND RP.UploadedDate = '"+requestedFrom+"'";
+        }
+        if(requestedFrom.equals("") && !requestedTo.equals("")){
+            request = " AND RP.UploadedDate = '"+requestedTo+"'";
+        }
+        String Query = "SELECT * FROM tblRecordedPolicies RP INNER JOIN tblControlNumber CN ON RP.Code = CN.Id WHERE RP.InsuranceNumber LIKE '%"+insuranceNumber+"%' AND RP.LastName LIKE '%"+lastName+"%' AND RP.OtherNames LIKE '%"+otherNames+"%' AND RP.ProductName LIKE '%"+insuranceProduct+"%'"+renewal+""+request+""+upload+"";
+        JSONArray RecordedPolicies = sqlHandler.getResult(Query, null);
+        return RecordedPolicies;
+    }
+
     public JSONArray getRecordedPoliciesWithIdentifier(String InternalIdentifier) {
         String code = getCode(InternalIdentifier);
         String Query = "SELECT * FROM tblRecordedPolicies WHERE Code = '"+code+"'";
@@ -2090,12 +2148,12 @@ public class ClientAndroidInterface {
     }
 
     public JSONArray getRecordedPolicies(String search_string) {
-        String Query = "SELECT * FROM tblRecordedPolicies WHERE InsuranceNumber LIKE '%"+search_string+"%' OR LastName LIKE '%"+search_string+"%' OR OtherNames LIKE '%"+search_string+"%' OR ProductName LIKE '%"+search_string+"%' OR isDone LIKE '%"+search_string+"%'";
+        String Query = "SELECT * FROM tblRecordedPolicies (WHERE InsuranceNumber LIKE '%"+search_string+"%' OR LastName LIKE '%"+search_string+"%' OR OtherNames LIKE '%"+search_string+"%' OR ProductName LIKE '%"+search_string+"%' OR isDone LIKE '%"+search_string+"%') AND Code = 'N'";
         JSONArray RecordedPolicies = sqlHandler.getResult(Query, null);
         return RecordedPolicies;
     }
     public JSONArray getRecordedPolicies(String From, String To) {
-        String Query = "SELECT * FROM tblRecordedPolicies WHERE UploadedDate BETWEEN '"+From+"' AND '"+To+"'";
+        String Query = "SELECT * FROM tblRecordedPolicies WHERE (UploadedDate BETWEEN '"+From+"' AND '"+To+"') AND Code = 'N'";
         JSONArray RecordedPolicies = sqlHandler.getResult(Query, null);
         return RecordedPolicies;
     }
@@ -2731,7 +2789,7 @@ public class ClientAndroidInterface {
             new Thread() {
                 public void run() {
                     try {
-                         enrol_result = Enrol(0, 0, 0, 0, 1);
+                        enrol_result = Enrol(0, 0, 0, 0, 1);
                     } catch (UserException e) {
                         e.printStackTrace();
                     } catch (JSONException e) {
@@ -2859,16 +2917,16 @@ public class ClientAndroidInterface {
 
     }
 
-/*    private void deleteImage() {
-        File fdelete = new File(PhotoPath.trim());
-        if (fdelete.exists()) {
-            if (fdelete.delete()) {
-                System.out.println("file Deleted :" + file_dj_path);
-            } else {
-                System.out.println("file not Deleted :" + file_dj_path);
+    /*    private void deleteImage() {
+            File fdelete = new File(PhotoPath.trim());
+            if (fdelete.exists()) {
+                if (fdelete.delete()) {
+                    System.out.println("file Deleted :" + file_dj_path);
+                } else {
+                    System.out.println("file not Deleted :" + file_dj_path);
+                }
             }
-        }
-    }*/
+        }*/
     public ArrayList<String> VerifyFamily() throws JSONException {
         ArrayList<String> FamilyIDs = new ArrayList<String>();
         boolean result = true;
@@ -3047,10 +3105,10 @@ public class ClientAndroidInterface {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-           // try {
-                FamilyId = object != null ? object.getString("FamilyId") : null;
-                IsOffline = Integer.parseInt(object.getString("isOffline"));
-                if(IsOffline == 2) IsOffline = 0;
+            // try {
+            FamilyId = object != null ? object.getString("FamilyId") : null;
+            IsOffline = Integer.parseInt(object.getString("isOffline"));
+            if(IsOffline == 2) IsOffline = 0;
         /*    } catch (JSONException e) {
                 e.printStackTrace();
             }*/
@@ -3182,27 +3240,27 @@ public class ClientAndroidInterface {
                 }*/
             }
 
-                //get Policies
-                Query = "SELECT PolicyId, FamilyId, EnrollDate, StartDate, NULLIF(EffectiveDate,'null') EffectiveDate, ExpiryDate, Policystatus, PolicyValue, ProdId, OfficerId, PolicyStage, isOffline\n" +
-                        "FROM tblPolicy WHERE ";
-                if(CallerId != 2){
-                    Query += " FamilyId = " + FamilyId;
-                }else{
-                    for(int j = 0; j < verifiedId.size(); j++){
-                        if((verifiedId.size()-j) == 1){
-                            Query += " FamilyId == " + verifiedId.get(j) + "" ;
-                        }else{
-                            Query += " FamilyId == " + verifiedId.get(j) + " OR";
-                        }
-                    }
-                    if(verifiedId.size() == 0){
-                        Query += " FamilyId != ''";
+            //get Policies
+            Query = "SELECT PolicyId, FamilyId, EnrollDate, StartDate, NULLIF(EffectiveDate,'null') EffectiveDate, ExpiryDate, Policystatus, PolicyValue, ProdId, OfficerId, PolicyStage, isOffline\n" +
+                    "FROM tblPolicy WHERE ";
+            if(CallerId != 2){
+                Query += " FamilyId = " + FamilyId;
+            }else{
+                for(int j = 0; j < verifiedId.size(); j++){
+                    if((verifiedId.size()-j) == 1){
+                        Query += " FamilyId == " + verifiedId.get(j) + "" ;
+                    }else{
+                        Query += " FamilyId == " + verifiedId.get(j) + " OR";
                     }
                 }
+                if(verifiedId.size() == 0){
+                    Query += " FamilyId != ''";
+                }
+            }
 
-                if (CallerId == 0) Query += " AND PolicyId = " + oPolicyId;
+            if (CallerId == 0) Query += " AND PolicyId = " + oPolicyId;
 
-                JSONArray policiesArray = sqlHandler.getResult(Query, null);
+            JSONArray policiesArray = sqlHandler.getResult(Query, null);
 
             QueryPL = Query;
 
@@ -3299,7 +3357,7 @@ public class ClientAndroidInterface {
                         "INNER JOIN tblPolicy PL ON PL.PolicyId = IP.PolicyId";
                 if (CallerId == 0) Query += " AND  IP.InsureeId = " + oInsureeId;
                 if (CallerId == 1) Query += " AND  PL.FamilyId = " + FamilyId;
-                    JSONArray InsureePolicyArray = sqlHandler.getResult(Query, null);
+                JSONArray InsureePolicyArray = sqlHandler.getResult(Query, null);
 
                 QueryIP = Query;
 
@@ -3577,76 +3635,76 @@ public class ClientAndroidInterface {
         return ( data.getData() );
     }*/
 
-@TargetApi(Build.VERSION_CODES.KITKAT)
-public static void copy(String name, byte[] data) throws IOException {
-    OutputStream out;
-    String root = Environment.getExternalStorageDirectory().getAbsolutePath()+"/IMIS/";
-    File createDir = new File(root+"Photos"+File.separator);
-    if(!createDir.exists()) {
-        createDir.mkdir();
+    @TargetApi(Build.VERSION_CODES.KITKAT)
+    public static void copy(String name, byte[] data) throws IOException {
+        OutputStream out;
+        String root = Environment.getExternalStorageDirectory().getAbsolutePath()+"/IMIS/";
+        File createDir = new File(root+"Photos"+File.separator);
+        if(!createDir.exists()) {
+            createDir.mkdir();
+        }
+        File file = new File(root + "Photos" + File.separator +name);
+        file.createNewFile();
+        out = new FileOutputStream(file);
+
+        out.write(data);
+        out.close();
     }
-    File file = new File(root + "Photos" + File.separator +name);
-    file.createNewFile();
-    out = new FileOutputStream(file);
+    public void xmlWriter(String ImgName, byte[] imgcontent ) throws IOException {
+        String Path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/IMIS/";
+        //Here we are creating a directory
+        File MyDir = new File(Path);
+        MyDir.mkdir();
 
-    out.write(data);
-    out.close();
-}
-public void xmlWriter(String ImgName, byte[] imgcontent ) throws IOException {
-    String Path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/IMIS/";
-    //Here we are creating a directory
-    File MyDir = new File(Path);
-    MyDir.mkdir();
-
-    File Dir = new File(Path + "EnrollmentXML");
-    Dir.mkdir();
+        File Dir = new File(Path + "EnrollmentXML");
+        Dir.mkdir();
 
 
-    //Here we are giving name to the XML file
-    String FileName = "EnrollmentXml.xml";
+        //Here we are giving name to the XML file
+        String FileName = "EnrollmentXml.xml";
 
-    //Here we are creating file in that directory
-    File EnrollmentXML = new File(Dir,FileName);
-    //Here we are creating outputstream
-    FileOutputStream fos = new FileOutputStream(EnrollmentXML,true);
+        //Here we are creating file in that directory
+        File EnrollmentXML = new File(Dir,FileName);
+        //Here we are creating outputstream
+        FileOutputStream fos = new FileOutputStream(EnrollmentXML,true);
 
 
-    XmlSerializer serializer = Xml.newSerializer();
+        XmlSerializer serializer = Xml.newSerializer();
 
-    serializer.setOutput(fos, "UTF-8");
-    serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
-    serializer.startTag(null, "Pictures");
+        serializer.setOutput(fos, "UTF-8");
+        serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
+        serializer.startTag(null, "Pictures");
 
-    serializer.startTag(null, "ImageName");
-    serializer.text(ImgName);
-    serializer.endTag(null, "ImageName");
+        serializer.startTag(null, "ImageName");
+        serializer.text(ImgName);
+        serializer.endTag(null, "ImageName");
 
-    serializer.startTag(null, "ImageContent");
-    serializer.text(String.valueOf(imgcontent));
-    serializer.endTag(null, "ImageContent");
+        serializer.startTag(null, "ImageContent");
+        serializer.text(String.valueOf(imgcontent));
+        serializer.endTag(null, "ImageContent");
 
-    serializer.endTag(null, "Pictures");
-    serializer.endDocument();
-    serializer.flush();
-    fos.close();
-}
-public void zipFile(){
-    global = (Global) mContext.getApplicationContext();
-    //@SuppressLint("SimpleDateFormat") SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss");
-    @SuppressLint("SimpleDateFormat") SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy-HH-mm");
-    @SuppressLint("SimpleDateFormat") SimpleDateFormat formatZip = new SimpleDateFormat("dd-MM-yyyy-HH-mm-ss");
-    Calendar cal = Calendar.getInstance();
-    String d = format.format(cal.getTime());
-    String dzip = formatZip.format(cal.getTime());
+        serializer.endTag(null, "Pictures");
+        serializer.endDocument();
+        serializer.flush();
+        fos.close();
+    }
+    public void zipFile(){
+        global = (Global) mContext.getApplicationContext();
+        //@SuppressLint("SimpleDateFormat") SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss");
+        @SuppressLint("SimpleDateFormat") SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy-HH-mm");
+        @SuppressLint("SimpleDateFormat") SimpleDateFormat formatZip = new SimpleDateFormat("dd-MM-yyyy-HH-mm-ss");
+        Calendar cal = Calendar.getInstance();
+        String d = format.format(cal.getTime());
+        String dzip = formatZip.format(cal.getTime());
 
-    String targetPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/IMIS/Enrolment/Enrolment_"+global.getOfficerCode()+"_"+d+".xml";
-    String zipFilePath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/IMIS/Enrolment/Enrolment_"+global.getOfficerCode()+"_"+dzip+".rar";
-    //String unzippedFolderPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/IMIS/Enrolment/Enrolment_"+global.getOfficerCode()+"_"+d+".xml";
-    String password = ")(#$1HsD"; // keep it EMPTY<""> for applying no password protection
+        String targetPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/IMIS/Enrolment/Enrolment_"+global.getOfficerCode()+"_"+d+".xml";
+        String zipFilePath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/IMIS/Enrolment/Enrolment_"+global.getOfficerCode()+"_"+dzip+".rar";
+        //String unzippedFolderPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/IMIS/Enrolment/Enrolment_"+global.getOfficerCode()+"_"+d+".xml";
+        String password = ")(#$1HsD"; // keep it EMPTY<""> for applying no password protection
 
-    Compressor.zip(targetPath, zipFilePath, password);
-    //Compressor.unzip(zipFilePath, unzippedFolderPath, password);
-}
+        Compressor.zip(targetPath, zipFilePath, password);
+        //Compressor.unzip(zipFilePath, unzippedFolderPath, password);
+    }
     public void zipFiles(){
         global = (Global) mContext.getApplicationContext();
         @SuppressLint("SimpleDateFormat") SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy-HH");
@@ -3985,17 +4043,17 @@ public void zipFile(){
         }else{
             String DeletePolicyPayment = "DELETE FROM tblPremium\n" +
                     "WHERE PolicyId IN (SELECT PolicyId FROM tblPolicy WHERE ";
-                if(FamilyIDs.size() != 0){
-                    for(int j = 0; j < FamilyIDs.size(); j++) {
-                        if ((FamilyIDs.size() - j) == 1) {
-                            DeletePolicyPayment += " FamilyId == " + FamilyIDs.get(j) + "";
-                        } else {
-                            DeletePolicyPayment += " FamilyId == " + FamilyIDs.get(j) + " OR";
-                        }
+            if(FamilyIDs.size() != 0){
+                for(int j = 0; j < FamilyIDs.size(); j++) {
+                    if ((FamilyIDs.size() - j) == 1) {
+                        DeletePolicyPayment += " FamilyId == " + FamilyIDs.get(j) + "";
+                    } else {
+                        DeletePolicyPayment += " FamilyId == " + FamilyIDs.get(j) + " OR";
                     }
-                }else{
-                    DeletePolicyPayment += " FamilyId = " + FamilyId + "";
                 }
+            }else{
+                DeletePolicyPayment += " FamilyId = " + FamilyId + "";
+            }
             DeletePolicyPayment += " )";
 
             String DeleteInsureePolicy = "DELETE FROM tblInsureePolicy\n" +
@@ -4123,59 +4181,59 @@ public void zipFile(){
         new Thread() {
             public void run() {
 
-                    CallSoap cs = new CallSoap();
-                    for (int i = 0; i < JSONfiles.length; i++) {
-                        UploadCounter = i + 1;
-                        //runOnUiThread(ChangeMessage);
-                        String JsonFileName = getFeedRenewalText(JSONfiles[i].getName());
-                        Boolean serv = null;
-                        if(ActivityName.equals("renewal")){
-                            cs.setFunctionName("UploadRenewal");
-                            serv = cs.UploadRenewal(JsonFileName,files[i].getName());
-                        }else{
-                            cs.setFunctionName("UploadFeedback");
-                            serv = cs.UploadFeedback(JsonFileName,files[i].getName());
-                        }
-
-                        if (serv == true) {
-                            XMLFile = JSONfiles[i];
-
-                            if (XMLFile.getName().contains("RenPolJSON_")) {
-                                cs.setFunctionName("isValidRenewal");
-                                int response = cs.isPolicyAccepted(files[i].getName());
-                                if (response == 1){
-                                    MoveFile(XMLFile,1);
-                                    MoveFile(files[i],1);
-                                } else{
-                                    MoveFile(XMLFile, 2);
-                                    MoveFile(files[i], 2);
-                                }
-                                result = 1;
-                            } else if (XMLFile.getName().contains("feedbackJSON_")) {
-                                cs.setFunctionName("isValidFeedback");
-                                int response = cs.isFeedbackAccepted(files[i].getName());
-                                if (response == 1){
-                                    MoveFile(XMLFile,1);
-                                    MoveFile(files[i],1);
-                                } else{
-                                    MoveFile(XMLFile, 2);
-                                    MoveFile(files[i], 2);
-                                }
-                                result = 1;
-                            } else{
-                                result = 2;
-                            }
-
-                            ((Activity) mContext).runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    ShowDialog(mContext.getResources().getString(R.string.RenewalUploaded));
-                                }
-                            });
-                        }else{
-                            result = -2;
-                        }
+                CallSoap cs = new CallSoap();
+                for (int i = 0; i < JSONfiles.length; i++) {
+                    UploadCounter = i + 1;
+                    //runOnUiThread(ChangeMessage);
+                    String JsonFileName = getFeedRenewalText(JSONfiles[i].getName());
+                    Boolean serv = null;
+                    if(ActivityName.equals("renewal")){
+                        cs.setFunctionName("UploadRenewal");
+                        serv = cs.UploadRenewal(JsonFileName,files[i].getName());
+                    }else{
+                        cs.setFunctionName("UploadFeedback");
+                        serv = cs.UploadFeedback(JsonFileName,files[i].getName());
                     }
+
+                    if (serv == true) {
+                        XMLFile = JSONfiles[i];
+
+                        if (XMLFile.getName().contains("RenPolJSON_")) {
+                            cs.setFunctionName("isValidRenewal");
+                            int response = cs.isPolicyAccepted(files[i].getName());
+                            if (response == 1){
+                                MoveFile(XMLFile,1);
+                                MoveFile(files[i],1);
+                            } else{
+                                MoveFile(XMLFile, 2);
+                                MoveFile(files[i], 2);
+                            }
+                            result = 1;
+                        } else if (XMLFile.getName().contains("feedbackJSON_")) {
+                            cs.setFunctionName("isValidFeedback");
+                            int response = cs.isFeedbackAccepted(files[i].getName());
+                            if (response == 1){
+                                MoveFile(XMLFile,1);
+                                MoveFile(files[i],1);
+                            } else{
+                                MoveFile(XMLFile, 2);
+                                MoveFile(files[i], 2);
+                            }
+                            result = 1;
+                        } else{
+                            result = 2;
+                        }
+
+                        ((Activity) mContext).runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                ShowDialog(mContext.getResources().getString(R.string.RenewalUploaded));
+                            }
+                        });
+                    }else{
+                        result = -2;
+                    }
+                }
 
                 new Runnable() {
                     @Override
@@ -4464,7 +4522,7 @@ public void zipFile(){
     }
 
     @SuppressWarnings("ConstantConditions")
-        public void startDownloading() throws JSONException, UserException {
+    public void startDownloading() throws JSONException, UserException {
 
         CallSoap cs = new CallSoap();
         cs.setFunctionName("downloadMasterData");
@@ -4903,8 +4961,8 @@ public void zipFile(){
             File myFile = new File("/"+dir+"/values.txt");
             FileInputStream fIn = new FileInputStream(myFile);
             BufferedReader myReader = new BufferedReader(new InputStreamReader(fIn));
-                aBuffer = myReader.readLine();
-                myReader.close();
+            aBuffer = myReader.readLine();
+            myReader.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -5116,8 +5174,8 @@ public void zipFile(){
             } catch (JSONException e) {
                 e.printStackTrace();//sio error
             }
-               if (MaxMember >= TotalIns){
-                   try {
+            if (MaxMember >= TotalIns){
+                try {
 //                General general = new General();
 //                if(general.isNetworkAvailable(mContext) && IsOffline == 0) {
 //                    CallSoap cs = new CallSoap();
@@ -5126,15 +5184,15 @@ public void zipFile(){
 //
 //                }
 //                else
-                       NewPolicyValue = getPolicyValue(EnrollmentDate, ProdID, FamilyId, StartDate, HasCycle, PolicyId, PolicyStage, isOffline);
-                   } catch (JSONException e) {
-                       e.printStackTrace();
-                   }
+                    NewPolicyValue = getPolicyValue(EnrollmentDate, ProdID, FamilyId, StartDate, HasCycle, PolicyId, PolicyStage, isOffline);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
 
 /*                   if (NewPolicyValue != PolicyValue) {
 
                    }*/
-                   if (!Activate) EffectiveDate = null;
+                if (!Activate) EffectiveDate = null;
  /*                String MaxIdQuery = "SELECT  IFNULL(COUNT(InsureePolicyId),0)+1  InsureePolicyId  FROM tblInsureePolicy";
                JSONArray JsonA = sqlHandler.getResult(MaxIdQuery, null);
                 try {
@@ -5144,49 +5202,49 @@ public void zipFile(){
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }*/
-                   String MaxIdQuery = "SELECT  Count(InsureePolicyId)+1  InsureePolicyId  FROM tblInsureePolicy";
-                   JSONArray JsonA = sqlHandler.getResult(MaxIdQuery, null);
-                   try {
-                       JSONObject JmaxOb = JsonA.getJSONObject(0);
-                       MaxInsureePolicyId = JmaxOb.getInt("InsureePolicyId");
-                   } catch (JSONException e) {
-                       e.printStackTrace();
-                   }
+                String MaxIdQuery = "SELECT  Count(InsureePolicyId)+1  InsureePolicyId  FROM tblInsureePolicy";
+                JSONArray JsonA = sqlHandler.getResult(MaxIdQuery, null);
+                try {
+                    JSONObject JmaxOb = JsonA.getJSONObject(0);
+                    MaxInsureePolicyId = JmaxOb.getInt("InsureePolicyId");
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
 
 
                 ContentValues values = new ContentValues();
 
-                   String PolicyQuery2 = " SELECT StartDate,EnrollDate,ExpiryDate FROM tblPolicy WHERE PolicyID =" + PolicyId;
-                   JSONArray PolicyArray2 = sqlHandler.getResult(PolicyQuery2, null);
-                   JSONObject PolicyObject2 = null;
-                       try {
-                           PolicyObject2 = PolicyArray2.getJSONObject(0);
-                           StartDate = PolicyObject2.getString("StartDate");
-                           ExpiryDate = PolicyObject2.getString("ExpiryDate");
-                           EnrollDate = PolicyObject2.getString("EnrollDate");
-                       } catch (JSONException e) {
-                           e.printStackTrace();
-                       }
-                   values.put("InsureePolicyId", MaxInsureePolicyId);
-                   values.put("InsureeId", InsureId);
-                   values.put("PolicyId", PolicyId);
-                   values.put("EnrollmentDate", EnrollDate);
-                   values.put("StartDate", StartDate);
-                   values.put("EffectiveDate", EffectiveDate);
-                   values.put("ExpiryDate", ExpiryDate);
-                   values.put("isOffline", isOffline);
+                String PolicyQuery2 = " SELECT StartDate,EnrollDate,ExpiryDate FROM tblPolicy WHERE PolicyID =" + PolicyId;
+                JSONArray PolicyArray2 = sqlHandler.getResult(PolicyQuery2, null);
+                JSONObject PolicyObject2 = null;
+                try {
+                    PolicyObject2 = PolicyArray2.getJSONObject(0);
+                    StartDate = PolicyObject2.getString("StartDate");
+                    ExpiryDate = PolicyObject2.getString("ExpiryDate");
+                    EnrollDate = PolicyObject2.getString("EnrollDate");
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                values.put("InsureePolicyId", MaxInsureePolicyId);
+                values.put("InsureeId", InsureId);
+                values.put("PolicyId", PolicyId);
+                values.put("EnrollmentDate", EnrollDate);
+                values.put("StartDate", StartDate);
+                values.put("EffectiveDate", EffectiveDate);
+                values.put("ExpiryDate", ExpiryDate);
+                values.put("isOffline", isOffline);
 
 
 /*                   String SavePolicyInsuree = "INSERT INTO tblInsureePolicy(InsureePolicyId,InsureeId,PolicyId,EnrollmentDate,StartDate,EffectiveDate,ExpiryDate,isOffline)\n" +
                            "SELECT " + MaxInsureePolicyId + "," + InsureId + "," + PolicyId + ",EnrollDate,StartDate," + EffectiveDate + ",ExpiryDate," + isOffline + "\n" +
                            "FROM tblPolicy WHERE PolicyID =" + PolicyId;*/
 
-                   try {
-                       sqlHandler.insertData("tblInsureePolicy", values);
-                   } catch (UserException e) {
-                       e.printStackTrace();
-                   }
-               }
+                try {
+                    sqlHandler.insertData("tblInsureePolicy", values);
+                } catch (UserException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
@@ -5413,7 +5471,7 @@ public void zipFile(){
             5   :   Premiums
          */
         JSONArray newFamilyArr = new JSONArray();
-         JSONArray Family = new JSONArray();
+        JSONArray Family = new JSONArray();
         JSONArray Insuree = new JSONArray();
         //  JSONArray Policy = new JSONArray();
         //  JSONArray PolicyInsuree = new JSONArray();
@@ -5717,7 +5775,7 @@ public void zipFile(){
                         String number = String.valueOf(Amount);
                         double amount = Double.parseDouble(number);
                         DecimalFormat formatter = null;
-                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                             formatter = new DecimalFormat("#,###.00");
                             TotalPremiums = formatter.format(amount);
                         }
@@ -5804,30 +5862,30 @@ public void zipFile(){
             //global = (Global) mContext.getApplicationContext();
             //final int userId = global.getUserId();
             //if (userId > 0) {
-                inProgress = true;
-                //pd = new ProgressDialog(mContext);
-                //pd = ProgressDialog.show(mContext, "", mContext.getResources().getString(R.string.Deleting));
-                Toast.makeText(mContext,"Please wait...",Toast.LENGTH_LONG).show();
+            inProgress = true;
+            //pd = new ProgressDialog(mContext);
+            //pd = ProgressDialog.show(mContext, "", mContext.getResources().getString(R.string.Deleting));
+            Toast.makeText(mContext,"Please wait...",Toast.LENGTH_LONG).show();
 
-                //Uncoment this if you want to delete online data too.
-                //CallSoap cs = new CallSoap();
-                //cs.setFunctionName("DeleteFromPhone");
-                DataDeleted = 1;//cs.DeleteFromPhone(Id, userId, DeleteInfo);
+            //Uncoment this if you want to delete online data too.
+            //CallSoap cs = new CallSoap();
+            //cs.setFunctionName("DeleteFromPhone");
+            DataDeleted = 1;//cs.DeleteFromPhone(Id, userId, DeleteInfo);
+
+            inProgress = false;
+
+            if (DataDeleted == 1) {
+                if (DeleteInfo.equalsIgnoreCase("F")) DeleteFamily(Id);//Enrollment page
+                if (DeleteInfo.equalsIgnoreCase("I")) DeleteInsuree(Id);//family and insuree page
+                if (DeleteInfo.equalsIgnoreCase("PO")) DeletePolicy(Id);//Family and policy page
+                if (DeleteInfo.equalsIgnoreCase("PR")) DeletePremium(Id);//PolicyPremium page
+
+                Toast.makeText(mContext,mContext.getResources().getString(R.string.dataDeleted),Toast.LENGTH_LONG).show();
 
                 inProgress = false;
+            }
 
-                if (DataDeleted == 1) {
-                    if (DeleteInfo.equalsIgnoreCase("F")) DeleteFamily(Id);//Enrollment page
-                    if (DeleteInfo.equalsIgnoreCase("I")) DeleteInsuree(Id);//family and insuree page
-                    if (DeleteInfo.equalsIgnoreCase("PO")) DeletePolicy(Id);//Family and policy page
-                    if (DeleteInfo.equalsIgnoreCase("PR")) DeletePremium(Id);//PolicyPremium page
-
-                    Toast.makeText(mContext,mContext.getResources().getString(R.string.dataDeleted),Toast.LENGTH_LONG).show();
-
-                    inProgress = false;
-                }
-
-               // pd.dismiss();
+            // pd.dismiss();
 
 /*                new Thread() {
                     public void run() {

@@ -226,8 +226,8 @@ public class OverViewPoliciesAdapter <VH extends TrackSelectionAdapter.ViewHolde
                             paymentObject = new JSONObject();
                             paymentObject.put("Id",String.valueOf(Id.getText()));
                             paymentObject.put("PolicyId",String.valueOf(PolicyId.getText()));
-                            paymentObject.put("insuree_number",String.valueOf(InsuranceNumber.getText()));
-                            paymentObject.put("productCode",String.valueOf(ProductCode.getText()));
+                            paymentObject.put("insurance_number",String.valueOf(InsuranceNumber.getText()));
+                            paymentObject.put("insurance_product_code",String.valueOf(ProductCode.getText()));
                             if(String.valueOf(isDone.getText()).equals("N")){
                                 paymentObject.put("renewal","0");
                             }else{
@@ -281,8 +281,8 @@ public class OverViewPoliciesAdapter <VH extends TrackSelectionAdapter.ViewHolde
                                 paymentObject = new JSONObject();
                                 paymentObject.put("Id",String.valueOf(Id.getText()));
                                 paymentObject.put("PolicyId",String.valueOf(PolicyId.getText()));
-                                paymentObject.put("insureeNumber",String.valueOf(InsuranceNumber.getText()));
-                                paymentObject.put("productCode",String.valueOf(ProductCode.getText()));
+                                paymentObject.put("insurance_number",String.valueOf(InsuranceNumber.getText()));
+                                paymentObject.put("insurance_product_code",String.valueOf(ProductCode.getText()));
                                 if(String.valueOf(isDone.getText()).equals("N")){
                                     paymentObject.put("renewal","0");
                                 }else{
