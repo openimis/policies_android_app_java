@@ -1,4 +1,4 @@
-package tz.co.imis;
+package org.openimis.imispolicies;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -13,8 +13,6 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-
-import tz.co.imis.R;
 
 public class ViewPolicies extends AppCompatActivity {
 

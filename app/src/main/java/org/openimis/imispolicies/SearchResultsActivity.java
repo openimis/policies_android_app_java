@@ -1,4 +1,4 @@
-package tz.co.imis;
+package org.openimis.imispolicies;
 
 import android.app.Activity;
 import android.app.SearchManager;

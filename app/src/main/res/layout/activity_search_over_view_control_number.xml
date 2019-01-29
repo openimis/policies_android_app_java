@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:layout_margin="10dp"
     android:orientation="vertical"
-    tools:context="tz.co.exact.imis.SearchOverViewControlNumber">
+    tools:context="org.openimis.imispolicies.SearchOverViewControlNumber">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -21,7 +21,7 @@
             android:typeface="monospace"
             android:fontFamily="sans-serif-light"
             android:textColor="@color/black"
-            android:text="Clear" />
+            android:text="@string/clear" />
         <Button
             android:id="@+id/btnSearch"
             android:layout_width="100dp"
@@ -49,7 +49,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:layout_marginTop="5dp"
-                android:hint="Insurance Number"
+                android:hint="@string/insurance_no"
                 android:paddingLeft="10dp"
                 android:background="@drawable/corner"/>
             <EditText
@@ -57,7 +57,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:layout_marginTop="5dp"
-                android:hint="Other names"
+                android:hint="@string/OtherNames"
                 android:paddingLeft="10dp"
                 android:background="@drawable/corner"/>
 
@@ -66,7 +66,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:layout_marginTop="5dp"
-                android:hint="Last names"
+                android:hint="@string/LastName"
                 android:paddingLeft="10dp"
                 android:background="@drawable/corner"/>
 
@@ -79,7 +79,7 @@
                 android:typeface="monospace"
                 android:fontFamily="sans-serif-light"
                 android:textColor="@color/black"
-                android:hint="Insurance product"
+                android:hint="@string/insurance_product"
                 android:background="@drawable/corner"/>
             <ListView
                 android:id="@+id/lv1"
@@ -109,7 +109,7 @@
                     android:fontFamily="sans-serif-light"
                     android:textColor="@color/black"
                     android:background="@drawable/corner"
-                    android:hint="Uploaded From"/>
+                    android:hint="@string/uploaded_from"/>
                 <TextView
                     android:id="@+id/lblTo"
                     android:layout_width="50dp"
@@ -120,7 +120,7 @@
                     android:layout_toRightOf="@+id/uploaded_from"
                     android:textAlignment="center"
                     android:paddingTop="20dp"
-                    android:text="TO"/>
+                    android:text="@string/to"/>
 
                 <TextView
                     android:id="@+id/uploaded_to"
@@ -134,7 +134,7 @@
                     android:paddingLeft="10dp"
                     android:paddingTop="15dp"
                     android:background="@drawable/corner"
-                    android:hint="Uploaded To"/>
+                    android:hint="@string/uploaded_to"/>
 
                 <TextView
                     android:id="@+id/requested_from"
@@ -148,7 +148,7 @@
                     android:paddingLeft="10dp"
                     android:paddingTop="15dp"
                     android:background="@drawable/corner"
-                    android:hint="Requested From"/>
+                    android:hint="@string/requested_from"/>
 
                 <TextView
                     android:id="@+id/requested_to"
@@ -163,7 +163,7 @@
                     android:paddingLeft="10dp"
                     android:paddingTop="15dp"
                     android:background="@drawable/corner"
-                    android:hint="Requested To"/>
+                    android:hint="@string/requested_to"/>
 
             </RelativeLayout>
 
@@ -174,7 +174,7 @@
                 android:typeface="monospace"
                 android:fontFamily="sans-serif-light"
                 android:textColor="@color/black"
-                android:text="Renewal"
+                android:text="@string/renewal"
                 />
             <RadioGroup
                 android:id="@+id/radio_renewal"

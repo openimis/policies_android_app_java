@@ -23,7 +23,7 @@
 //
 //In case of dispute arising out or in relation to the use of the program, it is subject to the public law of Switzerland. The place of jurisdiction is Berne.
 
-package tz.co.imis;
+package org.openimis.imispolicies;
 
 /**
  * Created by Hiren on 24/04/2017.

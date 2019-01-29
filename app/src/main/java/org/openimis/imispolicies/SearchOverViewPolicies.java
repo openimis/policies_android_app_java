@@ -1,4 +1,4 @@
-package tz.co.imis;
+package org.openimis.imispolicies;
 
 import android.app.DatePickerDialog;
 import android.content.Intent;
@@ -29,8 +29,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Locale;
-
-import tz.co.imis.R;
 
 public class SearchOverViewPolicies extends AppCompatActivity {
 

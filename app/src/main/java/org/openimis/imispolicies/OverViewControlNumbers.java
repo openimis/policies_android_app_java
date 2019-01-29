@@ -1,4 +1,4 @@
-package tz.co.imis;
+package org.openimis.imispolicies;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
@@ -35,8 +35,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-
-import tz.co.imis.R;
 
 public class OverViewControlNumbers extends AppCompatActivity {
     public SQLHandler sqlHandler;

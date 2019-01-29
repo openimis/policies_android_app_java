@@ -23,7 +23,7 @@
 //
 //In case of dispute arising out or in relation to the use of the program, it is subject to the public law of Switzerland. The place of jurisdiction is Berne.
 
-package tz.co.imis;
+package org.openimis.imispolicies;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -84,8 +84,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-
-import tz.co.imis.R;
 
 
 public class MainActivity extends AppCompatActivity
@@ -1035,7 +1033,7 @@ public class MainActivity extends AppCompatActivity
         // set dialog message
         alertDialogBuilder
                 .setCancelable(false)
-                .setPositiveButton("OK",
+                .setPositiveButton(MainActivity.this.getResources().getString(R.string.button_ok),
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog,int id) {
                                 if(!username.getText().toString().equals("") && !password.getText().toString().equals("")){
@@ -1081,6 +1079,11 @@ public class MainActivity extends AppCompatActivity
                                 }else{
                                     Toast.makeText(MainActivity.this,MainActivity.this.getResources().getString(R.string.Enter_Credentials), Toast.LENGTH_LONG).show();
                                 }
+                            }
+                        }).setNegativeButton(MainActivity.this.getResources().getString(R.string.button_cancel),
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.cancel();
                             }
                         });
 

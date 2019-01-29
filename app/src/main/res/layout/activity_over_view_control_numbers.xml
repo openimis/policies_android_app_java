@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:id="@+id/actv"
-    tools:context="tz.co.exact.imis.OverViewControlNumbers">
+    tools:context="org.openimis.imispolicies.OverViewControlNumbers">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -18,7 +18,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="5dp"
-            android:text="Number of found policies"/>
+            android:text="@string/number_of_found_policies"/>
         <TextView
             android:id="@+id/ValueNumberOfPolices"
             android:layout_width="match_parent"
@@ -36,7 +36,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/lblNumberOfPolices"
             android:layout_margin="10dp"
-            android:text="Amount of contribution"/>
+            android:text="@string/amount_of_contribution"/>
         <TextView
             android:id="@+id/ValueAmountOfContribution"
             android:layout_width="match_parent"

@@ -1,4 +1,4 @@
-package tz.co.imis;
+package org.openimis.imispolicies;
 
 import android.content.Intent;
 import android.support.v7.app.ActionBar;
@@ -7,8 +7,6 @@ import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
-
-import tz.co.imis.R;
 
 public class ControlNumbers extends AppCompatActivity {
     TextView OverViewPolicies;

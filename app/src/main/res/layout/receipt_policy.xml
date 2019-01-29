@@ -18,7 +18,7 @@
             android:id="@+id/LabelInsuranceNo"
             android:layout_width="wrap_content"
             android:layout_height="44dp"
-            android:text="Insurance No."
+            android:text="@string/insurance_no"
             android:textColor="@color/white"
             android:background="@color/colorPrimaryDark"
             android:typeface="monospace"
@@ -39,7 +39,7 @@
             android:textSize="12sp"
             android:textColor="@color/white"
             android:background="@color/colorPrimaryDark"
-            android:text="30040034"/>
+            android:text=""/>
         <TextView
             android:id="@+id/PolicyId"
             android:layout_width="match_parent"
@@ -82,7 +82,7 @@
             android:layout_marginBottom="10dp"
             android:typeface="monospace"
             android:fontFamily="sans-serif-light"
-            android:text="Renewal:" />
+            android:text="@string/renewal" />
         <TextView
             android:id="@+id/isDone"
             android:layout_width="wrap_content"
@@ -96,7 +96,7 @@
             android:textAlignment="textEnd"
             android:typeface="monospace"
             android:fontFamily="sans-serif-light"
-            android:text="Yes" />
+            android:text="" />
 
         <TextView
             android:id="@+id/NamesLabel"
@@ -108,7 +108,7 @@
             android:typeface="monospace"
             android:fontFamily="sans-serif-light"
             android:layout_below="@id/RenewalLabel"
-            android:text="Names:" />
+            android:text="@string/names" />
         <TextView
             android:id="@+id/Names"
             android:layout_width="wrap_content"
@@ -123,7 +123,7 @@
             android:gravity="end"
             android:textAlignment="textEnd"
             android:fontFamily="sans-serif-light"
-            android:text="Herman Gideon Lukindo" />
+            android:text="" />
         <TextView
             android:id="@+id/ProductCodeLabel"
             android:layout_width="wrap_content"
@@ -134,7 +134,7 @@
             android:typeface="monospace"
             android:fontFamily="sans-serif-light"
             android:layout_below="@id/NamesLabel"
-            android:text="ProductCode:" />
+            android:text="@string/product_code" />
         <TextView
             android:id="@+id/ProductCode"
             android:layout_width="wrap_content"
@@ -149,7 +149,7 @@
             android:gravity="end"
             android:textAlignment="textEnd"
             android:fontFamily="sans-serif-light"
-            android:text="X00012" />
+            android:text="" />
         <TextView
             android:id="@+id/ProductNameLabel"
             android:layout_width="wrap_content"
@@ -160,7 +160,7 @@
             android:typeface="monospace"
             android:fontFamily="sans-serif-light"
             android:layout_below="@id/ProductCodeLabel"
-            android:text="ProductName:" />
+            android:text="@string/product_name" />
         <TextView
             android:id="@+id/ProductName"
             android:layout_width="wrap_content"
@@ -175,7 +175,7 @@
             android:gravity="end"
             android:textAlignment="textEnd"
             android:fontFamily="sans-serif-light"
-            android:text="National Free" />
+            android:text="" />
 
     </RelativeLayout>
     <TextView
@@ -197,7 +197,7 @@
             android:layout_marginBottom="10dp"
             android:typeface="monospace"
             android:fontFamily="sans-serif-light"
-            android:text="Uploaded Date:" />
+            android:text="@string/uploaded_date" />
         <TextView
             android:id="@+id/UploadedDate"
             android:layout_width="wrap_content"
@@ -211,7 +211,7 @@
             android:textAlignment="textEnd"
             android:typeface="monospace"
             android:fontFamily="sans-serif-light"
-            android:text="20/10/2018" />
+            android:text="" />
 
         <TextView
             android:id="@+id/RequestedLabel"
@@ -223,7 +223,7 @@
             android:typeface="monospace"
             android:fontFamily="sans-serif-light"
             android:layout_below="@id/UploadedLabel"
-            android:text="Requested Date:" />
+            android:text="@string/requested_date" />
         <TextView
             android:id="@+id/RequestedDate"
             android:layout_width="wrap_content"
@@ -238,7 +238,7 @@
             android:gravity="end"
             android:textAlignment="textEnd"
             android:fontFamily="sans-serif-light"
-            android:text="17/08/2017" />
+            android:text="" />
 
     </RelativeLayout>
     <TextView

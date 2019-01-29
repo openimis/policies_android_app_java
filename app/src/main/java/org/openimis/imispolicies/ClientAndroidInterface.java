@@ -23,7 +23,7 @@
 //
 //In case of dispute arising out or in relation to the use of the program, it is subject to the public law of Switzerland. The place of jurisdiction is Berne.
 
-package tz.co.imis;
+package org.openimis.imispolicies;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
@@ -93,8 +93,6 @@ import java.util.regex.Pattern;
 import java.util.Formatter;
 
 import org.xmlpull.v1.XmlSerializer;
-
-import tz.co.imis.R;
 
 import static android.database.sqlite.SQLiteDatabase.openOrCreateDatabase;
 
@@ -4370,6 +4368,30 @@ public class ClientAndroidInterface {
     }
     @JavascriptInterface
     public void downloadMasterData() throws InterruptedException {
+
+        new AlertDialog.Builder(mContext)
+                .setMessage("Download Master Data")
+                .setPositiveButton(R.string.button_ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        DownMasterData();
+                    }
+                })
+                .setNegativeButton(R.string.button_cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                }).show();
+
+        //return true;
+        //        finally {
+//            pd.dismiss();
+//        }
+
+
+    }
+    public void DownMasterData(){
         ProgressDialog pd = null;
         pd = ProgressDialog.show(mContext, mContext.getResources().getString(R.string.Sync), mContext.getResources().getString(R.string.DownloadingMasterData));
         final ProgressDialog finalPd = pd;
@@ -4402,14 +4424,6 @@ public class ClientAndroidInterface {
             }
         };
         t.start();
-
-
-        //return true;
-        //        finally {
-//            pd.dismiss();
-//        }
-
-
     }
     public void importMasterData(String data) throws JSONException, UserException {
 
@@ -5977,7 +5991,11 @@ public class ClientAndroidInterface {
                                     public void onClick(DialogInterface dialog,int id) {
                                         if(!username.getText().toString().equals("") || !password.getText().toString().equals("")){
                                             int userid = 0;
-                                            userid = 1;//isValidLogin(username.getText().toString(),password.getText().toString());
+                                            try {
+                                                userid = isValidLogin(username.getText().toString(),password.getText().toString());
+                                            } catch (InterruptedException e) {
+                                                e.printStackTrace();
+                                            }
                                             if(userid > 0){
                                                 if(page.equals("Enquire")){
                                                     ((Enquire) mContext).finish();

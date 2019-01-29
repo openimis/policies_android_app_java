@@ -1,4 +1,4 @@
-package tz.co.imis;
+package org.openimis.imispolicies;
 
 import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
@@ -22,9 +22,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
 
-import tz.co.imis.R;
-
-import static tz.co.imis.MainActivity.global;
+import static org.openimis.imispolicies.MainActivity.global;
 
 public class CummulativeIndicators extends AppCompatActivity {
 

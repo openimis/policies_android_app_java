@@ -1,4 +1,4 @@
-package tz.co.imis;
+package org.openimis.imispolicies;
 
 import android.content.Context;
 import android.os.Build;
@@ -14,8 +14,6 @@ import android.widget.TextView;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import tz.co.imis.R;
 
 /**
  * Created by Hiren on 10/12/2018.

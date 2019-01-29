@@ -1,4 +1,4 @@
-package tz.co.imis;
+package org.openimis.imispolicies;
 
 /**
  * Created by Hiren on 3/16/2018.

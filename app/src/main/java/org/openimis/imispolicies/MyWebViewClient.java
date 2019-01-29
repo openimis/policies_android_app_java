@@ -23,7 +23,7 @@
 //
 //In case of dispute arising out or in relation to the use of the program, it is subject to the public law of Switzerland. The place of jurisdiction is Berne.
 
-package tz.co.imis;
+package org.openimis.imispolicies;
 
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -33,9 +33,7 @@ import android.net.Uri;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-import tz.co.imis.R;
-
-import static tz.co.imis.R.string.PageLoading;
+import static org.openimis.imispolicies.R.string.PageLoading;
 
 
 class MyWebViewClient extends WebViewClient {

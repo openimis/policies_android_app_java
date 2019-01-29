@@ -23,7 +23,7 @@
 //
 //In case of dispute arising out or in relation to the use of the program, it is subject to the public law of Switzerland. The place of jurisdiction is Berne.
 
-package tz.co.imis;
+package org.openimis.imispolicies;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -33,8 +33,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.CursorAdapter;
 import android.widget.TextView;
-
-import tz.co.imis.R;
 
 /**
  * Created by Hiren on 29/11/2016.

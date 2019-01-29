@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="tz.co.exact.imis.ControlNumbers">
+    tools:context="org.openimis.imispolicies.ControlNumbers">
 
     <TextView
         android:id="@+id/OverViewPolicies"
