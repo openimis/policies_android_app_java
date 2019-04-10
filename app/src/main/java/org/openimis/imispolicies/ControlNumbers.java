@@ -1,12 +1,20 @@
 package org.openimis.imispolicies;
 
+import android.app.AlertDialog;
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class ControlNumbers extends AppCompatActivity {
     TextView OverViewPolicies;
@@ -27,6 +35,7 @@ public class ControlNumbers extends AppCompatActivity {
         OverViewPolicies.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
                 Intent intent = new Intent(ControlNumbers.this, SearchOverViewPolicies.class);
                 startActivity(intent);
             }
@@ -50,4 +59,5 @@ public class ControlNumbers extends AppCompatActivity {
     public void onBackPressed() {
         super.onBackPressed();
     }
+
 }

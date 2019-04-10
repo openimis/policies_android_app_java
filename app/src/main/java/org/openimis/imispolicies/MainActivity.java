@@ -856,6 +856,9 @@ public class MainActivity extends AppCompatActivity
             }
 
 
+        }else if (id == R.id.nav_control_numbers) {
+            ClientAndroidInterface ca = new ClientAndroidInterface(context);
+            ca.launchControlNumbers();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

@@ -2095,12 +2095,17 @@ public class ClientAndroidInterface {
         JSONArray RecordedPolicies = sqlHandler.getResult(Query, null);
         return RecordedPolicies;
     }
-    public JSONArray getRecordedPolicies(String insuranceNumber, String otherNames, String lastName, String insuranceProduct, String uploadedFrom, String uploadedTo, String radioRenewal, String requestedFrom, String requestedTo) {
+    public JSONArray getRecordedPolicies(String insuranceNumber, String otherNames, String lastName, String insuranceProduct, String uploadedFrom, String uploadedTo, String radioRenewal, String requestedFrom, String requestedTo, String PaymentType) {
         String renewal = "";
         String request = "";
         String upload = "";
+        String payment_type = "";
+
         if(!radioRenewal.equals("")){
             renewal = " AND RP.isDone == '"+radioRenewal+"'";
+        }
+        if(!PaymentType.equals("")){
+            payment_type = " AND CN.PaymentType == '"+PaymentType+"'";
         }
         //Uploaded date filter
         if(!uploadedFrom.equals("") && !uploadedTo.equals("")){
@@ -2122,7 +2127,7 @@ public class ClientAndroidInterface {
         if(requestedFrom.equals("") && !requestedTo.equals("")){
             request = " AND RP.UploadedDate = '"+requestedTo+"'";
         }
-        String Query = "SELECT * FROM tblRecordedPolicies RP INNER JOIN tblControlNumber CN ON RP.Code = CN.Id WHERE RP.InsuranceNumber LIKE '%"+insuranceNumber+"%' AND RP.LastName LIKE '%"+lastName+"%' AND RP.OtherNames LIKE '%"+otherNames+"%' AND RP.ProductName LIKE '%"+insuranceProduct+"%'"+renewal+""+request+""+upload+"";
+        String Query = "SELECT * FROM tblRecordedPolicies RP INNER JOIN tblControlNumber CN ON RP.Code = CN.Id WHERE RP.InsuranceNumber LIKE '%"+insuranceNumber+"%' AND RP.LastName LIKE '%"+lastName+"%' AND RP.OtherNames LIKE '%"+otherNames+"%' AND RP.ProductName LIKE '%"+insuranceProduct+"%'"+renewal+" "+request+" "+upload+" "+payment_type+"";
         JSONArray RecordedPolicies = sqlHandler.getResult(Query, null);
         return RecordedPolicies;
     }
@@ -2181,12 +2186,13 @@ public class ClientAndroidInterface {
         JSONArray RecordedPolicies = sqlHandler.getResult(Query, arg);
         return RecordedPolicies.toString();
     }
-    public int insertRecordedPolicy(String amountCalculated, String amountConfirmed, String control_number, String InternalIdentifier){
+    public int insertRecordedPolicy(String amountCalculated, String amountConfirmed, String control_number, String InternalIdentifier, String PaymentType){
         ContentValues values = new ContentValues();
         values.put("AmountCalculated", String.valueOf(amountCalculated));
         values.put("AmountConfirmed", String.valueOf(amountConfirmed));
         values.put("ControlNumber", String.valueOf(control_number));
         values.put("InternalIdentifier", String.valueOf(InternalIdentifier));
+        values.put("PaymentType", String.valueOf(PaymentType));
         try {//Update to new policy value
             sqlHandler.insertData("tblControlNumber", values);
 
@@ -2218,6 +2224,18 @@ public class ClientAndroidInterface {
         values.put("ControlRequestDate", d);
         try {
             sqlHandler.updateData("tblRecordedPolicies", values, "Id = ?", new String[]{String.valueOf(Id)});
+        } catch (UserException e) {
+            e.printStackTrace();
+        }
+    }
+    public void updateUploadedDate(int PolicyId){
+        @SuppressLint("SimpleDateFormat") SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        Calendar cal = Calendar.getInstance();
+        String d = format.format(cal.getTime());
+        ContentValues values = new ContentValues();
+        values.put("UploadedDate", d);
+        try {
+            sqlHandler.updateData("tblRecordedPolicies", values, "PolicyId = ?", new String[]{String.valueOf(PolicyId)});
         } catch (UserException e) {
             e.printStackTrace();
         }
@@ -2368,6 +2386,7 @@ public class ClientAndroidInterface {
         String PolicyQuery = "DELETE FROM tblPolicy WHERE PolicyId=?";
         String PolicyArg[] = {String.valueOf(PolicyId)};
         JSONArray Policy = sqlHandler.getResult(PolicyQuery, PolicyArg);
+        deleteRecodedPolicy(String.valueOf(PolicyId));
         //Policy.toString();
         //Added by salum 12.12.2017
         DeleteInsureePolicy(PolicyId,0);
@@ -3406,7 +3425,6 @@ public class ClientAndroidInterface {
                 global = (Global) mContext.getApplicationContext();
                 InsureeImages[] InsureeImages = FamilyPictures(insureesArray, CallerId);
 
-                //if(CallerId ==  0 && IsOffline == 1)
 
                 if(CallerId != 2){
                     if(mylist.size() == 0){
@@ -3424,6 +3442,7 @@ public class ClientAndroidInterface {
                 int g = 0;
 //             EnrolResult=1001;
                 if (EnrolResult >= 0) {
+                    updatePolicyRecords(Policy);
                     if (IsOffline == 0 && EnrolResult > 0) {
                         ContentValues values = new ContentValues();
                         String UpdateQuery = "";
@@ -3464,7 +3483,6 @@ public class ClientAndroidInterface {
                 } else {
                     String ErrMsg = null;
                     switch (EnrolResult) {
-
                         case -1:
                             ErrMsg = "[" + CHFNumber + "] " + mContext.getString(R.string.MissingHOF);
                             break;
@@ -3510,6 +3528,20 @@ public class ClientAndroidInterface {
         }
         if (rtEnrolledId > 0) return rtEnrolledId;
         return EnrolResult;
+    }
+
+    public void updatePolicyRecords(String policy) throws JSONException {
+        JSONObject object = new JSONObject(policy);
+        JSONObject ob = null;
+        String policies = object.getString("Policy");
+        JSONArray jsonArray = new JSONArray(policies);
+        if(jsonArray.length() > 0){
+            for(int i = 0; i < jsonArray.length(); i++){
+                ob = jsonArray.getJSONObject(i);
+                int policyId = ob.getInt("PolicyId");
+                updateUploadedDate(policyId);
+            }
+        }
     }
 
     private void deleteUnzippedFie() {

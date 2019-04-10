@@ -13,12 +13,14 @@
 <color name="LightBlue">#008080</color>
 <color name="DarkBlue">#09578e</color>
 <color name="white">#FFF</color>
+<color name="transparent">#00ffffff</color>
 <color name="Black">#000000</color>
 
 <color name="orange">#ffae4c</color>
 <color name="orange_dark">#b66200</color>
 <color name="silver">#dcdcdc</color>
 <color name="grey">#737373</color>
+<color name="white2">#f4f4f4</color>
 <color name="blue">#0032d6</color>
 <color name="red">#ff000d</color>
 <color name="black">#080808</color>

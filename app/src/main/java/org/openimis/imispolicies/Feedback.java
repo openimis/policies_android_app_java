@@ -115,7 +115,7 @@ public class Feedback extends AppCompatActivity {
             public void onClick(View v) {
 
                 if (!isValidate()) return;
-                pd = ProgressDialog.show(Feedback.this, "", getResources().getString(R.string.UploadingFeedback));
+                pd = ProgressDialog.show(Feedback.this, "", getResources().getString(R.string.saving));
                 final String[] feed = {null};
 
                 new Thread(){

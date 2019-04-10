@@ -190,7 +190,7 @@ public class Renewal extends AppCompatActivity {
             public void onClick(View v) {
                 if (!chkDiscontinue.isChecked()) {
 
-                    pd = ProgressDialog.show(Renewal.this, "", getResources().getString(R.string.Uploading));
+                    pd = ProgressDialog.show(Renewal.this, "", getResources().getString(R.string.saving));
                     final String[] renewal = {null};
 
                     new Thread() {

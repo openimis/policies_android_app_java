@@ -9,6 +9,7 @@ import android.text.TextWatcher;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -17,17 +18,20 @@ import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.SimpleAdapter;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 
 public class SearchOverViewControlNumber extends AppCompatActivity {
@@ -42,6 +46,7 @@ public class SearchOverViewControlNumber extends AppCompatActivity {
     TextView Uploaded_To;
     TextView Requested_From;
     TextView Requested_To;
+    static String PayType = "";
 
     RadioButton Renewal_Yes;
     RadioButton Renewal_No;
@@ -55,6 +60,8 @@ public class SearchOverViewControlNumber extends AppCompatActivity {
     Calendar myCalendar1;
     Calendar myCalendarReqFrom;
     Calendar myCalendarReqTo;
+
+    Spinner PaymentSpinner;
 
     ClientAndroidInterface clientAndroidInterface;
 
@@ -90,6 +97,13 @@ public class SearchOverViewControlNumber extends AppCompatActivity {
         Requested_Yes = (RadioButton) findViewById(R.id.requested_yes);
         Requested_No = (RadioButton) findViewById(R.id.requested_no);
         Radio_Requested = (RadioGroup) findViewById(R.id.radio_requested);
+
+        PaymentSpinner = (Spinner) findViewById(R.id.payment_type);
+
+        addItemsOnSpinner2();
+        addListenerOnSpinnerItemSelection();
+
+
 
 
         Insurance_Product.addTextChangedListener(new TextWatcher() {
@@ -139,6 +153,7 @@ public class SearchOverViewControlNumber extends AppCompatActivity {
                 String UploadedTo = Uploaded_To.getText().toString();
                 String RequestedFrom = Requested_From.getText().toString();
                 String RequestedTo = Requested_To.getText().toString();
+                String PaymentType = PayType;
                 String RadioRenewal = "";
 
                 if(Renewal_Yes.isChecked() || Renewal_No.isChecked()){
@@ -159,6 +174,7 @@ public class SearchOverViewControlNumber extends AppCompatActivity {
                 intent.putExtra("UPLOADED_TO", UploadedTo);
                 intent.putExtra("REQUESTED_FROM", RequestedFrom);
                 intent.putExtra("REQUESTED_TO", RequestedTo);
+                intent.putExtra("PAYMENT_TYPE", PaymentType);
                 startActivity(intent);
 
             }
@@ -226,6 +242,27 @@ public class SearchOverViewControlNumber extends AppCompatActivity {
         });
 
 
+    }
+
+    // add items into spinner dynamically
+    public void addItemsOnSpinner2() {
+
+        List<String> list = new ArrayList<String>();
+        list.add("");
+        list.add("Bank Transfer");
+        list.add("Mobile Phone");
+
+        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this,
+                android.R.layout.simple_spinner_item, list);
+        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        PaymentSpinner.setAdapter(dataAdapter);
+    }
+
+
+
+
+    public void addListenerOnSpinnerItemSelection() {
+        PaymentSpinner.setOnItemSelectedListener(new CustomOnItemSelectedListener());
     }
 
     public boolean onOptionsItemSelected(MenuItem item){
@@ -358,5 +395,6 @@ public class SearchOverViewControlNumber extends AppCompatActivity {
 
         Requested_To.setText(String.valueOf(sdf.format(myCalendarReqTo.getTime())));
     }
+
 }
 

@@ -118,7 +118,7 @@
     <string name="Active">Actif</string>
     <string name="Idle">En attente</string>
     <string name="Suspended">Suspendu</string>
-    <string name="FileDoesntBelongHere">!Process Failed, Wrong File or Officer code.</string>
+    <string name="FileDoesntBelongHere">!Le process a échoué: mauvais fichier ou mauvais code agent.</string>
     <string name="ReceiptNotUnique">Le numéro de reçu doit être unique.</string>
     <string name="PleaseDeletePremium">Le contrat a une contribution. Veuillez d\'abord supprimer les contributions</string>
     <string name="PolicyDeleted">Contrat avec succès</string>
@@ -129,7 +129,7 @@
     <string name="InsureeNotDeleted">Assuré non supprimé</string>
     <string name="FamilyDeleted">Famille supprimée</string>
     <string name="Scan">Scanner</string>
-    <string name="InsureeName">Nom d\'assuré</string>
+    <string name="InsureeName">Nom de l\'assuré</string>
     <string name="ReadOnly">La carte SD est en mode lecture seule. Veuillez régler le mode de lecture/écriture et redémarrer l\'application.</string>
     <string name="NoSDCard">IMIS a besoin d\'une carte mémoire externe pour fonctionner. Veuillez insérer la carte mémoire et redémarrer l\'application.</string>
     <string name="ForceClose">Fermeture forcée</string>
@@ -140,7 +140,7 @@
     <string name="RecordNotFound">Le membre avec ce numéro d\'assurance n\'existe pas.</string>
     <string name="NoRenewalFound">Aucun renouvellement trouvé</string>
     <string name="NoInternet">Veuillez vérifier votre connexion Internet.</string>
-    <string name="Submit">Submit</string>
+    <string name="Submit">Soumettre</string>
     <string name="DiscontinuePolicy">Annuler le contrat</string>
     <string name="DiscontinuePolicyQ">Voulez-vous mettre fin à ce contrat ?</string>
     <string name="ProductCode">Code de produit</string>
@@ -272,7 +272,7 @@
     <string name="FamilyExists">La famille existe déjà dans le téléphone</string>
     <string name="ContentTitle">La nouvelle version du IMIS est maintenant disponible.</string>
     <string name="ContentText">Cliquez ici pour télécharger.</string>
-    <string name="saving">Enregistrement...</string>
+    <string name="saving">enregistrement...</string>
     <string name="Interuption">Le processus a été interrompu. Veuillez vérifier votre connexion Internet.</string>
     <string name="WithoutPolicyPremium">sans contrat/contribution</string>
     <string name="WithoutPhoto">sans photo</string>
@@ -311,35 +311,52 @@
     <string name="NoData">Aucune donnée n\'a été créée</string>
 
 
-    <string name="UnlistedRenewalPolicies">Unlisted Renewal Policies</string>
-    <string name="RenewYourPolicy">Renew Your Policy</string>
-    <string name="user_name">User name</string>
-    <string name="claim_code">Claim Code</string>
-    <string name="type_here">Type here</string>
-    <string name="Enter_Credentials">Please enter user name and password</string>
-    <string name="Login_Successful">Login Successful</string>
-    <string name="control_numbers">Control Numbers</string>
-    <string name="OverViewPolicies">Overview Policies</string>
-    <string name="OverViewControlNumber">Overview Control Number</string>
-    <string name="ControlNumbers">Control Numbers</string>
-    <string name="title_activity_overview_policies">OverviewPolicies</string>
-    <string name="title_activity_over_view_control_numbers">OverViewControlNumbers</string>
-    <string name="product_name">Product Name:</string>
-    <string name="uploaded_date">Uploaded Date:</string>
-    <string name="requested_date">Requested Date:</string>
-    <string name="product_code">Product Code:</string>
-    <string name="names">Names:</string>
-    <string name="renewal">Renewal:</string>
-    <string name="insurance_no">Insurance No.</string>
-    <string name="requested_to">Requested To</string>
-    <string name="requested_from">Requested From</string>
-    <string name="uploaded_to">Uploaded To</string>
-    <string name="to">TO</string>
-    <string name="uploaded_from">Uploaded From</string>
-    <string name="insurance_product">Insurance product</string>
-    <string name="clear">Clear</string>
-    <string name="requested">Requested</string>
-    <string name="number_of_found_policies">Number of found policies</string>
-    <string name="amount_of_contribution">Amount of contribution</string>
+    <string name="UnlistedRenewalPolicies">Polices renouvellées non listées</string>
+    <string name="RenewYourPolicy">Renouveler votre police</string>
+    <string name="user_name">nom de l\'utilisateur</string>
+    <string name="claim_code">code la du remboursement</string>
+    <string name="type_here">encoder ici</string>
+    <string name="Enter_Credentials">Entrer le nom d\'utilisateur et du mot de passe</string>
+    <string name="Login_Successful">Login a été entré avec succès</string>
+    <string name="control_numbers">numéros de control</string>
+    <string name="OverViewPolicies">aperçu des polices d\'assurance</string>
+    <string name="OverViewControlNumber">aperçu des numéros de contrôl</string>
+    <string name="ControlNumbers">numéros de control</string>
+    <string name="title_activity_overview_policies">aperçu des polices</string>
+    <string name="title_activity_over_view_control_numbers">aperçu des numéros de contrôl</string>
+    <string name="product_name">nom du produit:</string>
+    <string name="uploaded_date">date téléchargée:</string>
+    <string name="requested_date">date demandée:</string>
+    <string name="product_code">code du produit:</string>
+    <string name="names">noms:</string>
+    <string name="renewal">renouvellement:</string>
+    <string name="requested_to">demandé au</string>
+    <string name="requested_from">demandé du</string>
+    <string name="uploaded_to">téléchargé au</string>
+    <string name="to">au</string>
+    <string name="uploaded_from">téléchargé au</string>
+    <string name="clear">effacer</string>
+    <string name="requested">demandé</string>
+    <string name="number_of_found_policies">number of found policies</string>
+    <string name="amount_of_contribution">montant de la contribution</string>
     <string name="button_ok">OK</string>
+
+    <!--Please Convert the below strings-->
+
+    <string name="success">Successfully</string>
+    <string name="has_no_rights">You have no rights for this functionaliy</string>
+    <string name="no_data_delete">No data was selected to delete</string>
+    <string name="Get_Control_Number">Get Control Number</string>
+    <string name="notUploaded">policies where not deleted because they are not uploaded</string>
+    <string name="of">of</string>
+    <string name="requestSent">Request has been sent successfuly</string>
+    <string name="cant_be_deleted">This policy cant be deleted because it has not been uploaded yet.</string>
+
+    <string name="insurance_no">Insurance No.</string>
+    <string name="insurance_product">Insurance product</string>
+    <string name="request">Request</string>
+    <string name="Type_of_payment">Type of payment</string>
+
+
+
 </resources>

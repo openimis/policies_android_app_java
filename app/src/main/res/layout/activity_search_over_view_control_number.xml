@@ -193,6 +193,19 @@
             </RadioGroup>
 
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:text="@string/PaymentType"/>
+            <Spinner
+                android:id="@+id/payment_type"
+                android:layout_width="250dp"
+                android:layout_height="30dp"
+                android:layout_margin="10dp"
+                android:background="@drawable/corner"
+                android:drawSelectorOnTop="true"/>
+
         </LinearLayout>
 
 

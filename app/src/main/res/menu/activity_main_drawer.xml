@@ -27,11 +27,14 @@
             android:id="@+id/nav_modify_family"
             android:icon="@android:drawable/ic_menu_edit"
             android:title="@string/ModifyFamily" />
-
-        <!--<item-->
-            <!--android:id="@+id/nav_login"-->
-            <!--android:icon="@android:drawable/ic_partial_secure"-->
-            <!--android:title="@string/Login" />-->
+        <item
+            android:id="@+id/nav_control_numbers"
+            android:icon="@android:drawable/ic_menu_send"
+            android:title="@string/ControlNumbers" />
+<!--        <item
+            android:id="@+id/nav_login"
+            android:icon="@android:drawable/ic_partial_secure"
+            android:title="@string/Login" />-->
         <item
             android:id="@+id/nav_renewal"
             android:icon="@drawable/ic_renew"

@@ -319,11 +319,11 @@
     <string name="Login_Successful">Login Successful</string>
     <string name="control_numbers">Control Numbers</string>
     <string name="OverViewPolicies">Overview Policies</string>
-    <string name="OverViewControlNumber">Overview Control Number</string>
+    <string name="OverViewControlNumber">Overview Control Numbers</string>
     <string name="ControlNumbers">Control Numbers</string>
 
-    <string name="title_activity_overview_policies">OverviewPolicies</string>
-    <string name="title_activity_over_view_control_numbers">OverViewControlNumbers</string>
+    <string name="title_activity_overview_policies">Overview policies</string>
+    <string name="title_activity_over_view_control_numbers">Overview control numbers</string>
     <string name="product_name">Product Name:</string>
     <string name="uploaded_date">Uploaded Date:</string>
     <string name="requested_date">Requested Date:</string>
@@ -342,5 +342,16 @@
     <string name="number_of_found_policies">Number of found policies</string>
     <string name="amount_of_contribution">Amount of contribution</string>
     <string name="process_complete">Process Complete</string>
-
+    <string name="select_policy">Please select a policy/policies to request</string>
+    <string name="success">Successfully</string>
+    <string name="has_no_rights">You have no rights for this functionaliy</string>
+    <string name="button_ok">OK</string>
+    <string name="no_data_delete">No data was selected to delete</string>
+    <string name="Get_Control_Number">Get Control Number</string>
+    <string name="notUploaded">policies where not deleted because they are not uploaded</string>
+    <string name="of">of</string>
+    <string name="requestSent">Request has been sent successfuly</string>
+    <string name="cant_be_deleted">This policy cant be deleted because it has not been uploaded yet.</string>
+    <string name="Type_of_payment">Type of payment</string>
+    <string name="request">Request</string>
 </resources>

@@ -4,6 +4,11 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:id="@+id/layout_root"
+    android:background="@drawable/elevation"
+    android:layout_marginLeft="40dp"
+    android:layout_marginRight="40dp"
+    android:layout_marginTop="5dp"
+    android:layout_marginBottom="5dp"
     android:padding="20dp">
     <RelativeLayout
         android:layout_width="match_parent"
@@ -17,47 +22,60 @@
         <TextView
             android:id="@+id/LabelInsuranceNo"
             android:layout_width="wrap_content"
-            android:layout_height="44dp"
+            android:layout_height="35dp"
             android:text="@string/insurance_no"
             android:textColor="@color/white"
             android:background="@color/colorPrimaryDark"
             android:typeface="monospace"
             android:fontFamily="sans-serif-light"
             android:padding="11dp"
-            android:textSize="14sp"
+            android:textSize="10sp"
             android:textAppearance="?android:attr/textAppearanceLarge" />
         <TextView
             android:id="@+id/InsuranceNumber"
-            android:layout_width="130dp"
-            android:layout_height="44dp"
+            android:layout_width="wrap_content"
+            android:layout_height="35dp"
             android:layout_toRightOf="@id/LabelInsuranceNo"
             android:gravity="end"
             android:textAlignment="textEnd"
             android:typeface="monospace"
             android:fontFamily="sans-serif-light"
-            android:padding="15dp"
-            android:textSize="12sp"
+            android:padding="11dp"
+            android:textSize="10sp"
             android:textColor="@color/white"
             android:background="@color/colorPrimaryDark"
-            android:text=""/>
+            android:text="2000"/>
         <TextView
             android:id="@+id/PolicyId"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:visibility="gone"/>
-        <CheckBox
-            android:id="@+id/checkbox1"
+<!--        <CheckBox
             android:layout_width="wrap_content"
             android:layout_height="44dp"
             android:layout_toRightOf="@id/InsuranceNumber"
             android:layout_alignParentRight="true"
             android:gravity="end"
+            android:layout_marginLeft="40dp"
             android:textAlignment="textEnd"
             android:typeface="monospace"
             android:fontFamily="sans-serif-light"
             android:textSize="12sp"
             android:enabled="false"
-            android:background="@color/colorPrimaryDark"/>
+            android:visibility="gone"
+            android:background="@color/transparent"/>-->
+        <ImageView
+            android:id="@+id/checkbox1"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_margin="5dp"
+            android:fontFamily="sans-serif-light"
+            android:layout_toRightOf="@id/InsuranceNumber"
+
+            android:gravity="end"
+            android:layout_marginLeft="10dp"
+            android:src="@drawable/unchecked"
+            android:scaleType="centerInside"/>
 
     </RelativeLayout>
 
@@ -80,6 +98,7 @@
             android:textColor="@color/black"
             android:layout_marginTop="10dp"
             android:layout_marginBottom="10dp"
+            android:textSize="10sp"
             android:typeface="monospace"
             android:fontFamily="sans-serif-light"
             android:text="@string/renewal" />
@@ -96,6 +115,7 @@
             android:textAlignment="textEnd"
             android:typeface="monospace"
             android:fontFamily="sans-serif-light"
+            android:textSize="10sp"
             android:text="" />
 
         <TextView
@@ -108,6 +128,7 @@
             android:typeface="monospace"
             android:fontFamily="sans-serif-light"
             android:layout_below="@id/RenewalLabel"
+            android:textSize="10sp"
             android:text="@string/names" />
         <TextView
             android:id="@+id/Names"
@@ -123,6 +144,7 @@
             android:gravity="end"
             android:textAlignment="textEnd"
             android:fontFamily="sans-serif-light"
+            android:textSize="10sp"
             android:text="" />
         <TextView
             android:id="@+id/ProductCodeLabel"
@@ -134,6 +156,7 @@
             android:typeface="monospace"
             android:fontFamily="sans-serif-light"
             android:layout_below="@id/NamesLabel"
+            android:textSize="10sp"
             android:text="@string/product_code" />
         <TextView
             android:id="@+id/ProductCode"
@@ -149,6 +172,7 @@
             android:gravity="end"
             android:textAlignment="textEnd"
             android:fontFamily="sans-serif-light"
+            android:textSize="10sp"
             android:text="" />
         <TextView
             android:id="@+id/ProductNameLabel"
@@ -160,6 +184,7 @@
             android:typeface="monospace"
             android:fontFamily="sans-serif-light"
             android:layout_below="@id/ProductCodeLabel"
+            android:textSize="10sp"
             android:text="@string/product_name" />
         <TextView
             android:id="@+id/ProductName"
@@ -175,6 +200,7 @@
             android:gravity="end"
             android:textAlignment="textEnd"
             android:fontFamily="sans-serif-light"
+            android:textSize="10sp"
             android:text="" />
 
     </RelativeLayout>
@@ -183,6 +209,7 @@
         android:layout_height="0.1dp"
         android:typeface="monospace"
         android:fontFamily="sans-serif-thin"
+        android:textSize="10sp"
         android:background="@color/black"/>
     <RelativeLayout
         android:layout_width="match_parent"
@@ -196,6 +223,7 @@
             android:layout_marginTop="10dp"
             android:layout_marginBottom="10dp"
             android:typeface="monospace"
+            android:textSize="10sp"
             android:fontFamily="sans-serif-light"
             android:text="@string/uploaded_date" />
         <TextView
@@ -210,6 +238,7 @@
             android:gravity="end"
             android:textAlignment="textEnd"
             android:typeface="monospace"
+            android:textSize="10sp"
             android:fontFamily="sans-serif-light"
             android:text="" />
 
@@ -223,6 +252,7 @@
             android:typeface="monospace"
             android:fontFamily="sans-serif-light"
             android:layout_below="@id/UploadedLabel"
+            android:textSize="10sp"
             android:text="@string/requested_date" />
         <TextView
             android:id="@+id/RequestedDate"
@@ -237,6 +267,7 @@
             android:layout_below="@id/UploadedDate"
             android:gravity="end"
             android:textAlignment="textEnd"
+            android:textSize="10sp"
             android:fontFamily="sans-serif-light"
             android:text="" />
 
