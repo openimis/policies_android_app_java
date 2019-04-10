@@ -4,7 +4,7 @@ android {
     compileSdkVersion 25
     buildToolsVersion "25.0.0"
     defaultConfig {
-        applicationId "tz.co.exact.imis"
+        applicationId "org.openimis.imispolicies"
         minSdkVersion 15
         targetSdkVersion 25
         versionCode 1
@@ -43,4 +43,6 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile files('libs/android-support-v7-recyclerview.jar')
     compile files('libs/zip4j-1.2.7.jar')
+    compile files('libs/httpclient-4.2.3.jar')
+    compile files('libs/httpcore-4.2.3.jar')//compile 'com.android.support:support-annotations:27.1.1'
 }

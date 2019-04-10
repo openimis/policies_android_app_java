@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@color/DarkBlue"
+        android:textColor="@color/white"
+        android:textAlignment="textStart"
+        android:gravity="start"
+        android:paddingLeft="10dp"
+        android:typeface="monospace"
+        android:paddingTop="15dp"
+        android:textSize="21dp"
+        android:text="Report"
+        />
+    <TextView
+        android:id="@+id/report_message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:textColor="@color/Black"
+        android:layout_margin="10dp"
+        android:textSize="18dp"
+        android:textAlignment="textStart"
+        android:gravity="start"
+        android:typeface="monospace"/>
+
+
+</LinearLayout>
