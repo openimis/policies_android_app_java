@@ -38,6 +38,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -409,14 +410,15 @@ public class MainActivity extends AppCompatActivity
                 MainActivity.this);
 
 // Setting Dialog Title
-        alertDialog2.setTitle("NO INTERNET CONNECTION");
-        alertDialog2.setMessage("Do you want to import .txt file from your DATABASE folder?");
+        alertDialog2.setTitle(getResources().getString(R.string.NoInternetTitle));
+        alertDialog2.setMessage(getResources().getString(R.string.DoImport));
+        alertDialog2.setCancelable(false);
 
 // Setting Icon to Dialog
        // alertDialog2.setIcon(R.drawable.delete);
 
 // Setting Positive "Yes" Btn
-        alertDialog2.setPositiveButton("Yes",
+        alertDialog2.setPositiveButton(getResources().getString(R.string.Yes),
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
 
@@ -426,11 +428,11 @@ public class MainActivity extends AppCompatActivity
                         try{
                             startActivityForResult(intent, 4);
                         } catch (ActivityNotFoundException e){
-                            Toast.makeText(getApplicationContext(), "There are no file explorer clients installed.", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getApplicationContext(), getResources().getString(R.string.NoFileExporerInstalled), Toast.LENGTH_SHORT).show();
                         }
                         // Write your code here to execute after dialog
                     }
-                }).setNegativeButton("No",
+                }).setNegativeButton(getResources().getString(R.string.No),
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         dialog.cancel();
@@ -446,14 +448,14 @@ public class MainActivity extends AppCompatActivity
                 MainActivity.this);
 
 // Setting Dialog Title
-        alertDialog2.setTitle("NO INTERNET CONNECTION");
-        alertDialog2.setMessage("Do you want to import .txt file from your DATABASE folder?");
+        alertDialog2.setTitle(getResources().getString(R.string.NoInternetTitle));
+        alertDialog2.setMessage(getResources().getString(R.string.DoImport));
 
 // Setting Icon to Dialog
         // alertDialog2.setIcon(R.drawable.delete);
 
 // Setting Positive "Yes" Btn
-        alertDialog2.setPositiveButton("Yes",
+        alertDialog2.setPositiveButton(getResources().getString(R.string.Yes),
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
 
@@ -463,11 +465,11 @@ public class MainActivity extends AppCompatActivity
                         try{
                             startActivityForResult(intent, 4);
                         } catch (ActivityNotFoundException e){
-                            Toast.makeText(getApplicationContext(), "There are no file explorer clients installed.", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getApplicationContext(), getResources().getString(R.string.NoFileExporerInstalled), Toast.LENGTH_SHORT).show();
                         }
                         // Write your code here to execute after dialog
                     }
-                }).setNegativeButton("No",
+                }).setNegativeButton(getResources().getString(R.string.No),
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         dialog.cancel();
@@ -482,21 +484,22 @@ public class MainActivity extends AppCompatActivity
                 MainActivity.this);
 
 // Setting Dialog Title
-        alertDialog2.setTitle("Load file:");
+        alertDialog2.setTitle(getResources().getString(R.string.LoadFile));
         alertDialog2.setMessage(filename);
+        alertDialog2.setCancelable(false);
 
 // Setting Icon to Dialog
         // alertDialog2.setIcon(R.drawable.delete);
 
 // Setting Positive "Yes" Btn
-        alertDialog2.setPositiveButton("OK",
+        alertDialog2.setPositiveButton(getResources().getString(R.string.Ok),
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         MasterDataLocalAsync masterDataLocalAsync = new MasterDataLocalAsync();
                         masterDataLocalAsync.execute();
                         // Write your code here to execute after dialog
                     }
-                }).setNegativeButton("Quit",
+                }).setNegativeButton(getResources().getString(R.string.Quit),
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         dialog.cancel();
@@ -513,21 +516,22 @@ public class MainActivity extends AppCompatActivity
                 MainActivity.this);
 
 // Setting Dialog Title
-        alertDialog2.setTitle("Load file:");
+        alertDialog2.setTitle(getResources().getString(R.string.LoadFile));
         alertDialog2.setMessage(filename);
+        alertDialog2.setCancelable(false);
 
 // Setting Icon to Dialog
         // alertDialog2.setIcon(R.drawable.delete);
 
 // Setting Positive "Yes" Btn
-        alertDialog2.setPositiveButton("OK",
+        alertDialog2.setPositiveButton(getResources().getString(R.string.Ok),
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         MasterDataLocalAsync masterDataLocalAsync = new MasterDataLocalAsync();
                         masterDataLocalAsync.execute();
                         // Write your code here to execute after dialog
                     }
-                }).setNegativeButton("Quit",
+                }).setNegativeButton(getResources().getString(R.string.Quit),
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         dialog.cancel();
@@ -542,14 +546,14 @@ public class MainActivity extends AppCompatActivity
                 MainActivity.this);
 
 // Setting Dialog Title
-        alertDialog2.setTitle("Incomplete!");
+        alertDialog2.setTitle(getResources().getString(R.string.Incomplete));
         alertDialog2.setMessage(msg);
 
 // Setting Icon to Dialog
         // alertDialog2.setIcon(R.drawable.delete);
 
 // Setting Positive "Yes" Btn
-        alertDialog2.setPositiveButton("OK",
+        alertDialog2.setPositiveButton(getResources().getString(R.string.Ok),
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         // Write your code here to execute after dialog

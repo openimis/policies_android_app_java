@@ -354,4 +354,9 @@
     <string name="cant_be_deleted">This policy cant be deleted because it has not been uploaded yet.</string>
     <string name="Type_of_payment">Type of payment</string>
     <string name="request">Request</string>
+    <string name="NoInternetTitle">NO INTERNET CONNECTION</string>
+    <string name="DoImport">Do you want to import .txt file from your DATABASE folder?</string>
+    <string name="NoFileExporerInstalled">There are no file explorer clients installed.</string>
+    <string name="LoadFile">Load file:</string>
+    <string name="Incomplete">Incomplete!</string>
 </resources>

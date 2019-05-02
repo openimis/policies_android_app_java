@@ -4226,7 +4226,7 @@ public class ClientAndroidInterface {
                         cs.setFunctionName("UploadFeedback");
                         serv = cs.UploadFeedback(JsonFileName,files[i].getName());
                     }
-
+0
                     if (serv == true) {
                         XMLFile = JSONfiles[i];
 
