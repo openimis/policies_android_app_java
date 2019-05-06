@@ -1693,8 +1693,8 @@ public class ClientAndroidInterface {
         String ProductQuery = "SELECT P.ProductName ProductName\n" +
                 " FROM tblProduct P \n"+
                 " LEFT OUTER JOIN  tblLocations L ON (P.LocationId = L.LocationId) \n" +
-                " WHERE  (P.LocationId ='null' OR P.LocationId ='' OR P.LocationId = L.ParentLocationId) AND " +
-                "( '" + dt + "'  BETWEEN P.DateFrom AND P.Dateto )  \n" +
+                //" WHERE  (P.LocationId ='null' OR P.LocationId ='' OR P.LocationId = L.ParentLocationId) AND " +
+                " WHERE ( '" + dt + "'  BETWEEN P.DateFrom AND P.Dateto )  \n" +
                 " ORDER BY  L.LocationId DESC";
 
         JSONArray Products = sqlHandler.getResult(ProductQuery, null);
@@ -4226,7 +4226,6 @@ public class ClientAndroidInterface {
                         cs.setFunctionName("UploadFeedback");
                         serv = cs.UploadFeedback(JsonFileName,files[i].getName());
                     }
-0
                     if (serv == true) {
                         XMLFile = JSONfiles[i];
 
