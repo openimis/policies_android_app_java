@@ -356,7 +356,17 @@
     <string name="insurance_product">Insurance product</string>
     <string name="request">Request</string>
     <string name="Type_of_payment">Type of payment</string>
-
+    <string name="CheckCommission">Check Commission</string>
+    <string name="year">Year</string>
+    <string name="paid">Paid</string>
+    <string name="check">Check</string>
+    <string name="Get_Commission">Get Commissions</string>
+    <string name="commissions_report">Commissions Report</string>
+    <string name="amount">Amount</string>
+    <string name="Commissions">commissions</string>
+    <string name="SearchPolicies">Search Policies</string>
+    <string name="SearchControlNumbers">Search Control Numbers</string>
+    <string name="Overviews">Overviews</string>
 
 
 </resources>

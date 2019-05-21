@@ -22,7 +22,7 @@
         android:required="true" />
 
     <application
-        android:name="org.openimis.imispolicies.Global"
+        android:name=".Global"
         android:allowBackup="true"
         android:fullBackupContent="@xml/backup_descriptor"
         android:icon="@mipmap/ic_launcher"
@@ -33,7 +33,7 @@
         tools:ignore="GoogleAppIndexingWarning"
         tools:replace="android:icon">
         <activity
-            android:name="org.openimis.imispolicies.MainActivity"
+            android:name=".MainActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/app_name"
             android:screenOrientation="portrait"
@@ -45,62 +45,63 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="org.openimis.imispolicies.Enquire"
+            android:name=".Enquire"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/Enquire"
             android:screenOrientation="portrait" />
         <activity
-            android:name="org.openimis.imispolicies.RenewList"
+            android:name=".RenewList"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/Renewal"
             android:screenOrientation="portrait" />
         <activity
-            android:name="org.openimis.imispolicies.Renewal"
+            android:name=".Renewal"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/Renewal"
-            android:parentActivityName="org.openimis.imispolicies.RenewList"
+            android:parentActivityName=".RenewList"
             android:screenOrientation="portrait"
             tools:targetApi="jelly_bean" />
         <activity
-            android:name="org.openimis.imispolicies.FeedbackList"
+            android:name=".FeedbackList"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:screenOrientation="portrait" />
         <activity
-            android:name="org.openimis.imispolicies.Feedback"
+            android:name=".Feedback"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:parentActivityName="org.openimis.imispolicies.FeedbackList"
+            android:parentActivityName=".FeedbackList"
             android:screenOrientation="portrait"
             tools:targetApi="jelly_bean" />
         <activity
-            android:name="org.openimis.imispolicies.Statistics"
+            android:name=".Statistics"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:screenOrientation="portrait" />
         <activity
-            android:name="org.openimis.imispolicies.Acquire"
+            android:name=".Acquire"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/Acquire"
             android:screenOrientation="portrait" />
         <activity
-            android:name="org.openimis.imispolicies.Reports"
+            android:name=".Reports"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/Reports"
             android:screenOrientation="portrait" />
         <activity
-            android:name="org.openimis.imispolicies.SnapshotIndicators"
+            android:name=".SnapshotIndicators"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/SnapshotIndicators"
             android:screenOrientation="portrait" />
         <activity
-            android:name="org.openimis.imispolicies.CummulativeIndicators"
+            android:name=".CummulativeIndicators"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/CummulativeIndicators"
             android:screenOrientation="portrait" />
-        <activity android:name="org.openimis.imispolicies.ControlNumbers" />
-        <activity android:name="org.openimis.imispolicies.SearchOverViewPolicies" />
-        <activity android:name="org.openimis.imispolicies.OverViewPolicies1" />
-        <activity android:name="org.openimis.imispolicies.OverViewControlNumbers" />
-        <activity android:name="org.openimis.imispolicies.SearchOverViewControlNumber" />
-        <activity android:name="org.openimis.imispolicies.ViewPolicies"></activity>
+        <activity android:name=".ControlNumbers" />
+        <activity android:name=".SearchOverViewPolicies" />
+        <activity android:name=".OverViewPolicies1" />
+        <activity android:name=".OverViewControlNumbers" />
+        <activity android:name=".SearchOverViewControlNumber" />
+        <activity android:name=".ViewPolicies" />
+        <activity android:name=".CheckCommission"></activity>
     </application>
 
 </manifest>

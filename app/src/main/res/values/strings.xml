@@ -87,6 +87,7 @@
     <string name="New">New</string>
     <string name="SelectOfficer">Select Officer</string>
     <string name="SelectProduct">Select Product</string>
+    <string name="SelectMonth">Select Month</string>
     <string name="EnrolmentDate">Enrolment date</string>
     <string name="Product">Product</string>
     <string name="EffectiveDate">Effective Date</string>
@@ -213,7 +214,7 @@
     <string name="EnrollmentXML">Create Enrolments XML</string>
     <string name="UploadRenewals">Upload Renewals</string>
     <string name="UploadFeedBack">Upload FeedBacks</string>
-    <string name="DownloadMaster">Download Master</string>
+    <string name="DownloadMaster">Download Master Data</string>
     <string name="PleaseWait">Please Wait..</string>
     <string name="Language">Language</string>
     <string name="Families">Families</string>
@@ -289,7 +290,7 @@
     <string name="failedToUpload">Failed to Upload</string>
     <string name="dataDeleted">Deleted successfuly</string>
     <string name="InvalidEmail">Invalid Email!</string>
-    <string name="ServerError">Something went wrong on the server, Failed to update data!</string>
+    <string name="ServerError">Something went wrong on the server, Failed to upload data!</string>
     <string name="PolicyCovered">Price of the policy is covered. Do you still want to add contribution?</string>
     <string name="ExceedsPolicy">Contribution exceeds the price of the policy</string>
     <string name="PriceBelow">Price of the policy not covered yet, Please select action to perform.</string>
@@ -359,4 +360,15 @@
     <string name="NoFileExporerInstalled">There are no file explorer clients installed.</string>
     <string name="LoadFile">Load file:</string>
     <string name="Incomplete">Incomplete!</string>
+    <string name="CheckCommission">Check Commission</string>
+    <string name="year">Year</string>
+    <string name="paid">Paid</string>
+    <string name="check">Check</string>
+    <string name="Get_Commission">Get Commissions</string>
+    <string name="commissions_report">Commissions Report</string>
+    <string name="amount">Amount</string>
+    <string name="Commissions">commissions</string>
+    <string name="SearchPolicies">Search Policies</string>
+    <string name="SearchControlNumbers">Search Control Numbers</string>
+    <string name="Overviews">Overviews</string>
 </resources>

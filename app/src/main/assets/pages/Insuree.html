@@ -271,13 +271,21 @@ In case of dispute arising out or in relation to the use of the program, it is s
         }
 
         function fillRelationship(){
+            $textLanguage = "Relation";
+            if(Android.getSelectedLanguage() != "en"){
+                $textLanguage = "AltLanguage";
+            }
             var $Relations = Android.getRelationships();
-            bindDropdown('ddlRelationship', $Relations, 'RelationId', 'Relation',0, Android.getString('SelectRelationship'));
+            bindDropdown('ddlRelationship', $Relations, 'RelationId', $textLanguage,0, Android.getString('SelectRelationship'));
         }
 
         function fillGender(){
+            $textLanguage = "Gender";
+            if(Android.getSelectedLanguage() != "en"){
+                $textLanguage = "AltLanguage";
+            }
             var $Gender = Android.getGender();
-            bindDropdown('ddlGender', $Gender, 'Code', 'Gender',null, Android.getString('SelectGender'));
+            bindDropdown('ddlGender', $Gender, 'Code', $textLanguage,null, Android.getString('SelectGender'));
         }
 
         function fillMaritalStatus(){
@@ -317,18 +325,30 @@ In case of dispute arising out or in relation to the use of the program, it is s
         }
 
         function fillProfessions(){
+            $textLanguage = "Profession";
+            if(Android.getSelectedLanguage() != "en"){
+                $textLanguage = "AltLanguage";
+            }
             var $Professions = Android.getProfessions();
-            bindDropdown('ddlProfession', $Professions, 'ProfessionId', 'Profession',0, Android.getString('SelectProfession'));
+            bindDropdown('ddlProfession', $Professions, 'ProfessionId', $textLanguage,0, Android.getString('SelectProfession'));
         }
 
         function fillEducations(){
+            $textLanguage = "Education";
+            if(Android.getSelectedLanguage() != "en"){
+                $textLanguage = "AltLanguage";
+            }
             var $Educations = Android.getEducations();
-            bindDropdown('ddlEducation', $Educations, 'EducationId', 'Education',0, Android.getString('SelectEducation'));
+            bindDropdown('ddlEducation', $Educations, 'EducationId', $textLanguage,0, Android.getString('SelectEducation'));
         }
 
         function fillIdentificationTypes(){
+            $textLanguage = "IdentificationTypes";
+            if(Android.getSelectedLanguage() != "en"){
+                $textLanguage = "AltLanguage";
+            }
             var $idTypes = Android.getIdentificationTypes();
-            bindDropdown('ddlIdentificationType', $idTypes, 'IdentificationCode', 'IdentificationTypes',"", Android.getString('SelectIdentificationType'));
+            bindDropdown('ddlIdentificationType', $idTypes, 'IdentificationCode', $textLanguage,"", Android.getString('SelectIdentificationType'));
         }
 
         function fillFSPDistricts(RegionId){

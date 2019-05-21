@@ -123,11 +123,16 @@ public class RenewList extends AppCompatActivity {
                             global = (Global) RenewList.this.getApplicationContext();
 
                             int userid = global.getUserId();
-                            if(userid > 0){
-                                RefreshRenewals();
-                            }else{
-                                LoginDialogBox("Renewals");
+                            if (_general.isNetworkAvailable(RenewList.this.getApplicationContext())) {
+                                if(userid > 0){
+                                    RefreshRenewals();
+                                }else{
+                                    LoginDialogBox("Renewals");
+                                }
+                            }else {
+                                openDialogForFeedbackRenewal();
                             }
+
 
 
                             // FetchPayers();

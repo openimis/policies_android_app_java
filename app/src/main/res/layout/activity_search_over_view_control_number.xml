@@ -70,7 +70,7 @@
                 android:paddingLeft="10dp"
                 android:background="@drawable/corner"/>
 
-            <EditText
+<!--            <TextView
                 android:id="@+id/insurance_product"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
@@ -80,7 +80,17 @@
                 android:fontFamily="sans-serif-light"
                 android:textColor="@color/black"
                 android:hint="@string/insurance_product"
+                android:gravity="center_vertical"
+                android:textSize="20dp"
+                android:background="@drawable/corner"/>-->
+
+            <Spinner
+                android:id="@+id/insurance_product"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginTop="5dp"
                 android:background="@drawable/corner"/>
+
             <ListView
                 android:id="@+id/lv1"
                 android:layout_width="match_parent"

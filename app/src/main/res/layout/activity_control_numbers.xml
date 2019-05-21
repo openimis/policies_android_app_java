@@ -33,4 +33,18 @@
         android:background="@color/colorPrimary"
         android:text="@string/OverViewControlNumber"/>
 
+    <TextView
+        android:id="@+id/CheckCommission"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_margin="10dp"
+        android:typeface="monospace"
+        android:fontFamily="sans-serif-light"
+        android:textSize="20dp"
+        android:gravity="center"
+        android:textColor="@color/white"
+        android:background="@color/colorPrimary"
+        android:text="@string/CheckCommission"
+        android:visibility="gone"/>
+
 </LinearLayout>

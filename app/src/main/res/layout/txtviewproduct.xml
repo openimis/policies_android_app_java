@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/black">
 
     <TextView
         android:id="@+id/tv"
@@ -9,7 +10,8 @@
         android:layout_height="wrap_content"
         android:typeface="monospace"
         android:fontFamily="sans-serif-light"
-        android:textColor="@color/black"
-        android:textSize="23sp" />
+        android:textColor="@color/white"
+        android:layout_margin="5dp"
+        android:textSize="30dp" />
 
 </LinearLayout>

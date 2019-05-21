@@ -19,6 +19,7 @@ import org.json.JSONObject;
 public class ControlNumbers extends AppCompatActivity {
     TextView OverViewPolicies;
     TextView OverViewControlNumber;
+    TextView CheckCommission;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,11 +27,12 @@ public class ControlNumbers extends AppCompatActivity {
         setContentView(R.layout.activity_control_numbers);
         final ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setTitle(getResources().getString(R.string.ControlNumbers));
+        actionBar.setTitle(getResources().getString(R.string.Overviews));
 
 
         OverViewPolicies = (TextView) findViewById(R.id.OverViewPolicies);
         OverViewControlNumber = (TextView) findViewById(R.id.OverViewControlNumber);
+        CheckCommission = (TextView) findViewById(R.id.CheckCommission);
 
         OverViewPolicies.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -44,6 +46,14 @@ public class ControlNumbers extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(ControlNumbers.this, SearchOverViewControlNumber.class);
+                startActivity(intent);
+            }
+        });
+
+        CheckCommission.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(ControlNumbers.this, CheckCommission.class);
                 startActivity(intent);
             }
         });

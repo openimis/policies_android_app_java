@@ -107,7 +107,8 @@ public class OverViewPolicies1 extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         final ActionBar actionBar = getSupportActionBar();
-        actionBar.setTitle(getResources().getString(R.string.title_activity_overview_policies));
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setTitle(getResources().getString(R.string.OverViewPolicies));
 
         tokenl = new Token();
         toRestApi = new ToRestApi();

@@ -1037,6 +1037,8 @@ public class MainActivity extends AppCompatActivity
         final TextView username = (TextView) promptsView.findViewById(R.id.UserName);
         final TextView password = (TextView) promptsView.findViewById(R.id.Password);
 
+        username.setText(global.getOfficerCode());
+
         // set dialog message
         alertDialogBuilder
                 .setCancelable(false)
@@ -1099,5 +1101,8 @@ public class MainActivity extends AppCompatActivity
 
         // show it
         alertDialog.show();
+    }
+    public String getSelectedLanguage(){
+        return selectedLanguage;
     }
 }

@@ -1,13 +1,19 @@
 package org.openimis.imispolicies;
 
+import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.DatePicker;
@@ -17,6 +23,7 @@ import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.SimpleAdapter;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -37,7 +44,7 @@ public class SearchOverViewPolicies extends AppCompatActivity {
     EditText Insurance_Number;
     EditText Other_Names;
     EditText Last_Name;
-    EditText Insurance_Product;
+    Spinner Insurance_Product;
     TextView Uploaded_From;
     TextView Uploaded_To;
 
@@ -51,6 +58,7 @@ public class SearchOverViewPolicies extends AppCompatActivity {
 
     Calendar myCalendar;
     Calendar myCalendar1;
+    private ArrayList<HashMap<String, String>> ProductList = new ArrayList<>();
 
     ClientAndroidInterface clientAndroidInterface;
 
@@ -60,15 +68,20 @@ public class SearchOverViewPolicies extends AppCompatActivity {
     private RadioButton radioButtonRenewal;
     private RadioButton radioButtonRequested;
 
+    AlertDialog alertDialog;
+
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search_over_view_policies);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        final ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setTitle(getResources().getString(R.string.SearchPolicies));
 
         clientAndroidInterface = new ClientAndroidInterface(this);
         lv1 = (ListView) findViewById(R.id.lv1);
-        fillProducts();
+        //fillProducts();
 
         btnSearch = (Button) findViewById(R.id.btnSearch);
         btnClear = (Button) findViewById(R.id.btnClear);
@@ -76,7 +89,7 @@ public class SearchOverViewPolicies extends AppCompatActivity {
         Uploaded_From = (TextView) findViewById(R.id.uploaded_from);
         Uploaded_To = (TextView) findViewById(R.id.uploaded_to);
         Insurance_Number = (EditText) findViewById(R.id.insurance_number);
-        Insurance_Product = (EditText) findViewById(R.id.insurance_product);
+        Insurance_Product = (Spinner) findViewById(R.id.insurance_product);
         Other_Names = (EditText) findViewById(R.id.other_names);
         Last_Name = (EditText) findViewById(R.id.last_name);
         Renewal_Yes = (RadioButton) findViewById(R.id.renewal_yes);
@@ -87,7 +100,7 @@ public class SearchOverViewPolicies extends AppCompatActivity {
         Radio_Requested = (RadioGroup) findViewById(R.id.radio_requested);
 
 
-        Insurance_Product.addTextChangedListener(new TextWatcher() {
+/*        Insurance_Product.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
@@ -108,19 +121,15 @@ public class SearchOverViewPolicies extends AppCompatActivity {
             public void afterTextChanged(Editable s) {
 
             }
-        });
+        });*/
 
-        lv1.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+/*        Insurance_Product.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                HashMap<String, String> oItem;
-                //noinspection unchecked
-                oItem = (HashMap<String, String>) parent.getItemAtPosition(position);
-                Insurance_Product.setText(oItem.get("ProductName").toString());
-                lv1.setVisibility(View.GONE);
-
+            public void onClick(View view) {
+                new_search_engine();
             }
-        });
+        });*/
+
 
 
         btnSearch.setOnClickListener(new View.OnClickListener() {
@@ -129,7 +138,7 @@ public class SearchOverViewPolicies extends AppCompatActivity {
                 String InsuranceNumber = Insurance_Number.getText().toString();
                 String OtherNames = Other_Names.getText().toString();
                 String LastName = Last_Name.getText().toString();
-                String InsuranceProduct = Insurance_Product.getText().toString();
+                String InsuranceProduct = GetSelectedProduct();
                 String UploadedFrom = Uploaded_From.getText().toString();
                 String UploadedTo = Uploaded_To.getText().toString();
                 String RadioRenewal = "";
@@ -166,7 +175,7 @@ public class SearchOverViewPolicies extends AppCompatActivity {
                 Uploaded_From.setText("");
                 Uploaded_To.setText("");
                 Insurance_Number.setText("");
-                Insurance_Product.setText("");
+                Insurance_Product.setSelection(0);
                 Other_Names.setText("");
                 Last_Name.setText("");
                 Radio_Renewal.clearCheck();
@@ -198,7 +207,7 @@ public class SearchOverViewPolicies extends AppCompatActivity {
             }
         });
 
-
+        BindSpinnerProduct();
     }
 
     public boolean onOptionsItemSelected(MenuItem item){
@@ -210,7 +219,7 @@ public class SearchOverViewPolicies extends AppCompatActivity {
         super.onBackPressed();
     }
 
-    public void fillProducts(){
+    public void fillProducts(ListView lv1){
         JSONArray jsonArray = null;
         JSONObject object;
         String result = clientAndroidInterface.getProducts();
@@ -240,7 +249,6 @@ public class SearchOverViewPolicies extends AppCompatActivity {
 
 
                 lv1.setAdapter(adapter);
-
                 //setTitle("Products (" + String.valueOf(lv1.getCount()) + ")");
             }
         } catch (JSONException e) {
@@ -288,5 +296,153 @@ public class SearchOverViewPolicies extends AppCompatActivity {
         SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
 
         Uploaded_To.setText(String.valueOf(sdf.format(myCalendar1.getTime())));
+    }
+
+    private void BindSpinnerProduct() {
+        clientAndroidInterface = new ClientAndroidInterface(this);
+        String result = clientAndroidInterface.getProducts();
+
+        JSONArray jsonArray = null;
+        JSONObject object;
+
+        try {
+            jsonArray = new JSONArray(result);
+
+            ProductList.clear();
+
+            if(jsonArray.length() == 0){
+                HashMap<String, String> Product = new HashMap<>();
+                Product.put("ProductCode", String.valueOf(0));
+                Product.put("ProductName", getResources().getString(R.string.SelectProduct));
+                ProductList.add(Product);
+
+                SimpleAdapter adapter = new SimpleAdapter(SearchOverViewPolicies.this, ProductList, R.layout.spinnerproducts,
+                        new String[]{"ProductCode", "ProductName"},
+                        new int[]{R.id.tvProductCode, R.id.tvProductName});
+
+                Insurance_Product.setAdapter(adapter);
+            }else{
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    object = jsonArray.getJSONObject(i);
+
+                    // Enter an empty record
+                    if (i == 0) {
+                        HashMap<String, String> Product = new HashMap<>();
+                        Product.put("ProductCode", String.valueOf(0));
+                        Product.put("ProductName", getResources().getString(R.string.SelectProduct));
+                        ProductList.add(Product);
+                    }
+
+                    HashMap<String, String> Product = new HashMap<>();
+                    Product.put("ProductCode", object.getString("ProductCode"));
+                    Product.put("ProductName", object.getString("ProductName"));
+
+
+                    ProductList.add(Product);
+
+                    SimpleAdapter adapter = new SimpleAdapter(SearchOverViewPolicies.this, ProductList, R.layout.spinnerproducts,
+                            new String[]{"ProductCode", "ProductName"},
+                            new int[]{R.id.tvProductCode, R.id.tvProductName});
+
+                    Insurance_Product.setAdapter(adapter);
+
+                }
+            }
+
+
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public void new_search_engine(){
+        // get prompts.xml view
+        LayoutInflater li = LayoutInflater.from(this);
+        View promptsView = li.inflate(R.layout.new_search_engine, null);
+
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+                //this,android.R.style.Theme_Black_NoTitleBar_Fullscreen);
+                this,R.style.yourDialog);
+
+        // set prompts.xml to alertdialog builder
+        alertDialogBuilder.setView(promptsView);
+
+        final EditText type1 = (EditText) promptsView.findViewById(R.id.type1);
+        final ListView lv1 = (ListView) promptsView.findViewById(R.id.lv1);
+
+        fillProducts(lv1);
+
+        type1.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                lv1.setVisibility(View.VISIBLE);
+                if(type1.getText().toString().equals("")){
+                    lv1.setVisibility(View.GONE);
+                }
+                ((SimpleAdapter) adapter).getFilter().filter(s);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
+        lv1.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                HashMap<String, String> oItem;
+                //noinspection unchecked
+                oItem = (HashMap<String, String>) parent.getItemAtPosition(position);
+                //TextView Insurance_Product = (TextView) findViewById(R.id.insurance_product);
+                type1.setText(oItem.get("ProductName").toString());
+                //Insurance_Product.setText(oItem.get("ProductName").toString());
+                lv1.setVisibility(View.GONE);
+                alertDialog.dismiss();
+
+                InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
+                imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
+            }
+        });
+
+
+
+        // set dialog message
+        alertDialogBuilder
+                .setCancelable(true);
+
+        // create alert dialog
+        alertDialog = alertDialogBuilder.create();
+
+
+
+        // show it
+        alertDialog.show();
+    }
+
+    private String GetSelectedProduct() {
+        String Product = "0";
+        try{
+            HashMap<String, String> P = new HashMap<>();
+            //noinspection unchecked
+            P = (HashMap<String, String>) Insurance_Product.getSelectedItem();
+            if(P.get("ProductCode") == null) {
+                Product = "0";
+            }else{
+                Product = P.get("ProductCode");
+            }
+
+        }catch (Exception e){
+            // e.printStackTrace();
+        }
+
+        return Product;
     }
 }

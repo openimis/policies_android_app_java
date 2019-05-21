@@ -103,13 +103,12 @@ public class OverViewControlNumbers extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_over_view_control_numbers);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        final ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setTitle(getResources().getString(R.string.OverViewControlNumber));
 
         toRestApi = new ToRestApi();
         tokenl = new Token();
-
-        final ActionBar actionBar = getSupportActionBar();
-        actionBar.setTitle(getResources().getString(R.string.control_numbers));
 
         ValueNumberOfPolices = (TextView) findViewById(R.id.ValueNumberOfPolices);
         ValueAmountOfContribution = (TextView) findViewById(R.id.ValueAmountOfContribution);

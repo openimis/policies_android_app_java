@@ -333,6 +333,20 @@ public class ClientAndroidInterface {
 
         return Wards.toString();
     }
+    @JavascriptInterface
+    public String getWardsOfficer(String OfficerCode) {
+        JSONArray Wards = null;
+        String tableName = "tblOfficerVillages";
+        String[] columns = {"DISTINCT(WardID) WardID","ward"};
+        String where = " LOWER(code) = '" + OfficerCode.toLowerCase()+"'";
+        try{
+            Wards = sqlHandler.getResult(tableName, columns, where, null);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+        return Wards.toString();
+    }
 
     @JavascriptInterface
     public String getVillages(int WardId) {
@@ -341,6 +355,22 @@ public class ClientAndroidInterface {
         String where = "LocationType = 'V' AND ParentLocationId = " + WardId;
 
         JSONArray Villages = sqlHandler.getResult(tableName, columns, where, null);
+
+        return Villages.toString();
+    }
+    @JavascriptInterface
+    public String getVillagesOfficer(String WardID) {
+        JSONArray Villages = null;
+        String tableName = "tblOfficerVillages";
+        String[] columns = {"DISTINCT(LocationId)","village"};
+        String where = " WardID = " + Integer.parseInt(WardID);
+
+        try {
+            Villages = sqlHandler.getResult(tableName, columns, where, null);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
 
         return Villages.toString();
     }
@@ -373,7 +403,7 @@ public class ClientAndroidInterface {
     @JavascriptInterface
     public String getConfirmationTypes() {
         String tableName = "tblConfirmationTypes";
-        String[] columns = {"ConfirmationTypeCode", "ConfirmationType", "AltLanguage"};
+        String[] columns = {"ConfirmationTypeCode", "ConfirmationType", "IFNULL(NULLIF(AltLanguage, ''),ConfirmationType) as AltLanguage"};
         String where = null;
         String OrderBy = "SortOrder";
 
@@ -385,7 +415,7 @@ public class ClientAndroidInterface {
     @JavascriptInterface
     public String getGroupTypes() {
         String tableName = "tblFamilyTypes";
-        String[] columns = {"FamilyTypeCode", "FamilyType", "AltLanguage"};
+        String[] columns = {"FamilyTypeCode", "FamilyType", "IFNULL(NULLIF(AltLanguage, ''),FamilyType) as AltLanguage"};
         String where = null;
         String OrderBy = "SortOrder";
 
@@ -397,7 +427,7 @@ public class ClientAndroidInterface {
     @JavascriptInterface
     public String getGender() {
         String tableName = "tblGender";
-        String[] columns = {"Code", "Gender", "AltLanguage"};
+        String[] columns = {"Code", "Gender", "IFNULL(NULLIF(AltLanguage, ''),Gender) as AltLanguage"};
         String where = null;
         String OrderBy = "SortOrder";
 
@@ -484,7 +514,7 @@ public class ClientAndroidInterface {
     @JavascriptInterface
     public String getProfessions() {
         String tableName = "tblProfessions";
-        String[] columns = {"ProfessionId", "Profession", "AltLanguage"};
+        String[] columns = {"ProfessionId", "Profession", "IFNULL(NULLIF(AltLanguage, ''),Profession) as AltLanguage"};
         String where = null;
         String OrderBy = "SortOrder";
 
@@ -496,7 +526,7 @@ public class ClientAndroidInterface {
     @JavascriptInterface
     public String getEducations() {
         String tableName = "tblEducations";
-        String[] columns = {"EducationId", "Education", "AltLanguage"};
+        String[] columns = {"EducationId", "Education", "IFNULL(NULLIF(AltLanguage, ''),Education) as AltLanguage"};
         String where = null;
         String OrderBy = "SortOrder";
 
@@ -508,7 +538,7 @@ public class ClientAndroidInterface {
     @JavascriptInterface
     public String getIdentificationTypes() {
         String tableName = "tblIdentificationTypes";
-        String[] columns = {"IdentificationCode", "IdentificationTypes", "AltLanguage"};
+        String[] columns = {"IdentificationCode", "IdentificationTypes", "IFNULL(NULLIF(AltLanguage, ''),IdentificationTypes) as AltLanguage"};
         String where = null;
         String OrderBy = "SortOrder";
 
@@ -520,7 +550,7 @@ public class ClientAndroidInterface {
     @JavascriptInterface
     public String getRelationships() {
         String tableName = "tblRelations";
-        String[] columns = {"RelationId", "Relation", "AltLanguage"};
+        String[] columns = {"RelationId", "Relation", "IFNULL(NULLIF(AltLanguage, ''),Relation) as AltLanguage"};
         String where = null;
         String OrderBy = "SortOrder";
 
@@ -1690,7 +1720,7 @@ public class ClientAndroidInterface {
         Calendar cal = Calendar.getInstance();
         String dt = format.format(cal.getTime());
 
-        String ProductQuery = "SELECT P.ProductName ProductName\n" +
+        String ProductQuery = "SELECT P.ProductCode ProductCode, P.ProductName ProductName\n" +
                 " FROM tblProduct P \n"+
                 " LEFT OUTER JOIN  tblLocations L ON (P.LocationId = L.LocationId) \n" +
                 //" WHERE  (P.LocationId ='null' OR P.LocationId ='' OR P.LocationId = L.ParentLocationId) AND " +
@@ -4481,6 +4511,7 @@ public class ClientAndroidInterface {
             13  :   Relations
             14  :   PhoneDefaults
             15  :   Genders
+            16  :   OfficerVillages
          */
 
         JSONArray ConfirmationTypes = new JSONArray();
@@ -4498,6 +4529,7 @@ public class ClientAndroidInterface {
         JSONArray Relations = new JSONArray();
         JSONArray PhoneDefaults = new JSONArray();
         JSONArray Genders = new JSONArray();
+        JSONArray OfficerVillages = new JSONArray();
 
         for (int i = 0; i < masterData.length(); i++) {
             String keyName = masterData.getJSONObject(i).keys().next();
@@ -4547,6 +4579,9 @@ public class ClientAndroidInterface {
                 case "genders":
                     Genders = (JSONArray) masterData.getJSONObject(i).get(keyName);
                     break;
+                case "officersvillages":
+                    OfficerVillages = (JSONArray) masterData.getJSONObject(i).get(keyName);
+                    break;
             }
         }
 
@@ -4565,6 +4600,7 @@ public class ClientAndroidInterface {
         insertRelations(Relations);
         insertPhoneDefaults(PhoneDefaults);
         insertGenders(Genders);
+        insertOfficerVillages(OfficerVillages);
 
     }
 
@@ -4596,6 +4632,7 @@ public class ClientAndroidInterface {
             13  :   Relations
             14  :   PhoneDefaults
             15  :   Genders
+            16  :   OfficerVillages
          */
 
         JSONArray ConfirmationTypes = new JSONArray();
@@ -4613,6 +4650,7 @@ public class ClientAndroidInterface {
         JSONArray Relations = new JSONArray();
         JSONArray PhoneDefaults = new JSONArray();
         JSONArray Genders = new JSONArray();
+        JSONArray OfficerVillages = new JSONArray();
 
         for (int i = 0; i < masterData.length(); i++) {
             String keyName = masterData.getJSONObject(i).keys().next();
@@ -4662,6 +4700,9 @@ public class ClientAndroidInterface {
                 case "genders":
                     Genders = (JSONArray) masterData.getJSONObject(i).get(keyName);
                     break;
+                case "officersvillages":
+                        OfficerVillages = (JSONArray) masterData.getJSONObject(i).get(keyName);
+                    break;
             }
         }
 
@@ -4680,6 +4721,7 @@ public class ClientAndroidInterface {
         insertRelations(Relations);
         insertPhoneDefaults(PhoneDefaults);
         insertGenders(Genders);
+        insertOfficerVillages(OfficerVillages);
 
     }
 
@@ -4769,6 +4811,11 @@ public class ClientAndroidInterface {
     private boolean insertGenders(JSONArray jsonArray) throws JSONException {
         String Columns[] = {"Code", "Gender", "AltLanguage", "SortOrder"};
         sqlHandler.insertData("tblGender", Columns, jsonArray.toString(), "DELETE FROM tblGender;");
+        return true;
+    }
+    private boolean insertOfficerVillages(JSONArray jsonArray) throws JSONException {
+        String Columns[] = {"code", "Ward", "Village","LocationId","WardID"};
+        sqlHandler.insertData("tblOfficerVillages", Columns, jsonArray.toString(), "DELETE FROM tblOfficerVillages;");
         return true;
     }
 
@@ -6080,7 +6127,10 @@ public class ClientAndroidInterface {
         mContext.startActivity(intent);
     }
 
-
+    @JavascriptInterface
+    public String getSelectedLanguage(){
+        return ((MainActivity) mContext).getSelectedLanguage();
+    }
 }
 
 
