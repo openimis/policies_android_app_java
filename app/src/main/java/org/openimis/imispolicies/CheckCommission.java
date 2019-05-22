@@ -82,7 +82,7 @@ public class CheckCommission extends AppCompatActivity {
                 String pr = GetSelectedProduct();
                 String py = GetSelectedPayer();
                 String yr = edYear.getText().toString();
-                String mode = "Paid";
+                String mode = "0";// 0 means paid
 
                 getCommission(m,pr,py,yr,mode);
             }
@@ -255,12 +255,12 @@ public class CheckCommission extends AppCompatActivity {
 
 
     private String GetSelectedPayer() {
-        String Payer = "0";
+        String Payer = "";
         try{
             HashMap<String, String> P = new HashMap<>();
             //noinspection unchecked
             P = (HashMap<String, String>) spPayer.getSelectedItem();
-            if(P.get("PayerId") == null) {
+            if(P.get("PayerId") == null || P.get("PayerId").toString().equals("0")) {
                 Payer = "";
             }else{
                 Payer = P.get("PayerId");
@@ -279,7 +279,7 @@ public class CheckCommission extends AppCompatActivity {
             HashMap<String, String> P = new HashMap<>();
             //noinspection unchecked
             P = (HashMap<String, String>) spProduct.getSelectedItem();
-            if(P.get("ProductCode") == null) {
+            if(P.get("ProductCode") == null || P.get("ProductCode").toString().equals("0")) {
                 Product = "";
             }else{
                 Product = P.get("ProductCode");
@@ -317,8 +317,9 @@ public class CheckCommission extends AppCompatActivity {
         JSONObject obj = new JSONObject();
         JSONArray array = new JSONArray();
         try {
+            obj.put("enrolment_officer_code", ca.getOfficerCode().toString());
             obj.put("month", m);
-            obj.put("product", pr);
+            obj.put("insrance_product_code", pr);
             obj.put("payer", py);
             obj.put("year", yr);
             obj.put("mode", mode);
@@ -328,7 +329,7 @@ public class CheckCommission extends AppCompatActivity {
             Thread thread = new Thread(){
                 public void run() {
                     HttpClient httpClient = new DefaultHttpClient();
-                    HttpPost httpPost = new HttpPost("http://imis-mv.swisstph-mis.ch/restapi/api/GetCommissions");
+                    HttpPost httpPost = new HttpPost(AppInformation.DomainInfo.getDomain()+"/restapi/api/Policies/Get_Commissions");
 // Request parameters and other properties.
                     try {
                         StringEntity postingString = new StringEntity(obj_to_send);
@@ -353,52 +354,58 @@ public class CheckCommission extends AppCompatActivity {
                         HttpEntity respEntity = response.getEntity();
 
                         int cod = response.getStatusLine().getStatusCode();
-
-                        if (respEntity != null) {
-                            final String[] error_occured = {null};
-                            final String[] error_message = {null};
-                            final String[] Amount = {null};
-                            final String[] Commissions = {null};
-                            // EntityUtils to get the response content
-                            String content = null;
-                            content = EntityUtils.toString(respEntity);
-
-                            try {
-                                JSONObject res = new JSONObject(content);
-                                JSONObject ob = null;
-
-
-                                if(cod >= 400){
-                                    runOnUiThread(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            pd.dismiss();
-                                            LoginDialogBox();
-                                            if(tokenl.getTokenText().length() > 1){
-                                                View view = findViewById(R.id.actv);
-                                                Snackbar.make(view, getResources().getString(R.string.has_no_rights), Snackbar.LENGTH_LONG)
-                                                        .setAction("Action", null).show();
-                                            }
+                        if(cod >= 400){
+                            final int c = cod;
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    pd.dismiss();
+                                    LoginDialogBox();
+                                    if(tokenl.getTokenText().length() > 1){
+                                        View view = findViewById(R.id.actv);
+                                        if(c == 500){
+                                            Snackbar.make(view, c + "-"+getResources().getString(R.string.ServerError), Snackbar.LENGTH_LONG)
+                                                    .setAction("Action", null).show();
+                                        }else{
+                                            Snackbar.make(view, c + "-"+getResources().getString(R.string.has_no_rights), Snackbar.LENGTH_LONG)
+                                                    .setAction("Action", null).show();
                                         }
-                                    });
-                                }else {
+
+                                    }
+                                }
+                            });
+                        }else{
+                            if (respEntity != null) {
+                                final String[] error_occured = {null};
+                                final String[] error_message = {null};
+                                final String[] Amount = {null};
+                                final String[] Commissions = {null};
+                                // EntityUtils to get the response content
+                                String content = null;
+                                content = EntityUtils.toString(respEntity);
+
+                                try {
+                                    JSONArray res = new JSONArray(content);
+                                    JSONObject ob = null;
+
+
+
                                     runOnUiThread(new Runnable() {
                                         @Override
                                         public void run() {pd.dismiss();}
                                     });
                                     if(error_occured.equals("true")){
-                                        String erroroccured = res.getString("error_occured");
-                                        error_message[0] = res.getString("error_message");
+                                        //String erroroccured = res.getString("error_occured");
+                                        //error_message[0] = res.getString("error_message");
 
                                         View view = findViewById(R.id.actv);
                                         Snackbar.make(view, error_message[0], Snackbar.LENGTH_LONG)
                                                 .setAction("Action", null).show();
                                     }else{
-                                        String commissions = res.getString("commissions");
-                                        JSONArray arr = new JSONArray(commissions);
-                                        for(int j = 0;j < arr.length();j++){
+                                        //JSONArray arr = new JSONArray(commissions);
+                                        for(int j = 0;j < res.length();j++){
                                             try {
-                                                ob = arr.getJSONObject(j);
+                                                ob = res.getJSONObject(j);
                                                 Amount[0] = ob.getString("amount");
                                                 Commissions[0] = ob.getString("commissions");
                                                 CommissionsDialogReport(Amount[0], Commissions[0]);
@@ -420,30 +427,34 @@ public class CheckCommission extends AppCompatActivity {
                                             }
                                         });
                                     }
+
+                                } catch (JSONException e) {
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            pd.dismiss();
+                                            LoginDialogBox();
+                                            if(tokenl.getTokenText().length() > 1){
+                                                View view = findViewById(R.id.actv);
+                                                Snackbar.make(view, getResources().getString(R.string.has_no_rights), Snackbar.LENGTH_LONG)
+                                                        .setAction("Action", null).show();
+                                            }
+                                        }
+                                    });
                                 }
-                            } catch (JSONException e) {
+                            }else{
                                 runOnUiThread(new Runnable() {
                                     @Override
-                                    public void run() {
-                                        pd.dismiss();
-                                        LoginDialogBox();
-                                        if(tokenl.getTokenText().length() > 1){
-                                            View view = findViewById(R.id.actv);
-                                            Snackbar.make(view, getResources().getString(R.string.has_no_rights), Snackbar.LENGTH_LONG)
-                                                    .setAction("Action", null).show();
-                                        }
-                                    }
+                                    public void run() {pd.dismiss();}
                                 });
+                                View view = findViewById(R.id.actv);
+                                Snackbar.make(view, getResources().getString(R.string.NoInternet), Snackbar.LENGTH_LONG)
+                                        .setAction("Action", null).show();
                             }
-                        }else{
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {pd.dismiss();}
-                            });
-                            View view = findViewById(R.id.actv);
-                            Snackbar.make(view, getResources().getString(R.string.NoInternet), Snackbar.LENGTH_LONG)
-                                    .setAction("Action", null).show();
                         }
+
+
+
                     } catch (IOException e) {
                         runOnUiThread(new Runnable() {
                             @Override

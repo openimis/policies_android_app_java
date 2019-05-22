@@ -345,7 +345,7 @@
     <string name="process_complete">Process Complete</string>
     <string name="select_policy">Please select a policy/policies to request</string>
     <string name="success">Successfully</string>
-    <string name="has_no_rights">You have no rights for this functionaliy</string>
+    <string name="has_no_rights">You have no rights for this functionality</string>
     <string name="button_ok">OK</string>
     <string name="no_data_delete">No data was selected to delete</string>
     <string name="Get_Control_Number">Get Control Number</string>
