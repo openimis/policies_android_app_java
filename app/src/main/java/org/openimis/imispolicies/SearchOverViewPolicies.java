@@ -428,13 +428,13 @@ public class SearchOverViewPolicies extends AppCompatActivity {
     }
 
     private String GetSelectedProduct() {
-        String Product = "0";
+        String Product = "";
         try{
             HashMap<String, String> P = new HashMap<>();
             //noinspection unchecked
             P = (HashMap<String, String>) Insurance_Product.getSelectedItem();
-            if(P.get("ProductCode") == null) {
-                Product = "0";
+            if(P.get("ProductCode").toString().equals("0") || P.get("ProductCode") == null) {
+                Product = "";
             }else{
                 Product = P.get("ProductCode");
             }

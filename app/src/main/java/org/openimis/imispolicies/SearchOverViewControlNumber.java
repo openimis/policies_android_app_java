@@ -505,9 +505,9 @@ public class SearchOverViewControlNumber extends AppCompatActivity {
                 HashMap<String, String> oItem;
                 //noinspection unchecked
                 oItem = (HashMap<String, String>) parent.getItemAtPosition(position);
-                TextView Insurance_Product = (TextView) findViewById(R.id.insurance_product);
+                Spinner Insurance_Product = (Spinner) findViewById(R.id.insurance_product);
                 type1.setText(oItem.get("ProductName").toString());
-                Insurance_Product.setText(oItem.get("ProductName").toString());
+                //Insurance_Product.setText(oItem.get("ProductName").toString());
                 lv1.setVisibility(View.GONE);
                 alertDialog.dismiss();
 
@@ -533,13 +533,13 @@ public class SearchOverViewControlNumber extends AppCompatActivity {
     }
 
     private String GetSelectedProduct() {
-        String Product = "0";
+        String Product = "";
         try{
             HashMap<String, String> P = new HashMap<>();
             //noinspection unchecked
             P = (HashMap<String, String>) Insurance_Product.getSelectedItem();
-            if(P.get("ProductCode") == null) {
-                Product = "0";
+            if(P.get("ProductCode").toString().equals("0") || P.get("ProductCode") == null) {
+                Product = "";
             }else{
                 Product = P.get("ProductCode");
             }
