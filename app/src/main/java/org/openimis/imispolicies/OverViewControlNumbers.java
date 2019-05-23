@@ -105,7 +105,7 @@ public class OverViewControlNumbers extends AppCompatActivity {
         setContentView(R.layout.activity_over_view_control_numbers);
         final ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setTitle(getResources().getString(R.string.OverViewControlNumber));
+        actionBar.setTitle(getResources().getString(R.string.control_numbers));
 
         toRestApi = new ToRestApi();
         tokenl = new Token();
