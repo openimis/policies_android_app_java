@@ -14,14 +14,14 @@
         android:text="@string/CheckCommission"
         android:textSize="30dp"
         android:fontFamily="sans-serif-light"
-        android:layout_margin="10dp"
+        android:layout_margin="5dp"
         android:typeface="monospace"/>
 
     <Spinner
         android:id="@+id/spMonth"
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:layout_margin="10dp"
+        android:layout_margin="5dp"
         android:background="@drawable/corner"/>
 
     <EditText
@@ -30,7 +30,7 @@
         android:layout_height="50dp"
         android:background="@drawable/corner"
         android:padding="5dp"
-        android:layout_margin="10dp"
+        android:layout_margin="5dp"
         android:inputType="datetime"
         android:hint="@string/year"/>
     
@@ -40,7 +40,7 @@
         android:text="@string/paid"
         android:padding="5dp"
         android:gravity="center_vertical"
-        android:layout_margin="10dp"
+        android:layout_margin="5dp"
         android:textSize="20dp"
         android:background="@drawable/corner"/>
 
@@ -48,14 +48,14 @@
         android:id="@+id/spProduct"
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:layout_margin="10dp"
+        android:layout_margin="5dp"
         android:background="@drawable/corner"/>
 
     <Spinner
         android:id="@+id/spPayer"
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:layout_margin="10dp"
+        android:layout_margin="5dp"
         android:background="@drawable/corner"/>
     
     
@@ -68,15 +68,15 @@
             android:id="@+id/btnClear"
             android:layout_width="150dp"
             android:layout_height="50dp"
-            android:layout_margin="10dp"
+            android:layout_margin="5dp"
             android:text="@string/clear"
             android:visibility="gone"/>
 
         <Button
             android:id="@+id/btnCheck"
             android:layout_width="150dp"
-            android:layout_height="50dp"
-            android:layout_margin="10dp"
+            android:layout_height="40dp"
+            android:layout_margin="5dp"
             android:text="@string/check"/>
         
     </LinearLayout>

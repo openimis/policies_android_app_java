@@ -372,4 +372,6 @@
     <string name="SearchControlNumbers">Search Control Numbers</string>
     <string name="Overviews">Overviews</string>
     <string name="policies">Policies</string>
+    <string name="no_data">No data</string>
+    <string name="empty_year">Please fill the year</string>
 </resources>

@@ -312,7 +312,7 @@ public class SearchOverViewPolicies extends AppCompatActivity {
 
             if(jsonArray.length() == 0){
                 HashMap<String, String> Product = new HashMap<>();
-                Product.put("ProductCode", String.valueOf(0));
+                Product.put("ProductCode", "");
                 Product.put("ProductName", getResources().getString(R.string.SelectProduct));
                 ProductList.add(Product);
 
@@ -328,7 +328,7 @@ public class SearchOverViewPolicies extends AppCompatActivity {
                     // Enter an empty record
                     if (i == 0) {
                         HashMap<String, String> Product = new HashMap<>();
-                        Product.put("ProductCode", String.valueOf(0));
+                        Product.put("ProductCode", "");
                         Product.put("ProductName", getResources().getString(R.string.SelectProduct));
                         ProductList.add(Product);
                     }
@@ -433,7 +433,7 @@ public class SearchOverViewPolicies extends AppCompatActivity {
             HashMap<String, String> P = new HashMap<>();
             //noinspection unchecked
             P = (HashMap<String, String>) Insurance_Product.getSelectedItem();
-            if(P.get("ProductCode").toString().equals("0") || P.get("ProductCode") == null) {
+            if(P.get("ProductCode").toString().equals("0") || P.get("ProductCode") == null || P.get("ProductCode").toString().equals("")) {
                 Product = "";
             }else{
                 Product = P.get("ProductCode");
