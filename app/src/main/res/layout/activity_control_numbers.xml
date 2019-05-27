@@ -44,7 +44,6 @@
         android:gravity="center"
         android:textColor="@color/white"
         android:background="@color/colorPrimary"
-        android:text="@string/CheckCommission"
-        android:visibility="gone"/>
+        android:text="@string/CheckCommission" />
 
 </LinearLayout>
