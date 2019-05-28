@@ -4725,22 +4725,44 @@ public class ClientAndroidInterface {
 
     }
 
-    public void getOfficerVillages(String OfficerCode){
-        ToRestApi toRestApi = new ToRestApi();
-        JSONObject object = new JSONObject();
-        try {
-            object.put("enrollment_officer_code",OfficerCode);
-            JSONObject object1 = new JSONObject(toRestApi.postObjectToRestApiObject(object,"api/Locations/GetOfficerVillages"));
-            String OfficerVillages = object1.getString("data");
-
-            JSONArray arr = new JSONArray(OfficerVillages);
-            insertOfficerVillages(arr);
+    public void getOfficerVillages(final String OfficerCode){
+        final ToRestApi toRestApi = new ToRestApi();
+        final JSONObject object = new JSONObject();
+        final String[] str = {""};
 
 
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+        Thread thread = new Thread() {
+            public void run() {
 
+                try {
+                    object.put("enrollment_officer_code",OfficerCode);
+                    str[0] = toRestApi.postObjectToRestApiObject(object,"api/Locations/GetOfficerVillages");
+                    JSONObject object1 = null;
+                    object1 = new JSONObject(str[0]);
+                    String OfficerVillages = object1.getString("data");
+
+                    final JSONArray arr = new JSONArray(OfficerVillages);
+
+                    ((Activity) mContext).runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                insertOfficerVillages(arr);
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+
+                    });
+
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        };
+        thread.start();
     }
 
     private boolean insertConfirmationTypes(JSONArray jsonArray) throws JSONException {

@@ -611,7 +611,10 @@ public class MainActivity extends AppCompatActivity
                                         if (ca.isOfficerCodeValid(userInput.getText().toString())) {
                                             global.setOfficerCode(userInput.getText().toString());
                                             OfficerName.setText(global.getOfficerName());
-                                            ca.getOfficerVillages(userInput.getText().toString());
+                                            if(_General.isNetworkAvailable(MainActivity.this)){
+                                                ca.getOfficerVillages(userInput.getText().toString());
+                                            }
+
                                         } else {
                                             ShowDialogTex();
                                             ca.ShowDialog(getResources().getString(R.string.IncorrectOfficerCode));
