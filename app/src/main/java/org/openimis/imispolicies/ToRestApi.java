@@ -47,12 +47,12 @@ public class ToRestApi {
         }
         return response;
     }
-    public String postToRestApi(final String functionName) {
+    public String postObjectToRestApiObject(final JSONObject object, final String functionName) {
         final String[] content = {null};
         HttpClient httpClient = new DefaultHttpClient();
         HttpPost httpPost = new HttpPost(uri+functionName);
         try {
-            StringEntity postingString = new StringEntity("");
+            StringEntity postingString = new StringEntity(object.toString());
             httpPost.setEntity(postingString);
             httpPost.setHeader("Content-type", "application/json");
         } catch (UnsupportedEncodingException e) {

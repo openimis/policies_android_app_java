@@ -4607,10 +4607,10 @@ public class ClientAndroidInterface {
 
     @SuppressWarnings("ConstantConditions")
     public void startDownloading() throws JSONException, UserException {
-
         CallSoap cs = new CallSoap();
         cs.setFunctionName("downloadMasterData");
         String MD = cs.downloadMasterData();
+
         JSONArray masterData = new JSONArray(MD);
 
         if (masterData.length() == 0)
@@ -4651,7 +4651,7 @@ public class ClientAndroidInterface {
         JSONArray Relations = new JSONArray();
         JSONArray PhoneDefaults = new JSONArray();
         JSONArray Genders = new JSONArray();
-        JSONArray OfficerVillages = new JSONArray();
+        //JSONArray OfficerVillages = new JSONArray();
 
         for (int i = 0; i < masterData.length(); i++) {
             String keyName = masterData.getJSONObject(i).keys().next();
@@ -4701,9 +4701,9 @@ public class ClientAndroidInterface {
                 case "genders":
                     Genders = (JSONArray) masterData.getJSONObject(i).get(keyName);
                     break;
-                case "officersvillages":
+/*                case "officersvillages":
                     OfficerVillages = (JSONArray) masterData.getJSONObject(i).get(keyName);
-                    break;
+                    break;*/
             }
         }
 
@@ -4722,7 +4722,24 @@ public class ClientAndroidInterface {
         insertRelations(Relations);
         insertPhoneDefaults(PhoneDefaults);
         insertGenders(Genders);
-        insertOfficerVillages(OfficerVillages);
+
+    }
+
+    public void getOfficerVillages(String OfficerCode){
+        ToRestApi toRestApi = new ToRestApi();
+        JSONObject object = new JSONObject();
+        try {
+            object.put("enrollment_officer_code",OfficerCode);
+            JSONObject object1 = new JSONObject(toRestApi.postObjectToRestApiObject(object,"api/Locations/GetOfficerVillages"));
+            String OfficerVillages = object1.getString("data");
+
+            JSONArray arr = new JSONArray(OfficerVillages);
+            insertOfficerVillages(arr);
+
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
     }
 
