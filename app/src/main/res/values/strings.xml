@@ -141,7 +141,7 @@
     <string name="RecordNotFound">Member with this Insurance No. does not exist.</string>
     <string name="NoRenewalFound">No renewal found</string>
     <string name="NoInternet">Please check your internet connection.</string>
-    <string name="FileDoesntBelongHere">!Process Failed, Wrong File or Officer code.</string>
+    <string name="FileDoesntBelongHere">!Process Failed, Wrong File or Enrolment Officer code.</string>
     <string name="Submit">Submit</string>
     <string name="DiscontinuePolicy">Discontinue this policy</string>
     <string name="DiscontinuePolicyQ">Do you want to discontinue this policy?</string>
@@ -150,7 +150,7 @@
     <string name="UploadedSuccessfully">Data uploaded on the server successfully.</string>
     <string name="ServerRejected">Data is rejected by the server. Data is moved to the rejected folder of the phone.</string>
     <string name="BulkUpload">Data has been uploaded successfully. Please check your Rejected/Accepted folders to verify the server response.</string>
-    <string name="MissingOfficerCode">Please enter officer code</string>
+    <string name="MissingOfficerCode">Please enter Enrolment officer code</string>
     <string name="SavedOnSDCard">File is saved on external storage.</string>
     <string name="Uploading">uploading&#8230;</string>
     <string name="NoFeedbackFound">No feedback found</string>
@@ -183,8 +183,8 @@
     <string name="LoginName">Login Name</string>
     <string name="LoginFail">Login Failed</string>
     <string name="Password">Password</string>
-    <string name="OfficerCode">Officer Code :</string>
-    <string name="IncorrectOfficerCode">Incorrect officer code</string>
+    <string name="OfficerCode">Enrolment Officer Code :</string>
+    <string name="IncorrectOfficerCode">Incorrect enrolment officer code</string>
     <string name="Login">Login</string>
     <string name="FTPConnectionFailed">Unable to connect the server. Operation aborted.</string>
     <string name="SomethingWrongServer">Something went wrong on the server.</string>
