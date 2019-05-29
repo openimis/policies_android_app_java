@@ -5925,7 +5925,7 @@ public class ClientAndroidInterface {
         return TotalPremiums;
     }
 
-    private int getLocationId() throws JSONException {
+    public int getLocationId() throws JSONException {
         global = (Global) mContext.getApplicationContext();
         String Query = "SELECT LocationId FROM tblOfficer WHERE OfficerId = " + global.getOfficerId();
         JSONArray jsonArray = sqlHandler.getResult(Query, null);

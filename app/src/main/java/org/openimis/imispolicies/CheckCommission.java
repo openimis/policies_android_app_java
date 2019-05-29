@@ -5,6 +5,7 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -60,7 +61,9 @@ public class CheckCommission extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_check_commission);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        final ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setTitle(getResources().getString(R.string.CheckCommission));
 
 
         spPayer = (Spinner) findViewById(R.id.spPayer);
@@ -205,7 +208,12 @@ public class CheckCommission extends AppCompatActivity {
         int LocationId = ca.getLocationId(OfficerCode);
 
         //String result = ca.getProductsByDistrict(LocationId);
-        String result = ca.getProducts();
+        String result = null;
+        try {
+            result = ca.getProductsByDistrict(ca.getLocationId());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
         JSONArray jsonArray = null;
         JSONObject object;
