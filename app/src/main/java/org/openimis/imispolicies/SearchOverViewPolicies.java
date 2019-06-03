@@ -300,12 +300,8 @@ public class SearchOverViewPolicies extends AppCompatActivity {
 
     private void BindSpinnerProduct() {
         clientAndroidInterface = new ClientAndroidInterface(this);
-        String result = null;
-        try {
-            result = clientAndroidInterface.getProductsByDistrict(clientAndroidInterface.getLocationId());
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+
+        String result = clientAndroidInterface.getProductsRD();
 
         JSONArray jsonArray = null;
         JSONObject object;

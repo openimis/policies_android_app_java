@@ -1698,6 +1698,38 @@ public class ClientAndroidInterface {
         JSONArray Products = sqlHandler.getResult(ProductQuery, null);
         return Products.toString();
     }
+    public String getProductsRD() {
+        JSONArray Products = null;
+        String loc = null;
+        int RegionId = 0, DistrictId = 0;
+        try {
+            JSONArray locArray = null;
+            JSONObject obj = null;
+            loc = getOfficerLocation();
+            locArray = new JSONArray(loc);
+            if (locArray.length() == 0) {
+
+            } else {
+                for (int i = 0; i < locArray.length(); i++) {
+                    obj = locArray.getJSONObject(i);
+                    RegionId = Integer.parseInt(obj.getString("RegionId"));
+                    DistrictId = Integer.parseInt(obj.getString("DistrictId"));
+                }
+            }
+
+            String ProductQuery = "SELECT  ProductCode, ProductName \n" +
+                    "FROM tblProduct P\n" +
+                    "INNER JOIN  uvwLocations L ON (P.LocationId = L.LocationId) OR (P.LocationId = 'null' OR P.LocationId = '') \n" +
+                    "WHERE  ((L.RegionId = " + RegionId + " OR L.RegionId ='null') AND (L.DistrictId =  " + DistrictId + " OR L.DistrictId ='null') OR L.LocationId='null') " +
+                    "ORDER BY  L.LocationId DESC";
+
+            Products = sqlHandler.getResult(ProductQuery, null);
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return Products.toString();
+    }
 
     public String getProductsByDistrict(int DistrictId) {
 

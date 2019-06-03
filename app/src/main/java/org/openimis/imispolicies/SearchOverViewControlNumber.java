@@ -282,12 +282,10 @@ public class SearchOverViewControlNumber extends AppCompatActivity {
 
     private void BindSpinnerProduct() {
         clientAndroidInterface = new ClientAndroidInterface(this);
-        String result = null;
-        try {
-            result = clientAndroidInterface.getProductsByDistrict(clientAndroidInterface.getLocationId());
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+
+        String result = clientAndroidInterface.getProductsRD();
+            //result = clientAndroidInterface.getProductsByDistrict(clientAndroidInterface.getLocationId());
+
 
         JSONArray jsonArray = null;
         JSONObject object;

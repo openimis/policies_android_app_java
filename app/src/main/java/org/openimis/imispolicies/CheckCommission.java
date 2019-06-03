@@ -202,18 +202,7 @@ public class CheckCommission extends AppCompatActivity {
     private void BindSpinnerProduct() {
         ca = new ClientAndroidInterface(this);
 
-        Global global = new Global();
-        global = (Global) CheckCommission.this.getApplicationContext();
-        String OfficerCode = global.getOfficerCode();
-        int LocationId = ca.getLocationId(OfficerCode);
-
-        //String result = ca.getProductsByDistrict(LocationId);
-        String result = null;
-        try {
-            result = ca.getProductsByDistrict(ca.getLocationId());
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+        String result = ca.getProductsRD();
 
         JSONArray jsonArray = null;
         JSONObject object;

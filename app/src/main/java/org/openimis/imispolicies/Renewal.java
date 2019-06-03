@@ -163,7 +163,7 @@ public class Renewal extends AppCompatActivity {
 
         if(getIntent().getStringExtra("CHFID").equals(getResources().getString(R.string.UnlistedRenewalPolicies))){
             BindSpinnerPayersXXXX(LocationId);
-            BindSpinnerProduct(LocationId);
+            BindSpinnerProduct();
         }else{
             spProduct.setVisibility(View.GONE);
             BindSpinnerPayers();
@@ -292,7 +292,7 @@ public class Renewal extends AppCompatActivity {
                 String searchString = etOfficer.getText().toString();
                 int LocID = ca.getLocationId(searchString);
                 BindSpinnerPayersXXXX(LocID);
-                BindSpinnerProduct(LocID);
+                BindSpinnerProduct();
             }
 
             @Override
@@ -324,13 +324,13 @@ public class Renewal extends AppCompatActivity {
     }
 
     private String GetSelectedProduct() {
-        String Product = "0";
+        String Product = "";
         try{
             HashMap<String, String> P = new HashMap<>();
             //noinspection unchecked
             P = (HashMap<String, String>) spProduct.getSelectedItem();
             if(P.get("ProductCode") == null) {
-                Product = "0";
+                Product = "";
             }else{
                 Product = P.get("ProductCode");
                 etProductCode.setText(Product);
@@ -662,10 +662,10 @@ public class Renewal extends AppCompatActivity {
         }
 
     }
-    private void BindSpinnerProduct(int LocationId) {
+    private void BindSpinnerProduct() {
 
         ca = new ClientAndroidInterface(this);
-        String result = ca.getProductsByDistrict(LocationId);
+        String result = ca.getProductsRD();
 
         JSONArray jsonArray = null;
         JSONObject object;
@@ -681,7 +681,7 @@ public class Renewal extends AppCompatActivity {
                 // Enter an empty record
                 if (i == 0) {
                     HashMap<String, String> Product = new HashMap<>();
-                    Product.put("ProductCode", String.valueOf(0));
+                    Product.put("ProductCode", "");
                     Product.put("ProductName", getResources().getString(R.string.SelectProduct));
                     ProductList.add(Product);
                 }
