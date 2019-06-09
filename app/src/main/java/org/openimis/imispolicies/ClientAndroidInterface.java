@@ -1989,7 +1989,7 @@ public class ClientAndroidInterface {
     public int getSumPrem(String PolicyId) {
         int PolicId = Integer.parseInt(PolicyId);
         int totalPremium = 0;
-        String Query = "SELECT SUM(Amount) FROM tblPremium WHERE PolicyId = "+ PolicId + "";
+        String Query = "SELECT SUM(Amount) FROM tblPremium WHERE PolicyId = "+ PolicId + " AND isPhotoFee = 'false'";
         JSONArray Policies = sqlHandler.getResult(Query, null);
         try {
             JSONObject JmaxPolicyOb = Policies.getJSONObject(0);
