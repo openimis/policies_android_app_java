@@ -388,7 +388,7 @@ public class ClientAndroidInterface {
 
             object = new JSONObject();
             object.put("key", mContext.getResources().getString(R.string.No));
-            object.put("value", 0);
+            object.put("value", 2);
             YesNo.put(object);
 
 
