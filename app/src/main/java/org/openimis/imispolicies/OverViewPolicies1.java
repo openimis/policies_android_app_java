@@ -83,8 +83,10 @@ public class OverViewPolicies1 extends AppCompatActivity {
 
     @SuppressLint("SimpleDateFormat")
     SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+    SimpleDateFormat format2 = new SimpleDateFormat("yyyy/MM/dd");
     Calendar cal = Calendar.getInstance();
     String dt = format.format(cal.getTime());
+    String dt2 = format2.format(cal.getTime());
     private String AmountCalculated;
     private String amountConfirmed;
     private String PaymentType = "";
@@ -137,7 +139,7 @@ public class OverViewPolicies1 extends AppCompatActivity {
 
                         try {
                             getControlNumber.put("phone_number", "");
-                            getControlNumber.put("request_date", dt);
+                            getControlNumber.put("request_date", dt2);
                             getControlNumber.put("enrolment_officer_code", global.getOfficerCode());
                             getControlNumber.put("policies", paymentDetails);
                             getControlNumber.put("amount_to_be_paid", PolicyValueToSend);
