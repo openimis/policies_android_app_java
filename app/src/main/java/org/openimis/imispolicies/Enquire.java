@@ -175,7 +175,7 @@ public class Enquire extends AppCompatActivity {
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_GO) {
                     ClearForm();
-                  //  if (!CheckCHFID()) return false;
+                    //  if (!CheckCHFID()) return false;
 
                     pd = ProgressDialog.show(Enquire.this, "", getResources().getString(R.string.GetingInsuuree));
                     new Thread() {
@@ -362,6 +362,18 @@ public class Enquire extends AppCompatActivity {
                             Policy.put("SubItem1", jsonObject.getString("ProductName"));
                             Policy.put("SubItem2",Ded);
                             Policy.put("SubItem3",Ceiling);
+
+                            if(!ca.getSpecificControl("TotalAdmissionsLeft").equals("N")){Policy.put("SubItem4",jsonObject.getString("TotalAdmissionsLeft"));}
+                            if(!ca.getSpecificControl("TotalVisitsLeft").equals("N")){Policy.put("SubItem5",jsonObject.getString("TotalVisitsLeft"));}
+                            if(!ca.getSpecificControl("TotalConsultationsLeft").equals("N")){Policy.put("SubItem6",jsonObject.getString("TotalConsultationsLeft"));}
+                            if(!ca.getSpecificControl("TotalSurgeriesLeft").equals("N")){Policy.put("SubItem7",jsonObject.getString("TotalSurgeriesLeft"));}
+                            if(!ca.getSpecificControl("TotalDelivieriesLeft").equals("N")){Policy.put("SubItem8",jsonObject.getString("TotalDelivieriesLeft"));}
+                            if(!ca.getSpecificControl("TotalAntenatalLeft").equals("N")){Policy.put("SubItem9",jsonObject.getString("TotalAntenatalLeft"));}
+                            if(!ca.getSpecificControl("ConsultationAmountLeft").equals("N")){Policy.put("SubItem10",jsonObject.getString("ConsultationAmountLeft"));}
+                            if(!ca.getSpecificControl("SurgeryAmountLeft").equals("N")){Policy.put("SubItem11",jsonObject.getString("SurgeryAmountLeft"));}
+                            if(!ca.getSpecificControl("HospitalizationAmountLeft").equals("N")){Policy.put("SubItem12",jsonObject.getString("HospitalizationAmountLeft"));}
+                            if(!ca.getSpecificControl("HospitalizationAmountLeft").equals("N")){Policy.put("SubItem13",jsonObject.getString("HospitalizationAmountLeft"));}
+
                             PolicyList.add(Policy);
                             etCHFID.setText("");
                             //break;
@@ -369,8 +381,8 @@ public class Enquire extends AppCompatActivity {
                     }
                     ListAdapter adapter = new SimpleAdapter(Enquire.this,
                             PolicyList, R.layout.policylist,
-                            new String[]{"Heading","Heading1","SubItem1","SubItem2","SubItem3"},
-                            new int[]{R.id.tvHeading,R.id.tvHeading1,R.id.tvSubItem1,R.id.tvSubItem2,R.id.tvSubItem3}
+                            new String[]{"Heading","Heading1","SubItem1","SubItem2","SubItem3","SubItem4","SubItem5","SubItem6","SubItem7","SubItem8","SubItem9","SubItem10","SubItem11","SubItem12","SubItem13"},
+                            new int[]{R.id.tvHeading,R.id.tvHeading1,R.id.tvSubItem1,R.id.tvSubItem2,R.id.tvSubItem3,R.id.tvSubItem4,R.id.tvSubItem5,R.id.tvSubItem6,R.id.tvSubItem7,R.id.tvSubItem8,R.id.tvSubItem9,R.id.tvSubItem10,R.id.tvSubItem11,R.id.tvSubItem12,R.id.tvSubItem13}
                     );
 
                     lv.setAdapter(adapter);
@@ -418,11 +430,11 @@ public class Enquire extends AppCompatActivity {
         }
     }
     private String getDataFromDb(String chfid){
-       try {
-           //ca.OfflineEnquire(chfid);
-           result = ca.getDataFromDb2(chfid);
-           return result;
-       }catch(Exception e){
+        try {
+            //ca.OfflineEnquire(chfid);
+            result = ca.getDataFromDb2(chfid);
+            return result;
+        }catch(Exception e){
             result = e.toString();
         }
 
