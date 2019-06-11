@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="fill_parent"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:layout_width="fill_parent"
 	android:layout_height="wrap_content"
 	android:orientation="vertical"
 	android:paddingBottom="5dp">
@@ -29,7 +29,7 @@
 			android:padding="5dp"
 			android:textColor="@android:color/white"
 			android:textSize="20sp"
-            tools:ignore="RtlHardcoded">
+			tools:ignore="RtlHardcoded">
 
 		</TextView>
 	</LinearLayout>
@@ -42,25 +42,117 @@
 		android:paddingRight="10dp"
 		android:textAppearance="?android:attr/textAppearanceSmall"
 		android:textColor="@android:color/white"
-        tools:ignore="RtlHardcoded"></TextView>
+		tools:ignore="RtlHardcoded"></TextView>
 
 	<TextView
 		android:id="@+id/tvSubItem2"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
 		android:paddingLeft="10dp"
-        android:paddingRight="10dp"
+		android:paddingRight="10dp"
 		android:textAppearance="?android:attr/textAppearanceSmall"
 		android:textColor="@android:color/white"
-        tools:ignore="RtlHardcoded"></TextView>
+		tools:ignore="RtlHardcoded"></TextView>
 
 	<TextView
 		android:id="@+id/tvSubItem3"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
 		android:paddingLeft="10dp"
-        android:paddingRight="10dp"
+		android:paddingRight="10dp"
 		android:textAppearance="?android:attr/textAppearanceSmall"
 		android:textColor="@android:color/white"
-        tools:ignore="RtlHardcoded"></TextView>
+		tools:ignore="RtlHardcoded"></TextView>
+
+	<TextView
+		android:id="@+id/tvSubItem4"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:paddingLeft="10dp"
+		android:paddingRight="10dp"
+		android:textAppearance="?android:attr/textAppearanceSmall"
+		android:textColor="@android:color/white"
+		tools:ignore="RtlHardcoded"></TextView>
+
+	<TextView
+		android:id="@+id/tvSubItem5"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:paddingLeft="10dp"
+		android:paddingRight="10dp"
+		android:textAppearance="?android:attr/textAppearanceSmall"
+		android:textColor="@android:color/white"
+		tools:ignore="RtlHardcoded"></TextView>
+	<TextView
+		android:id="@+id/tvSubItem6"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:paddingLeft="10dp"
+		android:paddingRight="10dp"
+		android:textAppearance="?android:attr/textAppearanceSmall"
+		android:textColor="@android:color/white"
+		tools:ignore="RtlHardcoded"></TextView>
+	<TextView
+		android:id="@+id/tvSubItem7"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:paddingLeft="10dp"
+		android:paddingRight="10dp"
+		android:textAppearance="?android:attr/textAppearanceSmall"
+		android:textColor="@android:color/white"
+		tools:ignore="RtlHardcoded"></TextView>
+	<TextView
+		android:id="@+id/tvSubItem8"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:paddingLeft="10dp"
+		android:paddingRight="10dp"
+		android:textAppearance="?android:attr/textAppearanceSmall"
+		android:textColor="@android:color/white"
+		tools:ignore="RtlHardcoded"></TextView>
+	<TextView
+		android:id="@+id/tvSubItem9"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:paddingLeft="10dp"
+		android:paddingRight="10dp"
+		android:textAppearance="?android:attr/textAppearanceSmall"
+		android:textColor="@android:color/white"
+		tools:ignore="RtlHardcoded"></TextView>
+	<TextView
+		android:id="@+id/tvSubItem10"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:paddingLeft="10dp"
+		android:paddingRight="10dp"
+		android:textAppearance="?android:attr/textAppearanceSmall"
+		android:textColor="@android:color/white"
+		tools:ignore="RtlHardcoded"></TextView>
+	<TextView
+		android:id="@+id/tvSubItem11"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:paddingLeft="10dp"
+		android:paddingRight="10dp"
+		android:textAppearance="?android:attr/textAppearanceSmall"
+		android:textColor="@android:color/white"
+		tools:ignore="RtlHardcoded"></TextView>
+	<TextView
+		android:id="@+id/tvSubItem12"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:paddingLeft="10dp"
+		android:paddingRight="10dp"
+		android:textAppearance="?android:attr/textAppearanceSmall"
+		android:textColor="@android:color/white"
+		tools:ignore="RtlHardcoded"></TextView>
+	<TextView
+		android:id="@+id/tvSubItem13"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:paddingLeft="10dp"
+		android:paddingRight="10dp"
+		android:textAppearance="?android:attr/textAppearanceSmall"
+		android:textColor="@android:color/white"
+		tools:ignore="RtlHardcoded"></TextView>
 </LinearLayout>
