@@ -370,6 +370,10 @@
     <string name="policies">Policies</string>
     <string name="no_data">No data</string>
     <string name="empty_year">Please fill the year</string>
+    <string name="pick_date">Pick Date</string>
+    <string name="get">Get</string>
+    <string name="date_from">Date From</string>
+    <string name="date_to">Date To</string>
 
 
 </resources>
