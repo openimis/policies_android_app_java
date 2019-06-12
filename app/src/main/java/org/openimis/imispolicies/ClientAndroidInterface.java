@@ -5851,7 +5851,7 @@ public class ClientAndroidInterface {
     @JavascriptInterface
     public int getTotalFamilyOnline() {
 
-        String FamilyQuery = "SELECT count(1) Families FROM tblfamilies F INNER JOIN tblInsuree I ON F.FamilyId = I.FamilyId WHERE F.isOffline = 0 AND (F.FamilyId < 0 OR I.InsureeId < 0) Group By F.FamilyId";
+        String FamilyQuery = "SELECT count(DISTINCT I.FamilyId) Families FROM tblfamilies F INNER JOIN tblInsuree I ON F.FamilyId = I.FamilyId WHERE F.isOffline = 0 AND I.InsureeId < 0";
         JSONArray Families = sqlHandler.getResult(FamilyQuery, null);
         JSONObject object = null;
         int TotalFamilies = 0;
