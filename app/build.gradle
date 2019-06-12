@@ -1,12 +1,12 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 25
+    compileSdkVersion 28
     buildToolsVersion "25.0.0"
     defaultConfig {
         applicationId "org.openimis.imispolicies"
-        minSdkVersion 15
-        targetSdkVersion 25
+        minSdkVersion 21
+        targetSdkVersion 28
         versionCode 1
         versionName "1.4"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -35,11 +35,11 @@ dependencies {
     })
     compile(name: 'CaptureActivity', ext: 'aar')
     compile(name: 'General', ext: 'aar')
-    compile 'com.android.support:appcompat-v7:25.3.1'
-    compile 'com.android.support:design:25.3.1'
+    compile 'com.android.support:appcompat-v7:28.0.0'
+    compile 'com.android.support:design:28.0.0'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     compile 'com.squareup.picasso:picasso:2.5.2'
-    compile 'com.android.support:support-v4:25.3.1'
+    compile 'com.android.support:support-v4:28.0.0'
     testCompile 'junit:junit:4.12'
     compile files('libs/android-support-v7-recyclerview.jar')
     compile files('libs/zip4j-1.2.7.jar')

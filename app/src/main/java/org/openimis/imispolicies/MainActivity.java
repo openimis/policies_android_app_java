@@ -49,7 +49,7 @@ import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
-import android.support.v7.app.NotificationCompat;
+import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -85,6 +85,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+
+import static java.security.AccessController.getContext;
 
 
 public class MainActivity extends AppCompatActivity
@@ -986,7 +988,7 @@ public class MainActivity extends AppCompatActivity
                 Intent NotifyIntent = new Intent(Intent.ACTION_VIEW,Uri.parse(ApkFileLocation));
 
                 PendingIntent intent = PendingIntent.getActivity(MainActivity.this, 0, NotifyIntent,0);
-                NotificationCompat.Builder builder = new NotificationCompat.Builder(MainActivity.this);
+                NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "M_CH_ID");
                 builder.setAutoCancel(false);
                 builder.setContentTitle(ContentTitle);
                 builder.setContentText(ContentText);
