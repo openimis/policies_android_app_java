@@ -15,21 +15,21 @@
             android:clickable="true"
             android:layout_width="120dp"
             android:layout_height="50dp"
-            android:text="Date From"/>
+            android:text="@string/date_from"/>
         <Button
             android:id="@+id/DateTo"
             android:clickable="true"
             android:layout_width="120dp"
             android:layout_height="50dp"
             android:layout_toRightOf="@+id/DateFrom"
-            android:text="Date To"/>
+            android:text="@string/date_to"/>
 
         <Button
             android:id="@+id/btnGet"
             android:layout_width="60dp"
             android:layout_height="50dp"
             android:layout_toRightOf="@+id/DateTo"
-            android:text="Get"/>
+            android:text="@string/get"/>
 
     </RelativeLayout>
 
