@@ -69,6 +69,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.exact.CallSoap.CallSoap;
 import com.exact.general.General;
 
 import org.json.JSONArray;
@@ -408,14 +409,15 @@ public class MainActivity extends AppCompatActivity
                 MainActivity.this);
 
 // Setting Dialog Title
-        alertDialog2.setTitle("NO INTERNET CONNECTION");
-        alertDialog2.setMessage("Do you want to import .txt file from your DATABASE folder?");
+        alertDialog2.setTitle(getResources().getString(R.string.NoInternetTitle));
+        alertDialog2.setMessage(getResources().getString(R.string.DoImport));
+        alertDialog2.setCancelable(false);
 
 // Setting Icon to Dialog
        // alertDialog2.setIcon(R.drawable.delete);
 
 // Setting Positive "Yes" Btn
-        alertDialog2.setPositiveButton("Yes",
+        alertDialog2.setPositiveButton(getResources().getString(R.string.Yes),
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
 
@@ -425,11 +427,11 @@ public class MainActivity extends AppCompatActivity
                         try{
                             startActivityForResult(intent, 4);
                         } catch (ActivityNotFoundException e){
-                            Toast.makeText(getApplicationContext(), "There are no file explorer clients installed.", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getApplicationContext(), getResources().getString(R.string.NoFileExporerInstalled), Toast.LENGTH_SHORT).show();
                         }
                         // Write your code here to execute after dialog
                     }
-                }).setNegativeButton("No",
+                }).setNegativeButton(getResources().getString(R.string.No),
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         dialog.cancel();
@@ -445,14 +447,14 @@ public class MainActivity extends AppCompatActivity
                 MainActivity.this);
 
 // Setting Dialog Title
-        alertDialog2.setTitle("NO INTERNET CONNECTION");
-        alertDialog2.setMessage("Do you want to import .txt file from your DATABASE folder?");
+        alertDialog2.setTitle(getResources().getString(R.string.NoInternetTitle));
+        alertDialog2.setMessage(getResources().getString(R.string.DoImport));
 
 // Setting Icon to Dialog
         // alertDialog2.setIcon(R.drawable.delete);
 
 // Setting Positive "Yes" Btn
-        alertDialog2.setPositiveButton("Yes",
+        alertDialog2.setPositiveButton(getResources().getString(R.string.Yes),
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
 
@@ -462,11 +464,11 @@ public class MainActivity extends AppCompatActivity
                         try{
                             startActivityForResult(intent, 4);
                         } catch (ActivityNotFoundException e){
-                            Toast.makeText(getApplicationContext(), "There are no file explorer clients installed.", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getApplicationContext(), getResources().getString(R.string.NoFileExporerInstalled), Toast.LENGTH_SHORT).show();
                         }
                         // Write your code here to execute after dialog
                     }
-                }).setNegativeButton("No",
+                }).setNegativeButton(getResources().getString(R.string.No),
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         dialog.cancel();
@@ -481,21 +483,22 @@ public class MainActivity extends AppCompatActivity
                 MainActivity.this);
 
 // Setting Dialog Title
-        alertDialog2.setTitle("Load file:");
+        alertDialog2.setTitle(getResources().getString(R.string.LoadFile));
         alertDialog2.setMessage(filename);
+        alertDialog2.setCancelable(false);
 
 // Setting Icon to Dialog
         // alertDialog2.setIcon(R.drawable.delete);
 
 // Setting Positive "Yes" Btn
-        alertDialog2.setPositiveButton("OK",
+        alertDialog2.setPositiveButton(getResources().getString(R.string.Ok),
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         MasterDataLocalAsync masterDataLocalAsync = new MasterDataLocalAsync();
                         masterDataLocalAsync.execute();
                         // Write your code here to execute after dialog
                     }
-                }).setNegativeButton("Quit",
+                }).setNegativeButton(getResources().getString(R.string.Quit),
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         dialog.cancel();
@@ -512,21 +515,22 @@ public class MainActivity extends AppCompatActivity
                 MainActivity.this);
 
 // Setting Dialog Title
-        alertDialog2.setTitle("Load file:");
+        alertDialog2.setTitle(getResources().getString(R.string.LoadFile));
         alertDialog2.setMessage(filename);
+        alertDialog2.setCancelable(false);
 
 // Setting Icon to Dialog
         // alertDialog2.setIcon(R.drawable.delete);
 
 // Setting Positive "Yes" Btn
-        alertDialog2.setPositiveButton("OK",
+        alertDialog2.setPositiveButton(getResources().getString(R.string.Ok),
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         MasterDataLocalAsync masterDataLocalAsync = new MasterDataLocalAsync();
                         masterDataLocalAsync.execute();
                         // Write your code here to execute after dialog
                     }
-                }).setNegativeButton("Quit",
+                }).setNegativeButton(getResources().getString(R.string.Quit),
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         dialog.cancel();
@@ -541,14 +545,14 @@ public class MainActivity extends AppCompatActivity
                 MainActivity.this);
 
 // Setting Dialog Title
-        alertDialog2.setTitle("Incomplete!");
+        alertDialog2.setTitle(getResources().getString(R.string.Incomplete));
         alertDialog2.setMessage(msg);
 
 // Setting Icon to Dialog
         // alertDialog2.setIcon(R.drawable.delete);
 
 // Setting Positive "Yes" Btn
-        alertDialog2.setPositiveButton("OK",
+        alertDialog2.setPositiveButton(getResources().getString(R.string.Ok),
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         // Write your code here to execute after dialog
@@ -606,7 +610,9 @@ public class MainActivity extends AppCompatActivity
                                         if (ca.isOfficerCodeValid(userInput.getText().toString())) {
                                             global.setOfficerCode(userInput.getText().toString());
                                             OfficerName.setText(global.getOfficerName());
-
+                                            if(_General.isNetworkAvailable(MainActivity.this)){
+                                                ca.getOfficerVillages(userInput.getText().toString());
+                                            }
                                         } else {
                                             ShowDialogTex();
                                             ca.ShowDialog(getResources().getString(R.string.IncorrectOfficerCode));
@@ -844,8 +850,20 @@ public class MainActivity extends AppCompatActivity
             }).create().show();
 
         } else if (id == R.id.nav_enquire) {
-            Intent intent = new Intent(this, Enquire.class);
-            startActivity(intent);
+            Global global = new Global();
+            global = (Global) MainActivity.this.getApplicationContext();
+            int userid = global.getUserId();
+            if(userid > 0){
+                Intent intent = new Intent(this, Enquire.class);
+                startActivity(intent);
+            }else{
+                LoginDialogBox("Enquire");
+            }
+
+
+        }else if (id == R.id.nav_control_numbers) {
+            ClientAndroidInterface ca = new ClientAndroidInterface(context);
+            ca.launchControlNumbers();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -1003,5 +1021,89 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
+    public void LoginDialogBox(final String page){
 
+        final int[] userid = {0};
+
+        Global global = (Global) MainActivity.this.getApplicationContext();
+        // get prompts.xml view
+        LayoutInflater li = LayoutInflater.from(this);
+        View promptsView = li.inflate(R.layout.login_dialog, null);
+
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+
+        // set prompts.xml to alertdialog builder
+        alertDialogBuilder.setView(promptsView);
+
+        final TextView username = (TextView) promptsView.findViewById(R.id.UserName);
+        final TextView password = (TextView) promptsView.findViewById(R.id.Password);
+
+        username.setText(global.getOfficerCode());
+
+        // set dialog message
+        alertDialogBuilder
+                .setCancelable(false)
+                .setPositiveButton(MainActivity.this.getResources().getString(R.string.button_ok),
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog,int id) {
+                                if(!username.getText().toString().equals("") && !password.getText().toString().equals("")){
+
+                                    new Thread() {
+                                        public void run() {
+                                            CallSoap callSoap = new CallSoap();
+                                            callSoap.setFunctionName("isValidLogin");
+                                            userid[0] = callSoap.isUserLoggedIn(username.getText().toString(),password.getText().toString());
+
+                                            Global global = new Global();
+                                            global = (Global) MainActivity.this.getApplicationContext();
+                                            global.setUserId(userid[0]);
+
+                                            runOnUiThread(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    SetLogedIn(MainActivity.this.getResources().getString(R.string.Login), MainActivity.this.getResources().getString(R.string.Logout));
+
+                                                }
+                                            });
+
+                                            runOnUiThread(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    if(userid[0] > 0){
+                                                        if(page.equals("Enquire")){
+                                                            Intent intent = new Intent(MainActivity.this, Enquire.class);
+                                                            startActivity(intent);
+                                                            Toast.makeText(MainActivity.this,MainActivity.this.getResources().getString(R.string.Login_Successful),Toast.LENGTH_LONG).show();
+                                                        }
+
+                                                    }else{
+                                                        ca.ShowDialog(MainActivity.this.getResources().getString(R.string.LoginFail));
+                                                    }
+                                                }
+                                            });
+
+                                        }
+                                    }.start();
+
+
+                                }else{
+                                    Toast.makeText(MainActivity.this,MainActivity.this.getResources().getString(R.string.Enter_Credentials), Toast.LENGTH_LONG).show();
+                                }
+                            }
+                        }).setNegativeButton(MainActivity.this.getResources().getString(R.string.button_cancel),
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                    }
+                });
+
+        // create alert dialog
+        AlertDialog alertDialog = alertDialogBuilder.create();
+
+        // show it
+        alertDialog.show();
+    }
+    public String getSelectedLanguage(){
+        return selectedLanguage;
+    }
 }

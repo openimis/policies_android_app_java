@@ -37,13 +37,15 @@ In case of dispute arising out or in relation to the use of the program, it is s
         $(document).ready(function(){
         document.title = Android.getString('Search');
         $('#spPleaseWait').text(Android.getString('DownloadFamily'));
-         if(sessionStorage.getItem("UserData") == null){
+
+           var userid = Android.getUserId();
+         if(sessionStorage.getItem("UserData") == null && userid <= 0){
            window.open("Login.html?s=1", "_self");
          }
 
           $('#btnSearch').click(function(){
 			var InsuranceNumber = $('#txtInsuranceNumber').val();
-			if(InsuranceNumber.length  > 0){
+			if(InsuranceNumber.length > 0){
 			$("#divProgress").show();
             setTimeout(function(){
                 var Result =  Android.ModifyFamily(InsuranceNumber);

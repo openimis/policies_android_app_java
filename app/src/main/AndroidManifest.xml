@@ -94,6 +94,13 @@
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/CummulativeIndicators"
             android:screenOrientation="portrait" />
+        <activity android:name=".ControlNumbers" />
+        <activity android:name=".SearchOverViewPolicies" />
+        <activity android:name=".OverViewPolicies1" />
+        <activity android:name=".OverViewControlNumbers" />
+        <activity android:name=".SearchOverViewControlNumber" />
+        <activity android:name=".ViewPolicies" />
+        <activity android:name=".CheckCommission"></activity>
     </application>
 
 </manifest>

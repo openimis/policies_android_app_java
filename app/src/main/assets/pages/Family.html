@@ -140,20 +140,21 @@ In case of dispute arising out or in relation to the use of the program, it is s
 
         function getWards(DistrictId){
             var SelectText = Android.getString('SelectWard');
-            var $Wards = Android.getWards(parseInt(DistrictId));
+            var OfficerCode = Android.getOfficerCode();
+            var $Wards = Android.getWardsOfficer(OfficerCode);
             var rows = JSON.parse($Wards).length;
             if(rows == 1)SelectText = null;
-            bindDropdown('ddlWard', $Wards, 'LocationId', 'LocationName',0, SelectText);
+            bindDropdown('ddlWard', $Wards, 'WardID', 'ward',0, SelectText);
             if(rows == 1 )getVillages($('#ddlWard').val());
 
         }
 
         function getVillages(WardId){
             var SelectText = Android.getString('SelectVillage');
-            var $Villages = Android.getVillages(parseInt(WardId));
+            var $Villages = Android.getVillagesOfficer(WardId.toString());
             var rows = JSON.parse($Villages).length;
             if(rows == 1)SelectText = null;
-            bindDropdown('ddlVillage', $Villages, 'LocationId', 'LocationName',0,SelectText);
+            bindDropdown('ddlVillage', $Villages, 'LocationId', 'village',0,SelectText);
         }
 
         function getPovertyStatus(){
@@ -162,13 +163,21 @@ In case of dispute arising out or in relation to the use of the program, it is s
         }
 
         function getConfirmationTypes(){
+            $textLanguage = "ConfirmationType";
+            if(Android.getSelectedLanguage() != "en"){
+                $textLanguage = "AltLanguage";
+            }
             var $ConfirmationTypes = Android.getConfirmationTypes();
-            bindDropdown('ddlConfirmationType', $ConfirmationTypes, 'ConfirmationTypeCode', 'ConfirmationType',"", Android.getString('SelectConfirmationType'));
+            bindDropdown('ddlConfirmationType', $ConfirmationTypes, 'ConfirmationTypeCode', $textLanguage,"", Android.getString('SelectConfirmationType'));
         }
 
         function getFamilyTypes(){
+            $textLanguage = "FamilyType";
+            if(Android.getSelectedLanguage() != "en"){
+                $textLanguage = "AltLanguage";
+            }
             var $FamilyTypes = Android.getGroupTypes();
-            bindDropdown('ddlGroupType', $FamilyTypes, 'FamilyTypeCode', 'FamilyType',0, Android.getString('SelectFamilyType'));
+            bindDropdown('ddlGroupType', $FamilyTypes, 'FamilyTypeCode', $textLanguage,0, Android.getString('SelectFamilyType'));
         }
 
 

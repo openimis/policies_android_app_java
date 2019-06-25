@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@color/DarkBlue"
+        android:textColor="@color/white"
+        android:textAlignment="center"
+        android:typeface="monospace"
+        android:paddingTop="15dp"
+        android:text="REQUEST CONTROL NUMBER"
+        />
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:text="Total Amount"
+        android:textColor="@color/Black"
+        android:layout_margin="10dp"
+        android:textSize="25dp"
+        android:textAlignment="center"
+        android:typeface="monospace"/>
+
+    <EditText
+        android:id="@+id/display"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_margin="10dp"
+        android:padding="10dp"
+        android:textColor="@color/Black"
+        android:typeface="monospace"
+        android:inputType="number"
+        android:background="@drawable/corner"
+        />
+    <EditText
+        android:id="@+id/phonenumber"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_margin="10dp"
+        android:padding="10dp"
+        android:textColor="@color/Black"
+        android:typeface="monospace"
+        android:inputType="number"
+        android:hint="@string/PhoneNumber"
+        android:background="@drawable/corner"
+        />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:text="@string/Type_of_payment"/>
+
+    <Spinner
+        android:id="@+id/payment_type2"
+        android:layout_width="250dp"
+        android:layout_height="30dp"
+        android:layout_margin="10dp"
+        android:background="@drawable/corner"
+        android:drawSelectorOnTop="true"/>
+
+
+</LinearLayout>
