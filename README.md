@@ -33,7 +33,7 @@ git clone https://github.com/openimis/openimis_android_app_java
 
 In order to run the openIMIS IMIS Android Application, you need to
 know the openIMIS Web Services domain (DNS or IP address) and to 
-configure it in the tz.co.exact.imis.AppInformation java file.
+configure it in the imispolicies.AppInformation java file.
 
 ```
 private static String _Domain = "http://demo.openimis.org/";

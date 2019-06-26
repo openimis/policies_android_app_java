@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:layout_margin="10dp"
     android:orientation="vertical"
-    tools:context="tz.co.exact.imis.SearchOverViewControlNumber">
+    tools:context="org.openimis.imispolicies.tz.co.exact.SearchOverViewControlNumber">
 
     <LinearLayout
         android:layout_width="match_parent"
