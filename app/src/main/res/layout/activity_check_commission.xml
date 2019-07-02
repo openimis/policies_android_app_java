@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:id="@+id/actv"
+    tools:context="org.openimis.imispolicies.tz.co.exact.CheckCommission">
+
+    <Spinner
+        android:id="@+id/spMonth"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_margin="5dp"
+        android:background="@drawable/corner"/>
+
+    <EditText
+        android:id="@+id/edYear"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@drawable/corner"
+        android:padding="5dp"
+        android:layout_margin="5dp"
+        android:inputType="datetime"
+        android:hint="@string/year"/>
+    
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:text="@string/paid"
+        android:padding="5dp"
+        android:gravity="center_vertical"
+        android:layout_margin="5dp"
+        android:textSize="20dp"
+        android:background="@drawable/corner"/>
+
+    <Spinner
+        android:id="@+id/spProduct"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_margin="5dp"
+        android:background="@drawable/corner"/>
+
+    <Spinner
+        android:id="@+id/spPayer"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_margin="5dp"
+        android:background="@drawable/corner"/>
+    
+    
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+        
+        <Button
+            android:id="@+id/btnClear"
+            android:layout_width="150dp"
+            android:layout_height="50dp"
+            android:layout_margin="5dp"
+            android:text="@string/clear"
+            android:visibility="gone"/>
+
+        <Button
+            android:id="@+id/btnCheck"
+            android:layout_width="150dp"
+            android:layout_height="50dp"
+            android:layout_margin="5dp"
+            android:text="@string/check"/>
+        
+    </LinearLayout>
+
+</LinearLayout>

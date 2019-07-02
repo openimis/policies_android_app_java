@@ -6,15 +6,18 @@
 
     <TextView
         android:id="@+id/tvPayerId"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:visibility="gone"/>
 
     <TextView
         android:id="@+id/tvPayerName"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:textColor="@color/DarkBlue" />
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_margin="5dp"
+        android:textSize="20dp"
+        android:gravity="center_vertical"
+        android:textColor="@color/black" />
 
     <TextView
         android:id="@+id/tvPayerDescription"

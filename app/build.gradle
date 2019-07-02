@@ -4,12 +4,13 @@ android {
     compileSdkVersion 26
     buildToolsVersion '27.0.3'
     defaultConfig {
-        applicationId "tz.co.exact.imis"
+        applicationId "org.openimis.imispolicies"
         minSdkVersion 15
         targetSdkVersion 26
         versionCode 1
         versionName "1.2"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        useLibrary('org.apache.http.legacy')
     }
     buildTypes {
         release {

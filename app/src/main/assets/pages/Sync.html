@@ -46,6 +46,7 @@ In case of dispute arising out or in relation to the use of the program, it is s
               $('#CreateFeedbackXML').text(Android.getString('CreateFeedbackXML'));
               $('#UploadPhoto').text(Android.getString('UploadPhoto'));
               $('#DownloadMaster').text(Android.getString('DownloadMaster'));
+              $('#ControlNumbers').text(Android.getString('ControlNumbers'));
 
 
 
@@ -54,7 +55,8 @@ In case of dispute arising out or in relation to the use of the program, it is s
                     var action = $(this).attr("id");
                     switch(action){
                         case "liUploadEnrolment":
-                             if(sessionStorage.getItem("UserData") == null){
+                             var userid = Android.getUserId();
+                             if(sessionStorage.getItem("UserData") == null && userid <= 0){
                                 window.open("Login.html?s=0", "_self");
                              }else{
                                 Android.uploadEnrolment();
@@ -65,7 +67,8 @@ In case of dispute arising out or in relation to the use of the program, it is s
 
                         break;
                     case "liUploadRenewals":
-                             if(sessionStorage.getItem("UserData") == null){
+                             var userid = Android.getUserId();
+                             if(sessionStorage.getItem("UserData") == null && userid <= 0){
                                 window.open("Login.html?s=0", "_self");
                              }else{
                                 Android.UploadOfflineFeedbackRenewal('renewal');
@@ -76,7 +79,8 @@ In case of dispute arising out or in relation to the use of the program, it is s
                          Android.zipFeedBackRenewal('Renewal');
                         break;
                     case "liUploadFeedback":
-                             if(sessionStorage.getItem("UserData") == null){
+                             var userid = Android.getUserId();
+                             if(sessionStorage.getItem("UserData") == null && userid <= 0){
                                 window.open("Login.html?s=0", "_self");
                              }else{
                                 Android.UploadOfflineFeedbackRenewal('feedback');
@@ -96,11 +100,16 @@ In case of dispute arising out or in relation to the use of the program, it is s
 
                             break;
                     case "liUploadPhoto":
-                             if(sessionStorage.getItem("UserData") == null){
+                             var userid = Android.getUserId();
+                             if(sessionStorage.getItem("UserData") == null && userid <= 0){
                                 window.open("Login.html?s=0", "_self");
                              }
                           Android.UploadPhotos();
                          break;
+
+                    case "liControlNumbers":
+                          Android.launchControlNumbers();
+                          break;
                     }
                 }catch(e){
                     Android.ShowDialog(e.message);
@@ -151,6 +160,9 @@ In case of dispute arising out or in relation to the use of the program, it is s
         </li>
         <li id="liCreateFeedbackXML">
             <span id="CreateFeedbackXML">Create Feedback XML</span>
+        </li>
+        <li id="liControlNumbers" style="display:none;">
+            <span id="ControlNumbers">Control Numbers</span>
         </li>
         <li id="liUploadPhoto" style="display:none;">
             <span id="UploadPhoto">Upload Photo</span>
