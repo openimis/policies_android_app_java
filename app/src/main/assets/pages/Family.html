@@ -144,7 +144,7 @@ In case of dispute arising out or in relation to the use of the program, it is s
             var $Wards = Android.getWardsOfficer(OfficerCode);
             var rows = JSON.parse($Wards).length;
             if(rows == 1)SelectText = null;
-            bindDropdown('ddlWard', $Wards, 'WardID', 'ward',0, SelectText);
+            bindDropdown('ddlWard', $Wards, 'WardID', 'Ward',0, SelectText);
             if(rows == 1 )getVillages($('#ddlWard').val());
 
         }
@@ -154,7 +154,7 @@ In case of dispute arising out or in relation to the use of the program, it is s
             var $Villages = Android.getVillagesOfficer(WardId.toString());
             var rows = JSON.parse($Villages).length;
             if(rows == 1)SelectText = null;
-            bindDropdown('ddlVillage', $Villages, 'LocationId', 'village',0,SelectText);
+            bindDropdown('ddlVillage', $Villages, 'LocationId', 'Village',0,SelectText);
         }
 
         function getPovertyStatus(){

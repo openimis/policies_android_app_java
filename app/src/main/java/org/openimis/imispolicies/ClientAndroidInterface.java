@@ -36,6 +36,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -165,7 +166,9 @@ public class ClientAndroidInterface {
         String where = null;
         String OrderBy = null;
 
-        JSONArray ctls = sqlHandler.getResult(tableName, columns, null, null);
+        String query = "SELECT FieldName, Adjustibility FROM tblControls";
+
+        JSONArray ctls = sqlHandler.getResult(query,null);
 
         for (int i = 0; i < ctls.length(); i++) {
             try {
@@ -360,7 +363,7 @@ public class ClientAndroidInterface {
     public String getWardsOfficer(String OfficerCode) {
         JSONArray Wards = null;
         String tableName = "tblOfficerVillages";
-        String[] columns = {"DISTINCT(WardID) WardID","ward"};
+        String[] columns = {"DISTINCT(WardID) WardID","Ward"};
         String where = " LOWER(code) = '" + OfficerCode.toLowerCase()+"'";
         try{
             Wards = sqlHandler.getResult(tableName, columns, where, null);
@@ -385,7 +388,7 @@ public class ClientAndroidInterface {
     public String getVillagesOfficer(String WardID) {
         JSONArray Villages = null;
         String tableName = "tblOfficerVillages";
-        String[] columns = {"DISTINCT(LocationId)","village"};
+        String[] columns = {"DISTINCT(LocationId)","Village"};
         String where = " WardID = " + Integer.parseInt(WardID);
 
         try {
@@ -4544,13 +4547,15 @@ public class ClientAndroidInterface {
     }
     public void importMasterData(String data) throws JSONException, UserException {
 
-        String MD = data;
-        JSONArray masterData = new JSONArray(MD);
 
-        if (masterData.length() == 0)
-            throw new UserException(mContext.getResources().getString(R.string.DownloadMasterDataFailed));
+        try{
+            String MD = data;
+            JSONArray masterData = new JSONArray(MD);
 
-        //Sequence of table
+            if (masterData.length() == 0)
+                throw new UserException(mContext.getResources().getString(R.string.DownloadMasterDataFailed));
+
+            //Sequence of table
         /*
             1   :   ConfirmationTypes
             2   :   Controls
@@ -4570,93 +4575,97 @@ public class ClientAndroidInterface {
             16  :   OfficerVillages
          */
 
-        JSONArray ConfirmationTypes = new JSONArray();
-        JSONArray Controls = new JSONArray();
-        JSONArray Education = new JSONArray();
-        JSONArray FamilyTypes = new JSONArray();
-        JSONArray HF = new JSONArray();
-        JSONArray IdentificationTypes = new JSONArray();
-        JSONArray Languages = new JSONArray();
-        JSONArray Locations = new JSONArray();
-        JSONArray Officers = new JSONArray();
-        JSONArray Payers = new JSONArray();
-        JSONArray Products = new JSONArray();
-        JSONArray Professions = new JSONArray();
-        JSONArray Relations = new JSONArray();
-        JSONArray PhoneDefaults = new JSONArray();
-        JSONArray Genders = new JSONArray();
-        JSONArray OfficerVillages = new JSONArray();
+            JSONArray ConfirmationTypes = new JSONArray();
+            JSONArray Controls = new JSONArray();
+            JSONArray Education = new JSONArray();
+            JSONArray FamilyTypes = new JSONArray();
+            JSONArray HF = new JSONArray();
+            JSONArray IdentificationTypes = new JSONArray();
+            JSONArray Languages = new JSONArray();
+            JSONArray Locations = new JSONArray();
+            JSONArray Officers = new JSONArray();
+            JSONArray Payers = new JSONArray();
+            JSONArray Products = new JSONArray();
+            JSONArray Professions = new JSONArray();
+            JSONArray Relations = new JSONArray();
+            JSONArray PhoneDefaults = new JSONArray();
+            JSONArray Genders = new JSONArray();
+            JSONArray OfficerVillages = new JSONArray();
 
-        for (int i = 0; i < masterData.length(); i++) {
-            String keyName = masterData.getJSONObject(i).keys().next();
-            switch (keyName.toLowerCase()) {
-                case "confirmationtypes":
-                    ConfirmationTypes = (JSONArray) masterData.getJSONObject(i).get(keyName);
-                    break;
-                case "controls":
-                    Controls = (JSONArray) masterData.getJSONObject(i).get(keyName);
-                    break;
-                case "education":
-                    Education = (JSONArray) masterData.getJSONObject(i).get(keyName);
-                    break;
-                case "familytypes":
-                    FamilyTypes = (JSONArray) masterData.getJSONObject(i).get(keyName);
-                    break;
-                case "hf":
-                    HF = (JSONArray) masterData.getJSONObject(i).get(keyName);
-                    break;
-                case "identificationtypes":
-                    IdentificationTypes = (JSONArray) masterData.getJSONObject(i).get(keyName);
-                    break;
-                case "languages":
-                    Languages = (JSONArray) masterData.getJSONObject(i).get(keyName);
-                    break;
-                case "locations":
-                    Locations = (JSONArray) masterData.getJSONObject(i).get(keyName);
-                    break;
-                case "officers":
-                    Officers = (JSONArray) masterData.getJSONObject(i).get(keyName);
-                    break;
-                case "payers":
-                    Payers = (JSONArray) masterData.getJSONObject(i).get(keyName);
-                    break;
-                case "products":
-                    Products = (JSONArray) masterData.getJSONObject(i).get(keyName);
-                    break;
-                case "professions":
-                    Professions = (JSONArray) masterData.getJSONObject(i).get(keyName);
-                    break;
-                case "relations":
-                    Relations = (JSONArray) masterData.getJSONObject(i).get(keyName);
-                    break;
-                case "phonedefaults":
-                    PhoneDefaults = (JSONArray) masterData.getJSONObject(i).get(keyName);
-                    break;
-                case "genders":
-                    Genders = (JSONArray) masterData.getJSONObject(i).get(keyName);
-                    break;
-                case "officersvillages":
-                    OfficerVillages = (JSONArray) masterData.getJSONObject(i).get(keyName);
-                    break;
+            for (int i = 0; i < masterData.length(); i++) {
+                String keyName = masterData.getJSONObject(i).keys().next();
+                switch (keyName.toLowerCase()) {
+                    case "confirmationtypes":
+                        ConfirmationTypes = (JSONArray) masterData.getJSONObject(i).get(keyName);
+                        break;
+                    case "controls":
+                        Controls = (JSONArray) masterData.getJSONObject(i).get(keyName);
+                        break;
+                    case "education":
+                        Education = (JSONArray) masterData.getJSONObject(i).get(keyName);
+                        break;
+                    case "familytypes":
+                        FamilyTypes = (JSONArray) masterData.getJSONObject(i).get(keyName);
+                        break;
+                    case "hf":
+                        HF = (JSONArray) masterData.getJSONObject(i).get(keyName);
+                        break;
+                    case "identificationtypes":
+                        IdentificationTypes = (JSONArray) masterData.getJSONObject(i).get(keyName);
+                        break;
+                    case "languages":
+                        Languages = (JSONArray) masterData.getJSONObject(i).get(keyName);
+                        break;
+                    case "locations":
+                        Locations = (JSONArray) masterData.getJSONObject(i).get(keyName);
+                        break;
+                    case "officers":
+                        Officers = (JSONArray) masterData.getJSONObject(i).get(keyName);
+                        break;
+                    case "payers":
+                        Payers = (JSONArray) masterData.getJSONObject(i).get(keyName);
+                        break;
+                    case "products":
+                        Products = (JSONArray) masterData.getJSONObject(i).get(keyName);
+                        break;
+                    case "professions":
+                        Professions = (JSONArray) masterData.getJSONObject(i).get(keyName);
+                        break;
+                    case "relations":
+                        Relations = (JSONArray) masterData.getJSONObject(i).get(keyName);
+                        break;
+                    case "phonedefaults":
+                        PhoneDefaults = (JSONArray) masterData.getJSONObject(i).get(keyName);
+                        break;
+                    case "genders":
+                        Genders = (JSONArray) masterData.getJSONObject(i).get(keyName);
+                        break;
+                    case "officersvillages":
+                        OfficerVillages = (JSONArray) masterData.getJSONObject(i).get(keyName);
+                        break;
+                }
             }
+
+            insertConfirmationTypes(ConfirmationTypes);
+            insertControls(Controls);
+            insertEducation(Education);
+            insertFamilyTypes(FamilyTypes);
+            insertHF(HF);
+            insertIdentificationTypes(IdentificationTypes);
+            insertLanguages(Languages);
+            insertLocations(Locations);
+            insertOfficers(Officers);
+            insertPayers(Payers);
+            insertProducts(Products);
+            insertProfessions(Professions);
+            insertRelations(Relations);
+            insertPhoneDefaults(PhoneDefaults);
+            insertGenders(Genders);
+            insertOfficerVillages(OfficerVillages);
+        }catch (Exception e){
+            e.printStackTrace();
         }
 
-        insertConfirmationTypes(ConfirmationTypes);
-        insertControls(Controls);
-        insertEducation(Education);
-        insertFamilyTypes(FamilyTypes);
-        insertHF(HF);
-        insertIdentificationTypes(IdentificationTypes);
-        insertLanguages(Languages);
-        insertLocations(Locations);
-        insertOfficers(Officers);
-        insertPayers(Payers);
-        insertProducts(Products);
-        insertProfessions(Professions);
-        insertRelations(Relations);
-        insertPhoneDefaults(PhoneDefaults);
-        insertGenders(Genders);
-        insertOfficerVillages(OfficerVillages);
 
     }
 
@@ -4664,7 +4673,12 @@ public class ClientAndroidInterface {
     public void startDownloading() throws JSONException, UserException {
         CallSoap cs = new CallSoap();
         cs.setFunctionName("downloadMasterData");
-        String MD = cs.downloadMasterData();
+        String MD = "";
+        try{
+            MD = cs.downloadMasterData();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
 
         JSONArray masterData = new JSONArray(MD);
 
@@ -4909,8 +4923,13 @@ public class ClientAndroidInterface {
         return true;
     }
     private boolean insertOfficerVillages(JSONArray jsonArray) throws JSONException {
-        String Columns[] = {"code", "Ward", "Village","LocationId","WardID"};
-        sqlHandler.insertData("tblOfficerVillages", Columns, jsonArray.toString(), "DELETE FROM tblOfficerVillages;");
+        try{
+            String Columns[] = {"code", "Ward", "Village","LocationId","WardID"};
+            sqlHandler.insertData("tblOfficerVillages", Columns, jsonArray.toString(), "DELETE FROM tblOfficerVillages;");
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+
         return true;
     }
 

@@ -226,7 +226,6 @@ public class MainActivity extends AppCompatActivity
 
         setContentView(R.layout.activity_main);
 
-
         sqlHandler = new SQLHandler(this);
 
         sqlHandler.isPrivate = true;
@@ -237,6 +236,7 @@ public class MainActivity extends AppCompatActivity
         CreateFolders();
         //Check if database exists
         File database = getApplicationContext().getDatabasePath(SQLHandler.DBNAME);
+        //String dbPath = "/data/data/org.openimis.imispolicies/databases/" + DBNAME;
         if (!database.exists()) {
             sqlHandler.getReadableDatabase();
             if (copyDatabase(this)) {
@@ -295,7 +295,6 @@ public class MainActivity extends AppCompatActivity
         //Register for context acquire_menu
         registerForContextMenu(wv);
 
-        wv.loadUrl("file:///android_asset/pages/Home.html");
         wv.setWebViewClient(new MyWebViewClient(MainActivity.this));
 
         wv.setWebChromeClient(new WebChromeClient() {
@@ -363,12 +362,14 @@ public class MainActivity extends AppCompatActivity
         Dir.mkdir();
         Dir1.mkdir();
 
+        wv.loadUrl("file:///android_asset/pages/Home.html");
+
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-            OfficerName.setText(global.getOfficerName());
+            //OfficerName.setText(global.getOfficerName());
     }
 
     public static final void  SetLogedIn(String Lg, String Lo){
@@ -615,6 +616,7 @@ public class MainActivity extends AppCompatActivity
                                             OfficerName.setText(global.getOfficerName());
                                             if(_General.isNetworkAvailable(MainActivity.this)){
                                                 ca.getOfficerVillages(userInput.getText().toString());
+
                                             }
 
                                         } else {
