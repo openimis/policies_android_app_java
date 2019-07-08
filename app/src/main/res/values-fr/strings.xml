@@ -374,6 +374,8 @@
     <string name="get">Get</string>
     <string name="date_from">Date From</string>
     <string name="date_to">Date To</string>
+    <string name="send_sms">Send SMS</string>
+    <string name="requested_sms">Requested SMS</string>
 
 
 </resources>

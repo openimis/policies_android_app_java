@@ -62,5 +62,17 @@
         android:background="@drawable/corner"
         android:drawSelectorOnTop="true"/>
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:text="@string/send_sms"/>
+
+    <CheckBox
+        android:id="@+id/send_sms"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"/>
+
 
 </LinearLayout>

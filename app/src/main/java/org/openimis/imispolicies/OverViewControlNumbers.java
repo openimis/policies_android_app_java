@@ -7,6 +7,7 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
+import android.provider.Telephony;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.ActionBar;
@@ -97,6 +98,7 @@ public class OverViewControlNumbers extends AppCompatActivity {
     String RequestedFrom = "";
     String RequestedTo = "";
     String RadioRenewal = "";
+    String RadioSms = "";
     String PaymentType = "";
 
     @Override
@@ -225,6 +227,7 @@ public class OverViewControlNumbers extends AppCompatActivity {
         UploadedTo = getIntent().getStringExtra("REQUESTED_FROM");
         UploadedTo = getIntent().getStringExtra("REQUESTED_TO");
         RadioRenewal = getIntent().getStringExtra("RENEWAL");
+        RadioSms = getIntent().getStringExtra("SMS");
         PaymentType = getIntent().getStringExtra("PAYMENT_TYPE");
 
         fillRecordedPolicies();
@@ -332,6 +335,7 @@ public class OverViewControlNumbers extends AppCompatActivity {
                                 intent.putExtra("REQUESTED_FROM", RequestedFrom);
                                 intent.putExtra("REQUESTED_TO", RequestedTo);
                                 intent.putExtra("PAYMENT_TYPE", PaymentType);
+                                intent.putExtra("SMS", RadioSms);
                                 startActivity(intent);
                             }
                         });
@@ -344,7 +348,7 @@ public class OverViewControlNumbers extends AppCompatActivity {
     }
 
     public void fillRecordedPolicies(){
-        policy = clientAndroidInterface.getRecordedPolicies(InsuranceNumber,OtherNames,LastName,InsuranceProduct,UploadedFrom,UploadedTo,RadioRenewal,RequestedFrom,RequestedTo, PaymentType);//OrderArray;
+        policy = clientAndroidInterface.getRecordedPolicies(InsuranceNumber,OtherNames,LastName,InsuranceProduct,UploadedFrom,UploadedTo,RadioRenewal,RequestedFrom,RequestedTo, PaymentType, RadioSms);//OrderArray;
         LayoutInflater li = LayoutInflater.from(OverViewControlNumbers.this);
         View promptsView = li.inflate(R.layout.activity_over_view_control_numbers, null);
         PolicyRecyclerView = (RecyclerView) findViewById(R.id.listofpolicies);
