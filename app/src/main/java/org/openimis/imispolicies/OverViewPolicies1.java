@@ -75,7 +75,7 @@ public class OverViewPolicies1 extends AppCompatActivity {
     TextView NothingFound;
 
     CheckBox send_sms;
-    String SmsRequired = "0";
+    int SmsRequired = 0;
 
     public static int search_count = 0;
 
@@ -347,7 +347,7 @@ public class OverViewPolicies1 extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 if(((CompoundButton) view).isChecked()){
-                    SmsRequired = "1";
+                    SmsRequired = 1;
                 }
             }
         });
@@ -381,7 +381,7 @@ public class OverViewPolicies1 extends AppCompatActivity {
                                     amountConfirmed = finalAmount.getText().toString();
                                     PaymentType = PayType.toString();
 
-                                    getControlNumber(policies, SmsRequired);
+                                    getControlNumber(policies, String.valueOf(SmsRequired));
                                 } catch (JSONException e) {
                                     e.printStackTrace();
                                 } catch (IOException e) {
@@ -623,6 +623,16 @@ public class OverViewPolicies1 extends AppCompatActivity {
                         int cod = response.getStatusLine().getStatusCode();
                         final int Finalcode = cod;
                         if(cod >= 400){
+                            JSONObject ob = null;
+                            try{
+                                ob = new JSONObject(content);
+                                error_occured[0] = ob.getString("error_occured");
+                                if(error_occured[0].equals("true")){
+                                    error_message[0] = ob.getString("error_message");
+                                }
+                            }catch (Exception e){
+                                e.printStackTrace();
+                            }
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
@@ -630,7 +640,7 @@ public class OverViewPolicies1 extends AppCompatActivity {
                                     LoginDialogBox();
                                     if(tokenl.getTokenText().length() > 1){
                                         View view = findViewById(R.id.actv);
-                                        Snackbar.make(view, Finalcode+"-"+getResources().getString(R.string.has_no_rights), Snackbar.LENGTH_LONG)
+                                        Snackbar.make(view, Finalcode+"-"+error_message[0], Snackbar.LENGTH_LONG)//getResources().getString(R.string.has_no_rights)
                                                 .setAction("Action", null).show();
                                     }
                                 }
