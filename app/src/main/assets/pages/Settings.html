@@ -19,6 +19,8 @@
                 if(pass.length > 0)
                 {
                     Android.SaveRarPassword(pass);
+                    Android.ShowDialog('Password has been changed');
+                    $('#rarPassword').val('');
                 }
                 else
                 {
