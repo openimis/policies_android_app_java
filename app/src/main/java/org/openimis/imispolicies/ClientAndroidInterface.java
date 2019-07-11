@@ -34,6 +34,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -143,6 +144,7 @@ public class ClientAndroidInterface {
     private General general = new General(AppInformation.DomainInfo.getDomain());
     private ArrayList<String> mylist = new ArrayList<String>();
 
+    private final String defaultRarPassword = ")(#$1HsD";
 
     ClientAndroidInterface(Context c) {
         mContext = c;
@@ -3786,7 +3788,10 @@ public void zipFile(){
         String targetPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/IMIS/";
         String zipFilePath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/IMIS/"+"Master"+FileType+".rar";
         //String unzippedFolderPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/IMIS/Photos_"+global.getOfficerCode()+"_"+d+"";
-        String password = ")(#$1HsD"; // keep it EMPTY<""> for applying no password protection
+        //String password = ")(#$1HsD"; // keep it EMPTY<""> for applying no password protection
+
+        SharedPreferences sharedPreferences = global.getSharedPreferences("MyPref", 0);
+        String password = sharedPreferences.getString("rarPwd", defaultRarPassword);
 
         ArrayList<File> FilesToAdd = new ArrayList<File>();
         File folder = new File(targetPath);
@@ -5440,6 +5445,15 @@ public void zipFile(){
 
             }
         }.start();
+    }
+
+    @JavascriptInterface
+    public void SaveRarPassword(String password)
+    {
+        SharedPreferences sharedPreferences = mContext.getApplicationContext().getSharedPreferences("MyPref", 0);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString("rarPwd", password);
+        editor.apply();
     }
 
     @JavascriptInterface

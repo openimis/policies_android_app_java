@@ -831,7 +831,10 @@ public class MainActivity extends AppCompatActivity
             wv.loadUrl("file:///android_asset/pages/Sync.html");
         } else if (id == R.id.nav_about) {
             wv.loadUrl("file:///android_asset/pages/About.html");
-        } else if (id == R.id.nav_quit) {
+        }
+        else if (id == R.id.nav_settings) {
+            wv.loadUrl("file:///android_asset/pages/Settings.html");
+        }else if (id == R.id.nav_quit) {
             new AlertDialog.Builder(this)
                     .setMessage(getResources().getString(R.string.QuitAppQuestion))
                     .setCancelable(false)
