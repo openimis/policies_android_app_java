@@ -182,6 +182,7 @@
     <string name="LoginName">Login Name</string>
     <string name="LoginFail">Login Failed</string>
     <string name="Password">Password</string>
+    <string name="EnterRarPassword">Enter Rar Password</string>
     <string name="OfficerCode">Enrolment Officer Code :</string>
     <string name="IncorrectOfficerCode">Incorrect enrolment officer code</string>
     <string name="Login">Login</string>

@@ -85,8 +85,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 
-import org.openimis.imispolicies.R;
-
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -114,6 +112,7 @@ public class MainActivity extends AppCompatActivity
     ClientAndroidInterface ca;
     String aBuffer = "";
     String calledFrom = "java";
+    public File f;
 
     General _General = new General(AppInformation.DomainInfo.getDomain());
 
@@ -124,6 +123,7 @@ public class MainActivity extends AppCompatActivity
 
     NotificationManager mNotificationManager;
     Vibrator vibrator;
+    public String etRarPassword = "";
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -190,14 +190,17 @@ public class MainActivity extends AppCompatActivity
             Uri uri = data.getData();
             String path = "";
             path = uri.getPath();
-            File f = new File(path);
+            //File f = new File(path);
+            f = new File(path);
 
-            getMasterDataText((f.getName()).toString());
-            if(calledFrom == "java"){
-                ConfirmDialog((f.getName()).toString());
-            }else{
-                ConfirmDialogPage((f.getName()).toString());
-            }
+            ShowDialogTex2();
+
+//          getMasterDataText((f.getName()).toString());
+//            if(calledFrom == "java"){
+//                ConfirmDialog((f.getName()).toString());
+//            }else{
+//                ConfirmDialogPage((f.getName()).toString());
+//            }
 
         }else if(requestCode == 4 && resultCode == 0){
             finish();
@@ -634,6 +637,7 @@ public class MainActivity extends AppCompatActivity
                                     e.printStackTrace();
                                 }
                             }
+
                         })
                 .setNegativeButton(getResources().getString(negativeButton),
                         new DialogInterface.OnClickListener() {
@@ -651,6 +655,86 @@ public class MainActivity extends AppCompatActivity
 
     }
 
+
+    public void ShowDialogTex2() {
+
+        final ClientAndroidInterface ca = new ClientAndroidInterface(context);
+        LayoutInflater li = LayoutInflater.from(context);
+        @SuppressLint("InflateParams") View promptsView = li.inflate(R.layout.rar_pass_dialog, null);
+
+        android.support.v7.app.AlertDialog alertDialog = null;
+
+        final android.support.v7.app.AlertDialog.Builder alertDialogBuilder = new android.support.v7.app.AlertDialog.Builder(
+                context);
+
+        alertDialogBuilder.setView(promptsView);
+
+        final EditText userInput = (EditText) promptsView.findViewById(R.id.etRarPass);
+
+        alertDialogBuilder
+                .setCancelable(false)
+                .setPositiveButton(getResources().getString(R.string.Yes),
+                        new DialogInterface.OnClickListener() {
+
+                            public void onClick(DialogInterface dialog, int id) {
+                                try {
+                                    etRarPassword = userInput.getText().toString();
+                                    getMasterDataText2(f.getName(), etRarPassword);
+
+                                    if(calledFrom == "java"){
+                                        ConfirmDialog((f.getName()).toString());
+                                    } else{
+                                        ConfirmDialogPage((f.getName()).toString());
+                                    }
+                                }
+                                catch (Exception e) {
+                                        e.getMessage();
+                                    }
+                            }
+
+                        })
+                .setNegativeButton(getResources().getString(R.string.No),
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.cancel();
+                                finish();
+                            }
+                        });
+
+        // create alert dialog
+        alertDialog = alertDialogBuilder.create();
+
+        // show it
+        alertDialog.show();
+
+    }
+
+    public String getMasterDataText2(String fileName, String password) {
+        ca.unZipWithPassword(fileName, password);
+        String fname = "MasterData.txt";
+        try {
+            String dir = Environment.getExternalStorageDirectory() + File.separator + "IMIS/Database/";
+            File myFile = new File("/" + dir + "/" + fname + "");//"/"+dir+"/MasterData.txt"
+//            BufferedReader myReader = new BufferedReader(
+//                    new InputStreamReader(
+//                            new FileInputStream(myFile), "UTF32"));
+            FileInputStream fIn = new FileInputStream(myFile);
+            BufferedReader myReader = new BufferedReader(new InputStreamReader(fIn));
+            aBuffer = myReader.readLine();
+
+            myReader.close();
+/*            Scanner in = new Scanner(new FileReader("/"+dir+"/MasterData.txt"));
+            StringBuilder sb = new StringBuilder();
+            while(in.hasNext()) {
+                sb.append(in.next());
+            }
+            in.close();
+            aBuffer = sb.toString();*/
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return aBuffer;
+    }
 
     public String getMasterDataText(String filename){
         ca.unZip(filename);

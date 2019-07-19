@@ -9,26 +9,21 @@
 
 
     <script type="text/javascript">
-     $(document).ready(function()
-     {
-        $('#btnSaveRarPassword').click(function()
-        {
-            try
-            {
+     $(document).ready(function(){
+        $('#btnSaveRarPassword').click(function(){
+            try {
                 var pass = $('#rarPassword').val();
-                if(pass.length > 0)
-                {
-                    Android.SaveRarPassword(pass);
+                if(pass.length > 0){
+                    var tmp = Android.SaveRarPassword(pass);
                     Android.ShowDialog('Password has been changed');
                     $('#rarPassword').val('');
+                    $('#tempLabel').text(tmp);
                 }
-                else
-                {
+                else {
                     Android.ShowDialog('Rar password required');
                 }
             }
-            catch(e)
-            {
+            catch(e){
                Android.ShowDialog(e.message);
             }
 
@@ -51,6 +46,7 @@
     <div class="footer">
         <input type="submit" id="btnSaveRarPassword" strName="SaveRarPassword" value="Save">
     </div>
+
 
 </div>
 

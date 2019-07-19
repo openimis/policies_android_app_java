@@ -50,6 +50,7 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
+import android.util.Base64;
 import android.util.Xml;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -68,6 +69,8 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.security.MessageDigest;
+import java.security.SecureRandom;
 import java.util.Date;
 
 
@@ -90,12 +93,14 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.Random;
 import java.util.regex.Pattern;
 import java.util.Formatter;
 
 import org.xmlpull.v1.XmlSerializer;
 
-import org.openimis.imispolicies.R;
+import javax.crypto.Cipher;
+import javax.crypto.spec.SecretKeySpec;
 
 import static android.database.sqlite.SQLiteDatabase.openOrCreateDatabase;
 import static java.lang.Math.abs;
@@ -145,6 +150,7 @@ public class ClientAndroidInterface {
     private ArrayList<String> mylist = new ArrayList<String>();
 
     private final String defaultRarPassword = ")(#$1HsD";
+    private String salt;
 
     ClientAndroidInterface(Context c) {
         mContext = c;
@@ -3716,7 +3722,8 @@ public void zipFile(){
     String targetPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/IMIS/Enrolment/Enrolment_"+global.getOfficerCode()+"_"+d+".xml";
     String zipFilePath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/IMIS/Enrolment/Enrolment_"+global.getOfficerCode()+"_"+dzip+".rar";
     //String unzippedFolderPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/IMIS/Enrolment/Enrolment_"+global.getOfficerCode()+"_"+d+".xml";
-    String password = ")(#$1HsD"; // keep it EMPTY<""> for applying no password protection
+    //String password = ")(#$1HsD"; // keep it EMPTY<""> for applying no password protection
+    String password = getRarPwd();
 
     Compressor.zip(targetPath, zipFilePath, password);
     //Compressor.unzip(zipFilePath, unzippedFolderPath, password);
@@ -3733,7 +3740,8 @@ public void zipFile(){
         String targetPathFamily = Environment.getExternalStorageDirectory().getAbsolutePath() + "/IMIS/Family/";
         String zipFilePath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/IMIS/Enrolment/Enrolment_"+global.getOfficerCode()+"_"+dzip+".rar";
         //String unzippedFolderPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/IMIS/Photos_"+global.getOfficerCode()+"_"+d+"";
-        String password = ")(#$1HsD"; // keep it EMPTY<""> for applying no password protection
+        //String password = ")(#$1HsD"; // keep it EMPTY<""> for applying no password protection
+        String password = getRarPwd();
 
         ArrayList<File> FilesToAdd = new ArrayList<File>();
         File folder = new File(targetPath);
@@ -3752,11 +3760,29 @@ public void zipFile(){
         Compressor.zip(FilesToAdd, zipFilePath, password);
         //Compressor.unzip(zipFilePath, unzippedFolderPath, password);
     }
+
+    public boolean unZipWithPassword(String fileName, String password) {
+        String targetPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/IMIS/Database/" + fileName;
+        String unzippedFolderPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/IMIS/Database/";
+        //String unzippedFolderPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/IMIS/Enrolment/Enrolment_"+global.getOfficerCode()+"_"+d+".xml";
+        //String password = ")(#$1HsD"; // keep it EMPTY<""> for applying no password protection
+        //String password = getRarPwd();
+        //here we not don't have password set yet so we pass password from Edit Text rar input
+        try{
+            Compressor.unzip(targetPath, unzippedFolderPath, password);
+        }catch (Exception e){
+            return false;
+        }
+        return true;
+    }
+
     public boolean unZip(String FileName){
         String targetPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/IMIS/Database/" + FileName;
         String unzippedFolderPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/IMIS/Database/";
         //String unzippedFolderPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/IMIS/Enrolment/Enrolment_"+global.getOfficerCode()+"_"+d+".xml";
-        String password = ")(#$1HsD"; // keep it EMPTY<""> for applying no password protection
+        //String password = ")(#$1HsD"; // keep it EMPTY<""> for applying no password protection
+
+        String password = getRarPwd();
         try{
             Compressor.unzip(targetPath, unzippedFolderPath, password);
         }catch (Exception e){
@@ -3768,7 +3794,8 @@ public void zipFile(){
         String targetPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/IMIS/" + FileName;
         String unzippedFolderPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/IMIS/";
         //String unzippedFolderPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/IMIS/Enrolment/Enrolment_"+global.getOfficerCode()+"_"+d+".xml";
-        String password = ")(#$1HsD"; // keep it EMPTY<""> for applying no password protection
+        //String password = ")(#$1HsD"; // keep it EMPTY<""> for applying no password protection
+        String password = getRarPwd();
         try{
             Compressor.unzip(targetPath, unzippedFolderPath, password);
         }catch (Exception e){
@@ -3776,6 +3803,8 @@ public void zipFile(){
         }
         return true;
     }
+
+
     @JavascriptInterface
     public void zipFeedBackRenewal(final String FileType){
         global = (Global) mContext.getApplicationContext();
@@ -3789,9 +3818,7 @@ public void zipFile(){
         String zipFilePath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/IMIS/"+"Master"+FileType+".rar";
         //String unzippedFolderPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/IMIS/Photos_"+global.getOfficerCode()+"_"+d+"";
         //String password = ")(#$1HsD"; // keep it EMPTY<""> for applying no password protection
-
-        SharedPreferences sharedPreferences = global.getSharedPreferences("MyPref", 0);
-        String password = sharedPreferences.getString("rarPwd", defaultRarPassword);
+        String password = getRarPwd();
 
         ArrayList<File> FilesToAdd = new ArrayList<File>();
         File folder = new File(targetPath);
@@ -3876,6 +3903,28 @@ public void zipFile(){
         out.write(data);
         out.close();*/
     }
+
+    public String getRarPwd(){
+        global = (Global) mContext.getApplicationContext();
+        String password = "";
+        try{
+            SharedPreferences sharedPreferences = global.getSharedPreferences("MyPref", 0);
+
+            if (!sharedPreferences.contains("rarPwd")){
+                password = defaultRarPassword;
+            }
+            else{
+                String encryptedRarPassword = sharedPreferences.getString("rarPwd", defaultRarPassword);
+                password = decryptRarPwd(encryptedRarPassword, salt);
+            }
+        }
+        catch (Exception e){
+            e.getMessage();
+        }
+
+        return password;
+    }
+
     public void DeleteImages(JSONArray insurees, ArrayList<String> FamilyIDs, int CallerId) {
 
         String PhotoPath = null;
@@ -5447,13 +5496,59 @@ public void zipFile(){
         }.start();
     }
 
+    private SecretKeySpec generateKey(String encPassword) throws Exception {
+        final MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        byte[] bytes = encPassword.getBytes("UTF-8");
+        digest.update(bytes, 0, bytes.length);
+        byte[] key = digest.digest();
+        SecretKeySpec secretKeySpec = new SecretKeySpec(key, "AES");
+        return secretKeySpec;
+    }
+
+    public String encryptRarPwd(String dataToEncrypt, String encPassword) throws Exception{
+        SecretKeySpec key = generateKey(encPassword);
+        Cipher c = Cipher.getInstance("AES");
+        c.init(Cipher.ENCRYPT_MODE, key);
+        byte[] encVal = c.doFinal(dataToEncrypt.getBytes());
+        String encryptedValue = Base64.encodeToString(encVal, Base64.DEFAULT);
+        return encryptedValue;
+    }
+
+    public String decryptRarPwd(String dataToDecrypt, String decPassword) throws Exception {
+        SecretKeySpec key = generateKey(decPassword);
+        Cipher c = Cipher.getInstance("AES");
+        c.init(Cipher.DECRYPT_MODE, key);
+        byte[] decodedValue = Base64.decode(dataToDecrypt, Base64.DEFAULT);
+        byte[] decValue = c.doFinal(decodedValue);
+        String decryptedValue = new String(decValue);
+
+        return decryptedValue;
+    }
+
+    public String generateSalt(){
+        final Random r = new SecureRandom();
+        byte[] salt = new byte[32];
+        r.nextBytes(salt);
+        String encodedSalt = Base64.encodeToString(salt, Base64.DEFAULT);
+
+        return encodedSalt;
+    }
+
     @JavascriptInterface
-    public void SaveRarPassword(String password)
-    {
-        SharedPreferences sharedPreferences = mContext.getApplicationContext().getSharedPreferences("MyPref", 0);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString("rarPwd", password);
-        editor.apply();
+    public String SaveRarPassword(String password) {
+        try {
+            SharedPreferences sharedPreferences = mContext.getApplicationContext().getSharedPreferences("MyPref", 0);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            salt = generateSalt();
+            String encryptedPassword = encryptRarPwd(password, salt);
+            editor.putString("rarPwd", encryptedPassword);
+            editor.apply();
+            return encryptedPassword;
+        }
+        catch (Exception e) {
+            e.getMessage();
+            return null;
+        }
     }
 
     @JavascriptInterface
