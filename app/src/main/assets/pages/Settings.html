@@ -17,7 +17,6 @@
                     var tmp = Android.SaveRarPassword(pass);
                     Android.ShowDialog('Password has been changed');
                     $('#rarPassword').val('');
-                    $('#tempLabel').text(tmp);
                 }
                 else {
                     Android.ShowDialog('Rar password required');
@@ -28,6 +27,17 @@
             }
 
         });
+
+         $('#btnBackToDefault').click(function(){
+            try {
+                   Android.BackToDefaultRarPassword();
+                   Android.ShowDialog('Password has been changed to the default rar password');
+            }
+            catch(e){
+               Android.ShowDialog(e.message);
+            }
+        });
+
      });
 
     </script>
@@ -45,6 +55,17 @@
 
     <div class="footer">
         <input type="submit" id="btnSaveRarPassword" strName="SaveRarPassword" value="Save">
+    </div>
+
+    <br><br>
+
+    <ul class="ulEntry">
+        <li>
+            <span strName="BackToDefaultPassword">Set the default RAR password</span>
+        </li>
+    </ul>
+    <div class="footer">
+        <input type="submit" id="btnBackToDefault" strName="BackToDefault" value="Save">
     </div>
 
 
