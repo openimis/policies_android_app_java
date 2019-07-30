@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Settings</title>
+    <link href="../CSS/Style.CSS" rel="stylesheet" type="text/css"/>
+    <script src="../JS/jquery-3.2.1.min.js"></script>
+    <script src="../JS/exact.js"></script>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" charset="utf-8"/>
+
+
+    <script type="text/javascript">
+     $(document).ready(function(){
+        $('#btnSaveRarPassword').click(function(){
+            try {
+                var pass = $('#rarPassword').val();
+                if(pass.length > 0){
+                    var tmp = Android.SaveRarPassword(pass);
+                    Android.ShowDialog('Password has been changed');
+                    $('#rarPassword').val('');
+                }
+                else {
+                    Android.ShowDialog('Rar password required');
+                }
+            }
+            catch(e){
+               Android.ShowDialog(e.message);
+            }
+
+        });
+
+         $('#btnBackToDefault').click(function(){
+            try {
+                   Android.BackToDefaultRarPassword();
+                   Android.ShowDialog('Password has been changed to the default rar password');
+            }
+            catch(e){
+               Android.ShowDialog(e.message);
+            }
+        });
+
+     });
+
+    </script>
+</head>
+<body>
+
+<div>
+
+    <ul class="ulEntry">
+        <li>
+            <span strName="RarPassword">RAR Password</span>
+            <input type="password" id="rarPassword" required/>
+        </li>
+    </ul>
+
+    <div class="footer">
+        <input type="submit" id="btnSaveRarPassword" strName="SaveRarPassword" value="Save">
+    </div>
+
+    <br><br>
+
+    <ul class="ulEntry">
+        <li>
+            <span strName="BackToDefaultPassword">Set the default RAR password</span>
+        </li>
+    </ul>
+    <div class="footer">
+        <input type="submit" id="btnBackToDefault" strName="BackToDefault" value="Save">
+    </div>
+
+
+</div>
+
+</body>
+</html>
