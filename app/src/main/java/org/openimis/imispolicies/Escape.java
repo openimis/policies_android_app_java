@@ -43,16 +43,7 @@ public class Escape {
     }
 
     private boolean isValidInsuranceNumber(String InsuranceNumber){
-        if (InsuranceNumber.length() != 9) return false;
-        String chfid;
-        int Part1, Part2;
-        Part1 = Integer.parseInt(InsuranceNumber.toString())/10;
-        Part2 = Part1 % 7;
-
-        chfid = InsuranceNumber.substring(0, 8) + Integer.toString(Part2);
-        return InsuranceNumber.equals(chfid);
-
-        //return true;
+        return true;
     }
 
 }
