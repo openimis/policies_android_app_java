@@ -205,6 +205,30 @@ public class ClientAndroidInterface {
         return Adjustibility;
     }
 
+    @JavascriptInterface
+    public String getSpecificControlHtml(String FieldName) {
+
+        String tableName = "tblControls";
+        String[] columns = {"Adjustibility"};
+        String where = "FieldName = '"+FieldName+"'";
+        String OrderBy = null;
+        String Adjustibility = "O";
+
+        JSONArray ctls = sqlHandler.getResult(tableName, columns, where, null);
+
+        for (int i = 0; i < ctls.length(); i++) {
+            try {
+                JSONObject object = ctls.getJSONObject(i);
+                Adjustibility = object.getString("Adjustibility");
+                controls.put(FieldName, Adjustibility);
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        return Adjustibility;
+    }
+
 
     @JavascriptInterface
     public String GetSystemImageFolder()
@@ -6231,6 +6255,9 @@ public class ClientAndroidInterface {
     public String getSelectedLanguage(){
         return ((MainActivity) mContext).getSelectedLanguage();
     }
+
+
+
 }
 
 
