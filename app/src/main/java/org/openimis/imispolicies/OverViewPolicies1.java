@@ -359,6 +359,9 @@ public class OverViewPolicies1 extends AppCompatActivity {
 
 
         amount.setText(Number);
+        if(!"R".equals("R")){//clientAndroidInterface.getSpecificControl("ContributionPaid")
+            amount.setEnabled(false);
+        }
 
         final EditText finalAmount = (EditText) promptsView.findViewById(R.id.display);
 
