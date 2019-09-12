@@ -40,6 +40,11 @@ In case of dispute arising out or in relation to the use of the program, it is s
 
             document.title = Android.getString('AddEditPremium');
 
+            var adj = "R";
+            if(adj != "R"){
+                   $('#txtAmount').attr('readonly','readonly');
+            }
+
             if($("#ddlPhotoFee").is(":visible")){
                 $("#txtAmount").keyup(function(){
                   var cat = $("#ddlPhotoFee").val();
