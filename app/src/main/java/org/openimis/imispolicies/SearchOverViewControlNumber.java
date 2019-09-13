@@ -55,7 +55,10 @@ public class SearchOverViewControlNumber extends AppCompatActivity {
 
     RadioButton Renewal_Yes;
     RadioButton Renewal_No;
+    RadioButton Sms_Yes;
+    RadioButton Sms_No;
     RadioGroup Radio_Renewal;
+    RadioGroup Radio_Sms;
 
     RadioButton Requested_Yes;
     RadioButton Requested_No;
@@ -77,6 +80,7 @@ public class SearchOverViewControlNumber extends AppCompatActivity {
     ArrayList<HashMap<String, String>> FeedbackList = new ArrayList<HashMap<String, String>>();
     private ArrayList<HashMap<String, String>> ProductList = new ArrayList<>();
     private RadioButton radioButtonRenewal;
+    private RadioButton radioButtonSms;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -103,7 +107,10 @@ public class SearchOverViewControlNumber extends AppCompatActivity {
         Last_Name = (EditText) findViewById(R.id.last_name);
         Renewal_Yes = (RadioButton) findViewById(R.id.renewal_yes);
         Renewal_No = (RadioButton) findViewById(R.id.renewal_yes);
+        Sms_Yes = (RadioButton) findViewById(R.id.sms_required_yes);
+        Sms_No = (RadioButton) findViewById(R.id.sms_required_no);
         Radio_Renewal = (RadioGroup) findViewById(R.id.radio_renewal);
+        Radio_Sms = (RadioGroup) findViewById(R.id.radio_sms);
         Requested_Yes = (RadioButton) findViewById(R.id.requested_yes);
         Requested_No = (RadioButton) findViewById(R.id.requested_no);
         Radio_Requested = (RadioGroup) findViewById(R.id.radio_requested);
@@ -161,6 +168,7 @@ public class SearchOverViewControlNumber extends AppCompatActivity {
                 String RequestedTo = Requested_To.getText().toString();
                 String PaymentType = PayType;
                 String RadioRenewal = "";
+                String RadioSms = "";
 
                 if(Renewal_Yes.isChecked() || Renewal_No.isChecked()){
                     int selectedId = Radio_Renewal.getCheckedRadioButtonId();
@@ -168,10 +176,22 @@ public class SearchOverViewControlNumber extends AppCompatActivity {
                     RadioRenewal = radioButtonRenewal.getText().toString();
                 }
 
+                if(Sms_Yes.isChecked() || Sms_No.isChecked()){
+                    int selectedId = Radio_Sms.getCheckedRadioButtonId();
+                    radioButtonSms = (RadioButton) findViewById(selectedId);
+                    if(radioButtonSms.getText().toString().equals("Y")){
+                        RadioSms = "1";
+                    }else if(radioButtonSms.getText().toString().equals("N")){
+                        RadioSms = "0";
+                    }
+
+                }
+
 
 
                 Intent intent = new Intent(SearchOverViewControlNumber.this, OverViewControlNumbers.class);
                 intent.putExtra("RENEWAL", RadioRenewal);
+                intent.putExtra("SMS", RadioSms);
                 intent.putExtra("INSURANCE_NUMBER", InsuranceNumber);
                 intent.putExtra("OTHER_NAMES", OtherNames);
                 intent.putExtra("LAST_NAME", LastName);
@@ -197,6 +217,7 @@ public class SearchOverViewControlNumber extends AppCompatActivity {
                 Other_Names.setText("");
                 Last_Name.setText("");
                 Radio_Renewal.clearCheck();
+                Radio_Sms.clearCheck();
                 lv1.setVisibility(View.GONE);
             }
         });

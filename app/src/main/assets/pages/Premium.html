@@ -40,6 +40,11 @@ In case of dispute arising out or in relation to the use of the program, it is s
 
             document.title = Android.getString('AddEditPremium');
 
+            var adj = Android.getSpecificControlHtml("TotalAmount");
+            if(adj == "R"){
+                   $('#txtAmount').attr('readonly','readonly');
+            }
+
             if($("#ddlPhotoFee").is(":visible")){
                 $("#txtAmount").keyup(function(){
                   var cat = $("#ddlPhotoFee").val();
@@ -95,6 +100,17 @@ In case of dispute arising out or in relation to the use of the program, it is s
             var pp = Android.getPolicyVal(policyId);
             var prevAmount = parseInt(Android.getSumPrem(policyId));
             var bb = pp - prevAmount;
+
+            if($("#ddlPhotoFee").is(":visible")){
+
+            }else{
+                $('#txtAmount').val(bb);
+                $('#spContribution').text(bb);
+
+                $('#hfBalance').text(0);
+                $('#spBalance').text(0);
+            }
+            
             if(bb <= 0){
                 $('#div-details').hide();
                 $('.footer').hide();

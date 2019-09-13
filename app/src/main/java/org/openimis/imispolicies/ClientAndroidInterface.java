@@ -208,6 +208,30 @@ public class ClientAndroidInterface {
         return Adjustibility;
     }
 
+    @JavascriptInterface
+    public String getSpecificControlHtml(String FieldName) {
+
+        String tableName = "tblControls";
+        String[] columns = {"Adjustibility"};
+        String where = "FieldName = '"+FieldName+"'";
+        String OrderBy = null;
+        String Adjustibility = "O";
+
+        JSONArray ctls = sqlHandler.getResult(tableName, columns, where, null);
+
+        for (int i = 0; i < ctls.length(); i++) {
+            try {
+                JSONObject object = ctls.getJSONObject(i);
+                Adjustibility = object.getString("Adjustibility");
+                controls.put(FieldName, Adjustibility);
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        return Adjustibility;
+    }
+
 
     @JavascriptInterface
     public String GetSystemImageFolder()
@@ -2184,14 +2208,18 @@ public class ClientAndroidInterface {
         JSONArray RecordedPolicies = sqlHandler.getResult(Query, null);
         return RecordedPolicies;
     }
-    public JSONArray getRecordedPolicies(String insuranceNumber, String otherNames, String lastName, String insuranceProduct, String uploadedFrom, String uploadedTo, String radioRenewal, String requestedFrom, String requestedTo, String PaymentType) {
+    public JSONArray getRecordedPolicies(String insuranceNumber, String otherNames, String lastName, String insuranceProduct, String uploadedFrom, String uploadedTo, String radioRenewal, String requestedFrom, String requestedTo, String PaymentType, String RadioSms) {
         String renewal = "";
         String request = "";
         String upload = "";
         String payment_type = "";
+        String sms = "";
 
         if(!radioRenewal.equals("")){
             renewal = " AND RP.isDone == '"+radioRenewal+"'";
+        }
+        if(!RadioSms.equals("")){
+            sms = " AND CN.SmsRequired == '"+RadioSms+"'";
         }
         if(!PaymentType.equals("")){
             payment_type = " AND CN.PaymentType == '"+PaymentType+"'";
@@ -2216,7 +2244,7 @@ public class ClientAndroidInterface {
         if(requestedFrom.equals("") && !requestedTo.equals("")){
             request = " AND RP.UploadedDate = '"+requestedTo+"'";
         }
-        String Query = "SELECT * FROM tblRecordedPolicies RP INNER JOIN tblControlNumber CN ON RP.Code = CN.Id WHERE RP.InsuranceNumber LIKE '%"+insuranceNumber+"%' AND RP.LastName LIKE '%"+lastName+"%' AND RP.OtherNames LIKE '%"+otherNames+"%' AND RP.ProductName LIKE '%"+insuranceProduct+"%'"+renewal+" "+request+" "+upload+" "+payment_type+"";
+        String Query = "SELECT * FROM tblRecordedPolicies RP INNER JOIN tblControlNumber CN ON RP.Code = CN.Id WHERE RP.InsuranceNumber LIKE '%"+insuranceNumber+"%' AND RP.LastName LIKE '%"+lastName+"%' AND RP.OtherNames LIKE '%"+otherNames+"%' AND RP.ProductName LIKE '%"+insuranceProduct+"%'"+renewal+" "+request+" "+upload+" "+payment_type+" "+sms+"";
         JSONArray RecordedPolicies = sqlHandler.getResult(Query, null);
         return RecordedPolicies;
     }
@@ -2275,13 +2303,14 @@ public class ClientAndroidInterface {
         JSONArray RecordedPolicies = sqlHandler.getResult(Query, arg);
         return RecordedPolicies.toString();
     }
-    public int insertRecordedPolicy(String amountCalculated, String amountConfirmed, String control_number, String InternalIdentifier, String PaymentType){
+    public int insertRecordedPolicy(String amountCalculated, String amountConfirmed, String control_number, String InternalIdentifier, String PaymentType, String SmsRequired){
         ContentValues values = new ContentValues();
         values.put("AmountCalculated", String.valueOf(amountCalculated));
         values.put("AmountConfirmed", String.valueOf(amountConfirmed));
         values.put("ControlNumber", String.valueOf(control_number));
         values.put("InternalIdentifier", String.valueOf(InternalIdentifier));
         values.put("PaymentType", String.valueOf(PaymentType));
+        values.put("SmsRequired", String.valueOf(SmsRequired));
         try {//Update to new policy value
             sqlHandler.insertData("tblControlNumber", values);
 
@@ -6245,6 +6274,9 @@ public class ClientAndroidInterface {
     public String getSelectedLanguage(){
         return ((MainActivity) mContext).getSelectedLanguage();
     }
+
+
+
 }
 
 
