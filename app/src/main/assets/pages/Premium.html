@@ -40,8 +40,8 @@ In case of dispute arising out or in relation to the use of the program, it is s
 
             document.title = Android.getString('AddEditPremium');
 
-            var adj = "R";
-            if(adj != "R"){
+            var adj = Android.getSpecificControlHtml("TotalAmount");
+            if(adj == "R"){
                    $('#txtAmount').attr('readonly','readonly');
             }
 
