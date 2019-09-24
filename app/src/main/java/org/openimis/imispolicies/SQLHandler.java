@@ -694,9 +694,15 @@ public class SQLHandler extends SQLiteOpenHelper {
             if(array.length()==0)
                 return;
 
-            if (!TextUtils.isEmpty(PreExecute))
+
+            if(!mDatabase.isOpen()){
                 openDatabase();
+            }
+
+            if (!TextUtils.isEmpty(PreExecute)){
                 mDatabase.execSQL(PreExecute);
+            }
+
 
             mDatabase.beginTransaction();
             for(int i= 0;i < array.length();i++){
@@ -721,8 +727,9 @@ public class SQLHandler extends SQLiteOpenHelper {
         }catch (Exception e){
             e.printStackTrace();
         }
-        openDatabase();
-
+        if(mDatabase.isOpen()){
+            closeDatabase();
+        }
 
     }
 
