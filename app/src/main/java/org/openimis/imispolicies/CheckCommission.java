@@ -230,8 +230,8 @@ public class CheckCommission extends AppCompatActivity {
                     // Enter an empty record
                     if (i == 0) {
                         HashMap<String, String> Product = new HashMap<>();
-                        Product.put("ProductCode", "");
-                        Product.put("ProductName", getResources().getString(R.string.SelectProduct));
+                        Product.put("ProductCode", getResources().getString(R.string.SelectProduct));
+                        Product.put("ProductName", "");
                         ProductList.add(Product);
 
                     }

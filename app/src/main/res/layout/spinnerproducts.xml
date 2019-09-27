@@ -9,14 +9,10 @@
         android:layout_width="wrap_content"
         android:layout_height="40dp"
         android:layout_margin="5dp"
+        android:layout_marginRight="5dp"
         android:gravity="center_vertical"
         android:textSize="15dp"
-        android:textColor="@color/black"/>
-    <TextView
-        android:id="@+id/line"
-        android:layout_width="wrap_content"
-        android:layout_height="40dp"
-        android:text="_"/>
+        android:textColor="@color/colorPrimary"/>
 
     <TextView
         android:id="@+id/tvProductName"
