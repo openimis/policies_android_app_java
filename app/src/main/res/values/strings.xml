@@ -303,7 +303,7 @@
     <string name="NumberOfFIP">Number of Families with Idle Policies</string>
     <string name="NumberOfFSP">Number of Families with Suspended Polices</string>
     <string name="NumberOfNP">Number of New Policies</string>
-    <string name="NumberOfRP">Number of renewed Policies</string>
+    <string name="NumberOfRP">Number of Renewed Policies</string>
     <string name="NumberOfEP">Number of Expired Policies</string>
     <string name="NumberOfSP">Number of Suspended Polices</string>
     <string name="AmountCC">Amount of collected contribution</string>
@@ -367,6 +367,7 @@
     <string name="Get_Commission">Get Commissions</string>
     <string name="commissions_report">Commissions Report</string>
     <string name="amount">Amount</string>
+    <string name="amountContribution">Amount of contribution </string>
     <string name="Commissions">commissions</string>
     <string name="SearchPolicies">Search Policies</string>
     <string name="SearchControlNumbers">Search Control Numbers</string>

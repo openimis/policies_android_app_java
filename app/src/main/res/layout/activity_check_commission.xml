@@ -26,13 +26,11 @@
         android:inputType="datetime"
         android:textSize="15dp"
         android:hint="@string/year"/>
-    
-    <TextView
+
+    <Spinner
+        android:id="@+id/spMode"
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:text="@string/paid"
-        android:padding="5dp"
-        android:gravity="center_vertical"
         android:layout_margin="5dp"
         android:textSize="15dp"
         android:background="@drawable/corner"/>
