@@ -26,7 +26,7 @@
             android:id="@+id/lblAmount"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/amount"
+            android:text="@string/amountContribution"
             android:fontFamily="sans-serif-light"
             android:typeface="monospace"
             android:layout_margin="10dp"

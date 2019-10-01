@@ -42,6 +42,7 @@ public class CheckCommission extends AppCompatActivity {
     Spinner spPayer;
     Spinner spProduct;
     Spinner spMonth;
+    Spinner spMode;
     ClientAndroidInterface ca;
 
     EditText edYear;
@@ -69,6 +70,7 @@ public class CheckCommission extends AppCompatActivity {
         spPayer = (Spinner) findViewById(R.id.spPayer);
         spProduct = (Spinner) findViewById(R.id.spProduct);
         spMonth = (Spinner) findViewById(R.id.spMonth);
+        spMode = (Spinner) findViewById(R.id.spMode);
 
         edYear = (EditText) findViewById(R.id.edYear);
 
@@ -84,8 +86,8 @@ public class CheckCommission extends AppCompatActivity {
                 String m = GetSelectedMonth();
                 String pr = GetSelectedProduct();
                 String py = GetSelectedPayer();
+                String mode = GetSelectedMode();
                 String yr = edYear.getText().toString();
-                String mode = "0";// 0 means paid
                 if(yr.equals("")){
                     pd.dismiss();
                     view = findViewById(R.id.actv);
@@ -103,6 +105,7 @@ public class CheckCommission extends AppCompatActivity {
         BindSpinnerMonth();
         BindSpinnerProduct();
         BindSpinnerPayers();
+        BindSpinnerPayMode();
     }
 
 
@@ -134,6 +137,23 @@ public class CheckCommission extends AppCompatActivity {
         spMonth.setAdapter(dataAdapter);
     }
 
+    private void BindSpinnerPayMode() {
+
+        // Spinner Drop down elements
+        List<String> mode = new ArrayList<String>();
+        mode.add("Paid");
+        mode.add("Prescribed");
+
+
+        // Creating adapter for spinner
+        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, mode);
+
+        // Drop down layout style - list view with radio button
+        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        // attaching data adapter to spinner
+        spMode.setAdapter(dataAdapter);
+    }
 
     private void BindSpinnerPayers() {
         ca = new ClientAndroidInterface(this);
@@ -230,8 +250,8 @@ public class CheckCommission extends AppCompatActivity {
                     // Enter an empty record
                     if (i == 0) {
                         HashMap<String, String> Product = new HashMap<>();
-                        Product.put("ProductCode", "");
-                        Product.put("ProductName", getResources().getString(R.string.SelectProduct));
+                        Product.put("ProductCode", getResources().getString(R.string.SelectProduct));
+                        Product.put("ProductName", "");
                         ProductList.add(Product);
 
                     }
@@ -279,6 +299,21 @@ public class CheckCommission extends AppCompatActivity {
         }
 
         return Payer;
+    }
+    private String GetSelectedMode() {
+        String Mode = "0";
+        Object obj;
+        try{
+            HashMap<String, String> P = new HashMap<>();
+            //noinspection unchecked
+            obj = spMode.getSelectedItem();
+            Mode = (obj.toString().equals("Paid"))?"0":"1";
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+        return Mode;
     }
 
     private String GetSelectedProduct() {
