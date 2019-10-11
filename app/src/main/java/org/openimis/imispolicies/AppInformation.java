@@ -6,7 +6,7 @@ package org.openimis.imispolicies;
 
  public class AppInformation {
      public static class DomainInfo {
-          private static String _Domain = "http://149.210.235.40/";
+          private static String _Domain = "http://imis-mv.swisstph-mis.ch/";
 
          public static String getDomain(){
              return _Domain;

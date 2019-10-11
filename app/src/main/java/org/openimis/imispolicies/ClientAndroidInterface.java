@@ -135,6 +135,8 @@ public class ClientAndroidInterface {
 
     SQLiteDatabase db;
 
+    static public String filePath = null;
+
     RecyclerView.LayoutManager myLayoutManger;
     EnrollmentReport enrollmentReport;
 
@@ -149,9 +151,14 @@ public class ClientAndroidInterface {
     ClientAndroidInterface(Context c) {
         mContext = c;
         sqlHandler = new SQLHandler(c);
+
+        SQLiteDatabase database = sqlHandler.getReadableDatabase();
+        filePath = database.getPath();
+        database.close();
         // activity = (Activity) c.getApplicationContext();
-        getControls();
+
     }
+
 
     @JavascriptInterface
     public void SetUrl(String Url) {
@@ -159,7 +166,7 @@ public class ClientAndroidInterface {
         global.setCurrentUrl(Url);
     }
 
-    private void getControls() {
+    public void getControls() {
 
         String tableName = "tblControls";
         String[] columns = {"FieldName", "Adjustibility"};
@@ -4864,8 +4871,13 @@ public class ClientAndroidInterface {
     }
 
     private boolean insertConfirmationTypes(JSONArray jsonArray) throws JSONException {
-        String Columns[] = {"ConfirmationTypeCode", "ConfirmationType", "SortOrder", "AltLanguage"};
-        sqlHandler.insertData("tblConfirmationTypes", Columns, jsonArray.toString(), "DELETE FROM tblConfirmationTypes");
+        try {
+            String Columns[] = {"ConfirmationTypeCode", "ConfirmationType", "SortOrder", "AltLanguage"};
+            sqlHandler.insertData("tblConfirmationTypes", Columns, jsonArray.toString(), "DELETE FROM tblConfirmationTypes");
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
         return true;
     }
 
@@ -4971,9 +4983,14 @@ public class ClientAndroidInterface {
     }
 
     public JSONArray getLanguage() {
-        String Query = "SELECT * FROM tblLanguages";
-
-        return sqlHandler.getResult(Query, null);
+        JSONArray jsonArray = null;
+        try{
+            String Query = "SELECT * FROM tblLanguages";
+           jsonArray = sqlHandler.getResult(Query, null);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return jsonArray;
     }
 
 
@@ -6276,7 +6293,21 @@ public class ClientAndroidInterface {
     }
 
 
-
+    public void checkForDatabase(Context context) {
+        MainActivity mainActivity = new MainActivity();
+        File database = context.getDatabasePath(SQLHandler.DBNAME);
+        //String dbPath = "/data/data/org.openimis.imispolicies/databases/" + DBNAME;
+        if (!database.exists()) {
+            sqlHandler.getReadableDatabase();
+            sqlHandler.close();
+            if (mainActivity.copyDatabase(context)) {
+                Toast.makeText(context, "Copy database success", Toast.LENGTH_SHORT);
+            } else {
+                Toast.makeText(context, "Copy database failed", Toast.LENGTH_SHORT);
+                return;
+            }
+        }
+    }
 }
 
 

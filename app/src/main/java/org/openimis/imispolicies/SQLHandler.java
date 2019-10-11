@@ -455,13 +455,15 @@ public class SQLHandler extends SQLiteOpenHelper {
 
 
 
+
+
+
     private void openDatabase() {
         //String dbPath = mContext.getDatabasePath(DBNAME).getPath();
-        String dbPath = "/data/data/org.openimis.imispolicies/databases/" + DBNAME;
+
+        String dbPath = ClientAndroidInterface.filePath;//"/data/data/org.openimis.imispolicies/databases/" + DBNAME;
+
         String dbOfflinePath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/IMIS/" + OFFLINEDBNAME;
-        if (mDatabase != null && mDatabase.isOpen()) {
-            return;
-        }
         if (isPrivate)
             mDatabase = SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READWRITE);
         else
@@ -685,6 +687,8 @@ public class SQLHandler extends SQLiteOpenHelper {
 
 
     public void insertData(String TableName, String[] Columns, String data, String PreExecute) throws JSONException {
+        String dbPath = ClientAndroidInterface.filePath;
+        mDatabase = SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READWRITE);
         try {
             JSONArray array = null;
             JSONObject object;

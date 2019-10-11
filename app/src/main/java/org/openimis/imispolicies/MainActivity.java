@@ -226,27 +226,18 @@ public class MainActivity extends AppCompatActivity
 
         setContentView(R.layout.activity_main);
 
-        sqlHandler = new SQLHandler(this);
+        //sqlHandler = new SQLHandler(this);
+        ca = new ClientAndroidInterface(context);
+        ca.getControls();
 
-        sqlHandler.isPrivate = true;
+        //sqlHandler.isPrivate = true;
         global = (Global) getApplicationContext();
-
         //Set the Image folder path
         global.setImageFolder(getApplicationContext().getApplicationInfo().dataDir + "/Images/");
         CreateFolders();
         //Check if database exists
-        File database = getApplicationContext().getDatabasePath(SQLHandler.DBNAME);
-        //String dbPath = "/data/data/org.openimis.imispolicies/databases/" + DBNAME;
-        if (!database.exists()) {
-            sqlHandler.getReadableDatabase();
-            if (copyDatabase(this)) {
-                Toast.makeText(this, "Copy database success", Toast.LENGTH_SHORT);
-            } else {
-                Toast.makeText(this, "Copy database failed", Toast.LENGTH_SHORT);
-                return;
-            }
-        }else
-            sqlHandler.getReadableDatabase();
+                ca.checkForDatabase(context);
+            //sqlHandler.getReadableDatabase();
 
         //Create image folder
         createImageFolder();
@@ -320,7 +311,7 @@ public class MainActivity extends AppCompatActivity
                 SetLogedIn(getApplication().getResources().getString(R.string.Login),getApplication().getResources().getString(R.string.Logout));
             }
         });
-        ca = new ClientAndroidInterface(context);
+
         if(ca.isMasterDataAvailable() > 0){
             loadLanguages();
         }
@@ -363,7 +354,6 @@ public class MainActivity extends AppCompatActivity
         Dir1.mkdir();
 
         wv.loadUrl("file:///android_asset/pages/Home.html");
-
     }
 
     @Override
@@ -392,7 +382,6 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void loadLanguages(){
-        ClientAndroidInterface ca = new ClientAndroidInterface(context);
         JSONArray Languages=ca.getLanguage();
         JSONObject LanguageObject = null;
 
@@ -694,7 +683,7 @@ public class MainActivity extends AppCompatActivity
     }
 
 
-    private boolean copyDatabase(Context context) {
+    public boolean copyDatabase(Context context) {
         try {
             InputStream inputStream = getApplicationContext().getAssets().open("database/" + SQLHandler.DBNAME);
             String outFileName = getApplicationContext().getApplicationInfo().dataDir + "/databases/" + SQLHandler.DBNAME;
