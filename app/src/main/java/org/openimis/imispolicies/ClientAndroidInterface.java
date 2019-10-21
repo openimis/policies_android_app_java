@@ -2926,65 +2926,71 @@ public class ClientAndroidInterface {
     @JavascriptInterface
     public void uploadEnrolment() throws Exception {
 
-        pd = new ProgressDialog(mContext);
-        pd = ProgressDialog.show(mContext, "", mContext.getResources().getString(R.string.Uploading));
+        if(general.isNetworkAvailable(mContext)){
+            pd = new ProgressDialog(mContext);
+            pd = ProgressDialog.show(mContext, "", mContext.getResources().getString(R.string.Uploading));
 
-        try {
-            new Thread() {
-                public void run() {
-                    try {
-                        enrol_result = Enrol(0, 0, 0, 0, 1);
-                    } catch (UserException e) {
-                        e.printStackTrace();
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    if(mylist.size() == 0){
-                        ((Activity) mContext).runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                if(enrol_result != 999){
-                                    //if error is encountered
-                                    if (enrolMessages.size() > 0 && enrolMessages != null) {
-                                        CharSequence[] charSequence = enrolMessages.toArray(new CharSequence[(enrolMessages.size())]);
-                                        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-                                        builder.setTitle(mContext.getResources().getString(R.string.UploadFailureReport));
-                                        builder.setCancelable(false);
-                                        builder.setItems(charSequence, null);
-                                        builder.setPositiveButton(mContext.getResources().getString(R.string.Ok), new DialogInterface.OnClickListener() {
-                                            @Override
-                                            public void onClick(DialogInterface dialogInterface, int i) {
-                                                dialogInterface.dismiss();
-                                            }
-                                        });
-                                        AlertDialog dialog = builder.create();
-                                        dialog.show();
-                                        enrolMessages.clear();
+            try {
+                new Thread() {
+                    public void run() {
+                        try {
+                            enrol_result = Enrol(0, 0, 0, 0, 1);
+                        } catch (UserException e) {
+                            e.printStackTrace();
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        if(mylist.size() == 0){
+                            ((Activity) mContext).runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if(enrol_result != 999){
+                                        //if error is encountered
+                                        if (enrolMessages.size() > 0 && enrolMessages != null) {
+                                            CharSequence[] charSequence = enrolMessages.toArray(new CharSequence[(enrolMessages.size())]);
+                                            AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                                            builder.setTitle(mContext.getResources().getString(R.string.UploadFailureReport));
+                                            builder.setCancelable(false);
+                                            builder.setItems(charSequence, null);
+                                            builder.setPositiveButton(mContext.getResources().getString(R.string.Ok), new DialogInterface.OnClickListener() {
+                                                @Override
+                                                public void onClick(DialogInterface dialogInterface, int i) {
+                                                    dialogInterface.dismiss();
+                                                }
+                                            });
+                                            AlertDialog dialog = builder.create();
+                                            dialog.show();
+                                            enrolMessages.clear();
 
+                                        }else{
+                                            //deleteImage();
+                                            ShowDialog(mContext.getResources().getString(R.string.FamilyUploaded));
+                                        }
                                     }else{
-                                        //deleteImage();
-                                        ShowDialog(mContext.getResources().getString(R.string.FamilyUploaded));
+                                        ShowDialog(mContext.getResources().getString(R.string.NoDataAvailable));
                                     }
-                                }else{
-                                    ShowDialog(mContext.getResources().getString(R.string.NoDataAvailable));
+
+                                    //ShowDialog(mContext.getResources().getString(R.string.FamilyUploaded));
                                 }
 
-                                //ShowDialog(mContext.getResources().getString(R.string.FamilyUploaded));
-                            }
+                            });
+                        }
 
-                        });
+
+                        pd.dismiss();
                     }
-
-
-                    pd.dismiss();
-                }
-            }.start();
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new Exception(e.getMessage());
+                }.start();
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new Exception(e.getMessage());
+            }
+        }else{
+            ShowDialog(mContext.getResources().getString(R.string.NoInternet));
         }
+
+
 
 
     }
@@ -5637,44 +5643,45 @@ public class ClientAndroidInterface {
 
     @JavascriptInterface
     public int ModifyFamily(final String InsuranceNumber) {//herman change
-        IsFamilyAvailable = 0;
-        inProgress = true;
+        if(general.isNetworkAvailable(mContext)){
+            IsFamilyAvailable = 0;
+            inProgress = true;
 
-        String Query = "SELECT * FROM tblInsuree WHERE Trim(CHFID) = '" + InsuranceNumber + "'";
-        JSONArray JsonInsNo = sqlHandler.getResult(Query, null);
+            String Query = "SELECT * FROM tblInsuree WHERE Trim(CHFID) = '" + InsuranceNumber + "'";
+            JSONArray JsonInsNo = sqlHandler.getResult(Query, null);
 
-        if (JsonInsNo.length() > 0) {
-            IsFamilyAvailable = 2;
-            inProgress = false;
-        }else {
+            if (JsonInsNo.length() > 0) {
+                IsFamilyAvailable = 2;
+                inProgress = false;
+            }else {
 
-            try {
-                int LocationId = getLocationId();
+                try {
+                    int LocationId = getLocationId();
 
-                CallSoap cs = new CallSoap();
-                cs.setFunctionName("DownloadFamilyData");
-                String MD = cs.DownloadFamilyData(InsuranceNumber, LocationId);
-                JSONArray FamilyData = new JSONArray(MD);
+                    CallSoap cs = new CallSoap();
+                    cs.setFunctionName("DownloadFamilyData");
+                    String MD = cs.DownloadFamilyData(InsuranceNumber, LocationId);
+                    JSONArray FamilyData = new JSONArray(MD);
 
-                if (FamilyData.length() == 0) {
-                    IsFamilyAvailable = 0;
+                    if (FamilyData.length() == 0) {
+                        IsFamilyAvailable = 0;
+                        inProgress = false;
+                    }else {
+                        DownloadFamilyData(FamilyData);
+                        IsFamilyAvailable = 1;
+                        inProgress = false;
+                    }
                     inProgress = false;
-                }else {
-                    DownloadFamilyData(FamilyData);
-                    IsFamilyAvailable = 1;
+
+                } catch (JSONException e) {
                     inProgress = false;
+                    e.printStackTrace();
+                } catch (UserException e) {
+                    inProgress = false;
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-                inProgress = false;
-
-            } catch (JSONException e) {
-                inProgress = false;
-                e.printStackTrace();
-            } catch (UserException e) {
-                inProgress = false;
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
 
 
 /*            new Thread() {
@@ -5704,8 +5711,12 @@ public class ClientAndroidInterface {
                     }
                 }
             }.start();*/
-            while (inProgress) {
-            }
+                while (inProgress) {
+                }
+        }
+
+        }else {
+            IsFamilyAvailable = 3;
         }
 
         inProgress = false;

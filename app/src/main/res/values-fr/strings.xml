@@ -376,6 +376,7 @@
     <string name="date_to">Date To</string>
     <string name="send_sms">Send SMS</string>
     <string name="requested_sms">Requested SMS</string>
+    <string name="amountContribution">Amount of contribution </string>
 
 
 </resources>

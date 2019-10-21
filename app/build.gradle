@@ -5,7 +5,7 @@ android {
     buildToolsVersion "25.0.0"
     defaultConfig {
         applicationId "org.openimis.imispolicies"
-        minSdkVersion 27
+        minSdkVersion 21
         targetSdkVersion 28
         versionCode 1
         versionName "1.4"
