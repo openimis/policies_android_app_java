@@ -124,6 +124,7 @@ public class MainActivity extends AppCompatActivity
     NotificationManager mNotificationManager;
     Vibrator vibrator;
     public String etRarPassword = "";
+    boolean isUserLogged = false;
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -338,21 +339,21 @@ public class MainActivity extends AppCompatActivity
         _General.isSDCardAvailable();
 
         //Check if network available
-        if (_General.isNetworkAvailable(MainActivity.this)){
-            //Check if any updates available on the server.
-            new Thread(){
-                public void run(){
-                    CheckForUpdates();
-                }
-
-            }.start();
+//        if (_General.isNetworkAvailable(MainActivity.this)){
+//            //Check if any updates available on the server.
+//            new Thread(){
+//                public void run(){
+//                    CheckForUpdates();
+//                }
+//
+//            }.start();
 //tvMode.setText(Html.fromHtml("<font color='green'>Online mode.</font>"));
 
-        }else{
+//        }else{
 //tvMode.setText(Html.fromHtml("<font color='red'>Offline mode.</font>"));
             //setTitle(getResources().getString(R.string.app_name) + "-" + getResources().getString(R.string.OfflineMode));
             //setTitleColor(getResources().getColor(R.color.Red));
-        }
+//        }
 
         String Path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/IMIS/";
         //Here we are creating a directory
@@ -615,9 +616,9 @@ public class MainActivity extends AppCompatActivity
                                         if (ca.isOfficerCodeValid(userInput.getText().toString())) {
                                             global.setOfficerCode(userInput.getText().toString());
                                             OfficerName.setText(global.getOfficerName());
-                                            if(_General.isNetworkAvailable(MainActivity.this)){
-                                                ca.getOfficerVillages(userInput.getText().toString());
-                                            }
+//                                            if(_General.isNetworkAvailable(MainActivity.this)){
+//                                                ca.getOfficerVillages(userInput.getText().toString());
+//                                            }
                                         } else {
                                             ShowDialogTex();
                                             ca.ShowDialog(getResources().getString(R.string.IncorrectOfficerCode));
@@ -1114,7 +1115,7 @@ public class MainActivity extends AppCompatActivity
 
         final int[] userid = {0};
 
-        Global global = (Global) MainActivity.this.getApplicationContext();
+        global = (Global) MainActivity.this.getApplicationContext();
         // get prompts.xml view
         LayoutInflater li = LayoutInflater.from(this);
         View promptsView = li.inflate(R.layout.login_dialog, null);
@@ -1139,26 +1140,24 @@ public class MainActivity extends AppCompatActivity
 
                                     new Thread() {
                                         public void run() {
-                                            CallSoap callSoap = new CallSoap();
-                                            callSoap.setFunctionName("isValidLogin");
-                                            userid[0] = callSoap.isUserLoggedIn(username.getText().toString(),password.getText().toString());
-
-                                            Global global = new Global();
-                                            global = (Global) MainActivity.this.getApplicationContext();
-                                            global.setUserId(userid[0]);
+                                            ClientAndroidInterface cai = new ClientAndroidInterface(context);
+                                            try {
+                                                isUserLogged = cai.LoginToken(username.getText().toString(),password.getText().toString());
+                                            } catch (InterruptedException e) {
+                                                e.printStackTrace();
+                                            }
 
                                             runOnUiThread(new Runnable() {
                                                 @Override
                                                 public void run() {
                                                     SetLogedIn(MainActivity.this.getResources().getString(R.string.Login), MainActivity.this.getResources().getString(R.string.Logout));
-
                                                 }
                                             });
 
                                             runOnUiThread(new Runnable() {
                                                 @Override
                                                 public void run() {
-                                                    if(userid[0] > 0){
+                                                    if(isUserLogged){
                                                         if(page.equals("Enquire")){
                                                             Intent intent = new Intent(MainActivity.this, Enquire.class);
                                                             startActivity(intent);

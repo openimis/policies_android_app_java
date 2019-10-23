@@ -497,8 +497,6 @@ public class OverViewControlNumbers extends AppCompatActivity {
 
     private int getControlNumber(final JSONArray order) throws IOException, JSONException {
 
-        //JSONArray newPolicies = removeDublicatePolicies(order);
-
         final JSONObject jsonObject = new JSONObject();
 
         try {
@@ -508,21 +506,20 @@ public class OverViewControlNumbers extends AppCompatActivity {
         }
         Thread thread = new Thread(){
             public void run() {
+                String uri = AppInformation.DomainInfo.getDomain()+"api/";
                 HttpClient httpClient = new DefaultHttpClient();
-                HttpPost httpPost = new HttpPost("http://imis-mv.swisstph-mis.ch/restapi/api/GetAssignedControlNumbers");
-// Request parameters and other properties.
+                HttpPost httpPost = new HttpPost(uri + "GetAssignedControlNumbers");
+
                 try {
                     StringEntity postingString = new StringEntity(jsonObject.toString());
                     httpPost.setEntity(postingString);
                     httpPost.setHeader("Content-type", "application/json");
                     httpPost.setHeader("Authorization", "bearer "+tokenl.getTokenText());
+                    httpPost.setHeader("api-version", "1");
                 } catch (UnsupportedEncodingException e) {
-                    // writing error to Log
                     e.printStackTrace();
                 }
-/*
- * Execute the HTTP Request
- */
+
                 runOnUiThread(new Runnable() {
                     public void run() {
                         pd = ProgressDialog.show(OverViewControlNumbers.this, "", getResources().getString(R.string.Get_Control_Number));

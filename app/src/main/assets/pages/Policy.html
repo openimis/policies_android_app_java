@@ -52,6 +52,7 @@ In case of dispute arising out or in relation to the use of the program, it is s
 
              $("#Officer").hide();
              var OfficerId =  Android.getOfficerId();
+             var OfficerCode =  Android.getOfficerCode();
              $("#ddlOfficer").val(parseInt(OfficerId));
 
              //LoadOfficers(LocationId, null);
@@ -230,10 +231,7 @@ In case of dispute arising out or in relation to the use of the program, it is s
         </li>
         <li id="Officer">
             <span strName="Officer">Officer</span>
-<!--            <select datafield="OfficerId" id="ddlOfficer" required>
-
-            </select>-->
-            <input type='hidden' datafield="OfficerId" type="date" id="ddlOfficer" required/>
+            <!--<input  datafield="OfficerId" type="text" id="ddlOfficer" required/>-->
         </li>
 
         <li>

@@ -77,6 +77,7 @@ public class Feedback extends AppCompatActivity {
     private Button btnSubmit;
 
     private int ClaimId;
+    private String ClaimUUID;
     private File FeedbackXML;
     private File FeedbackJSON;
     private String FileName;
@@ -104,7 +105,8 @@ public class Feedback extends AppCompatActivity {
         btnSubmit = (Button) findViewById(R.id.btnSubmit);
         OfficerCode=getIntent().getStringExtra("OfficerCode");
         etOfficer.setText(OfficerCode);
-         ClaimId = Integer.parseInt(getIntent().getStringExtra("ClaimId"));
+        ClaimId = Integer.parseInt(getIntent().getStringExtra("ClaimId"));
+        ClaimUUID = getIntent().getStringExtra("ClaimUUID");
         etClaimCode.setText(getIntent().getStringExtra("ClaimCode"));
         etCHFID.setText(getIntent().getStringExtra("CHFID"));
 
@@ -121,8 +123,8 @@ public class Feedback extends AppCompatActivity {
 
                         String Answers = Answers();
                         try {
-                            feed[0] = WriteJSON(String.valueOf(etOfficer.getText()), String.valueOf(ClaimId),etCHFID.getText().toString(),Answers);
-                            WriteXML(String.valueOf(etOfficer.getText()), String.valueOf(ClaimId),etCHFID.getText().toString(),Answers);
+                            feed[0] = WriteJSON(String.valueOf(etOfficer.getText()), ClaimUUID,etCHFID.getText().toString(),Answers);
+                            WriteXML(String.valueOf(etOfficer.getText()), ClaimUUID,etCHFID.getText().toString(),Answers);
                         } catch (IllegalArgumentException | IllegalStateException e) {
                             e.printStackTrace();
                             return;
@@ -212,7 +214,7 @@ public class Feedback extends AppCompatActivity {
     }
 
 
-    private void WriteXML(String Officer, String ClaimID, String CHFID, String Answers) throws IllegalArgumentException, IllegalStateException, IOException{
+    private void WriteXML(String Officer, String ClaimUUID, String CHFID, String Answers) throws IllegalArgumentException, IllegalStateException, IOException{
         //Here we are creating a directory
         File MyDir = new File(Path);
         MyDir.mkdir();
@@ -245,9 +247,9 @@ public class Feedback extends AppCompatActivity {
         serializer.text(Officer);
         serializer.endTag(null, "Officer");
 
-        serializer.startTag(null, "ClaimID");
-        serializer.text(ClaimID);
-        serializer.endTag(null,"ClaimID");
+        serializer.startTag(null, "ClaimUUID");
+        serializer.text(ClaimUUID);
+        serializer.endTag(null,"ClaimUUID");
 
         serializer.startTag(null, "CHFID");
         serializer.text(CHFID);
@@ -271,7 +273,7 @@ public class Feedback extends AppCompatActivity {
 
 
     }
-    private String WriteJSON(String Officer, String ClaimID, String CHFID, String Answers){
+    private String WriteJSON(String Officer, String ClaimUUID, String CHFID, String Answers){
 
         //Create all the directories required
         File MyDir = new File(Path);
@@ -291,7 +293,7 @@ public class Feedback extends AppCompatActivity {
             JSONObject FeedbackObject = new JSONObject();
 
             FeedbackObject.put("Officer", Officer);
-            FeedbackObject.put("ClaimID", ClaimID);
+            FeedbackObject.put("ClaimUUID", ClaimUUID);
             FeedbackObject.put("CHFID", CHFID);
             FeedbackObject.put("Answers", Answers);
             FeedbackObject.put("Date", d);

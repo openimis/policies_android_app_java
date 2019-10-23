@@ -15,6 +15,9 @@ import android.widget.Toast;
 import com.exact.CallSoap.CallSoap;
 import com.exact.general.General;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -146,28 +149,32 @@ public class CummulativeIndicators extends AppCompatActivity {
     }
 
     public void getCommulativeIndicators(String DateFrom, String DateTo){
-        //global = (Global) mContext.getApplicationContext();
-        CallSoap cs = new CallSoap();
-        cs.setFunctionName("GetCumulativeIndicators");
         try {
-            commulative = cs.GetCummulativeIndicators(DateFrom, DateTo, String.valueOf(global.getOfficerId()));
+            JSONObject cumulativeObj = new JSONObject();
+            cumulativeObj.put("FromDate", DateFrom);
+            cumulativeObj.put("ToDate", DateTo);
+
+
+            ToRestApi rest = new ToRestApi();
+            HttpResponse response = rest.postToRestApiToken(cumulativeObj,"report/indicators/cumulative");
+
+            HttpEntity entity = response.getEntity();
+            commulative = EntityUtils.toString(entity);
+
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     if(commulative.length() != 0){
                         try {
-                            JSONArray SnapshotData = new JSONArray(commulative);
+                            JSONObject ob = new JSONObject(commulative);
 
-                            for(int j = 0;j < SnapshotData.length();j++){
-                                JSONObject ob = SnapshotData.getJSONObject(j);
-                                NPC.setText(String.valueOf(ob.getInt("NewPolicies")));
-                                RPC.setText(String.valueOf(ob.getInt("RenewedPolicies")));
-                                EPC.setText(String.valueOf(ob.getInt("ExpiredPolicies")));
-                                SPC.setText(String.valueOf(ob.getInt("SuspendedPolicies")));
-                                CCC.setText(String.valueOf(ob.getInt("CollectedContribution")));
+                            NPC.setText(ob.getString("newPolicies"));
+                            RPC.setText(ob.getString("renewedPolicies"));
+                            EPC.setText(ob.getString("expiredPolicies"));
+                            SPC.setText(ob.getString("suspendedPolicies"));
+                            CCC.setText(ob.getString("collectedContribution"));
 
-                                CommulativeReport.setVisibility(View.VISIBLE);
-                            }
+                            CommulativeReport.setVisibility(View.VISIBLE);
                         }catch (Exception e){
                             Toast.makeText(getApplicationContext(), "Something went wrong on the server", Toast.LENGTH_SHORT);
                         }

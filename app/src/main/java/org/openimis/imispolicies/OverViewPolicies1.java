@@ -550,21 +550,20 @@ public class OverViewPolicies1 extends AppCompatActivity {
 
         Thread thread = new Thread(){
             public void run() {
+                String uri = AppInformation.DomainInfo.getDomain()+"api/";
                 HttpClient httpClient = new DefaultHttpClient();
-                HttpPost httpPost = new HttpPost("http://imis-mv.swisstph-mis.ch/restapi/api/GetControlNumber");
-// Request parameters and other properties.
+                HttpPost httpPost = new HttpPost(uri + "GetControlNumber");
+
                 try {
                     StringEntity postingString = new StringEntity(order.toString());
                     httpPost.setEntity(postingString);
                     httpPost.setHeader("Content-type", "application/json");
                     httpPost.setHeader("Authorization", "bearer "+tokenl.getTokenText());
+                    httpPost.setHeader("api-version", "1");
                 } catch (UnsupportedEncodingException e) {
-                    // writing error to Log
                     e.printStackTrace();
                 }
-/*
- * Execute the HTTP Request
- */
+
                 runOnUiThread(new Runnable() {
                     public void run() {
                         pd = ProgressDialog.show(OverViewPolicies1.this, "", getResources().getString(R.string.Get_Control_Number));

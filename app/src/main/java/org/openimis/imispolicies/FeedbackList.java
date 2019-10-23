@@ -27,6 +27,7 @@ package org.openimis.imispolicies;
 
 import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
@@ -54,6 +55,9 @@ import android.widget.Toast;
 import com.exact.CallSoap.CallSoap;
 import com.exact.general.General;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -82,6 +86,8 @@ public class FeedbackList extends AppCompatActivity {
     private EditText etFeedbackSearch;
     private ListAdapter adapter;
 
+    boolean isUserLogged = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -90,7 +96,7 @@ public class FeedbackList extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         global = (Global) getApplicationContext();
         OfficerCode = global.getOfficerCode();
-
+        ca = new ClientAndroidInterface(this);
         etFeedbackSearch = (EditText) findViewById(R.id.etFeedbackSearch);
         lv = (ListView) findViewById(R.id.lvFeedbacks);
         fillFeedbacks();
@@ -117,8 +123,13 @@ public class FeedbackList extends AppCompatActivity {
                             Global global = new Global();
                             global = (Global) FeedbackList.this.getApplicationContext();
 
-                            int userid = global.getUserId();
-                            if(userid > 0){
+                            Token token = null;
+
+                            try{
+                                token = global.getJWTToken();
+                            }catch (Exception e){}
+
+                            if(token != null){
                                 RefreshFeedbacks();
                             }else{
                                 LoginDialogBox("Feedbacks");
@@ -127,7 +138,6 @@ public class FeedbackList extends AppCompatActivity {
                         } catch (IOException | XmlPullParserException e) {
                             e.printStackTrace();
                         }
-
 
                     }
                 }, 3000);
@@ -168,14 +178,26 @@ public class FeedbackList extends AppCompatActivity {
         });
 
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                String claimUUID = "";
+
                 Intent intent = new Intent(getApplicationContext(), Feedback.class);
                 HashMap<String, String> oItem;
                 //noinspection unchecked
                 oItem = (HashMap<String, String>) parent.getItemAtPosition(position);
+
+                try{
+                    claimUUID = ca.getClaimUUIDByClaimCode(oItem.get("ClaimCode"))
+                            .getJSONObject(0)
+                            .getString("ClaimUUID");
+                }catch(Exception e){}
+
                 intent.putExtra("CHFID", oItem.get("CHFID"));
                 intent.putExtra("ClaimId", oItem.get("ClaimId"));
+                intent.putExtra("ClaimUUID", claimUUID);
                 intent.putExtra("ClaimCode", oItem.get("ClaimCode"));
                 intent.putExtra("OfficerCode", OfficerCode);
                 startActivityForResult(intent, 0);
@@ -377,22 +399,23 @@ public class FeedbackList extends AppCompatActivity {
 
     private void RefreshFeedbacks() throws IOException, XmlPullParserException {
         if (_general.isNetworkAvailable(this)) {
-
             //   pd = ProgressDialog.show(this, "", getResources().getString(R.string.Loading));
             new Thread() {
                 public void run() {
                     String result = null;
-                    CallSoap cs = new CallSoap();
-                    cs.setFunctionName("getFeedbacksNew");
+
                     try {
-                        result = cs.getFeedbackRenewals(OfficerCode);
+                        ToRestApi rest = new ToRestApi();
+                        result = rest.getObjectFromRestApiToken("feedback");
+
                         if (result.equalsIgnoreCase("[]")|| result ==null ) {
                             FeedbackList.clear();
                             return;
                         }
-                    } catch (IOException | XmlPullParserException e) {
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
+
                     Boolean IsInserted = ca.InsertFeedbacks(result);
 
                     if (!IsInserted) {
@@ -437,6 +460,7 @@ public class FeedbackList extends AppCompatActivity {
 
         username.setText(global.getOfficerCode().toString());
 
+        ca = new ClientAndroidInterface(this);
 
         // set dialog message
         alertDialogBuilder
@@ -448,18 +472,16 @@ public class FeedbackList extends AppCompatActivity {
 
                                     new Thread() {
                                         public void run() {
-                                            CallSoap callSoap = new CallSoap();
-                                            callSoap.setFunctionName("isValidLogin");
-                                            userid[0] = callSoap.isUserLoggedIn(username.getText().toString(),password.getText().toString());
-
-                                            Global global = new Global();
-                                            global = (Global) FeedbackList.this.getApplicationContext();
-                                            global.setUserId(userid[0]);
+                                            try {
+                                                isUserLogged = ca.LoginToken(username.getText().toString(),password.getText().toString());
+                                            } catch (InterruptedException e) {
+                                                e.printStackTrace();
+                                            }
 
                                             runOnUiThread(new Runnable() {
                                                 @Override
                                                 public void run() {
-                                                    if(userid[0] > 0){
+                                                    if(isUserLogged){
                                                         if(page.equals("Feedbacks")){
                                                             finish();
                                                             Intent intent = new Intent(FeedbackList.this, FeedbackList.class);
