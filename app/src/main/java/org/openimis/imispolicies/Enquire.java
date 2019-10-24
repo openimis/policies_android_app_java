@@ -288,23 +288,22 @@ public class Enquire extends AppCompatActivity {
                     for(i = 0;i< jsonArray.length();i++){
                         JSONObject jsonObject = jsonArray.getJSONObject(i);
                         if (!etCHFID.getText().toString().trim().equals(jsonObject.getString("chfid").trim())) continue;
-
                         tvCHFID.setText(jsonObject.getString("chfid"));
                         tvName.setText(jsonObject.getString("insureeName"));
                         tvDOB.setText(jsonObject.getString("dob"));
                         tvGender.setText(jsonObject.getString("gender"));
 
-
-
                         if (_General.isNetworkAvailable(Enquire.this)){
+                            String photo_url_str = "";
 
-                            String photo_url_str =_General.getDomain() + "/" + jsonObject.getString("PhotoPath");
-
-                            iv.setImageResource(R.drawable.person);
-                            Picasso.with(getApplicationContext())
-                                    .load(photo_url_str)
-                                    .placeholder(R.drawable.person)
-                                    .error(R.drawable.person).into(iv);
+                            try{
+                                photo_url_str =_General.getDomain() + "/" + jsonObject.getString("photoPath");
+                                iv.setImageResource(R.drawable.person);
+                                Picasso.with(getApplicationContext())
+                                        .load(photo_url_str)
+                                        .placeholder(R.drawable.person)
+                                        .error(R.drawable.person).into(iv);
+                            }catch(Exception e){}
 
                         }else{
 
@@ -321,12 +320,9 @@ public class Enquire extends AppCompatActivity {
                                 }
                             }
 
-
                         }
 
-
-                        jsonArray = new JSONArray(jsonObject.getString("details"));
-
+                        jsonArray = jsonObject.getJSONArray("details");
 
                         for(i = 0;i< jsonArray.length();i++){
                             jsonObject = jsonArray.getJSONObject(i);
