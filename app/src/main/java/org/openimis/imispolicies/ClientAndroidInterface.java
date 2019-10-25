@@ -305,7 +305,7 @@ public class ClientAndroidInterface {
         global = (Global) mContext.getApplicationContext();
         String Query = "SELECT LocationId, LocationName FROM tblLocations WHERE LocationId = (SELECT L.ParentLocationId LocationId FROM tblLocations L\n" +
                 "INNER JOIN tblOfficer O ON L.LocationId = O.LocationId\n" +
-                "WHERE Code = '" + global.getOfficerCode() + "')";
+                "WHERE LOWER(O.Code) = '" + global.getOfficerCode().toLowerCase() + "')";
         JSONArray Regions = sqlHandler.getResult(Query, null);
 
         return Regions.toString();
@@ -3657,6 +3657,10 @@ public class ClientAndroidInterface {
                         "FROM tblInsureePolicy IP\n" +
                         "INNER JOIN tblPolicy PL ON PL.PolicyId = IP.PolicyId";
                 if (CallerId == 0) Query += " AND  IP.InsureeId = " + oInsureeId;
+                if (CallerId != 2) {
+                    Query += " WHERE PL.FamilyId = " + FamilyId;
+                }
+
                 JSONArray InsureePolicyArray = sqlHandler.getResult(Query, null);
 
                 QueryIP = Query;
