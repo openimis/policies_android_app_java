@@ -330,7 +330,7 @@ public class RenewList extends AppCompatActivity {
         String d = format.format(cal.getTime());
 
         ClientAndroidInterface ca = new ClientAndroidInterface(this);
-        String result = ca.OfflineRenewals("E001");
+        String result = ca.OfflineRenewals(OfficerCode);
         JSONArray jsonArray = null;
         JSONObject object;
 

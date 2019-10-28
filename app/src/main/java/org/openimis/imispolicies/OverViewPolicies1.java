@@ -552,14 +552,13 @@ public class OverViewPolicies1 extends AppCompatActivity {
             public void run() {
                 String uri = AppInformation.DomainInfo.getDomain()+"api/";
                 HttpClient httpClient = new DefaultHttpClient();
-                HttpPost httpPost = new HttpPost(uri + "GetControlNumber");
+                HttpPost httpPost = new HttpPost(uri + "payment/GetControlNumber");
 
                 try {
                     StringEntity postingString = new StringEntity(order.toString());
                     httpPost.setEntity(postingString);
                     httpPost.setHeader("Content-type", "application/json");
                     httpPost.setHeader("Authorization", "bearer "+tokenl.getTokenText());
-                    httpPost.setHeader("api-version", "1");
                 } catch (UnsupportedEncodingException e) {
                     e.printStackTrace();
                 }
