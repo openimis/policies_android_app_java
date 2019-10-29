@@ -44,10 +44,13 @@ import android.widget.EditText;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
-
+import java.text.DateFormat;
 
 import com.exact.CallSoap.CallSoap;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -243,14 +246,30 @@ public class Statistics extends AppCompatActivity {
         } catch (ParseException e) {
             e.printStackTrace();
         }
-        String stats = null;
+        String stats = "";
+
+        DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        JSONObject objStats = new JSONObject();
+        try {
+            objStats.put("fromDate", formatter.format(FromDate));
+            objStats.put("toDate", formatter.format(ToDate));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        ToRestApi rest = new ToRestApi();
 
         if (Caller.equals("F")) {
-            cs.setFunctionName("GetFeedbackStats");
-            stats = cs.GetFeedbackStats(OfficerCode, FromDate, ToDate);
+            HttpResponse response = rest.postToRestApiToken(objStats,"report/feedback");
+            try {
+                stats = EntityUtils.toString(response.getEntity());
+            } catch (Exception e) {}
+
         } else if (Caller.equals("R")) {
-            cs.setFunctionName("GetRenewalStats");
-            stats = cs.GetRenewalStats(OfficerCode,  FromDate, ToDate);
+            HttpResponse response = rest.postToRestApiToken(objStats,"report/renewal");
+            try {
+                stats = EntityUtils.toString(response.getEntity());
+            } catch (Exception e) {}
         }
 
         final String finalStats = stats;
@@ -261,28 +280,24 @@ public class Statistics extends AppCompatActivity {
 
 
                 try {
-                    JSONArray jsonArray = new JSONArray(finalStats);
-                    if (jsonArray.length() == 0) {
+                    JSONObject statsObj = new JSONObject(finalStats);
+                    if (statsObj.length() == 0) {
                         ShowDialog(getResources().getString(R.string.NoStatFound));
                     } else {
-
-                        JSONObject jsonObject = new JSONObject();
-                        jsonObject = jsonArray.getJSONObject(0);
-
                         HashMap<String, String> data = new HashMap<>();
                         data.put("Label", "Total Sent");
                         if (Caller.equals("F"))
-                            data.put("Value", String.valueOf(jsonObject.get("FeedbackSent")));
+                            data.put("Value", String.valueOf(statsObj.get("feedbackSent")));
                         else if (Caller.equals("R"))
-                            data.put("Value", String.valueOf(jsonObject.get("RenewalSent")));
+                            data.put("Value", String.valueOf(statsObj.get("renewalSent")));
                         FeedbackStats.add(data);
 
                         data = new HashMap<>();
                         data.put("Label", "Accepted");
                         if (Caller.equals("F"))
-                            data.put("Value", String.valueOf(jsonObject.get("FeedbackAccepted")));
+                            data.put("Value", String.valueOf(statsObj.get("feedbackAccepted")));
                         else if (Caller.equals("R"))
-                            data.put("Value", String.valueOf(jsonObject.get("RenewalAccepted")));
+                            data.put("Value", String.valueOf(statsObj.get("renewalAccepted")));
                         FeedbackStats.add(data);
 
                         ListAdapter adapter = new SimpleAdapter(Statistics.this,
@@ -306,10 +321,7 @@ public class Statistics extends AppCompatActivity {
 
     }
     private void GetEnrolmentStats(){
-
         EnrolmentStats = new ArrayList<HashMap<String, String>>();
-
-        CallSoap cs = new CallSoap();
 
         Date FromDate, ToDate;
 
@@ -322,33 +334,46 @@ public class Statistics extends AppCompatActivity {
         } catch (ParseException e) {
             e.printStackTrace();
         }
-        String stats = null;
 
-        cs.setFunctionName("GetEnrolmentStats");
-        stats = cs.GetEnrolmentStats(OfficerCode, FromDate, ToDate);
+        DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 
-        final String finalStats = stats;
+        JSONObject objEnrolment = new JSONObject();
+        try {
+            objEnrolment.put("fromDate", formatter.format(FromDate));
+            objEnrolment.put("toDate", formatter.format(ToDate));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        ToRestApi rest = new ToRestApi();
+        HttpResponse response = rest.postToRestApiToken(objEnrolment,"report/enrolment");
+
+        HttpEntity entity = response.getEntity();
+        String entityString = "";
+        JSONObject enrolmentStatsObj = new JSONObject();
+
+        try {
+            entityString = EntityUtils.toString(entity);
+            enrolmentStatsObj = new JSONObject(entityString);
+        } catch (Exception e) {}
+
+        final JSONObject finalEnrolmentStatsObj = enrolmentStatsObj;
 
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 try {
-                    JSONArray jsonArray = new JSONArray(finalStats);
-                    if(jsonArray.length() == 0){
+                    if(finalEnrolmentStatsObj.length() == 0){
                         ShowDialog(getResources().getString(R.string.NoStatFound));
                     }else{
-
-                        JSONObject jsonObject = new JSONObject();
-                        jsonObject = jsonArray.getJSONObject(0);
-
                         HashMap<String,String> data = new HashMap<String, String>();
                         data.put("Label", "Total Submitted");
-                        data.put("Value", String.valueOf(jsonObject.get("TotalSubmitted")));
+                        data.put("Value", String.valueOf(finalEnrolmentStatsObj.get("totalSubmitted")));
                         EnrolmentStats.add(data);
 
                         data = new HashMap<String, String>();
                         data.put("Label", "Assigned");
-                        data.put("Value", String.valueOf(jsonObject.get("TotalAssigned")));
+                        data.put("Value", String.valueOf(finalEnrolmentStatsObj.get("totalAssigned")));
                         EnrolmentStats.add(data);
 
                         ListAdapter adapter = new SimpleAdapter(Statistics.this,
@@ -360,17 +385,12 @@ public class Statistics extends AppCompatActivity {
 
                         lvStats.setAdapter(adapter);
                     }
-
-
                 }
                 catch (JSONException e) {
                     e.printStackTrace();
                 }
-
             }
         });
-
-
     }
     private AlertDialog ShowDialog(String msg) {
         return new AlertDialog.Builder(this)

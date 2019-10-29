@@ -70,6 +70,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.openimis.imispolicies.R;
 
@@ -86,6 +87,7 @@ public class RenewList extends AppCompatActivity {
     private ListAdapter adapter;
     public String UnlistedRenPolicy;
 
+    boolean isUserLogged = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -120,9 +122,14 @@ public class RenewList extends AppCompatActivity {
                             Global global = new Global();
                             global = (Global) RenewList.this.getApplicationContext();
 
-                            int userid = global.getUserId();
+                            Token token = null;
+
+                            try{
+                                token = global.getJWTToken();
+                            }catch (Exception e){}
+
                             if (_general.isNetworkAvailable(RenewList.this.getApplicationContext())) {
-                                if(userid > 0){
+                                if(token != null){
                                     RefreshRenewals();
                                 }else{
                                     LoginDialogBox("Renewals");
@@ -187,12 +194,14 @@ public class RenewList extends AppCompatActivity {
                 HashMap<String, String> oItem;
                 //noinspection unchecked
                 oItem = (HashMap<String, String>) parent.getItemAtPosition(position);
+
                 intent.putExtra("CHFID", oItem.get("CHFID"));
                 intent.putExtra("ProductCode", oItem.get("ProductCode"));
                 intent.putExtra("RenewalId", oItem.get("RenewalId"));
                 intent.putExtra("OfficerCode", OfficerCode);
                 intent.putExtra("LocationId", oItem.get("LocationId"));
                 intent.putExtra("PolicyValue", oItem.get("PolicyValue"));
+                intent.putExtra("RenewalUUID", oItem.get("RenewalUUID"));
                 startActivityForResult(intent, 0);
 
             }
@@ -340,6 +349,7 @@ public class RenewList extends AppCompatActivity {
             Renewal.put("ProductCode", "");
             Renewal.put("LocationId", String.valueOf(ca.getLocationId(OfficerCode)));
             Renewal.put("EnrollDate", d);
+            Renewal.put("RenewalUUID", "");
             RenewalList.add(Renewal);
             if (jsonArray.length() == 0) {
                 //RenewalList.clear();
@@ -357,6 +367,7 @@ public class RenewList extends AppCompatActivity {
                 Renewal.put("ProductCode", "");
                 Renewal.put("LocationId", String.valueOf(ca.getLocationId(OfficerCode)));
                 Renewal.put("EnrollDate", d);
+                Renewal.put("RenewalUUID", "");
                 RenewalList.add(Renewal);
                 for (int i = 0; i < jsonArray.length(); i++) {
 
@@ -373,6 +384,7 @@ public class RenewList extends AppCompatActivity {
                     Renewal.put("ProductCode", object.getString("ProductCode"));
                     Renewal.put("LocationId", object.getString("LocationId"));
                     Renewal.put("PolicyValue", object.getString("PolicyValue"));
+                    Renewal.put("RenewalUUID", object.getString("RenewalUUID"));
                     RenewalList.add(Renewal);
                 }
             }
@@ -417,6 +429,7 @@ public class RenewList extends AppCompatActivity {
             Renewal.put("ProductCode", "");
             Renewal.put("LocationId", String.valueOf(ca.getLocationId(OfficerCode)));
             Renewal.put("EnrollDate", d);
+            Renewal.put("RenewalUUID", "");
             RenewalList.add(Renewal);
             if (jsonArray.length() == 0) {
                 //RenewalList.clear();
@@ -434,6 +447,7 @@ public class RenewList extends AppCompatActivity {
                 Renewal.put("ProductCode", "");
                 Renewal.put("LocationId", String.valueOf(ca.getLocationId(OfficerCode)));
                 Renewal.put("EnrollDate", d);
+                Renewal.put("RenewalUUID", "");
                 RenewalList.add(Renewal);
 
                 for (int i = 0; i < jsonArray.length(); i++) {
@@ -451,6 +465,7 @@ public class RenewList extends AppCompatActivity {
                     Renewal.put("ProductCode", object.getString("ProductCode"));
                     Renewal.put("LocationId", object.getString("LocationId"));
                     Renewal.put("PolicyValue", object.getString("PolicyValue"));
+                    Renewal.put("RenewalUUID", object.getString("RenewalUUID"));
                     RenewalList.add(Renewal);
                 }
             }
@@ -471,23 +486,21 @@ public class RenewList extends AppCompatActivity {
 
 
     private void RefreshRenewals() throws IOException, XmlPullParserException {
-
         if (_general.isNetworkAvailable(this)) {
             new Thread() {
                 public void run() {
                     String result = null;
-                    CallSoap cs = new CallSoap();
-                    cs.setFunctionName("getRenewalsNew");
+
                     try {
-                        result = cs.getFeedbackRenewals(OfficerCode);
-                    } catch (IOException | XmlPullParserException e) {
+                        ToRestApi rest = new ToRestApi();
+                        result = rest.getObjectFromRestApiToken("policy");
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
 
                     if (result != null) {
                         ca.InsertRenewals(result);
                     }
-
 
                     runOnUiThread(new Runnable() {
                         @Override
@@ -498,13 +511,10 @@ public class RenewList extends AppCompatActivity {
                 }
             }.start();
 
-
         } else {
             openDialogForFeedbackRenewal();
             //Toast.makeText(this, getResources().getString(R.string.NoInternet), Toast.LENGTH_LONG).show();
         }
-
-
     }
 
     @Override
@@ -513,6 +523,7 @@ public class RenewList extends AppCompatActivity {
         menuInflater.inflate(R.menu.menu_statistics, menu);
         return true;
     }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -560,18 +571,17 @@ public class RenewList extends AppCompatActivity {
 
                                     new Thread() {
                                         public void run() {
-                                            CallSoap callSoap = new CallSoap();
-                                            callSoap.setFunctionName("isValidLogin");
-                                            userid[0] = callSoap.isUserLoggedIn(username.getText().toString(),password.getText().toString());
 
-                                            Global global = new Global();
-                                            global = (Global) RenewList.this.getApplicationContext();
-                                            global.setUserId(userid[0]);
+                                            try {
+                                                isUserLogged = ca.LoginToken(username.getText().toString(),password.getText().toString());
+                                            } catch (InterruptedException e) {
+                                                e.printStackTrace();
+                                            }
 
                                             runOnUiThread(new Runnable() {
                                                 @Override
                                                 public void run() {
-                                                    if(userid[0] > 0){
+                                                    if(isUserLogged){
                                                         if(page.equals("Renewals")){
                                                             finish();
                                                             Intent intent = new Intent(RenewList.this, RenewList.class);

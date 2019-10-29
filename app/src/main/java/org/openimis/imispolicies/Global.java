@@ -27,6 +27,8 @@ package org.openimis.imispolicies;
 
 import android.app.Application;
 
+import java.util.UUID;
+
 public class Global extends Application {
     private String OfficerCode;
     private String OfficerName;
@@ -34,6 +36,15 @@ public class Global extends Application {
     private  int OfficerId;
 
     private String ImageFolder;
+
+    private Token JWTToken;
+
+    public Token getJWTToken() {
+        return JWTToken;
+    }
+    public void setJWTToken(Token token) {
+        JWTToken = token;
+    }
 
     public String getOfficerCode() {
         return OfficerCode;

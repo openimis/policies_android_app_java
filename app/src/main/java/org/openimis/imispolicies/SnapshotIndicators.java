@@ -43,6 +43,10 @@ import android.widget.Toast;
 
 import com.exact.CallSoap.CallSoap;
 import com.exact.general.General;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import java.text.SimpleDateFormat;
@@ -165,26 +169,31 @@ public class SnapshotIndicators extends AppCompatActivity {
     public void GetSnapshot(String today) {
         Global global = new Global();
         global = (Global) this.getApplicationContext();
-        CallSoap cs = new CallSoap();
-        cs.setFunctionName("GetSnapshotIndicators");
+
         try {
-             snapshot = cs.GetSnapshotIndicators( today, String.valueOf(global.getOfficerId()));
+
+            JSONObject snapshotObj = new JSONObject();
+            snapshotObj.put("SnapshotDate", today);
+
+
+            ToRestApi rest = new ToRestApi();
+            HttpResponse response = rest.postToRestApiToken(snapshotObj,"report/indicators/snapshot");
+
+            HttpEntity entity = response.getEntity();
+            snapshot = EntityUtils.toString(entity);
+
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     if(snapshot.length() != 0 || snapshot != null){
                         try {
-                            JSONArray SnapshotData = new JSONArray(snapshot);
+                            JSONObject ob = new JSONObject(snapshot);
+                            FAPC.setText(ob.getString("active"));
+                            FEPC.setText(ob.getString("expired"));
+                            FIPC.setText(ob.getString("idle"));
+                            FSPC.setText(ob.getString("suspended"));
 
-                            for(int j = 0;j < SnapshotData.length();j++){
-                                JSONObject ob = SnapshotData.getJSONObject(j);
-                                FAPC.setText(String.valueOf(ob.getInt("Active")));
-                                FEPC.setText(String.valueOf(ob.getInt("Expired")));
-                                FIPC.setText(String.valueOf(ob.getInt("Idle")));
-                                FSPC.setText(String.valueOf(ob.getInt("Suspended")));
-
-                                snapshotReport.setVisibility(View.VISIBLE);
-                            }
+                            snapshotReport.setVisibility(View.VISIBLE);
                         }catch (Exception e){
                             Toast.makeText(getApplicationContext(), "No data found.", Toast.LENGTH_SHORT);
                         }

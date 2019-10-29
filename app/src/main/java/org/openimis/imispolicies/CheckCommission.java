@@ -208,7 +208,7 @@ public class CheckCommission extends AppCompatActivity {
         int LocationId = ca.getLocationId(OfficerCode);
 
         //String result = ca.getProductsByDistrict(LocationId);
-        String result = null;
+        String result = "";
         try {
             result = ca.getProductsByDistrict(ca.getLocationId());
         } catch (JSONException e) {
@@ -338,17 +338,17 @@ public class CheckCommission extends AppCompatActivity {
         try {
             obj.put("enrolment_officer_code", ca.getOfficerCode().toString());
             if(m.equals("January")){obj.put("month", 1);}
-            if(m.equals("January")){obj.put("month", 2);}
-            if(m.equals("January")){obj.put("month", 3);}
-            if(m.equals("January")){obj.put("month", 4);}
-            if(m.equals("January")){obj.put("month", 5);}
-            if(m.equals("January")){obj.put("month", 6);}
-            if(m.equals("January")){obj.put("month", 7);}
-            if(m.equals("January")){obj.put("month", 8);}
-            if(m.equals("January")){obj.put("month", 9);}
-            if(m.equals("January")){obj.put("month", 10);}
-            if(m.equals("January")){obj.put("month", 11);}
-            if(m.equals("January")){obj.put("month", 12);}
+            if(m.equals("February")){obj.put("month", 2);}
+            if(m.equals("March")){obj.put("month", 3);}
+            if(m.equals("April")){obj.put("month", 4);}
+            if(m.equals("May")){obj.put("month", 5);}
+            if(m.equals("June")){obj.put("month", 6);}
+            if(m.equals("July")){obj.put("month", 7);}
+            if(m.equals("August")){obj.put("month", 8);}
+            if(m.equals("September")){obj.put("month", 9);}
+            if(m.equals("October")){obj.put("month", 10);}
+            if(m.equals("November")){obj.put("month", 11);}
+            if(m.equals("December")){obj.put("month", 12);}
             obj.put("insrance_product_code", pr);
             obj.put("payer", py);
             obj.put("year", yr);
@@ -358,9 +358,9 @@ public class CheckCommission extends AppCompatActivity {
 
             Thread thread = new Thread(){
                 public void run() {
+                    String uri = AppInformation.DomainInfo.getDomain()+"api/";
                     HttpClient httpClient = new DefaultHttpClient();
-                    HttpPost httpPost = new HttpPost(AppInformation.DomainInfo.getDomain()+"/restapi/api/Policies/Get_Commissions");
-// Request parameters and other properties.
+                    HttpPost httpPost = new HttpPost(uri + "policy/commissions");
                     try {
                         StringEntity postingString = new StringEntity(obj_to_send);
                         httpPost.setEntity(postingString);

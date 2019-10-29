@@ -244,9 +244,19 @@ public class Enquire extends AppCompatActivity {
         result = "";
 
         if(_General.isNetworkAvailable(this)){
-            CallSoap cs = new CallSoap();
-            cs.setFunctionName("EnquireInsuree");
-            result = cs.getInsureeInfo(chfid);
+            ToRestApi rest = new ToRestApi();
+            String res = rest.getObjectFromRestApiToken("insuree/" + chfid + "/enquire");
+
+            JSONObject jobj = new JSONObject();
+            try{
+                jobj = new JSONObject(res);
+            }
+            catch(Exception e){}
+
+            JSONArray arr = new JSONArray();
+            arr.put(jobj);
+
+            result = arr.toString();
         }else{
             //TODO: yet to be done
             result = getDataFromDb(etCHFID.getText().toString());
@@ -277,31 +287,30 @@ public class Enquire extends AppCompatActivity {
                     int i = 0;
                     for(i = 0;i< jsonArray.length();i++){
                         JSONObject jsonObject = jsonArray.getJSONObject(i);
-                        if (!etCHFID.getText().toString().trim().equals(jsonObject.getString("CHFID").trim())) continue;
-
-                        tvCHFID.setText(jsonObject.getString("CHFID"));
-                        tvName.setText(jsonObject.getString("InsureeName"));
-                        tvDOB.setText(jsonObject.getString("DOB"));
-                        tvGender.setText(jsonObject.getString("Gender"));
-
-
+                        if (!etCHFID.getText().toString().trim().equals(jsonObject.getString("chfid").trim())) continue;
+                        tvCHFID.setText(jsonObject.getString("chfid"));
+                        tvName.setText(jsonObject.getString("insureeName"));
+                        tvDOB.setText(jsonObject.getString("dob"));
+                        tvGender.setText(jsonObject.getString("gender"));
 
                         if (_General.isNetworkAvailable(Enquire.this)){
+                            String photo_url_str = "";
 
-                            String photo_url_str =_General.getDomain() + "/" + jsonObject.getString("PhotoPath");
-
-                            iv.setImageResource(R.drawable.person);
-                            Picasso.with(getApplicationContext())
-                                    .load(photo_url_str)
-                                    .placeholder(R.drawable.person)
-                                    .error(R.drawable.person).into(iv);
+                            try{
+                                photo_url_str =_General.getDomain() + "/" + jsonObject.getString("photoPath");
+                                iv.setImageResource(R.drawable.person);
+                                Picasso.with(getApplicationContext())
+                                        .load(photo_url_str)
+                                        .placeholder(R.drawable.person)
+                                        .error(R.drawable.person).into(iv);
+                            }catch(Exception e){}
 
                         }else{
 
                             if(ca.theImage != null){
                                 iv.setImageBitmap(ca.theImage);
                             }else {
-                                byte[] photo = jsonObject.getString("PhotoPath").getBytes();
+                                byte[] photo = jsonObject.getString("photoPath").getBytes();
                                 ByteArrayInputStream is = new ByteArrayInputStream(photo);
                                 theImage = BitmapFactory.decodeStream(is);
                                 if(theImage != null){
@@ -311,12 +320,9 @@ public class Enquire extends AppCompatActivity {
                                 }
                             }
 
-
                         }
 
-
-                        jsonArray = new JSONArray(jsonObject.getString("Details"));
-
+                        jsonArray = jsonObject.getJSONArray("details");
 
                         for(i = 0;i< jsonArray.length();i++){
                             jsonObject = jsonArray.getJSONObject(i);
@@ -325,33 +331,33 @@ public class Enquire extends AppCompatActivity {
                             HashMap<String, String> Policy = new HashMap<>();
                             jsonObject = jsonArray.getJSONObject(i);
                             double iDedType = 0;
-                            if(!jsonObject.getString("DedType").equalsIgnoreCase("null"))iDedType = Double.valueOf(jsonObject.getString("DedType"));
+                            if(!jsonObject.getString("dedType").equalsIgnoreCase("null"))iDedType = Double.valueOf(jsonObject.getString("dedType"));
 
                             String Ded = "",Ded1= "",Ded2 = "";
                             String Ceiling = "",Ceiling1 = "", Ceiling2 ="";
 
                             String jDed1 = "",jDed2 = "",jCeiling1 = "",jCeiling2 = "";
 
-                            if(jsonObject.getString("Ded1").equalsIgnoreCase("null")) jDed1 = "";else jDed1 = jsonObject.getString("Ded1");
-                            if(jsonObject.getString("Ded2").equalsIgnoreCase("null")) jDed2 = "";else jDed2 = jsonObject.getString("Ded2");
-                            if(jsonObject.getString("Ceiling1").equalsIgnoreCase("null")) jCeiling1 = "";else jCeiling1 = jsonObject.getString("Ceiling1");
-                            if(jsonObject.getString("Ceiling2").equalsIgnoreCase("null")) jCeiling2 = "";else jCeiling2 = jsonObject.getString("Ceiling2");
+                            if(jsonObject.getString("ded1").equalsIgnoreCase("null")) jDed1 = "";else jDed1 = jsonObject.getString("ded1");
+                            if(jsonObject.getString("ded2").equalsIgnoreCase("null")) jDed2 = "";else jDed2 = jsonObject.getString("ded2");
+                            if(jsonObject.getString("ceiling1").equalsIgnoreCase("null")) jCeiling1 = "";else jCeiling1 = jsonObject.getString("ceiling1");
+                            if(jsonObject.getString("ceiling2").equalsIgnoreCase("null")) jCeiling2 = "";else jCeiling2 = jsonObject.getString("ceiling2");
 
                             //Get the type
 
                             if(iDedType == 1 | iDedType == 2 | iDedType == 3){
-                                if (!jDed1.equals(""))Ded1 = jsonObject.getString("Ded1");
-                                if (!jCeiling1.equals(""))Ceiling1 = jsonObject.getString("Ceiling1");
+                                if (!jDed1.equals(""))Ded1 = jsonObject.getString("ded1");
+                                if (!jCeiling1.equals(""))Ceiling1 = jsonObject.getString("ceiling1");
 
                                 if(!Ded1.equals("")) Ded = "Deduction: " + Ded1;
                                 if(!Ceiling1.equals("")) Ceiling = "Ceiling: " + Ceiling1;
 
                             }else if(iDedType == 1.1 | iDedType == 2.1 | iDedType == 3.1){
 
-                                if (jDed1.length() > 0)Ded1 = " IP:" + jsonObject.getString("Ded1");
-                                if (jDed2.length() > 0)Ded2 = " OP:" + jsonObject.getString("Ded2");
-                                if (jCeiling1.length() > 0)Ceiling1 = " IP:" +  jsonObject.getString("Ceiling1");
-                                if (jCeiling2.length() > 0)Ceiling2 = " OP:" +  jsonObject.getString("Ceiling2");
+                                if (jDed1.length() > 0)Ded1 = " IP:" + jsonObject.getString("ded1");
+                                if (jDed2.length() > 0)Ded2 = " OP:" + jsonObject.getString("ded2");
+                                if (jCeiling1.length() > 0)Ceiling1 = " IP:" +  jsonObject.getString("ceiling1");
+                                if (jCeiling2.length() > 0)Ceiling2 = " OP:" +  jsonObject.getString("ceiling2");
 
                                 if (!(Ded1 + Ded2).equals("")) Ded = "Deduction: "+ Ded1 + Ded2;
                                 if (!(Ceiling1 + Ceiling2).equals("")) Ceiling = "Ceiling: "+ Ceiling1 + Ceiling2;
@@ -359,9 +365,9 @@ public class Enquire extends AppCompatActivity {
                             }
 
 
-                            Policy.put("Heading", jsonObject.getString("ProductCode"));
-                            Policy.put("Heading1", jsonObject.getString("ExpiryDate")+ "  " + jsonObject.getString("Status"));
-                            Policy.put("SubItem1", jsonObject.getString("ProductName"));
+                            Policy.put("Heading", jsonObject.getString("productCode"));
+                            Policy.put("Heading1", jsonObject.getString("expiryDate")+ "  " + jsonObject.getString("status"));
+                            Policy.put("SubItem1", jsonObject.getString("productName"));
                             Policy.put("SubItem2",Ded);
                             Policy.put("SubItem3",Ceiling);
                             PolicyList.add(Policy);

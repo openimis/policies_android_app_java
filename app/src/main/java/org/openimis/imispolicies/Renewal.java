@@ -50,6 +50,9 @@ import android.widget.Toast;
 import com.exact.CallSoap.CallSoap;
 import com.exact.general.General;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -91,6 +94,7 @@ public class Renewal extends AppCompatActivity {
     private final static String Path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/IMIS/";
 
     private int RenewalId;
+    private String RenewalUUID;
     private int result;
     private EditText PolicyValue;
 
@@ -150,7 +154,8 @@ public class Renewal extends AppCompatActivity {
         etOfficer.setText(getIntent().getStringExtra("OfficerCode"));
         OfficerCode = getIntent().getStringExtra("OfficerCode");
         RenewalId = Integer.parseInt(getIntent().getStringExtra("RenewalId"));
-
+        RenewalId = Integer.parseInt(getIntent().getStringExtra("RenewalId"));
+        RenewalUUID = getIntent().getStringExtra("RenewalUUID");
         etProductCode.setText(getIntent().getStringExtra("ProductCode"));
         LocationId = Integer.parseInt(getIntent().getStringExtra("LocationId"));
         PolicyValue.setText(getIntent().getStringExtra("PolicyValue"));
@@ -493,7 +498,6 @@ public class Renewal extends AppCompatActivity {
     }
 
     private void DiscontinuePolicy() {
-
         new AlertDialog.Builder(this)
                 .setMessage(R.string.DiscontinuePolicyQ)
                 .setPositiveButton(R.string.Yes, new DialogInterface.OnClickListener() {
@@ -504,11 +508,10 @@ public class Renewal extends AppCompatActivity {
                         new Thread() {
                             @Override
                             public void run() {
-                                CallSoap cs = new CallSoap();
-                                cs.setFunctionName("DiscontinuePolicy");
+                                ToRestApi rest = new ToRestApi();
                                 try {
                                     if(_General.isNetworkAvailable(getApplicationContext())){
-                                        cs.DiscontinuePolicy(RenewalId);
+                                        String result = rest.deleteFromRestApiToken("policy/renew/" + RenewalUUID);
                                         DeleteRow(RenewalId);
                                         pd.dismiss();
                                         finish();
@@ -519,7 +522,7 @@ public class Renewal extends AppCompatActivity {
                                         finish();
                                     }
 
-                                } catch (final IOException e) {
+                                } catch (final Exception e) {
                                     e.printStackTrace();
                                     pd.dismiss();
                                     runOnUiThread(new Runnable() {
@@ -528,18 +531,6 @@ public class Renewal extends AppCompatActivity {
                                             chkDiscontinue.setChecked(false);
                                             ca.ShowDialog(e.toString());
                                         }
-                                    });
-                                } catch (final XmlPullParserException e) {
-
-                                    e.printStackTrace();
-                                    pd.dismiss();
-                                    runOnUiThread(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            chkDiscontinue.setChecked(false);
-                                            ca.ShowDialog(e.toString());
-                                        }
-
                                     });
                                 }
                             }
@@ -764,10 +755,25 @@ public class Renewal extends AppCompatActivity {
             if (etReceiptNo.getText().toString().trim().length() > 0) {
 //                new Thread() {
 //                    public void run() {
-                CallSoap cs = new CallSoap();
-                cs.setFunctionName("isUniqueReceiptNo");
 
-                if (!cs.isUniqueReceiptNo(etReceiptNo.getText().toString(), etCHFID.getText().toString())) {
+                boolean isUniqueReceiptNo = false;
+                String entityString = "";
+
+                try{
+                    JSONObject receiptObj = new JSONObject();
+                    receiptObj.put("ReceiptNo", etReceiptNo.getText().toString());
+                    receiptObj.put("CHFID", etCHFID.getText().toString());
+
+                    ToRestApi rest = new ToRestApi();
+                    HttpResponse response = rest.postToRestApiToken(receiptObj,"premium/receipt");
+
+                    HttpEntity entity = response.getEntity();
+                    entityString = EntityUtils.toString(entity);
+                }catch(Exception e){}
+
+                isUniqueReceiptNo = Boolean.valueOf(entityString);
+
+                if (!isUniqueReceiptNo) {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
