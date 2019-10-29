@@ -550,34 +550,19 @@ public class OverViewPolicies1 extends AppCompatActivity {
 
         Thread thread = new Thread(){
             public void run() {
-                String uri = AppInformation.DomainInfo.getDomain()+"api/";
-                HttpClient httpClient = new DefaultHttpClient();
-                HttpPost httpPost = new HttpPost(uri + "payment/GetControlNumber");
-
-                try {
-                    StringEntity postingString = new StringEntity(order.toString());
-                    httpPost.setEntity(postingString);
-                    httpPost.setHeader("Content-type", "application/json");
-                    httpPost.setHeader("Authorization", "bearer "+tokenl.getTokenText());
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
-                }
-
                 runOnUiThread(new Runnable() {
                     public void run() {
                         pd = ProgressDialog.show(OverViewPolicies1.this, "", getResources().getString(R.string.Get_Control_Number));
                     }
                 });
 
-                //Send Request Here
                 HttpResponse response = null;
                 try {
-                    response = httpClient.execute(httpPost);
+                    response = toRestApi.postToRestApiToken(order, "payment/GetControlNumber");
 
                     HttpEntity respEntity = response.getEntity();
                     String content = null;
                     if (respEntity != null) {
-                        //final String[] code = {null};
                         final String[] error_occured = {null};
                         final String[] error_message = {null};
                         final String[] internal_Identifier = {null};

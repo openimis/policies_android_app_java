@@ -110,24 +110,24 @@ public class OverViewControlNumbers extends AppCompatActivity {
             public void onClick(View view) {
                 General _general = new General(AppInformation.DomainInfo.getDomain());
 
-                if(_general.isNetworkAvailable(OverViewControlNumbers.this)){
-                    if(tokenl.getTokenText().length() <= 0){
+                if (_general.isNetworkAvailable(OverViewControlNumbers.this)) {
+                    if (tokenl.getTokenText().length() <= 0) {
                         LoginDialogBox();
-                    }else{
+                    } else {
                         Global global = new Global();
                         global = (Global) getApplicationContext();
 
                         try {
-                            getControlNumber.put("internalIdentifier",PolicyValueToSend);
+                            getControlNumber.put("internalIdentifier", PolicyValueToSend);
 
                             n[0] = "";
-                            for(int i=0; i<num.size(); i++){
-                                n[0] += num.get(i)+"\n";
+                            for (int i = 0; i < num.size(); i++) {
+                                n[0] += num.get(i) + "\n";
                             }
                             AmountCalculated = String.valueOf(PolicyValueToSend);
-                            if(num.size() != 0){
+                            if (num.size() != 0) {
                                 trackBox(paymentDetails);
-                            }else{
+                            } else {
                                 View view1 = findViewById(R.id.actv);
                                 Snackbar.make(view1, getResources().getString(R.string.select_policy), Snackbar.LENGTH_LONG)
                                         .setAction("Action", null).show();
@@ -137,7 +137,7 @@ public class OverViewControlNumbers extends AppCompatActivity {
                             e.printStackTrace();
                         }
                     }
-                }else{
+                } else {
                     View view1 = findViewById(R.id.actv);
                     Snackbar.make(view1, "", Snackbar.LENGTH_LONG)
                             .setAction("Action", null).show();
@@ -150,20 +150,20 @@ public class OverViewControlNumbers extends AppCompatActivity {
         fab2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (paymentDetails.length()>0){
+                if (paymentDetails.length() > 0) {
                     String unDeletedPolicies = "";
                     int unDeletedPoliciesCount = 0;
                     int totalPolicies = paymentDetails.length();
-                    for(int i=0; i<paymentDetails.length(); i++){
+                    for (int i = 0; i < paymentDetails.length(); i++) {
                         try {
                             JSONObject payment = paymentDetails.getJSONObject(0);
                             String policyid = payment.getString("PolicyId");
                             String uploaded_date = payment.getString("uploaded_date");
 
-                            if(uploaded_date.equals("")){
-                                unDeletedPoliciesCount ++;
+                            if (uploaded_date.equals("")) {
+                                unDeletedPoliciesCount++;
                                 unDeletedPolicies += policyid;
-                            }else{
+                            } else {
                                 clientAndroidInterface.deleteRecodedPolicy(policyid);
                             }
 
@@ -172,20 +172,20 @@ public class OverViewControlNumbers extends AppCompatActivity {
                         }
                     }
 
-                    if(unDeletedPoliciesCount > 0){
+                    if (unDeletedPoliciesCount > 0) {
                         String sms = "";
-                        if(totalPolicies == 1){
-                            sms = getResources().getString(R.string.cant_be_deleted) ;
-                        }else{
-                            sms = unDeletedPoliciesCount + " " +getResources().getString(R.string.of) + " " + totalPolicies + " " + getResources().getString(R.string.notUploaded) ;
+                        if (totalPolicies == 1) {
+                            sms = getResources().getString(R.string.cant_be_deleted);
+                        } else {
+                            sms = unDeletedPoliciesCount + " " + getResources().getString(R.string.of) + " " + totalPolicies + " " + getResources().getString(R.string.notUploaded);
                         }
                         num.clear();
                         policyDeleteDialogReport(sms);
-                    }else{
+                    } else {
                         num.clear();
                         policyDeleteDialogReport(getResources().getString(R.string.dataDeleted));
                     }
-                }else{
+                } else {
                     runOnUiThread(new Runnable() {
                         public void run() {
                             pd.dismiss();
@@ -217,8 +217,8 @@ public class OverViewControlNumbers extends AppCompatActivity {
 
         int PolicyValue = 0;
         JSONObject ob = null;
-        if(policy != null){
-            for(int j = 0; j < policy.length(); j++){
+        if (policy != null) {
+            for (int j = 0; j < policy.length(); j++) {
                 try {
                     ob = policy.getJSONObject(j);
                     PolicyValue += Integer.parseInt(ob.getString("PolicyValue"));
@@ -229,14 +229,14 @@ public class OverViewControlNumbers extends AppCompatActivity {
             }
 
             search_count = overViewControlNumberAdapter.getCount();
-            if(search_count == 0){
+            if (search_count == 0) {
                 NothingFound.setVisibility(View.VISIBLE);
                 fab.setVisibility(View.GONE);
                 fab2.setVisibility(View.GONE);
             }
             ValueNumberOfPolices.setText(String.valueOf(search_count));
             ValueAmountOfContribution.setText(String.valueOf(PolicyValue));
-        }else{
+        } else {
             ValueNumberOfPolices.setText("0");
             ValueAmountOfContribution.setText("0");
         }
@@ -276,17 +276,17 @@ public class OverViewControlNumbers extends AppCompatActivity {
     }*/
 
 
-
-    public boolean onOptionsItemSelected(MenuItem item){
+    public boolean onOptionsItemSelected(MenuItem item) {
         onBackPressed();
         return true;
     }
+
     @Override
     public void onBackPressed() {
         super.onBackPressed();
     }
 
-    public void policyDeleteDialogReport(String message){
+    public void policyDeleteDialogReport(String message) {
         // get prompts.xml view
         LayoutInflater li = LayoutInflater.from(this);
         View promptsView = li.inflate(R.layout.policy_delete_report_dialog, null);
@@ -329,19 +329,19 @@ public class OverViewControlNumbers extends AppCompatActivity {
         alertDialog.show();
     }
 
-    public void fillRecordedPolicies(){
-        policy = clientAndroidInterface.getRecordedPolicies(InsuranceNumber,OtherNames,LastName,InsuranceProduct,UploadedFrom,UploadedTo,RadioRenewal,RequestedFrom,RequestedTo, PaymentType);//OrderArray;
+    public void fillRecordedPolicies() {
+        policy = clientAndroidInterface.getRecordedPolicies(InsuranceNumber, OtherNames, LastName, InsuranceProduct, UploadedFrom, UploadedTo, RadioRenewal, RequestedFrom, RequestedTo, PaymentType);//OrderArray;
         LayoutInflater li = LayoutInflater.from(OverViewControlNumbers.this);
         View promptsView = li.inflate(R.layout.activity_over_view_control_numbers, null);
         PolicyRecyclerView = (RecyclerView) findViewById(R.id.listofpolicies);
-        overViewControlNumberAdapter = new OverViewControlNumberAdapter(this,policy);
+        overViewControlNumberAdapter = new OverViewControlNumberAdapter(this, policy);
         PolicyRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         //PolicyRecyclerView.addItemDecoration(new DividerItemDecoration(this,DividerItemDecoration.VERTICAL));
         PolicyRecyclerView.setAdapter(overViewControlNumberAdapter);
     }
 
 
-    public void trackBox(final JSONArray policies){
+    public void trackBox(final JSONArray policies) {
         // get prompts.xml view
         LayoutInflater li = LayoutInflater.from(this);
         View promptsView = li.inflate(R.layout.assigncontrolnumber, null);
@@ -381,6 +381,7 @@ public class OverViewControlNumbers extends AppCompatActivity {
         // show it
         alertDialog.show();
     }
+
     public void LoginDialogBox() {
 
         //final int[] userid = {0};
@@ -407,7 +408,7 @@ public class OverViewControlNumbers extends AppCompatActivity {
                 .setPositiveButton(getResources().getString(R.string.Ok),
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
-                                if(!username.getText().toString().equals("") && !password.getText().toString().equals("")){
+                                if (!username.getText().toString().equals("") && !password.getText().toString().equals("")) {
                                     pd = ProgressDialog.show(OverViewControlNumbers.this, getResources().getString(R.string.Login), getResources().getString(R.string.InProgress));
 
                                     new Thread() {
@@ -417,13 +418,13 @@ public class OverViewControlNumbers extends AppCompatActivity {
                                             userid[0] = callSoap.isUserLoggedIn(username.getText().toString(),password.getText().toString());*/
                                             JSONObject object = new JSONObject();
                                             try {
-                                                object.put("userName",username.getText().toString());
-                                                object.put("password",password.getText().toString());
+                                                object.put("userName", username.getText().toString());
+                                                object.put("password", password.getText().toString());
                                             } catch (JSONException e) {
                                                 e.printStackTrace();
                                             }
                                             String functionName = "login";
-                                            HttpResponse response = toRestApi.postToRestApi(object,functionName);
+                                            HttpResponse response = toRestApi.postToRestApi(object, functionName);
 
                                             String content = null;
                                             HttpEntity respEntity = response.getEntity();
@@ -438,7 +439,7 @@ public class OverViewControlNumbers extends AppCompatActivity {
                                                 }
                                             }
 
-                                            if(response.getStatusLine().getStatusCode() == 200){
+                                            if (response.getStatusLine().getStatusCode() == 200) {
                                                 JSONObject ob = null;
                                                 String token = null;
                                                 try {
@@ -454,22 +455,22 @@ public class OverViewControlNumbers extends AppCompatActivity {
                                                 runOnUiThread(new Runnable() {
                                                     @Override
                                                     public void run() {
-                                                        if(finalToken.length() > 0){
+                                                        if (finalToken.length() > 0) {
                                                             pd.dismiss();
-                                                            Toast.makeText(OverViewControlNumbers.this,OverViewControlNumbers.this.getResources().getString(R.string.Login_Successful), Toast.LENGTH_LONG).show();
-                                                        }else{
+                                                            Toast.makeText(OverViewControlNumbers.this, OverViewControlNumbers.this.getResources().getString(R.string.Login_Successful), Toast.LENGTH_LONG).show();
+                                                        } else {
                                                             pd.dismiss();
-                                                            Toast.makeText(OverViewControlNumbers.this,OverViewControlNumbers.this.getResources().getString(R.string.LoginFail), Toast.LENGTH_LONG).show();
+                                                            Toast.makeText(OverViewControlNumbers.this, OverViewControlNumbers.this.getResources().getString(R.string.LoginFail), Toast.LENGTH_LONG).show();
                                                             LoginDialogBox();
                                                         }
                                                     }
                                                 });
-                                            }else{
+                                            } else {
                                                 runOnUiThread(new Runnable() {
                                                     @Override
                                                     public void run() {
                                                         pd.dismiss();
-                                                        Toast.makeText(OverViewControlNumbers.this,OverViewControlNumbers.this.getResources().getString(R.string.LoginFail), Toast.LENGTH_LONG).show();
+                                                        Toast.makeText(OverViewControlNumbers.this, OverViewControlNumbers.this.getResources().getString(R.string.LoginFail), Toast.LENGTH_LONG).show();
                                                         LoginDialogBox();
                                                     }
                                                 });
@@ -477,9 +478,9 @@ public class OverViewControlNumbers extends AppCompatActivity {
 
                                         }
                                     }.start();
-                                }else{
+                                } else {
                                     LoginDialogBox();
-                                    Toast.makeText(OverViewControlNumbers.this,OverViewControlNumbers.this.getResources().getString(R.string.Enter_Credentials), Toast.LENGTH_LONG).show();
+                                    Toast.makeText(OverViewControlNumbers.this, OverViewControlNumbers.this.getResources().getString(R.string.Enter_Credentials), Toast.LENGTH_LONG).show();
                                 }
                             }
                         })
@@ -500,35 +501,21 @@ public class OverViewControlNumbers extends AppCompatActivity {
         final JSONObject jsonObject = new JSONObject();
 
         try {
-            jsonObject.put("requests",order);
+            jsonObject.put("requests", order);
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        Thread thread = new Thread(){
+        Thread thread = new Thread() {
             public void run() {
-                String uri = AppInformation.DomainInfo.getDomain()+"api/";
-                HttpClient httpClient = new DefaultHttpClient();
-                HttpPost httpPost = new HttpPost(uri + "payment/GetAssignedControlNumbers");
-
-                try {
-                    StringEntity postingString = new StringEntity(jsonObject.toString());
-                    httpPost.setEntity(postingString);
-                    httpPost.setHeader("Content-type", "application/json");
-                    httpPost.setHeader("Authorization", "bearer "+tokenl.getTokenText());
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
-                }
-
                 runOnUiThread(new Runnable() {
                     public void run() {
                         pd = ProgressDialog.show(OverViewControlNumbers.this, "", getResources().getString(R.string.Get_Control_Number));
                     }
                 });
 
-                //Send Request Here
                 HttpResponse response = null;
                 try {
-                    response = httpClient.execute(httpPost);
+                    response = toRestApi.postToRestApiToken(jsonObject, "payment/GetAssignedControlNumbers");
 
                     HttpEntity respEntity = response.getEntity();
 
@@ -541,42 +528,44 @@ public class OverViewControlNumbers extends AppCompatActivity {
                         final String[] control_number = {null};
                         // EntityUtils to get the response content
                         String content = null;
-                            content = EntityUtils.toString(respEntity);
+                        content = EntityUtils.toString(respEntity);
 
                         try {
                             JSONObject res = new JSONObject(content);
                             JSONObject ob = null;
 
 
-                            if(cod >= 400){
+                            if (cod >= 400) {
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
                                         pd.dismiss();
                                         LoginDialogBox();
-                                        if(tokenl.getTokenText().length() > 1){
+                                        if (tokenl.getTokenText().length() > 1) {
                                             View view = findViewById(R.id.actv);
                                             Snackbar.make(view, getResources().getString(R.string.has_no_rights), Snackbar.LENGTH_LONG)
                                                     .setAction("Action", null).show();
                                         }
                                     }
                                 });
-                            }else {
+                            } else {
                                 runOnUiThread(new Runnable() {
                                     @Override
-                                    public void run() {pd.dismiss();}
+                                    public void run() {
+                                        pd.dismiss();
+                                    }
                                 });
-                                if(error_occured.equals("true")){
+                                if (error_occured.equals("true")) {
                                     String erroroccured = res.getString("error_occured");
                                     error_message[0] = res.getString("error_message");
 
                                     View view = findViewById(R.id.actv);
                                     Snackbar.make(view, error_message[0], Snackbar.LENGTH_LONG)
                                             .setAction("Action", null).show();
-                                }else{
+                                } else {
                                     String assignedcontrolnumbers = res.getString("assigned_control_numbers");
                                     JSONArray arr = new JSONArray(assignedcontrolnumbers);
-                                    for(int j = 0;j < arr.length();j++){
+                                    for (int j = 0; j < arr.length(); j++) {
                                         try {
                                             ob = arr.getJSONObject(j);
                                             internal_Identifier[0] = ob.getString("internal_identifier");
@@ -587,7 +576,9 @@ public class OverViewControlNumbers extends AppCompatActivity {
                                             e.printStackTrace();
                                             runOnUiThread(new Runnable() {
                                                 @Override
-                                                public void run() {pd.dismiss();}
+                                                public void run() {
+                                                    pd.dismiss();
+                                                }
                                             });
                                             View view = findViewById(R.id.actv);
                                             Snackbar.make(view, String.valueOf(e), Snackbar.LENGTH_LONG)
@@ -608,7 +599,7 @@ public class OverViewControlNumbers extends AppCompatActivity {
                                 public void run() {
                                     pd.dismiss();
                                     LoginDialogBox();
-                                    if(tokenl.getTokenText().length() > 1){
+                                    if (tokenl.getTokenText().length() > 1) {
                                         View view = findViewById(R.id.actv);
                                         Snackbar.make(view, getResources().getString(R.string.has_no_rights), Snackbar.LENGTH_LONG)
                                                 .setAction("Action", null).show();
@@ -616,10 +607,12 @@ public class OverViewControlNumbers extends AppCompatActivity {
                                 }
                             });
                         }
-                    }else{
+                    } else {
                         runOnUiThread(new Runnable() {
                             @Override
-                            public void run() {pd.dismiss();}
+                            public void run() {
+                                pd.dismiss();
+                            }
                         });
                         View view = findViewById(R.id.actv);
                         Snackbar.make(view, getResources().getString(R.string.NoInternet), Snackbar.LENGTH_LONG)
@@ -628,7 +621,9 @@ public class OverViewControlNumbers extends AppCompatActivity {
                 } catch (IOException e) {
                     runOnUiThread(new Runnable() {
                         @Override
-                        public void run() {pd.dismiss();}
+                        public void run() {
+                            pd.dismiss();
+                        }
                     });
                     View view = findViewById(R.id.actv);
                     Snackbar.make(view, getResources().getString(R.string.NoInternet), Snackbar.LENGTH_LONG)
@@ -646,18 +641,18 @@ public class OverViewControlNumbers extends AppCompatActivity {
         JSONObject newPolicies = new JSONObject();
         String identifier = "";
         int count = order.length();
-        try{
-            for(int i=0; i < count; i++){
+        try {
+            for (int i = 0; i < count; i++) {
 
                 JSONObject obj = new JSONObject(order.getString(i).toString());
                 String objIdentifier = obj.get("internal_identifier").toString();
-                if(!identifier.equals(objIdentifier)){
-                    newPolicies.put("internal_identifier",objIdentifier);
+                if (!identifier.equals(objIdentifier)) {
+                    newPolicies.put("internal_identifier", objIdentifier);
                 }
 
                 identifier = objIdentifier;
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
