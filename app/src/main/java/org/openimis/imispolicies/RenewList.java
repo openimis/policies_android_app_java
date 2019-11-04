@@ -372,7 +372,7 @@ public class RenewList extends AppCompatActivity {
                     Renewal.put("FullName", object.getString("LastName") + " " + object.getString("OtherNames"));
                     Renewal.put("Product", object.getString("ProductCode") + " : " + object.getString("ProductName"));
                     Renewal.put("VillageName", object.getString("VillageName"));
-                    Renewal.put("EnrollDate", object.getString("EnrollDate"));
+                    Renewal.put("EnrollDate", object.getString("RenewalPromptDate"));
                     Renewal.put("PolicyId", object.getString("PolicyId"));
                     Renewal.put("ProductCode", object.getString("ProductCode"));
                     Renewal.put("LocationId", object.getString("LocationId"));
@@ -450,7 +450,7 @@ public class RenewList extends AppCompatActivity {
                     Renewal.put("FullName", object.getString("LastName") + " " + object.getString("OtherNames"));
                     Renewal.put("Product", object.getString("ProductCode") + " : " + object.getString("ProductName"));
                     Renewal.put("VillageName", object.getString("VillageName"));
-                    Renewal.put("EnrollDate", object.getString("EnrollDate"));
+                    Renewal.put("EnrollDate", object.getString("RenewalPromptDate"));
                     Renewal.put("PolicyId", object.getString("PolicyId"));
                     Renewal.put("ProductCode", object.getString("ProductCode"));
                     Renewal.put("LocationId", object.getString("LocationId"));
