@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@color/DarkBlue"
+        android:textColor="@color/white"
+        android:textAlignment="textStart"
+        android:gravity="start"
+        android:paddingLeft="10dp"
+        android:typeface="monospace"
+        android:paddingTop="15dp"
+        android:textSize="21dp"
+        android:text="@string/commissions_report" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="10dp">
+        
+        <TextView
+            android:id="@+id/lblAmount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/amount"
+            android:fontFamily="sans-serif-light"
+            android:typeface="monospace"
+            android:layout_margin="10dp"
+            android:textSize="20dp" />
+
+        <TextView
+            android:id="@+id/AmountValue"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="30000"
+            android:textColor="@color/Black"
+            android:textSize="18dp"
+            android:layout_toRightOf="@id/lblAmount"
+            android:gravity="end"
+            android:layout_margin="10dp"
+            android:typeface="monospace"/>
+
+        <TextView
+            android:id="@+id/lblCommissions"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/Commissions"
+            android:fontFamily="sans-serif-light"
+            android:layout_below="@id/lblAmount"
+            android:typeface="monospace"
+            android:layout_margin="10dp"
+            android:textSize="20dp" />
+
+        <TextView
+            android:id="@+id/CommissionsValue"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="30000"
+            android:textColor="@color/Black"
+            android:textSize="18dp"
+            android:layout_toRightOf="@id/lblCommissions"
+            android:layout_below="@id/AmountValue"
+            android:gravity="end"
+            android:layout_margin="10dp"
+            android:typeface="monospace"/>
+
+    </RelativeLayout>
+
+
+
+</LinearLayout>

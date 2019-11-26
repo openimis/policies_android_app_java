@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="org.openimis.imispolicies.tz.co.exact.ControlNumbers">
+
+    <TextView
+        android:id="@+id/OverViewPolicies"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_margin="10dp"
+        android:typeface="monospace"
+        android:fontFamily="sans-serif-light"
+        android:textSize="20dp"
+        android:gravity="center"
+        android:textColor="@color/white"
+        android:background="@color/colorPrimary"
+        android:text="@string/OverViewPolicies"/>
+
+    <TextView
+        android:id="@+id/OverViewControlNumber"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_margin="10dp"
+        android:typeface="monospace"
+        android:fontFamily="sans-serif-light"
+        android:textSize="20dp"
+        android:gravity="center"
+        android:textColor="@color/white"
+        android:background="@color/colorPrimary"
+        android:text="@string/OverViewControlNumber"/>
+
+    <TextView
+        android:id="@+id/CheckCommission"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_margin="10dp"
+        android:typeface="monospace"
+        android:fontFamily="sans-serif-light"
+        android:textSize="20dp"
+        android:gravity="center"
+        android:textColor="@color/white"
+        android:background="@color/colorPrimary"
+        android:text="@string/CheckCommission" />
+
+</LinearLayout>

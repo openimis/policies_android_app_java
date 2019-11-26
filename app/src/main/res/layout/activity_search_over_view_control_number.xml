@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="10dp"
+    android:orientation="vertical"
+    tools:context="org.openimis.imispolicies.tz.co.exact.SearchOverViewControlNumber">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="right">
+
+        <Button
+            android:id="@+id/btnClear"
+            android:layout_width="100dp"
+            android:layout_height="60dp"
+            android:typeface="monospace"
+            android:fontFamily="sans-serif-light"
+            android:textColor="@color/black"
+            android:text="@string/clear" />
+        <Button
+            android:id="@+id/btnSearch"
+            android:layout_width="100dp"
+            android:layout_height="60dp"
+            android:typeface="monospace"
+            android:fontFamily="sans-serif-light"
+            android:textColor="@color/black"
+            android:text="@string/Search" />
+
+    </LinearLayout>
+
+
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <EditText
+                android:id="@+id/insurance_number"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginTop="5dp"
+                android:hint="@string/insurance_no"
+                android:paddingLeft="10dp"
+                android:background="@drawable/corner"/>
+            <EditText
+                android:id="@+id/other_names"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginTop="5dp"
+                android:hint="@string/OtherNames"
+                android:paddingLeft="10dp"
+                android:background="@drawable/corner"/>
+
+            <EditText
+                android:id="@+id/last_name"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginTop="5dp"
+                android:hint="@string/LastName"
+                android:paddingLeft="10dp"
+                android:background="@drawable/corner"/>
+
+<!--            <TextView
+                android:id="@+id/insurance_product"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginTop="5dp"
+                android:paddingLeft="10dp"
+                android:typeface="monospace"
+                android:fontFamily="sans-serif-light"
+                android:textColor="@color/black"
+                android:hint="@string/insurance_product"
+                android:gravity="center_vertical"
+                android:textSize="20dp"
+                android:background="@drawable/corner"/>-->
+
+            <Spinner
+                android:id="@+id/insurance_product"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginTop="5dp"
+                android:background="@drawable/corner"/>
+
+            <ListView
+                android:id="@+id/lv1"
+                android:layout_width="match_parent"
+                android:layout_height="150dp"
+                android:layout_marginTop="5dp"
+                android:typeface="monospace"
+                android:fontFamily="sans-serif-light"
+                android:textColor="@color/black"
+                android:visibility="gone"
+                android:paddingLeft="10dp"
+                android:background="@drawable/corner">
+            </ListView>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/uploaded_from"
+                    android:layout_width="150dp"
+                    android:layout_height="50dp"
+                    android:layout_marginTop="5dp"
+                    android:paddingLeft="10dp"
+                    android:paddingTop="15dp"
+                    android:typeface="monospace"
+                    android:fontFamily="sans-serif-light"
+                    android:textColor="@color/black"
+                    android:background="@drawable/corner"
+                    android:hint="@string/uploaded_from"/>
+                <TextView
+                    android:id="@+id/lblTo"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:typeface="monospace"
+                    android:fontFamily="sans-serif-light"
+                    android:textColor="@color/black"
+                    android:layout_toRightOf="@+id/uploaded_from"
+                    android:textAlignment="center"
+                    android:paddingTop="20dp"
+                    android:text="@string/to"/>
+
+                <TextView
+                    android:id="@+id/uploaded_to"
+                    android:layout_width="150dp"
+                    android:layout_height="50dp"
+                    android:layout_marginTop="5dp"
+                    android:typeface="monospace"
+                    android:fontFamily="sans-serif-light"
+                    android:textColor="@color/black"
+                    android:layout_toRightOf="@+id/lblTo"
+                    android:paddingLeft="10dp"
+                    android:paddingTop="15dp"
+                    android:background="@drawable/corner"
+                    android:hint="@string/uploaded_to"/>
+
+                <TextView
+                    android:id="@+id/requested_from"
+                    android:layout_width="150dp"
+                    android:layout_height="50dp"
+                    android:layout_marginTop="5dp"
+                    android:typeface="monospace"
+                    android:fontFamily="sans-serif-light"
+                    android:textColor="@color/black"
+                    android:layout_below="@id/uploaded_from"
+                    android:paddingLeft="10dp"
+                    android:paddingTop="15dp"
+                    android:background="@drawable/corner"
+                    android:hint="@string/requested_from"/>
+
+                <TextView
+                    android:id="@+id/requested_to"
+                    android:layout_width="150dp"
+                    android:layout_height="50dp"
+                    android:layout_marginTop="5dp"
+                    android:typeface="monospace"
+                    android:fontFamily="sans-serif-light"
+                    android:textColor="@color/black"
+                    android:layout_toRightOf="@id/lblTo"
+                    android:layout_below="@id/uploaded_to"
+                    android:paddingLeft="10dp"
+                    android:paddingTop="15dp"
+                    android:background="@drawable/corner"
+                    android:hint="@string/requested_to"/>
+
+            </RelativeLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:typeface="monospace"
+                android:fontFamily="sans-serif-light"
+                android:textColor="@color/black"
+                android:text="@string/renewal"
+                />
+            <RadioGroup
+                android:id="@+id/radio_renewal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="5dp">
+                <RadioButton android:id="@+id/renewal_yes"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Y" />
+                <RadioButton android:id="@+id/renewal_no"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="N" />
+            </RadioGroup>
+
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:text="@string/PaymentType"/>
+            <Spinner
+                android:id="@+id/payment_type"
+                android:layout_width="250dp"
+                android:layout_height="30dp"
+                android:layout_margin="10dp"
+                android:background="@drawable/corner"
+                android:drawSelectorOnTop="true"/>
+
+        </LinearLayout>
+
+
+
+    </ScrollView>
+
+
+
+</LinearLayout>
+

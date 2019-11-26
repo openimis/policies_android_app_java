@@ -42,9 +42,9 @@ In case of dispute arising out or in relation to the use of the program, it is s
              sessionStorage.setItem("user","out");
              Android.isValidLogin('','');
                 window.open("Enrollment.html", "_self");
-
          }
-
+         var officer_code = Android.getOfficerCode();
+         $("#txtLoginName").val(officer_code);
         if(sessionStorage.getItem("UserData") != null){
            window.open("Enrollment.html", "_self");
          }
@@ -60,7 +60,7 @@ In case of dispute arising out or in relation to the use of the program, it is s
               sessionStorage.setItem("user","in");
             $("#divProgress").show();
             setTimeout(function(){
-                var LoggedIn =  Android.isValidLogin(Username, Password);
+                var LoggedIn =  Android.LoginJI(Username, Password);
                   if(LoggedIn > 0){
                         SaveUserLoggedIn();
                         if(isSearch == 0)window.open('Sync.html', '_self');

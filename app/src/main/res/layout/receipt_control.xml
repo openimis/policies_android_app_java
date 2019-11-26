@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/elevation"
+    android:layout_marginLeft="40dp"
+    android:layout_marginRight="40dp"
+    android:layout_marginTop="5dp"
+    android:layout_marginBottom="5dp"
+    android:padding="20dp">
+
+    <TextView
+        android:id="@+id/PolicyId"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"/>
+
+    <TextView
+        android:id="@+id/InternalIdentifier"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@color/black"
+        android:typeface="monospace"
+        android:fontFamily="sans-serif-light"
+        android:textColor="@color/white"
+        android:textSize="10sp"
+        android:paddingTop="15dp"
+        android:paddingLeft="10dp"
+        android:visibility="gone"
+        android:text=""/>
+    <TextView
+        android:id="@+id/req_date"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:background="@color/black"
+        android:typeface="monospace"
+        android:fontFamily="sans-serif-light"
+        android:textColor="@color/white"
+        android:textSize="14sp"
+        android:paddingTop="10dp"
+        android:paddingLeft="10dp"
+        android:text="Date"/>
+    <CheckBox
+        android:layout_width="wrap_content"
+        android:layout_height="44dp"
+        android:typeface="monospace"
+        android:fontFamily="sans-serif-light"
+        android:textSize="12sp"
+        android:visibility="gone"
+        android:layout_margin="10dp" />
+
+    <ImageView
+        android:id="@+id/checkbox1"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
+        android:fontFamily="sans-serif-light"
+        android:layout_margin="10dp"
+        android:src="@drawable/unchecked"/>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+        android:id="@+id/lblAmountCalculated"
+        android:layout_width="wrap_content"
+        android:layout_height="30dp"
+        android:typeface="monospace"
+        android:fontFamily="sans-serif-light"
+        android:textColor="@color/black"
+        android:textSize="10sp"
+        android:paddingLeft="10dp"
+        android:layout_margin="5dp"
+        android:text="Amount Calculated"/>
+
+        <TextView
+            android:id="@+id/AmountCalculated"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:typeface="monospace"
+            android:fontFamily="sans-serif-light"
+            android:textColor="@color/black"
+            android:textSize="10sp"
+            android:textAlignment="textEnd"
+            android:paddingRight="10dp"
+            android:layout_margin="5dp"
+            android:layout_toRightOf="@+id/lblAmountCalculated"
+            android:text="0"
+            android:gravity="end" />
+
+        <TextView
+            android:id="@+id/lblAmountConfirmed"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:typeface="monospace"
+            android:fontFamily="sans-serif-light"
+            android:textColor="@color/black"
+            android:textSize="10sp"
+            android:paddingLeft="10dp"
+            android:layout_margin="5dp"
+            android:layout_below="@+id/lblAmountCalculated"
+            android:text="Amount Confirmed"/>
+
+        <TextView
+            android:id="@+id/AmountConfirmed"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:typeface="monospace"
+            android:fontFamily="sans-serif-light"
+            android:textColor="@color/black"
+            android:textSize="10sp"
+            android:textAlignment="textEnd"
+            android:paddingRight="10dp"
+            android:layout_margin="5dp"
+            android:layout_below="@+id/AmountCalculated"
+            android:layout_toRightOf="@+id/lblAmountCalculated"
+            android:text="0"
+            android:gravity="end" />
+
+        <TextView
+            android:id="@+id/lblControlNumber"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:typeface="monospace"
+            android:fontFamily="sans-serif-light"
+            android:textColor="@color/black"
+            android:textSize="10sp"
+            android:paddingLeft="10dp"
+            android:layout_margin="5dp"
+            android:layout_below="@+id/lblAmountConfirmed"
+            android:text="Control Number"/>
+
+        <TextView
+            android:id="@+id/controlNumber"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:typeface="monospace"
+            android:fontFamily="sans-serif-light"
+            android:textColor="@color/blue"
+            android:textSize="10sp"
+            android:textAlignment="textEnd"
+            android:paddingRight="10dp"
+            android:layout_margin="5dp"
+            android:layout_below="@+id/AmountConfirmed"
+            android:layout_toRightOf="@+id/lblControlNumber"
+            android:text=""
+            android:gravity="end" />
+
+
+        <TextView
+            android:id="@+id/lblPaymentType"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:typeface="monospace"
+            android:fontFamily="sans-serif-light"
+            android:textColor="@color/black"
+            android:textSize="10sp"
+            android:paddingLeft="10dp"
+            android:layout_margin="5dp"
+            android:layout_below="@+id/lblControlNumber"
+            android:text="@string/PaymentType"/>
+
+        <TextView
+            android:id="@+id/PaymentType"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:typeface="monospace"
+            android:fontFamily="sans-serif-light"
+            android:textColor="@color/blue"
+            android:textSize="10sp"
+            android:textAlignment="textEnd"
+            android:paddingRight="10dp"
+            android:layout_margin="5dp"
+            android:layout_below="@+id/controlNumber"
+            android:layout_toRightOf="@+id/lblPaymentType"
+            android:text=""
+            android:gravity="end" />
+
+        <TextView
+            android:id="@+id/UploadedDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:fontFamily="sans-serif-light"
+            android:text="" />
+
+    </RelativeLayout>
+
+
+</LinearLayout>
