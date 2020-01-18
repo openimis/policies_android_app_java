@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="SelectMonth">Selecter Mois</string>
+    <string name="SomethingWrongServer">Il y a eu un probléme sur le serveur.</string>
+    <string name="NoDataAvailable">Pas de donné disponible</string>
+    <string name="process_complete">Procesus Complet</string>
+    <string name="select_policy">Veuillez selectioner un police</string>
+    <string name="NoInternetTitle">PAS DE CONNECTION INTERNET </string>
+    <string name="DoImport">Voulez vous importer le ficher .txt dans la base de donnée ?</string>
+    <string name="NoFileExporerInstalled">Il n\'y a pas d\'application de gestiondes fichier d\'installé.</string>
+    <string name="LoadFile">Chargement fichier:</string>
+    <string name="Incomplete">Incomplet!</string>
     <string name="app_name">IMIS POLICIES</string>
     <string name="navigation_drawer_open">Ouvrir le menu de navigation</string>
     <string name="navigation_drawer_close">Fermer le menu de navigation</string>

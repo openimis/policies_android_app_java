@@ -3507,6 +3507,9 @@ public class ClientAndroidInterface {
                         "INNER JOIN tblPolicy PL ON PL.PolicyId = IP.PolicyId";
                 if (CallerId == 0) Query += " AND  IP.InsureeId = " + oInsureeId;
                 if (CallerId == 1) Query += " AND  PL.FamilyId = " + FamilyId;
+                if (CallerId != 2) {
+                    Query += " WHERE PL.FamilyId = " + FamilyId;
+                }
                 JSONArray InsureePolicyArray = sqlHandler.getResult(Query, null);
 
                 QueryIP = Query;

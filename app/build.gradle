@@ -13,9 +13,78 @@ android {
         useLibrary 'org.apache.http.legacy'
     }
     buildTypes {
+        def API_BASE_URL = "API_BASE_URL_VALUE"
+
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            productFlavors {
+                chf {
+                    buildConfigField "String", "API_BASE_URL", '"http://chf-imis.or.tz/"'
+                }
+                demo{
+                    buildConfigField "String", "API_BASE_URL", '"http://demo.openimis.org/"'
+                }
+            }
+        }
+        release_dev {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            productFlavors {
+                chf {
+                    buildConfigField "String", "API_BASE_URL", '"http://dev.chf-imis.or.tz/"'
+                }
+                demo{
+                    buildConfigField "String", "API_BASE_URL",'"http://demo.openimis.org/"'
+                }
+            }
+        }
+        debug {
+
+            productFlavors {
+                chf {
+                    buildConfigField "String", "API_BASE_URL", '"http://dev.chf-imis.or.tz/"'
+                }
+                demo{
+                    buildConfigField "String", "API_BASE_URL", '"http://demo.openimis.org/"'
+                }
+            }
+        }
+    flavorDimensions 'std'
+    }
+    signingConfigs {
+        chfReleaseConfig {
+            storeFile file('U:\\keys\\AndroidKeys')
+            storePassword "openIMIS"
+            keyAlias "chf-dev"
+            keyPassword "chf-dev"
+        }
+        demoReleaseConfig {
+            storeFile file('U:\\keys\\AndroidKeys')
+            storePassword "openIMIS"
+            keyAlias "chf-dev"
+            keyPassword "chf-dev"
+        }
+    }
+        flavorDimensions 'std'
+    productFlavors {
+        demo {
+            applicationId "org.openimis.imispolicies.demo"
+            dimension = 'std'
+            versionCode = 14
+            versionName = '1,4'
+            targetSdkVersion 21
+            minSdkVersion 25
+            signingConfig signingConfigs.demoReleaseConfig
+        }
+        chf {
+            applicationId "org.openimis.imispolicies.chf"
+            dimension = 'std'
+            versionCode = 14
+            versionName = '1.4'
+            targetSdkVersion 21
+            minSdkVersion 25
+            signingConfig signingConfigs.chfReleaseConfig
         }
     }
 }
