@@ -73,8 +73,8 @@ android {
             dimension = 'std'
             versionCode = 14
             versionName = '1,4'
-            targetSdkVersion 21
-            minSdkVersion 25
+            targetSdkVersion 25
+            minSdkVersion 19
             signingConfig signingConfigs.demoReleaseConfig
         }
         chf {
@@ -82,8 +82,8 @@ android {
             dimension = 'std'
             versionCode = 14
             versionName = '1.4'
-            targetSdkVersion 21
-            minSdkVersion 25
+            targetSdkVersion 25
+            minSdkVersion 19
             signingConfig signingConfigs.chfReleaseConfig
         }
     }
