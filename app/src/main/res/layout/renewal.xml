@@ -17,7 +17,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true">
+        tools:ignore="RtlHardcoded">
 
         <LinearLayout
             android:layout_width="fill_parent"
@@ -31,7 +31,7 @@
                 android:layout_height="wrap_content"
                 android:clickable="false"
                 android:cursorVisible="false"
-                android:inputType="none"
+                android:inputType="text"
                 android:ems="10"
                 android:focusable="false"
                 android:focusableInTouchMode="false"
@@ -88,6 +88,10 @@
                 android:maxLines="1">
 
             </EditText>
+            <Spinner
+                android:id="@+id/spProduct"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
 
             <AutoCompleteTextView
                 android:id="@+id/etOfficer"
@@ -123,7 +127,6 @@
 
             </EditText>
 
-
             <EditText
                 android:id="@+id/etAmount"
                 android:layout_width="fill_parent"
@@ -156,10 +159,9 @@
 
     </ScrollView>
 
-    <!--Following attributes were removed from btnSubmit-->
+    <!--this attribute was removed from btnSubmit-->
     <!--android:layout_alignBottom="@+id/scrollView"-->
     <!--android:layout_alignParentBottom="true"-->
-    <!---->
     <!--<LinearLayout-->
     <!--android:id="@+id/linearLayout"-->
     <!--android:layout_width="fill_parent"-->
