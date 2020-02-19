@@ -86,7 +86,7 @@ In case of dispute arising out or in relation to the use of the program, it is s
                 $("#ddlVillage").val($Family[0]["VillageId"]);
 
                 var isOffline = $Family[0]["isOffline"];
-                if(isOffline == 0){
+                if(isOffline == 0 || isOffline == false || isOffline == "false"){
                     $("#ddlRegion").attr("disabled","disabled");
                     $("#ddlDistrict").attr("disabled","disabled");
                     $("#ddlWard").attr("disabled","disabled");
@@ -141,20 +141,22 @@ In case of dispute arising out or in relation to the use of the program, it is s
         function getWards(DistrictId){
             var SelectText = Android.getString('SelectWard');
             var OfficerCode = Android.getOfficerCode();
-            var $Wards = Android.getWardsOfficer(OfficerCode);
+            //var $Wards = Android.getWardsOfficer(OfficerCode);
+            var $Wards = Android.getWards(parseInt(DistrictId));
             var rows = JSON.parse($Wards).length;
             if(rows == 1)SelectText = null;
-            bindDropdown('ddlWard', $Wards, 'WardID', 'Ward',0, SelectText);
+            bindDropdown('ddlWard', $Wards, 'LocationId', 'LocationName',0, SelectText);
             if(rows == 1 )getVillages($('#ddlWard').val());
 
         }
 
         function getVillages(WardId){
             var SelectText = Android.getString('SelectVillage');
-            var $Villages = Android.getVillagesOfficer(WardId.toString());
+            //var $Villages = Android.getVillagesOfficer(WardId.toString());
+            var $Villages = Android.getVillages(parseInt(WardId.toString()));
             var rows = JSON.parse($Villages).length;
             if(rows == 1)SelectText = null;
-            bindDropdown('ddlVillage', $Villages, 'LocationId', 'Village',0,SelectText);
+            bindDropdown('ddlVillage', $Villages, 'LocationId', 'LocationName',0,SelectText);
         }
 
         function getPovertyStatus(){

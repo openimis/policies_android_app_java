@@ -6,7 +6,8 @@ import static org.openimis.imispolicies.BuildConfig.API_BASE_URL;
 
  public class AppInformation {
      public static class DomainInfo {
-          private static String _Domain = API_BASE_URL;
+          private static String _Domain = "http://dev.chf-imis.or.tz/";
+//          private static String _Domain = "http://imis-mv.swisstph-mis.ch/";
 
          public static String getDomain(){
              return _Domain;
