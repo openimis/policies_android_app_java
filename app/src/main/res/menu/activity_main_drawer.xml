@@ -27,10 +27,10 @@
             android:id="@+id/nav_modify_family"
             android:icon="@android:drawable/ic_menu_edit"
             android:title="@string/ModifyFamily" />
-        <!-- <item
+         <item
             android:id="@+id/nav_control_numbers"
             android:icon="@android:drawable/ic_menu_send"
-            android:title="@string/ControlNumbers" />-->
+            android:title="@string/ControlNumbers" />
 <!--        <item
             android:id="@+id/nav_login"
             android:icon="@android:drawable/ic_partial_secure"

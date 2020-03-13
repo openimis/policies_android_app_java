@@ -2,11 +2,11 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 28
-    buildToolsVersion "25.0.0"
+    buildToolsVersion "25.0.3"
     defaultConfig {
         applicationId "org.openimis.imispolicies"
-        minSdkVersion 21
-        targetSdkVersion 28
+        minSdkVersion 19
+        targetSdkVersion 27
         versionCode 1
         versionName "1.4"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -73,7 +73,7 @@ android {
             dimension = 'std'
             versionCode = 14
             versionName = '1,4'
-            targetSdkVersion 25
+            targetSdkVersion 27
             minSdkVersion 19
             signingConfig signingConfigs.demoReleaseConfig
         }
@@ -82,7 +82,7 @@ android {
             dimension = 'std'
             versionCode = 14
             versionName = '1.4'
-            targetSdkVersion 25
+            targetSdkVersion 27
             minSdkVersion 19
             signingConfig signingConfigs.chfReleaseConfig
         }
@@ -99,19 +99,19 @@ allprojects {
 }
 
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
     compile(name: 'CaptureActivity', ext: 'aar')
     compile(name: 'General', ext: 'aar')
-    compile 'com.android.support:appcompat-v7:28.0.0'
-    compile 'com.android.support:design:28.0.0'
-    compile 'com.android.support.constraint:constraint-layout:1.0.2'
-    compile 'com.squareup.picasso:picasso:2.5.2'
-    compile 'com.android.support:support-v4:28.0.0'
-    testCompile 'junit:junit:4.12'
-    compile files('libs/android-support-v7-recyclerview.jar')
+    implementation 'com.android.support:appcompat-v7:28.0.0'
+    implementation 'com.android.support:design:28.0.0'
+    implementation 'com.android.support.constraint:constraint-layout:1.0.2'
+    implementation 'com.squareup.picasso:picasso:2.5.2'
+    implementation 'com.android.support:support-v4:28.0.0'
+    implementation 'com.android.support:recyclerview-v7:28.0.0'
+    testImplementation 'junit:junit:4.12'
     compile files('libs/zip4j-1.2.7.jar')
     compile files('libs/httpclient-4.2.3.jar')
     compile files('libs/httpcore-4.2.3.jar')

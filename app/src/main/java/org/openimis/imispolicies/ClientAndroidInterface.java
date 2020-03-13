@@ -6295,11 +6295,11 @@ public class ClientAndroidInterface {
         return  global.getUserId();
     }
 
-    /*@JavascriptInterface
+    @JavascriptInterface
     public void launchControlNumbers(){
         Intent intent = new Intent(mContext, ControlNumbers.class);
         mContext.startActivity(intent);
-    }*/
+    }
 
 
     @JavascriptInterface
