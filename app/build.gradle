@@ -19,14 +19,13 @@ android {
         versionName "1.4"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         useLibrary 'org.apache.http.legacy'
-        signingConfig signingConfigs.releaseConfig
     }
     buildTypes {
-        def API_BASE_URL = "API_BASE_URL_VALUE"
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             debuggable = false
+            signingConfig signingConfigs.releaseConfig
         }
         debug {
             debuggable = true
@@ -34,6 +33,11 @@ android {
         flavorDimensions 'std'
     }
     flavorDimensions 'std'
+    productFlavors.all {
+        buildConfigField "String", "API_BASE_URL", '"http://demo.openimis.org/"'
+        buildConfigField "boolean", "SHOW_CONTROL_NUMBER_MENU", 'false'
+        resValue "string", "app_name", "openIMIS Policies"
+    }
     productFlavors {
         demoProd {
             applicationId "org.openimis.imispolicies.demoProd"
@@ -56,13 +60,26 @@ android {
         chfTest {
             applicationId "org.openimis.imispolicies.chfTest"
             buildConfigField "String", "API_BASE_URL", '"http://dev.chf-imis.or.tz/"'
+            buildConfigField "boolean", "SHOW_CONTROL_NUMBER_MENU", 'true'
             resValue "string", "app_name", "CHF Policies Test"
             dimension = 'std'
         }
         chfDev {
             applicationId "org.openimis.imispolicies.chfDev"
-            buildConfigField "String", "API_BASE_URL", '"http://chf-dev.swisstph-mis.ch"'
+            buildConfigField "String", "API_BASE_URL", '"http://chf-dev.swisstph-mis.ch/"'
             resValue "string", "app_name", "CHF Policies Dev"
+            dimension = 'std'
+        }
+        bephaProd {
+            applicationId "org.openimis.imispolicies.bephaProd"
+            buildConfigField "String", "API_BASE_URL", '"http://149.210.235.40/"'
+            resValue "string", "app_name", "BEPHA Policies"
+            dimension = 'std'
+        }
+        bephaTest {
+            applicationId "org.openimis.imispolicies.bephaTest"
+            buildConfigField "String", "API_BASE_URL", '"http://149.210.235.40/dev/"'
+            resValue "string", "app_name", "BEPHA Policies Test"
             dimension = 'std'
         }
         master {
@@ -76,6 +93,8 @@ android {
         chfProd.java.srcDir 'src/chf/java'
         chfTest.java.srcDir 'src/chf/java'
         chfDev.java.srcDir 'src/chf/java'
+        bephaProd.java.srcDir 'src/bepha/java'
+        bephaTest.java.srcDir 'src/bepha/java'
     }
 }
 
