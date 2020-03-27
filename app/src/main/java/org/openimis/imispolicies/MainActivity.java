@@ -367,6 +367,15 @@ public class MainActivity extends AppCompatActivity
         Dir.mkdir();
         Dir1.mkdir();
 
+        hideControlNumberMenuItem();
+
+    }
+
+    private void hideControlNumberMenuItem()
+    {
+        navigationView = (NavigationView) findViewById(R.id.nav_view);
+        Menu nav_Menu = navigationView.getMenu();
+        nav_Menu.findItem(R.id.nav_control_numbers).setVisible(AppInformation.MenuInfo.getShowControlNumberMenu());
     }
 
     @Override
@@ -819,14 +828,8 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        /*MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.main, menu);
-        MenuItem mi = menu.findItem(R.id.nav_control_numbers);
-        if (!AppInformation.MenuInfo.getShowControlNumberMenu()) {
-            mi.setVisible(false);
-        }*/
-        return super.onPrepareOptionsMenu(menu);
-
+        super.onPrepareOptionsMenu(menu);
+        return true;
     }
 
     @Override
@@ -838,6 +841,7 @@ public class MainActivity extends AppCompatActivity
         if (!Language2.equals("")) {
             menu.add(0, MENU_LANGUAGE_2, 0, Language2);
         }
+
         return true;
     }
 

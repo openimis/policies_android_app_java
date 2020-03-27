@@ -59,6 +59,7 @@ android {
         demoRelease {
             applicationId "org.openimis.imispolicies.demoRelease"
             buildConfigField "String", "API_BASE_URL", '"http://release.openimis.org/rest/"'
+            buildConfigField "boolean", "SHOW_CONTROL_NUMBER_MENU", 'true'
             resValue "string", "app_name", "Policies Release"
             dimension = 'std'
         }
