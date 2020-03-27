@@ -1,8 +1,25 @@
 apply plugin: 'com.android.application'
 
+// Load keystore
+def keystorePropertiesFile = file("keystore.properties");
+def keystoreProperties = new Properties()
+if ( keystorePropertiesFile.exists() ) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
 android {
     compileSdkVersion 28
     buildToolsVersion '28.0.3'
+    if ( keystorePropertiesFile.exists() ) {
+        signingConfigs {
+            releaseConfig {
+                storeFile file(keystoreProperties['storeFile'])
+                storePassword keystoreProperties['storePassword']
+                keyAlias keystoreProperties['keyAlias']
+                keyPassword keystoreProperties['keyPassword']
+            }
+        }
+    }
     defaultConfig {
         applicationId "org.openimis.imispolicies"
         minSdkVersion 19
@@ -16,6 +33,10 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            debuggable = false
+            if ( keystorePropertiesFile.exists() ) {
+                signingConfig signingConfigs.releaseConfig
+            }
         }
         debug {
             debuggable = true
