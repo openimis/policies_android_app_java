@@ -53,6 +53,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.MenuInflater;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -100,10 +101,10 @@ public class MainActivity extends AppCompatActivity
     //private General general;
     private static final int MENU_LANGUAGE_1 = Menu.FIRST;
     private static final int MENU_LANGUAGE_2 = Menu.FIRST + 1;
-    private  String Language1;
-    private String Language2;
-    private String LanguageCode1;
-    private String LanguageCode2;
+    private  String Language1 = "";
+    private String Language2 = "";
+    private String LanguageCode1 = "";
+    private String LanguageCode2 = "";
     private String selectedLanguage;
     public String ImagePath;
     public String InsureeNumber;
@@ -402,9 +403,11 @@ public class MainActivity extends AppCompatActivity
             LanguageObject = Languages.getJSONObject(0);
             Language1 = (LanguageObject.getString("LanguageName"));
             LanguageCode1 = (LanguageObject.getString("LanguageCode"));
-            LanguageObject = Languages.getJSONObject(1);
-            Language2 = (LanguageObject.getString("LanguageName"));
-            LanguageCode2 = (LanguageObject.getString("LanguageCode"));
+            if (Languages.length()>1) {
+                LanguageObject = Languages.getJSONObject(1);
+                Language2 = (LanguageObject.getString("LanguageName"));
+                LanguageCode2 = (LanguageObject.getString("LanguageCode"));
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -816,8 +819,14 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        super.onPrepareOptionsMenu(menu);
-        return true;
+        /*MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main, menu);
+        MenuItem mi = menu.findItem(R.id.nav_control_numbers);
+        if (!AppInformation.MenuInfo.getShowControlNumberMenu()) {
+            mi.setVisible(false);
+        }*/
+        return super.onPrepareOptionsMenu(menu);
+
     }
 
     @Override
@@ -826,8 +835,9 @@ public class MainActivity extends AppCompatActivity
         //getMenuInflater().inflate(R.acquire_menu.language, acquire_menu);
         super.onCreateOptionsMenu(menu);
         menu.add(0, MENU_LANGUAGE_1, 0, Language1) ;
-        menu.add(0, MENU_LANGUAGE_2, 0, Language2);
-
+        if (!Language2.equals("")) {
+            menu.add(0, MENU_LANGUAGE_2, 0, Language2);
+        }
         return true;
     }
 

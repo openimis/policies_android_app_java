@@ -5,10 +5,10 @@ android {
     buildToolsVersion '28.0.3'
     defaultConfig {
         applicationId "org.openimis.imispolicies"
-        minSdkVersion 15
+        minSdkVersion 19
         targetSdkVersion 27
-        versionCode 2
-        versionName "2.0.0"
+        versionCode 3
+        versionName "2.0.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         useLibrary('org.apache.http.legacy')
     }
@@ -17,6 +17,34 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+        debug {
+            debuggable = true
+        }
+        flavorDimensions 'std'
+    }
+    flavorDimensions 'std'
+    productFlavors.all {
+        buildConfigField "String", "API_BASE_URL", '"http://demo.openimis.org/"'
+        buildConfigField "boolean", "SHOW_CONTROL_NUMBER_MENU", 'false'
+        resValue "string", "app_name", "openIMIS Policies"
+    }
+    productFlavors {
+        demoProd {
+            applicationId "org.openimis.imispolicies.demoProd"
+            buildConfigField "String", "API_BASE_URL", '"http://demo.openimis.org/rest/"'
+            resValue "string", "app_name", "Policies Demo"
+            dimension = 'std'
+        }
+        demoRelease {
+            applicationId "org.openimis.imispolicies.demoRelease"
+            buildConfigField "String", "API_BASE_URL", '"http://release.openimis.org/rest/"'
+            resValue "string", "app_name", "Policies Release"
+            dimension = 'std'
+        }
+    }
+    sourceSets {
+        demoProd.java.srcDir 'src/demo/java'
+        demoRelease.java.srcDir 'src/demo/java'
     }
 }
 
@@ -38,12 +66,15 @@ dependencies {
     })
     compile(name: 'CaptureActivity', ext: 'aar')
     compile(name: 'General', ext: 'aar')
-    implementation  'com.android.support:appcompat-v7:27.1.1'
-    implementation  'com.android.support:design:27.1.1'
-    implementation  'com.android.support.constraint:constraint-layout:1.1.3'
-    implementation  'com.squareup.picasso:picasso:2.5.2'
-    implementation  'com.android.support:support-v4:27.1.1'
-    testImplementation  'junit:junit:4.12'
-    implementation  'com.android.support:recyclerview-v7:27.1.1'
+    implementation 'com.android.support:appcompat-v7:28.0.0'
+    implementation 'com.android.support:design:28.0.0'
+    implementation 'com.android.support.constraint:constraint-layout:1.1.3'
+    implementation 'com.squareup.picasso:picasso:2.5.2'
+    implementation 'com.android.support:support-v4:28.0.0'
+    implementation 'com.android.support:recyclerview-v7:28.0.0'
+    testImplementation 'junit:junit:4.12'
     compile files('libs/zip4j-1.2.7.jar')
+    compile files('libs/httpclient-4.2.3.jar')
+    compile files('libs/httpcore-4.2.3.jar')
+//compile 'com.android.support:support-annotations:27.1.1'
 }
