@@ -1,5 +1,6 @@
 package org.openimis.imispolicies;
 import static org.openimis.imispolicies.BuildConfig.API_BASE_URL;
+import static org.openimis.imispolicies.BuildConfig.RAR_PASSWORD;
 import static org.openimis.imispolicies.BuildConfig.SHOW_CONTROL_NUMBER_MENU;
 
  public class AppInformation {
@@ -8,7 +9,7 @@ import static org.openimis.imispolicies.BuildConfig.SHOW_CONTROL_NUMBER_MENU;
 //         URL address of openIMIS demo server => please update with your own Web Services base URL/IP
          private static String _Domain = API_BASE_URL;
 
-         private static final String DEFAULT_RAR_PASSWORD = ")(#$1HsD";
+         private static final String DEFAULT_RAR_PASSWORD = RAR_PASSWORD;
 
          public static String getDomain(){
              return _Domain;

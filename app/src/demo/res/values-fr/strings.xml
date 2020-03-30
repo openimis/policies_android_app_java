@@ -14,8 +14,8 @@
   <string name="Sync">Synchroniser</string>
   <string name="About">A propos</string>
   <string name="Quit">Quitter</string>
-  <string name="Region">Promoteur</string>
-  <string name="District">Mutuelle</string>
+  <string name="Region">Région</string>
+  <string name="District">District</string>
   <string name="Ward">Section</string>
   <string name="Village">Village/GO</string>
   <string name="PovertyStatus">Situation de pauvreté</string>
@@ -25,8 +25,8 @@
   <string name="Ethnicity">Ethnicité</string>
   <string name="PermanentAddress">Adresse permanente</string>
   <string name="Next">Suivant</string>
-  <string name="SelectRegion">Choisir un promoteur</string>
-  <string name="SelectDistrict">Choisir une mutuelle</string>
+  <string name="SelectRegion">Choisir une Région</string>
+  <string name="SelectDistrict">Choisir un district</string>
   <string name="SelectWard">Choisir une section</string>
   <string name="SelectVillage">Choisir un village/GO</string>
   <string name="Yes">Oui</string>
@@ -237,7 +237,7 @@
   <string name="FeedBackNotUploaded">Les retours d\'information n\'ont pas pu être téléchargés, veuillez réessayer plus tard.</string>
   <string name="RenewalNotUploaded">Le renouvellement n\'a pas pu être téléchargé, veuillez réessayer plus tard.</string>
   <string name="FSPRegion">Région de PPS</string>
-  <string name="CurrentRegion">Promoteur actuel</string>
+  <string name="CurrentRegion">Région actuelle</string>
   <string name="RenewalUploaded">Télécharger avec succès. S\'il vous plaît vérifier les dossiers acceptés / rejetés.</string>
   <string name="TitleDelete">Suppression échouée</string>
   <string name="DeleteFamilyWithPolicy">Cette famille a été supprimée seulement hors ligne parce qu\'elle a un contrat en ligne.</string>

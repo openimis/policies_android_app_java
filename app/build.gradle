@@ -47,6 +47,7 @@ android {
     productFlavors.all {
         buildConfigField "String", "API_BASE_URL", '"http://demo.openimis.org/"'
         buildConfigField "boolean", "SHOW_CONTROL_NUMBER_MENU", 'false'
+        buildConfigField "String", "RAR_PASSWORD", '")(#$1HsD"'
         resValue "string", "app_name", "openIMIS Policies"
     }
     productFlavors {
