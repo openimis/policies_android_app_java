@@ -37,6 +37,7 @@ The configuration of the application is done through product flavors and build v
 demoProd {
 	applicationId "org.openimis.imispolicies.demoProd"
 	buildConfigField "String", "API_BASE_URL", '"http://demo.openimis.org/rest/"'
+	buildConfigField "String", "RAR_PASSWORD", '")(#$1HsD"'
 	buildConfigField "boolean", "SHOW_CONTROL_NUMBER_MENU", 'false'
 	resValue "string", "app_name", "Policies Demo"
 	dimension = 'std'
@@ -47,6 +48,7 @@ Parameters:
 
 * ```applicationId``` allow to build the application with its own application id. This allows to run different version of the application on the same device.
 * ```API_BASE_URL``` represents the openIMIS REST API URL (based on DNS or IP address) to connect to. 
+* ```RAR_PASSWORD``` represents the password to be used for the offline extract. 
 * ```SHOW_CONTROL_NUMBER_MENU``` allow to show or hide the Control Number menu item in case the implementation does not implement the ePayment module. 
 * ```app_name``` is a resource string allowing to change the name of the application. 
 
