@@ -85,7 +85,7 @@
   <string name="InsuranceNumberExists">Member with this Insuree number already exists</string>
   <string name="Add">Add</string>
   <string name="New">New</string>
-  <string name="SelectOfficer">Select Officer</string>
+  <string name="SelectOfficer">Select Enrolment Officer</string>
   <string name="SelectProduct">Select Product</string>
   <string name="SelectMonth">Select Month</string>
   <string name="EnrolmentDate">Enrolment date</string>
@@ -93,7 +93,7 @@
   <string name="EffectiveDate">Effective Date</string>
   <string name="StartDate">Start Date</string>
   <string name="ExpireDate">Expire Date</string>
-  <string name="Officer">Officer</string>
+  <string name="Officer">Enrolment Officer</string>
   <string name="PolicyStatus">Policy Status : </string>
   <string name="PolicyValue">Policy Value : </string>
   <string name="Balance">Balance : </string>
@@ -140,7 +140,7 @@
   <string name="RecordNotFound">Member with this Insuree number does not exist.</string>
   <string name="NoRenewalFound">No renewal found</string>
   <string name="NoInternet">Please check your internet connection.</string>
-  <string name="FileDoesntBelongHere">Process Failed, Wrong File or enrolment Officer code.</string>
+  <string name="FileDoesntBelongHere">Process Failed, Wrong File or Enrolment Officer code.</string>
   <string name="Submit">Submit</string>
   <string name="DiscontinuePolicy">Discontinue this policy</string>
   <string name="DiscontinuePolicyQ">Do you want to discontinue this policy?</string>
@@ -149,7 +149,7 @@
   <string name="UploadedSuccessfully">Data uploaded on the server successfully.</string>
   <string name="ServerRejected">Data is rejected by the server. Data is moved to the rejected folder of the phone.</string>
   <string name="BulkUpload">Data has been uploaded successfully. Please check your Rejected/Accepted folders to verify the server response.</string>
-  <string name="MissingOfficerCode">Please enter enrolment officer code</string>
+  <string name="MissingOfficerCode">Please enter Enrolment Officer code</string>
   <string name="SavedOnSDCard">File is saved on external storage.</string>
   <string name="Uploading">Uploading…</string>
   <string name="NoFeedbackFound">No feedback found</string>
@@ -165,7 +165,7 @@
   <string name="Assessment">How satisfied are you with the care you received at the health facility? Rate on a scale 1–5 (1= not satisfied; 5= very satisfied)</string>
   <string name="UploadingFeedback">Uploading feedback…</string>
   <string name="UploadAllFeedback">Upload all feedback</string>
-  <string name="MissingOfficer">Please enter Enrolment Assistant Code</string>
+  <string name="MissingOfficer">Please enter Enrolment Officer Code</string>
   <string name="MissingClaimID">Please enter Claim ID</string>
   <string name="MissingInsureeNumber">Please enter the Insuree number</string>
   <string name="MissingAnswers">All the questions must be answered.</string>
@@ -184,7 +184,7 @@
   <string name="Password">Password</string>
   <string name="EnterRarPassword">Enter Rar Password</string>
   <string name="OfficerCode">Enrolment Officer Code:</string>
-  <string name="IncorrectOfficerCode">Incorrect enrolment officer code</string>
+  <string name="IncorrectOfficerCode">Incorrect Enrolment Officer code</string>
   <string name="Login">Login</string>
   <string name="FTPConnectionFailed">Unable to connect the server. Operation aborted.</string>
   <string name="SomethingWrongServer">Something went wrong on the server.</string>
@@ -238,7 +238,7 @@
   <string name="RenewalNotUploaded">Renewal could not be uploaded please, try again later</string>
   <string name="FSPRegion">Region of FSP</string>
   <string name="CurrentRegion">Current Region</string>
-  <string name="RenewalUploaded">Upload successfully please check Accepted/Rejected folders</string>
+  <string name="RenewalUploaded">Upload successful please check Accepted/Rejected folders</string>
   <string name="TitleDelete">Delete Failed</string>
   <string name="DeleteFamilyWithPolicy">This Family has been deleted only offline because it has a policy online.</string>
   <string name="PolicyValueChange">Value of policy with the enrolment date : </string>
@@ -375,4 +375,5 @@
   <string name="empty_year">Please fill the year</string>
   <string name="DeleteFamilyOnlyOffline">Deleting of family will also Delete all Insurees, Policies and Premiums of this Family</string>
   <string name="LastInstallment">Last Installment</string>
+  <string name="TestKeyDD">This is a test.</string>
 </resources>

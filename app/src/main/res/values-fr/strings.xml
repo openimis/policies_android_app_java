@@ -375,4 +375,5 @@
   <string name="empty_year">Entrer l\'année</string>
   <string name="DeleteFamilyOnlyOffline">Suppression de la famille supprimera également tous les assurés, les polices et les cotisations de la famille.</string>
   <string name="LastInstallment">Dernier versement</string>
+  <string name="TestKeyDD">Ceci est un test.</string>
 </resources>
