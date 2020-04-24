@@ -319,7 +319,7 @@ public class ClientAndroidInterface {
 //        String where = "LocationType = 'D' AND ParentLocationId = " + RegionId;
         String Query = "SELECT * FROM tblLocations L\n" +
                 "INNER JOIN tblOfficer O ON L.LocationId = O.LocationId\n" +
-                "WHERE Code = '" + global.getOfficerCode() + "' AND LocationType = 'D' AND ParentLocationId = " + RegionId;
+                "WHERE LOWER(O.Code) = '" + global.getOfficerCode().toLowerCase() + "' AND LocationType = 'D' AND ParentLocationId = " + RegionId;
         JSONArray Districts = sqlHandler.getResult(Query, null);
         return Districts.toString();
     }
@@ -1851,7 +1851,7 @@ public class ClientAndroidInterface {
                 "FROM tblProduct P\n" +
                 "INNER JOIN  uvwLocations L ON (P.LocationId = L.LocationId) OR (P.LocationId = 'null' OR P.LocationId = '') \n" +
                 "WHERE  ((L.RegionId = " + RegionId + " OR L.RegionId ='null') AND (L.DistrictId =  " + DistrictId + " OR L.DistrictId ='null') OR L.LocationId='null') AND " +
-                "( '" + EnrolmentDate + "'  BETWEEN P.DateFrom AND P.Dateto OR IFNULL(" + EnrolmentDate + ",0) = 0 )  \n" +
+                "( '" + EnrolmentDate + "'  BETWEEN P.DateFrom AND P.DateTo OR IFNULL(" + EnrolmentDate + ",0) = 0 )  \n" +
                 "ORDER BY  L.LocationId DESC";
 
         JSONArray Products = sqlHandler.getResult(ProductQuery, null);
@@ -5478,7 +5478,7 @@ public class ClientAndroidInterface {
         global = (Global) mContext.getApplicationContext();
         String Query = " SELECT RegionId, DistrictId FROM uvwLocations UL\n" +
                 " INNER JOIN tblOfficer O ON O.LocationId = UL.DistrictId \n" +
-                " WHERE O.Code = '" + global.getOfficerCode() + "'";
+                " WHERE LOWER(O.Code) = '" + global.getOfficerCode().toLowerCase() + "'";
         JSONArray jsonArray = sqlHandler.getResult(Query, null);
         return jsonArray.toString();
     }
