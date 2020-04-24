@@ -31,16 +31,37 @@ git clone https://github.com/openimis/openimis_android_app_java
 
 ### Configuration
 
-In order to run the openIMIS IMIS Android Application, you need to
-know the openIMIS Web Services domain (DNS or IP address) and to 
-configure it in the imispolicies.AppInformation java file.
+The configuration of the application is done through product flavors and build variants. The configuration can be found in ```app\build.gradle``` file. The default configuration contains demoProd or demoRelease flavors. Here is an example of product flavor. 
 
 ```
-private static String _Domain = "http://demo.openimis.org/";
+demoProd {
+	applicationId "org.openimis.imispolicies.demoProd"
+	buildConfigField "String", "API_BASE_URL", '"http://demo.openimis.org/rest/"'
+	buildConfigField "String", "RAR_PASSWORD", '")(#$1HsD"'
+	buildConfigField "boolean", "SHOW_CONTROL_NUMBER_MENU", 'false'
+	resValue "string", "app_name", "Policies Demo"
+	dimension = 'std'
+}
 ```
 
-For demo purposes, the default Web Services domain is set to the openIMIS
-demo server: demo.openimis.org.  
+Parameters: 
+
+* ```applicationId``` allow to build the application with its own application id. This allows to run different version of the application on the same device.
+* ```API_BASE_URL``` represents the openIMIS REST API URL (based on DNS or IP address) to connect to. 
+* ```RAR_PASSWORD``` represents the password to be used for the offline extract. 
+* ```SHOW_CONTROL_NUMBER_MENU``` allow to show or hide the Control Number menu item in case the implementation does not implement the ePayment module. 
+* ```app_name``` is a resource string allowing to change the name of the application. 
+
+Escape procedures can be configured and language resource files can be changed. Please follow the ```sourceSets``` record. Look in ```app\src\demo``` folder for an example. 
+
+```
+sourceSets {
+	demoProd.java.srcDir 'src/demo/java'
+	demoRelease.java.srcDir 'src/demo/java'
+}
+```
+
+You can add your own product flavor. Make sure you choose the updated built variant or your product flavor when running or building the application.
 
 ### Running the app
 

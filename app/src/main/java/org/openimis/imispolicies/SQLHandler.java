@@ -86,6 +86,12 @@ public class SQLHandler extends SQLiteOpenHelper {
         }
     }
 
+    @Override
+    public void onOpen(SQLiteDatabase db) {
+        super.onOpen(db);
+        db.disableWriteAheadLogging();
+    }
+
     private void openDatabase() {
         String dbPath = mContext.getDatabasePath(DBNAME).getPath();
         String dbOfflinePath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/IMIS/" + OFFLINEDBNAME;
