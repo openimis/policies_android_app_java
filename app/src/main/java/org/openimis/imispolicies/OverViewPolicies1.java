@@ -564,11 +564,11 @@ public class OverViewPolicies1 extends AppCompatActivity {
         AlertDialog alertDialog = alertDialogBuilder.create();
         alertDialog.show();
     }
-    public int getControlNumber(final JSONObject order, final String SmsRequired) throws IOException {
+    private int getControlNumber(final JSONObject order, final String SmsRequired) throws IOException {
         Thread thread = new Thread(){
             public void run() {
                 HttpClient httpClient = new DefaultHttpClient();
-                HttpPost httpPost = new HttpPost(AppInformation.DomainInfo.getDomain()+"api/api/GetControlNumber");
+                HttpPost httpPost = new HttpPost(AppInformation.DomainInfo.getDomain()+"/api/api/GetControlNumber");
 // Request parameters and other properties.
                 try {
                     StringEntity postingString = new StringEntity(order.toString());
