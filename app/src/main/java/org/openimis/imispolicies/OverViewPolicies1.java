@@ -698,7 +698,7 @@ public class OverViewPolicies1 extends AppCompatActivity {
         return 0;
     }
 
-    public void updateAfterRequest(int Code) {
+    private void updateAfterRequest(int Code) {
         JSONObject ob = null;
         for(int j = 0;j < paymentDetails.length();j++){
             try {
@@ -711,7 +711,7 @@ public class OverViewPolicies1 extends AppCompatActivity {
         }
     }
 
-    public int insertAfterRequest(String amountCalculated, String control_number, String InternalIdentifier, String PaymentType, String SmsRequired) {
+    private int insertAfterRequest(String amountCalculated, String control_number, String InternalIdentifier, String PaymentType, String SmsRequired) {
         return clientAndroidInterface.insertRecordedPolicy(amountCalculated,amountConfirmed, control_number, InternalIdentifier,PaymentType, SmsRequired);
     }
 }
