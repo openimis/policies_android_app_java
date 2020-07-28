@@ -383,7 +383,7 @@ public class CheckCommission extends AppCompatActivity {
             Thread thread = new Thread(){
                 public void run() {
                     HttpClient httpClient = new DefaultHttpClient();
-                    HttpPost httpPost = new HttpPost(AppInformation.DomainInfo.getDomain()+"/restapi/api/Policies/Get_Commissions");
+                    HttpPost httpPost = new HttpPost(AppInformation.DomainInfo.getDomain()+"/api/api/Policies/Get_Commissions");
 // Request parameters and other properties.
                     try {
                         StringEntity postingString = new StringEntity(obj_to_send);

@@ -262,7 +262,6 @@ public class ClientAndroidInterface {
         return new AlertDialog.Builder(mContext)
                 .setMessage(msg)
                 .setCancelable(false)
-
                 .setPositiveButton(R.string.Ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
@@ -2211,6 +2210,12 @@ public class ClientAndroidInterface {
         }else{
             upload = "";
         }
+
+        if (upload.equals("") && requested.equals("")) {
+            requested = " AND typeof(Code) = 'integer'";
+            upload = " OR UploadedDate != ''";
+        }
+
         String Query = "SELECT * FROM tblRecordedPolicies WHERE InsuranceNumber LIKE '%"+insuranceNumber+"%' AND LastName LIKE '%"+lastName+"%' AND OtherNames LIKE '%"+otherNames+"%' AND ProductName LIKE '%"+insuranceProduct+"%'"+renewal+""+requested+""+upload+"";
         JSONArray RecordedPolicies = sqlHandler.getResult(Query, null);
         return RecordedPolicies;
@@ -2261,6 +2266,20 @@ public class ClientAndroidInterface {
         String Query = "SELECT * FROM tblRecordedPolicies WHERE Code = '"+code+"'";
         JSONArray RecordedPolicies = sqlHandler.getResult(Query, null);
         return RecordedPolicies;
+    }
+
+    public JSONArray getNotEnrolledPolicies(String insuranceNumber, String insuranceProduct, String renewal) {
+        String aRenewal = "";
+        if (!renewal.equals("")) {
+            aRenewal = " AND isDone == '"+renewal+"'";
+        }
+
+        String uploaded = " AND UploadedDate == ''";
+        String requested = " AND typeof(Code) != 'integer'";
+
+        String query = "SELECT * FROM tblRecordedPolicies WHERE InsuranceNumber LIKE '%"+insuranceNumber+"%' AND ProductCode LIKE '%"+insuranceProduct+"%' "+aRenewal+" "+uploaded+" "+requested+"";
+        JSONArray notEnrolledPolicies = sqlHandler.getResult(query, null);
+        return notEnrolledPolicies;
     }
 
     public String getCode(String InternalIdentifier) {

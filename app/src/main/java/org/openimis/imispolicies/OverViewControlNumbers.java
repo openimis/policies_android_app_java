@@ -527,7 +527,7 @@ public class OverViewControlNumbers extends AppCompatActivity {
         Thread thread = new Thread(){
             public void run() {
                 HttpClient httpClient = new DefaultHttpClient();
-                HttpPost httpPost = new HttpPost(AppInformation.DomainInfo.getDomain()+"/restapi/api/GetAssignedControlNumbers");
+                HttpPost httpPost = new HttpPost(AppInformation.DomainInfo.getDomain()+"/api/api/GetAssignedControlNumbers");
 // Request parameters and other properties.
                 try {
                     StringEntity postingString = new StringEntity(jsonObject.toString());

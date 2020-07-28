@@ -1,25 +1,18 @@
 package org.openimis.imispolicies;
 
-import android.app.AlertDialog;
-import android.app.ProgressDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 public class ControlNumbers extends AppCompatActivity {
     TextView OverViewPolicies;
     TextView OverViewControlNumber;
     TextView CheckCommission;
+    TextView NotEnrolledPolicies;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,6 +26,8 @@ public class ControlNumbers extends AppCompatActivity {
         OverViewPolicies = (TextView) findViewById(R.id.OverViewPolicies);
         OverViewControlNumber = (TextView) findViewById(R.id.OverViewControlNumber);
         CheckCommission = (TextView) findViewById(R.id.CheckCommission);
+        NotEnrolledPolicies = (TextView) findViewById(R.id.NotEnrolledPolicies);
+
 
         OverViewPolicies.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -58,6 +53,13 @@ public class ControlNumbers extends AppCompatActivity {
             }
         });
 
+        NotEnrolledPolicies.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(ControlNumbers.this, SearchNotEnrolledPolicies.class);
+                startActivity(intent);
+            }
+        });
 
     }
 
