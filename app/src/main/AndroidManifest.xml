@@ -106,7 +106,8 @@
         <activity android:name=".SearchOverViewControlNumber" />
         <activity android:name=".ViewPolicies" />
         <activity android:name=".CheckCommission"></activity>
-
+        <activity android:name=".SearchNotEnrolledPolicies"></activity>
+        <activity android:name=".NotEnrolledPoliciesOverview"></activity>
     </application>
 
 </manifest>

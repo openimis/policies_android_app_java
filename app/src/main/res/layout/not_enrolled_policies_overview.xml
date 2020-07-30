@@ -6,7 +6,8 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:id="@+id/actv"
-    tools:context="org.openimis.imispolicies.OverViewControlNumbers">
+    tools:context="org.openimis.imispolicies.NotEnrolledPoliciesOverview">
+
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -14,60 +15,59 @@
         android:background="@color/grey">
 
         <TextView
-            android:id="@+id/lblNumberOfPolices"
+            android:id="@+id/numOfFoundPoliciesLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="5dp"
+            android:layout_margin="10dp"
             android:textColor="@color/white"
             android:typeface="monospace"
             android:text="@string/number_of_found_policies"/>
         <TextView
-            android:id="@+id/ValueNumberOfPolices"
+            android:id="@+id/numOfFoundPoliciesValue"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="5dp"
+            android:layout_margin="10dp"
             android:textAlignment="textEnd"
             android:textColor="@color/white"
-            android:textStyle="bold"
             android:typeface="monospace"
-            android:layout_toRightOf="@+id/lblNumberOfPolices"
+            android:layout_toRightOf="@+id/numOfFoundPoliciesLabel"
             android:text="0"
             android:gravity="end" />
 
         <TextView
-            android:id="@+id/lblAmountOfContribution"
+            android:id="@+id/amountOfContributionsLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/lblNumberOfPolices"
-            android:layout_margin="5dp"
+            android:layout_below="@+id/numOfFoundPoliciesLabel"
+            android:layout_margin="10dp"
             android:textColor="@color/white"
             android:typeface="monospace"
             android:text="@string/amount_of_contribution"/>
         <TextView
-            android:id="@+id/ValueAmountOfContribution"
+            android:id="@+id/amountOfContributionsValue"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="5dp"
+            android:layout_margin="10dp"
             android:textAlignment="textEnd"
-            android:textStyle="bold"
-            android:textColor="@color/white"
             android:typeface="monospace"
-            android:layout_below="@+id/ValueNumberOfPolices"
-            android:layout_toRightOf="@+id/lblAmountOfContribution"
+            android:textColor="@color/white"
+            android:layout_below="@+id/numOfFoundPoliciesValue"
+            android:layout_toRightOf="@+id/amountOfContributionsLabel"
             android:text="0"
             android:gravity="end" />
         <TextView
-            android:id="@+id/NothingFound"
+            android:id="@+id/noPoliciesFound"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
             android:textColor="@color/orange"
             android:typeface="monospace"
-            android:layout_below="@+id/lblAmountOfContribution"
+            android:layout_below="@+id/amountOfContributionsValue"
             android:text="@string/NoDataAvailable"
             android:visibility="gone" />
 
     </RelativeLayout>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="45dp"
@@ -75,9 +75,8 @@
         android:background="@color/grey"
         android:layout_marginBottom="5dp">
 
-
         <Button
-            android:id="@+id/fab2"
+            android:id="@+id/deleteNotEnrolledPoliciesButton"
             android:layout_width="80dp"
             android:layout_height="35dp"
             android:text="@string/Delete"
@@ -88,7 +87,7 @@
             android:textColor="@color/white"/>
 
         <Button
-            android:id="@+id/fab"
+            android:id="@+id/requestControlNumberButton"
             android:layout_width="80dp"
             android:layout_height="35dp"
             android:text="@string/request"
@@ -98,30 +97,18 @@
             android:layout_margin="5dp"
             android:textColor="@color/white"/>
 
-<!--        <android.support.design.widget.FloatingActionButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|left"
-            android:layout_margin="@dimen/fab_margin"
-            android:visibility="gone"
-            app:srcCompat="@android:drawable/ic_menu_delete" />
-
-        <android.support.design.widget.FloatingActionButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|end"
-            android:layout_margin="@dimen/fab_margin"
-            android:visibility="gone"
-            app:srcCompat="@android:drawable/ic_menu_send" />-->
 
     </LinearLayout>
 
     <android.support.v7.widget.RecyclerView
-        android:id="@+id/listofpolicies"
+        android:id="@+id/listOfNotEnrolledPolicies"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_margin="5dp"
-        android:background="@color/white" />
+        android:background="@color/white"/>
+
+
+
 
 
 </LinearLayout>

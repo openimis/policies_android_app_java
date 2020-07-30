@@ -114,7 +114,8 @@ public class SQLHandler extends SQLiteOpenHelper {
                             + "AmountConfirmed INTEGER,"
                             + "ControlNumber TEXT,"
                             + "InternalIdentifier TEXT,"
-                            + "PaymentType TEXT " + ")"
+                            + "PaymentType TEXT,"
+                            + "SmsRequired TEXT" + ")"
             );
             sqLiteDatabase.execSQL(
                     "CREATE TABLE " + tblControls + "("

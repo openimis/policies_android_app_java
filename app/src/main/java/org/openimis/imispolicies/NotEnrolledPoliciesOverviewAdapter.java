@@ -7,7 +7,6 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CheckBox;
 import android.widget.Filter;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -16,12 +15,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-/**
- * Created by Hiren on 10/12/2018.
- */
-//Please see newPolicies and query to check Insuaree numbers
-public class OverViewPoliciesAdapter <VH extends TrackSelectionAdapter.ViewHolder> extends RecyclerView.Adapter {
-    OverViewPolicies1 overViewPolicies = new OverViewPolicies1();
+public class NotEnrolledPoliciesOverviewAdapter<VH extends TrackSelectionAdapter.ViewHolder> extends RecyclerView.Adapter {
+    NotEnrolledPoliciesOverview overViewPolicies = new NotEnrolledPoliciesOverview();
     private JSONArray policies;
     private JSONArray newPolicies;
 
@@ -40,21 +35,17 @@ public class OverViewPoliciesAdapter <VH extends TrackSelectionAdapter.ViewHolde
     private int focusedItem = 0;
     private int policyvalue = 0;
 
-
     public JSONArray paymentDetails = new JSONArray();
     public JSONObject paymentObject;
 
-
-
     //Constructor
     Context _context;
-    public OverViewPoliciesAdapter(Context rContext, JSONArray _policies){
+
+    public NotEnrolledPoliciesOverviewAdapter(Context rContext, JSONArray _policies) {
         _context = rContext;
         policies = _policies;
 
     }
-
-
 
     @Override
     public void onAttachedToRecyclerView(final RecyclerView recyclerView) {
@@ -97,7 +88,7 @@ public class OverViewPoliciesAdapter <VH extends TrackSelectionAdapter.ViewHolde
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View row = LayoutInflater.from(parent.getContext()).inflate(R.layout.receipt_policy,parent,false);
+        View row = LayoutInflater.from(parent.getContext()).inflate(R.layout.receipt_policy, parent, false);
 
         Reportmsg view = new Reportmsg(row);
         return view;
@@ -111,11 +102,10 @@ public class OverViewPoliciesAdapter <VH extends TrackSelectionAdapter.ViewHolde
                 String query = charSequence.toString();
 
 
-
                 if (query.isEmpty()) {
                     newPolicies = policies;
                 } else {
-                    for(int i=0; i<=policies.length();i++){
+                    for (int i = 0; i <= policies.length(); i++) {
                         try {
                             if (policies.getString(i).toLowerCase().contains(query.toLowerCase())) {
                                 newPolicies.put(policies.getString(i));//Please see newPolicies and query to check Insuaree numbers
@@ -164,11 +154,6 @@ public class OverViewPoliciesAdapter <VH extends TrackSelectionAdapter.ViewHolde
             e.printStackTrace();
         }
 
-        if (UploadedDate.equals("") && !RequestedDate.equals("")) {
-            LastName = "";
-            OtherNames = "";
-        }
-
         ((Reportmsg) holder).Id.setText(Id);
         ((Reportmsg) holder).PolicyId.setText(PolicyId);
         ((Reportmsg) holder).InsuranceNumber.setText(InsuranceNumber);
@@ -188,11 +173,11 @@ public class OverViewPoliciesAdapter <VH extends TrackSelectionAdapter.ViewHolde
     }
 
 
-    public int getCount(){
+    public int getCount() {
         return getItemCount();
     }
 
-    public class Reportmsg extends RecyclerView.ViewHolder{
+    public class Reportmsg extends RecyclerView.ViewHolder {
 
         public TextView Id;
         public TextView PolicyId;
@@ -205,35 +190,30 @@ public class OverViewPoliciesAdapter <VH extends TrackSelectionAdapter.ViewHolde
         public TextView RequestedDate;
         public ImageView checkbox1;
 
-
-
-
         public Reportmsg(final View itemView) {
             super(itemView);
-
-
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
 
                     // Redraw the old selection and the new
-                    if(overViewPolicies.num.size() == 0){
+                    if (overViewPolicies.num.size() == 0) {
                         overViewPolicies.num.add(String.valueOf(getLayoutPosition()));
                         //itemView.setBackgroundColor(Color.GRAY);
                         checkbox1.setBackgroundResource(R.drawable.checked);
 
                         try {
                             paymentObject = new JSONObject();
-                            paymentObject.put("Position",String.valueOf(getLayoutPosition()));
-                            paymentObject.put("Id",String.valueOf(Id.getText()));
-                            paymentObject.put("PolicyId",String.valueOf(PolicyId.getText()));
-                            paymentObject.put("insurance_number",String.valueOf(InsuranceNumber.getText()));
-                            paymentObject.put("insurance_product_code",String.valueOf(ProductCode.getText()));
-                            paymentObject.put("uploaded_date",String.valueOf(UploadedDate.getText()));
-                            if(String.valueOf(isDone.getText()).equals("N")){
-                                paymentObject.put("renewal","0");
-                            }else{
-                                paymentObject.put("renewal","1");
+                            paymentObject.put("Position", String.valueOf(getLayoutPosition()));
+                            paymentObject.put("Id", String.valueOf(Id.getText()));
+                            paymentObject.put("PolicyId", String.valueOf(PolicyId.getText()));
+                            paymentObject.put("insurance_number", String.valueOf(InsuranceNumber.getText()));
+                            paymentObject.put("insurance_product_code", String.valueOf(ProductCode.getText()));
+                            paymentObject.put("uploaded_date", String.valueOf(UploadedDate.getText()));
+                            if (String.valueOf(isDone.getText()).equals("N")) {
+                                paymentObject.put("renewal", "0");
+                            } else {
+                                paymentObject.put("renewal", "1");
                             }
                             paymentDetails.put(paymentObject);
                             overViewPolicies.paymentDetails = paymentDetails;
@@ -243,21 +223,21 @@ public class OverViewPoliciesAdapter <VH extends TrackSelectionAdapter.ViewHolde
                         }
                         overViewPolicies.PolicyValueToSend += Integer.parseInt(PolicyValue);
 
-                    }else{
+                    } else {
                         int ans = 0;
-                        for (int i=0; i<overViewPolicies.num.size(); i++){
-                            if(overViewPolicies.num.get(i).equals(String.valueOf(getLayoutPosition()))){
+                        for (int i = 0; i < overViewPolicies.num.size(); i++) {
+                            if (overViewPolicies.num.get(i).equals(String.valueOf(getLayoutPosition()))) {
                                 ans = 1;
                                 overViewPolicies.num.remove(i);
                                 //itemView.setBackgroundColor(Color.WHITE);
                                 checkbox1.setBackgroundResource(R.drawable.unchecked);
 
                                 JSONObject ob = null;
-                                for(int j = 0;j < paymentDetails.length();j++){
+                                for (int j = 0; j < paymentDetails.length(); j++) {
                                     try {
                                         ob = paymentDetails.getJSONObject(j);
                                         String position = ob.getString("Position");
-                                        if(position.equals(String.valueOf(getLayoutPosition()))){
+                                        if (position.equals(String.valueOf(getLayoutPosition()))) {
                                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                                                 paymentDetails.remove(j);
                                             }
@@ -274,22 +254,22 @@ public class OverViewPoliciesAdapter <VH extends TrackSelectionAdapter.ViewHolde
                             }
                             ans = 0;
                         }
-                        if(ans == 0){
+                        if (ans == 0) {
                             overViewPolicies.num.add(String.valueOf(getLayoutPosition()));
                             //itemView.setBackgroundColor(Color.GRAY);
                             checkbox1.setBackgroundResource(R.drawable.checked);
 
                             try {
                                 paymentObject = new JSONObject();
-                                paymentObject.put("Id",String.valueOf(Id.getText()));
-                                paymentObject.put("PolicyId",String.valueOf(PolicyId.getText()));
-                                paymentObject.put("insurance_number",String.valueOf(InsuranceNumber.getText()));
-                                paymentObject.put("insurance_product_code",String.valueOf(ProductCode.getText()));
-                                paymentObject.put("uploaded_date",String.valueOf(UploadedDate.getText()));
-                                if(String.valueOf(isDone.getText()).equals("N")){
-                                    paymentObject.put("renewal","0");
-                                }else{
-                                    paymentObject.put("renewal","1");
+                                paymentObject.put("Id", String.valueOf(Id.getText()));
+                                paymentObject.put("PolicyId", String.valueOf(PolicyId.getText()));
+                                paymentObject.put("insurance_number", String.valueOf(InsuranceNumber.getText()));
+                                paymentObject.put("insurance_product_code", String.valueOf(ProductCode.getText()));
+                                paymentObject.put("uploaded_date", String.valueOf(UploadedDate.getText()));
+                                if (String.valueOf(isDone.getText()).equals("N")) {
+                                    paymentObject.put("renewal", "0");
+                                } else {
+                                    paymentObject.put("renewal", "1");
                                 }
                                 paymentDetails.put(paymentObject);
                                 overViewPolicies.paymentDetails = paymentDetails;

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="10dp"
+    android:orientation="vertical"
+    tools:context="org.openimis.imispolicies.SearchNotEnrolledPolicies">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+        <EditText
+            android:id="@+id/ins_num"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginTop="5dp"
+            android:paddingLeft="10dp"
+            android:hint="@string/insurance_no"
+            android:background="@drawable/corner"/>
+
+        <Spinner
+            android:id="@+id/ins_product"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginTop="5dp"
+            android:background="@drawable/corner"/>
+
+        <ListView
+            android:id="@+id/ins_prod_list"
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:layout_marginTop="5dp"
+            android:typeface="monospace"
+            android:fontFamily="sans-serif-light"
+            android:textColor="@color/black"
+            android:visibility="gone"
+            android:paddingLeft="10dp"
+            android:background="@drawable/corner">
+        </ListView>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:typeface="monospace"
+            android:fontFamily="sans-serif-light"
+            android:textColor="@color/black"
+            android:text="@string/renewal"
+            />
+        <RadioGroup
+            android:id="@+id/renewal_radio"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="5dp">
+            <RadioButton android:id="@+id/renewal_yes_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Y" />
+            <RadioButton android:id="@+id/renewal_no_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="N" />
+        </RadioGroup>
+
+            <Button
+                android:id="@+id/notEnrolledPoliciesSearchBtn"
+                android:layout_width="100dp"
+                android:layout_height="60dp"
+                android:typeface="monospace"
+                android:fontFamily="sans-serif-light"
+                android:textColor="@color/black"
+                android:text="@string/request" />
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</LinearLayout>
