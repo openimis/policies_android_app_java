@@ -387,6 +387,10 @@
     <string name="send_sms">Send SMS</string>
     <string name="requested_sms">Requested SMS</string>
     <string name="amountContribution">Amount of contribution </string>
+    <string name="enrolled_policies">Enrolled Policies</string>
+    <string name="not_enrolled_policies">Not Enrolled Policies</string>
+    <string name="request_enrolled_policies">Request for Not Enrolled Policies</string>
+    <string name="phone_number_not_provided">Phone number not provided</string>
 
 
 </resources>

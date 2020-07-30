@@ -22,7 +22,7 @@ import java.io.UnsupportedEncodingException;
 
 public class ToRestApi {
     Token tokenl = new Token();
-    private String uri = AppInformation.DomainInfo.getDomain()+"/api/";
+    private String uri = AppInformation.DomainInfo.getDomain()+"/restapi/";
 
     //Post
     public HttpResponse postToRestApi(final JSONObject object, final String functionName) {

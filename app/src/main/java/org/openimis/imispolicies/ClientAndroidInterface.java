@@ -2274,10 +2274,7 @@ public class ClientAndroidInterface {
             aRenewal = " AND isDone == '"+renewal+"'";
         }
 
-        String uploaded = " AND UploadedDate == ''";
-        String requested = " AND typeof(Code) != 'integer'";
-
-        String query = "SELECT * FROM tblRecordedPolicies WHERE InsuranceNumber LIKE '%"+insuranceNumber+"%' AND ProductCode LIKE '%"+insuranceProduct+"%' "+aRenewal+" "+uploaded+" "+requested+"";
+        String query = "SELECT * FROM tblRecordedPolicies WHERE InsuranceNumber LIKE '%"+insuranceNumber+"%' AND ProductCode LIKE '%"+insuranceProduct+"%' "+aRenewal+" AND UploadedDate == '' AND typeof(Code) != 'integer'";
         JSONArray notEnrolledPolicies = sqlHandler.getResult(query, null);
         return notEnrolledPolicies;
     }

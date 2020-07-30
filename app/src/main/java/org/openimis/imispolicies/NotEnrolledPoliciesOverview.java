@@ -538,7 +538,7 @@ public class NotEnrolledPoliciesOverview extends AppCompatActivity {
         alertDialog.show();
     }
 
-    public int getControlNumber(final JSONObject order, final String SmsRequired) throws IOException {
+    private int getControlNumber(final JSONObject order, final String SmsRequired) throws IOException {
 
         Thread thread = new Thread() {
             public void run() {
