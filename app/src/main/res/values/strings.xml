@@ -384,4 +384,5 @@
     <string name="not_enrolled_policies">Not Enrolled Policies</string>
     <string name="request_enrolled_policies">Request for Not Enrolled Policies</string>
     <string name="phone_number_not_provided">Phone number not provided</string>
+    <string name="not_unique_products">Insurance products of the selected policies are not unique</string>
 </resources>

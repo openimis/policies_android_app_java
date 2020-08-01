@@ -89,7 +89,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Locale;
+import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.Formatter;
 
@@ -6338,6 +6340,25 @@ public class ClientAndroidInterface {
                 return;
             }
         }
+    }
+
+    public boolean isProductsListUnique(JSONObject policies) {
+        ArrayList<String> productCodes = new ArrayList();
+        try {
+            JSONArray policiesArray = policies.getJSONArray("policies");
+            for (int i = 0; i < policiesArray.length(); i++) {
+                JSONObject policyObject = policiesArray.getJSONObject(i);
+                String productCode = policyObject.getString("insurance_product_code");
+                productCodes.add(productCode);
+            }
+            Set<String> nonRepeatedCodes = new HashSet(productCodes);
+            if (nonRepeatedCodes.size() < productCodes.size()) {
+                return false;
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return true;
     }
 }
 

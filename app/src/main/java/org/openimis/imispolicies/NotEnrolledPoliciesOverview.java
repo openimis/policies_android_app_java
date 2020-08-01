@@ -346,7 +346,11 @@ public class NotEnrolledPoliciesOverview extends AppCompatActivity {
                                     if (SmsRequired == 1 && phoneNumber.getText().toString().equals("")) {
                                         clientAndroidInterface.ShowDialog(getResources().getString(R.string.phone_number_not_provided));
                                     } else {
-                                        getControlNumber(policies, String.valueOf(SmsRequired));
+                                        if (!clientAndroidInterface.isProductsListUnique(policies)) {
+                                            policyDeleteDialogReport(getResources().getString(R.string.not_unique_products));
+                                        } else {
+                                            getControlNumber(policies, String.valueOf(SmsRequired));
+                                        }
                                     }
                                 } catch (JSONException e) {
                                     e.printStackTrace();
