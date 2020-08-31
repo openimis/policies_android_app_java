@@ -38,6 +38,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -85,6 +86,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+
+import static java.security.AccessController.getContext;
 
 
 public class MainActivity extends AppCompatActivity
@@ -235,7 +238,9 @@ public class MainActivity extends AppCompatActivity
 
         sqlHandler.isPrivate = true;
         global = (Global) getApplicationContext();
-
+// TODO: Check this
+//        ca = new ClientAndroidInterface(context);
+//        ca.getControls();
         //Set the Image folder path
         global.setImageFolder(getApplicationContext().getApplicationInfo().dataDir + "/Images/");
         CreateFolders();
@@ -249,7 +254,7 @@ public class MainActivity extends AppCompatActivity
                 Toast.makeText(this, "Copy database failed", Toast.LENGTH_SHORT);
                 return;
             }
-        }else
+        } else 
             sqlHandler.getReadableDatabase();
 
         //Create image folder
@@ -650,7 +655,6 @@ public class MainActivity extends AppCompatActivity
                                     e.printStackTrace();
                                 }
                             }
-
                         })
                 .setNegativeButton(getResources().getString(negativeButton),
                         new DialogInterface.OnClickListener() {
@@ -829,6 +833,9 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
+        if (!AppInformation.MenuInfo.getShowControlNumberMenu()) {
+            menu.removeItem(R.id.nav_control_numbers);
+        }
         return true;
     }
 
@@ -841,7 +848,6 @@ public class MainActivity extends AppCompatActivity
         if (!Language2.equals("")) {
             menu.add(0, MENU_LANGUAGE_2, 0, Language2);
         }
-
         return true;
     }
 
@@ -1088,7 +1094,7 @@ public class MainActivity extends AppCompatActivity
                 Intent NotifyIntent = new Intent(Intent.ACTION_VIEW,Uri.parse(ApkFileLocation));
 
                 PendingIntent intent = PendingIntent.getActivity(MainActivity.this, 0, NotifyIntent,0);
-                NotificationCompat.Builder builder = new NotificationCompat.Builder(MainActivity.this);
+                NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "M_CH_ID");
                 builder.setAutoCancel(false);
                 builder.setContentTitle(ContentTitle);
                 builder.setContentText(ContentText);

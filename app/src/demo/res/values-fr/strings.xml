@@ -243,7 +243,7 @@
   <string name="DeleteFamilyWithPolicy">Cette famille a été supprimée seulement hors ligne parce qu\'elle a un contrat en ligne.</string>
   <string name="PolicyValueChange">Contrat avec date d\'adhésion :</string>
   <string name="Changed">\" Modifié \"</string>
-  <string name="ExceedThreshold"><![CDATA[Les contrats suivants avec date d\'adhésion dépasseront le nombre maximum d\'assurés <br/> Voulez-vous activer cet assuré ?]]></string>
+  <string name="ExceedThreshold">Les contrats suivants avec date d\'adhésion dépasseront le nombre maximum d\'assurés <br/> Voulez-vous activer cet assuré ?</string>
   <string name="ExceedMemberCount">Les contrats avec les dates d\'adhésion suivantes ont atteint leur nombre maximum de membres et, par conséquent, cette assurance ne sera pas couverte par ces polices, mais l\'assuré est ajouté à la famille :</string>
   <string name="Acquire">Acquérir</string>
   <string name="SavedOnMemoryCard">Les données ont été sauvegardées sur la carte mémoire externe.</string>
@@ -292,7 +292,7 @@
   <string name="PolicyCovered">Le prix du contrat est couvert. Voulez-vous toujours ajouter une contribution ?</string>
   <string name="ExceedsPolicy">La contribution dépasse le prix du contrat.</string>
   <string name="PriceBelow">Le prix du contrat n\'est pas encore couvert, veuillez sélectionner l\'action à effectuer.</string>
-  <string name="MaxInstallment"><![CDATA[Il s\'agit du dernier versement selon la définition du Paquet de bénéfice, Prix du contrat pas encore couvert. Veuillez sélectionner l\'action à effectuer.]]></string>
+  <string name="MaxInstallment">Il s\'agit du dernier versement selon la définition du Paquet de bénéfice, Prix du contrat pas encore couvert. Veuillez sélectionner l\'action à effectuer.</string>
   <string name="Reports">Rapports</string>
   <string name="SnapshotIndicators">Indicateurs d\'aperçu général</string>
   <string name="CummulativeIndicators">Indicateurs cumulatifs</string>
@@ -375,4 +375,13 @@
   <string name="empty_year">Entrer l\'année</string>
   <string name="DeleteFamilyOnlyOffline">Suppression de la famille supprimera également tous les assurés, les polices et les cotisations de la famille.</string>
   <string name="LastInstallment">Dernier versement</string>
+  <!-- Require translation -->
+  <string name="app_name">IMIS POLICIES</string>
+  <string name="pick_date">Pick Date</string>
+  <string name="get">Get</string>
+  <string name="date_from">Date From</string>
+  <string name="date_to">Date To</string>
+  <string name="send_sms">Send SMS</string>
+  <string name="requested_sms">Requested SMS</string>
+  <string name="amountContribution">Amount of contribution </string>
 </resources>

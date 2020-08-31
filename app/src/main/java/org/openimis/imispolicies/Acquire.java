@@ -39,6 +39,7 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -100,7 +101,11 @@ public class Acquire extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.acquire_main);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        final ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setTitle(getResources().getString(R.string.Acquire));
+
+
         global = (Global) getApplicationContext();
         ca = new ClientAndroidInterface(this);
 

@@ -8,6 +8,7 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.Filter;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -35,6 +36,7 @@ public class OverViewControlNumberAdapter<VH extends TrackSelectionAdapter.ViewH
     String InternalIdentifier = null;
     String PaymentType = null;
     String UploadedDate = null;
+    String Sms = null;
 
     private int focusedItem = 0;
     private int policyvalue = 0;
@@ -154,6 +156,11 @@ public class OverViewControlNumberAdapter<VH extends TrackSelectionAdapter.ViewH
             AmountCalculated = object.getString("AmountCalculated");
             PaymentType = object.getString("PaymentType");
             UploadedDate = object.getString("UploadedDate");
+            if(object.getString("SmsRequired").equals("1")){
+                Sms = _context.getResources().getString(R.string.Yes);
+            }else{
+                Sms = _context.getResources().getString(R.string.No);
+            }
             controlNumber = (String.valueOf(object.getString("ControlNumber")).equals("null")) ? "" : object.getString("ControlNumber") ;
 
         } catch (JSONException e) {
@@ -168,6 +175,7 @@ public class OverViewControlNumberAdapter<VH extends TrackSelectionAdapter.ViewH
         ((Reportmsg) holder).controlNumber.setText(controlNumber);
         ((Reportmsg) holder).paymentType.setText(PaymentType);
         ((Reportmsg) holder).UploadedDate.setText(UploadedDate);
+        ((Reportmsg) holder).Sms.setText(Sms);
 
         //((Reportmsg) holder).InternalIdentifier.setText(InternalIdentifier);
 
@@ -195,6 +203,7 @@ public class OverViewControlNumberAdapter<VH extends TrackSelectionAdapter.ViewH
         public TextView paymentType;
         public ImageView checkbox1;
         public TextView UploadedDate;
+        public TextView Sms;
 
 
         public Reportmsg(final View itemView) {
@@ -303,6 +312,7 @@ public class OverViewControlNumberAdapter<VH extends TrackSelectionAdapter.ViewH
             checkbox1 = (ImageView) itemView.findViewById(R.id.checkbox1);
             paymentType = (TextView) itemView.findViewById(R.id.PaymentType);
             UploadedDate = (TextView) itemView.findViewById(R.id.UploadedDate);
+            Sms = (TextView) itemView.findViewById(R.id.SMS);
         }
     }
 

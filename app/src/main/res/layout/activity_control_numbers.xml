@@ -46,4 +46,16 @@
         android:background="@color/colorPrimary"
         android:text="@string/CheckCommission" />
 
+    <TextView
+        android:id="@+id/NotEnrolledPolicies"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_margin="10dp"
+        android:typeface="monospace"
+        android:fontFamily="sans-serif-light"
+        android:textSize="20dp"
+        android:gravity="center"
+        android:textColor="@color/white"
+        android:background="@color/colorPrimary"
+        android:text="@string/not_enrolled_policies" />
 </LinearLayout>

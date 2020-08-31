@@ -33,6 +33,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -95,7 +96,10 @@ public class Enquire extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_enquire);
         //noinspection ConstantConditions
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        final ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setTitle(getResources().getString(R.string.Enquire));
+
         ca = new ClientAndroidInterface(this);
 
 
@@ -370,6 +374,40 @@ public class Enquire extends AppCompatActivity {
                             Policy.put("SubItem1", jsonObject.getString("productName"));
                             Policy.put("SubItem2",Ded);
                             Policy.put("SubItem3",Ceiling);
+                            // TODO: Check if this is necessary
+                            // String TotalAdmissionsLeft = "";
+                            // String TotalVisitsLeft = "";
+                            // String TotalConsultationsLeft = "";
+                            // String TotalSurgeriesLeft = "";
+                            // String TotalDelivieriesLeft = "";
+                            // String TotalAntenatalLeft = "";
+                            // String ConsultationAmountLeft = "";
+                            // String SurgeryAmountLeft = "";
+                            // String HospitalizationAmountLeft = "";
+                            // String AntenatalAmountLeft = "";
+
+                            // TotalAdmissionsLeft = jsonObject.getString("TotalAdmissionsLeft").equalsIgnoreCase("null")? "": "TotalAdmissionsLeft: "+jsonObject.getString("TotalAdmissionsLeft");
+                            // TotalVisitsLeft = jsonObject.getString("TotalVisitsLeft").equalsIgnoreCase("null")? "": "TotalVisitsLeft: "+jsonObject.getString("TotalVisitsLeft");
+                            // TotalConsultationsLeft = jsonObject.getString("TotalConsultationsLeft").equalsIgnoreCase("null")? "": "TotalConsultationsLeft: "+jsonObject.getString("TotalConsultationsLeft");
+                            // TotalSurgeriesLeft = jsonObject.getString("TotalSurgeriesLeft").equalsIgnoreCase("null")? "": "TotalSurgeriesLeft: "+jsonObject.getString("TotalSurgeriesLeft");
+                            // TotalDelivieriesLeft = jsonObject.getString("TotalDelivieriesLeft").equalsIgnoreCase("null")? "": "TotalDelivieriesLeft: "+jsonObject.getString("TotalDelivieriesLeft");
+                            // TotalAntenatalLeft = jsonObject.getString("TotalAntenatalLeft").equalsIgnoreCase("null")? "": "TotalAntenatalLeft: "+jsonObject.getString("TotalAntenatalLeft");
+                            // ConsultationAmountLeft = jsonObject.getString("ConsultationAmountLeft").equalsIgnoreCase("null")? "": "ConsultationAmountLeft: "+jsonObject.getString("ConsultationAmountLeft");
+                            // SurgeryAmountLeft = jsonObject.getString("SurgeryAmountLeft").equalsIgnoreCase("null")? "": "TotalAdmissionsLeft: "+jsonObject.getString("SurgeryAmountLeft");
+                            // HospitalizationAmountLeft = jsonObject.getString("HospitalizationAmountLeft").equalsIgnoreCase("null")? "": "TotalAdmissionsLeft: "+jsonObject.getString("HospitalizationAmountLeft");
+                            // AntenatalAmountLeft = jsonObject.getString("AntenatalAmountLeft").equalsIgnoreCase("null")? "": "AntenatalAmountLeft: "+jsonObject.getString("AntenatalAmountLeft");
+
+                            // if(!ca.getSpecificControl("TotalAdmissionsLeft").equals("N")){Policy.put("SubItem4",TotalAdmissionsLeft);}
+                            // if(!ca.getSpecificControl("TotalVisitsLeft").equals("N")){Policy.put("SubItem5",TotalVisitsLeft);}
+                            // if(!ca.getSpecificControl("TotalConsultationsLeft").equals("N")){Policy.put("SubItem6",TotalConsultationsLeft);}
+                            // if(!ca.getSpecificControl("TotalSurgeriesLeft").equals("N")){Policy.put("SubItem7",TotalSurgeriesLeft);}
+                            // if(!ca.getSpecificControl("TotalDelivieriesLeft").equals("N")){Policy.put("SubItem8",TotalDelivieriesLeft);}
+                            // if(!ca.getSpecificControl("TotalAntenatalLeft").equals("N")){Policy.put("SubItem9",TotalAntenatalLeft);}
+                            // if(!ca.getSpecificControl("ConsultationAmountLeft").equals("N")){Policy.put("SubItem10",ConsultationAmountLeft);}
+                            // if(!ca.getSpecificControl("SurgeryAmountLeft").equals("N")){Policy.put("SubItem11",SurgeryAmountLeft);}
+                            // if(!ca.getSpecificControl("HospitalizationAmountLeft").equals("N")){Policy.put("SubItem12",HospitalizationAmountLeft);}
+                            // if(!ca.getSpecificControl("AntenatalAmountLeft").equals("N")){Policy.put("SubItem13",AntenatalAmountLeft);}
+
                             PolicyList.add(Policy);
                             etCHFID.setText("");
                             //break;
@@ -377,8 +415,8 @@ public class Enquire extends AppCompatActivity {
                     }
                     ListAdapter adapter = new SimpleAdapter(Enquire.this,
                             PolicyList, R.layout.policylist,
-                            new String[]{"Heading","Heading1","SubItem1","SubItem2","SubItem3"},
-                            new int[]{R.id.tvHeading,R.id.tvHeading1,R.id.tvSubItem1,R.id.tvSubItem2,R.id.tvSubItem3}
+                            new String[]{"Heading","Heading1","SubItem1","SubItem2","SubItem3","SubItem4","SubItem5","SubItem6","SubItem7","SubItem8","SubItem9","SubItem10","SubItem11","SubItem12","SubItem13"},
+                            new int[]{R.id.tvHeading,R.id.tvHeading1,R.id.tvSubItem1,R.id.tvSubItem2,R.id.tvSubItem3,R.id.tvSubItem4,R.id.tvSubItem5,R.id.tvSubItem6,R.id.tvSubItem7,R.id.tvSubItem8,R.id.tvSubItem9,R.id.tvSubItem10,R.id.tvSubItem11,R.id.tvSubItem12,R.id.tvSubItem13}
                     );
 
                     lv.setAdapter(adapter);

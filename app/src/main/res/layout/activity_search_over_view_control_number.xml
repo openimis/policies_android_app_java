@@ -216,6 +216,29 @@
                 android:background="@drawable/corner"
                 android:drawSelectorOnTop="true"/>
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:text="@string/requested_sms"/>
+
+            <RadioGroup
+                android:id="@+id/radio_sms"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="5dp">
+                <RadioButton android:id="@+id/sms_required_yes"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Y" />
+                <RadioButton android:id="@+id/sms_required_no"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="N" />
+            </RadioGroup>
+
+
         </LinearLayout>
 
 

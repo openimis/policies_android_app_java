@@ -243,7 +243,7 @@
   <string name="DeleteFamilyWithPolicy">This Family has been deleted only offline because it has a policy online.</string>
   <string name="PolicyValueChange">Value of policy with the enrolment date : </string>
   <string name="Changed"> Changed</string>
-  <string name="ExceedThreshold"><![CDATA[Following policies with enrolment date will exceed the Maximum number of threshold of Insurees <br/> Do you want to activate this Insuree?]]></string>
+  <string name="ExceedThreshold">Following policies with enrolment date will exceed the Maximum number of threshold of Insurees <br/> Do you want to activate this Insuree?</string>
   <string name="ExceedMemberCount">Policies with the following enrolment dates have reached to their maximum number of members count and therefore this insuree will not be covered by these policies however the insuree is added to the family : </string>
   <string name="Acquire">Acquire</string>
   <string name="SavedOnMemoryCard">Data has been saved on the external memory card.</string>
@@ -292,7 +292,7 @@
   <string name="PolicyCovered">Price of the policy is covered. Do you still want to add contribution?</string>
   <string name="ExceedsPolicy">Contribution exceeds the price of the policy</string>
   <string name="PriceBelow">Price of the policy not covered yet. Please select action to perform.</string>
-  <string name="MaxInstallment"><![CDATA[This is the last installment according to the product definition.<br/>Price of the policy not covered yet. Please select action to perform.]]></string>
+  <string name="MaxInstallment">This is the last installment according to the product definition.<br/>Price of the policy not covered yet. Please select action to perform.</string>
   <string name="Reports">Reports</string>
   <string name="SnapshotIndicators">Snapshot Indicators</string>
   <string name="CummulativeIndicators">Cumulative Indicators</string>
@@ -375,4 +375,16 @@
   <string name="empty_year">Please fill the year</string>
   <string name="DeleteFamilyOnlyOffline">Deleting of family will also Delete all Insurees, Policies and Premiums of this Family</string>
   <string name="LastInstallment">Last Installment</string>
+  <string name="amountContribution">Amount of contribution </string>
+  <string name="pick_date">Pick Date</string>
+  <string name="get">Get</string>
+  <string name="date_from">Date From</string>
+  <string name="date_to">Date To</string>
+  <string name="send_sms">Send SMS</string>
+  <string name="requested_sms">Requested SMS</string>
+  <string name="enrolled_policies">Enrolled Policies</string>
+  <string name="not_enrolled_policies">Not Enrolled Policies</string>
+  <string name="request_enrolled_policies">Request for Not Enrolled Policies</string>
+  <string name="phone_number_not_provided">Phone number not provided</string>
+  <string name="not_unique_products">Insurance products of the selected policies are not unique</string>
 </resources>

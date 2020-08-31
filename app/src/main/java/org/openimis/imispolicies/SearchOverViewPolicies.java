@@ -3,10 +3,11 @@ package org.openimis.imispolicies;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -301,12 +302,8 @@ public class SearchOverViewPolicies extends AppCompatActivity {
 
     private void BindSpinnerProduct() {
         clientAndroidInterface = new ClientAndroidInterface(this);
-        String result = "";
-        try {
-            result = clientAndroidInterface.getProductsByDistrict(clientAndroidInterface.getLocationId());
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+
+        String result = clientAndroidInterface.getProductsRD();
 
         JSONArray jsonArray = null;
         JSONObject object;

@@ -7,6 +7,7 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.Filter;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -163,6 +164,11 @@ public class OverViewPoliciesAdapter<VH extends TrackSelectionAdapter.ViewHolder
 
         } catch (JSONException e) {
             e.printStackTrace();
+        }
+
+        if (UploadedDate.equals("") && !RequestedDate.equals("")) {
+            LastName = "";
+            OtherNames = "";
         }
 
         ((Reportmsg) holder).Id.setText(Id);

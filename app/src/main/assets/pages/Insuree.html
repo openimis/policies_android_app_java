@@ -240,10 +240,14 @@ In case of dispute arising out or in relation to the use of the program, it is s
 
             $('#btnScan').click(function (){
                var InsuranceNo = Android.getScannedNumber();
-                if(InsuranceNo > 0){
+                 var ans = Android.isValidInsuranceNumber(InsuranceNo);
+                 if(ans != true){
+                    $('#txtInsuranceNumber').val("");
+                    $('#txtInsuranceNumber').focus();
+                 }else{
                     $('#txtInsuranceNumber').val(InsuranceNo);
                     getImage();
-                }
+                 }
             });
 
             if($('#hfIsOffline').val() == "0"){

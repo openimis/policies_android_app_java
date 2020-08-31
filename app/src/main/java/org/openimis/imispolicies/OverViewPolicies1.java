@@ -2,13 +2,12 @@ package org.openimis.imispolicies;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -16,12 +15,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import com.exact.general.General;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -41,8 +39,13 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-import org.openimis.imispolicies.R;
 
+import android.app.ProgressDialog;
+import android.widget.Toast;
+
+import com.exact.general.General;
+
+import org.openimis.imispolicies.R;
 
 public class OverViewPolicies1 extends AppCompatActivity {
 
@@ -59,6 +62,9 @@ public class OverViewPolicies1 extends AppCompatActivity {
     TextView ValueAmountOfContribution;
     TextView NothingFound;
 
+    CheckBox send_sms;
+    int SmsRequired = 0;
+
     public static int search_count = 0;
 
     public static List<String> num = new ArrayList<>();
@@ -67,9 +73,9 @@ public class OverViewPolicies1 extends AppCompatActivity {
 
     public static int PolicyValueToSend = 0;
     public static JSONObject getControlNumber = new JSONObject();
-
     @SuppressLint("SimpleDateFormat")
     SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+    SimpleDateFormat format2 = new SimpleDateFormat("yyyy/MM/dd");
     Calendar cal = Calendar.getInstance();
     String dt = format.format(cal.getTime());
     private String AmountCalculated;
@@ -304,7 +310,6 @@ public class OverViewPolicies1 extends AppCompatActivity {
         PolicyRecyclerView.setAdapter(overViewPoliciesAdapter);
     }
 
-
     public void trackBox(final JSONObject policies, String Number){
         // get prompts.xml view
         LayoutInflater li = LayoutInflater.from(this);
@@ -319,6 +324,19 @@ public class OverViewPolicies1 extends AppCompatActivity {
         final EditText amount = (EditText) promptsView.findViewById(R.id.display);
         final EditText phoneNumber = (EditText) promptsView.findViewById(R.id.phonenumber);
         final Spinner payment_type = (Spinner) promptsView.findViewById(R.id.payment_type2);
+        final CheckBox send_sms = (CheckBox) promptsView.findViewById(R.id.send_sms);
+
+
+
+        send_sms.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(((CompoundButton) view).isChecked()){
+                    SmsRequired = 1;
+                }
+            }
+        });
+
 
         addItemsOnSpinner2(payment_type);
         addListenerOnSpinnerItemSelection(payment_type);
@@ -326,6 +344,9 @@ public class OverViewPolicies1 extends AppCompatActivity {
 
 
         amount.setText(Number);
+        if(clientAndroidInterface.getSpecificControl("TotalAmount").equals("R")){
+            amount.setEnabled(false);
+        }
 
         final EditText finalAmount = (EditText) promptsView.findViewById(R.id.display);
 
@@ -334,11 +355,11 @@ public class OverViewPolicies1 extends AppCompatActivity {
                 .setCancelable(false)
                 .setPositiveButton(getResources().getString(R.string.Get_Control_Number),
                         new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
+                            public void onClick(DialogInterface dialog,int id) {
                                 try {
                                     policies.put("phone_number",phoneNumber.getText().toString());
                                     policies.put("amount_to_be_paid",finalAmount.getText().toString());
-
+                                    policies.put("SmsRequired",SmsRequired);
 
                                     if(PayType.toString().equals("Mobile Phone")){
                                         policies.put("type_of_payment","MobilePhone");
@@ -348,7 +369,15 @@ public class OverViewPolicies1 extends AppCompatActivity {
                                     amountConfirmed = finalAmount.getText().toString();
                                     PaymentType = PayType.toString();
 
-                                    getControlNumber(policies);
+                                    if (SmsRequired == 1 && phoneNumber.getText().toString().equals("")) {
+                                        clientAndroidInterface.ShowDialog(getResources().getString(R.string.phone_number_not_provided));
+                                    } else {
+                                        if (!clientAndroidInterface.isProductsListUnique(policies)) {
+                                            policyDeleteDialogReport(getResources().getString(R.string.not_unique_products));
+                                        } else {
+                                            getControlNumber(policies, String.valueOf(SmsRequired));
+                                        }
+                                    }
                                 } catch (JSONException e) {
                                     e.printStackTrace();
                                 } catch (IOException e) {
@@ -546,10 +575,24 @@ public class OverViewPolicies1 extends AppCompatActivity {
         AlertDialog alertDialog = alertDialogBuilder.create();
         alertDialog.show();
     }
-    private int getControlNumber(final JSONObject order) throws IOException {
-
+    private int getControlNumber(final JSONObject order, final String SmsRequired) throws IOException {
         Thread thread = new Thread(){
             public void run() {
+                HttpClient httpClient = new DefaultHttpClient();
+                HttpPost httpPost = new HttpPost(AppInformation.DomainInfo.getDomain()+"/restapi/api/GetControlNumber");
+// Request parameters and other properties.
+                try {
+                    StringEntity postingString = new StringEntity(order.toString());
+                    httpPost.setEntity(postingString);
+                    httpPost.setHeader("Content-type", "application/json");
+                    httpPost.setHeader("Authorization", "bearer "+tokenl.getTokenText());
+                } catch (UnsupportedEncodingException e) {
+                    // writing error to Log
+                    e.printStackTrace();
+                }
+/*
+ * Execute the HTTP Request
+ */
                 runOnUiThread(new Runnable() {
                     public void run() {
                         pd = ProgressDialog.show(OverViewPolicies1.this, "", getResources().getString(R.string.Get_Control_Number));
@@ -573,6 +616,16 @@ public class OverViewPolicies1 extends AppCompatActivity {
                         int cod = response.getStatusLine().getStatusCode();
                         final int Finalcode = cod;
                         if(cod >= 400){
+                            JSONObject ob = null;
+                            try{
+                                ob = new JSONObject(content);
+                                error_occured[0] = ob.getString("error_occured");
+                                if(error_occured[0].equals("true")){
+                                    error_message[0] = ob.getString("error_message");
+                                }
+                            }catch (Exception e){
+                                e.printStackTrace();
+                            }
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
@@ -604,7 +657,7 @@ public class OverViewPolicies1 extends AppCompatActivity {
                                 }else{
                                     internal_Identifier[0] = ob.getString("internal_identifier");
                                     control_number[0] = ob.getString("control_number");
-                                    int id = insertAfterRequest(amountConfirmed, control_number[0], internal_Identifier[0], PaymentType);
+                                    int id = insertAfterRequest(amountConfirmed, control_number[0], internal_Identifier[0], PaymentType, SmsRequired);
                                     updateAfterRequest(id);
                                     runOnUiThread(new Runnable() {
                                         public void run() {
@@ -667,7 +720,7 @@ public class OverViewPolicies1 extends AppCompatActivity {
         }
     }
 
-    private int insertAfterRequest(String amountCalculated, String control_number, String InternalIdentifier, String PaymentType) {
-        return clientAndroidInterface.insertRecordedPolicy(amountCalculated,amountConfirmed, control_number, InternalIdentifier,PaymentType);
+    private int insertAfterRequest(String amountCalculated, String control_number, String InternalIdentifier, String PaymentType, String SmsRequired) {
+        return clientAndroidInterface.insertRecordedPolicy(amountCalculated,amountConfirmed, control_number, InternalIdentifier,PaymentType, SmsRequired);
     }
 }

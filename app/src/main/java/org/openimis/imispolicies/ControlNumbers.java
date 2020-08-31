@@ -14,6 +14,7 @@ public class ControlNumbers extends AppCompatActivity {
     TextView OverViewPolicies;
     TextView OverViewControlNumber;
     TextView CheckCommission;
+    TextView NotEnrolledPolicies;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,6 +28,8 @@ public class ControlNumbers extends AppCompatActivity {
         OverViewPolicies = (TextView) findViewById(R.id.OverViewPolicies);
         OverViewControlNumber = (TextView) findViewById(R.id.OverViewControlNumber);
         CheckCommission = (TextView) findViewById(R.id.CheckCommission);
+        NotEnrolledPolicies = (TextView) findViewById(R.id.NotEnrolledPolicies);
+
 
         OverViewPolicies.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -52,6 +55,13 @@ public class ControlNumbers extends AppCompatActivity {
             }
         });
 
+        NotEnrolledPolicies.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(ControlNumbers.this, SearchNotEnrolledPolicies.class);
+                startActivity(intent);
+            }
+        });
 
     }
 

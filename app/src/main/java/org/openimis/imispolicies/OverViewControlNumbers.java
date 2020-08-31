@@ -7,20 +7,22 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
-import android.os.Bundle;
+import android.provider.Telephony;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.exact.general.General;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -32,6 +34,21 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import android.app.AlertDialog;
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.exact.general.General;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -83,6 +100,7 @@ public class OverViewControlNumbers extends AppCompatActivity {
     String RequestedFrom = "";
     String RequestedTo = "";
     String RadioRenewal = "";
+    String RadioSms = "";
     String PaymentType = "";
 
     @Override
@@ -211,6 +229,7 @@ public class OverViewControlNumbers extends AppCompatActivity {
         UploadedTo = getIntent().getStringExtra("REQUESTED_FROM");
         UploadedTo = getIntent().getStringExtra("REQUESTED_TO");
         RadioRenewal = getIntent().getStringExtra("RENEWAL");
+        RadioSms = getIntent().getStringExtra("SMS");
         PaymentType = getIntent().getStringExtra("PAYMENT_TYPE");
 
         fillRecordedPolicies();
@@ -318,6 +337,7 @@ public class OverViewControlNumbers extends AppCompatActivity {
                                 intent.putExtra("REQUESTED_FROM", RequestedFrom);
                                 intent.putExtra("REQUESTED_TO", RequestedTo);
                                 intent.putExtra("PAYMENT_TYPE", PaymentType);
+                                intent.putExtra("SMS", RadioSms);
                                 startActivity(intent);
                             }
                         });
@@ -381,7 +401,7 @@ public class OverViewControlNumbers extends AppCompatActivity {
         // show it
         alertDialog.show();
     }
-
+    
     public void LoginDialogBox() {
 
         //final int[] userid = {0};
@@ -498,15 +518,32 @@ public class OverViewControlNumbers extends AppCompatActivity {
 
     private int getControlNumber(final JSONArray order) throws IOException, JSONException {
 
+        //JSONArray newPolicies = removeDublicatePolicies(order);
+
         final JSONObject jsonObject = new JSONObject();
 
         try {
-            jsonObject.put("requests", order);
+            jsonObject.put("requests",order);
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        Thread thread = new Thread() {
+        Thread thread = new Thread(){
             public void run() {
+                HttpClient httpClient = new DefaultHttpClient();
+                HttpPost httpPost = new HttpPost(AppInformation.DomainInfo.getDomain()+"/restapi/api/GetAssignedControlNumbers");
+// Request parameters and other properties.
+                try {
+                    StringEntity postingString = new StringEntity(jsonObject.toString());
+                    httpPost.setEntity(postingString);
+                    httpPost.setHeader("Content-type", "application/json");
+                    httpPost.setHeader("Authorization", "bearer "+tokenl.getTokenText());
+                } catch (UnsupportedEncodingException e) {
+                    // writing error to Log
+                    e.printStackTrace();
+                }
+/*
+ * Execute the HTTP Request
+ */
                 runOnUiThread(new Runnable() {
                     public void run() {
                         pd = ProgressDialog.show(OverViewControlNumbers.this, "", getResources().getString(R.string.Get_Control_Number));
