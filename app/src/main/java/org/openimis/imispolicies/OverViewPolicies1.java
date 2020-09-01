@@ -75,7 +75,6 @@ public class OverViewPolicies1 extends AppCompatActivity {
     public static JSONObject getControlNumber = new JSONObject();
     @SuppressLint("SimpleDateFormat")
     SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-    SimpleDateFormat format2 = new SimpleDateFormat("yyyy/MM/dd");
     Calendar cal = Calendar.getInstance();
     String dt = format.format(cal.getTime());
     private String AmountCalculated;

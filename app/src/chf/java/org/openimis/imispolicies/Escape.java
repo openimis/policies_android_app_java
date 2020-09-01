@@ -46,15 +46,12 @@ public class Escape {
 
     private boolean isValidInsuranceNumber(String InsuranceNumber){
         if (InsuranceNumber.length() != 9) return false;
-        String chfid;
-        int Part1, Part2;
-        Part1 = Integer.parseInt(InsuranceNumber.toString())/10;
-        Part2 = Part1 % 7;
+        int actualControlNumber, expectedControlNumber;
 
-        chfid = InsuranceNumber.substring(0, 8) + Integer.toString(Part2);
-        return InsuranceNumber.equals(chfid);
+        expectedControlNumber = Integer.parseInt(InsuranceNumber.substring(8));
+        actualControlNumber = Integer.parseInt(InsuranceNumber.substring(0, 8)) % 7;
 
-        //return true;
+        return expectedControlNumber == actualControlNumber;
     }
 
 }
