@@ -190,7 +190,6 @@ public class SnapshotIndicators extends AppCompatActivity {
                 public void run() {
                     if(snapshot.length() != 0 || snapshot != null){
                         try {
-                            // TODO: Check if iteration works better
                             JSONObject ob = new JSONObject(snapshot);
                             FAPC.setText(ob.getString("active"));
                             FEPC.setText(ob.getString("expired"));

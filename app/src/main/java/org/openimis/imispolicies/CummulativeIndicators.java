@@ -170,7 +170,6 @@ public class CummulativeIndicators extends AppCompatActivity {
                 public void run() {
                     if(commulative.length() != 0){
                         try {
-                            //TODO:  Check if iteration was better
                             JSONObject ob = new JSONObject(commulative);
 
                             NPC.setText(ob.getString("newPolicies"));

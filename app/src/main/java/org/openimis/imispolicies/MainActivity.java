@@ -238,9 +238,6 @@ public class MainActivity extends AppCompatActivity
 
         sqlHandler.isPrivate = true;
         global = (Global) getApplicationContext();
-// TODO: Check this
-//        ca = new ClientAndroidInterface(context);
-//        ca.getControls();
         //Set the Image folder path
         global.setImageFolder(getApplicationContext().getApplicationInfo().dataDir + "/Images/");
         CreateFolders();
