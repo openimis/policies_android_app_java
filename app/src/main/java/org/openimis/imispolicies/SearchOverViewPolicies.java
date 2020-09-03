@@ -158,7 +158,7 @@ public class SearchOverViewPolicies extends AppCompatActivity {
                     RadioRequested = radioButtonRequested.getText().toString();
                 }
 
-                Intent intent = new Intent(SearchOverViewPolicies.this, OverViewPolicies1.class);
+                Intent intent = new Intent(SearchOverViewPolicies.this, OverViewPolicies.class);
                 intent.putExtra("RENEWAL", RadioRenewal);
                 intent.putExtra("INSURANCE_NUMBER", InsuranceNumber);
                 intent.putExtra("OTHER_NAMES", OtherNames);

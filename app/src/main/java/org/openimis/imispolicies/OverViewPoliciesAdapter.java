@@ -23,7 +23,7 @@ import org.openimis.imispolicies.R;
  */
 //Please see newPolicies and query to check Insuaree numbers
 public class OverViewPoliciesAdapter<VH extends TrackSelectionAdapter.ViewHolder> extends RecyclerView.Adapter {
-    OverViewPolicies1 overViewPolicies = new OverViewPolicies1();
+    OverViewPolicies overViewPolicies = new OverViewPolicies();
     private JSONArray policies;
     private JSONArray newPolicies;
 

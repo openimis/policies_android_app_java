@@ -101,7 +101,7 @@
             android:screenOrientation="portrait" />
         <activity android:name="org.openimis.imispolicies.ControlNumbers" />
         <activity android:name="org.openimis.imispolicies.SearchOverViewPolicies" />
-        <activity android:name="org.openimis.imispolicies.OverViewPolicies1" />
+        <activity android:name="org.openimis.imispolicies.OverViewPolicies" />
         <activity android:name="org.openimis.imispolicies.OverViewControlNumbers" />
         <activity android:name="org.openimis.imispolicies.SearchOverViewControlNumber" />
         <activity android:name="org.openimis.imispolicies.ViewPolicies" />

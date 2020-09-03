@@ -45,9 +45,7 @@ import android.widget.Toast;
 
 import com.exact.general.General;
 
-import org.openimis.imispolicies.R;
-
-public class OverViewPolicies1 extends AppCompatActivity {
+public class OverViewPolicies extends AppCompatActivity {
 
     JSONArray policy;
     ClientAndroidInterface clientAndroidInterface;
@@ -120,7 +118,7 @@ public class OverViewPolicies1 extends AppCompatActivity {
 
                 General _general = new General(AppInformation.DomainInfo.getDomain());
 
-                if(_general.isNetworkAvailable(OverViewPolicies1.this)){
+                if(_general.isNetworkAvailable(OverViewPolicies.this)){
                     if(tokenl.getTokenText().length() <= 0){
                         LoginDialogBox();
                     }else{
@@ -300,7 +298,7 @@ public class OverViewPolicies1 extends AppCompatActivity {
 
     public void fillRecordedPolicies(){
         policy = clientAndroidInterface.getRecordedPolicies(InsuranceNumber,OtherNames,LastName,InsuranceProduct,UploadedFrom,UploadedTo,RadioRenewal,RadioRequested);//OrderArray;
-        LayoutInflater li = LayoutInflater.from(OverViewPolicies1.this);
+        LayoutInflater li = LayoutInflater.from(OverViewPolicies.this);
         View promptsView = li.inflate(R.layout.activity_over_view_policies1, null);
         PolicyRecyclerView = (RecyclerView) findViewById(R.id.listofpolicies);
         overViewPoliciesAdapter = new OverViewPoliciesAdapter(this,policy);
@@ -438,7 +436,7 @@ public class OverViewPolicies1 extends AppCompatActivity {
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 finish();
-                                Intent intent = new Intent(OverViewPolicies1.this, OverViewPolicies1.class);
+                                Intent intent = new Intent(OverViewPolicies.this, OverViewPolicies.class);
                                 intent.putExtra("RENEWAL", RadioRenewal);
                                 intent.putExtra("INSURANCE_NUMBER", InsuranceNumber);
                                 intent.putExtra("OTHER_NAMES", OtherNames);
@@ -462,7 +460,7 @@ public class OverViewPolicies1 extends AppCompatActivity {
 
         //final int[] userid = {0};
 
-        Global global = (Global) OverViewPolicies1.this.getApplicationContext();
+        Global global = (Global) OverViewPolicies.this.getApplicationContext();
 
         // get prompts.xml view
         LayoutInflater li = LayoutInflater.from(this);
@@ -485,7 +483,7 @@ public class OverViewPolicies1 extends AppCompatActivity {
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 if(!username.getText().toString().equals("") && !password.getText().toString().equals("")){
-                                    pd = ProgressDialog.show(OverViewPolicies1.this, getResources().getString(R.string.Login), getResources().getString(R.string.InProgress));
+                                    pd = ProgressDialog.show(OverViewPolicies.this, getResources().getString(R.string.Login), getResources().getString(R.string.InProgress));
 
                                     new Thread() {
                                         public void run() {
@@ -532,10 +530,10 @@ public class OverViewPolicies1 extends AppCompatActivity {
                                                     public void run() {
                                                         if(finalToken.length() > 0){
                                                             pd.dismiss();
-                                                            Toast.makeText(OverViewPolicies1.this,OverViewPolicies1.this.getResources().getString(R.string.Login_Successful), Toast.LENGTH_LONG).show();
+                                                            Toast.makeText(OverViewPolicies.this, OverViewPolicies.this.getResources().getString(R.string.Login_Successful), Toast.LENGTH_LONG).show();
                                                         }else{
                                                             pd.dismiss();
-                                                            Toast.makeText(OverViewPolicies1.this,OverViewPolicies1.this.getResources().getString(R.string.LoginFail), Toast.LENGTH_LONG).show();
+                                                            Toast.makeText(OverViewPolicies.this, OverViewPolicies.this.getResources().getString(R.string.LoginFail), Toast.LENGTH_LONG).show();
                                                             LoginDialogBox();
                                                         }
                                                     }
@@ -545,7 +543,7 @@ public class OverViewPolicies1 extends AppCompatActivity {
                                                     @Override
                                                     public void run() {
                                                         pd.dismiss();
-                                                        Toast.makeText(OverViewPolicies1.this,OverViewPolicies1.this.getResources().getString(R.string.LoginFail), Toast.LENGTH_LONG).show();
+                                                        Toast.makeText(OverViewPolicies.this, OverViewPolicies.this.getResources().getString(R.string.LoginFail), Toast.LENGTH_LONG).show();
                                                         LoginDialogBox();
                                                     }
                                                 });
@@ -558,7 +556,7 @@ public class OverViewPolicies1 extends AppCompatActivity {
 
                                 }else{
                                     LoginDialogBox();
-                                    Toast.makeText(OverViewPolicies1.this,OverViewPolicies1.this.getResources().getString(R.string.Enter_Credentials), Toast.LENGTH_LONG).show();
+                                    Toast.makeText(OverViewPolicies.this, OverViewPolicies.this.getResources().getString(R.string.Enter_Credentials), Toast.LENGTH_LONG).show();
                                 }
 
                             }
@@ -594,7 +592,7 @@ public class OverViewPolicies1 extends AppCompatActivity {
  */
                 runOnUiThread(new Runnable() {
                     public void run() {
-                        pd = ProgressDialog.show(OverViewPolicies1.this, "", getResources().getString(R.string.Get_Control_Number));
+                        pd = ProgressDialog.show(OverViewPolicies.this, "", getResources().getString(R.string.Get_Control_Number));
                     }
                 });
 

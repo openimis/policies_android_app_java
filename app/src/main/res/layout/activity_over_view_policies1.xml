@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:id="@+id/actv"
-    tools:context="org.openimis.imispolicies.tz.co.exact.OverViewPolicies1">
+    tools:context="org.openimis.imispolicies.tz.co.exact.OverViewPolicies">
 
 
     <RelativeLayout
