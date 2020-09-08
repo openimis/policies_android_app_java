@@ -375,12 +375,16 @@
   <string name="empty_year">Entrer l\'année</string>
   <string name="DeleteFamilyOnlyOffline">Suppression de la famille supprimera également tous les assurés, les polices et les cotisations de la famille.</string>
   <string name="LastInstallment">Dernier versement</string>
-  <!-- Require translation -->
-  <string name="pick_date">Pick Date</string>
-  <string name="get">Get</string>
-  <string name="date_from">Date From</string>
-  <string name="date_to">Date To</string>
-  <string name="send_sms">Send SMS</string>
-  <string name="requested_sms">Requested SMS</string>
-  <string name="amountContribution">Amount of contribution </string>
+  <string name="enrolled_policies">Polices enregistrées</string>
+  <string name="not_enrolled_policies">Polices non enregistrées</string>
+  <string name="request_enrolled_policies">Demande pour polices non enregistrées</string>
+  <string name="phone_number_not_provided">Numéro de téléphone non fourni</string>
+  <string name="not_unique_products">Les produits d\'assurance des polices sélectionnées ne sont pas uniques</string>
+  <string name="amountContribution">Montant de la contribution</string>
+  <string name="pick_date">Choisir la date</string>
+  <string name="get">Obtenir</string>
+  <string name="date_from">Date du</string>
+  <string name="date_to">Date à</string>
+  <string name="send_sms">Envoyer un SMS</string>
+  <string name="requested_sms">SMS demandé</string>
 </resources>
