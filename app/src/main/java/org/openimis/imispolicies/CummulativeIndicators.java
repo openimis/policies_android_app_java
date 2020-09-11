@@ -2,6 +2,7 @@ package org.openimis.imispolicies;
 
 import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.MenuItem;
@@ -56,7 +57,10 @@ public class CummulativeIndicators extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cummulative_indicators);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        final ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setTitle(getResources().getString(R.string.CummulativeIndicators));
 
         DateFrom= (Button) findViewById(R.id.DateFrom);
         DateTo= (Button) findViewById(R.id.DateTo);

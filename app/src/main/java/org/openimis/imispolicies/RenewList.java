@@ -194,7 +194,6 @@ public class RenewList extends AppCompatActivity {
                 HashMap<String, String> oItem;
                 //noinspection unchecked
                 oItem = (HashMap<String, String>) parent.getItemAtPosition(position);
-
                 intent.putExtra("CHFID", oItem.get("CHFID"));
                 intent.putExtra("ProductCode", oItem.get("ProductCode"));
                 intent.putExtra("RenewalId", oItem.get("RenewalId"));
@@ -523,7 +522,6 @@ public class RenewList extends AppCompatActivity {
         menuInflater.inflate(R.menu.menu_statistics, menu);
         return true;
     }
-
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {

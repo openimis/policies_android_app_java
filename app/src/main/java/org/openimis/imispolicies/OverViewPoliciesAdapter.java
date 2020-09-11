@@ -7,6 +7,7 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.Filter;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -22,7 +23,7 @@ import org.openimis.imispolicies.R;
  */
 //Please see newPolicies and query to check Insuaree numbers
 public class OverViewPoliciesAdapter<VH extends TrackSelectionAdapter.ViewHolder> extends RecyclerView.Adapter {
-    OverViewPolicies1 overViewPolicies = new OverViewPolicies1();
+    OverViewPolicies overViewPolicies = new OverViewPolicies();
     private JSONArray policies;
     private JSONArray newPolicies;
 
@@ -163,6 +164,11 @@ public class OverViewPoliciesAdapter<VH extends TrackSelectionAdapter.ViewHolder
 
         } catch (JSONException e) {
             e.printStackTrace();
+        }
+
+        if (UploadedDate.equals("") && !RequestedDate.equals("")) {
+            LastName = "";
+            OtherNames = "";
         }
 
         ((Reportmsg) holder).Id.setText(Id);

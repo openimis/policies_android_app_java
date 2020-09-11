@@ -166,7 +166,7 @@ public class Renewal extends AppCompatActivity {
 
         if(getIntent().getStringExtra("CHFID").equals(getResources().getString(R.string.UnlistedRenewalPolicies))){
             BindSpinnerPayersXXXX(LocationId);
-            BindSpinnerProduct(LocationId);
+            BindSpinnerProduct();
         }else{
             spProduct.setVisibility(View.GONE);
             BindSpinnerPayers();
@@ -295,7 +295,7 @@ public class Renewal extends AppCompatActivity {
                 String searchString = etOfficer.getText().toString();
                 int LocID = ca.getLocationId(searchString);
                 BindSpinnerPayersXXXX(LocID);
-                BindSpinnerProduct(LocID);
+                BindSpinnerProduct();
             }
 
             @Override
@@ -642,10 +642,10 @@ public class Renewal extends AppCompatActivity {
         }
 
     }
-    private void BindSpinnerProduct(int LocationId) {
+    private void BindSpinnerProduct() {
 
         ca = new ClientAndroidInterface(this);
-        String result = ca.getProductsByDistrict(LocationId);
+        String result = ca.getProductsRD();
 
         JSONArray jsonArray = null;
         JSONObject object;

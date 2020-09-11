@@ -375,4 +375,17 @@
   <string name="empty_year">Tafadhali jaza mwaka</string>
   <string name="DeleteFamilyOnlyOffline">Taarifa za familia hii zitafutwa kwenye simu tu.</string>
   <string name="LastInstallment">Haya yatakuwa malipo yako ya mwisho, Je unahakika unataka kuendelea?.</string>
+  <!-- Require translation -->
+  <string name="amountContribution">Amount of contribution </string>
+  <string name="pick_date">Pick Date</string>
+  <string name="get">Get</string>
+  <string name="date_from">Date From</string>
+  <string name="date_to">Date To</string>
+  <string name="send_sms">Send SMS</string>
+  <string name="requested_sms">Requested SMS</string>
+  <string name="enrolled_policies">Enrolled Policies</string>
+  <string name="not_enrolled_policies">Not Enrolled Policies</string>
+  <string name="request_enrolled_policies">Request for Not Enrolled Policies</string>
+  <string name="phone_number_not_provided">Phone number not provided</string>
+  <string name="not_unique_products">Insurance products of the selected policies are not unique</string>
 </resources>

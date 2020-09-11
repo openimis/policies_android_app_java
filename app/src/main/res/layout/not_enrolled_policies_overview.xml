@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:id="@+id/actv"
+    tools:context="org.openimis.imispolicies.NotEnrolledPoliciesOverview">
+
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/grey">
+
+        <TextView
+            android:id="@+id/numOfFoundPoliciesLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:textColor="@color/white"
+            android:typeface="monospace"
+            android:text="@string/number_of_found_policies"/>
+        <TextView
+            android:id="@+id/numOfFoundPoliciesValue"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:textAlignment="textEnd"
+            android:textColor="@color/white"
+            android:typeface="monospace"
+            android:layout_toRightOf="@+id/numOfFoundPoliciesLabel"
+            android:text="0"
+            android:gravity="end" />
+
+        <TextView
+            android:id="@+id/amountOfContributionsLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/numOfFoundPoliciesLabel"
+            android:layout_margin="10dp"
+            android:textColor="@color/white"
+            android:typeface="monospace"
+            android:text="@string/amount_of_contribution"/>
+        <TextView
+            android:id="@+id/amountOfContributionsValue"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:textAlignment="textEnd"
+            android:typeface="monospace"
+            android:textColor="@color/white"
+            android:layout_below="@+id/numOfFoundPoliciesValue"
+            android:layout_toRightOf="@+id/amountOfContributionsLabel"
+            android:text="0"
+            android:gravity="end" />
+        <TextView
+            android:id="@+id/noPoliciesFound"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:textColor="@color/orange"
+            android:typeface="monospace"
+            android:layout_below="@+id/amountOfContributionsValue"
+            android:text="@string/NoDataAvailable"
+            android:visibility="gone" />
+
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="45dp"
+        android:orientation="horizontal"
+        android:background="@color/grey"
+        android:layout_marginBottom="5dp">
+
+        <Button
+            android:id="@+id/deleteNotEnrolledPoliciesButton"
+            android:layout_width="80dp"
+            android:layout_height="35dp"
+            android:text="@string/Delete"
+            android:elevation="@dimen/app_bar_height"
+            android:background="@color/red"
+            android:textStyle="bold"
+            android:layout_margin="5dp"
+            android:textColor="@color/white"/>
+
+        <Button
+            android:id="@+id/requestControlNumberButton"
+            android:layout_width="80dp"
+            android:layout_height="35dp"
+            android:text="@string/request"
+            android:elevation="@dimen/app_bar_height"
+            android:background="@color/black"
+            android:textStyle="bold"
+            android:layout_margin="5dp"
+            android:textColor="@color/white"/>
+
+
+    </LinearLayout>
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/listOfNotEnrolledPolicies"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="5dp"
+        android:background="@color/white"/>
+
+
+
+
+
+</LinearLayout>
