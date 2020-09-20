@@ -545,7 +545,7 @@ public class NotEnrolledPoliciesOverview extends AppCompatActivity {
         Thread thread = new Thread() {
             public void run() {
                 HttpClient httpClient = new DefaultHttpClient();
-                HttpPost httpPost = new HttpPost(AppInformation.DomainInfo.getDomain() + "/api/api/GetControlNumber");
+                HttpPost httpPost = new HttpPost(AppInformation.DomainInfo.getDomain() + "payment/GetControlNumber");
 // Request parameters and other properties.
                 try {
                     StringEntity postingString = new StringEntity(order.toString());

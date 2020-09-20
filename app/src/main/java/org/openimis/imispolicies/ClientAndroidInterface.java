@@ -4920,7 +4920,7 @@ public class ClientAndroidInterface {
 
                 try {
                     object.put("enrollment_officer_code", OfficerCode);
-                    str[0] = toRestApi.postObjectToRestApiObject(object, "api/Locations/GetOfficerVillages");
+                    str[0] = toRestApi.postObjectToRestApiObject(object, "/Locations/GetOfficerVillages");
                     JSONObject object1 = null;
                     object1 = new JSONObject(str[0]);
                     String OfficerVillages = object1.getString("data");
