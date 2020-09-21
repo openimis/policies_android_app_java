@@ -106,6 +106,8 @@
         <activity android:name="org.openimis.imispolicies.SearchOverViewControlNumber" />
         <activity android:name="org.openimis.imispolicies.ViewPolicies" />
         <activity android:name="org.openimis.imispolicies.CheckCommission"></activity>
+        <activity android:name="org.openimis.imispolicies.SearchNotEnrolledPolicies"></activity>
+        <activity android:name="org.openimis.imispolicies.NotEnrolledPoliciesOverview"></activity>
     </application>
 
 </manifest>
