@@ -4951,7 +4951,7 @@ public class ClientAndroidInterface {
 
     private boolean insertConfirmationTypes(JSONArray jsonArray) throws JSONException {
         try {
-            String Columns[] = {"ConfirmationTypeCode", "ConfirmationType", "SortOrder", "AltLanguage"};
+            String Columns[] = {"confirmationTypeCode", "confirmationType", "sortOrder", "altLanguage"};
             sqlHandler.insertData("tblConfirmationTypes", Columns, jsonArray.toString(), "DELETE FROM tblConfirmationTypes");
         }catch (Exception e){
             e.printStackTrace();
