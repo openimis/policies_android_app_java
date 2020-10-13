@@ -2960,6 +2960,8 @@ public class ClientAndroidInterface {
                             e.printStackTrace();
                         } catch (IOException e) {
                             e.printStackTrace();
+                        } catch (NumberFormatException e) {
+                            e.printStackTrace();
                         }
                         if (mylist.size() == 0) {
                             ((Activity) mContext).runOnUiThread(new Runnable() {
@@ -2994,6 +2996,13 @@ public class ClientAndroidInterface {
                                     //ShowDialog(mContext.getResources().getString(R.string.FamilyUploaded));
                                 }
 
+                            });
+                        } else {
+                            ((Activity) mContext).runOnUiThread(
+                                    new Runnable(){
+                                        @Override public void run(){
+                                            ShowDialog(mylist.toString());
+                                    }
                             });
                         }
 
@@ -3030,6 +3039,8 @@ public class ClientAndroidInterface {
                         e.printStackTrace();
                     } catch (IOException e) {
                         e.printStackTrace();
+                    } catch (NumberFormatException e) {
+                        e.printStackTrace();
                     }
                     if (mylist.size() == 0) {
                         ((Activity) mContext).runOnUiThread(new Runnable() {
@@ -3065,6 +3076,13 @@ public class ClientAndroidInterface {
                             }
 
                         });
+                    } else {
+                        ((Activity) mContext).runOnUiThread(
+                                new Runnable(){
+                                    @Override public void run(){
+                                        ShowDialog(mylist.toString());
+                                    }
+                                });
                     }
 
 
