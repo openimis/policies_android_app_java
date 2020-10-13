@@ -14,10 +14,6 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
-import android.view.View;
-
-import com.exact.general.General;
-
 public class ToRestApi {
     Token tokenl = new Token();
     private String uri = AppInformation.DomainInfo.getDomain()+"api/";
