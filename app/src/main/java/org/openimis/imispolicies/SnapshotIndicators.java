@@ -164,9 +164,9 @@ public class SnapshotIndicators extends AppCompatActivity {
                 e.printStackTrace();
             }
 
-        }
-
-
+        } else {
+            ca.ShowDialog(getResources().getString(R.string.NoInternet));
+            }
     }
 
     public void GetSnapshot(String today) {

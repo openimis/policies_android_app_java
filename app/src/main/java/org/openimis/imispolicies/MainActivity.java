@@ -1129,8 +1129,11 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void LoginDialogBox(final String page){
-
-        final int[] userid = {0};
+        General _General = new General(AppInformation.DomainInfo.getDomain());
+        if (!_General.isNetworkAvailable(this)) {
+            ca.ShowDialog(getResources().getString(R.string.NoInternet));
+            return;
+        }
 
         global = (Global) MainActivity.this.getApplicationContext();
         // get prompts.xml view

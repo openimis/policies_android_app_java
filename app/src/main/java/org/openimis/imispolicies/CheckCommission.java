@@ -20,6 +20,8 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.exact.general.General;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -59,6 +61,8 @@ public class CheckCommission extends AppCompatActivity {
 
     private ArrayList<HashMap<String, String>> PayersList = new ArrayList<>();
     private ArrayList<HashMap<String, String>> ProductList = new ArrayList<>();
+
+    private General _General = new General(AppInformation.DomainInfo.getDomain());
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -564,8 +568,10 @@ public class CheckCommission extends AppCompatActivity {
 
 
     public void LoginDialogBox() {
-
-        //final int[] userid = {0};
+        if (!_General.isNetworkAvailable(this)) {
+            ca.ShowDialog(getResources().getString(R.string.NoInternet));
+            return;
+        }
 
         Global global = (Global) CheckCommission.this.getApplicationContext();
 

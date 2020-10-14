@@ -51,6 +51,8 @@ public class NotEnrolledPoliciesOverview extends AppCompatActivity {
     RecyclerView PolicyRecyclerView;
     NotEnrolledPoliciesOverviewAdapter notEnrolledPoliciesOverviewAdapter;
 
+    General _General = new General(AppInformation.DomainInfo.getDomain());
+
     ToRestApi toRestApi;
     Token tokenl;
     ProgressDialog pd;
@@ -430,10 +432,17 @@ public class NotEnrolledPoliciesOverview extends AppCompatActivity {
     }
 
     public void LoginDialogBox() {
-
-        //final int[] userid = {0};
-
+        General _General = new General(AppInformation.DomainInfo.getDomain());
+        if (!_General.isNetworkAvailable(this)) {
+            clientAndroidInterface.ShowDialog(getResources().getString(R.string.NoInternet));
+            return;
+        }
         Global global = (Global) NotEnrolledPoliciesOverview.this.getApplicationContext();
+
+        if (!_General.isNetworkAvailable(this)) {
+            clientAndroidInterface.ShowDialog(getResources().getString(R.string.InternetRequired));
+            return;
+        }
 
         // get prompts.xml view
         LayoutInflater li = LayoutInflater.from(this);

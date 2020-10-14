@@ -457,8 +457,11 @@ public class OverViewPolicies extends AppCompatActivity {
     }
 
     public void LoginDialogBox() {
-
-        //final int[] userid = {0};
+        General _General = new General(AppInformation.DomainInfo.getDomain());
+        if (!_General.isNetworkAvailable(this)) {
+            clientAndroidInterface.ShowDialog(getResources().getString(R.string.NoInternet));
+            return;
+        }
 
         Global global = (Global) OverViewPolicies.this.getApplicationContext();
 

@@ -2997,15 +2997,7 @@ public class ClientAndroidInterface {
                                 }
 
                             });
-                        } else {
-                            ((Activity) mContext).runOnUiThread(
-                                    new Runnable(){
-                                        @Override public void run(){
-                                            ShowDialog(mylist.toString());
-                                    }
-                            });
                         }
-
 
                         //pd.dismiss();
                     }
@@ -3608,9 +3600,11 @@ public class ClientAndroidInterface {
                         for (int j = 0; j < insureesArray.length(); j++) {
                             tempInsureesArray = insureesArray;
                             JSONObject imgObj = new JSONObject();
-                            imgObj.put("ImageName", InsureeImages[j].ImageName);
-                            imgObj.put("ImageContent", Base64.encodeToString(InsureeImages[j].ImageContent, Base64.DEFAULT));
-                            tempInsureesArray.getJSONObject(j).put("picture", imgObj);
+                            if (InsureeImages[j] != null) {
+                                imgObj.put("ImageName", InsureeImages[j].ImageName);
+                                imgObj.put("ImageContent", Base64.encodeToString(InsureeImages[j].ImageContent, Base64.DEFAULT));
+                                tempInsureesArray.getJSONObject(j).put("picture", imgObj);
+                            }
                         }
 
                         familyObj.put("insurees", tempInsureesArray);
@@ -3626,6 +3620,10 @@ public class ClientAndroidInterface {
 
                         familyObj.put("policies", tempPoliciesArray);
 
+                        if (mylist.size() != 0) {
+                            addCategoryBox();
+                            break;
+                        }
                         // InsureePolicy
                         familyObj.put("insureePolicy", InsureePolicyArray);
 
@@ -6345,11 +6343,28 @@ public class ClientAndroidInterface {
         return rule;
     }
 
+    @JavascriptInterface
+    public boolean CheckInternetAvailable() {
+        // check internet connection
+        General _General = new General(AppInformation.DomainInfo.getDomain());
+        if(!_General.isNetworkAvailable(mContext)) {
+            ShowDialog(mContext.getResources().getString(R.string.NoInternet));
+            return false;
+        }
+        return true;
+    }
+
     public void LoginDialogBox(final String page) {
 
         ((Activity) mContext).runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                // check internet connection
+                General _General = new General(AppInformation.DomainInfo.getDomain());
+                if(!_General.isNetworkAvailable(mContext)) {
+                    ShowDialog(mContext.getResources().getString(R.string.NoInternet));
+                    return;
+                }
                 // get prompts.xml view
                 LayoutInflater li = LayoutInflater.from(mContext);
                 View promptsView = li.inflate(R.layout.login_dialog, null);
