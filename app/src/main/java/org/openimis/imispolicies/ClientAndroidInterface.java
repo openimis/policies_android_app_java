@@ -6365,11 +6365,7 @@ public class ClientAndroidInterface {
             @Override
             public void run() {
                 // check internet connection
-                General _General = new General(AppInformation.DomainInfo.getDomain());
-                if(!_General.isNetworkAvailable(mContext)) {
-                    ShowDialog(mContext.getResources().getString(R.string.NoInternet));
-                    return;
-                }
+                CheckInternetAvailable();
                 // get prompts.xml view
                 LayoutInflater li = LayoutInflater.from(mContext);
                 View promptsView = li.inflate(R.layout.login_dialog, null);
