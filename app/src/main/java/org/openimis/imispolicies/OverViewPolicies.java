@@ -457,11 +457,9 @@ public class OverViewPolicies extends AppCompatActivity {
     }
 
     public void LoginDialogBox() {
-        General _General = new General(AppInformation.DomainInfo.getDomain());
-        if (!_General.isNetworkAvailable(this)) {
-            clientAndroidInterface.ShowDialog(getResources().getString(R.string.NoInternet));
+        if(!clientAndroidInterface.CheckInternetAvailable())
             return;
-        }
+
 
         Global global = (Global) OverViewPolicies.this.getApplicationContext();
 

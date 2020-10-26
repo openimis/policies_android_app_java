@@ -568,7 +568,8 @@ public class CheckCommission extends AppCompatActivity {
 
 
     public void LoginDialogBox() {
-        ca.CheckInternetAvailable();
+        if (!ca.CheckInternetAvailable())
+            return;
 
         Global global = (Global) CheckCommission.this.getApplicationContext();
 

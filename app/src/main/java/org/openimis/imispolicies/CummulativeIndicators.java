@@ -155,7 +155,9 @@ public class CummulativeIndicators extends AppCompatActivity {
 
     public void getCommulativeIndicators(String DateFrom, String DateTo){
         try {
-            ca.CheckInternetAvailable();
+            if (!ca.CheckInternetAvailable())
+                return;
+
             JSONObject cumulativeObj = new JSONObject();
             cumulativeObj.put("FromDate", DateFrom);
             cumulativeObj.put("ToDate", DateTo);

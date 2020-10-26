@@ -212,7 +212,8 @@ public class FeedbackList extends AppCompatActivity {
 
     private void fillFeedbacks() {
         if (!ca.CheckInternetAvailable())
-            return;;
+            return;
+        
         String result = ca.getOfflineFeedBack(OfficerCode);
 
         JSONArray jsonArray = null;
@@ -446,7 +447,9 @@ public class FeedbackList extends AppCompatActivity {
         }
     }
     public void LoginDialogBox(final String page){
-        ca.CheckInternetAvailable();
+        if (!ca.CheckInternetAvailable())
+            return;
+
         final int[] userid = {0};
 
         Global global = (Global) FeedbackList.this.getApplicationContext();

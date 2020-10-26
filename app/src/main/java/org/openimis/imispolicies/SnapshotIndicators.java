@@ -165,8 +165,9 @@ public class SnapshotIndicators extends AppCompatActivity {
             }
 
         } else {
-        ca.CheckInternetAvailable();
-            }
+            if(!ca.CheckInternetAvailable())
+                return;
+        }
     }
 
     public void GetSnapshot(String today) {

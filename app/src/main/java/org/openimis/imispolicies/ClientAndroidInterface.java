@@ -6365,7 +6365,8 @@ public class ClientAndroidInterface {
             @Override
             public void run() {
                 // check internet connection
-                CheckInternetAvailable();
+                if (!CheckInternetAvailable())
+                    return;
                 // get prompts.xml view
                 LayoutInflater li = LayoutInflater.from(mContext);
                 View promptsView = li.inflate(R.layout.login_dialog, null);

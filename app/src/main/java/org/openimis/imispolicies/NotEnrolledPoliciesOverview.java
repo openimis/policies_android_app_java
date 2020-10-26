@@ -432,15 +432,8 @@ public class NotEnrolledPoliciesOverview extends AppCompatActivity {
     }
 
     public void LoginDialogBox() {
-        General _General = new General(AppInformation.DomainInfo.getDomain());
-        if (!_General.isNetworkAvailable(this)) {
-            clientAndroidInterface.ShowDialog(getResources().getString(R.string.NoInternet));
-            return;
-        }
         Global global = (Global) NotEnrolledPoliciesOverview.this.getApplicationContext();
-
-        if (!_General.isNetworkAvailable(this)) {
-            clientAndroidInterface.ShowDialog(getResources().getString(R.string.InternetRequired));
+        if (!clientAndroidInterface.CheckInternetAvailable()) {
             return;
         }
 
