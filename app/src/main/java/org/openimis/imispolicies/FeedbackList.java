@@ -442,11 +442,7 @@ public class FeedbackList extends AppCompatActivity {
         }
     }
     public void LoginDialogBox(final String page){
-        General _General = new General(AppInformation.DomainInfo.getDomain());
-        if (!_General.isNetworkAvailable(this)) {
-            ca.ShowDialog(getResources().getString(R.string.NoInternet));
-            return;
-        }
+        ca.CheckInternetAvailable();
         final int[] userid = {0};
 
         Global global = (Global) FeedbackList.this.getApplicationContext();

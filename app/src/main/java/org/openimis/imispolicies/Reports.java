@@ -56,12 +56,11 @@ public class Reports extends AppCompatActivity {
     }
 
     protected void openReport(Class<?> reportClass) {
-        if (!_General.isNetworkAvailable(this)) {
-            ca.ShowDialog(getResources().getString(R.string.NoInternet));
-            return;
+        boolean isInternetAvailable = ca.CheckInternetAvailable();
+        if (isInternetAvailable) {
+            Intent i = new Intent(this, reportClass);
+            startActivity(i);
         }
-        Intent i = new Intent(this, reportClass);
-        startActivity(i);
     }
 
     @Override

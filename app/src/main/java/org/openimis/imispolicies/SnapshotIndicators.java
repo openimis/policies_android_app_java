@@ -165,7 +165,7 @@ public class SnapshotIndicators extends AppCompatActivity {
             }
 
         } else {
-            ca.ShowDialog(getResources().getString(R.string.NoInternet));
+        ca.CheckInternetAvailable();
             }
     }
 

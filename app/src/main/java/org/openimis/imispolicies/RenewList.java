@@ -530,11 +530,7 @@ public class RenewList extends AppCompatActivity {
                 finish();
                 return true;
             case R.id.mnuStatistics:
-                General _General = new General(AppInformation.DomainInfo.getDomain());
-                if (!_General.isNetworkAvailable(this)) {
-                    ca.ShowDialog(getResources().getString(R.string.NoInternet));
-                    return true;
-                }
+                ca.CheckInternetAvailable();
                 Intent stats = new Intent(this, Statistics.class);
                 stats.putExtra("Title", "Renewal Statistics");
                 stats.putExtra("Caller", "R");
@@ -546,11 +542,7 @@ public class RenewList extends AppCompatActivity {
     }
 
     public void LoginDialogBox(final String page){
-        General _General = new General(AppInformation.DomainInfo.getDomain());
-        if (!_General.isNetworkAvailable(this)) {
-            ca.ShowDialog(getResources().getString(R.string.NoInternet));
-            return;
-        }
+        ca.CheckInternetAvailable();
 
         Global global = (Global) RenewList.this.getApplicationContext();
         // get prompts.xml view

@@ -3631,6 +3631,11 @@ public class ClientAndroidInterface {
                         familyArr.put(familyObj);
                         resultObj.put("family", familyArr);
 
+                        if (mylist.size() != 0) {
+                            addCategoryBox();
+                            break;
+                        }
+
                         ToRestApi rest = new ToRestApi();
                         HttpResponse response = rest.postToRestApiToken(resultObj, "family");
 
