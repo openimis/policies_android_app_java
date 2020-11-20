@@ -33,7 +33,8 @@ import static org.openimis.imispolicies.MainActivity.global;
 public class CummulativeIndicators extends AppCompatActivity {
 
     private General _General = new General(AppInformation.DomainInfo.getDomain());
-    private ClientAndroidInterface ca = new ClientAndroidInterface(this);
+    private ClientAndroidInterface ca;
+
     Boolean ClickedFrom = false;
     Boolean ClickedTo = false;
 
@@ -62,6 +63,8 @@ public class CummulativeIndicators extends AppCompatActivity {
         final ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setTitle(getResources().getString(R.string.CummulativeIndicators));
+
+        ca = new ClientAndroidInterface(this);
 
         DateFrom= (Button) findViewById(R.id.DateFrom);
         DateTo= (Button) findViewById(R.id.DateTo);

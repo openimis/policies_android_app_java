@@ -738,11 +738,8 @@ public class SQLHandler extends SQLiteOpenHelper {
         try {
             openDatabase();
             Long lastInsertedId = mDatabase.insertOrThrow(tableName, null, contentValues);
-            if (lastInsertedId <= 0) {
-                throw new UserException((String) mContext.getResources().getText(R.string.ErrorInsert));
-            }
             return (int) (long) lastInsertedId;
-        } catch (SQLException | UserException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
             throw e;
         } finally {
