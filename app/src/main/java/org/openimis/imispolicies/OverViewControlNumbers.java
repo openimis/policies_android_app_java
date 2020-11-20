@@ -52,6 +52,8 @@ public class OverViewControlNumbers extends AppCompatActivity {
     RecyclerView PolicyRecyclerView;
     OverViewControlNumberAdapter overViewControlNumberAdapter;
 
+    General _General = new General(AppInformation.DomainInfo.getDomain());
+
     TextView ValueNumberOfPolices;
     TextView ValueAmountOfContribution;
 
@@ -384,8 +386,10 @@ public class OverViewControlNumbers extends AppCompatActivity {
     }
     
     public void LoginDialogBox() {
-
-        //final int[] userid = {0};
+        if (!_General.isNetworkAvailable(this)) {
+            clientAndroidInterface.ShowDialog(getResources().getString(R.string.NoInternet));
+            return;
+        }
 
         Global global = (Global) OverViewControlNumbers.this.getApplicationContext();
 

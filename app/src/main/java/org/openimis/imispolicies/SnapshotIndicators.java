@@ -164,9 +164,10 @@ public class SnapshotIndicators extends AppCompatActivity {
                 e.printStackTrace();
             }
 
+        } else {
+            if(!ca.CheckInternetAvailable())
+                return;
         }
-
-
     }
 
     public void GetSnapshot(String today) {

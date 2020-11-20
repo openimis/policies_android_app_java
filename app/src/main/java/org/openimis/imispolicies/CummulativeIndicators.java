@@ -34,6 +34,7 @@ public class CummulativeIndicators extends AppCompatActivity {
 
     private General _General = new General(AppInformation.DomainInfo.getDomain());
     private ClientAndroidInterface ca;
+
     Boolean ClickedFrom = false;
     Boolean ClickedTo = false;
 
@@ -157,6 +158,9 @@ public class CummulativeIndicators extends AppCompatActivity {
 
     public void getCommulativeIndicators(String DateFrom, String DateTo){
         try {
+            if (!ca.CheckInternetAvailable())
+                return;
+
             JSONObject cumulativeObj = new JSONObject();
             cumulativeObj.put("FromDate", DateFrom);
             cumulativeObj.put("ToDate", DateTo);

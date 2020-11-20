@@ -113,8 +113,13 @@ public class FeedbackList extends AppCompatActivity {
         swipe.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-
                 swipe.setRefreshing(true);
+
+                if(!ca.CheckInternetAvailable()) {
+                    swipe.setRefreshing(false);
+                    return;
+                }
+
                 (new Handler()).postDelayed(new Runnable() {
                     @Override
                     public void run() {
@@ -203,12 +208,12 @@ public class FeedbackList extends AppCompatActivity {
                 startActivityForResult(intent, 0);
             }
         });
-
-
     }
 
     private void fillFeedbacks() {
-        ca = new ClientAndroidInterface(this);
+        if (!ca.CheckInternetAvailable())
+            return;
+        
         String result = ca.getOfflineFeedBack(OfficerCode);
 
         JSONArray jsonArray = null;
@@ -398,7 +403,7 @@ public class FeedbackList extends AppCompatActivity {
     }
 
     private void RefreshFeedbacks() throws IOException, XmlPullParserException {
-        if (_general.isNetworkAvailable(this)) {
+        if (ca.CheckInternetAvailable()) {
             //   pd = ProgressDialog.show(this, "", getResources().getString(R.string.Loading));
             new Thread() {
                 public void run() {
@@ -442,6 +447,8 @@ public class FeedbackList extends AppCompatActivity {
         }
     }
     public void LoginDialogBox(final String page){
+        if (!ca.CheckInternetAvailable())
+            return;
 
         final int[] userid = {0};
 

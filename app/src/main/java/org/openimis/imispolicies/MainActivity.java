@@ -1129,8 +1129,8 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void LoginDialogBox(final String page){
-
-        final int[] userid = {0};
+        if(!ca.CheckInternetAvailable())
+            return;
 
         global = (Global) MainActivity.this.getApplicationContext();
         // get prompts.xml view
