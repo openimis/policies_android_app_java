@@ -1,4 +1,6 @@
 apply plugin: 'com.android.application'
+apply from: "$project.rootDir/script-git-version.gradle"
+apply plugin: 'com.android.application'
 
 // Load keystore
 def keystorePropertiesFile = file("keystore.properties");
@@ -23,9 +25,9 @@ android {
     defaultConfig {
         applicationId "org.openimis.imispolicies"
         minSdkVersion 19
-        targetSdkVersion 27
-        versionCode 3
-        versionName "2.0.1"
+        targetSdkVersion 30
+        versionCode gitVersionCode
+        versionName gitVersionName
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         useLibrary('org.apache.http.legacy')
     }
@@ -64,6 +66,7 @@ android {
             buildConfigField "boolean", "SHOW_CONTROL_NUMBER_MENU", 'true'
             resValue "string", "app_name", "Policies Release"
             dimension = 'std'
+            versionCode = gitVersionCodeTime
         }
     }
     sourceSets {
