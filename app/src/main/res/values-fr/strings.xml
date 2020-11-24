@@ -375,7 +375,6 @@
   <string name="empty_year">Entrer l\'année</string>
   <string name="DeleteFamilyOnlyOffline">Suppression de la famille supprimera également tous les assurés, les polices et les cotisations de la famille.</string>
   <string name="LastInstallment">Dernier versement</string>
-  <string name="app_name">IMIS POLICIES</string>
   <string name="pick_date">Pick Date</string>
   <string name="get">Get</string>
   <string name="date_from">Date From</string>

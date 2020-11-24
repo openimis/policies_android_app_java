@@ -10,7 +10,6 @@
     <string name="NoFileExporerInstalled">Il n\'y a pas d\'application de gestiondes fichier d\'installé.</string>
     <string name="LoadFile">Chargement fichier:</string>
     <string name="Incomplete">Incomplet!</string>
-    <string name="app_name">IMIS POLICIES</string>
     <string name="navigation_drawer_open">Ouvrir le menu de navigation</string>
     <string name="navigation_drawer_close">Fermer le menu de navigation</string>
     <string name="action_settings">Réglages</string>

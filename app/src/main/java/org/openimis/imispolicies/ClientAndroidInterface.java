@@ -2935,17 +2935,16 @@ public class ClientAndroidInterface {
                                 } else {
                                     ShowDialog(mContext.getResources().getString(R.string.NoDataAvailable));
                                 }
-
-                            });
-                        }
-
-                        //pd.dismiss();
+                            }
+                        });
                     }
-                }.start();
-            } catch (Exception e) {
-                e.printStackTrace();
-                throw new Exception(e.getMessage());
-            }
+                        //pd.dismiss();
+                }
+            }.start();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new Exception(e.getMessage());
+        }
     }
     @JavascriptInterface
     public void CreateEnrolmentXML() throws Exception {

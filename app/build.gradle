@@ -68,7 +68,9 @@ android {
     }
     sourceSets {
         demoProd.java.srcDir 'src/demo/java'
+        demoProd.res.srcDir 'src/demo/res'
         demoRelease.java.srcDir 'src/demo/java'
+        demoRelease.res.srcDir 'src/demo/res'
     }
 }
 
