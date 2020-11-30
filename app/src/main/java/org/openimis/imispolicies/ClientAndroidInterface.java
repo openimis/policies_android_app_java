@@ -3528,6 +3528,7 @@ public class ClientAndroidInterface {
                         for (int j = 0; j < insureesArray.length(); j++) {
                             tempInsureesArray = insureesArray;
                             JSONObject imgObj = new JSONObject();
+
                             if (InsureeImages[j] != null) {
                                 imgObj.put("ImageName", InsureeImages[j].ImageName);
                                 imgObj.put("ImageContent", Base64.encodeToString(InsureeImages[j].ImageContent, Base64.DEFAULT));
@@ -3781,6 +3782,8 @@ public class ClientAndroidInterface {
                             images[j] = img;
                         } else {
                             mylist.add("Insuree " + chfid + " " + " " + lastname + " " + " " + othername + " " + mContext.getResources().getString(R.string.WithoutPhoto));
+                            addCategoryBox();
+                            break;
                         }
                     } else {
                         byte[] empty = new byte[0];
