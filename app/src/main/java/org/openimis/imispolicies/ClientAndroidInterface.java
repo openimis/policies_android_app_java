@@ -2996,17 +2996,10 @@ public class ClientAndroidInterface {
                                     //ShowDialog(mContext.getResources().getString(R.string.FamilyUploaded));
                                 }
 
-                            });
-                        } else {
-                            ((Activity) mContext).runOnUiThread(
-                                    new Runnable(){
-                                        @Override public void run(){
-                                            ShowDialog(mylist.toString());
-                                    }
-                            });
-                        }
+                        });
+                    } else {
 
-
+                    }
                         //pd.dismiss();
                     }
                 }.start();
@@ -3608,9 +3601,11 @@ public class ClientAndroidInterface {
                         for (int j = 0; j < insureesArray.length(); j++) {
                             tempInsureesArray = insureesArray;
                             JSONObject imgObj = new JSONObject();
-                            imgObj.put("ImageName", InsureeImages[j].ImageName);
-                            imgObj.put("ImageContent", Base64.encodeToString(InsureeImages[j].ImageContent, Base64.DEFAULT));
-                            tempInsureesArray.getJSONObject(j).put("picture", imgObj);
+                            if(InsureeImages[j] != null) {
+                                imgObj.put("ImageName", InsureeImages[j].ImageName);
+                                imgObj.put("ImageContent", Base64.encodeToString(InsureeImages[j].ImageContent, Base64.DEFAULT));
+                                tempInsureesArray.getJSONObject(j).put("picture", imgObj);
+                            }
                         }
 
                         familyObj.put("insurees", tempInsureesArray);
@@ -3850,6 +3845,8 @@ public class ClientAndroidInterface {
                             images[j] = img;
                         } else {
                             mylist.add("Insuree " + chfid + " " + " " + lastname + " " + " " + othername + " " + mContext.getResources().getString(R.string.WithoutPhoto));
+                            addCategoryBox();
+                            break;
                         }
                     } else {
                         byte[] empty = new byte[0];
