@@ -52,7 +52,10 @@ In case of dispute arising out or in relation to the use of the program, it is s
 
            $('#spPleaseWait').text(Android.getString('PleaseWait'));
            $('#btnLogin').click(function() {
-
+            var internetAvailable = Android.CheckInternetAvailable();
+            if (!internetAvailable) {
+                return;
+            }
             var passed = isFormValidated();
             if(passed){
              var Username = $('#txtLoginName').val();

@@ -33,6 +33,8 @@ import static org.openimis.imispolicies.MainActivity.global;
 public class CummulativeIndicators extends AppCompatActivity {
 
     private General _General = new General(AppInformation.DomainInfo.getDomain());
+    private ClientAndroidInterface ca;
+
     Boolean ClickedFrom = false;
     Boolean ClickedTo = false;
 
@@ -61,6 +63,8 @@ public class CummulativeIndicators extends AppCompatActivity {
         final ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setTitle(getResources().getString(R.string.CummulativeIndicators));
+
+        ca = new ClientAndroidInterface(this);
 
         DateFrom= (Button) findViewById(R.id.DateFrom);
         DateTo= (Button) findViewById(R.id.DateTo);
@@ -154,6 +158,9 @@ public class CummulativeIndicators extends AppCompatActivity {
 
     public void getCommulativeIndicators(String DateFrom, String DateTo){
         try {
+            if (!ca.CheckInternetAvailable())
+                return;
+
             JSONObject cumulativeObj = new JSONObject();
             cumulativeObj.put("FromDate", DateFrom);
             cumulativeObj.put("ToDate", DateTo);
