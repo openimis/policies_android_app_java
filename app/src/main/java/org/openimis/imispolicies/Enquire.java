@@ -393,8 +393,8 @@ public class Enquire extends AppCompatActivity {
                              TotalDelivieriesLeft = jsonObject.getString("totalDelivieriesLeft").equalsIgnoreCase("null")? "": "TotalDelivieriesLeft: "+jsonObject.getString("totalDelivieriesLeft");
                              TotalAntenatalLeft = jsonObject.getString("totalAntenatalLeft").equalsIgnoreCase("null")? "": "TotalAntenatalLeft: "+jsonObject.getString("totalAntenatalLeft");
                              ConsultationAmountLeft = jsonObject.getString("consultationAmountLeft").equalsIgnoreCase("null")? "": "ConsultationAmountLeft: "+jsonObject.getString("consultationAmountLeft");
-                             SurgeryAmountLeft = jsonObject.getString("surgeryAmountLeft").equalsIgnoreCase("null")? "": "TotalAdmissionsLeft: "+jsonObject.getString("surgeryAmountLeft");
-                             HospitalizationAmountLeft = jsonObject.getString("hospitalizationAmountLeft").equalsIgnoreCase("null")? "": "TotalAdmissionsLeft: "+jsonObject.getString("hospitalizationAmountLeft");
+                             SurgeryAmountLeft = jsonObject.getString("surgeryAmountLeft").equalsIgnoreCase("null")? "": "SurgeryAmountLeft: "+jsonObject.getString("surgeryAmountLeft");
+                             HospitalizationAmountLeft = jsonObject.getString("hospitalizationAmountLeft").equalsIgnoreCase("null")? "": "HospitalizationAmountLeft: "+jsonObject.getString("hospitalizationAmountLeft");
                              AntenatalAmountLeft = jsonObject.getString("antenatalAmountLeft").equalsIgnoreCase("null")? "": "AntenatalAmountLeft: "+jsonObject.getString("antenatalAmountLeft");
 
                              if(!ca.getSpecificControl("TotalAdmissionsLeft").equals("N")){Policy.put("SubItem4",TotalAdmissionsLeft);}
