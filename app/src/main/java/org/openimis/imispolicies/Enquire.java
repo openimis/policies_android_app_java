@@ -401,7 +401,7 @@ public class Enquire extends AppCompatActivity {
                              if(!ca.getSpecificControl("TotalVisitsLeft").equals("N")){Policy.put("SubItem5",TotalVisitsLeft);}
                              if(!ca.getSpecificControl("TotalConsultationsLeft").equals("N")){Policy.put("SubItem6",TotalConsultationsLeft);}
                              if(!ca.getSpecificControl("TotalSurgeriesLeft").equals("N")){Policy.put("SubItem7",TotalSurgeriesLeft);}
-                             if(!ca.getSpecificControl("TotalDeliveriesLeft").equals("N")){Policy.put("SubItem8",TotalDeliveriesLeft);}
+                             if(!ca.getSpecificControl("TotalDelivieriesLeft").equals("N")){Policy.put("SubItem8",TotalDeliveriesLeft);}
                              if(!ca.getSpecificControl("TotalAntenatalLeft").equals("N")){Policy.put("SubItem9",TotalAntenatalLeft);}
                              if(!ca.getSpecificControl("ConsultationAmountLeft").equals("N")){Policy.put("SubItem10",ConsultationAmountLeft);}
                              if(!ca.getSpecificControl("SurgeryAmountLeft").equals("N")){Policy.put("SubItem11",SurgeryAmountLeft);}
