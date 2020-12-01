@@ -388,4 +388,15 @@
   <string name="request_enrolled_policies">Request for Not Enrolled Policies</string>
   <string name="phone_number_not_provided">Phone number not provided</string>
   <string name="not_unique_products">Insurance products of the selected policies are not unique</string>
+  <string name="totalAdmissionsLeft">TotalAdmissionsLeft</string>
+  <string name="totalVisitsLeft">TotalVisitsLeft</string>
+  <string name="totalConsultationsLeft">TotalConsultationsLeft</string>
+  <string name="totalSurgeriesLeft">TotalSurgeriesLeft</string>
+  <string name="totalDeliveriesLeft">TotalDeliveriesLeft</string>
+  <string name="totalAntenatalLeft">TotalAntenatalLeft</string>
+  <string name="consultationAmountLeft">ConsultationAmountLeft</string>
+  <string name="surgeryAmountLeft">SurgeryAmountLeft</string>
+  <string name="hospitalizationAmountLeft">HospitalizationAmountLeft</string>
+  <string name="antenatalAmountLeft">AntenatalAmountLeft</string>
+  <string name="app_name">IMIS POLICIES</string>
 </resources>

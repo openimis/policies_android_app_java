@@ -379,29 +379,29 @@ public class Enquire extends AppCompatActivity {
                              String TotalVisitsLeft = "";
                              String TotalConsultationsLeft = "";
                              String TotalSurgeriesLeft = "";
-                             String TotalDelivieriesLeft = "";
+                             String TotalDeliveriesLeft = "";
                              String TotalAntenatalLeft = "";
                              String ConsultationAmountLeft = "";
                              String SurgeryAmountLeft = "";
                              String HospitalizationAmountLeft = "";
                              String AntenatalAmountLeft = "";
-
-                             TotalAdmissionsLeft = jsonObject.getString("totalAdmissionsLeft").equalsIgnoreCase("null")? "": "TotalAdmissionsLeft: "+jsonObject.getString("totalAdmissionsLeft");
-                             TotalVisitsLeft = jsonObject.getString("totalVisitsLeft").equalsIgnoreCase("null")? "": "TotalVisitsLeft: "+jsonObject.getString("totalVisitsLeft");
-                             TotalConsultationsLeft = jsonObject.getString("totalConsultationsLeft").equalsIgnoreCase("null")? "": "TotalConsultationsLeft: "+jsonObject.getString("totalConsultationsLeft");
-                             TotalSurgeriesLeft = jsonObject.getString("totalSurgeriesLeft").equalsIgnoreCase("null")? "": "TotalSurgeriesLeft: "+jsonObject.getString("totalSurgeriesLeft");
-                             TotalDelivieriesLeft = jsonObject.getString("totalDelivieriesLeft").equalsIgnoreCase("null")? "": "TotalDelivieriesLeft: "+jsonObject.getString("totalDelivieriesLeft");
-                             TotalAntenatalLeft = jsonObject.getString("totalAntenatalLeft").equalsIgnoreCase("null")? "": "TotalAntenatalLeft: "+jsonObject.getString("totalAntenatalLeft");
-                             ConsultationAmountLeft = jsonObject.getString("consultationAmountLeft").equalsIgnoreCase("null")? "": "ConsultationAmountLeft: "+jsonObject.getString("consultationAmountLeft");
-                             SurgeryAmountLeft = jsonObject.getString("surgeryAmountLeft").equalsIgnoreCase("null")? "": "SurgeryAmountLeft: "+jsonObject.getString("surgeryAmountLeft");
-                             HospitalizationAmountLeft = jsonObject.getString("hospitalizationAmountLeft").equalsIgnoreCase("null")? "": "HospitalizationAmountLeft: "+jsonObject.getString("hospitalizationAmountLeft");
-                             AntenatalAmountLeft = jsonObject.getString("antenatalAmountLeft").equalsIgnoreCase("null")? "": "AntenatalAmountLeft: "+jsonObject.getString("antenatalAmountLeft");
+                             
+                             TotalAdmissionsLeft = buildEnquireValue(jsonObject, "totalAdmissionsLeft", R.string.totalAdmissionsLeft);
+                             TotalVisitsLeft = buildEnquireValue(jsonObject, "totalVisitsLeft", R.string.totalVisitsLeft);
+                             TotalConsultationsLeft = buildEnquireValue(jsonObject, "totalConsultationsLeft", R.string.totalConsultationsLeft);
+                             TotalSurgeriesLeft = buildEnquireValue(jsonObject, "totalSurgeriesLeft", R.string.totalSurgeriesLeft);
+                             TotalDeliveriesLeft = buildEnquireValue(jsonObject, "totalDelivieriesLeft", R.string.totalDeliveriesLeft);
+                             TotalAntenatalLeft = buildEnquireValue(jsonObject, "totalAntenatalLeft", R.string.totalAntenatalLeft);
+                             ConsultationAmountLeft = buildEnquireValue(jsonObject, "consultationAmountLeft", R.string.consultationAmountLeft);
+                             SurgeryAmountLeft = buildEnquireValue(jsonObject, "surgeryAmountLeft", R.string.surgeryAmountLeft);
+                             HospitalizationAmountLeft = buildEnquireValue(jsonObject, "hospitalizationAmountLeft", R.string.hospitalizationAmountLeft);
+                             AntenatalAmountLeft = buildEnquireValue(jsonObject, "antenatalAmountLeft", R.string.antenatalAmountLeft);
 
                              if(!ca.getSpecificControl("TotalAdmissionsLeft").equals("N")){Policy.put("SubItem4",TotalAdmissionsLeft);}
                              if(!ca.getSpecificControl("TotalVisitsLeft").equals("N")){Policy.put("SubItem5",TotalVisitsLeft);}
                              if(!ca.getSpecificControl("TotalConsultationsLeft").equals("N")){Policy.put("SubItem6",TotalConsultationsLeft);}
                              if(!ca.getSpecificControl("TotalSurgeriesLeft").equals("N")){Policy.put("SubItem7",TotalSurgeriesLeft);}
-                             if(!ca.getSpecificControl("TotalDelivieriesLeft").equals("N")){Policy.put("SubItem8",TotalDelivieriesLeft);}
+                             if(!ca.getSpecificControl("TotalDeliveriesLeft").equals("N")){Policy.put("SubItem8",TotalDeliveriesLeft);}
                              if(!ca.getSpecificControl("TotalAntenatalLeft").equals("N")){Policy.put("SubItem9",TotalAntenatalLeft);}
                              if(!ca.getSpecificControl("ConsultationAmountLeft").equals("N")){Policy.put("SubItem10",ConsultationAmountLeft);}
                              if(!ca.getSpecificControl("SurgeryAmountLeft").equals("N")){Policy.put("SubItem11",SurgeryAmountLeft);}
@@ -433,6 +433,16 @@ public class Enquire extends AppCompatActivity {
             }
         });
 
+    }
+
+    protected String buildEnquireValue(JSONObject jsonObject, String jsonKey, int labelId) throws JSONException {
+        boolean ignore = jsonObject.getString(jsonKey).equalsIgnoreCase("null");
+        if (ignore) {
+            return "";
+        } else {
+            String label = getResources().getString(labelId);
+            return label + ": " + jsonObject.getString(jsonKey);
+        }
     }
 
     @Override
