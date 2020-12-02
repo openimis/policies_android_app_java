@@ -916,8 +916,15 @@ public class MainActivity extends AppCompatActivity
             startActivity(i);
 
         }else if (id == R.id.nav_reports) {
-            Intent i = new Intent(this, Reports.class);
-            startActivity(i);
+            Global global = (Global) MainActivity.this.getApplicationContext();
+            int userid = global.getUserId();
+            if(userid > 0){
+                Intent i = new Intent(this, Reports.class);
+                startActivity(i);
+            }else{
+                LoginDialogBox("Reports");
+            }
+
 
         } else if (id == R.id.nav_feedback) {
             Intent intent = new Intent(this, FeedbackList.class);
@@ -1176,6 +1183,11 @@ public class MainActivity extends AppCompatActivity
                                                 public void run() {
                                                     if(isUserLogged){
                                                         if(page.equals("Enquire")){
+                                                            Intent intent = new Intent(MainActivity.this, Enquire.class);
+                                                            startActivity(intent);
+                                                            Toast.makeText(MainActivity.this,MainActivity.this.getResources().getString(R.string.Login_Successful),Toast.LENGTH_LONG).show();
+                                                        }
+                                                        if(page.equals("Reports")){
                                                             Intent intent = new Intent(MainActivity.this, Enquire.class);
                                                             startActivity(intent);
                                                             Toast.makeText(MainActivity.this,MainActivity.this.getResources().getString(R.string.Login_Successful),Toast.LENGTH_LONG).show();
