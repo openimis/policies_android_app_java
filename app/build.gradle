@@ -58,6 +58,12 @@ android {
             buildConfigField "String", "RAR_PASSWORD", '")(#$1HsD"'
             dimension = 'std'
         }
+
+        demoRelease {
+            applicationId "org.openimis.imispolicies.demoRelease"
+            buildConfigField "String", "API_BASE_URL", '"http://release.openimis.org/rest/"'
+        }
+
         chfDev {
             applicationId "org.openimis.imispolicies.chf"
             buildConfigField "String", "API_BASE_URL", '"http://chf-dev.swisstph-mis.ch/rest/"'
@@ -89,6 +95,9 @@ android {
     sourceSets {
         demoProd.java.srcDir 'src/demo/java'
         demoProd.res.srcDir 'src/demo/res'
+
+        demoRelease.java.srcDir 'src/demo/java'
+        demoRelease.res.srcDir 'src/demo/res'
 
         chfDev.java.srcDir 'src/chf/java'
         chfDev.res.srcDir 'src/chf/res'
