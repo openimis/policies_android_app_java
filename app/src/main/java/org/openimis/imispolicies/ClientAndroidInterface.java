@@ -6341,6 +6341,11 @@ public class ClientAndroidInterface {
                                                     Intent intent = new Intent(mContext, FeedbackList.class);
                                                     mContext.startActivity(intent);
                                                 }
+                                                if (page.equals("Reports")) {
+                                                    ((FeedbackList) mContext).finish();
+                                                    Intent intent = new Intent(mContext, Reports.class);
+                                                    mContext.startActivity(intent);
+                                                }
 
                                             } else {
                                                 ShowDialog(mContext.getResources().getString(R.string.LoginFail));
