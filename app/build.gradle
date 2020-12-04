@@ -50,21 +50,44 @@ android {
         buildConfigField "String", "API_BASE_URL", '"http://demo.openimis.org/rest/"'
         buildConfigField "boolean", "SHOW_CONTROL_NUMBER_MENU", 'false'
         buildConfigField "String", "RAR_PASSWORD", '")(#$1HsD"'
-        resValue "string", "app_name", "openIMIS Policies"
     }
     productFlavors {
         demoProd {
             applicationId "org.openimis.imispolicies.demoProd"
             buildConfigField "String", "API_BASE_URL", '"http://demo.openimis.org/rest/"'
             buildConfigField "String", "RAR_PASSWORD", '")(#$1HsD"'
-            resValue "string", "app_name", "Policies Demo"
             dimension = 'std'
         }
+
         demoRelease {
             applicationId "org.openimis.imispolicies.demoRelease"
             buildConfigField "String", "API_BASE_URL", '"http://release.openimis.org/rest/"'
+        }
+
+        chfDev {
+            applicationId "org.openimis.imispolicies.chf"
+            buildConfigField "String", "API_BASE_URL", '"http://chf-dev.swisstph-mis.ch/rest/"'
+            buildConfigField "String", "RAR_PASSWORD", '")(#$1HsD"'
             buildConfigField "boolean", "SHOW_CONTROL_NUMBER_MENU", 'true'
-            resValue "string", "app_name", "Policies Release"
+            dimension = 'std'
+        }
+        mvDev {
+            applicationId "org.openimis.imispolicies.mv"
+            buildConfigField "String", "API_BASE_URL", '"http://imis-mv.swisstph-mis.ch/rest/"'
+            buildConfigField "String", "RAR_PASSWORD", '")(#$1HsD"'
+            buildConfigField "boolean", "SHOW_CONTROL_NUMBER_MENU", 'true'
+            dimension = 'std'
+        }
+        bephaDev {
+            applicationId "org.openimis.imispolicies.bepha"
+            buildConfigField "String", "API_BASE_URL", '"http://149.210.235.40/devupgrade/rest/"'
+            buildConfigField "String", "RAR_PASSWORD", '")(#$1HsD"'
+            dimension = 'std'
+        }
+        local {
+            applicationId "org.openimis.imispolicies.local"
+            buildConfigField "String", "API_BASE_URL", '"http://10.0.2.2:35788/"'
+            buildConfigField "String", "RAR_PASSWORD", '")(#$1HsD"'
             dimension = 'std'
             versionCode = gitVersionCodeTime
         }
@@ -72,8 +95,20 @@ android {
     sourceSets {
         demoProd.java.srcDir 'src/demo/java'
         demoProd.res.srcDir 'src/demo/res'
+
         demoRelease.java.srcDir 'src/demo/java'
         demoRelease.res.srcDir 'src/demo/res'
+
+        chfDev.java.srcDir 'src/chf/java'
+        chfDev.res.srcDir 'src/chf/res'
+
+        mvDev.java.srcDir 'src/master/java'
+
+        local.java.srcDir 'src/master/java'
+        local.res.srcDir 'src/demo/res'
+
+        bephaDev.java.srcDir 'src/bepha/java'
+        bephaDev.res.srcDir 'src/bepha/res'
     }
 }
 
