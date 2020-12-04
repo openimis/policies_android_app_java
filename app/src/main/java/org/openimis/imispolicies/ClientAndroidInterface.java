@@ -3579,6 +3579,7 @@ public class ClientAndroidInterface {
                 } else {
                     if (QueryF != "") {
                         fname = sqlHandler.getResultXML2(QueryF, QueryI, QueryPL, QueryPR, QueryIP, global.getOfficerCode(), global.getOfficerId());
+                        FamilyPictures(insureesArray, 2);
                     }
                     EnrolResult = 0;
                 }
