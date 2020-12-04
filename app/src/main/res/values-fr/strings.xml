@@ -397,4 +397,5 @@
   <string name="surgeryAmountLeft">SurgeryAmountLeft</string>
   <string name="hospitalizationAmountLeft">HospitalizationAmountLeft</string>
   <string name="antenatalAmountLeft">AntenatalAmountLeft</string>
+  <string name="deliveryAmountLeft">DeliveryAmountLeft</string>
 </resources>
