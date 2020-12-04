@@ -385,7 +385,8 @@ public class Enquire extends AppCompatActivity {
                              String SurgeryAmountLeft = "";
                              String HospitalizationAmountLeft = "";
                              String AntenatalAmountLeft = "";
-                             
+                             String DeliveryAmountLeft = "";
+
                              TotalAdmissionsLeft = buildEnquireValue(jsonObject, "totalAdmissionsLeft", R.string.totalAdmissionsLeft);
                              TotalVisitsLeft = buildEnquireValue(jsonObject, "totalVisitsLeft", R.string.totalVisitsLeft);
                              TotalConsultationsLeft = buildEnquireValue(jsonObject, "totalConsultationsLeft", R.string.totalConsultationsLeft);
@@ -396,6 +397,7 @@ public class Enquire extends AppCompatActivity {
                              SurgeryAmountLeft = buildEnquireValue(jsonObject, "surgeryAmountLeft", R.string.surgeryAmountLeft);
                              HospitalizationAmountLeft = buildEnquireValue(jsonObject, "hospitalizationAmountLeft", R.string.hospitalizationAmountLeft);
                              AntenatalAmountLeft = buildEnquireValue(jsonObject, "antenatalAmountLeft", R.string.antenatalAmountLeft);
+                             DeliveryAmountLeft = buildEnquireValue(jsonObject, "deliveryAmountLeft", R.string.deliveryAmountLeft);
 
                              if(!ca.getSpecificControl("TotalAdmissionsLeft").equals("N")){Policy.put("SubItem4",TotalAdmissionsLeft);}
                              if(!ca.getSpecificControl("TotalVisitsLeft").equals("N")){Policy.put("SubItem5",TotalVisitsLeft);}
@@ -407,6 +409,7 @@ public class Enquire extends AppCompatActivity {
                              if(!ca.getSpecificControl("SurgeryAmountLeft").equals("N")){Policy.put("SubItem11",SurgeryAmountLeft);}
                              if(!ca.getSpecificControl("HospitalizationAmountLeft").equals("N")){Policy.put("SubItem12",HospitalizationAmountLeft);}
                              if(!ca.getSpecificControl("AntenatalAmountLeft").equals("N")){Policy.put("SubItem13",AntenatalAmountLeft);}
+                             if(!ca.getSpecificControl("DeliveryAmountLeft").equals("N")){Policy.put("SubItem14",DeliveryAmountLeft);}
 
                             PolicyList.add(Policy);
                             etCHFID.setText("");
@@ -415,8 +418,8 @@ public class Enquire extends AppCompatActivity {
                     }
                     ListAdapter adapter = new SimpleAdapter(Enquire.this,
                             PolicyList, R.layout.policylist,
-                            new String[]{"Heading","Heading1","SubItem1","SubItem2","SubItem3","SubItem4","SubItem5","SubItem6","SubItem7","SubItem8","SubItem9","SubItem10","SubItem11","SubItem12","SubItem13"},
-                            new int[]{R.id.tvHeading,R.id.tvHeading1,R.id.tvSubItem1,R.id.tvSubItem2,R.id.tvSubItem3,R.id.tvSubItem4,R.id.tvSubItem5,R.id.tvSubItem6,R.id.tvSubItem7,R.id.tvSubItem8,R.id.tvSubItem9,R.id.tvSubItem10,R.id.tvSubItem11,R.id.tvSubItem12,R.id.tvSubItem13}
+                            new String[]{"Heading","Heading1","SubItem1","SubItem2","SubItem3","SubItem4","SubItem5","SubItem6","SubItem7","SubItem8","SubItem9","SubItem10","SubItem11","SubItem12","SubItem13","SubItem14"},
+                            new int[]{R.id.tvHeading,R.id.tvHeading1,R.id.tvSubItem1,R.id.tvSubItem2,R.id.tvSubItem3,R.id.tvSubItem4,R.id.tvSubItem5,R.id.tvSubItem6,R.id.tvSubItem7,R.id.tvSubItem8,R.id.tvSubItem9,R.id.tvSubItem10,R.id.tvSubItem11,R.id.tvSubItem12,R.id.tvSubItem13,R.id.tvSubItem14}
                     );
 
                     lv.setAdapter(adapter);
