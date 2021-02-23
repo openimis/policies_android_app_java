@@ -34,15 +34,15 @@
             android:id="@+id/nav_login"
             android:icon="@android:drawable/ic_partial_secure"
             android:title="@string/Login" />-->
-        <item
+        <!--<item
             android:id="@+id/nav_renewal"
             android:icon="@drawable/ic_renew"
-            android:title="@string/Renewal" />
+            android:title="@string/Renewal" />-->
 
-        <item
+        <!--<item
             android:id="@+id/nav_feedback"
             android:icon="@drawable/ic_feedback"
-            android:title="@string/Feedback" />
+            android:title="@string/Feedback" />-->
         <item
             android:id="@+id/nav_reports"
             android:icon="@drawable/ic_enroll"
