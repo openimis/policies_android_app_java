@@ -224,7 +224,7 @@
   <string name="AddEditPolicy">Add/Edit Policy</string>
   <string name="Premiums">Contributions</string>
   <string name="AddEditPremium">Add/Edit Contribution</string>
-  <string name="QuitAppQuestion">Do you want to quit openIMIS Policies?</string>
+  <string name="QuitAppQuestion">Do you want to quit openIMIS Educash?</string>
   <string name="UploadFailureReport">Upload report</string>
   <string name="Go">Go</string>
   <string name="Insuree">Insuree</string>
@@ -375,4 +375,8 @@
   <string name="empty_year">Please fill the year</string>
   <string name="DeleteFamilyOnlyOffline">Deleting of family will also Delete all Insurees, Policies and Premiums of this Family</string>
   <string name="LastInstallment">Last Installment</string>
+  <string name="SelectNetworkProvider">Preferred mode of receiving Money Transfer</string>
+  <string name="MTN">MTN</string>
+  <string name="Orange">Orange</string>
+  <string name="ExpressUnion">Express Union</string>
 </resources>

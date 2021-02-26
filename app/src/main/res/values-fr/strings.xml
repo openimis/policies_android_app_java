@@ -224,7 +224,7 @@
   <string name="AddEditPolicy">Ajouter/Modifier le contrat</string>
   <string name="Premiums">Contributions</string>
   <string name="AddEditPremium">Ajouter/Modifier la contribution</string>
-  <string name="QuitAppQuestion">Voulez-vous quitter openIMIS ?</string>
+  <string name="QuitAppQuestion">Voulez-vous quitter openIMIS Educash?</string>
   <string name="UploadFailureReport">Télécharger le rapport</string>
   <string name="Go">OK</string>
   <string name="Insuree">Assuré</string>
@@ -375,4 +375,8 @@
   <string name="empty_year">Entrer l\'année</string>
   <string name="DeleteFamilyOnlyOffline">Suppression de la famille supprimera également tous les assurés, les polices et les cotisations de la famille.</string>
   <string name="LastInstallment">Dernier versement</string>
+  <string name="SelectNetworkProvider">Mode de reception préferé</string>
+  <string name="MTN">MTN</string>
+  <string name="Orange">Orange</string>
+  <string name="ExpressUnion">Express Union</string>
 </resources>

@@ -267,7 +267,7 @@ In case of dispute arising out or in relation to the use of the program, it is s
             fillFSPRegions();
             fillFSPDistricts();
             fillFSPCategory();
-
+            fillNetworkProvider();
         }
 
         function fillRelationship(){
@@ -291,6 +291,12 @@ In case of dispute arising out or in relation to the use of the program, it is s
         function fillMaritalStatus(){
             var $MaritalStatus = Android.getMaritalStatus();
             bindDropdown('ddlMaritalStatus', $MaritalStatus, 'Code', 'Status', null, null);
+        }
+
+        function fillNetworkProvider(){
+            var $NetworkProvider = Android.getNetworkProvider();
+            bindDropdown('ddlNetworkProvider1', $NetworkProvider, 'Code', 'Status', null, null);
+            bindDropdown('ddlNetworkProvider2', $NetworkProvider, 'Code', 'Status', null, null);
         }
 
         function fillBeneficiaryCard(){
@@ -402,6 +408,23 @@ In case of dispute arising out or in relation to the use of the program, it is s
             <span strName="Relation">Relation</span>
             <select id="ddlRelationship" dataField="Relationship"></select>
         </li>
+        <li id="CurrentRegion">
+            <span strName="CurrentRegion">Current Region</span>
+            <select id="ddlCurrentRegion" datafield="CurRegion"></select>
+        </li>
+        <li id="CurrentDistrict">
+            <span strName="CurrentDistrict">Current District</span>
+            <select id="ddlCurrentDistrict" datafield="CurDistrict"></select>
+        </li>
+        <li id="CurrentMunicipality">
+            <span strName="CurrentMunicipality">Current Municipality</span>
+            <select id="ddlCurrentMunicipality" datafield="CurWard"></select>
+        </li>
+        <li id="CurrentVillage">
+            <span strName="CurrentVillage">Current Village</span>
+            <select id="ddlCurrentVillage" datafield="CurVillage"></select>
+        </li>
+        <hr/>
         <li>
             <input type="hidden" datafield="InsureeId" id="hfInsureeId" value="0"/>
             <input type="hidden" datafld="isOffline" id="hfIsOffline" value="."/>
@@ -421,6 +444,14 @@ In case of dispute arising out or in relation to the use of the program, it is s
             <input type="text" maxlength="50" id="txtLastName" dataField="LastName" required/>
         </li>
         <li>
+            <span strName="Gender">Gender</span>
+            <select id="ddlGender" datafield="Gender" required></select>
+        </li>
+        <li id="CurrentAddress">
+            <span strName="CurrentAddress">Current Address</span>
+            <textarea id="txtCurrentAddress" maxlength="200" datafield="CurrentAddress"></textarea>
+        </li>
+        <li>
             <input type="hidden" id="hfImagePath" datafield="PhotoPath" />
             <input type="hidden" id="hfNewPhotoPath" datafield="PhotoPath" />
             <div id="imgDiv">
@@ -428,12 +459,8 @@ In case of dispute arising out or in relation to the use of the program, it is s
             </div>
         </li>
         <li>
-            <span strName="BirthDate">Birth date</span>
-            <input type="date" id="txtBirthDate" dataField="DOB" required/>
-        </li>
-        <li>
-            <span strName="Gender">Gender</span>
-            <select id="ddlGender" datafield="Gender" required></select>
+            <span strName="BirthDate">Age/DoB</span>
+            <input type="date" id="txtBirthDate" dataField="DOB"/>
         </li>
         <li id="MaritalStatus">
             <span strName="MaritalStatus">Marital Status</span>
@@ -443,38 +470,24 @@ In case of dispute arising out or in relation to the use of the program, it is s
             <span strName="BeneficiaryCard">Beneficiary Card</span>
             <select id="ddlBeneficiaryCard" datafield="CardIssued"></select>
         </li>
-        <li id="CurrentRegion">
-            <span strName="CurrentRegion">Current Region</span>
-            <select id="ddlCurrentRegion" datafield="CurRegion"></select>
-        </li>
-        <li id="CurrentDistrict">
-            <span strName="CurrentDistrict">Current District</span>
-            <select id="ddlCurrentDistrict" datafield="CurDistrict"></select>
-        </li>
-        <li id="CurrentMunicipality">
-            <span strName="CurrentMunicipality">Current Municipality</span>
-            <select id="ddlCurrentMunicipality" datafield="CurWard"></select>
-        </li>
-        <li id="CurrentVillage">
-            <span strName="CurrentVillage">Current Village</span>
-            <select id="ddlCurrentVillage" datafield="CurVillage"></select>
-        </li>
-        <li id="CurrentAddress">
-            <span strName="CurrentAddress">Current Address</span>
-            <textarea id="txtCurrentAddress" maxlength="200" datafield="CurrentAddress"></textarea>
-        </li>
-        <li id="Profession">
-            <span strName="Profession">Profession</span>
-            <select id="ddlProfession" datafield="Profession"></select>
-        </li>
-        <li id="Education">
-            <span strName="Education">Education</span>
-            <select id="ddlEducation" datafield="Education"></select>
-        </li>
         <li>
             <span strName="PhoneNumber">Phone number</span>
-            <input type="number" id="txtPhoneNumber" datafield="Phone" maxlength="50"/>
+            <input type="tel" id="txtPhoneNumber" datafield="Phone" maxlength="50"/>
         </li>
+        <li id="NetworkProviderPhone1">
+            <span strName="NetworkProviderPhone1">Network Provider</span>
+            <select id="ddlNetworkProvider1" datafield="NetworkProvider"></select>
+        </li>
+        <li>
+            <span strName="PhoneNumber2">Alternative Phone</span>
+            <input type="tel" id="txtPhoneNumber2" datafield="Phone2" maxlength="50"/>
+        </li>
+        <li id="NetworkProviderPhone1">
+            <span strName="NetworkProviderPhone1">Network Provider</span>
+            <select id="ddlNetworkProvider2" datafield="NetworkProvider"></select>
+        </li>
+
+
         <li id="InsureeEmail">
             <span strName="Email">Email</span>
             <input type="email" maxlength="200" id="txtEmail" datafield="Email"/>
@@ -484,11 +497,25 @@ In case of dispute arising out or in relation to the use of the program, it is s
             <select id="ddlIdentificationType" datafield="TypeOfId"></select>
         </li>
         <li id="IdentificationNumber">
-            <span strName="IdentificationNumber">Identification Number</span>
+            <span strName="IdentificationNumber">National ID Card Number of Head of HH</span>
             <input type="text" id="txtIdentificationNumber" maxlength="50" datafield="IdentificationNumber"/>
         </li>
+        <li id="NetworkProviderPhonePrefer">
+            <span strName="NetworkProviderPhonePrefer">Preferred mode of receiving Money Transfer by Head of Householdr</span>
+            <select id="ddlPaiementPrefer" datafield="PaiementProvider"></select>
+        </li>
+    </ul>
+    <ul class="ulEntry">
+        <li id="Profession">
+            <span strName="Profession">Occupation of Head of Household</span>
+            <select id="ddlProfession" datafield="Profession"></select>
+        </li>
+        <li id="Education">
+            <span strName="Education">Level of Education of Head of Household</span>
+            <select id="ddlEducation" datafield="Education"></select>
+        </li>
         <li id="FSPRegion">
-            <span strName="FSPRegion"></span>
+            <span strName="FSPRegion">Region</span>
             <select id="ddlFSPRegion" datafield="FSPRegion"></select>
         </li>
         <li id="FSPDistrict">

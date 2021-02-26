@@ -908,17 +908,20 @@ public class MainActivity extends AppCompatActivity
 //        }
         else if (id == R.id.nav_modify_family) {
             wv.loadUrl("file:///android_asset/pages/Search.html");
-        } else if (id == R.id.nav_renewal) {
-            Intent i = new Intent(this, RenewList.class);
-            startActivity(i);
+        //}
+        //else if (id == R.id.nav_renewal) {
+        //    Intent i = new Intent(this, RenewList.class);
+        //    startActivity(i);
 
-        }else if (id == R.id.nav_reports) {
-            Intent i = new Intent(this, Reports.class);
-            startActivity(i);
+       // }
+        //else if (id == R.id.nav_reports) {
+        //    Intent i = new Intent(this, Reports.class);
+        //    startActivity(i);
 
-        } else if (id == R.id.nav_feedback) {
-            Intent intent = new Intent(this, FeedbackList.class);
-            startActivity(intent);
+//        }
+        //else if (id == R.id.nav_feedback) {
+        //    Intent intent = new Intent(this, FeedbackList.class);
+        //    startActivity(intent);
         } else if (id == R.id.nav_sync) {
             //general = new General();
             ClientAndroidInterface ca = new ClientAndroidInterface(context);
