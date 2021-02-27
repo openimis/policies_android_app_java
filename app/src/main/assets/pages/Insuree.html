@@ -39,10 +39,41 @@ In case of dispute arising out or in relation to the use of the program, it is s
             
             //Hide the relationship if the insuree is the HOF
             if(sessionStorage.getItem("FamilyData") !== null){
-                $("#Relationship").hide();
+                $("#Hof").hide();
                 $("#ddlRelationship").prop("required", false);
+                $("#txtLastName").prop("required", false);
+            }else{
+                $("#Children").hide();
             }
 
+
+            // Birthday Management "I don't know"
+            $('#idk').click(function() {
+                $("#txtBirthDate").prop("disabled", true);
+                if (!$(this).is(':checked')) {
+                    $("#txtBirthDate").prop("disabled", false);
+                }
+              });
+
+            // NoPhone Management "I don't know"
+            $('#noPhone1').click(function() {
+                $("#txtPhoneNumber").prop("disabled", true);
+                $("#ddlNetworkProvider1").prop("disabled", true);
+                if (!$(this).is(':checked')) {
+                    $("#txtPhoneNumber").prop("disabled", false);
+                    $("#ddlNetworkProvider1").prop("disabled", false);
+                }
+              });
+
+            // NoPhone Management "I don't know"
+            $('#noPhone2').click(function() {
+                $("#txtPhoneNumber2").prop("disabled", true);
+                $("#ddlNetworkProvider2").prop("disabled", true);
+                if (!$(this).is(':checked')) {
+                    $("#txtPhoneNumber2").prop("disabled", false);
+                    $("#ddlNetworkProvider2").prop("disabled", false);
+                }
+              });
 
             document.title = Android.getString('AddEditInsuree');
             Android.shutDownProgress();
@@ -251,6 +282,18 @@ In case of dispute arising out or in relation to the use of the program, it is s
                 $('#btnScan').hide();
             }
 
+
+            $('.tabHof').hide();
+            $('#locationHOF').show();
+
+            $('#HohLocationTab').click(function(){
+                $('.tabHof').hide();
+                $('#locationHOF').show();
+            })
+            $('#HohInfoTab').click(function(){
+                $('.tabHof').hide();
+                $('#InfoHOF').show();
+            })
         });
 
 
@@ -403,11 +446,8 @@ In case of dispute arising out or in relation to the use of the program, it is s
     <span id="spPleaseWait"></span>
 </div>
 <div>
-    <ul class="ulEntry">
-        <li id="Relationship">
-            <span strName="Relation">Relation</span>
-            <select id="ddlRelationship" dataField="Relationship"></select>
-        </li>
+    <a href="#" id="HohLocationTab" class="NavigationTab">Location</a>
+    <ul class="ulEntry tabHof" id="locationHOF">
         <li id="CurrentRegion">
             <span strName="CurrentRegion">Current Region</span>
             <select id="ddlCurrentRegion" datafield="CurRegion"></select>
@@ -424,7 +464,10 @@ In case of dispute arising out or in relation to the use of the program, it is s
             <span strName="CurrentVillage">Current Village</span>
             <select id="ddlCurrentVillage" datafield="CurVillage"></select>
         </li>
-        <hr/>
+    </ul>
+    <hr/>
+    <a href="#" id="HohInfoTab" class="NavigationTab">Head of Household Information</a>
+    <ul class="ulEntry tabHof" id="InfoHOF">
         <li>
             <input type="hidden" datafield="InsureeId" id="hfInsureeId" value="0"/>
             <input type="hidden" datafld="isOffline" id="hfIsOffline" value="."/>
@@ -460,18 +503,20 @@ In case of dispute arising out or in relation to the use of the program, it is s
         </li>
         <li>
             <span strName="BirthDate">Age/DoB</span>
+            <div id="Birthday-idk">
+                <input type="checkbox" id="idk" name="idk" class="left">
+                <label for="idk" class="left">Don't Know</label>
+            </div>
             <input type="date" id="txtBirthDate" dataField="DOB"/>
+
         </li>
-        <li id="MaritalStatus">
-            <span strName="MaritalStatus">Marital Status</span>
-            <select id="ddlMaritalStatus" datafield="Marital"></select>
-        </li>
-        <li id="BeneficiaryCard">
-            <span strName="BeneficiaryCard">Beneficiary Card</span>
-            <select id="ddlBeneficiaryCard" datafield="CardIssued"></select>
-        </li>
+
         <li>
             <span strName="PhoneNumber">Phone number</span>
+            <div id="noPhone1-idk">
+                <input type="checkbox" id="noPhone1" name="noPhone1" class="left">
+                <label for="noPhone1" class="left">Respondent has no phone</label>
+            </div>
             <input type="tel" id="txtPhoneNumber" datafield="Phone" maxlength="50"/>
         </li>
         <li id="NetworkProviderPhone1">
@@ -480,14 +525,16 @@ In case of dispute arising out or in relation to the use of the program, it is s
         </li>
         <li>
             <span strName="PhoneNumber2">Alternative Phone</span>
+            <div id="noPhone2-idk">
+                <input type="checkbox" id="noPhone2" name="noPhone2" class="left">
+                <label for="noPhone2" class="left">Respondent Has no alt. phone</label>
+            </div>
             <input type="tel" id="txtPhoneNumber2" datafield="Phone2" maxlength="50"/>
         </li>
         <li id="NetworkProviderPhone1">
             <span strName="NetworkProviderPhone1">Network Provider</span>
             <select id="ddlNetworkProvider2" datafield="NetworkProvider"></select>
         </li>
-
-
         <li id="InsureeEmail">
             <span strName="Email">Email</span>
             <input type="email" maxlength="200" id="txtEmail" datafield="Email"/>
@@ -504,8 +551,6 @@ In case of dispute arising out or in relation to the use of the program, it is s
             <span strName="NetworkProviderPhonePrefer">Preferred mode of receiving Money Transfer by Head of Householdr</span>
             <select id="ddlPaiementPrefer" datafield="PaiementProvider"></select>
         </li>
-    </ul>
-    <ul class="ulEntry">
         <li id="Profession">
             <span strName="Profession">Occupation of Head of Household</span>
             <select id="ddlProfession" datafield="Profession"></select>
@@ -529,6 +574,28 @@ In case of dispute arising out or in relation to the use of the program, it is s
         <li id="FSP">
             <span strName="FSP">First Service Point</span>
             <select id="ddlFSP" datafield="HFID"></select>
+        </li>
+    </ul>
+    <a href="#" id="HohVulnerabilityTab" class="NavigationTab">Household Vulnerability</a>
+    <ul class="ulEntry tabHof" id="InfoHOF">
+        <li id="MaritalStatus">
+            <span strName="MaritalStatus">Marital Status</span>
+            <select id="ddlMaritalStatus" datafield="Marital"></select>
+        </li>
+        <li id="BeneficiaryCard">
+            <span strName="BeneficiaryCard">Beneficiary Card</span>
+            <select id="ddlBeneficiaryCard" datafield="CardIssued"></select>
+        </li>
+
+    </ul>
+    <ul class="ulEntry" id="Children">
+        <li id="Relationship">
+            <span strName="Relation">Relation</span>
+            <select id="ddlRelationship" dataField="Relationship"></select>
+        </li>
+        <li>
+            <span strName="LastName">Name of Child</span>
+            <input type="text" maxlength="50" id="txtLastName" dataField="LastName" required/>
         </li>
     </ul>
 </div>

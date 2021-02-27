@@ -158,6 +158,26 @@ float:left;
     float:right;
     font-size: 1em !important
 }
+
+.NavigationTab{
+    display:block;
+    background:#42b7fb;
+    color:#FFF;
+    margin: 5px 0px 5px 0px;
+    padding: 5px;
+}
+
+#Birthday-idk input,
+#noPhone1-idk input,
+#noPhone2-idk input{
+    width:25%;
+}
+#Birthday-idk label,
+#noPhone1-idk label,
+#noPhone2-idk label{
+    line-height:50px;
+}
+
 p{
     margin: 0.2em 0;
 }
