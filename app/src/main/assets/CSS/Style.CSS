@@ -169,11 +169,14 @@ float:left;
 
 #Birthday-idk input,
 #noPhone1-idk input,
+#identification-idk input,
 #noPhone2-idk input{
     width:25%;
 }
+
 #Birthday-idk label,
 #noPhone1-idk label,
+#identification-idk label,
 #noPhone2-idk label{
     line-height:50px;
 }

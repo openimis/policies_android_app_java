@@ -75,6 +75,16 @@ In case of dispute arising out or in relation to the use of the program, it is s
                 }
               });
 
+             // NoPhone Management "I don't know"
+            $('#identification-idk-check').click(function() {
+                $("#txtIdentificationNumber").prop("disabled", true);
+                $("#ddlIdentificationType").prop("disabled", true);
+                if (!$(this).is(':checked')) {
+                    $("#txtIdentificationNumber").prop("disabled", false);
+                    $("#ddlIdentificationType").prop("disabled", false);
+                }
+              });
+
             document.title = Android.getString('AddEditInsuree');
             Android.shutDownProgress();
         
@@ -294,6 +304,10 @@ In case of dispute arising out or in relation to the use of the program, it is s
                 $('.tabHof').hide();
                 $('#InfoHOF').show();
             })
+            $('#HohVulnerabilityTab').click(function(){
+                $('.tabHof').hide();
+                $('#VulnerabilityHOF').show();
+            })
         });
 
 
@@ -311,6 +325,7 @@ In case of dispute arising out or in relation to the use of the program, it is s
             fillFSPDistricts();
             fillFSPCategory();
             fillNetworkProvider();
+            fillPaiementProvider();
         }
 
         function fillRelationship(){
@@ -340,6 +355,11 @@ In case of dispute arising out or in relation to the use of the program, it is s
             var $NetworkProvider = Android.getNetworkProvider();
             bindDropdown('ddlNetworkProvider1', $NetworkProvider, 'Code', 'Status', null, null);
             bindDropdown('ddlNetworkProvider2', $NetworkProvider, 'Code', 'Status', null, null);
+        }
+
+        function fillPaiementProvider(){
+            var $PaiementProvider = Android.getPaiementProvider();
+            bindDropdown('ddlPaiementPrefer', $PaiementProvider, 'Code', 'Status', null, null);
         }
 
         function fillBeneficiaryCard(){
@@ -494,13 +514,7 @@ In case of dispute arising out or in relation to the use of the program, it is s
             <span strName="CurrentAddress">Current Address</span>
             <textarea id="txtCurrentAddress" maxlength="200" datafield="CurrentAddress"></textarea>
         </li>
-        <li>
-            <input type="hidden" id="hfImagePath" datafield="PhotoPath" />
-            <input type="hidden" id="hfNewPhotoPath" datafield="PhotoPath" />
-            <div id="imgDiv">
-                <img src="" alt="Image" onerror="noImage(this);" id="imgInsuree"/>
-            </div>
-        </li>
+
         <li>
             <span strName="BirthDate">Age/DoB</span>
             <div id="Birthday-idk">
@@ -535,12 +549,12 @@ In case of dispute arising out or in relation to the use of the program, it is s
             <span strName="NetworkProviderPhone1">Network Provider</span>
             <select id="ddlNetworkProvider2" datafield="NetworkProvider"></select>
         </li>
-        <li id="InsureeEmail">
-            <span strName="Email">Email</span>
-            <input type="email" maxlength="200" id="txtEmail" datafield="Email"/>
-        </li>
         <li id="IdentificationType">
             <span strName="IdentificationType">Identification Type</span>
+            <div id="identification-idk">
+                <input type="checkbox" id="identification-idk-check" name="identification-idk-check" class="left">
+                <label for="identification-idk-check" class="left">Head of HH has no ID Card</label>
+            </div>
             <select id="ddlIdentificationType" datafield="TypeOfId"></select>
         </li>
         <li id="IdentificationNumber">
@@ -548,8 +562,16 @@ In case of dispute arising out or in relation to the use of the program, it is s
             <input type="text" id="txtIdentificationNumber" maxlength="50" datafield="IdentificationNumber"/>
         </li>
         <li id="NetworkProviderPhonePrefer">
-            <span strName="NetworkProviderPhonePrefer">Preferred mode of receiving Money Transfer by Head of Householdr</span>
+            <span strName="NetworkProviderPhonePrefer">Preferred mode of receiving Money Transfer by Head of Household</span>
             <select id="ddlPaiementPrefer" datafield="PaiementProvider"></select>
+        </li>
+
+    </ul>
+    <a href="#" id="HohVulnerabilityTab" class="NavigationTab">Household Vulnerability</a>
+    <ul class="ulEntry tabHof" id="VulnerabilityHOF">
+        <li id="MaritalStatus">
+            <span strName="MaritalStatus">Marital Status</span>
+            <select id="ddlMaritalStatus" datafield="Marital"></select>
         </li>
         <li id="Profession">
             <span strName="Profession">Occupation of Head of Household</span>
@@ -575,13 +597,6 @@ In case of dispute arising out or in relation to the use of the program, it is s
             <span strName="FSP">First Service Point</span>
             <select id="ddlFSP" datafield="HFID"></select>
         </li>
-    </ul>
-    <a href="#" id="HohVulnerabilityTab" class="NavigationTab">Household Vulnerability</a>
-    <ul class="ulEntry tabHof" id="InfoHOF">
-        <li id="MaritalStatus">
-            <span strName="MaritalStatus">Marital Status</span>
-            <select id="ddlMaritalStatus" datafield="Marital"></select>
-        </li>
         <li id="BeneficiaryCard">
             <span strName="BeneficiaryCard">Beneficiary Card</span>
             <select id="ddlBeneficiaryCard" datafield="CardIssued"></select>
@@ -592,6 +607,13 @@ In case of dispute arising out or in relation to the use of the program, it is s
         <li id="Relationship">
             <span strName="Relation">Relation</span>
             <select id="ddlRelationship" dataField="Relationship"></select>
+        </li>
+        <li>
+            <input type="hidden" id="hfImagePath" datafield="PhotoPath" />
+            <input type="hidden" id="hfNewPhotoPath" datafield="PhotoPath" />
+            <div id="imgDiv">
+                <img src="" alt="Image" onerror="noImage(this);" id="imgInsuree"/>
+            </div>
         </li>
         <li>
             <span strName="LastName">Name of Child</span>

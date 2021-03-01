@@ -379,4 +379,6 @@
   <string name="MTN">MTN</string>
   <string name="Orange">Orange</string>
   <string name="ExpressUnion">Express Union</string>
+  <string name="nextel">Nextel</string>
+  <string name="camtel">Camtel</string>
 </resources>

@@ -546,8 +546,18 @@ public class ClientAndroidInterface {
             networkProvider.put(object);
 
             object = new JSONObject();
-            object.put("Code", "EU");
-            object.put("Status", mContext.getResources().getString(R.string.ExpressUnion));
+            object.put("Code", "N");
+            object.put("Status", mContext.getResources().getString(R.string.nextel));
+            networkProvider.put(object);
+
+            object = new JSONObject();
+            object.put("Code", "C");
+            object.put("Status", mContext.getResources().getString(R.string.camtel));
+            networkProvider.put(object);
+
+            object = new JSONObject();
+            object.put("Code", "O");
+            object.put("Status", mContext.getResources().getString(R.string.Other));
             networkProvider.put(object);
 
         } catch (JSONException e) {
@@ -555,6 +565,36 @@ public class ClientAndroidInterface {
         }
 
         return networkProvider.toString();
+    }
+
+    @JavascriptInterface
+    public String getPaiementProvider() {
+        JSONArray paiementProvider = new JSONArray();
+        JSONObject object = new JSONObject();
+
+        try {
+            object.put("Code", "");
+            object.put("Status", mContext.getResources().getString(R.string.SelectNetworkProvider));
+            paiementProvider.put(object);
+
+            object = new JSONObject();
+            object.put("Code", "M");
+            object.put("Status", mContext.getResources().getString(R.string.MTN));
+            paiementProvider.put(object);
+
+            object = new JSONObject();
+            object.put("Code", "O");
+            object.put("Status", mContext.getResources().getString(R.string.Orange));
+            paiementProvider.put(object);
+
+            object = new JSONObject();
+            object.put("Code", "EU");
+            object.put("Status", mContext.getResources().getString(R.string.ExpressUnion));
+            paiementProvider.put(object);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return paiementProvider.toString();
     }
 
     @JavascriptInterface

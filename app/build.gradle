@@ -23,7 +23,8 @@ android {
     defaultConfig {
         applicationId "org.openimis.imispolicies"
         minSdkVersion 19
-        targetSdkVersion 27
+        targetSdkVersion 29
+
         versionCode 3
         versionName "2.0.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
