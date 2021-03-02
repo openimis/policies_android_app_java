@@ -21,7 +21,7 @@ android {
         }
     }
     defaultConfig {
-        applicationId "org.openimis.imispolicies"
+        applicationId "cm.ynote.rhemacare"
         minSdkVersion 19
         targetSdkVersion 29
 
@@ -53,14 +53,14 @@ android {
     }
     productFlavors {
         demoProd {
-            applicationId "org.openimis.imispolicies.demoProd"
+            applicationId "cm.ynote.rhemacare.demoProd"
             buildConfigField "String", "API_BASE_URL", '"http://demo.openimis.org/rest/"'
             buildConfigField "String", "RAR_PASSWORD", '")(#$1HsD"'
             resValue "string", "app_name", "Policies Demo"
             dimension = 'std'
         }
         demoRelease {
-            applicationId "org.openimis.imispolicies.demoRelease"
+            applicationId "cm.ynote.rhemacare.demoRelease"
             buildConfigField "String", "API_BASE_URL", '"http://release.openimis.org/rest/"'
             buildConfigField "boolean", "SHOW_CONTROL_NUMBER_MENU", 'true'
             resValue "string", "app_name", "Policies Release"

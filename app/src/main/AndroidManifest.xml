@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="org.openimis.imispolicies"
+    package="cm.ynote.rhemacare"
     android:versionCode="2"
     android:versionName="2.0.2">
 
@@ -22,7 +22,7 @@
         android:required="true" />
 
     <application
-        android:name="org.openimis.imispolicies.Global"
+        android:name="cm.ynote.rhemacare.Global"
         android:allowBackup="true"
         android:fullBackupContent="@xml/backup_descriptor"
         android:icon="@mipmap/ic_launcher"
@@ -37,7 +37,7 @@
             android:name="org.apache.http.legacy"
             android:required="false"/>
         <activity
-            android:name="org.openimis.imispolicies.MainActivity"
+            android:name="cm.ynote.rhemacare.MainActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/app_name"
             android:screenOrientation="portrait"
@@ -49,62 +49,62 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="org.openimis.imispolicies.Enquire"
+            android:name="cm.ynote.rhemacare.Enquire"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/Enquire"
             android:screenOrientation="portrait" />
         <activity
-            android:name="org.openimis.imispolicies.RenewList"
+            android:name="cm.ynote.rhemacare.RenewList"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/Renewal"
             android:screenOrientation="portrait" />
         <activity
-            android:name="org.openimis.imispolicies.Renewal"
+            android:name="cm.ynote.rhemacare.Renewal"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/Renewal"
-            android:parentActivityName="org.openimis.imispolicies.RenewList"
+            android:parentActivityName="cm.ynote.rhemacare.RenewList"
             android:screenOrientation="portrait"
             tools:targetApi="jelly_bean" />
         <activity
-            android:name="org.openimis.imispolicies.FeedbackList"
+            android:name="cm.ynote.rhemacare.FeedbackList"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:screenOrientation="portrait" />
         <activity
-            android:name="org.openimis.imispolicies.Feedback"
+            android:name="cm.ynote.rhemacare.Feedback"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:parentActivityName="org.openimis.imispolicies.FeedbackList"
+            android:parentActivityName="cm.ynote.rhemacare.FeedbackList"
             android:screenOrientation="portrait"
             tools:targetApi="jelly_bean" />
         <activity
-            android:name="org.openimis.imispolicies.Statistics"
+            android:name="cm.ynote.rhemacare.Statistics"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:screenOrientation="portrait" />
         <activity
-            android:name="org.openimis.imispolicies.Acquire"
+            android:name="cm.ynote.rhemacare.Acquire"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/Acquire"
             android:screenOrientation="portrait" />
-        <activity android:name="org.openimis.imispolicies.Reports"
+        <activity android:name="cm.ynote.rhemacare.Reports"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/Reports"
             android:screenOrientation="portrait" />
         <activity
-            android:name="org.openimis.imispolicies.SnapshotIndicators"
+            android:name="cm.ynote.rhemacare.SnapshotIndicators"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/SnapshotIndicators"
             android:screenOrientation="portrait" />
 
-        <activity android:name="org.openimis.imispolicies.CummulativeIndicators"
+        <activity android:name="cm.ynote.rhemacare.CummulativeIndicators"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/CummulativeIndicators"
             android:screenOrientation="portrait" />
-        <activity android:name="org.openimis.imispolicies.ControlNumbers" />
-        <activity android:name="org.openimis.imispolicies.SearchOverViewPolicies" />
-        <activity android:name="org.openimis.imispolicies.OverViewPolicies1" />
-        <activity android:name="org.openimis.imispolicies.OverViewControlNumbers" />
-        <activity android:name="org.openimis.imispolicies.SearchOverViewControlNumber" />
-        <activity android:name="org.openimis.imispolicies.ViewPolicies" />
-        <activity android:name="org.openimis.imispolicies.CheckCommission"></activity>
+        <activity android:name="cm.ynote.rhemacare.ControlNumbers" />
+        <activity android:name="cm.ynote.rhemacare.SearchOverViewPolicies" />
+        <activity android:name="cm.ynote.rhemacare.OverViewPolicies1" />
+        <activity android:name="cm.ynote.rhemacare.OverViewControlNumbers" />
+        <activity android:name="cm.ynote.rhemacare.SearchOverViewControlNumber" />
+        <activity android:name="cm.ynote.rhemacare.ViewPolicies" />
+        <activity android:name="cm.ynote.rhemacare.CheckCommission"></activity>
     </application>
 
 </manifest>

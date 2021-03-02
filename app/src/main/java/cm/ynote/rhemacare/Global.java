@@ -25,25 +25,71 @@
 
 package cm.ynote.rhemacare;
 
-import cm.ynote.rhemacare.R;
+import android.app.Application;
 
-public class Escape {
-    public int CheckInsuranceNumber(String InsuranceNumber){
+public class Global extends Application {
+    private String OfficerCode;
+    private String OfficerName;
+    private int UserId;
+    private  int OfficerId;
 
-        if (InsuranceNumber.length() == 0){
-            return R.string.MissingInsuranceNumber;
-        }
+    private String ImageFolder;
 
-        if (!isValidInsuranceNumber(InsuranceNumber)){
-            return R.string.InvalidInsuranceNumber;
+    private Token JWTToken;
 
-        }
-
-        return 0;
+    public Token getJWTToken() {
+        return JWTToken;
+    }
+    public void setJWTToken(Token token) {
+        JWTToken = token;
     }
 
-    private boolean isValidInsuranceNumber(String InsuranceNumber){
-        return true;
+    public String getOfficerCode() {
+        return OfficerCode;
     }
 
+    public void setOfficerCode(String officerCode) {
+        OfficerCode = officerCode;
+    }
+
+    public int getUserId() {
+        return UserId;
+    }
+    public void setUserId(int userId) {
+        UserId = userId;
+    }
+
+    public int getOfficerId() {
+        return OfficerId;
+    }
+    public void setOfficerId(int officerId) {
+        OfficerId = officerId;
+    }
+
+    public String getImageFolder() {
+        return ImageFolder;
+    }
+
+    public void setImageFolder(String imageFolder) {
+        ImageFolder = imageFolder;
+    }
+
+    private  String CurrentUrl;
+    public String getCurrentUrl() {
+        return CurrentUrl;
+    }
+
+    public void setCurrentUrl(String currentUrl) {
+        CurrentUrl = currentUrl;
+    }
+
+
+
+    public String getOfficerName() {
+        return OfficerName;
+    }
+
+    public void setOfficerName(String officerName) {
+        OfficerName = officerName;
+    }
 }

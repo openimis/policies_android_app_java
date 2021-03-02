@@ -25,25 +25,67 @@
 
 package cm.ynote.rhemacare;
 
+import android.content.Context;
+import android.database.Cursor;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.CursorAdapter;
+import android.widget.TextView;
+
 import cm.ynote.rhemacare.R;
 
-public class Escape {
-    public int CheckInsuranceNumber(String InsuranceNumber){
-
-        if (InsuranceNumber.length() == 0){
-            return R.string.MissingInsuranceNumber;
-        }
-
-        if (!isValidInsuranceNumber(InsuranceNumber)){
-            return R.string.InvalidInsuranceNumber;
-
-        }
-
-        return 0;
+public class PayerAdapter extends CursorAdapter implements AdapterView.OnItemClickListener {
+    private ClientAndroidInterface ca;
+    private String LocationId ="1";
+    public PayerAdapter(Context context){
+        //noinspection deprecation
+        super(context,null);
+        ca= new ClientAndroidInterface(context);
+    }
+    @Override
+    public View newView(Context context, Cursor cursor, ViewGroup parent) {
+        final LayoutInflater inflater = LayoutInflater.from(context);
+        return inflater.inflate(R.layout.payer_list,parent, false);
     }
 
-    private boolean isValidInsuranceNumber(String InsuranceNumber){
-        return true;
+    @Override
+    public void bindView(View view, Context context, Cursor cursor) {
+        final int descColumnIndex = cursor.getColumnIndexOrThrow("PayerName");
+        final int IdColumnIndex = cursor.getColumnIndexOrThrow("PayerId");
+               String Suggestion = cursor.getString(descColumnIndex);
+        TextView text1 = (TextView) view.findViewById(R.id.text1);
+        text1.setText(Suggestion);
+
     }
 
+    @Override
+    public Cursor runQueryOnBackgroundThread(CharSequence constraint) {
+        if (getFilterQueryProvider() != null) {
+            return getFilterQueryProvider().runQuery(constraint);
+        }
+
+        return ca.SearchPayer(
+                (constraint != null ? constraint.toString() : ""),LocationId);
+    }
+
+    @Override
+    public CharSequence convertToString(Cursor cursor) {
+        final int columnIndex = cursor.getColumnIndexOrThrow("PayerName");
+        return cursor.getString(columnIndex);
+    }
+
+
+    @Override
+    public void onItemClick(AdapterView<?> listView, View view, int position, long id) {
+//        Cursor cursor = (Cursor) listView.getItemAtPosition(position);
+//
+//        // Get the Item Number from this row in the database.
+//        String itemNumber = cursor.getString(cursor.getColumnIndexOrThrow("Code"));
+
+
+    }
 }
+
+

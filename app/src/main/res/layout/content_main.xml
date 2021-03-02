@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:showIn="@layout/app_bar_main"
-    tools:context="org.openimis.imispolicies.MainActivity">
+    tools:context="org.openimis.imispolicies.cm.openimis.imispolicies.MainActivity">
 
 
     <WebView

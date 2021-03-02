@@ -25,25 +25,9 @@
 
 package cm.ynote.rhemacare;
 
-import cm.ynote.rhemacare.R;
+public class UserException extends Exception {
 
-public class Escape {
-    public int CheckInsuranceNumber(String InsuranceNumber){
-
-        if (InsuranceNumber.length() == 0){
-            return R.string.MissingInsuranceNumber;
-        }
-
-        if (!isValidInsuranceNumber(InsuranceNumber)){
-            return R.string.InvalidInsuranceNumber;
-
-        }
-
-        return 0;
+    public UserException(String message) {
+        super(message);
     }
-
-    private boolean isValidInsuranceNumber(String InsuranceNumber){
-        return true;
-    }
-
 }

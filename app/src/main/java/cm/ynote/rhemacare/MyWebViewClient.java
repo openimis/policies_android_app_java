@@ -25,25 +25,60 @@
 
 package cm.ynote.rhemacare;
 
+import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.net.Uri;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
+
 import cm.ynote.rhemacare.R;
 
-public class Escape {
-    public int CheckInsuranceNumber(String InsuranceNumber){
+import static cm.ynote.rhemacare.R.string.PageLoading;
 
-        if (InsuranceNumber.length() == 0){
-            return R.string.MissingInsuranceNumber;
-        }
 
-        if (!isValidInsuranceNumber(InsuranceNumber)){
-            return R.string.InvalidInsuranceNumber;
+class MyWebViewClient extends WebViewClient {
+    private Context context;
 
-        }
-
-        return 0;
+    MyWebViewClient(Context ctx){
+        context = ctx;
     }
 
-    private boolean isValidInsuranceNumber(String InsuranceNumber){
-        return true;
+    @SuppressWarnings("deprecation")
+    @Override
+    public boolean shouldOverrideUrlLoading(WebView view, String url) {
+
+        if(Uri.parse(url).getHost().equals("file:///android_asset/pages/") || Uri.parse(url).getHost().equals("")){
+            return false;
+        }else{
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+            context.startActivity(intent);
+            return true;
+        }
     }
+
+    private ProgressDialog pd = null;
+
+    @Override
+    public void onPageStarted(WebView view, String url, Bitmap favicon) {
+        
+        pd = new ProgressDialog(context);
+        pd.setTitle(context.getResources().getText(R.string.PleaseWait));
+        pd.setMessage(context.getResources().getText(PageLoading));
+        pd.show();
+
+        super.onPageStarted(view, url, favicon);
+
+    }
+
+    @Override
+    public void onPageFinished(WebView view, String url) {
+        pd.dismiss();
+        super.onPageFinished(view, url);
+    }
+
+
+
 
 }
