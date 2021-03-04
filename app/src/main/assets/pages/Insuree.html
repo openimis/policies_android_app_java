@@ -46,14 +46,14 @@ In case of dispute arising out or in relation to the use of the program, it is s
                 $("#ddlRelationship").prop("required", false);
                 $("#txtLastName").prop("required", false);
             }else{
-                //$("#Children").hide();
+                $("#Children").hide();
             }
 
 
             /*** Checkbox Management zhen a user don't know the answer ****/
             // Birthday Management "I don't know"
             $('#idk').click(function() {
-                $("#txtBirthDateChild").prop("disabled", true);
+                $("#txtBirthDate").prop("disabled", true);
                 if (!$(this).is(':checked')) {
                     $("#txtBirthDate").prop("disabled", false);
                 }
@@ -83,7 +83,7 @@ In case of dispute arising out or in relation to the use of the program, it is s
             $('#noPhone2').click(function() {
                 $("#txtPhoneNumber2").prop("disabled", true);
                 $("#ddlNetworkProvider2").prop("disabled", true);
-                $("#notRegisteredPhone@").prop("disabled", true);
+                $("#notRegisteredPhone2").prop("disabled", true);
                 if (!$(this).is(':checked')) {
                     $("#txtPhoneNumber2").prop("disabled", false);
                     $("#ddlNetworkProvider2").prop("disabled", false);
@@ -98,6 +98,14 @@ In case of dispute arising out or in relation to the use of the program, it is s
                 if (!$(this).is(':checked')) {
                     $("#txtIdentificationNumber").prop("disabled", false);
                     $("#ddlIdentificationType").prop("disabled", false);
+                }
+              });
+
+             // No Girl Mariage Management "None"
+             $('#noHHNBGirlMarried').click(function() {
+                $("#HHNBGirlsMarried").prop("disabled", true);
+                if (!$(this).is(':checked')) {
+                    $("#HHNBGirlsMarried").prop("disabled", false);
                 }
               });
 
@@ -126,6 +134,88 @@ In case of dispute arising out or in relation to the use of the program, it is s
                 });
 
 
+            /***** Manage phone number provider ******/
+            function ddlPaiementPreferFunction(networkDefined){
+                $("#ddlPaiementPrefer > option").each(function() {
+                    $(this).show();
+                    if(this.value!=networkDefined && this.value !="EU" && this.value !=""){
+                        $(this).hide();
+                    }
+                });
+            }
+
+            $("#ddlNetworkProvider1").change(function(){
+               console.log($(this).val());
+               switch($(this).val()) {
+                  case "O":
+                   ddlPaiementPreferFunction("O");
+                    break;
+                  case "M":
+                    ddlPaiementPreferFunction("M");
+                    break;
+                  default:
+                    ddlPaiementPreferFunction("-1");
+                }
+            });
+
+
+            /****** Addition of input form ******/
+            $(".HHNBPersonLivingTotal").change(function(){
+               sumTotal=0;
+               $(".HHNBPersonLivingTotal").each(function(){
+                   sumTotal+=Number($(this).val());
+               });
+               $("#HHNBPersonLivingT").val(sumTotal);
+
+            });
+
+            $(".HHNBChildrenLivingTotal").change(function(){
+               sumTotal=0;
+               $(".HHNBChildrenLivingTotal").each(function(){
+                   sumTotal+=Number($(this).val());
+               });
+               $("#HHNBChildrenLivingT").val(sumTotal);
+            });
+
+            $(".HHNBChildrenLivingTotal").change(function(){
+               sumTotal=0;
+               $(".HHNBChildrenLivingTotal").each(function(){
+                   sumTotal+=Number($(this).val());
+               });
+               $("#HHNBChildrenLivingT").val(sumTotal);
+            });
+
+            $(".HHNBChildrenSchoolLivingTotal").change(function(){
+               sumTotal=0;
+               $(".HHNBChildrenSchoolLivingTotal").each(function(){
+                   sumTotal+=Number($(this).val());
+               });
+               $("#HHNBChildrenSchoolLivingT").val(sumTotal);
+            });
+
+            $(".HHNBChildrenCompleteSchoolLivingTotal").change(function(){
+               sumTotal=0;
+               $(".HHNBChildrenCompleteSchoolLivingTotal").each(function(){
+                   sumTotal+=Number($(this).val());
+               });
+               $("#HHNBChildrenCompleteSchoolLivingT").val(sumTotal);
+            });
+
+            $(".HHNBChildrenDropSchoolLivingTotal").change(function(){
+               sumTotal=0;
+               $(".HHNBChildrenDropSchoolLivingTotal").each(function(){
+                   sumTotal+=Number($(this).val());
+               });
+               $("#HHNBChildrenDropSchoolLivingT").val(sumTotal);
+            });
+
+            $(".HHNBChildrenBirthCertifTotal").change(function(){
+               sumTotal=0;
+               $(".HHNBChildrenBirthCertifTotal").each(function(){
+                   sumTotal+=Number($(this).val());
+               });
+               $("#HHNBChildrenBirthCertifT").val(sumTotal);
+            });
 
 
             document.title = Android.getString('AddEditInsuree');
@@ -602,7 +692,8 @@ In case of dispute arising out or in relation to the use of the program, it is s
         </li>
         <li id="NetworkProviderPhone1">
             <span strName="NetworkProviderPhone1">2-10. Network Provider</span>
-            <select id="ddlNetworkProvider1" datafield="NetworkProvider"></select>
+            <select id="ddlNetworkProvider1" datafield="NetworkProvider">
+            </select>
         </li>
         <li>
             <span strName="PhoneNumber2">2-11. Alternative Phone</span>
@@ -637,7 +728,8 @@ In case of dispute arising out or in relation to the use of the program, it is s
         </li>
         <li id="NetworkProviderPhonePrefer">
             <span strName="NetworkProviderPhonePrefer">2.16- Preferred mode of receiving Money Transfer by Head of Household</span>
-            <select id="ddlPaiementPrefer" datafield="PaiementProvider"></select>
+            <select id="ddlPaiementPrefer" datafield="PaiementProvider">
+            </select>
         </li>
 
     </ul>
@@ -673,12 +765,12 @@ In case of dispute arising out or in relation to the use of the program, it is s
         <hr/>
         <li id="HHNBPersonLivingMale">
             <span strName="HHNBPersonLivingM">3-7. Number of Male living in Houshold</span>
-            <input type="number" id="HHNBPersonLivingM" maxlength="3" datafield="HHNBPersonLivingM"/>
+            <input type="number" id="HHNBPersonLivingM" maxlength="3" class="HHNBPersonLivingTotal" datafield="HHNBPersonLivingM"/>
         </li>
 
         <li id="HHNBPersonLivingFemale">
             <span strName="HHNBPersonLivingF">3-7. Number of Female living in Houshold</span>
-            <input type="number" id="HHNBPersonLivingF" maxlength="3" datafield="HHNBPersonLivingF"/>
+            <input type="number" id="HHNBPersonLivingF" maxlength="3" class="HHNBPersonLivingTotal" datafield="HHNBPersonLivingF"/>
         </li>
 
         <li id="HHNBPersonLivingTotal">
@@ -689,12 +781,12 @@ In case of dispute arising out or in relation to the use of the program, it is s
         <hr/>
         <li id="HHNBChildrenLivingMale">
             <span strName="HHNBChildrenLivingM">3-8. Number of Boys/Dependents below 18 years in Houshold</span>
-            <input type="number" id="HHNBChildrenLivingM" maxlength="3" datafield="HHNBChildrenLivingM"/>
+            <input type="number" id="HHNBChildrenLivingM" class="HHNBChildrenLivingTotal" maxlength="3" datafield="HHNBChildrenLivingM"/>
         </li>
 
         <li id="HHNBChildrenLivingFemale">
             <span strName="HHNBChildrenLivingF">3-8. Number of Girls/Dependents below 18 years in Houshold</span>
-            <input type="number" id="HHNBChildrenLivingF" maxlength="3" datafield="HHNBChildrenLivingF"/>
+            <input type="number" id="HHNBChildrenLivingF" class="HHNBChildrenLivingTotal" class="HHNBPersonLivingTotal maxlength="3" datafield="HHNBChildrenLivingF"/>
         </li>
 
         <li id="HHNBChildrenLivingTotal">
@@ -705,12 +797,12 @@ In case of dispute arising out or in relation to the use of the program, it is s
         <hr/>
         <li id="HHNBChildrenSchoolLivingMale">
             <span strName="HHNBChildrenSchoolLivingM">3-9. Number of Boys in Houshold going to Primary School</span>
-            <input type="number" id="HHNBChildrenSchoolLivingM" maxlength="3" datafield="HHNBChildrenSchoolLivingM"/>
+            <input type="number" id="HHNBChildrenSchoolLivingM" class="HHNBChildrenSchoolLivingTotal" maxlength="3" datafield="HHNBChildrenSchoolLivingM"/>
         </li>
 
         <li id="HHNBChildrenSchoolLivingFemale">
             <span strName="HHNBChildrenSchoolLivingF">3-9. Number of Girls in Houshold going to Primary School</span>
-            <input type="number" id="HHNBChildrenSchoolLivingF" maxlength="3" datafield="HHNBChildrenSchoolLivingF"/>
+            <input type="number" id="HHNBChildrenSchoolLivingF" class="HHNBChildrenSchoolLivingTotal" maxlength="3" datafield="HHNBChildrenSchoolLivingF"/>
         </li>
 
         <li id="HHNBChildrenSchoolLivingTotal">
@@ -721,28 +813,28 @@ In case of dispute arising out or in relation to the use of the program, it is s
         <hr/>
         <li id="HHNBChildrenCompleteSchoolLivingMale">
             <span strName="HHNBChildrenCompleteSchoolLivingM">3-10. Number of Boys in HH below 18 that have completed primary school</span>
-            <input type="number" id="HHNBChildrenCompleteSchoolLivingM" maxlength="3" datafield="HHNBChildrenCompleteSchoolLivingM"/>
+            <input type="number" id="HHNBChildrenCompleteSchoolLivingM" class="HHNBChildrenCompleteSchoolLivingTotal" maxlength="3" datafield="HHNBChildrenCompleteSchoolLivingM"/>
         </li>
 
         <li id="HHNBChildrenCompleteSchoolLivingFemale">
             <span strName="HHNBChildrenCompleteSchoolLivingF">3-10. Number of Girls in HH below 18 that have completed primary school</span>
-            <input type="number" id="HHNBChildrenCompleteSchoolLivingF" maxlength="3" datafield="HHNBChildrenCompleteSchoolLivingF"/>
+            <input type="number" id="HHNBChildrenCompleteSchoolLivingF" class="HHNBChildrenCompleteSchoolLivingTotal" maxlength="3" datafield="HHNBChildrenCompleteSchoolLivingF"/>
         </li>
 
         <li id="HHNBChildrenCompleteSchoolLivingTotal">
             <span strName="HHNBChildrenCompleteSchoolLivingTotal">3-10. Number of Children in HH below 18 that have completed primary school</span>
-            <input type="number" id="HHNBChildrenCompleteSchoolLivingT" maxlength="3" datafield="HHNBChildrenCompleteSchoolLivingTotal" disabled/>
+            <input type="number" id="HHNBChildrenCompleteSchoolLivingT"  maxlength="3" datafield="HHNBChildrenCompleteSchoolLivingTotal" disabled/>
         </li>
 
         <hr/>
         <li id="HHNBChildrenDropSchoolLivingMale">
             <span strName="HHNBChildrenDropSchoolLivingM">3-11. Number of boys below 18 not going to/dropped from primary school</span>
-            <input type="number" id="HHNBChildrenDropSchoolLivingM" maxlength="3" datafield="HHNBChildrenDropSchoolLivingM"/>
+            <input type="number" id="HHNBChildrenDropSchoolLivingM" class="HHNBChildrenDropSchoolLivingTotal" maxlength="3" datafield="HHNBChildrenDropSchoolLivingM"/>
         </li>
 
         <li id="HHNBChildrenDropSchoolLivingFemale">
             <span strName="HHNBChildrenDropSchoolLivingF">3-11. Number of girls below 18 not going to/dropped from primary school</span>
-            <input type="number" id="HHNBChildrenDropSchoolLivingF" maxlength="3" datafield="HHNBChildrenDropSchoolLivingF"/>
+            <input type="number" id="HHNBChildrenDropSchoolLivingF" class="HHNBChildrenDropSchoolLivingTotal" maxlength="3" datafield="HHNBChildrenDropSchoolLivingF"/>
         </li>
 
         <li id="HHNBChildrenDropSchoolLivingTotal">
@@ -757,18 +849,18 @@ In case of dispute arising out or in relation to the use of the program, it is s
                 <input type="checkbox" id="noHHNBGirlMarried" name="noHHNBGirlMarried" class="left">
                 <label for="noHHNBGirlMarried" class="left">None</label>
             </div>
-            <input type="number" id="HHNBGirlsMarried" maxlength="3" datafield="HHNBGirlsMarried" disabled/>
+            <input type="number" id="HHNBGirlsMarried" maxlength="3" datafield="HHNBGirlsMarried"/>
         </li>
 
         <hr/>
         <li id="HHNBChildrenBirthCertifMale">
             <span strName="HHNBChildrenBirthCertifM">3-13. Number of boys below 18 in HH WITHOUT Birth Certificate</span>
-            <input type="number" id="HHNBChildrenDropSchoolLivingM" maxlength="3" datafield="HHNBChildrenBirthCertifM"/>
+            <input type="number" id="HHNBChildrenDropSchoolLivingM" class="HHNBChildrenBirthCertifTotal" maxlength="3" datafield="HHNBChildrenBirthCertifM"/>
         </li>
 
         <li id="HHNBChildrenBirthCertifFemale">
             <span strName="HHNBChildrenBirthCertifF">3-13. Number of girls below 18 in HH WITHOUT Birth Certificate</span>
-            <input type="number" id="HHNBChildrenBirthCertifF" maxlength="3" datafield="HHNBChildrenBirthCertifF"/>
+            <input type="number" id="HHNBChildrenBirthCertifF" class="HHNBChildrenBirthCertifTotal" maxlength="3" datafield="HHNBChildrenBirthCertifF"/>
         </li>
 
         <li id="HHNBChildrenBirthCertifTotal">
@@ -898,10 +990,6 @@ In case of dispute arising out or in relation to the use of the program, it is s
         <li id="CHEnrolmentStatus">
             <span strName="CHEnrolmentStatus">6. Child’s current enrollment status</span>
             <select id="ddlCHEnrolmentStatus" datafield="CHEnrolmentStatus">
-                <option value=''>Select</option>
-                <option value='1'>Oui</option>
-                <option value='0'>No</option>
-
             </select>
         </li>
 
