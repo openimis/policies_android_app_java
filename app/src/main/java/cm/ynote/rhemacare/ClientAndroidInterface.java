@@ -598,6 +598,36 @@ public class ClientAndroidInterface {
     }
 
     @JavascriptInterface
+    public String getStatusProvider() {
+        JSONArray statusProvider = new JSONArray();
+        JSONObject object = new JSONObject();
+
+        try {
+            object.put("Code", "");
+            object.put("Status", mContext.getResources().getString(R.string.SelectNetworkProvider));
+            statusProvider.put(object);
+
+            object = new JSONObject();
+            object.put("Code", "H");
+            object.put("Status", mContext.getResources().getString(R.string.HostCommunityMember));
+            statusProvider.put(object);
+
+            object = new JSONObject();
+            object.put("Code", "D");
+            object.put("Status", mContext.getResources().getString(R.string.DisplacedbyCrises));
+            statusProvider.put(object);
+
+            object = new JSONObject();
+            object.put("Code", "O");
+            object.put("Status", mContext.getResources().getString(R.string.OtherSituationsspecify));
+            statusProvider.put(object);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return statusProvider.toString();
+    }
+
+    @JavascriptInterface
     public String getProfessions() {
         String tableName = "tblProfessions";
         String[] columns = {"ProfessionId", "Profession", "AltLanguage"};
