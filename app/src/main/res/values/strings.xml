@@ -384,4 +384,5 @@
     <string name="HostCommunityMember">Host Community Member</string>
   <string name="DisplacedbyCrises">Displaced by Crises</string>
   <string name="OtherSituationsspecify">Other Situations (specify)</string>
+    <string name="SelectEnrollmentStatus">is the child currently enrolled</string>
 </resources>

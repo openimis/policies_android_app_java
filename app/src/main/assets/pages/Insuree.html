@@ -36,22 +36,34 @@ In case of dispute arising out or in relation to the use of the program, it is s
 
 
         $(document).ready(function(){
-            
+
+            $(".default-hide").hide();
+
+            $("#Hof").hide();
             //Hide the relationship if the insuree is the HOF
             if(sessionStorage.getItem("FamilyData") !== null){
                 $("#Hof").hide();
                 $("#ddlRelationship").prop("required", false);
                 $("#txtLastName").prop("required", false);
             }else{
-                $("#Children").hide();
+                //$("#Children").hide();
             }
 
 
+            /*** Checkbox Management zhen a user don't know the answer ****/
             // Birthday Management "I don't know"
             $('#idk').click(function() {
-                $("#txtBirthDate").prop("disabled", true);
+                $("#txtBirthDateChild").prop("disabled", true);
                 if (!$(this).is(':checked')) {
                     $("#txtBirthDate").prop("disabled", false);
+                }
+              });
+
+            // Birthday Management Children "I don't know"
+            $('#idk-ChildBirthday').click(function() {
+                $("#txtBirthDateChild").prop("disabled", true);
+                if (!$(this).is(':checked')) {
+                    $("#txtBirthDateChild").prop("disabled", false);
                 }
               });
 
@@ -80,7 +92,7 @@ In case of dispute arising out or in relation to the use of the program, it is s
               });
 
              // NoPhone Management "I don't know"
-            $('#identification-idk-check').click(function() {
+             $('#identification-idk-check').click(function() {
                 $("#txtIdentificationNumber").prop("disabled", true);
                 $("#ddlIdentificationType").prop("disabled", true);
                 if (!$(this).is(':checked')) {
@@ -88,6 +100,33 @@ In case of dispute arising out or in relation to the use of the program, it is s
                     $("#ddlIdentificationType").prop("disabled", false);
                 }
               });
+
+
+
+              /***** Show Hide Block ******/
+
+                $(".LinkQuestionCH6-Yes").hide();
+                $(".LinkQuestionCH6-No").hide();
+                $("#ddlCHEnrolmentStatus").change(function(){
+                   if($(this).val()==1){
+                    $(".LinkQuestionCH6-Yes").show();
+                    $(".LinkQuestionCH6-No").hide();
+                   }else{
+                    $(".LinkQuestionCH6-Yes").hide();
+                    $(".LinkQuestionCH6-No").show();
+                   }
+                });
+                $("#CHSpecialNeeds6").change(function(){
+                   console.log($(this).is(':checked'));
+                   if($(this).is(':checked')==true){
+                    $("#CHSpecialNeeds-1").show();
+                   }else{
+                    $("#CHSpecialNeeds-1").hide();
+                   }
+                });
+
+
+
 
             document.title = Android.getString('AddEditInsuree');
             Android.shutDownProgress();
@@ -330,6 +369,8 @@ In case of dispute arising out or in relation to the use of the program, it is s
             fillFSPCategory();
             fillNetworkProvider();
             fillPaiementProvider();
+
+            fillEnrollementStatus();
         }
 
         function fillRelationship(){
@@ -443,6 +484,14 @@ In case of dispute arising out or in relation to the use of the program, it is s
             var $HF = Android.getHF(parseInt(DistrictId), HFLevel);
             bindDropdown('ddlFSP', $HF, 'HFID', 'HF',0, Android.getString('SelectHF'));
         }
+
+
+
+        function fillEnrollementStatus(){
+            var $YesNo = Android.getYesNo();
+            bindDropdown('ddlCHEnrolmentStatus', $YesNo, 'value', 'key',null, Android.getString('SelectEnrollmentStatus'));
+        }
+
 
         function createJSONString(){
             var jsonInsuree = getControlsValuesJSON('li');
@@ -812,7 +861,7 @@ In case of dispute arising out or in relation to the use of the program, it is s
     </ul>
     <ul class="ulEntry" id="Children">
         <li id="Relationship">
-            <span strName="Relation">Relation</span>
+            <span strName="Relation">1. Relation</span>
             <select id="ddlRelationship" dataField="Relationship"></select>
         </li>
         <li>
@@ -823,9 +872,102 @@ In case of dispute arising out or in relation to the use of the program, it is s
             </div>
         </li>
         <li>
-            <span strName="LastName">Name of Child</span>
-            <input type="text" maxlength="50" id="txtLastName" dataField="LastName" required/>
+            <span strName="ChildLastName">2. Name of Child</span>
+            <input type="text" maxlength="50" id="txtChildLastName" dataField="ChildLastName" required/>
         </li>
+
+        <li>
+            <span strName="ChildGender">3. Sex</span>
+            <select id="ddlChildGender" datafield="ChildGender" required></select>
+        </li>
+
+        <li>
+            <span strName="BirthDateChild">4. Age/DoB</span>
+            <div id="BirthdayChild-idk">
+                <input type="checkbox" id="idk-ChildBirthday" name="idk" class="left">
+                <label for="idk" class="left">Don't Know</label>
+            </div>
+            <input type="date" id="txtBirthDateChild" dataField="DOB"/>
+        </li>
+
+        <li id="CHBirthCertificate">
+            <span strName="CHBirthCertificate">5. Child has Birth Certificate</span>
+            <select id="ddlCHBirthCertificates" datafield="CHBirthCertificate"></select>
+        </li>
+
+        <li id="CHEnrolmentStatus">
+            <span strName="CHEnrolmentStatus">6. Child’s current enrollment status</span>
+            <select id="ddlCHEnrolmentStatus" datafield="CHEnrolmentStatus">
+                <option value=''>Select</option>
+                <option value='1'>Oui</option>
+                <option value='0'>No</option>
+
+            </select>
+        </li>
+
+        <li id="CHEnrolmentPresentSchool" class="LinkQuestionCH6-Yes">
+            <span strName="CHEnrolmentPresentSchool">7. If Yes, name of present school</span>
+            <input type="text" maxlength="50" id="txtChildLastName" dataField="ChildLastName" required/>
+        </li>
+
+        <li id="CHEnrolmentWhichClass" class="LinkQuestionCH6-Yes">
+            <span strName="CHEnrolmentWhichClass">8. If Yes, present class in school</span>
+            <select id="ddlCHEnrolmentWhichClass" datafield="CHEnrolmentWhichClass"></select>
+        </li>
+
+        <li id="CHEnrolmentScore" class="LinkQuestionCH6-Yes">
+            <span strName="CHEnrolmentScore">9. If Yes, what was the child’s performance in class last term? (Average Score from Report Booklet)</span>
+            <select id="ddlCHEnrolmentScore" datafield="CHEnrolmentScore"></select>
+        </li>
+
+        <li id="CHEnrolmentOutofSchool" class="LinkQuestionCH6-No">
+            <span strName="CHEnrolmentOutofSchool">10. If out-of-school, number of years not in school</span>
+            <select id="ddlCHEnrolmentOutofSchool" datafield="CHEnrolmentOutofSchool"></select>
+        </li>
+
+        <li id="CHParentalStatus">
+            <span strName="CHParentalStatus">11. Parental Status of Child: (Check as many as applicable)</span>
+            <select id="ddlCHParentalStatus" datafield="CHParentalStatus"></select>
+        </li>
+        <hr/>
+        <li id="CHResidentialStatus">
+            <span strName="ResidentialStatus">12. Residential Status of Child: (Check as many as applicable (Select as many as applicable)</span>
+            <input type="checkbox" id="ResidentialStatus1" name="ResidentialStatus1" value="DC">
+            <label for="ResidentialStatus1"> Displaced Child</label><br>
+            <input type="checkbox" id="ResidentialStatus2" name="ResidentialStatus2" value="HCC">
+            <label for="ResidentialStatus2"> Host Community Child</label><br>
+            <input type="checkbox" id="ResidentialStatus3" name="ResidentialStatus3" value="MFC">
+            <label for="ResidentialStatus3"> Mbororo/Fulani Child</label><br>
+            <input type="checkbox" id="ResidentialStatus4" name="ResidentialStatus4" value="CLOP">
+            <label for="ResidentialStatus4"> Child living with Own Parents</label><br>
+            <input type="checkbox" id="ResidentialStatus5" name="ResidentialStatus5" value="CUS">
+            <label for="ResidentialStatus5"> Child Unaccompanied/Separated</label><br>
+            <input type="checkbox" id="ResidentialStatus6" name="ResidentialStatus6" value="CRFC">
+            <label for="ResidentialStatus6"> Child living with Relation/Foster Caregivers</label><br>
+            <input type="checkbox" id="ResidentialStatus7" name="ResidentialStatus7" value="CCHH">
+            <label for="ResidentialStatus7"> Child living in a Child-headed Household</label><br>
+        </li>
+        <hr/>
+        <li id="CHSpecialNeeds">
+            <span strName="CHSpecialNeeds">13. Child Has Special Needs (Check as many as applicable)</span>
+            <input type="checkbox" id="CHSpecialNeeds1" name="CHSpecialNeeds1" value="DC">
+            <label for="CHSpecialNeeds1"> Child is mentally retarded/has learning disability/altruistic</label><br>
+            <input type="checkbox" id="CHSpecialNeeds2" name="CHSpecialNeeds2" value="HCC">
+            <label for="CHSpecialNeeds2"> Child has hearing/speech impairment</label><br>
+            <input type="checkbox" id="CHSpecialNeeds3" name="CHSpecialNeeds3" value="MFC">
+            <label for="CHSpecialNeeds3"> Child has visual impairment</label><br>
+            <input type="checkbox" id="CHSpecialNeeds4" name="CHSpecialNeeds4" value="CLOP">
+            <label for="CHSpecialNeeds4"> Child has amputation/other mobility impairment</label><br>
+            <input type="checkbox" id="CHSpecialNeeds5" name="CHSpecialNeeds5" value="CUS">
+            <label for="CHSpecialNeeds5"> Child has albinism</label><br>
+            <input type="checkbox" id="CHSpecialNeeds6" name="CHSpecialNeeds6" value="CRFC">
+            <label for="CHSpecialNeeds6"> Other disability</label><br>
+        </li>
+        <li id="CHSpecialNeeds-1" class='default-hide'>
+            <span strName="CHSpecialNeeds-1">13. Specify</span>
+            <input type="text" id="CHSpecialNeeds-1Text" maxlength="50" datafield="CHSpecialNeeds-1"/>
+        </li>
+
     </ul>
 </div>
 <div class="footer">
