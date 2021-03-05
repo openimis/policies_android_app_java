@@ -4,7 +4,7 @@
   <string name="navigation_drawer_close">Fermer le menu de navigation</string>
   <string name="action_settings">Réglages</string>
   <string name="Pleasewait">Veuillez patienter...</string>
-  <string name="PageLoading">La page se charge...</string>
+  <string name="PageLoading">La page se charsge...</string>
   <string name="HeaderTitle">RhemaCare</string>
   <string name="HeaderEmail">admin@imis.com</string>
   <string name="Home">Accueil</string>
@@ -381,7 +381,7 @@
   <string name="ExpressUnion">Express Union</string>
   <string name="nextel">Nextel</string>
   <string name="camtel">Camtel</string>
-    <string name="HostCommunityMember">Host Community Member</string>
+  <string name="HostCommunityMember">Host Community Member</string>
   <string name="DisplacedbyCrises">Displaced by Crises</string>
   <string name="OtherSituationsspecify">Other Situations (specify)</string>
 </resources>

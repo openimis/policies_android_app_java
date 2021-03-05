@@ -46,24 +46,25 @@ android {
     }
     flavorDimensions 'std'
     productFlavors.all {
-        buildConfigField "String", "API_BASE_URL", '"http://demo.openimis.org/rest/"'
+        buildConfigField "String", "API_BASE_URL", '"https://demo.openimis.org/rest/"'
         buildConfigField "boolean", "SHOW_CONTROL_NUMBER_MENU", 'false'
         buildConfigField "String", "RAR_PASSWORD", '")(#$1HsD"'
-        resValue "string", "app_name", "openIMIS Policies"
+        resValue "string", "app_name", "Educash"
     }
+
     productFlavors {
         demoProd {
             applicationId "cm.ynote.rhemacare.demoProd"
-            buildConfigField "String", "API_BASE_URL", '"http://demo.openimis.org/rest/"'
+            buildConfigField "String", "API_BASE_URL", '"https://demo.openimis.org/rest/"'
             buildConfigField "String", "RAR_PASSWORD", '")(#$1HsD"'
-            resValue "string", "app_name", "Policies Demo"
+            resValue "string", "app_name", "Educash"
             dimension = 'std'
         }
         demoRelease {
             applicationId "cm.ynote.rhemacare.demoRelease"
-            buildConfigField "String", "API_BASE_URL", '"http://release.openimis.org/rest/"'
+            buildConfigField "String", "API_BASE_URL", '"https://release.openimis.org/rest/"'
             buildConfigField "boolean", "SHOW_CONTROL_NUMBER_MENU", 'true'
-            resValue "string", "app_name", "Policies Release"
+            resValue "string", "app_name", "Educash"
             dimension = 'std'
         }
     }
