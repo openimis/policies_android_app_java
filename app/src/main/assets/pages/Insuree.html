@@ -160,13 +160,21 @@ In case of dispute arising out or in relation to the use of the program, it is s
 
 
             /****** Addition of input form ******/
+
+            function calcDailyExpenditure(){
+                 value = $("#HHExpenditureText").val()/$("#HHNBPersonLivingT").val();
+                 value = Math.round(value);
+                 $("#HHExpenditurePerHText").val(value);
+            }
+
+
             $(".HHNBPersonLivingTotal").change(function(){
                sumTotal=0;
                $(".HHNBPersonLivingTotal").each(function(){
                    sumTotal+=Number($(this).val());
                });
                $("#HHNBPersonLivingT").val(sumTotal);
-
+               calcDailyExpenditure()
             });
 
             $(".HHNBChildrenLivingTotal").change(function(){
@@ -217,6 +225,9 @@ In case of dispute arising out or in relation to the use of the program, it is s
                $("#HHNBChildrenBirthCertifT").val(sumTotal);
             });
 
+            $("#HHExpenditureText").change(function(){
+                calcDailyExpenditure();
+            });
 
             document.title = Android.getString('AddEditInsuree');
             Android.shutDownProgress();
