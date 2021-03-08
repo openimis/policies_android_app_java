@@ -375,7 +375,7 @@
   <string name="empty_year">Entrer l\'année</string>
   <string name="DeleteFamilyOnlyOffline">Suppression de la famille supprimera également tous les assurés, les polices et les cotisations de la famille.</string>
   <string name="LastInstallment">Dernier versement</string>
-  <string name="SelectNetworkProvider">Mode de reception préferé</string>
+  <string name="SelectNetworkProvider">Selectionnez le reseau</string>
   <string name="MTN">MTN</string>
   <string name="Orange">Orange</string>
   <string name="ExpressUnion">Express Union</string>
@@ -399,4 +399,21 @@
   <string name="SelectAverageScore">Select Average Score</string>
   <string name="BelowAverage">Below average (less than 50%) OR (less than 10/20)</string>
   <string name="Average">Average (50 – 54%) OR (10 – 10.9/20)</string>
+  <string name="SelectPaiementProvider">Mode de paiement Préféré</string>
+  <string name="SelectHHStatus">Select Head of House</string>
+  <string name="selectLengthStay">Length of stay</string>
+  <string name="Lessthan1year">Less than 1 year</string>
+  <string name="Lessthan3years">Less than 3 years</string>
+  <string name="Morethan3years">More than 3 years</string>
+  <string name="SelectHealthStatus">Select Health Status</string>
+  <string name="Healthy"><![CDATA[Healthy & Fit/Not Ill]]></string>
+  <string name="Frequentlysick">Frequently sick but NOT on sick bed or hospitalized</string>
+  <string name="VerySick">Very Sick/Hospitalized/Bed-ridden/Incapacitated</string>
+  <string name="TerminallyIll">Head of HH is Terminally Ill</string>
+  <string name="Disability">Head of Household has Disability</string>
+  <string name="SelectNutritional">Select balanced meals the previous day</string>
+  <string name="once">Once</string>
+  <string name="twice">Twice</string>
+  <string name="threeMore">Three or more times</string>
+  <string name="None">none</string>
 </resources>

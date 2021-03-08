@@ -43,7 +43,7 @@ In case of dispute arising out or in relation to the use of the program, it is s
             $("#Children").hide();
             //Hide the relationship if the insuree is the HOF
             console.log(sessionStorage.getItem("FamilyData") !== null);
-            if(sessionStorage.getItem("FamilyData") !== null){
+            if(sessionStorage.getItem("FamilyData") == null){
                 $("#Hof").hide();
                 $("#Children").show();
                 $("#ddlRelationship").prop("required", false);
@@ -246,6 +246,7 @@ In case of dispute arising out or in relation to the use of the program, it is s
             $('#ddlCurrentRegion').change(function(){
                fillCurrentDistricts(parseInt($(this).val()));
             });
+
 
             $('#ddlFSPRegion').change(function(){
                 fillFSPDistricts($(this).val());
@@ -473,6 +474,11 @@ In case of dispute arising out or in relation to the use of the program, it is s
             fillNetworkProvider();
             fillPaiementProvider();
 
+
+            fillNutritionalStatusProvider();
+            fillLengthStayProvider();
+            fillStatusProvider();
+            fillnotRegisteredPhone();
             fillChildBirthCertifStatus();
             fillChildEnrollementProvider();
             fillChildCurrentSchoolLevelProvider();
@@ -519,10 +525,31 @@ In case of dispute arising out or in relation to the use of the program, it is s
             bindDropdown('ddlHHStatus', $StatusProvider, 'Code', 'Status', null, null);
         }
 
+        function fillLengthStayProvider(){
+            var $lengthStayProvider = Android.getLengthStayProvider();
+            bindDropdown('ddlHLengthOfStay', $lengthStayProvider, 'Code', 'Status', null, null);
+        }
+
+        function fillHHStatusProvider(){
+            var $hHStatusProvider = Android.gethHStatusProvider();
+            bindDropdown('ddlHHHealthStatus', $hHStatusProvider, 'Code', 'Status', null, null);
+        }
+
+        function fillNutritionalStatusProvider(){
+            var $nutritionalStatusProvider = Android.getNutritionalStatusProvider();
+            bindDropdown('ddlHHNutriionalStatus', $nutritionalStatusProvider, 'Code', 'Status', null, null);
+        }
+
 
         function fillChildBirthCertifStatus(){
             var $YesNo = Android.getYesNo();
             bindDropdown('ddlCHBirthCertificates', $YesNo, 'value', 'key',null, Android.getString('SelectEnrollmentStatus'));
+        }
+
+        function fillnotRegisteredPhone(){
+            var $YesNo = Android.getYesNo();
+            bindDropdown('ddlnotRegisteredPhone1', $YesNo, 'value', 'key',null, Android.getString('SelectHHName'));
+            bindDropdown('ddlnotRegisteredPhone2', $YesNo, 'value', 'key',null, Android.getString('SelectHHName'));
         }
 
         function fillChildEnrollementProvider(){
@@ -546,8 +573,9 @@ In case of dispute arising out or in relation to the use of the program, it is s
         }
 
         function fillCurrentRegion(){
-        var $Regions = Android.getRegionsWO();
-        bindDropdown('ddlCurrentRegion', $Regions, 'LocationId', 'LocationName',0, Android.getString('SelectRegion'));
+            var $Regions = Android.getRegionsWO();
+            bindDropdown('ddlCurrentRegion', $Regions, 'LocationId', 'LocationName',0, Android.getString('SelectRegion'));
+            bindDropdown('ddlHHOrigin', $Regions, 'LocationId', 'LocationName',0, Android.getString('SelectRegion'));
         }
 
         function fillFSPRegions(){
