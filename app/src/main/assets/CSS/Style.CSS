@@ -173,19 +173,63 @@ float:left;
 #noPhone2-idk input,
 #noRegisteredPhone1-idk input,
 #noRegisteredPhone2-idk input,
-#noIDCard input{
+#noIDCard input,
+#noHHNBGirlMarried-idk input{
     width:25%;
 }
 
+#BirthdayChild-idk,
+#Birthday-idk,
+#noPhone1-idk,
+#noPhone2-idk,
+#identification-idk,
+#noHHNBGirlMarried-idk{
+  width:50%;
+  float:left;
+}
+
+#CHResidentialStatus input,
+#CHSpecialNeeds input,
+#HHMentalPhysicalDisabilityObtainable input{
+  width:15%;
+  float:left;
+}
+
+
+#BirthdayChild-idk input,
+#txtBirthDate,
+#txtPhoneNumber,
+#txtPhoneNumber2,
+#ddlIdentificationType,
+#HHNBGirlsMarried{
+    float: left;
+    width: 40%;
+}
+
 #Birthday-idk label,
-#noPhone1-idk label,
 #identification-idk label,
 #noPhone2-idk label,
-#noRegisteredPhone1-idk label,
 #noRegisteredPhone2-idk label,
-#noIDCard label{
+#noIDCard label,
+#BirthdayChild-idk label,
+#CHResidentialStatus label,
+#CHSpecialNeeds label,
+#noHHNBGirlMarried-idk label,
+#HHMentalPhysicalDisabilityObtainable label{
     line-height:50px;
 }
+
+#noRegisteredPhone1-idk label,
+#noPhone2-idk label,
+#noPhone1-idk label,
+#identification-idk label{
+    line-height:25px;
+}
+
+#txtBirthDateChild{
+    width:45%;
+}
+
 
 p{
     margin: 0.2em 0;

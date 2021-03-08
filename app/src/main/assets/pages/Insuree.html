@@ -40,13 +40,17 @@ In case of dispute arising out or in relation to the use of the program, it is s
             $(".default-hide").hide();
 
             $("#Hof").hide();
+            $("#Children").hide();
             //Hide the relationship if the insuree is the HOF
+            console.log(sessionStorage.getItem("FamilyData") !== null);
             if(sessionStorage.getItem("FamilyData") !== null){
                 $("#Hof").hide();
+                $("#Children").show();
                 $("#ddlRelationship").prop("required", false);
                 $("#txtLastName").prop("required", false);
             }else{
                 $("#Children").hide();
+                $("#Hof").show();
             }
 
 
@@ -71,11 +75,11 @@ In case of dispute arising out or in relation to the use of the program, it is s
             $('#noPhone1').click(function() {
                 $("#txtPhoneNumber").prop("disabled", true);
                 $("#ddlNetworkProvider1").prop("disabled", true);
-                $("#notRegisteredPhone1").prop("disabled", true);
+                $("#ddlnotRegisteredPhone1").prop("disabled", true);
                 if (!$(this).is(':checked')) {
                     $("#txtPhoneNumber").prop("disabled", false);
                     $("#ddlNetworkProvider1").prop("disabled", false);
-                    $("#notRegisteredPhone1").prop("disabled", false);
+                    $("#ddlnotRegisteredPhone1").prop("disabled", false);
                 }
               });
 
@@ -83,11 +87,11 @@ In case of dispute arising out or in relation to the use of the program, it is s
             $('#noPhone2').click(function() {
                 $("#txtPhoneNumber2").prop("disabled", true);
                 $("#ddlNetworkProvider2").prop("disabled", true);
-                $("#notRegisteredPhone2").prop("disabled", true);
+                $("#ddlnotRegisteredPhone2").prop("disabled", true);
                 if (!$(this).is(':checked')) {
                     $("#txtPhoneNumber2").prop("disabled", false);
                     $("#ddlNetworkProvider2").prop("disabled", false);
-                    $("#notRegisteredPhone2").prop("disabled", false);
+                    $("#ddlnotRegisteredPhone2").prop("disabled", false);
                 }
               });
 
@@ -125,7 +129,6 @@ In case of dispute arising out or in relation to the use of the program, it is s
                    }
                 });
                 $("#CHSpecialNeeds6").change(function(){
-                   console.log($(this).is(':checked'));
                    if($(this).is(':checked')==true){
                     $("#CHSpecialNeeds-1").show();
                    }else{
@@ -145,7 +148,6 @@ In case of dispute arising out or in relation to the use of the program, it is s
             }
 
             $("#ddlNetworkProvider1").change(function(){
-               console.log($(this).val());
                switch($(this).val()) {
                   case "O":
                    ddlPaiementPreferFunction("O");
@@ -471,7 +473,10 @@ In case of dispute arising out or in relation to the use of the program, it is s
             fillNetworkProvider();
             fillPaiementProvider();
 
-            fillEnrollementStatus();
+            fillChildBirthCertifStatus();
+            fillChildEnrollementProvider();
+            fillChildCurrentSchoolLevelProvider();
+            fillChildCurrentSchoolPerfProvider();
         }
 
         function fillRelationship(){
@@ -490,6 +495,7 @@ In case of dispute arising out or in relation to the use of the program, it is s
             }
             var $Gender = Android.getGender();
             bindDropdown('ddlGender', $Gender, 'Code', $textLanguage,null, Android.getString('SelectGender'));
+            bindDropdown('ddlChildGender', $Gender, 'Code', $textLanguage,null, Android.getString('SelectGender'));
         }
 
         function fillMaritalStatus(){
@@ -511,6 +517,27 @@ In case of dispute arising out or in relation to the use of the program, it is s
         function fillStatusProvider(){
             var $StatusProvider = Android.getStatusProvider();
             bindDropdown('ddlHHStatus', $StatusProvider, 'Code', 'Status', null, null);
+        }
+
+
+        function fillChildBirthCertifStatus(){
+            var $YesNo = Android.getYesNo();
+            bindDropdown('ddlCHBirthCertificates', $YesNo, 'value', 'key',null, Android.getString('SelectEnrollmentStatus'));
+        }
+
+        function fillChildEnrollementProvider(){
+            var $ChildBirthProvider = Android.getChildEnrollementProvider();
+            bindDropdown('ddlCHEnrolmentStatus', $ChildBirthProvider, 'Code', 'Status', null, null);
+        }
+
+        function fillChildCurrentSchoolLevelProvider(){
+            var $CHEnrolmentWhichClassProvider = Android.getCHEnrolmentWhichClassProvider();
+            bindDropdown('ddlCHEnrolmentWhichClass', $CHEnrolmentWhichClassProvider, 'Code', 'Status', null, null);
+        }
+
+        function fillChildCurrentSchoolPerfProvider(){
+            var $childCurrentSchoolPerfProvider = Android.getchildCurrentSchoolPerfProvider();
+            bindDropdown('ddlCHEnrolmentScore', $childCurrentSchoolPerfProvider, 'Code', 'Status', null, null);
         }
 
         function fillBeneficiaryCard(){
@@ -586,14 +613,6 @@ In case of dispute arising out or in relation to the use of the program, it is s
             bindDropdown('ddlFSP', $HF, 'HFID', 'HF',0, Android.getString('SelectHF'));
         }
 
-
-
-        function fillEnrollementStatus(){
-            var $YesNo = Android.getYesNo();
-            bindDropdown('ddlCHEnrolmentStatus', $YesNo, 'value', 'key',null, Android.getString('SelectEnrollmentStatus'));
-        }
-
-
         function createJSONString(){
             var jsonInsuree = getControlsValuesJSON('li');
             return jsonInsuree;
@@ -620,12 +639,11 @@ In case of dispute arising out or in relation to the use of the program, it is s
 
 
 </head>
-<body>
 <div id="divProgress">
     <span id="spPleaseWait"></span>
 </div>
-<div>
-    <a href="#" id="HohLocationTab" class="NavigationTab">Location</a>
+<div id="Hof">
+    <a href="#HohLocationTab" id="HohLocationTab" class="NavigationTab">Location</a>
     <ul class="ulEntry tabHof" id="locationHOF">
         <li id="CurrentRegion">
             <span strName="CurrentRegion">Current Region</span>
@@ -645,7 +663,7 @@ In case of dispute arising out or in relation to the use of the program, it is s
         </li>
     </ul>
     <hr/>
-    <a href="#" id="HohInfoTab" class="NavigationTab">Head of Household Information</a>
+    <a href="#HohInfoTab" id="HohInfoTab" class="NavigationTab">Head of Household Information</a>
     <ul class="ulEntry tabHof" id="InfoHOF">
         <li>
             <input type="hidden" datafield="InsureeId" id="hfInsureeId" value="0"/>
@@ -679,61 +697,67 @@ In case of dispute arising out or in relation to the use of the program, it is s
         </li>
 
         <li>
-            <span strName="BirthDate">2-7. Age/DoB</span>
-            <div id="Birthday-idk">
-                <input type="checkbox" id="idk" name="idk" class="left">
-                <label for="idk" class="left">Don't Know</label>
+            <div>
+                <span strName="BirthDate">2-7. Age/DoB</span>
             </div>
-            <input type="date" id="txtBirthDate" dataField="DOB"/>
+            <div>
+                <div id="Birthday-idk">
+                    <input type="checkbox" id="idk" name="idk" class="left">
+                    <label for="idk" class="left">Don't Know</label>
+                </div>
+                <input type="date" id="txtBirthDate" dataField="DOB"/>
+            </div>
         </li>
 
-        <li>
+        <li class="clearFix">
             <span strName="PhoneNumber">2-8. Phone number</span>
-            <div id="noPhone1-idk">
-                <input type="checkbox" id="noPhone1" name="noPhone1" class="left">
-                <label for="noPhone1" class="left">Respondent has no phone</label>
-            </div>
-            <input type="tel" id="txtPhoneNumber" datafield="Phone" maxlength="50"/>
-        </li>
-        <li>
-            <div id="noRegisteredPhone1-idk">
-                <input type="checkbox" id="notRegisteredPhone1" name="notRegisteredPhone1" class="left">
-                <label for="notRegisteredPhone1" class="left">2-9. Is this Phone Number registered in Head of HH’s Name?</label>
+            <div>
+                <div id="noPhone1-idk">
+                    <input type="checkbox" id="noPhone1" name="noPhone1" class="left">
+                    <label for="noPhone1" class="left">Respondent has<br/> no phone</label>
+                </div>
+                <input type="tel" id="txtPhoneNumber" datafield="Phone" maxlength="50"/>
             </div>
         </li>
-        <li id="NetworkProviderPhone1">
+        <li class="clearFix">
+            <span strName="notRegisteredPhone1">2-9. Is this Phone Number registered in Head of HH’s Name?</span>
+            <select id="ddlnotRegisteredPhone1" datafield="notRegisteredPhone1"></select>
+        </li>
+        <li id="NetworkProviderPhone1" class="clearFix">
             <span strName="NetworkProviderPhone1">2-10. Network Provider</span>
             <select id="ddlNetworkProvider1" datafield="NetworkProvider">
             </select>
         </li>
         <li>
             <span strName="PhoneNumber2">2-11. Alternative Phone</span>
-            <div id="noPhone2-idk">
-                <input type="checkbox" id="noPhone2" name="noPhone2" class="left">
-                <label for="noPhone2" class="left">Respondent Has no alt. phone</label>
+            <div>
+                <div id="noPhone2-idk">
+                    <input type="checkbox" id="noPhone2" name="noPhone2" class="left">
+                    <label for="noPhone2" class="left">Respondent Has <br/> no alt. phone</label>
+                </div>
+                <input type="tel" id="txtPhoneNumber2" datafield="Phone2" maxlength="50"/>
             </div>
-            <input type="tel" id="txtPhoneNumber2" datafield="Phone2" maxlength="50"/>
         </li>
-        <li id="NetworkProvider2">
+        <li id="NetworkProvider2" class="clearFix">
             <span strName="NetworkProvider2">2-13. Network Provider</span>
             <select id="ddlNetworkProvider2" datafield="NetworkProvider2"></select>
         </li>
-        <li>
-            <div id="noRegisteredPhone2-idk">
-                <input type="checkbox" id="notRegisteredPhone2" name="notRegisteredPhone2" class="left">
-                <label for="notRegisteredPhone2" class="left">Is this Phone Number registered in Head of HH’s Name?</label>
-            </div>
+        <li class="clearFix">
+            <span strName="notRegisteredPhone2">2-13. Is this Phone Number registered in Head of HH’s Name?</span>
+            <select id="ddlnotRegisteredPhone2" datafield="notRegisteredPhone2"></select>
         </li>
 
-        <li id="IdentificationType">
+        <li id="IdentificationType" class="clearFix">
             <span strName="IdentificationType">2.14- Identification Type</span>
-            <div id="identification-idk">
-                <input type="checkbox" id="identification-idk-check" name="identification-idk-check" class="left">
-                <label for="identification-idk-check" class="left">Head of HH has no ID Card</label>
+            <div>
+                <div id="identification-idk">
+                    <input type="checkbox" id="identification-idk-check" name="identification-idk-check" class="left">
+                    <label for="identification-idk-check" class="left">Head of HH<br/> has no ID Card</label>
+                </div>
+                <select id="ddlIdentificationType" datafield="TypeOfId"></select>
             </div>
-            <select id="ddlIdentificationType" datafield="TypeOfId"></select>
         </li>
-        <li id="IdentificationNumber">
+        <li id="IdentificationNumber" class="clearFix">
             <span strName="IdentificationNumber">2.15- National ID Card Number of Head of HH</span>
             <input type="text" id="txtIdentificationNumber" maxlength="50" datafield="IdentificationNumber"/>
         </li>
@@ -745,7 +769,7 @@ In case of dispute arising out or in relation to the use of the program, it is s
 
     </ul>
     <hr/>
-    <a href="#" id="HohVulnerabilityTab" class="NavigationTab">Household Vulnerability</a>
+    <a href="#HohVulnerabilityTab" id="HohVulnerabilityTab" class="NavigationTab">Household Vulnerability</a>
     <ul class="ulEntry tabHof" id="VulnerabilityHOF">
         <li id="Profession">
             <span strName="Profession">3-1. Occupation of Head of Household</span>
@@ -854,17 +878,19 @@ In case of dispute arising out or in relation to the use of the program, it is s
         </li>
         <hr/>
 
-        <li id="HHNBGirlMarried">
+        <li id="HHNBGirlMarried" class="clearFix">
             <span strName="HHNBGirlsMarried">3-12. Number of girls below 18 who are married from household</span>
-            <div id="noHHNBGirlMarried-idk">
-                <input type="checkbox" id="noHHNBGirlMarried" name="noHHNBGirlMarried" class="left">
-                <label for="noHHNBGirlMarried" class="left">None</label>
+            <div>
+                <div id="noHHNBGirlMarried-idk">
+                    <input type="checkbox" id="noHHNBGirlMarried" name="noHHNBGirlMarried" class="left">
+                    <label for="noHHNBGirlMarried" class="left">None</label>
+                </div>
+                <input type="number" id="HHNBGirlsMarried" maxlength="3" datafield="HHNBGirlsMarried"/>
             </div>
-            <input type="number" id="HHNBGirlsMarried" maxlength="3" datafield="HHNBGirlsMarried"/>
         </li>
 
-        <hr/>
-        <li id="HHNBChildrenBirthCertifMale">
+        <hr class="clearFix"/>
+        <li id="HHNBChildrenBirthCertifMale" class="clearFix">
             <span strName="HHNBChildrenBirthCertifM">3-13. Number of boys below 18 in HH WITHOUT Birth Certificate</span>
             <input type="number" id="HHNBChildrenBirthCertifM" class="HHNBChildrenBirthCertifTotal" maxlength="3" datafield="HHNBChildrenBirthCertifM"/>
         </li>
@@ -923,14 +949,16 @@ In case of dispute arising out or in relation to the use of the program, it is s
         <hr/>
         <li id="HHMentalPhysicalDisabilityObtainable">
             <span strName="HHMentalPhysicalDisabilityO">3-19. If YES, list the types of disability obtainable in Household</span>
-            <input type="checkbox" id="HHMentalPhysicalDisabilityO1" name="HHMentalPhysicalDisabilityO1" value="MD">
-            <label for="HHMentalPhysicalDisabilityO1"> Mental Disability</label><br>
-            <input type="checkbox" id="HHMentalPhysicalDisabilityO2" name="HHMentalPhysicalDisabilityO3" value="SP">
-            <label for="HHMentalPhysicalDisabilityO2"> Speech/heating impairment/Visual Impairment</label><br>
-            <input type="checkbox" id="HHMentalPhysicalDisabilityO3" name="HHMentalPhysicalDisabilityO3" value="MO">
-            <label for="HHMentalPhysicalDisabilityO3"> Mobility impairment</label><br>
-            <input type="checkbox" id="HHMentalPhysicalDisabilityO4" name="HHMentalPhysicalDisabilityO4" value="OT">
-            <label for="HHMentalPhysicalDisabilityO4"> Other</label><br>
+            <div class="clearfix">
+                <input type="checkbox" id="HHMentalPhysicalDisabilityO1" name="HHMentalPhysicalDisabilityO1" value="MD">
+                <label for="HHMentalPhysicalDisabilityO1"> Mental Disability</label><br>
+                <input type="checkbox" id="HHMentalPhysicalDisabilityO2" name="HHMentalPhysicalDisabilityO3" value="SP">
+                <label for="HHMentalPhysicalDisabilityO2"> Speech/heating impairment/Visual Impairment</label><br>
+                <input type="checkbox" id="HHMentalPhysicalDisabilityO3" name="HHMentalPhysicalDisabilityO3" value="MO">
+                <label for="HHMentalPhysicalDisabilityO3"> Mobility impairment</label><br>
+                <input type="checkbox" id="HHMentalPhysicalDisabilityO4" name="HHMentalPhysicalDisabilityO4" value="OT">
+                <label for="HHMentalPhysicalDisabilityO4"> Other</label><br>
+            </div>
         </li>
 
         <li id="HHMentalPhysicalDisabilityO4-1">
@@ -962,7 +990,9 @@ In case of dispute arising out or in relation to the use of the program, it is s
         </li>
 
     </ul>
-    <ul class="ulEntry" id="Children">
+</div>
+<div id="Children">
+    <ul class="ulEntry" >
         <li id="Relationship">
             <span strName="Relation">1. Relation</span>
             <select id="ddlRelationship" dataField="Relationship"></select>
@@ -985,15 +1015,19 @@ In case of dispute arising out or in relation to the use of the program, it is s
         </li>
 
         <li>
-            <span strName="BirthDateChild">4. Age/DoB</span>
-            <div id="BirthdayChild-idk">
-                <input type="checkbox" id="idk-ChildBirthday" name="idk" class="left">
-                <label for="idk" class="left">Don't Know</label>
+            <div>
+                <span strName="BirthDateChild">4. Age/DoB</span>
             </div>
-            <input type="date" id="txtBirthDateChild" dataField="DOB"/>
+            <div>
+                <div id="BirthdayChild-idk">
+                    <input type="checkbox" id="idk-ChildBirthday" name="idk" class="left">
+                    <label for="idk" class="left">Don't Know</label>
+                </div>
+                <input type="date" id="txtBirthDateChild" dataField="DOB"/>
+            </div>
         </li>
 
-        <li id="CHBirthCertificate">
+        <li id="CHBirthCertificate" class="clearFix">
             <span strName="CHBirthCertificate">5. Child has Birth Certificate</span>
             <select id="ddlCHBirthCertificates" datafield="CHBirthCertificate"></select>
         </li>
@@ -1031,36 +1065,40 @@ In case of dispute arising out or in relation to the use of the program, it is s
         <hr/>
         <li id="CHResidentialStatus">
             <span strName="ResidentialStatus">12. Residential Status of Child: (Check as many as applicable (Select as many as applicable)</span>
-            <input type="checkbox" id="ResidentialStatus1" name="ResidentialStatus1" value="DC">
-            <label for="ResidentialStatus1"> Displaced Child</label><br>
-            <input type="checkbox" id="ResidentialStatus2" name="ResidentialStatus2" value="HCC">
-            <label for="ResidentialStatus2"> Host Community Child</label><br>
-            <input type="checkbox" id="ResidentialStatus3" name="ResidentialStatus3" value="MFC">
-            <label for="ResidentialStatus3"> Mbororo/Fulani Child</label><br>
-            <input type="checkbox" id="ResidentialStatus4" name="ResidentialStatus4" value="CLOP">
-            <label for="ResidentialStatus4"> Child living with Own Parents</label><br>
-            <input type="checkbox" id="ResidentialStatus5" name="ResidentialStatus5" value="CUS">
-            <label for="ResidentialStatus5"> Child Unaccompanied/Separated</label><br>
-            <input type="checkbox" id="ResidentialStatus6" name="ResidentialStatus6" value="CRFC">
-            <label for="ResidentialStatus6"> Child living with Relation/Foster Caregivers</label><br>
-            <input type="checkbox" id="ResidentialStatus7" name="ResidentialStatus7" value="CCHH">
-            <label for="ResidentialStatus7"> Child living in a Child-headed Household</label><br>
+            <div class="clearfix">
+                <input type="checkbox" id="ResidentialStatus1" name="ResidentialStatus1" value="DC">
+                <label for="ResidentialStatus1"> Displaced Child</label><br>
+                <input type="checkbox" id="ResidentialStatus2" name="ResidentialStatus2" value="HCC">
+                <label for="ResidentialStatus2"> Host Community Child</label><br>
+                <input type="checkbox" id="ResidentialStatus3" name="ResidentialStatus3" value="MFC">
+                <label for="ResidentialStatus3"> Mbororo/Fulani Child</label><br>
+                <input type="checkbox" id="ResidentialStatus4" name="ResidentialStatus4" value="CLOP">
+                <label for="ResidentialStatus4"> Child living with Own Parents</label><br>
+                <input type="checkbox" id="ResidentialStatus5" name="ResidentialStatus5" value="CUS">
+                <label for="ResidentialStatus5"> Child Unaccompanied/Separated</label><br>
+                <input type="checkbox" id="ResidentialStatus6" name="ResidentialStatus6" value="CRFC">
+                <label for="ResidentialStatus6"> Child living with Relation/Foster Caregivers</label><br>
+                <input type="checkbox" id="ResidentialStatus7" name="ResidentialStatus7" value="CCHH">
+                <label for="ResidentialStatus7"> Child living in a Child-headed Household</label><br>
+            </div>
         </li>
         <hr/>
         <li id="CHSpecialNeeds">
             <span strName="CHSpecialNeeds">13. Child Has Special Needs (Check as many as applicable)</span>
-            <input type="checkbox" id="CHSpecialNeeds1" name="CHSpecialNeeds1" value="DC">
-            <label for="CHSpecialNeeds1"> Child is mentally retarded/has learning disability/altruistic</label><br>
-            <input type="checkbox" id="CHSpecialNeeds2" name="CHSpecialNeeds2" value="HCC">
-            <label for="CHSpecialNeeds2"> Child has hearing/speech impairment</label><br>
-            <input type="checkbox" id="CHSpecialNeeds3" name="CHSpecialNeeds3" value="MFC">
-            <label for="CHSpecialNeeds3"> Child has visual impairment</label><br>
-            <input type="checkbox" id="CHSpecialNeeds4" name="CHSpecialNeeds4" value="CLOP">
-            <label for="CHSpecialNeeds4"> Child has amputation/other mobility impairment</label><br>
-            <input type="checkbox" id="CHSpecialNeeds5" name="CHSpecialNeeds5" value="CUS">
-            <label for="CHSpecialNeeds5"> Child has albinism</label><br>
-            <input type="checkbox" id="CHSpecialNeeds6" name="CHSpecialNeeds6" value="CRFC">
-            <label for="CHSpecialNeeds6"> Other disability</label><br>
+            <div class="clearfix">
+                <input type="checkbox" id="CHSpecialNeeds1" name="CHSpecialNeeds1" value="DC">
+                <label for="CHSpecialNeeds1"> Child is mentally retarded/has learning disability/altruistic</label><br>
+                <input type="checkbox" id="CHSpecialNeeds2" name="CHSpecialNeeds2" value="HCC">
+                <label for="CHSpecialNeeds2"> Child has hearing/speech impairment</label><br>
+                <input type="checkbox" id="CHSpecialNeeds3" name="CHSpecialNeeds3" value="MFC">
+                <label for="CHSpecialNeeds3"> Child has visual impairment</label><br>
+                <input type="checkbox" id="CHSpecialNeeds4" name="CHSpecialNeeds4" value="CLOP">
+                <label for="CHSpecialNeeds4"> Child has amputation/other mobility impairment</label><br>
+                <input type="checkbox" id="CHSpecialNeeds5" name="CHSpecialNeeds5" value="CUS">
+                <label for="CHSpecialNeeds5"> Child has albinism</label><br>
+                <input type="checkbox" id="CHSpecialNeeds6" name="CHSpecialNeeds6" value="CRFC">
+                <label for="CHSpecialNeeds6"> Other disability</label><br>
+            </div>
         </li>
         <li id="CHSpecialNeeds-1" class='default-hide'>
             <span strName="CHSpecialNeeds-1">13. Specify</span>

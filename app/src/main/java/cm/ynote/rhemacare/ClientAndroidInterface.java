@@ -628,6 +628,121 @@ public class ClientAndroidInterface {
     }
 
     @JavascriptInterface
+    public String getChildEnrollementProvider() {
+        JSONArray childEnrollementBirthProvider = new JSONArray();
+        JSONObject object = new JSONObject();
+
+        try {
+            object.put("Code", "");
+            object.put("Status", mContext.getResources().getString(R.string.ChildEnrollementStatus));
+            childEnrollementBirthProvider.put(object);
+
+            object = new JSONObject();
+            object.put("Code", "I");
+            object.put("Status", mContext.getResources().getString(R.string.Enrolledinschool));
+            childEnrollementBirthProvider.put(object);
+
+            object = new JSONObject();
+            object.put("Code", "D");
+            object.put("Status", mContext.getResources().getString(R.string.OutofSchool));
+            childEnrollementBirthProvider.put(object);
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return childEnrollementBirthProvider.toString();
+    }
+
+    @JavascriptInterface
+    public String getCHEnrolmentWhichClassProvider() {
+        JSONArray cHEnrolmentWhichClassProvider = new JSONArray();
+        JSONObject object = new JSONObject();
+
+        try {
+            object.put("Code", "");
+            object.put("Status", mContext.getResources().getString(R.string.SelectPresentClass));
+            cHEnrolmentWhichClassProvider.put(object);
+
+            object = new JSONObject();
+            object.put("Code", "P1");
+            object.put("Status", mContext.getResources().getString(R.string.P1));
+            cHEnrolmentWhichClassProvider.put(object);
+
+            object = new JSONObject();
+            object.put("Code", "P2");
+            object.put("Status", mContext.getResources().getString(R.string.P1));
+            cHEnrolmentWhichClassProvider.put(object);
+
+            object = new JSONObject();
+            object.put("Code", "P3");
+            object.put("Status", mContext.getResources().getString(R.string.P3));
+            cHEnrolmentWhichClassProvider.put(object);
+
+            object = new JSONObject();
+            object.put("Code", "P4");
+            object.put("Status", mContext.getResources().getString(R.string.P4));
+            cHEnrolmentWhichClassProvider.put(object);
+
+            object = new JSONObject();
+            object.put("Code", "P5");
+            object.put("Status", mContext.getResources().getString(R.string.P5));
+            cHEnrolmentWhichClassProvider.put(object);
+
+            object = new JSONObject();
+            object.put("Code", "CP6");
+            object.put("Status", mContext.getResources().getString(R.string.CompletedP6));
+            cHEnrolmentWhichClassProvider.put(object);
+
+            object = new JSONObject();
+            object.put("Code", "Nur");
+            object.put("Status", mContext.getResources().getString(R.string.Nursery));
+            cHEnrolmentWhichClassProvider.put(object);
+
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return cHEnrolmentWhichClassProvider.toString();
+    }
+
+
+    @JavascriptInterface
+    public String getchildCurrentSchoolPerfProvider() {
+        JSONArray childCurrentSchoolPerfProvider = new JSONArray();
+        JSONObject object = new JSONObject();
+
+        try {
+            object.put("Code", "");
+            object.put("Status", mContext.getResources().getString(R.string.SelectAverageScore));
+            childCurrentSchoolPerfProvider.put(object);
+
+            object = new JSONObject();
+            object.put("Code", "BA");
+            object.put("Status", mContext.getResources().getString(R.string.BelowAverage));
+            childCurrentSchoolPerfProvider.put(object);
+
+            object = new JSONObject();
+            object.put("Code", "AV");
+            object.put("Status", mContext.getResources().getString(R.string.Average));
+            childCurrentSchoolPerfProvider.put(object);
+
+            object = new JSONObject();
+            object.put("Code", "P3");
+            object.put("Status", mContext.getResources().getString(R.string.P3));
+            childCurrentSchoolPerfProvider.put(object);
+
+            object = new JSONObject();
+            object.put("Code", "P4");
+            object.put("Status", mContext.getResources().getString(R.string.P4));
+            childCurrentSchoolPerfProvider.put(object);
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return childCurrentSchoolPerfProvider.toString();
+    }
+
+    @JavascriptInterface
     public String getProfessions() {
         String tableName = "tblProfessions";
         String[] columns = {"ProfessionId", "Profession", "AltLanguage"};
