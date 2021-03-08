@@ -871,15 +871,11 @@ public class MainActivity extends AppCompatActivity
 
         switch (item.getItemId()) {
             case MENU_LANGUAGE_1:
-                if (selectedLanguage.equalsIgnoreCase(LanguageCode1))
-                    return true;
                 selectedLanguage = LanguageCode1;
                 changeLanguage(selectedLanguage, true);
 
                 return  true;
             case MENU_LANGUAGE_2:
-                if (selectedLanguage.equalsIgnoreCase(LanguageCode2))
-                    return true;
                 selectedLanguage = LanguageCode2;
                 changeLanguage(selectedLanguage, true);
                return  true;
