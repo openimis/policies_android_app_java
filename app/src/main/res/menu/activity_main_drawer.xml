@@ -13,12 +13,7 @@
             android:icon="@drawable/ic_enquire"
             android:title="@string/Enquire" />
 
-        <item
-            android:id="@+id/nav_acquire"
-            android:icon="@android:drawable/ic_menu_camera"
-            android:title="@string/Acquire" />
-
-        <item
+    <item
             android:id="@+id/nav_enrolment"
             android:icon="@drawable/ic_enroll"
             android:title="@string/Enrolment" />
@@ -63,9 +58,5 @@
         android:id="@+id/nav_about"
         android:icon="@drawable/ic_about"
         android:title="@string/About" />
-    <item
-        android:id="@+id/nav_settings"
-        android:icon="@drawable/ic_settings"
-        android:title="Settings" />
 
 </menu>

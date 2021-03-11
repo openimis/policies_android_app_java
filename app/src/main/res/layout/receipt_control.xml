@@ -185,6 +185,35 @@
             android:fontFamily="sans-serif-light"
             android:text="" />
 
+        <TextView
+            android:id="@+id/lblSMS"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:typeface="monospace"
+            android:fontFamily="sans-serif-light"
+            android:textColor="@color/black"
+            android:textSize="10sp"
+            android:paddingLeft="10dp"
+            android:layout_margin="5dp"
+            android:layout_below="@+id/lblPaymentType"
+            android:text="SMS Requested"/>
+
+        <TextView
+            android:id="@+id/SMS"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:typeface="monospace"
+            android:fontFamily="sans-serif-light"
+            android:textColor="@color/blue"
+            android:textSize="10sp"
+            android:textAlignment="textEnd"
+            android:paddingRight="10dp"
+            android:layout_margin="5dp"
+            android:layout_below="@+id/PaymentType"
+            android:layout_toRightOf="@+id/lblSMS"
+            android:text=""
+            android:gravity="end" />
+
     </RelativeLayout>
 
 

@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply from: "$project.rootDir/script-git-version.gradle"
 
 // Load keystore
 def keystorePropertiesFile = file("keystore.properties");
@@ -21,12 +22,12 @@ android {
         }
     }
     defaultConfig {
-        applicationId "cm.ynote.rhemacare"
+        applicationId "cm.ynote.educash.demoProd"
         minSdkVersion 19
-        targetSdkVersion 29
-
-        versionCode 4
-        versionName "2.0.2"
+        targetSdkVersion 30
+        versionCode gitVersionCode
+        versionName gitVersionName
+        resValue "string", "app_name", "Educash"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         useLibrary('org.apache.http.legacy')
     }
@@ -46,22 +47,21 @@ android {
     }
     flavorDimensions 'std'
     productFlavors.all {
-        buildConfigField "String", "API_BASE_URL", '"http://3.238.179.83:89/rest/"'
+        buildConfigField "String", "API_BASE_URL", '"https://demo.openimis.org/rest/"'
         buildConfigField "boolean", "SHOW_CONTROL_NUMBER_MENU", 'false'
         buildConfigField "String", "RAR_PASSWORD", '")(#$1HsD"'
         resValue "string", "app_name", "Educash"
     }
-
     productFlavors {
         demoProd {
-            applicationId "cm.ynote.rhemacare.demoProd"
-            buildConfigField "String", "API_BASE_URL", '"http://3.238.179.83:89/rest/"'
+            applicationId "cm.ynote.educash.demoProd"
+            buildConfigField "String", "API_BASE_URL", '"https://demo.openimis.org/rest/"'
             buildConfigField "String", "RAR_PASSWORD", '")(#$1HsD"'
             resValue "string", "app_name", "Educash"
             dimension = 'std'
         }
         demoRelease {
-            applicationId "cm.ynote.rhemacare.demoRelease"
+            applicationId "cm.ynote.educash.demoRelease"
             buildConfigField "String", "API_BASE_URL", '"https://release.openimis.org/rest/"'
             buildConfigField "boolean", "SHOW_CONTROL_NUMBER_MENU", 'true'
             resValue "string", "app_name", "Educash"
