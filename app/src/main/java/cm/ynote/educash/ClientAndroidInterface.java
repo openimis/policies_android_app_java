@@ -1352,6 +1352,7 @@ public class ClientAndroidInterface {
             values.put("DOB", data.get("txtBirthDate"));
             values.put("Gender", data.get("ddlGender"));
             values.put("Marital", Marital);
+
             if (IsHeadSet == -1) {
                 values.put("isHead", isHead);
             } else {
@@ -1376,6 +1377,43 @@ public class ClientAndroidInterface {
             values.put("Email", data.get("txtEmail"));
             values.put("TypeOfId", IdentificationType);
 
+            values.put("NetWorkProvider1", data.get("NetWorkProvider1"));
+            values.put("NetWorkProvider2", data.get("NetWorkProvider2"));
+            values.put("IsHeadPhone1", data.get("IsHeadPhone1"));
+            values.put("IsHeadPhone2", data.get("IsHeadPhone2"));
+            values.put("AltPhone", data.get("AltPhone"));
+            values.put("PreferredPaiementMode", data.get("PreferredPaiementMode"));
+            values.put("HeadStatus", data.get("HeadStatus"));
+            values.put("LengthPresentLocation", data.get("LengthPresentLocation"));
+            values.put("HHOriginVillage", data.get("txtOriginVillager"));
+            values.put("HHOriginRegion", data.get("ddlHHOrigin"));
+
+            values.put("MaleLivingHoushold", data.get("MaleLivingHoushold"));
+            values.put("FemaleLivingHoushold", data.get("FemaleLivingHoushold"));
+            values.put("PersonLivingHoushold", data.get("PersonLivingHoushold"));
+
+            values.put("HHNBChildrenLivingM", data.get("HHNBChildrenLivingM"));
+            values.put("HHNBChildrenLivingF", data.get("HHNBChildrenLivingF"));
+            values.put("HHNBChildrenLivingT", data.get("HHNBChildrenLivingT"));
+
+            values.put("HHNBChildrenSchoolLivingM", data.get("HHNBChildrenSchoolLivingM"));
+            values.put("HHNBChildrenSchoolLivingF", data.get("HHNBChildrenSchoolLivingF"));
+            values.put("HHNBChildrenSchoolLivingT", data.get("HHNBChildrenSchoolLivingT"));
+
+            values.put("HHNBChildrenCompleteSchoolLivingM", data.get("HHNBChildrenCompleteSchoolLivingM"));
+            values.put("HHNBChildrenCompleteSchoolLivingF", data.get("HHNBChildrenCompleteSchoolLivingF"));
+            values.put("HHNBChildrenCompleteSchoolLivingT", data.get("HHNBChildrenCompleteSchoolLivingT"));
+
+            values.put("HHNBChildrenDropSchoolLivingM", data.get("HHNBChildrenDropSchoolLivingM"));
+            values.put("HHNBChildrenDropSchoolLivingF", data.get("HHNBChildrenDropSchoolLivingF"));
+            values.put("HHNBChildrenDropSchoolLivingT", data.get("HHNBChildrenDropSchoolLivingT"));
+
+            values.put("HHHealthStatus", data.get("ddlHHHealthStatus"));
+            values.put("HHExpenditure", data.get("HHExpenditureText"));
+            values.put("HHExpenditurePerH", data.get("HHExpenditurePerHText"));
+            values.put("HHHealthStatus", data.get("ddlHHNutriionalStatus"));
+            values.put("HHMentalPhysicalDisability", data.get("ddlHHMentalPhysicalDisability"));
+
             if (data.get("ddlFSP") != null)
                 values.put("HFID", Integer.valueOf(data.get("ddlFSP")));
             values.put("CurrentAddress", data.get("txtCurrentAddress"));
@@ -1384,6 +1422,8 @@ public class ClientAndroidInterface {
                 values.put("CurVillage", Integer.valueOf(data.get("ddlCurrentVillage")));
 //            if(isOffline == 1 || isOffline)
 
+            Log.d("---- insuree Insert Data :", String.valueOf(data));
+            Log.d("---- insuree Insert :", String.valueOf(values));
 
             if (rtInsureeId == 0) {//New Insuaree
                 values.put("isOffline", 1);
@@ -1665,6 +1705,8 @@ public class ClientAndroidInterface {
     @JavascriptInterface
     public String getInsuree(int InsureeId) {
         String Query = "SELECT InsureeId, FamilyId, CHFID, LastName, OtherNames, DOB, Gender, Marital, isHead, IdentificationNumber, Phone, isOffline , PhotoPath, CardIssued, Relationship, Profession, Education, Email, TypeOfId, I.HFID, CurrentAddress,R.LocationId CurRegion, D.LocationId CurDistrict, W.LocationId CurWard,  I.CurVillage, HFR.LocationId FSPRegion, HFD.LocationId FSPDistrict, HF.HFLevel FSPCategory,\n" +
+                "IsHeadPhone1, IsHeadPhone2, AltPhone, NetWorkProvider1, NetWorkProvider2, PreferredPaiementMode, HeadStatus, LengthPresentLocation, MaleLivingHoushold, FemaleLivingHoushold, PersonLivingHoushold, HHNBChildrenLivingM, HHNBChildrenLivingF, HHNBChildrenLivingT, HHNBChildrenSchoolLivingM, HHNBChildrenSchoolLivingF, HHNBChildrenSchoolLivingT, HHNBChildrenCompleteSchoolLivingT, HHNBChildrenCompleteSchoolLivingM, HHNBChildrenCompleteSchoolLivingF, \n" +
+                "CHParentalStatus, HHNBChildrenDropSchoolLivingM, HHNBChildrenDropSchoolLivingF, HHNBChildrenDropSchoolLivingT, HHNBGirlsMarried \n" +
                 "CHBirthCertificate, CHEnrolmentStatus, ChildSchoolName, CHEnrolmentWhichClass, CHEnrolmentScore \n" +
                 "FROM tblInsuree I\n" +
                 "LEFT OUTER JOIN tblLocations V ON V.LocationId = I.CurVillage\n" +
@@ -5250,6 +5292,9 @@ public class ClientAndroidInterface {
         Log.d("Json Requete",MD);
         JSONObject masterData = new JSONObject(MD);
 
+        Log.d("Json Requete languages ", String.valueOf(masterData.get("languages")));
+        Log.d("Json Requete officers", String.valueOf(masterData.get("officers")));
+
         if (masterData.length() == 0)
             throw new UserException(mContext.getResources().getString(R.string.DownloadMasterDataFailed));
 
@@ -5416,6 +5461,8 @@ public class ClientAndroidInterface {
         String Query = "SELECT * FROM tblLanguages";
         JSONArray Languages = sqlHandler.getResult(Query, null);
         return Languages.length();
+
+
 
     }
 

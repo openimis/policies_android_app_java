@@ -53,16 +53,16 @@ In case of dispute arising out or in relation to the use of the program, it is s
                 $("#ddlCurrentVillage").prop("required", !boolMandatory);
                 $("#txtOtherNames").prop("required", !boolMandatory);
                 $("#ddlMaritalStatus").prop("required", !boolMandatory);
-                $("#ddlPaiementPrefer").prop("required", !boolMandatory);
+                $("#PreferredPaiementMode").prop("required", !boolMandatory);
                 $("#ddlProfession").prop("required", !boolMandatory);
                 $("#ddlEducation").prop("required", !boolMandatory);
-                $("#ddlHHStatus").prop("required", !boolMandatory);
+                $("#HeadStatus").prop("required", !boolMandatory);
                 $("#txtOriginVillager").prop("required", !boolMandatory);
                 $("#ddlHHOrigin").prop("required", !boolMandatory);
-                $("#ddlHLengthOfStay").prop("required", !boolMandatory);
+                $("#LengthPresentLocation").prop("required", !boolMandatory);
 
-                $("#HHNBPersonLivingM").prop("required", !boolMandatory);
-                $("#HHNBPersonLivingF").prop("required", !boolMandatory);
+                $("#MaleLivingHoushold").prop("required", !boolMandatory);
+                $("#FemaleLivingHoushold").prop("required", !boolMandatory);
                 $("#HHNBChildrenLivingM").prop("required", !boolMandatory);
                 $("#HHNBChildrenLivingF").prop("required", !boolMandatory);
                 $("#HHNBChildrenSchoolLivingM").prop("required", !boolMandatory);
@@ -77,8 +77,6 @@ In case of dispute arising out or in relation to the use of the program, it is s
                 $("#HHExpenditureText").prop("required", !boolMandatory);
                 $("#ddlHHNutriionalStatus").prop("required", !boolMandatory);
                 $("#ddlHHMentalPhysicalDisability").prop("required", !boolMandatory);
-                $("#ddlHHHealthStatus").prop("required", !boolMandatory);
-                $("#ddlHHHealthStatus").prop("required", !boolMandatory);
             }
 
             //Hide the relationship if the insuree is the HOF
@@ -116,24 +114,24 @@ In case of dispute arising out or in relation to the use of the program, it is s
             // NoPhone Management "I don't know"
             $('#noPhone1').click(function() {
                 $("#txtPhoneNumber").prop("disabled", true);
-                $("#ddlNetworkProvider1").prop("disabled", true);
-                $("#ddlnotRegisteredPhone1").prop("disabled", true);
+                $("#NetWorkProvider1").prop("disabled", true);
+                $("#IsHeadPhone1").prop("disabled", true);
                 if (!$(this).is(':checked')) {
                     $("#txtPhoneNumber").prop("disabled", false);
-                    $("#ddlNetworkProvider1").prop("disabled", false);
-                    $("#ddlnotRegisteredPhone1").prop("disabled", false);
+                    $("#NetWorkProvider1").prop("disabled", false);
+                    $("#IsHeadPhone1").prop("disabled", false);
                 }
               });
 
             // NoPhone Management "I don't know"
             $('#noPhone2').click(function() {
-                $("#txtPhoneNumber2").prop("disabled", true);
-                $("#ddlNetworkProvider2").prop("disabled", true);
-                $("#ddlnotRegisteredPhone2").prop("disabled", true);
+                $("#AltPhone").prop("disabled", true);
+                $("#NetWorkProvider2").prop("disabled", true);
+                $("#IsHeadPhone2").prop("disabled", true);
                 if (!$(this).is(':checked')) {
-                    $("#txtPhoneNumber2").prop("disabled", false);
-                    $("#ddlNetworkProvider2").prop("disabled", false);
-                    $("#ddlnotRegisteredPhone2").prop("disabled", false);
+                    $("#AltPhone").prop("disabled", false);
+                    $("#NetWorkProvider2").prop("disabled", false);
+                    $("#IsHeadPhone2").prop("disabled", false);
                 }
               });
 
@@ -199,8 +197,8 @@ In case of dispute arising out or in relation to the use of the program, it is s
 
 
             /***** Manage phone number provider ******/
-            function ddlPaiementPreferFunction(networkDefined){
-                $("#ddlPaiementPrefer > option").each(function() {
+            function PreferredPaiementModeFunction(networkDefined){
+                $("#PreferredPaiementMode > option").each(function() {
                     $(this).show();
                     if(this.value!=networkDefined && this.value !="EU" && this.value !=""){
                         $(this).hide();
@@ -208,16 +206,16 @@ In case of dispute arising out or in relation to the use of the program, it is s
                 });
             }
 
-            $("#ddlNetworkProvider1").change(function(){
+            $("#NetWorkProvider1").change(function(){
                switch($(this).val()) {
                   case "O":
-                   ddlPaiementPreferFunction("O");
+                   PreferredPaiementModeFunction("O");
                     break;
                   case "M":
-                    ddlPaiementPreferFunction("M");
+                    PreferredPaiementModeFunction("M");
                     break;
                   default:
-                    ddlPaiementPreferFunction("-1");
+                    PreferredPaiementModeFunction("-1");
                 }
             });
 
@@ -225,18 +223,18 @@ In case of dispute arising out or in relation to the use of the program, it is s
             /****** Addition of input form ******/
 
             function calcDailyExpenditure(){
-                 value = $("#HHExpenditureText").val()/$("#HHNBPersonLivingT").val();
+                 value = $("#HHExpenditureText").val()/$("#PersonLivingHoushold").val();
                  value = Math.round(value);
                  $("#HHExpenditurePerHText").val(value);
             }
 
 
-            $(".HHNBPersonLivingTotal").change(function(){
+            $(".PersonLivingHousholdotal").change(function(){
                sumTotal=0;
-               $(".HHNBPersonLivingTotal").each(function(){
+               $(".PersonLivingHousholdotal").each(function(){
                    sumTotal+=Number($(this).val());
                });
-               $("#HHNBPersonLivingT").val(sumTotal);
+               $("#PersonLivingHoushold").val(sumTotal);
                calcDailyExpenditure()
             });
 
@@ -303,7 +301,7 @@ In case of dispute arising out or in relation to the use of the program, it is s
 
             document.title = Android.getString('AddEditInsuree');
             Android.shutDownProgress();
-        
+
 
           var FSPDistrictCss=   $('#FSPDistrict').css('display');
           if(FSPDistrictCss == 'none')  $('#FSPRegion').css("display", "none");
@@ -369,6 +367,7 @@ In case of dispute arising out or in relation to the use of the program, it is s
                     Android.clearInsuranceNo();
                     var jsonInsuree = createJSONString();
 
+                    console.log("jsonInsuree : "+jsonInsuree);
                     if(sessionStorage.getItem("FamilyData") !== null){
                         var FamilyId = Android.SaveFamily(sessionStorage.getItem("FamilyData"), jsonInsuree);
 
@@ -485,7 +484,7 @@ In case of dispute arising out or in relation to the use of the program, it is s
                 $('#ddlCurrentMunicipality').val($.parseJSON(Insuree)[0]["CurWard"]).trigger("change");
                 $('#ddlCurrentVillage').val($.parseJSON(Insuree)[0]["CurVillage"]);
                 $('#ddlFSPRegion').val($.parseJSON(Insuree)[0]["FSPRegion"]).trigger("change");
-    
+
                 try{
                     $('#ddlFSPDistrict').val($.parseJSON(Insuree)[0]["FSPDistrict"]).trigger("change");
                 }catch(e){
@@ -598,23 +597,23 @@ In case of dispute arising out or in relation to the use of the program, it is s
 
         function fillNetworkProvider(){
             var $NetworkProvider = Android.getNetworkProvider();
-            bindDropdown('ddlNetworkProvider1', $NetworkProvider, 'Code', 'Status', null, null);
-            bindDropdown('ddlNetworkProvider2', $NetworkProvider, 'Code', 'Status', null, null);
+            bindDropdown('NetWorkProvider1', $NetworkProvider, 'Code', 'Status', null, null);
+            bindDropdown('NetWorkProvider2', $NetworkProvider, 'Code', 'Status', null, null);
         }
 
         function fillPaiementProvider(){
             var $PaiementProvider = Android.getPaiementProvider();
-            bindDropdown('ddlPaiementPrefer', $PaiementProvider, 'Code', 'Status', null, null);
+            bindDropdown('PreferredPaiementMode', $PaiementProvider, 'Code', 'Status', null, null);
         }
 
         function fillStatusProvider(){
             var $StatusProvider = Android.getStatusProvider();
-            bindDropdown('ddlHHStatus', $StatusProvider, 'Code', 'Status', null, null);
+            bindDropdown('HeadStatus', $StatusProvider, 'Code', 'Status', null, null);
         }
 
         function fillLengthStayProvider(){
             var $lengthStayProvider = Android.getLengthStayProvider();
-            bindDropdown('ddlHLengthOfStay', $lengthStayProvider, 'Code', 'Status', null, null);
+            bindDropdown('LengthPresentLocation', $lengthStayProvider, 'Code', 'Status', null, null);
         }
 
         function fillHHStatusProvider(){
@@ -650,8 +649,8 @@ In case of dispute arising out or in relation to the use of the program, it is s
 
         function fillnotRegisteredPhone(){
             var $YesNo = Android.getYesNo();
-            bindDropdown('ddlnotRegisteredPhone1', $YesNo, 'value', 'key',null, Android.getString('SelectHHName'));
-            bindDropdown('ddlnotRegisteredPhone2', $YesNo, 'value', 'key',null, Android.getString('SelectHHName'));
+            bindDropdown('IsHeadPhone1', $YesNo, 'value', 'key',null, Android.getString('SelectHHName'));
+            bindDropdown('IsHeadPhone2', $YesNo, 'value', 'key',null, Android.getString('SelectHHName'));
         }
 
         function fillChildEnrollementProvider(){
@@ -757,7 +756,7 @@ In case of dispute arising out or in relation to the use of the program, it is s
             }else{
                 $('#imgInsuree').attr('src', '');
             }
-            $("#hfImagePath").val($('#imgInsuree').attr('src'));sssasadd
+            $("#hfImagePath").val($('#imgInsuree').attr('src'));
         }
 
     </script>
@@ -852,11 +851,11 @@ In case of dispute arising out or in relation to the use of the program, it is s
         </li>
         <li class="clearFix">
             <span strName="notRegisteredPhone1">2-9. Is this Phone Number registered in Head of HH’s Name?</span>
-            <select id="ddlnotRegisteredPhone1" datafield="notRegisteredPhone1"></select>
+            <select id="IsHeadPhone1" datafield="IsHeadPhone1"></select>
         </li>
         <li id="NetworkProviderPhone1" class="clearFix">
             <span strName="NetworkProviderPhone1">2-10. Network Provider</span>
-            <select id="ddlNetworkProvider1" datafield="NetworkProvider">
+            <select id="NetWorkProvider1" datafield="NetWorkProvider1">
             </select>
         </li>
         <li>
@@ -866,16 +865,17 @@ In case of dispute arising out or in relation to the use of the program, it is s
                     <input type="checkbox" id="noPhone2" name="noPhone2" class="left">
                     <label for="noPhone2" class="left">Respondent Has <br/> no alt. phone</label>
                 </div>
-                <input type="tel" id="txtPhoneNumber2" datafield="Phone2" maxlength="50"/>
+                <input type="tel" id="AltPhone" datafield="AltPhone" maxlength="50"/>
             </div>
         </li>
+        <li class="clearFix">
+            <span strName="IsHeadPhone2">2-12. Is this Phone Number registered in Head of HH’s Name?</span>
+            <select id="IsHeadPhone2" datafield="IsHeadPhone2"></select>
+        </li>
+
         <li id="NetworkProvider2" class="clearFix">
             <span strName="NetworkProvider2">2-13. Network Provider</span>
-            <select id="ddlNetworkProvider2" datafield="NetworkProvider2"></select>
-        </li>
-        <li class="clearFix">
-            <span strName="notRegisteredPhone2">2-13. Is this Phone Number registered in Head of HH’s Name?</span>
-            <select id="ddlnotRegisteredPhone2" datafield="notRegisteredPhone2"></select>
+            <select id="NetWorkProvider2" datafield="NetWorkProvider2"></select>
         </li>
 
         <li id="IdentificationType" class="clearFix">
@@ -899,7 +899,7 @@ In case of dispute arising out or in relation to the use of the program, it is s
         </li>
         <li id="NetworkProviderPhonePrefer">
             <span strName="NetworkProviderPhonePrefer">2.16- Preferred mode of receiving Money Transfer by Head of Household</span>
-            <select id="ddlPaiementPrefer" datafield="PaiementProvider">
+            <select id="PreferredPaiementMode" datafield="PreferredPaiementMode">
             </select>
         </li>
 
@@ -917,11 +917,11 @@ In case of dispute arising out or in relation to the use of the program, it is s
         </li>
         <li id="HHStatus">
             <span strName="HHStatus">3-3. Status of Head of HH</span>
-            <select id="ddlHHStatus" datafield="HHStatus"></select>
+            <select id="HeadStatus" datafield="HeadStatus"></select>
         </li>
         <li id="HHLengthOfstay">
             <span strName="HHLengthofStay">3-4. Length of stay in present location</span>
-            <select id="ddlHLengthOfStay" datafield="HHLengthofStay"></select>
+            <select id="LengthPresentLocation" datafield="LengthPresentLocation"></select>
         </li>
 
         <li id="HHOriginRegion">
@@ -936,19 +936,19 @@ In case of dispute arising out or in relation to the use of the program, it is s
 
 
         <hr/>
-        <li id="HHNBPersonLivingMale">
-            <span strName="HHNBPersonLivingM">3-7. Number of Male living in Houshold</span>
-            <input type="tel" id="HHNBPersonLivingM" maxlength="3" class="HHNBPersonLivingTotal" datafield="HHNBPersonLivingM"/>
+        <li id="MaleLivingHousholdale">
+            <span strName="MaleLivingHoushold">3-7. Number of Male living in Houshold</span>
+            <input type="tel" id="MaleLivingHoushold" maxlength="3" class="PersonLivingHousholdotal" datafield="MaleLivingHoushold"/>
         </li>
 
-        <li id="HHNBPersonLivingFemale">
-            <span strName="HHNBPersonLivingF">3-7. Number of Female living in Houshold</span>
-            <input type="tel" id="HHNBPersonLivingF" maxlength="3" class="HHNBPersonLivingTotal" datafield="HHNBPersonLivingF"/>
+        <li id="FemaleLivingHousholdemale">
+            <span strName="FemaleLivingHoushold">3-7. Number of Female living in Houshold</span>
+            <input type="tel" id="FemaleLivingHoushold" maxlength="3" class="PersonLivingHousholdotal" datafield="FemaleLivingHoushold"/>
         </li>
 
-        <li id="HHNBPersonLivingTotal">
-            <span strName="HHNBPersonLivingTotal">3-7. Number of persons living in Houshold</span>
-            <input type="number" id="HHNBPersonLivingT" maxlength="3" datafield="HHNBPersonLivingTotal" disabled/>
+        <li id="PersonLivingHousholdotal">
+            <span strName="PersonLivingHousholdotal">3-7. Number of persons living in Houshold</span>
+            <input type="number" id="PersonLivingHoushold" maxlength="3" datafield="PersonLivingHoushold" disabled/>
         </li>
 
         <hr/>
@@ -959,7 +959,7 @@ In case of dispute arising out or in relation to the use of the program, it is s
 
         <li id="HHNBChildrenLivingFemale">
             <span strName="HHNBChildrenLivingF">3-8. Number of Girls/Dependents below 18 years in Houshold</span>
-            <input type="tel" id="HHNBChildrenLivingF" class="HHNBChildrenLivingTotal" class="HHNBPersonLivingTotal" maxlength="3" datafield="HHNBChildrenLivingF"/>
+            <input type="tel" id="HHNBChildrenLivingF" class="HHNBChildrenLivingTotal" class="PersonLivingHousholdotal" maxlength="3" datafield="HHNBChildrenLivingF"/>
         </li>
 
         <li id="HHNBChildrenLivingTotal">
@@ -1106,7 +1106,7 @@ In case of dispute arising out or in relation to the use of the program, it is s
 
         <hr/>
 
-        <li id="FSPRegion">
+        <li id="FSPRegion"
             <span strName="FSPRegion">Region</span>
             <select id="ddlFSPRegion" datafield="FSPRegion"></select>
         </li>
