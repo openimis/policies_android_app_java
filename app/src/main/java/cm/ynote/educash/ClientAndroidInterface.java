@@ -1385,8 +1385,8 @@ public class ClientAndroidInterface {
             values.put("PreferredPaiementMode", data.get("PreferredPaiementMode"));
             values.put("HeadStatus", data.get("HeadStatus"));
             values.put("LengthPresentLocation", data.get("LengthPresentLocation"));
-            values.put("HHOriginVillage", data.get("txtOriginVillager"));
-            values.put("HHOriginRegion", data.get("ddlHHOrigin"));
+            values.put("HHOriginVillage", data.get("HHOriginVillage"));
+            values.put("HHOriginRegion", data.get("HHOriginRegion"));
 
             values.put("MaleLivingHoushold", data.get("MaleLivingHoushold"));
             values.put("FemaleLivingHoushold", data.get("FemaleLivingHoushold"));
@@ -1408,11 +1408,19 @@ public class ClientAndroidInterface {
             values.put("HHNBChildrenDropSchoolLivingF", data.get("HHNBChildrenDropSchoolLivingF"));
             values.put("HHNBChildrenDropSchoolLivingT", data.get("HHNBChildrenDropSchoolLivingT"));
 
-            values.put("HHHealthStatus", data.get("ddlHHHealthStatus"));
-            values.put("HHExpenditure", data.get("HHExpenditureText"));
-            values.put("HHExpenditurePerH", data.get("HHExpenditurePerHText"));
-            values.put("HHHealthStatus", data.get("ddlHHNutriionalStatus"));
-            values.put("HHMentalPhysicalDisability", data.get("ddlHHMentalPhysicalDisability"));
+            values.put("HHNBChildrenBirthCertifM", data.get("HHNBChildrenBirthCertifM"));
+            values.put("HHNBChildrenBirthCertifF", data.get("HHNBChildrenBirthCertifF"));
+            values.put("HHNBChildrenBirthCertifT", data.get("HHNBChildrenBirthCertifT"));
+
+            values.put("DateInconnue", data.get("DateInconnue"));
+
+            values.put("HHHealthStatus", data.get("HHHealthStatus"));
+            values.put("HHExpenditure", data.get("HHExpenditure"));
+            values.put("HHExpenditurePerH", data.get("HHExpenditurePerH"));
+            values.put("HHNutritionalStatus", data.get("HHNutritionalStatus"));
+            values.put("HHMentalPhysicalDisability", data.get("HHMentalPhysicalDisability"));
+            values.put("HHNBGirlsMarried", data.get("HHNBGirlsMarried"));
+
 
             if (data.get("ddlFSP") != null)
                 values.put("HFID", Integer.valueOf(data.get("ddlFSP")));
@@ -1706,7 +1714,8 @@ public class ClientAndroidInterface {
     public String getInsuree(int InsureeId) {
         String Query = "SELECT InsureeId, FamilyId, CHFID, LastName, OtherNames, DOB, Gender, Marital, isHead, IdentificationNumber, Phone, isOffline , PhotoPath, CardIssued, Relationship, Profession, Education, Email, TypeOfId, I.HFID, CurrentAddress,R.LocationId CurRegion, D.LocationId CurDistrict, W.LocationId CurWard,  I.CurVillage, HFR.LocationId FSPRegion, HFD.LocationId FSPDistrict, HF.HFLevel FSPCategory,\n" +
                 "IsHeadPhone1, IsHeadPhone2, AltPhone, NetWorkProvider1, NetWorkProvider2, PreferredPaiementMode, HeadStatus, LengthPresentLocation, MaleLivingHoushold, FemaleLivingHoushold, PersonLivingHoushold, HHNBChildrenLivingM, HHNBChildrenLivingF, HHNBChildrenLivingT, HHNBChildrenSchoolLivingM, HHNBChildrenSchoolLivingF, HHNBChildrenSchoolLivingT, HHNBChildrenCompleteSchoolLivingT, HHNBChildrenCompleteSchoolLivingM, HHNBChildrenCompleteSchoolLivingF, \n" +
-                "CHParentalStatus, HHNBChildrenDropSchoolLivingM, HHNBChildrenDropSchoolLivingF, HHNBChildrenDropSchoolLivingT, HHNBGirlsMarried \n" +
+                "CHParentalStatus, HHNBChildrenDropSchoolLivingM, HHNBChildrenDropSchoolLivingF, HHNBChildrenDropSchoolLivingT, HHNBGirlsMarried, HHNBChildrenBirthCertifM, HHNBChildrenBirthCertifF, HHNBChildrenBirthCertifT, HHHealthStatus, HHExpenditure, HHExpenditurePerH, HHNutritionalStatus, HHMentalPhysicalDisability, HHMentalPhysicalDisabilityM, HHMentalPhysicalDisabilityF, HHMentalPhysicalDisabilityT, HHOriginRegion, HHOriginVillage, \n" +
+                "HHMentalPhysicalDisabilityO1, HHMentalPhysicalDisabilityO2, HHMentalPhysicalDisabilityO3, HHMentalPhysicalDisabilityO4, CHEnrolmentStatus, ChildSchoolName, CHEnrolmentWhichClass, CHEnrolmentOutofSchool, CHBirthCertificate, DateInconnueChild, CHEnrolmentScore, ResidentialStatus1, ResidentialStatus2, ResidentialStatus3, ResidentialStatus4, ResidentialStatus5, ResidentialStatus6, CHSpecialNeeds1, CHSpecialNeeds2, CHSpecialNeeds3, CHSpecialNeeds4, CHSpecialNeeds5, CHSpecialNeeds6,  \n" +
                 "CHBirthCertificate, CHEnrolmentStatus, ChildSchoolName, CHEnrolmentWhichClass, CHEnrolmentScore \n" +
                 "FROM tblInsuree I\n" +
                 "LEFT OUTER JOIN tblLocations V ON V.LocationId = I.CurVillage\n" +

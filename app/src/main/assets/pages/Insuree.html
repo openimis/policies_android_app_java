@@ -57,8 +57,8 @@ In case of dispute arising out or in relation to the use of the program, it is s
                 $("#ddlProfession").prop("required", !boolMandatory);
                 $("#ddlEducation").prop("required", !boolMandatory);
                 $("#HeadStatus").prop("required", !boolMandatory);
-                $("#txtOriginVillager").prop("required", !boolMandatory);
-                $("#ddlHHOrigin").prop("required", !boolMandatory);
+                $("#HHOriginVillage").prop("required", !boolMandatory);
+                $("#HHOriginRegion").prop("required", !boolMandatory);
                 $("#LengthPresentLocation").prop("required", !boolMandatory);
 
                 $("#MaleLivingHoushold").prop("required", !boolMandatory);
@@ -73,10 +73,10 @@ In case of dispute arising out or in relation to the use of the program, it is s
                 $("#HHNBChildrenDropSchoolLivingF").prop("required", !boolMandatory);
                 $("#HHNBChildrenBirthCertifM").prop("required", !boolMandatory);
                 $("#HHNBChildrenBirthCertifF").prop("required", !boolMandatory);
-                $("#ddlHHHealthStatus").prop("required", !boolMandatory);
-                $("#HHExpenditureText").prop("required", !boolMandatory);
+                $("#HHHealthStatus").prop("required", !boolMandatory);
+                $("#HHExpenditure").prop("required", !boolMandatory);
                 $("#ddlHHNutriionalStatus").prop("required", !boolMandatory);
-                $("#ddlHHMentalPhysicalDisability").prop("required", !boolMandatory);
+                $("#HHMentalPhysicalDisability").prop("required", !boolMandatory);
             }
 
             //Hide the relationship if the insuree is the HOF
@@ -96,7 +96,7 @@ In case of dispute arising out or in relation to the use of the program, it is s
 
             /*** Checkbox Management zhen a user don't know the answer ****/
             // Birthday Management "I don't know"
-            $('#idk').click(function() {
+            $('#DateInconnue').click(function() {
                 $("#txtBirthDate").prop("disabled", true);
                 if (!$(this).is(':checked')) {
                     $("#txtBirthDate").prop("disabled", false);
@@ -177,7 +177,7 @@ In case of dispute arising out or in relation to the use of the program, it is s
                 });
 
                 $(".showDisability318").hide();
-                $("#ddlHHMentalPhysicalDisability").change(function(){
+                $("#HHMentalPhysicalDisability").change(function(){
                    if($(this).val()==1){
                     $(".showDisability318").show();
                    }else{
@@ -223,9 +223,9 @@ In case of dispute arising out or in relation to the use of the program, it is s
             /****** Addition of input form ******/
 
             function calcDailyExpenditure(){
-                 value = $("#HHExpenditureText").val()/$("#PersonLivingHoushold").val();
+                 value = $("#HHExpenditure").val()/$("#PersonLivingHoushold").val();
                  value = Math.round(value);
-                 $("#HHExpenditurePerHText").val(value);
+                 $("#HHExpenditurePerH").val(value);
             }
 
 
@@ -246,13 +246,6 @@ In case of dispute arising out or in relation to the use of the program, it is s
                $("#HHNBChildrenLivingT").val(sumTotal);
             });
 
-            $(".HHNBChildrenLivingTotal").change(function(){
-               sumTotal=0;
-               $(".HHNBChildrenLivingTotal").each(function(){
-                   sumTotal+=Number($(this).val());
-               });
-               $("#HHNBChildrenLivingT").val(sumTotal);
-            });
 
             $(".HHNBChildrenSchoolLivingTotal").change(function(){
                sumTotal=0;
@@ -295,7 +288,7 @@ In case of dispute arising out or in relation to the use of the program, it is s
             });
 
 
-            $("#HHExpenditureText").change(function(){
+            $("#HHExpenditure").change(function(){
                 calcDailyExpenditure();
             });
 
@@ -618,17 +611,17 @@ In case of dispute arising out or in relation to the use of the program, it is s
 
         function fillHHStatusProvider(){
             var $hHStatusProvider = Android.gethHStatusProvider();
-            bindDropdown('ddlHHHealthStatus', $hHStatusProvider, 'Code', 'Status', null, null);
+            bindDropdown('HHHealthStatus', $hHStatusProvider, 'Code', 'Status', null, null);
         }
 
         function fillNutritionalStatusProvider(){
             var $nutritionalStatusProvider = Android.getNutritionalStatusProvider();
-            bindDropdown('ddlHHNutriionalStatus', $nutritionalStatusProvider, 'Code', 'Status', null, null);
+            bindDropdown('HHNutritionalStatus', $nutritionalStatusProvider, 'Code', 'Status', null, null);
         }
 
         function fillHHMentalPhysicalDisability(){
             var $YesNo = Android.getYesNo();
-            bindDropdown('ddlHHMentalPhysicalDisability', $YesNo, 'value', 'key',null, Android.getString('SelectMentalPhysicalDisability'));
+            bindDropdown('HHMentalPhysicalDisability', $YesNo, 'value', 'key',null, Android.getString('SelectMentalPhysicalDisability'));
         }
 
 
@@ -676,7 +669,7 @@ In case of dispute arising out or in relation to the use of the program, it is s
         function fillCurrentRegion(){
             var $Regions = Android.getRegionsWO();
             bindDropdown('ddlCurrentRegion', $Regions, 'LocationId', 'LocationName',0, Android.getString('SelectRegion'));
-            bindDropdown('ddlHHOrigin', $Regions, 'LocationId', 'LocationName',0, Android.getString('SelectRegion'));
+            bindDropdown('HHOriginRegion', $Regions, 'LocationId', 'LocationName',0, Android.getString('SelectRegion'));
         }
 
         function fillFSPRegions(){
@@ -792,8 +785,8 @@ In case of dispute arising out or in relation to the use of the program, it is s
             </div>
             <div>
                 <div id="Birthday-idk">
-                    <input type="checkbox" id="idk" name="idk" class="left">
-                    <label for="idk" class="left">Don't Know</label>
+                    <input type="checkbox" id="DateInconnue" name="DateInconnue" class="left">
+                    <label for="DateInconnue" class="left">Don't Know</label>
                 </div>
                 <input type="date" id="txtBirthDate" dataField="DOB"/>
             </div>
@@ -924,29 +917,29 @@ In case of dispute arising out or in relation to the use of the program, it is s
             <select id="LengthPresentLocation" datafield="LengthPresentLocation"></select>
         </li>
 
-        <li id="HHOriginRegion">
-            <span strName="HHOriginRegion">3-6. Region of Origin</span>
-            <select id="ddlHHOrigin" datafield="HHOriginRegion"></select>
+        <li>
+            <span strName="HHOriginRegion">3-5. Region of Origin</span>
+            <select id="HHOriginRegion" datafield="HHOriginRegion"></select>
         </li>
 
-        <li id="HHLVillageOrigin">
-            <span strName="HHOriginVillage">3-5. Village of Origin of Head of HH</span>
-            <input type="text" id="txtOriginVillager" maxlength="50" datafield="HHOriginVillage"/>
+        <li>
+            <span strName="HHOriginVillage">3-6. Village of Origin of Head of HH</span>
+            <input type="text" id="HHOriginVillage" maxlength="50" datafield="HHOriginVillage"/>
         </li>
 
 
         <hr/>
-        <li id="MaleLivingHousholdale">
+        <li>
             <span strName="MaleLivingHoushold">3-7. Number of Male living in Houshold</span>
             <input type="tel" id="MaleLivingHoushold" maxlength="3" class="PersonLivingHousholdotal" datafield="MaleLivingHoushold"/>
         </li>
 
-        <li id="FemaleLivingHousholdemale">
+        <li>
             <span strName="FemaleLivingHoushold">3-7. Number of Female living in Houshold</span>
             <input type="tel" id="FemaleLivingHoushold" maxlength="3" class="PersonLivingHousholdotal" datafield="FemaleLivingHoushold"/>
         </li>
 
-        <li id="PersonLivingHousholdotal">
+        <li>
             <span strName="PersonLivingHousholdotal">3-7. Number of persons living in Houshold</span>
             <input type="number" id="PersonLivingHoushold" maxlength="3" datafield="PersonLivingHoushold" disabled/>
         </li>
@@ -962,57 +955,57 @@ In case of dispute arising out or in relation to the use of the program, it is s
             <input type="tel" id="HHNBChildrenLivingF" class="HHNBChildrenLivingTotal" class="PersonLivingHousholdotal" maxlength="3" datafield="HHNBChildrenLivingF"/>
         </li>
 
-        <li id="HHNBChildrenLivingTotal">
-            <span strName="HHNBChildrenLivingTotal">3-8. Number of Children/Dependents below 18 years in Houshold</span>
-            <input type="number" id="HHNBChildrenLivingT" maxlength="3" datafield="HHNBChildrenLivingTotal" disabled/>
+        <li>
+            <span strName="HHNBChildrenLivingT">3-8. Number of Children/Dependents below 18 years in Houshold</span>
+            <input type="number" id="HHNBChildrenLivingT" maxlength="3" datafield="HHNBChildrenLivingT" disabled/>
         </li>
 
         <hr/>
-        <li id="HHNBChildrenSchoolLivingMale">
+        <li>
             <span strName="HHNBChildrenSchoolLivingM">3-9. Number of Boys in Houshold going to Primary School</span>
             <input type="tel" id="HHNBChildrenSchoolLivingM" class="HHNBChildrenSchoolLivingTotal" maxlength="3" datafield="HHNBChildrenSchoolLivingM"/>
         </li>
 
-        <li id="HHNBChildrenSchoolLivingFemale">
+        <li>
             <span strName="HHNBChildrenSchoolLivingF">3-9. Number of Girls in Houshold going to Primary School</span>
             <input type="tel" id="HHNBChildrenSchoolLivingF" class="HHNBChildrenSchoolLivingTotal" maxlength="3" datafield="HHNBChildrenSchoolLivingF"/>
         </li>
 
-        <li id="HHNBChildrenSchoolLivingTotal">
-            <span strName="HHNBChildrenSchoolLivingTotal">3-9. Total Number of Children in Houshold going to Primary School</span>
-            <input type="number" id="HHNBChildrenSchoolLivingT" maxlength="3" datafield="HHNBChildrenSchoolLivingTotal" disabled/>
+        <li>
+            <span strName="HHNBChildrenSchoolLivingT">3-9. Total Number of Children in Houshold going to Primary School</span>
+            <input type="number" id="HHNBChildrenSchoolLivingT" maxlength="3" datafield="HHNBChildrenSchoolLivingT" disabled/>
         </li>
 
         <hr/>
-        <li id="HHNBChildrenCompleteSchoolLivingMale">
+        <li>
             <span strName="HHNBChildrenCompleteSchoolLivingM">3-10. Number of Boys in HH below 18 that have completed primary school</span>
             <input type="tel" id="HHNBChildrenCompleteSchoolLivingM" class="HHNBChildrenCompleteSchoolLivingTotal" maxlength="3" datafield="HHNBChildrenCompleteSchoolLivingM"/>
         </li>
 
-        <li id="HHNBChildrenCompleteSchoolLivingFemale">
+        <li>
             <span strName="HHNBChildrenCompleteSchoolLivingF">3-10. Number of Girls in HH below 18 that have completed primary school</span>
             <input type="tel" id="HHNBChildrenCompleteSchoolLivingF" class="HHNBChildrenCompleteSchoolLivingTotal" maxlength="3" datafield="HHNBChildrenCompleteSchoolLivingF"/>
         </li>
 
-        <li id="HHNBChildrenCompleteSchoolLivingTotal">
+        <li>
             <span strName="HHNBChildrenCompleteSchoolLivingTotal">3-10. Number of Children in HH below 18 that have completed primary school</span>
-            <input type="number" id="HHNBChildrenCompleteSchoolLivingT"  maxlength="3" datafield="HHNBChildrenCompleteSchoolLivingTotal" disabled/>
+            <input type="number" id="HHNBChildrenCompleteSchoolLivingT"  maxlength="3" datafield="HHNBChildrenCompleteSchoolLivingT" disabled/>
         </li>
 
         <hr/>
-        <li id="HHNBChildrenDropSchoolLivingMale">
-            <span strName="HHNBChildrenDropSchoolLivingMale">3-11. Number of boys below 18 not going to/dropped from primary school</span>
-            <input type="tel" id="HHNBChildrenDropSchoolLivingM" class="HHNBChildrenDropSchoolLivingTotal" maxlength="3" datafield="HHNBChildrenDropSchoolLivingMale"/>
+        <li>
+            <span strName="HHNBChildrenDropSchoolLivingM">3-11. Number of boys below 18 not going to/dropped from primary school</span>
+            <input type="tel" id="HHNBChildrenDropSchoolLivingM" class="HHNBChildrenDropSchoolLivingTotal" maxlength="3" datafield="HHNBChildrenDropSchoolLivingM"/>
         </li>
 
-        <li id="HHNBChildrenDropSchoolLivingFemale">
-            <span strName="HHNBChildrenDropSchoolLivingFemale">3-11. Number of girls below 18 not going to/dropped from primary school</span>
-            <input type="tel" id="HHNBChildrenDropSchoolLivingF" class="HHNBChildrenDropSchoolLivingTotal" maxlength="3" datafield="HHNBChildrenDropSchoolLivingFemale"/>
+        <li>
+            <span strName="HHNBChildrenDropSchoolLivingF">3-11. Number of girls below 18 not going to/dropped from primary school</span>
+            <input type="tel" id="HHNBChildrenDropSchoolLivingF" class="HHNBChildrenDropSchoolLivingTotal" maxlength="3" datafield="HHNBChildrenDropSchoolLivingF"/>
         </li>
 
-        <li id="HHNBChildrenDropSchoolLivingTotal">
-            <span strName="HHNBChildrenDropSchoolLivingTotal">3-11. Number of children below 18 not going to/dropped from primary school</span>
-            <input type="number" id="HHNBChildrenDropSchoolLivingT" maxlength="3" datafield="HHNBChildrenDropSchoolLivingTotal" disabled/>
+        <li>
+            <span strName="HHNBChildrenDropSchoolLivingT">3-11. Number of children below 18 not going to/dropped from primary school</span>
+            <input type="number" id="HHNBChildrenDropSchoolLivingT" maxlength="3" datafield="HHNBChildrenDropSchoolLivingT" disabled/>
         </li>
         <hr/>
 
@@ -1028,43 +1021,43 @@ In case of dispute arising out or in relation to the use of the program, it is s
         </li>
 
         <hr class="clearFix"/>
-        <li id="HHNBChildrenBirthCertifMale" class="clearFix">
+        <li class="clearFix">
             <span strName="HHNBChildrenBirthCertifM">3-13. Number of boys below 18 in HH WITHOUT Birth Certificate</span>
             <input type="tel" id="HHNBChildrenBirthCertifM" class="HHNBChildrenBirthCertifTotal" maxlength="3" datafield="HHNBChildrenBirthCertifM"/>
         </li>
 
-        <li id="HHNBChildrenBirthCertifFemale">
+        <li>
             <span strName="HHNBChildrenBirthCertifF">3-13. Number of girls below 18 in HH WITHOUT Birth Certificate</span>
             <input type="tel" id="HHNBChildrenBirthCertifF" class="HHNBChildrenBirthCertifTotal" maxlength="3" datafield="HHNBChildrenBirthCertifF"/>
         </li>
 
-        <li id="HHNBChildrenBirthCertifTotal">
-            <span strName="HHNBChildrenBirthCertifTotal">3-13. Number of boys/girls below 18 in HH WITHOUT Birth Certificate</span>
-            <input type="number" id="HHNBChildrenBirthCertifT" maxlength="3" datafield="HHNBChildrenBirthCertifTotal" disabled/>
+        <li>
+            <span strName="HHNBChildrenBirthCertifT">3-13. Number of boys/girls below 18 in HH WITHOUT Birth Certificate</span>
+            <input type="number" id="HHNBChildrenBirthCertifT" maxlength="3" datafield="HHNBChildrenBirthCertifT" disabled/>
         </li>
         <hr/>
-        <li id="HHHealthStatus">
+        <li>
             <span strName="HHHealthStatus">3-14. Health Status of Head of Household</span>
-            <select id="ddlHHHealthStatus" datafield="HHHealthStatus"></select>
+            <select id="HHHealthStatus" datafield="HHHealthStatus"></select>
         </li>
-        <li id="HHExpenditure">
+        <li>
             <span strName="HHExpenditure">3-15. Household Expenditure (How much the entire HH spends a day)</span>
-            <input type="tel" id="HHExpenditureText" maxlength="8" datafield="HHExpenditure"/>
+            <input type="tel" id="HHExpenditure" maxlength="8" datafield="HHExpenditure"/>
         </li>
 
-        <li id="HHExpenditurePerH">
+        <li>
             <span strName="HHExpenditure">3-16. Household Daily Expenditure per Head (divide total daily expenditure by # pers in HH)</span>
-            <input type="number" id="HHExpenditurePerHText" maxlength="8" datafield="HHExpenditurePerH" disabled/>
+            <input type="number" id="HHExpenditurePerH" maxlength="8" datafield="HHExpenditurePerH" disabled/>
         </li>
 
-        <li id="HHNutritionalStatus">
+        <li>
             <span strName="HHNutritionalStatus">3-17. Household Nutritional Status (how many balanced meals household ate the previous day)</span>
-            <select id="ddlHHNutriionalStatus" datafield="HHHealthStatus"></select>
+            <select id="HHNutritionalStatus" datafield="HHNutritionalStatus"></select>
         </li>
 
-        <li id="HHMentalPhysicalDisability">
+        <li>
             <span strName="HHMentalPhysicalDisability">3-18. Household has children or adults with physical or mental disability</span>
-            <select id="ddlHHMentalPhysicalDisability" datafield="HHMentalPhysicalDisability">
+            <select id="HHMentalPhysicalDisability" datafield="HHMentalPhysicalDisability">
             </select>
         </li>
 
