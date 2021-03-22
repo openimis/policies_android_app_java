@@ -1047,7 +1047,7 @@ public class ClientAndroidInterface {
             HFLevels.put(object);
 
             object = new JSONObject();
-            object.put("Code", "D");//Uploaded = 1;
+            object.put("Code", "D");
             object.put("HFLevel", mContext.getResources().getString(R.string.Dispensary));
             HFLevels.put(object);
 
@@ -1412,7 +1412,11 @@ public class ClientAndroidInterface {
             values.put("HHNBChildrenBirthCertifF", data.get("HHNBChildrenBirthCertifF"));
             values.put("HHNBChildrenBirthCertifT", data.get("HHNBChildrenBirthCertifT"));
 
-            values.put("DateInconnue", data.get("DateInconnue"));
+            values.put("DOB_unknow", data.get("DOB_unknow"));
+            values.put("noPhone1", data.get("noPhone1"));
+            values.put("noPhone2", data.get("noPhone2"));
+            values.put("identificationIdkCheck", data.get("identificationIdkCheck"));
+            values.put("noHHNBGirlMarried", data.get("noHHNBGirlMarried"));
 
             values.put("HHHealthStatus", data.get("HHHealthStatus"));
             values.put("HHExpenditure", data.get("HHExpenditure"));
@@ -1420,7 +1424,29 @@ public class ClientAndroidInterface {
             values.put("HHNutritionalStatus", data.get("HHNutritionalStatus"));
             values.put("HHMentalPhysicalDisability", data.get("HHMentalPhysicalDisability"));
             values.put("HHNBGirlsMarried", data.get("HHNBGirlsMarried"));
+ 
+            values.put("HHMentalPhysicalDisabilityM", data.get("HHMentalPhysicalDisabilityM"));
+            values.put("HHMentalPhysicalDisabilityF", data.get("HHMentalPhysicalDisabilityF"));
+            values.put("HHMentalPhysicalDisabilityT", data.get("HHMentalPhysicalDisabilityT"));
+            values.put("HHMentalPhysicalDisabilityO1", data.get("HHMentalPhysicalDisabilityO1"));
+            values.put("HHMentalPhysicalDisabilityO2", data.get("HHMentalPhysicalDisabilityO2"));
+            values.put("HHMentalPhysicalDisabilityO3", data.get("HHMentalPhysicalDisabilityO3"));
+            values.put("HHMentalPhysicalDisabilityO4", data.get("HHMentalPhysicalDisabilityO4"));
 
+            // Child Data
+            values.put("ResidentialStatus1", data.get("ResidentialStatus1"));
+            values.put("ResidentialStatus2", data.get("ResidentialStatus2"));
+            values.put("ResidentialStatus3", data.get("ResidentialStatus3"));
+            values.put("ResidentialStatus4", data.get("ResidentialStatus4"));
+            values.put("ResidentialStatus5", data.get("ResidentialStatus5"));
+            values.put("ResidentialStatus6", data.get("ResidentialStatus6"));
+
+            values.put("CHSpecialNeeds1", data.get("CHSpecialNeeds1"));
+            values.put("CHSpecialNeeds2", data.get("CHSpecialNeeds2"));
+            values.put("CHSpecialNeeds3", data.get("CHSpecialNeeds3"));
+            values.put("CHSpecialNeeds4", data.get("CHSpecialNeeds4"));
+            values.put("CHSpecialNeeds5", data.get("CHSpecialNeeds5"));
+            values.put("CHSpecialNeeds6", data.get("CHSpecialNeeds6"));
 
             if (data.get("ddlFSP") != null)
                 values.put("HFID", Integer.valueOf(data.get("ddlFSP")));
@@ -1428,7 +1454,6 @@ public class ClientAndroidInterface {
             values.put("GeoLocation", "");
             if (data.get("ddlCurrentVillage") != null)
                 values.put("CurVillage", Integer.valueOf(data.get("ddlCurrentVillage")));
-//            if(isOffline == 1 || isOffline)
 
             Log.d("---- insuree Insert Data :", String.valueOf(data));
             Log.d("---- insuree Insert :", String.valueOf(values));
@@ -1715,8 +1740,8 @@ public class ClientAndroidInterface {
         String Query = "SELECT InsureeId, FamilyId, CHFID, LastName, OtherNames, DOB, Gender, Marital, isHead, IdentificationNumber, Phone, isOffline , PhotoPath, CardIssued, Relationship, Profession, Education, Email, TypeOfId, I.HFID, CurrentAddress,R.LocationId CurRegion, D.LocationId CurDistrict, W.LocationId CurWard,  I.CurVillage, HFR.LocationId FSPRegion, HFD.LocationId FSPDistrict, HF.HFLevel FSPCategory,\n" +
                 "IsHeadPhone1, IsHeadPhone2, AltPhone, NetWorkProvider1, NetWorkProvider2, PreferredPaiementMode, HeadStatus, LengthPresentLocation, MaleLivingHoushold, FemaleLivingHoushold, PersonLivingHoushold, HHNBChildrenLivingM, HHNBChildrenLivingF, HHNBChildrenLivingT, HHNBChildrenSchoolLivingM, HHNBChildrenSchoolLivingF, HHNBChildrenSchoolLivingT, HHNBChildrenCompleteSchoolLivingT, HHNBChildrenCompleteSchoolLivingM, HHNBChildrenCompleteSchoolLivingF, \n" +
                 "CHParentalStatus, HHNBChildrenDropSchoolLivingM, HHNBChildrenDropSchoolLivingF, HHNBChildrenDropSchoolLivingT, HHNBGirlsMarried, HHNBChildrenBirthCertifM, HHNBChildrenBirthCertifF, HHNBChildrenBirthCertifT, HHHealthStatus, HHExpenditure, HHExpenditurePerH, HHNutritionalStatus, HHMentalPhysicalDisability, HHMentalPhysicalDisabilityM, HHMentalPhysicalDisabilityF, HHMentalPhysicalDisabilityT, HHOriginRegion, HHOriginVillage, \n" +
-                "HHMentalPhysicalDisabilityO1, HHMentalPhysicalDisabilityO2, HHMentalPhysicalDisabilityO3, HHMentalPhysicalDisabilityO4, CHEnrolmentStatus, ChildSchoolName, CHEnrolmentWhichClass, CHEnrolmentOutofSchool, CHBirthCertificate, DateInconnueChild, CHEnrolmentScore, ResidentialStatus1, ResidentialStatus2, ResidentialStatus3, ResidentialStatus4, ResidentialStatus5, ResidentialStatus6, CHSpecialNeeds1, CHSpecialNeeds2, CHSpecialNeeds3, CHSpecialNeeds4, CHSpecialNeeds5, CHSpecialNeeds6,  \n" +
-                "CHBirthCertificate, CHEnrolmentStatus, ChildSchoolName, CHEnrolmentWhichClass, CHEnrolmentScore \n" +
+                "HHMentalPhysicalDisabilityO1, HHMentalPhysicalDisabilityO2, HHMentalPhysicalDisabilityO3, HHMentalPhysicalDisabilityO4, noPhone1, noPhone2, CHEnrolmentStatus, ChildSchoolName, CHEnrolmentWhichClass, CHEnrolmentOutofSchool, CHBirthCertificate, CHEnrolmentScore, ResidentialStatus1, ResidentialStatus2, ResidentialStatus3, ResidentialStatus4, ResidentialStatus5, ResidentialStatus6, CHSpecialNeeds1, CHSpecialNeeds2, CHSpecialNeeds3, CHSpecialNeeds4, CHSpecialNeeds5, CHSpecialNeeds6,  \n" +
+                "CHBirthCertificate, CHEnrolmentStatus, identificationIdkCheck, noHHNBGirlMarried, ChildSchoolName, CHEnrolmentWhichClass, CHEnrolmentScore, DOB_unknow \n" +
                 "FROM tblInsuree I\n" +
                 "LEFT OUTER JOIN tblLocations V ON V.LocationId = I.CurVillage\n" +
                 "LEFT OUTER JOIN tblLocations W ON W.LocationId = V.ParentLocationId\n" +
