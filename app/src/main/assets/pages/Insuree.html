@@ -46,9 +46,9 @@ In case of dispute arising out or in relation to the use of the program, it is s
             function changeRequiredFieldsForm(boolMandatory){
                 $("#txtChildLastName").prop("required", boolMandatory);
                 $("#ddlChildGender").prop("required", boolMandatory);
-                $("#ddlCHBirthCertificates").prop("required", boolMandatory);
-                $("#ddlCHEnrolmentStatus").prop("required", boolMandatory);
-                $("#ddlCHParentalStatus").prop("required", boolMandatory);
+                $("#CHBirthCertificate").prop("required", boolMandatory);
+                $("#CHEnrolmentStatus").prop("required", boolMandatory);
+                $("#CHParentalStatus").prop("required", boolMandatory);
                 $("#ddlRelationship").prop("required", boolMandatory);
                 $("#ddlCurrentVillage").prop("required", !boolMandatory);
                 $("#txtOtherNames").prop("required", !boolMandatory);
@@ -159,7 +159,7 @@ In case of dispute arising out or in relation to the use of the program, it is s
 
                 $(".LinkQuestionCH6-Yes").hide();
                 $(".LinkQuestionCH6-No").hide();
-                $("#ddlCHEnrolmentStatus").change(function(){
+                $("#CHEnrolmentStatus").change(function(){
                    if($(this).val()=="I"){
                     $(".LinkQuestionCH6-Yes").show();
                     $(".LinkQuestionCH6-No").hide();
@@ -629,17 +629,17 @@ In case of dispute arising out or in relation to the use of the program, it is s
 
         function fillCHEnrolmentOutofSchool(){
             var $cHEnrolmentOutofSchool = Android.getCHEnrolmentOutofSchool();
-            bindDropdown('ddlCHEnrolmentOutofSchool', $cHEnrolmentOutofSchool, 'Code', 'Status', null, null);
+            bindDropdown('CHEnrolmentOutofSchool', $cHEnrolmentOutofSchool, 'Code', 'Status', null, null);
         }
 
         function fillCHParentalStatus(){
             var $cHParentalStatus = Android.getCHParentalStatus();
-            bindDropdown('ddlCHParentalStatus', $cHParentalStatus, 'Code', 'Status', null, null);
+            bindDropdown('CHParentalStatus', $cHParentalStatus, 'Code', 'Status', null, null);
         }
 
         function fillChildBirthCertifStatus(){
             var $YesNo = Android.getYesNo();
-            bindDropdown('ddlCHBirthCertificates', $YesNo, 'value', 'key',null, Android.getString('SelectEnrollmentStatus'));
+            bindDropdown('CHBirthCertificate', $YesNo, 'value', 'key',null, Android.getString('SelectEnrollmentStatus'));
         }
 
         function fillnotRegisteredPhone(){
@@ -650,17 +650,17 @@ In case of dispute arising out or in relation to the use of the program, it is s
 
         function fillChildEnrollementProvider(){
             var $ChildBirthProvider = Android.getChildEnrollementProvider();
-            bindDropdown('ddlCHEnrolmentStatus', $ChildBirthProvider, 'Code', 'Status', null, null);
+            bindDropdown('CHEnrolmentStatus', $ChildBirthProvider, 'Code', 'Status', null, null);
         }
 
         function fillChildCurrentSchoolLevelProvider(){
             var $CHEnrolmentWhichClassProvider = Android.getCHEnrolmentWhichClassProvider();
-            bindDropdown('ddlCHEnrolmentWhichClass', $CHEnrolmentWhichClassProvider, 'Code', 'Status', null, null);
+            bindDropdown('CHEnrolmentWhichClass', $CHEnrolmentWhichClassProvider, 'Code', 'Status', null, null);
         }
 
         function fillChildCurrentSchoolPerfProvider(){
             var $childCurrentSchoolPerfProvider = Android.getchildCurrentSchoolPerfProvider();
-            bindDropdown('ddlCHEnrolmentScore', $childCurrentSchoolPerfProvider, 'Code', 'Status', null, null);
+            bindDropdown('CHEnrolmentScore', $childCurrentSchoolPerfProvider, 'Code', 'Status', null, null);
         }
 
         function fillBeneficiaryCard(){
@@ -1133,40 +1133,40 @@ In case of dispute arising out or in relation to the use of the program, it is s
             </div>
         </li>
 
-        <li id="CHBirthCertificate" class="clearFix">
+        <li class="clearFix">
             <span strName="CHBirthCertificate">2. Child has Birth Certificate</span>
-            <select id="ddlCHBirthCertificates" datafield="CHBirthCertificate" required></select>
+            <select id="CHBirthCertificate" datafield="CHBirthCertificate" required></select>
         </li>
 
-        <li id="CHEnrolmentStatus">
+        <li>
             <span strName="CHEnrolmentStatus">3. Child’s current enrollment status</span>
-            <select id="ddlCHEnrolmentStatus" datafield="CHEnrolmentStatus" required>
+            <select id="CHEnrolmentStatus" datafield="CHEnrolmentStatus" required>
             </select>
         </li>
 
-        <li id="CHEnrolmentPresentSchool" class="LinkQuestionCH6-Yes">
-            <span strName="CHEnrolmentPresentSchool">4. If Yes, name of present school</span>
-            <input type="text" maxlength="50" id="CHEnrolmentPresentSchool-test" dataField="ChildLastName"/>
+        <li class="LinkQuestionCH6-Yes">
+            <span strName="ChildSchoolName">4. If Yes, name of present school</span>
+            <input type="text" maxlength="50" id="ChildSchoolName" dataField="ChildSchoolName"/>
         </li>
 
-        <li id="CHEnrolmentWhichClass" class="LinkQuestionCH6-Yes">
+        <li class="LinkQuestionCH6-Yes">
             <span strName="CHEnrolmentWhichClass">5. If Yes, present class in school</span>
-            <select id="ddlCHEnrolmentWhichClass" datafield="CHEnrolmentWhichClass"></select>
+            <select id="CHEnrolmentWhichClass" datafield="CHEnrolmentWhichClass"></select>
         </li>
 
-        <li id="CHEnrolmentScore" class="LinkQuestionCH6-Yes">
+        <li class="LinkQuestionCH6-Yes">
             <span strName="CHEnrolmentScore">6. If Yes, what was the child’s performance in class last term? (Average Score from Report Booklet)</span>
-            <select id="ddlCHEnrolmentScore" datafield="CHEnrolmentScore"></select>
+            <select id="CHEnrolmentScore" datafield="CHEnrolmentScore"></select>
         </li>
 
-        <li id="CHEnrolmentOutofSchool" class="LinkQuestionCH6-No">
+        <li class="LinkQuestionCH6-No">
             <span strName="CHEnrolmentOutofSchool">7. If out-of-school, number of years not in school</span>
-            <select id="ddlCHEnrolmentOutofSchool" datafield="CHEnrolmentOutofSchool"></select>
+            <select id="CHEnrolmentOutofSchool" datafield="CHEnrolmentOutofSchool"></select>
         </li>
 
-        <li id="CHParentalStatus">
+        <li>
             <span strName="CHParentalStatus">8. Parental Status of Child: (Check as many as applicable)</span>
-            <select id="ddlCHParentalStatus" datafield="CHParentalStatus" required></select>
+            <select id="CHParentalStatus" datafield="CHParentalStatus" required></select>
         </li>
         <hr/>
         <li id="CHResidentialStatus">

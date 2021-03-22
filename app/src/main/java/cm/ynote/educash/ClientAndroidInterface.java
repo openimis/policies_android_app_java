@@ -1424,7 +1424,7 @@ public class ClientAndroidInterface {
             values.put("HHNutritionalStatus", data.get("HHNutritionalStatus"));
             values.put("HHMentalPhysicalDisability", data.get("HHMentalPhysicalDisability"));
             values.put("HHNBGirlsMarried", data.get("HHNBGirlsMarried"));
- 
+
             values.put("HHMentalPhysicalDisabilityM", data.get("HHMentalPhysicalDisabilityM"));
             values.put("HHMentalPhysicalDisabilityF", data.get("HHMentalPhysicalDisabilityF"));
             values.put("HHMentalPhysicalDisabilityT", data.get("HHMentalPhysicalDisabilityT"));
@@ -1447,6 +1447,14 @@ public class ClientAndroidInterface {
             values.put("CHSpecialNeeds4", data.get("CHSpecialNeeds4"));
             values.put("CHSpecialNeeds5", data.get("CHSpecialNeeds5"));
             values.put("CHSpecialNeeds6", data.get("CHSpecialNeeds6"));
+
+            values.put("CHBirthCertificate", data.get("CHBirthCertificate"));
+            values.put("CHEnrolmentStatus", data.get("CHEnrolmentStatus"));
+            values.put("ChildSchoolName", data.get("ChildSchoolName"));
+            values.put("CHEnrolmentWhichClass", data.get("CHEnrolmentWhichClass"));
+            values.put("CHEnrolmentScore", data.get("CHEnrolmentScore"));
+            values.put("CHEnrolmentOutofSchool", data.get("CHEnrolmentOutofSchool"));
+            values.put("CHParentalStatus", data.get("CHParentalStatus"));
 
             if (data.get("ddlFSP") != null)
                 values.put("HFID", Integer.valueOf(data.get("ddlFSP")));
