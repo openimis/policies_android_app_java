@@ -1188,7 +1188,7 @@ public class MainActivity extends AppCompatActivity
                                                             Toast.makeText(MainActivity.this,MainActivity.this.getResources().getString(R.string.Login_Successful),Toast.LENGTH_LONG).show();
                                                         }
                                                         if(page.equals("Reports")){
-                                                            Intent intent = new Intent(MainActivity.this, Enquire.class);
+                                                            Intent intent = new Intent(MainActivity.this, Reports.class);
                                                             startActivity(intent);
                                                             Toast.makeText(MainActivity.this,MainActivity.this.getResources().getString(R.string.Login_Successful),Toast.LENGTH_LONG).show();
                                                         }
