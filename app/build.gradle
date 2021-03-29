@@ -34,7 +34,8 @@ android {
     buildTypes {
         release {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            shrinkResources false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             debuggable = false
             if ( keystorePropertiesFile.exists() ) {
                 signingConfig signingConfigs.releaseConfig
@@ -50,18 +51,21 @@ android {
         buildConfigField "String", "API_BASE_URL", '"http://demo.openimis.org/rest/"'
         buildConfigField "boolean", "SHOW_CONTROL_NUMBER_MENU", 'false'
         buildConfigField "String", "RAR_PASSWORD", '")(#$1HsD"'
+        resValue "string", "app_name", "openIMIS Policies"
     }
     productFlavors {
         demoProd {
             applicationId "org.openimis.imispolicies.demoProd"
             buildConfigField "String", "API_BASE_URL", '"http://demo.openimis.org/rest/"'
             buildConfigField "String", "RAR_PASSWORD", '")(#$1HsD"'
+            resValue "string", "app_name", "Policies Demo"
             dimension = 'std'
         }
 
         demoRelease {
             applicationId "org.openimis.imispolicies.demoRelease"
             buildConfigField "String", "API_BASE_URL", '"http://release.openimis.org/rest/"'
+            resValue "string", "app_name", "Policies Release"
         }
 
         chfDev {
@@ -69,6 +73,7 @@ android {
             buildConfigField "String", "API_BASE_URL", '"http://chf-dev.swisstph-mis.ch/rest/"'
             buildConfigField "String", "RAR_PASSWORD", '")(#$1HsD"'
             buildConfigField "boolean", "SHOW_CONTROL_NUMBER_MENU", 'true'
+            resValue "string", "app_name", "Policies CHF DEV"
             dimension = 'std'
         }
         mvDev {
@@ -76,12 +81,14 @@ android {
             buildConfigField "String", "API_BASE_URL", '"http://imis-mv.swisstph-mis.ch/rest/"'
             buildConfigField "String", "RAR_PASSWORD", '")(#$1HsD"'
             buildConfigField "boolean", "SHOW_CONTROL_NUMBER_MENU", 'true'
+            resValue "string", "app_name", "Policies MV DEV"
             dimension = 'std'
         }
         bephaDev {
             applicationId "org.openimis.imispolicies.bepha"
             buildConfigField "String", "API_BASE_URL", '"http://149.210.235.40/devupgrade/rest/"'
             buildConfigField "String", "RAR_PASSWORD", '")(#$1HsD"'
+            resValue "string", "app_name", "Policies BEPHA DEV"
             dimension = 'std'
         }
         local {
@@ -93,11 +100,6 @@ android {
         }
     }
     sourceSets {
-        demoProd.java.srcDir 'src/demo/java'
-        demoProd.res.srcDir 'src/demo/res'
-
-        demoRelease.java.srcDir 'src/demo/java'
-        demoRelease.res.srcDir 'src/demo/res'
 
         chfDev.java.srcDir 'src/chf/java'
         chfDev.res.srcDir 'src/chf/res'
@@ -109,6 +111,11 @@ android {
 
         bephaDev.java.srcDir 'src/bepha/java'
         bephaDev.res.srcDir 'src/bepha/res'
+
+        [demoProd, demoRelease].each {
+            it.java.srcDir 'src/demo/java'
+            it.res.srcDir 'src/demo/res'
+        }
     }
 }
 
