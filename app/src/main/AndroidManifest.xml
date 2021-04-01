@@ -33,6 +33,7 @@
         android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
+        android:requestLegacyExternalStorage="true"
         android:hardwareAccelerated="true"
         tools:ignore="GoogleAppIndexingWarning"
         tools:replace="android:icon">
