@@ -262,7 +262,7 @@ public class FeedbackList extends AppCompatActivity {
         ca.unZipFeedbacksRenewals(filename);
         String fname = filename.substring(0, filename.indexOf("."));
         try {
-            String dir = Environment.getExternalStorageDirectory() + File.separator + "IMIS/";
+            String dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/IMIS/";
             File myFile = new File("/" + dir + "/" + fname + ".txt");//"/"+dir+"/MasterData.txt"
 //            BufferedReader myReader = new BufferedReader(
 //                    new InputStreamReader(

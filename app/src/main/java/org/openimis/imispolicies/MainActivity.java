@@ -123,7 +123,7 @@ public class MainActivity extends AppCompatActivity
     final String VersionField = "AppVersionImis";
     final String ApkFileLocation = _General.getDomain() + "/Apps/IMIS.apk";
     final int SIMPLE_NOTFICATION_ID = 98029;
-    final static String Path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/IMIS/";
+    final static String Path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/IMIS/";
 
     NotificationManager mNotificationManager;
     Vibrator vibrator;
@@ -167,7 +167,7 @@ public class MainActivity extends AppCompatActivity
          /*   if (!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
                 //handle case of no SDCARD present
             } else {
-                String dir = Environment.getExternalStorageDirectory() + File.separator + "scanned";
+                String dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/scanned";
                 //create folder
                 File folder = new File(dir); //folder name
                 folder.mkdirs();
@@ -358,7 +358,7 @@ public class MainActivity extends AppCompatActivity
             //setTitleColor(getResources().getColor(R.color.Red));
 //        }
 
-        String Path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/IMIS/";
+        String Path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/IMIS/";
         //Here we are creating a directory
         File MyDir = new File(Path);
         MyDir.mkdir();
@@ -396,8 +396,8 @@ public class MainActivity extends AppCompatActivity
 
     }
     public void CreateFolders(){
-        String MainPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/IMIS/";
-        String Path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/IMIS/Database";
+        String MainPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/IMIS/";
+        String Path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/IMIS/Database";
         //Here we are creating a directory
         File MyDir = new File(MainPath);
         File MainDir = new File(Path);
@@ -727,7 +727,7 @@ public class MainActivity extends AppCompatActivity
         ca.unZipWithPassword(fileName, password);
         String fname = "MasterData.txt";
         try {
-            String dir = Environment.getExternalStorageDirectory() + File.separator + "IMIS/Database/";
+            String dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/IMIS/Database/";
             File myFile = new File("/" + dir + "/" + fname + "");//"/"+dir+"/MasterData.txt"
 //            BufferedReader myReader = new BufferedReader(
 //                    new InputStreamReader(
@@ -754,7 +754,7 @@ public class MainActivity extends AppCompatActivity
         ca.unZip(filename);
         String fname = "MasterData.txt";
         try {
-            String dir = Environment.getExternalStorageDirectory() + File.separator + "IMIS/Database/";
+            String dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/IMIS/Database/";
             File myFile = new File("/" + dir + "/" + fname + "");//"/"+dir+"/MasterData.txt"
 //            BufferedReader myReader = new BufferedReader(
 //                    new InputStreamReader(

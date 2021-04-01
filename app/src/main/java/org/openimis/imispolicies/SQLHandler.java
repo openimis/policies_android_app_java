@@ -464,7 +464,7 @@ public class SQLHandler extends SQLiteOpenHelper {
 
     private void openDatabase() {
         String dbPath = mContext.getDatabasePath(DBNAME).getPath();
-        String dbOfflinePath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/IMIS/" + OFFLINEDBNAME;
+        String dbOfflinePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/IMIS/" + OFFLINEDBNAME;
         if (mDatabase != null && mDatabase.isOpen()) {
             return;
         }
@@ -557,7 +557,7 @@ public class SQLHandler extends SQLiteOpenHelper {
         Calendar cal = Calendar.getInstance();
         String d = format.format(cal.getTime());
 
-        String Path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/IMIS/";
+        String Path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/IMIS/";
         //Here we are creating a directory
         File MyDir = new File(Path);
         MyDir.mkdir();

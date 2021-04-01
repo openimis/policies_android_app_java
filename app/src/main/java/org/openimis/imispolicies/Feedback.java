@@ -81,8 +81,8 @@ public class Feedback extends AppCompatActivity {
     private File FeedbackXML;
     private File FeedbackJSON;
     private String FileName;
-     private String OfficerCode;
-    private final String Path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/IMIS/";
+    private String OfficerCode;
+    private final String Path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/IMIS/";
     private int msgType;
     private ClientAndroidInterface ca;
     @Override
@@ -302,7 +302,7 @@ public class Feedback extends AppCompatActivity {
             FullObject.put("feedback",FeedbackObject);
 
             try {
-                String dir = Environment.getExternalStorageDirectory() + File.separator + "IMIS/";
+                String dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/IMIS/";
                 FileOutputStream fOut = new FileOutputStream(dir+FileName);
                 OutputStreamWriter myOutWriter =new OutputStreamWriter(fOut);
                 myOutWriter.append(FullObject.toString());

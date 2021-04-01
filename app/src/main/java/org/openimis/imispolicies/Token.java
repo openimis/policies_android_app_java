@@ -19,7 +19,7 @@ public class Token {
         if (!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
             //handle case of no SDCARD present
         } else {
-            String dir = Environment.getExternalStorageDirectory() + File.separator + "IMIS/Authentications/";
+            String dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/IMIS/Authentications/";
             //create folder
             File folder = new File(dir); //folder name
             folder.mkdirs();
@@ -42,7 +42,7 @@ public class Token {
     public String getTokenText(){
         String aBuffer = "";
         try {
-            String dir = Environment.getExternalStorageDirectory() + File.separator + "IMIS/Authentications/";
+            String dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/IMIS/Authentications/";
             File myFile = new File("/"+dir+"/token.txt");
             FileInputStream fIn = new FileInputStream(myFile);
             BufferedReader myReader = new BufferedReader(new InputStreamReader(fIn));

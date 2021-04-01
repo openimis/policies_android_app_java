@@ -91,7 +91,7 @@ public class Renewal extends AppCompatActivity {
     private String OfficerCode;
 
     private int LocationId;
-    private final static String Path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/IMIS/";
+    private final static String Path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/IMIS/";
 
     private int RenewalId;
     private String RenewalUUID;
@@ -460,7 +460,7 @@ public class Renewal extends AppCompatActivity {
             FullObject.put("Policy",RenewalObject);
 
             try {
-                String dir = Environment.getExternalStorageDirectory() + File.separator + "IMIS/";
+                String dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/IMIS/";
                 FileOutputStream fOut = new FileOutputStream(dir+FileName);
                 OutputStreamWriter myOutWriter =new OutputStreamWriter(fOut);
                 myOutWriter.append(FullObject.toString());
