@@ -763,16 +763,7 @@ In case of dispute arising out or in relation to the use of the program, it is s
 </div>
 <div>
     <ul class="ulEntry">
-        <li>
-            <input type="hidden" datafield="InsureeId" id="hfInsureeId" value="0"/>
-            <input type="hidden" datafld="isOffline" id="hfIsOffline" value="."/>
-            <input type="hidden" datafield="isHead" id="hfisHead" value="-1"/>
-            <span strName="InsuranceNumber">Beneficiary Number</span>
-            <div style="display:flex">
-                <input type="text" maxlength="12" id="txtInsuranceNumber" dataField="CHFID" onkeyup="getImage()" min="0" required/>
-                <img src="" alt="Scan" id="btnScan" style="width:50px !important"  />
-            </div>
-        </li>
+
         <li>
             <span strName="LastName">Last Name</span>
             <input type="text" maxlength="50" id="txtLastName" dataField="LastName" required/>
@@ -821,21 +812,21 @@ In case of dispute arising out or in relation to the use of the program, it is s
     <ul class="ulEntry tabHof" id="InfoHOF">
 
         <li>
-            <span strName="OtherNames">2-2. Other Names</span>
+            <span strName="2-2. Other Names">2-2. Other Names</span>
             <input type="text" maxlength="50" id="txtOtherNames" dataField="OtherNames" required/>
         </li>
 
         <li id="MaritalStatus">
-            <span strName="MaritalStatus">2-5. Marital Status</span>
+            <span strName="2-5. Marital Status">2-5. Marital Status</span>
             <select id="ddlMaritalStatus" datafield="Marital"></select>
         </li>
         <li id="CurrentAddress">
-            <span strName="CurrentAddress">2-6. Current Address</span>
+            <span strName="2-6. Current Address">2-6. Current Address</span>
             <textarea id="txtCurrentAddress" maxlength="200" datafield="CurrentAddress"></textarea>
         </li>
 
         <li class="clearFix">
-            <span strName="PhoneNumber">2-8. Phone number</span>
+            <span strName="2-8. Phone number">2-8. Phone number</span>
             <div>
                 <div id="noPhone1-idk">
                     <input type="checkbox" datafield="noPhone1" id="noPhone1" name="noPhone1" class="left">
@@ -902,6 +893,16 @@ In case of dispute arising out or in relation to the use of the program, it is s
     <hr/>
     <a href="#HohVulnerabilityTab" id="HohVulnerabilityTab" class="NavigationTab">Household Vulnerability</a>
     <ul class="ulEntry tabHof" id="VulnerabilityHOF">
+        <li>
+            <input type="hidden" datafield="InsureeId" id="hfInsureeId" value="0"/>
+            <input type="hidden" datafld="isOffline" id="hfIsOffline" value="."/>
+            <input type="hidden" datafield="isHead" id="hfisHead" value="-1"/>
+            <span strName="InsuranceNumber">Beneficiary Number</span>
+            <div style="display:flex">
+                <input type="text" maxlength="12" id="txtInsuranceNumber" dataField="CHFID" onkeyup="getImage()" min="0" required/>
+                <img src="" alt="Scan" id="btnScan" style="width:50px !important"  />
+            </div>
+        </li>
         <li id="Profession">
             <span strName="Profession">3-1. Occupation of Head of Household</span>
             <select id="ddlProfession" datafield="Profession"></select>
@@ -1099,23 +1100,6 @@ In case of dispute arising out or in relation to the use of the program, it is s
         </li>
 
         <hr/>
-
-        <li id="FSPRegion"
-            <span strName="FSPRegion">Region</span>
-            <select id="ddlFSPRegion" datafield="FSPRegion"></select>
-        </li>
-        <li id="FSPDistrict">
-            <span strName="FSPDistrict">District</span>
-            <select id="ddlFSPDistrict" datafield="FSPDistrict"></select>
-        </li>
-        <li id="FSPCategory">
-            <span strName="FSPCategory">Level</span>
-            <select id="ddlFSPCategory" datafield="FSPCategory"></select>
-        </li>
-        <li id="FSP">
-            <span strName="FSP">Financial Point</span>
-            <select id="ddlFSP" datafield="HFID"></select>
-        </li>
     </ul>
 </div>
 <div id="Children" class="clearFix">
