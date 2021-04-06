@@ -39,7 +39,7 @@ demoProd {
 	buildConfigField "String", "API_BASE_URL", '"http://demo.openimis.org/rest/"'
 	buildConfigField "String", "RAR_PASSWORD", '")(#$1HsD"'
 	buildConfigField "boolean", "SHOW_CONTROL_NUMBER_MENU", 'false'
-	resValue "string", "app_name", "Policies Demo"
+	resValue "string", "app_name_policies", "Policies Demo"
 	dimension = 'std'
 }
 ```
@@ -50,7 +50,7 @@ Parameters:
 * ```API_BASE_URL``` represents the openIMIS REST API URL (based on DNS or IP address) to connect to. 
 * ```RAR_PASSWORD``` represents the password to be used for the offline extract. 
 * ```SHOW_CONTROL_NUMBER_MENU``` allow to show or hide the Control Number menu item in case the implementation does not implement the ePayment module. 
-* ```app_name``` is a resource string allowing to change the name of the application. 
+* ```app_name_policies``` is a resource string allowing to change the name of the application.
 
 Escape procedures can be configured and language resource files can be changed. Please follow the ```sourceSets``` record. Look in ```app\src\demo``` folder for an example. 
 
