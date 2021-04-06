@@ -10,8 +10,8 @@ if ( keystorePropertiesFile.exists() ) {
 }
 
 android {
-    compileSdkVersion 28
-    buildToolsVersion '28.0.3'
+    compileSdkVersion 30
+    buildToolsVersion '30.0.3'
     if ( keystorePropertiesFile.exists() ) {
         signingConfigs {
             releaseConfig {
@@ -51,21 +51,21 @@ android {
         buildConfigField "String", "API_BASE_URL", '"http://demo.openimis.org/rest/"'
         buildConfigField "boolean", "SHOW_CONTROL_NUMBER_MENU", 'false'
         buildConfigField "String", "RAR_PASSWORD", '")(#$1HsD"'
-        resValue "string", "app_name", "openIMIS Policies"
+        resValue "string", "app_name_policies", "Policies"
     }
     productFlavors {
         demoProd {
             applicationId "org.openimis.imispolicies.demoProd"
             buildConfigField "String", "API_BASE_URL", '"http://demo.openimis.org/rest/"'
             buildConfigField "String", "RAR_PASSWORD", '")(#$1HsD"'
-            resValue "string", "app_name", "Policies Demo"
+            resValue "string", "app_name_policies", "Policies Demo"
             dimension = 'std'
         }
 
         demoRelease {
             applicationId "org.openimis.imispolicies.demoRelease"
             buildConfigField "String", "API_BASE_URL", '"http://release.openimis.org/rest/"'
-            resValue "string", "app_name", "Policies Release"
+            resValue "string", "app_name_policies", "Policies Release"
         }
 
         chfDev {
@@ -73,7 +73,7 @@ android {
             buildConfigField "String", "API_BASE_URL", '"http://chf-dev.swisstph-mis.ch/rest/"'
             buildConfigField "String", "RAR_PASSWORD", '")(#$1HsD"'
             buildConfigField "boolean", "SHOW_CONTROL_NUMBER_MENU", 'true'
-            resValue "string", "app_name", "Policies CHF DEV"
+            resValue "string", "app_name_policies", "Policies CHF DEV"
             dimension = 'std'
         }
         mvDev {
@@ -81,20 +81,21 @@ android {
             buildConfigField "String", "API_BASE_URL", '"http://imis-mv.swisstph-mis.ch/rest/"'
             buildConfigField "String", "RAR_PASSWORD", '")(#$1HsD"'
             buildConfigField "boolean", "SHOW_CONTROL_NUMBER_MENU", 'true'
-            resValue "string", "app_name", "Policies MV DEV"
+            resValue "string", "app_name_policies", "Policies MV DEV"
             dimension = 'std'
         }
         bephaDev {
             applicationId "org.openimis.imispolicies.bepha"
             buildConfigField "String", "API_BASE_URL", '"http://149.210.235.40/devupgrade/rest/"'
             buildConfigField "String", "RAR_PASSWORD", '")(#$1HsD"'
-            resValue "string", "app_name", "Policies BEPHA DEV"
+            resValue "string", "app_name_policies", "Policies BEPHA DEV"
             dimension = 'std'
         }
         local {
             applicationId "org.openimis.imispolicies.local"
             buildConfigField "String", "API_BASE_URL", '"http://10.0.2.2:35788/"'
             buildConfigField "String", "RAR_PASSWORD", '")(#$1HsD"'
+            resValue "string", "app_name_policies", "Policies Local"
             dimension = 'std'
             versionCode = gitVersionCodeTime
         }
