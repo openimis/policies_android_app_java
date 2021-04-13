@@ -123,7 +123,7 @@ public class ClientAndroidInterface {
     private Global global;
     private int Uploaded;
     private HashMap<String, String> controls = new HashMap<>();
-    private final String Path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/IMIS/";
+    private String Path;
 
 
     private File[] files;
@@ -166,9 +166,11 @@ public class ClientAndroidInterface {
 
     ClientAndroidInterface(Context c) {
         mContext = c;
+        global = (Global) mContext.getApplicationContext();
         sqlHandler = new SQLHandler(c);
         getControls();
         SQLiteDatabase database = sqlHandler.getReadableDatabase();
+        Path = global.getMainDirectory();
         filePath = database.getPath();
         database.close();
         // activity = (Activity) c.getApplicationContext();
@@ -178,7 +180,6 @@ public class ClientAndroidInterface {
 
     @JavascriptInterface
     public void SetUrl(String Url) {
-        global = (Global) mContext.getApplicationContext();
         global.setCurrentUrl(Url);
     }
 
@@ -3694,14 +3695,13 @@ public class ClientAndroidInterface {
         Calendar cal = Calendar.getInstance();
         String d = format.format(cal.getTime());*/
 
-        String targetPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/IMIS/Family/";
+        String targetPath = global.getSubdirectory("Family");
         File file = new File(targetPath, fname);
         file.delete();
     }
 
     public void deleteUnzippedPhotos() {
-        global = (Global) mContext.getApplicationContext();
-        String targetPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/IMIS/Photos";
+        String targetPath = global.getSubdirectory("Photos");
         File folder = new File(targetPath);
         for (int i = 0; i < folder.listFiles().length; i++) {
             if (folder.listFiles()[i].isFile()) {
@@ -3713,11 +3713,8 @@ public class ClientAndroidInterface {
 
     public InsureeImages[] FamilyPictures(JSONArray insurees, int CallerId) throws IOException {
 
-        String Path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/IMIS/Photos";
+        String Path = global.getSubdirectory("Photos");
         //Here we are creating a directory
-        File MyDir = new File(Path);
-        MyDir.mkdir();
-
 
         InsureeImages[] images = new InsureeImages[insurees.length()];
 
@@ -3815,15 +3812,12 @@ public class ClientAndroidInterface {
         return ( data.getData() );
     }*/
 
-    @TargetApi(Build.VERSION_CODES.KITKAT)
+    //@TargetApi(Build.VERSION_CODES.KITKAT)
     public static void copy(String name, byte[] data) throws IOException {
         OutputStream out;
-        String root = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/IMIS/";
-        File createDir = new File(root + "Photos" + File.separator);
-        if (!createDir.exists()) {
-            createDir.mkdir();
-        }
-        File file = new File(root + "Photos" + File.separator + name);
+        String photosDir = new Global().getSubdirectory("Photos");
+
+        File file = new File(photosDir + File.separator + name);
         file.createNewFile();
         out = new FileOutputStream(file);
 
@@ -3832,17 +3826,10 @@ public class ClientAndroidInterface {
     }
 
     public void xmlWriter(String ImgName, byte[] imgcontent) throws IOException {
-        String Path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/IMIS/";
-        //Here we are creating a directory
-        File MyDir = new File(Path);
-        MyDir.mkdir();
-
-        File Dir = new File(Path + "EnrollmentXML");
-        Dir.mkdir();
-
+        File Dir = new File(global.getSubdirectory("EnrolmentXML"));
 
         //Here we are giving name to the XML file
-        String FileName = "EnrollmentXml.xml";
+        String FileName = "EnrolmentXml.xml";
 
         //Here we are creating file in that directory
         File EnrollmentXML = new File(Dir, FileName);
@@ -3879,8 +3866,8 @@ public class ClientAndroidInterface {
         String d = format.format(cal.getTime());
         String dzip = formatZip.format(cal.getTime());
 
-        String targetPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/IMIS/Enrolment/Enrolment_" + global.getOfficerCode() + "_" + d + ".xml";
-        String zipFilePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/IMIS/Enrolment/Enrolment_" + global.getOfficerCode() + "_" + dzip + ".rar";
+        String targetPath = global.getSubdirectory("Enrolment") + File.separator + "Enrolment_" + global.getOfficerCode() + "_" + d + ".xml";
+        String zipFilePath = global.getSubdirectory("Enrolment") + File.separator + "Enrolment_" + global.getOfficerCode() + "_" + dzip + ".rar";
         //String unzippedFolderPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/IMIS/Enrolment/Enrolment_"+global.getOfficerCode()+"_"+d+".xml";
         String password = getRarPwd();
 
@@ -3896,9 +3883,9 @@ public class ClientAndroidInterface {
         String d = format.format(cal.getTime());
         String dzip = formatZip.format(cal.getTime());
 
-        String targetPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/IMIS/Photos/";
-        String targetPathFamily = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/IMIS/Family/";
-        String zipFilePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/IMIS/Enrolment/Enrolment_" + global.getOfficerCode() + "_" + dzip + ".rar";
+        String targetPath = global.getSubdirectory("Photos");
+        String targetPathFamily = global.getSubdirectory("Family");
+        String zipFilePath = global.getSubdirectory("Enrolment") + File.separator + "Enrolment_" + global.getOfficerCode() + "_" + dzip + ".rar";
         //String unzippedFolderPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/IMIS/Photos_"+global.getOfficerCode()+"_"+d+"";
         String password = getRarPwd();
 
@@ -3921,8 +3908,8 @@ public class ClientAndroidInterface {
     }
 
     public boolean unZipWithPassword(String fileName, String password) {
-        String targetPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/IMIS/Database/" + fileName;
-        String unzippedFolderPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/IMIS/Database/";
+        String targetPath = global.getSubdirectory("Database") + File.separator + fileName;
+        String unzippedFolderPath = global.getSubdirectory("Database");
         //String unzippedFolderPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/IMIS/Enrolment/Enrolment_"+global.getOfficerCode()+"_"+d+".xml";
         //here we not don't have password set yet so we pass password from Edit Text rar input
         try {
@@ -3934,8 +3921,8 @@ public class ClientAndroidInterface {
     }
 
     public boolean unZip(String FileName) {
-        String targetPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/IMIS/Database/" + FileName;
-        String unzippedFolderPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/IMIS/Database/";
+        String targetPath = global.getSubdirectory("Database") + File.separator + FileName;
+        String unzippedFolderPath = global.getSubdirectory("Database");
         //String unzippedFolderPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/IMIS/Enrolment/Enrolment_"+global.getOfficerCode()+"_"+d+".xml";
         String password = getRarPwd();
 
@@ -3948,8 +3935,8 @@ public class ClientAndroidInterface {
     }
 
     public boolean unZipFeedbacksRenewals(String FileName) {
-        String targetPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/IMIS/" + FileName;
-        String unzippedFolderPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/IMIS/";
+        String targetPath = global.getSubdirectory("Database") + File.separator + FileName;
+        String unzippedFolderPath = global.getSubdirectory("Database");
         //String unzippedFolderPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/IMIS/Enrolment/Enrolment_"+global.getOfficerCode()+"_"+d+".xml";
 
         String password = getRarPwd();
@@ -3971,8 +3958,8 @@ public class ClientAndroidInterface {
         String d = format.format(cal.getTime());
 
 
-        String targetPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/IMIS/";
-        String zipFilePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/IMIS/" + "Master" + FileType + ".rar";
+        String targetPath = global.getMainDirectory();
+        String zipFilePath = global.getMainDirectory() + File.separator + "Master" + FileType + ".rar";
         //String unzippedFolderPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/IMIS/Photos_"+global.getOfficerCode()+"_"+d+"";
 
         String password = getRarPwd();
@@ -4412,8 +4399,8 @@ public class ClientAndroidInterface {
     public String getFeedRenewalText(String fileName) {
         String aBuffer = "";
         try {
-            String dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/IMIS/";
-            File myFile = new File("/" + dir + "/" + fileName + "");//"/"+dir+"/MasterData.txt"
+            String dir = global.getMainDirectory();
+            File myFile = new File(dir,fileName);//"/"+dir+"/MasterData.txt"
 //            BufferedReader myReader = new BufferedReader(
 //                    new InputStreamReader(
 //                            new FileInputStream(myFile), "UTF32"));
@@ -5229,8 +5216,8 @@ public class ClientAndroidInterface {
     public void clearBuffer() {
 // empty the current content
         try {
-            String dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/scanned";
-            FileOutputStream fOut = new FileOutputStream(dir + "/values.txt");
+            String dir = global.getSubdirectory("scanned");
+            FileOutputStream fOut = new FileOutputStream(new File(dir , "/values.txt"));
             OutputStreamWriter myOutWriter = new OutputStreamWriter(fOut);
             myOutWriter.append("");
             myOutWriter.close();
@@ -5243,8 +5230,8 @@ public class ClientAndroidInterface {
     @JavascriptInterface
     public String getInsuranceNo() {
         try {
-            String dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/scanned";
-            File myFile = new File("/" + dir + "/values.txt");
+            String dir = global.getSubdirectory("scanned");;
+            File myFile = new File(dir , "values.txt");
             FileInputStream fIn = new FileInputStream(myFile);
             BufferedReader myReader = new BufferedReader(new InputStreamReader(fIn));
             aBuffer = myReader.readLine();
@@ -5276,10 +5263,7 @@ public class ClientAndroidInterface {
     }
 
     public void clearXml() {
-        String dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/scanned";
-        //create folder
-        File folder = new File(dir); //folder name
-        folder.mkdirs();
+        String dir = global.getSubdirectory("scanned");
 
         //create file
         File file = new File(dir, "values.txt");

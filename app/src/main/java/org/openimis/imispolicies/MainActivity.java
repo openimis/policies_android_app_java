@@ -42,6 +42,7 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Vibrator;
@@ -87,6 +88,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 
+import static android.provider.Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION;
 import static java.security.AccessController.getContext;
 
 
@@ -123,7 +125,6 @@ public class MainActivity extends AppCompatActivity
     final String VersionField = "AppVersionImis";
     final String ApkFileLocation = _General.getDomain() + "/Apps/IMIS.apk";
     final int SIMPLE_NOTFICATION_ID = 98029;
-    final static String Path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/IMIS/";
 
     NotificationManager mNotificationManager;
     Vibrator vibrator;
@@ -167,7 +168,7 @@ public class MainActivity extends AppCompatActivity
          /*   if (!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
                 //handle case of no SDCARD present
             } else {
-                String dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/scanned";
+                String dir = global.getSubdirectory("scanned");
                 //create folder
                 File folder = new File(dir); //folder name
                 folder.mkdirs();
@@ -358,16 +359,6 @@ public class MainActivity extends AppCompatActivity
             //setTitleColor(getResources().getColor(R.color.Red));
 //        }
 
-        String Path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/IMIS/";
-        //Here we are creating a directory
-        File MyDir = new File(Path);
-        MyDir.mkdir();
-
-        File Dir = new File(Path + "Enrolment");
-        File Dir1 = new File(Path + "Photos");
-
-        Dir.mkdir();
-        Dir1.mkdir();
 
         hideControlNumberMenuItem();
 
@@ -392,17 +383,14 @@ public class MainActivity extends AppCompatActivity
 
         }
         else Login.setText(Lg);
-
-
     }
-    public void CreateFolders(){
-        String MainPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/IMIS/";
-        String Path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/IMIS/Database";
-        //Here we are creating a directory
-        File MyDir = new File(MainPath);
-        File MainDir = new File(Path);
-        MyDir.mkdir();
-        MainDir.mkdir();
+
+    public void CreateFolders() {
+        global.getMainDirectory();
+        String[] subdirectories = {"Enrolment", "Photos", "Database", "Authentications", "AcceptedFeedback", "RejectedFeedback", "AcceptedRenewal", "RejectedRenewal", "Family","EnrolmentXML"};
+        for (String dir : subdirectories) {
+            global.getSubdirectory(dir);
+        }
     }
 
     private void loadLanguages(){
@@ -727,8 +715,8 @@ public class MainActivity extends AppCompatActivity
         ca.unZipWithPassword(fileName, password);
         String fname = "MasterData.txt";
         try {
-            String dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/IMIS/Database/";
-            File myFile = new File("/" + dir + "/" + fname + "");//"/"+dir+"/MasterData.txt"
+            String dir = global.getSubdirectory("Database");
+            File myFile = new File(dir,fname);//"/"+dir+"/MasterData.txt"
 //            BufferedReader myReader = new BufferedReader(
 //                    new InputStreamReader(
 //                            new FileInputStream(myFile), "UTF32"));
@@ -754,8 +742,8 @@ public class MainActivity extends AppCompatActivity
         ca.unZip(filename);
         String fname = "MasterData.txt";
         try {
-            String dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/IMIS/Database/";
-            File myFile = new File("/" + dir + "/" + fname + "");//"/"+dir+"/MasterData.txt"
+            String dir = global.getSubdirectory("Database");
+            File myFile = new File(dir,fname);//"/"+dir+"/MasterData.txt"
 //            BufferedReader myReader = new BufferedReader(
 //                    new InputStreamReader(
 //                            new FileInputStream(myFile), "UTF32"));
@@ -1118,6 +1106,18 @@ public class MainActivity extends AppCompatActivity
         String[] PERMISSIONS = {Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.VIBRATE, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.INTERNET, Manifest.permission.CAMERA, Manifest.permission.ACCESS_NETWORK_STATE, Manifest.permission.ACCESS_WIFI_STATE, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.CHANGE_WIFI_STATE};
         if(!hasPermissions(this, PERMISSIONS)){
             ActivityCompat.requestPermissions(this, PERMISSIONS, PERMISSION_ALL);
+        }
+
+        // Ask for "Manage External Storage" permission, required in Android 11
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            String[] Android11Permissions = {Manifest.permission.MANAGE_EXTERNAL_STORAGE};
+            if(!hasPermissions(this, Android11Permissions)){
+                ActivityCompat.requestPermissions(this, Android11Permissions, PERMISSION_ALL);
+                if(!Environment.isExternalStorageManager()) {
+                    Intent intent = new Intent(ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
+                    startActivity(intent);
+                }
+            }
         }
     }
     public static boolean hasPermissions(Context context, String... permissions) {
