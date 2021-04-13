@@ -73,6 +73,8 @@ import org.openimis.imispolicies.R;
 public class Renewal extends AppCompatActivity {
 
     private General _General = new General(AppInformation.DomainInfo.getDomain());
+    private Global global;
+
     private ClientAndroidInterface ca;
     private EditText etOfficer;
     private EditText etCHFID;
@@ -91,7 +93,6 @@ public class Renewal extends AppCompatActivity {
     private String OfficerCode;
 
     private int LocationId;
-    private final static String Path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/IMIS/";
 
     private int RenewalId;
     private String RenewalUUID;
@@ -107,6 +108,7 @@ public class Renewal extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        global = (Global) getApplicationContext();
 
         setContentView(R.layout.renewal);
 
@@ -349,14 +351,7 @@ public class Renewal extends AppCompatActivity {
     private void WriteXML() {
         try {
             //Create All directories
-            File MyDir = new File(Path);
-            MyDir.mkdir();
-
-            File DirRejected = new File(Path + "RejectedRenewal");
-            DirRejected.mkdir();
-
-            File DirAccepted = new File(Path + "AcceptedRenewal");
-            DirAccepted.mkdir();
+            File MyDir = new File(global.getMainDirectory());
 
             //Create File name
             @SuppressLint("SimpleDateFormat") SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
@@ -427,9 +422,7 @@ public class Renewal extends AppCompatActivity {
     public String WriteJSON(){
 
         //Create all the directories required
-        File MyDir = new File(Path);
-        MyDir.mkdir();
-
+        File MyDir = new File(global.getMainDirectory());
 
         //Create a file name
         SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
@@ -460,8 +453,7 @@ public class Renewal extends AppCompatActivity {
             FullObject.put("Policy",RenewalObject);
 
             try {
-                String dir = Environment.getExternalStorageDirectory() + File.separator + "IMIS/";
-                FileOutputStream fOut = new FileOutputStream(dir+FileName);
+                FileOutputStream fOut = new FileOutputStream(PolicyJSON);
                 OutputStreamWriter myOutWriter =new OutputStreamWriter(fOut);
                 myOutWriter.append(FullObject.toString());
                 myOutWriter.close();
@@ -487,12 +479,12 @@ public class Renewal extends AppCompatActivity {
     }
 
     private void MoveFile(File file) {
-        switch (result) {
+        switch(result){
             case 1:
-                file.renameTo(new File(Path + "AcceptedRenewal/" + file.getName()));
+                file.renameTo(new File(global.getSubdirectory("AcceptedRenewal"),file.getName()));
                 break;
             case 2:
-                file.renameTo(new File(Path + "RejectedRenewal/" + file.getName()));
+                file.renameTo(new File(global.getSubdirectory("RejectedRenewal"),file.getName()));
                 break;
         }
     }

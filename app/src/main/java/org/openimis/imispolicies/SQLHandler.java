@@ -57,6 +57,7 @@ public class SQLHandler extends SQLiteOpenHelper {
     private static final String OFFLINEDBNAME = "ImisData.db3";
     public Boolean isPrivate = true;
     private Context mContext;
+    private Global global;
     private SQLiteDatabase mDatabase;
     private static final int DATABASE_VERSION = 2;
     int count = 1;
@@ -96,6 +97,7 @@ public class SQLHandler extends SQLiteOpenHelper {
     public SQLHandler(Context context) {
         super(context, DBNAME, null, DATABASE_VERSION);
         this.mContext = context;
+        global = (Global) mContext.getApplicationContext();
     }
 
 
@@ -464,7 +466,7 @@ public class SQLHandler extends SQLiteOpenHelper {
 
     private void openDatabase() {
         String dbPath = mContext.getDatabasePath(DBNAME).getPath();
-        String dbOfflinePath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/IMIS/" + OFFLINEDBNAME;
+        String dbOfflinePath = global.getMainDirectory() + File.separator + OFFLINEDBNAME;
         if (mDatabase != null && mDatabase.isOpen()) {
             return;
         }
@@ -557,12 +559,7 @@ public class SQLHandler extends SQLiteOpenHelper {
         Calendar cal = Calendar.getInstance();
         String d = format.format(cal.getTime());
 
-        String Path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/IMIS/";
-        //Here we are creating a directory
-        File MyDir = new File(Path);
-        MyDir.mkdir();
-
-        File Dir = new File(Path + "Family");
+        File Dir = new File(global.getSubdirectory("Family"));
         Dir.mkdir();
 
 

@@ -241,8 +241,8 @@ public class RenewList extends AppCompatActivity {
         ca.unZipFeedbacksRenewals(filename);
         String fname = filename.substring(0, filename.indexOf("."));
         try {
-            String dir = Environment.getExternalStorageDirectory() + File.separator + "IMIS/";
-            File myFile = new File("/" + dir + "/" + fname + ".txt");//"/"+dir+"/MasterData.txt"
+            String dir = global.getSubdirectory("Database");
+            File myFile = new File(dir,fname);//"/"+dir+"/MasterData.txt"
 //            BufferedReader myReader = new BufferedReader(
 //                    new InputStreamReader(
 //                            new FileInputStream(myFile), "UTF32"));

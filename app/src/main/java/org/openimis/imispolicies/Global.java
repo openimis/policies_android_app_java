@@ -26,22 +26,33 @@
 package org.openimis.imispolicies;
 
 import android.app.Application;
+import android.os.Environment;
+import android.util.Log;
 
+import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
+
+import static org.openimis.imispolicies.BuildConfig.APP_DIR;
 
 public class Global extends Application {
     private String OfficerCode;
     private String OfficerName;
     private int UserId;
-    private  int OfficerId;
+    private int OfficerId;
 
     private String ImageFolder;
 
     private Token JWTToken;
 
+    private String MainDirectory;
+    private Map<String, String> SubDirectories = new HashMap<>();
+
     public Token getJWTToken() {
         return JWTToken;
     }
+
     public void setJWTToken(Token token) {
         JWTToken = token;
     }
@@ -57,6 +68,7 @@ public class Global extends Application {
     public int getUserId() {
         return UserId;
     }
+
     public void setUserId(int userId) {
         UserId = userId;
     }
@@ -64,6 +76,7 @@ public class Global extends Application {
     public int getOfficerId() {
         return OfficerId;
     }
+
     public void setOfficerId(int officerId) {
         OfficerId = officerId;
     }
@@ -76,7 +89,8 @@ public class Global extends Application {
         ImageFolder = imageFolder;
     }
 
-    private  String CurrentUrl;
+    private String CurrentUrl;
+
     public String getCurrentUrl() {
         return CurrentUrl;
     }
@@ -85,13 +99,47 @@ public class Global extends Application {
         CurrentUrl = currentUrl;
     }
 
-
-
     public String getOfficerName() {
         return OfficerName;
     }
 
     public void setOfficerName(String officerName) {
         OfficerName = officerName;
+    }
+
+    private String createOrCheckDirectory(String path) {
+        File dir = new File(path);
+
+        if (dir.exists() || dir.mkdir()) {
+            return path;
+        } else {
+            return "";
+        }
+    }
+
+    public String getMainDirectory() {
+        if (MainDirectory == null) {
+            String documentsDir = createOrCheckDirectory(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS).toString());
+            MainDirectory = createOrCheckDirectory(documentsDir + File.separator + APP_DIR);
+
+            if ("".equals(documentsDir) || "".equals(MainDirectory)) {
+                Log.w("DIRS", "Main directory could not be created");
+            }
+        }
+        return MainDirectory;
+    }
+
+    public String getSubdirectory(String subdirectory) {
+        if (!SubDirectories.containsKey(subdirectory)) {
+            String subDir = createOrCheckDirectory(getMainDirectory() + File.separator + subdirectory);
+
+            if ("".equals(subDir)) {
+                Log.w("DIRS", subdirectory + " directory could not be created");
+                return null;
+            } else {
+                SubDirectories.put(subdirectory, subDir);
+            }
+        }
+        return SubDirectories.get(subdirectory);
     }
 }
