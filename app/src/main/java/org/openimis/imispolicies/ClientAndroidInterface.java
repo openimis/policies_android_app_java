@@ -52,6 +52,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Base64;
+import android.util.Log;
 import android.util.Xml;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -2488,7 +2489,8 @@ public class ClientAndroidInterface {
             JSONArray FID = sqlHandler.getResult(Query, null);
             JSONObject Ob = FID.getJSONObject(0);
             FamilyId = Ob.getInt("FamilyId");
-
+            Integer y = new Integer(FamilyId);
+            Log.d("DeleteInsuree", "Lets delete insuree "+y.toString());
             String IsHeadQuery = "SELECT InsureeId FROM tblInsuree WHERE InsureeId=? AND ishead =?";
             String IsHeadarg[] = {String.valueOf(InsureeId), "1"};
             JSONArray IsHead = sqlHandler.getResult(IsHeadQuery, IsHeadarg);
@@ -6179,17 +6181,15 @@ public class ClientAndroidInterface {
             //pd = new ProgressDialog(mContext);
             //pd = ProgressDialog.show(mContext, "", mContext.getResources().getString(R.string.Deleting));
             Toast.makeText(mContext, "Please wait...", Toast.LENGTH_LONG).show();
-
             //Uncoment this if you want to delete online data too.
             //CallSoap cs = new CallSoap();
             //cs.setFunctionName("DeleteFromPhone");
             DataDeleted = 1;//cs.DeleteFromPhone(Id, userId, DeleteInfo);
 
             inProgress = false;
-
             if (DataDeleted == 1) {
                 if (DeleteInfo.equalsIgnoreCase("F")) DeleteFamily(Id);//Enrollment page
-//                    if (DeleteInfo.equalsIgnoreCase("I")) DeleteInsuree(UUID);//family and insuree page
+                if (DeleteInfo.equalsIgnoreCase("I")) DeleteInsuree(Id);//family and insuree page
 //                    if (DeleteInfo.equalsIgnoreCase("PO")) DeletePolicy(UUID);//Family and policy page
 //                    if (DeleteInfo.equalsIgnoreCase("PR")) DeletePremium(UUID);//PolicyPremium page
 
