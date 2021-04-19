@@ -3358,7 +3358,7 @@ public class ClientAndroidInterface {
             }
 
             //get Policies
-            Query = "SELECT PolicyId, FamilyId, EnrollDate, StartDate, NULLIF(EffectiveDate,'null') EffectiveDate, ExpiryDate, Policystatus, PolicyValue, ProdId, OfficerId, PolicyStage, isOffline\n" +
+            Query = "SELECT PolicyId, ABS(FamilyId) AS FamilyId, EnrollDate, StartDate, NULLIF(EffectiveDate,'null') EffectiveDate, ExpiryDate, Policystatus, PolicyValue, ProdId, OfficerId, PolicyStage, isOffline\n" +
                     "FROM tblPolicy WHERE ";
             if (CallerId != 2) {
                 Query += " FamilyId = " + FamilyId;
