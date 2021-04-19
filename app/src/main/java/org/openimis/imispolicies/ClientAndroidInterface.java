@@ -101,6 +101,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.Random;
 import java.util.UUID;
@@ -4656,6 +4657,46 @@ public class ClientAndroidInterface {
         }
     }
 
+    public void getOfficerVillages(final String OfficerCode) {
+        final ToRestApi toRestApi = new ToRestApi();
+        final JSONObject object = new JSONObject();
+        final String[] str = {""};
+
+
+        Thread thread = new Thread() {
+            public void run() {
+
+                try {
+                    object.put("enrollment_officer_code", OfficerCode);
+                    str[0] = toRestApi.postObjectToRestApiObject(object, "/Locations/GetOfficerVillages");
+                    JSONObject object1 = null;
+                    object1 = new JSONObject(str[0]);
+                    String OfficerVillages = object1.getString("data");
+
+                    final JSONArray arr = new JSONArray(OfficerVillages);
+
+                    ((Activity) mContext).runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                insertOfficerVillages(arr);
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+
+                    });
+
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        };
+        thread.start();
+    }
+
     @JavascriptInterface
     public void popUpOfficerDialog() {
         ((MainActivity) mContext).ShowDialogTex();
@@ -4706,13 +4747,34 @@ public class ClientAndroidInterface {
     }
 
     public void importMasterData(String data) throws JSONException, UserException {
+        try {
+            JSONArray masterDataArray = new JSONArray(data);
+            processOldFormat(masterDataArray);
+        } catch (JSONException e) {
+            try {
+                JSONObject masterDataObject = new JSONObject(data);
+                processNewFormat(masterDataObject);
+            } catch (JSONException e2) {
+                throw new UserException(mContext.getResources().getString(R.string.DownloadMasterDataFailed));
+            }
+        }
+    }
 
-        String MD = data;
-        JSONArray masterData = new JSONArray(MD);
+    @SuppressWarnings("ConstantConditions")
+    public void startDownloading() throws JSONException, UserException {
+        ToRestApi rest = new ToRestApi();
+        String MD = rest.getObjectFromRestApi("master");
+
+        JSONObject masterData = new JSONObject(MD);
 
         if (masterData.length() == 0)
             throw new UserException(mContext.getResources().getString(R.string.DownloadMasterDataFailed));
 
+        processNewFormat(masterData);
+    }
+
+    private void processOldFormat(JSONArray masterData) throws UserException
+    {
         //Sequence of table
         /*
             1   :   ConfirmationTypes
@@ -4750,243 +4812,226 @@ public class ClientAndroidInterface {
         JSONArray Genders = new JSONArray();
         //JSONArray OfficerVillages = new JSONArray();
 
-        for (int i = 0; i < masterData.length(); i++) {
-            String keyName = masterData.getJSONObject(i).keys().next();
-            switch (keyName.toLowerCase()) {
-                case "confirmationtypes":
-                    ConfirmationTypes = (JSONArray) masterData.getJSONObject(i).get(keyName);
-                    break;
-                case "controls":
-                    Controls = (JSONArray) masterData.getJSONObject(i).get(keyName);
-                    break;
-                case "education":
-                    Education = (JSONArray) masterData.getJSONObject(i).get(keyName);
-                    break;
-                case "familytypes":
-                    FamilyTypes = (JSONArray) masterData.getJSONObject(i).get(keyName);
-                    break;
-                case "hf":
-                    HF = (JSONArray) masterData.getJSONObject(i).get(keyName);
-                    break;
-                case "identificationtypes":
-                    IdentificationTypes = (JSONArray) masterData.getJSONObject(i).get(keyName);
-                    break;
-                case "languages":
-                    Languages = (JSONArray) masterData.getJSONObject(i).get(keyName);
-                    break;
-                case "locations":
-                    Locations = (JSONArray) masterData.getJSONObject(i).get(keyName);
-                    break;
-                case "officers":
-                    Officers = (JSONArray) masterData.getJSONObject(i).get(keyName);
-                    break;
-                case "payers":
-                    Payers = (JSONArray) masterData.getJSONObject(i).get(keyName);
-                    break;
-                case "products":
-                    Products = (JSONArray) masterData.getJSONObject(i).get(keyName);
-                    break;
-                case "professions":
-                    Professions = (JSONArray) masterData.getJSONObject(i).get(keyName);
-                    break;
-                case "relations":
-                    Relations = (JSONArray) masterData.getJSONObject(i).get(keyName);
-                    break;
-                case "phonedefaults":
-                    PhoneDefaults = (JSONArray) masterData.getJSONObject(i).get(keyName);
-                    break;
-                case "genders":
-                    Genders = (JSONArray) masterData.getJSONObject(i).get(keyName);
-                    break;
+        try {
+            for (int i = 0; i < masterData.length(); i++) {
+                String keyName = masterData.getJSONObject(i).keys().next();
+                switch (keyName.toLowerCase()) {
+                    case "confirmationtypes":
+                        ConfirmationTypes = (JSONArray) masterData.getJSONObject(i).get(keyName);
+                        break;
+                    case "controls":
+                        Controls = (JSONArray) masterData.getJSONObject(i).get(keyName);
+                        break;
+                    case "education":
+                        Education = (JSONArray) masterData.getJSONObject(i).get(keyName);
+                        break;
+                    case "familytypes":
+                        FamilyTypes = (JSONArray) masterData.getJSONObject(i).get(keyName);
+                        break;
+                    case "hf":
+                        HF = (JSONArray) masterData.getJSONObject(i).get(keyName);
+                        break;
+                    case "identificationtypes":
+                        IdentificationTypes = (JSONArray) masterData.getJSONObject(i).get(keyName);
+                        break;
+                    case "languages":
+                        Languages = (JSONArray) masterData.getJSONObject(i).get(keyName);
+                        break;
+                    case "locations":
+                        Locations = (JSONArray) masterData.getJSONObject(i).get(keyName);
+                        break;
+                    case "officers":
+                        Officers = (JSONArray) masterData.getJSONObject(i).get(keyName);
+                        break;
+                    case "payers":
+                        Payers = (JSONArray) masterData.getJSONObject(i).get(keyName);
+                        break;
+                    case "products":
+                        Products = (JSONArray) masterData.getJSONObject(i).get(keyName);
+                        break;
+                    case "professions":
+                        Professions = (JSONArray) masterData.getJSONObject(i).get(keyName);
+                        break;
+                    case "relations":
+                        Relations = (JSONArray) masterData.getJSONObject(i).get(keyName);
+                        break;
+                    case "phonedefaults":
+                        PhoneDefaults = (JSONArray) masterData.getJSONObject(i).get(keyName);
+                        break;
+                    case "genders":
+                        Genders = (JSONArray) masterData.getJSONObject(i).get(keyName);
+                        break;
 /*                case "officersvillages":
                     OfficerVillages = (JSONArray) masterData.getJSONObject(i).get(keyName);
                     break;*/
+                }
+            }
+
+            insertConfirmationTypes(ConfirmationTypes);
+            insertControls(Controls);
+            insertEducation(Education);
+            insertFamilyTypes(FamilyTypes);
+            insertHF(HF);
+            insertIdentificationTypes(IdentificationTypes);
+            insertLanguages(Languages);
+            insertLocations(Locations);
+            insertOfficers(Officers);
+            insertPayers(Payers);
+            insertProducts(Products);
+            insertProfessions(Professions);
+            insertRelations(Relations);
+            insertPhoneDefaults(PhoneDefaults);
+            insertGenders(Genders);
+        } catch (JSONException e)
+        {
+            e.printStackTrace();
+            throw new UserException(mContext.getResources().getString(R.string.DownloadMasterDataFailed));
+        }
+    }
+
+    private void processNewFormat(JSONObject masterData) throws UserException
+    {
+        try {
+            insertConfirmationTypes((JSONArray) masterData.get("confirmationTypes"));
+            insertControls((JSONArray) masterData.get("controls"));
+            insertEducation((JSONArray) masterData.get("education"));
+            insertFamilyTypes((JSONArray) masterData.get("familyTypes"));
+            insertHF((JSONArray) masterData.get("hf"));
+            insertIdentificationTypes((JSONArray) masterData.get("identificationTypes"));
+            insertLanguages((JSONArray) masterData.get("languages"));
+            insertLocations((JSONArray) masterData.get("locations"));
+            insertOfficers((JSONArray) masterData.get("officers"));
+            insertPayers((JSONArray) masterData.get("payers"));
+            insertProducts((JSONArray) masterData.get("products"));
+            insertProfessions((JSONArray) masterData.get("professions"));
+            insertRelations((JSONArray) masterData.get("relations"));
+            insertPhoneDefaults((JSONArray) masterData.get("phoneDefaults"));
+            insertGenders((JSONArray) masterData.get("genders"));
+        } catch (JSONException e)
+        {
+            e.printStackTrace();
+            throw new UserException(mContext.getResources().getString(R.string.DownloadMasterDataFailed));
+        }
+    }
+
+    private String[] getColumnNames(JSONArray jsonArray)
+    {
+        String[] Columns = {};
+        if(jsonArray.length()>0)
+        {
+            ArrayList<String> columnsList = new ArrayList<>();
+            Iterator<String> keys;
+            try {
+                keys = jsonArray.getJSONObject(0).keys();
+                while(keys.hasNext())
+                    columnsList.add(keys.next());
+                Columns = columnsList.toArray(new String[0]);
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
         }
-
-        insertConfirmationTypes(ConfirmationTypes);
-        insertControls(Controls);
-        insertEducation(Education);
-        insertFamilyTypes(FamilyTypes);
-        insertHF(HF);
-        insertIdentificationTypes(IdentificationTypes);
-        insertLanguages(Languages);
-        insertLocations(Locations);
-        insertOfficers(Officers);
-        insertPayers(Payers);
-        insertProducts(Products);
-        insertProfessions(Professions);
-        insertRelations(Relations);
-        insertPhoneDefaults(PhoneDefaults);
-        insertGenders(Genders);
-
-    }
-
-    @SuppressWarnings("ConstantConditions")
-    public void startDownloading() throws JSONException, UserException {
-        ToRestApi rest = new ToRestApi();
-        String MD = rest.getObjectFromRestApi("master");
-
-        JSONObject masterData = new JSONObject(MD);
-
-        if (masterData.length() == 0)
-            throw new UserException(mContext.getResources().getString(R.string.DownloadMasterDataFailed));
-
-        insertConfirmationTypes((JSONArray) masterData.get("confirmationTypes"));
-        insertControls((JSONArray) masterData.get("controls"));
-        insertEducation((JSONArray) masterData.get("education"));
-        insertFamilyTypes((JSONArray) masterData.get("familyTypes"));
-        insertHF((JSONArray) masterData.get("hf"));
-        insertIdentificationTypes((JSONArray) masterData.get("identificationTypes"));
-        insertLanguages((JSONArray) masterData.get("languages"));
-        insertLocations((JSONArray) masterData.get("locations"));
-        insertOfficers((JSONArray) masterData.get("officers"));
-        insertPayers((JSONArray) masterData.get("payers"));
-        insertProducts((JSONArray) masterData.get("products"));
-        insertProfessions((JSONArray) masterData.get("professions"));
-        insertRelations((JSONArray) masterData.get("relations"));
-        insertPhoneDefaults((JSONArray) masterData.get("phoneDefaults"));
-        insertGenders((JSONArray) masterData.get("genders"));
-    }
-
-    public void getOfficerVillages(final String OfficerCode) {
-        final ToRestApi toRestApi = new ToRestApi();
-        final JSONObject object = new JSONObject();
-        final String[] str = {""};
-
-
-        Thread thread = new Thread() {
-            public void run() {
-
-                try {
-                    object.put("enrollment_officer_code", OfficerCode);
-                    str[0] = toRestApi.postObjectToRestApiObject(object, "/Locations/GetOfficerVillages");
-                    JSONObject object1 = null;
-                    object1 = new JSONObject(str[0]);
-                    String OfficerVillages = object1.getString("data");
-
-                    final JSONArray arr = new JSONArray(OfficerVillages);
-
-                    ((Activity) mContext).runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                insertOfficerVillages(arr);
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }
-
-                    });
-
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-
-            }
-        };
-        thread.start();
+        return Columns;
     }
 
     private boolean insertConfirmationTypes(JSONArray jsonArray) throws JSONException {
         try {
-            String Columns[] = {"confirmationTypeCode", "confirmationType", "sortOrder", "altLanguage"};
+            String[] Columns = getColumnNames(jsonArray);
             sqlHandler.insertData("tblConfirmationTypes", Columns, jsonArray.toString(), "DELETE FROM tblConfirmationTypes");
         }catch (Exception e){
             e.printStackTrace();
+            return false;
         }
 
         return true;
     }
 
     private boolean insertControls(JSONArray jsonArray) throws JSONException {
-        String Columns[] = {"fieldName", "adjustibility"};
+        String[] Columns = getColumnNames(jsonArray);
         sqlHandler.insertData("tblControls", Columns, jsonArray.toString(), "DELETE FROM tblControls;");
         return true;
     }
 
     private boolean insertEducation(JSONArray jsonArray) throws JSONException {
-        String Columns[] = {"educationId", "education", "sortOrder", "altLanguage"};
+        String[] Columns = getColumnNames(jsonArray);
         sqlHandler.insertData("tblEducations", Columns, jsonArray.toString(), "DELETE FROM tblEducations;");
         return true;
     }
 
     private boolean insertFamilyTypes(JSONArray jsonArray) throws JSONException {
-        String Columns[] = {"familyTypeCode", "familyType", "sortOrder", "altLanguage"};
+        String[] Columns = getColumnNames(jsonArray);
         sqlHandler.insertData("tblFamilyTypes", Columns, jsonArray.toString(), "DELETE FROM tblFamilyTypes;");
         return true;
     }
 
     private boolean insertHF(JSONArray jsonArray) throws JSONException {
-        String Columns[] = {"hfid", "hfCode", "hfName", "locationId", "hfLevel"};
+        String[] Columns = getColumnNames(jsonArray);
         sqlHandler.insertData("tblHF", Columns, jsonArray.toString(), "DELETE FROM tblHF;");
         return true;
     }
 
     private boolean insertIdentificationTypes(JSONArray jsonArray) throws JSONException {
-        String Columns[] = {"identificationCode", "identificationTypes", "altLanguage", "sortOrder"};
+        String[] Columns = getColumnNames(jsonArray);
         sqlHandler.insertData("tblIdentificationTypes", Columns, jsonArray.toString(), "DELETE FROM tblIdentificationTypes;");
         return true;
     }
 
     private boolean insertLanguages(JSONArray jsonArray) throws JSONException {
-        String Columns[] = {"languageCode", "languageName", "sortOrder"};
+        String[] Columns = getColumnNames(jsonArray);
         sqlHandler.insertData("tblLanguages", Columns, jsonArray.toString(), "DELETE FROM tblLanguages;");
         return true;
     }
 
     private boolean insertLocations(JSONArray jsonArray) throws JSONException {
-        String Columns[] = {"locationId", "locationCode", "locationName", "parentLocationId", "locationType"};
+        String[] Columns = getColumnNames(jsonArray);
         sqlHandler.insertData("tblLocations", Columns, jsonArray.toString(), "DELETE FROM tblLocations;");
 
         return true;
     }
 
     private boolean insertOfficers(JSONArray jsonArray) throws JSONException {
-        String Columns[] = {"officerId", "officerUUID", "code", "lastName", "otherNames", "phone", "locationId", "officerIDSubst", "worksTo"};
+        String[] Columns = getColumnNames(jsonArray);
         sqlHandler.insertData("tblOfficer", Columns, jsonArray.toString(), "DELETE FROM tblOfficer;");
         return true;
     }
 
     private boolean insertPayers(JSONArray jsonArray) throws JSONException {
-        String Columns[] = {"payerId", "payerName", "locationId"};
+        String[] Columns = getColumnNames(jsonArray);
         sqlHandler.insertData("tblPayer", Columns, jsonArray.toString(), "DELETE FROM tblPayer;");
         return true;
     }
 
     private boolean insertProducts(JSONArray jsonArray) throws JSONException {
-        String Columns[] = {"prodId", "productCode", "productName", "locationId", "insurancePeriod", "dateFrom", "dateTo", "conversionProdId", "lumpsum", "memberCount", "premiumAdult", "premiumChild", "registrationLumpsum", "registrationFee", "generalAssemblyLumpSum", "generalAssemblyFee", "startCycle1", "startCycle2", "startCycle3", "startCycle4", "gracePeriodRenewal", "maxInstallments", "waitingPeriod", "threshold", "renewalDiscountPerc", "renewalDiscountPeriod", "administrationPeriod", "enrolmentDiscountPerc", "enrolmentDiscountPeriod", "gracePeriod"};
+        String[] Columns = getColumnNames(jsonArray);
         sqlHandler.insertData("tblProduct", Columns, jsonArray.toString(), "DELETE FROM tblProduct;");
         return true;
     }
 
     private boolean insertProfessions(JSONArray jsonArray) throws JSONException {
-        String Columns[] = {"professionId", "profession", "sortOrder", "altLanguage"};
+        String[] Columns = getColumnNames(jsonArray);
         sqlHandler.insertData("tblProfessions", Columns, jsonArray.toString(), "DELETE FROM tblProfessions;");
         return true;
     }
 
     private boolean insertRelations(JSONArray jsonArray) throws JSONException {
-        String Columns[] = {"relationId", "relation", "sortOrder", "altLanguage"};
+        String[] Columns = getColumnNames(jsonArray);
         sqlHandler.insertData("tblRelations", Columns, jsonArray.toString(), "DELETE FROM tblRelations;");
         return true;
     }
 
     private boolean insertPhoneDefaults(JSONArray jsonArray) throws JSONException {
-        String Columns[] = {"ruleName", "ruleValue"};
+        String[] Columns = getColumnNames(jsonArray);
         sqlHandler.insertData("tblIMISDefaultsPhone", Columns, jsonArray.toString(), "DELETE FROM tblIMISDefaultsPhone;");
         return true;
     }
 
     private boolean insertGenders(JSONArray jsonArray) throws JSONException {
-        String Columns[] = {"code", "gender", "altLanguage", "sortOrder"};
+        String[] Columns = getColumnNames(jsonArray);
         sqlHandler.insertData("tblGender", Columns, jsonArray.toString(), "DELETE FROM tblGender;");
         return true;
     }
 
     private boolean insertOfficerVillages(JSONArray jsonArray) throws JSONException {
-        String Columns[] = {"code", "ward", "village", "locationId", "wardID"};
+        String[] Columns = getColumnNames(jsonArray);
         sqlHandler.insertData("tblOfficerVillages", Columns, jsonArray.toString(), "DELETE FROM tblOfficerVillages;");
         return true;
     }
