@@ -1,3 +1,6 @@
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+
 apply plugin: 'com.android.application'
 apply from: "$project.rootDir/script-git-version.gradle"
 apply plugin: 'com.android.application'
@@ -7,6 +10,13 @@ def keystorePropertiesFile = file("keystore.properties");
 def keystoreProperties = new Properties()
 if ( keystorePropertiesFile.exists() ) {
     keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
+//generate date
+static def getDate() {
+    LocalDateTime date = LocalDateTime.now()
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern('dd MMMM yyyy HH:mm').withLocale(Locale.UK)
+    return date.format(formatter)
 }
 
 android {
@@ -53,6 +63,7 @@ android {
         buildConfigField "String", "RAR_PASSWORD", '")(#$1HsD"'
         buildConfigField "String", "APP_DIR", '"IMIS"'
         resValue "string", "app_name_policies", "Policies"
+        resValue "string", "ReleaseDateValue", getDate()
     }
     productFlavors {
         demoProd {
