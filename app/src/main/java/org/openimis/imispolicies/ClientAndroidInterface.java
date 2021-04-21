@@ -6189,7 +6189,7 @@ public class ClientAndroidInterface {
 
             if (DataDeleted == 1) {
                 if (DeleteInfo.equalsIgnoreCase("F")) DeleteFamily(Id);//Enrollment page
-//                    if (DeleteInfo.equalsIgnoreCase("I")) DeleteInsuree(UUID);//family and insuree page
+                if (DeleteInfo.equalsIgnoreCase("I")) DeleteInsuree(Id);//family and insuree page
 //                    if (DeleteInfo.equalsIgnoreCase("PO")) DeletePolicy(UUID);//Family and policy page
 //                    if (DeleteInfo.equalsIgnoreCase("PR")) DeletePremium(UUID);//PolicyPremium page
 
