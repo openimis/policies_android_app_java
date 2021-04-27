@@ -715,7 +715,6 @@ public class SQLHandler extends SQLiteOpenHelper {
 
                 } catch (JSONException e) {
                     e.printStackTrace();
-                    throw e;
                 }
 
             }
