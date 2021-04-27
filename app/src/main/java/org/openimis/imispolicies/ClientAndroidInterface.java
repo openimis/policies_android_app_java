@@ -3908,7 +3908,7 @@ public class ClientAndroidInterface {
     }
 
     public boolean unZipWithPassword(String fileName, String password) {
-        String targetPath = global.getSubdirectory("Database") + File.separator + fileName;
+        String targetPath = fileName;
         String unzippedFolderPath = global.getSubdirectory("Database");
         //String unzippedFolderPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/IMIS/Enrolment/Enrolment_"+global.getOfficerCode()+"_"+d+".xml";
         //here we not don't have password set yet so we pass password from Edit Text rar input
