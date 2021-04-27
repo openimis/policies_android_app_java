@@ -3816,7 +3816,7 @@ public class ClientAndroidInterface {
     //@TargetApi(Build.VERSION_CODES.KITKAT)
     public static void copy(String name, byte[] data) throws IOException {
         OutputStream out;
-        String photosDir = new Global().getSubdirectory("Photos");
+        String photosDir = Global.getGlobal().getSubdirectory("Photos");
 
         File file = new File(photosDir + File.separator + name);
         file.createNewFile();
@@ -4717,7 +4717,7 @@ public class ClientAndroidInterface {
                         @Override
                         public void run() {
                             ShowDialog(mContext.getResources().getString(R.string.DataDownloadedSuccess));
-                            Global global = new Global();
+                            Global global = Global.getGlobal();
                             global.setOfficerCode("");
 //                            Intent refresh = new Intent(mContext, MainActivity.class);
 //                            ((MainActivity)mContext).startActivity(refresh);

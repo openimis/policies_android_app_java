@@ -26,6 +26,7 @@
 package org.openimis.imispolicies;
 
 import android.app.Application;
+import android.content.Context;
 import android.os.Environment;
 import android.util.Log;
 
@@ -38,6 +39,8 @@ import java.util.Map;
 import static org.openimis.imispolicies.BuildConfig.APP_DIR;
 
 public class Global extends Application {
+    private static Global GlobalContext;
+
     private String OfficerCode;
     private String OfficerName;
     private int UserId;
@@ -52,6 +55,20 @@ public class Global extends Application {
     private Map<String, String> SubDirectories = new HashMap<>();
 
     private List<String> ProtectedDirectories = Arrays.asList("Authentications","Database");
+
+    public static Global getGlobal() {
+        return GlobalContext;
+    }
+
+    public static Context getContext() {
+        return GlobalContext.getApplicationContext();
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        GlobalContext = this;
+    }
 
     public Token getJWTToken() {
         return JWTToken;
