@@ -3816,7 +3816,7 @@ public class ClientAndroidInterface {
     //@TargetApi(Build.VERSION_CODES.KITKAT)
     public static void copy(String name, byte[] data) throws IOException {
         OutputStream out;
-        String photosDir = new Global().getSubdirectory("Photos");
+        String photosDir = Global.getGlobal().getSubdirectory("Photos");
 
         File file = new File(photosDir + File.separator + name);
         file.createNewFile();
@@ -3909,7 +3909,7 @@ public class ClientAndroidInterface {
     }
 
     public boolean unZipWithPassword(String fileName, String password) {
-        String targetPath = global.getSubdirectory("Database") + File.separator + fileName;
+        String targetPath = fileName;
         String unzippedFolderPath = global.getSubdirectory("Database");
         //String unzippedFolderPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/IMIS/Enrolment/Enrolment_"+global.getOfficerCode()+"_"+d+".xml";
         //here we not don't have password set yet so we pass password from Edit Text rar input
@@ -4717,7 +4717,7 @@ public class ClientAndroidInterface {
                         @Override
                         public void run() {
                             ShowDialog(mContext.getResources().getString(R.string.DataDownloadedSuccess));
-                            Global global = new Global();
+                            Global global = Global.getGlobal();
                             global.setOfficerCode("");
 //                            Intent refresh = new Intent(mContext, MainActivity.class);
 //                            ((MainActivity)mContext).startActivity(refresh);

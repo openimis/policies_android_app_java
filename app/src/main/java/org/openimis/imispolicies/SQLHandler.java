@@ -708,7 +708,6 @@ public class SQLHandler extends SQLiteOpenHelper {
                     object = array.getJSONObject(i);
                     ContentValues cv = new ContentValues();
                     for(String c: Columns){
-
                         cv.put(c,  object.getString(c));
                     }
                     mDatabase.insert(TableName,null,cv);

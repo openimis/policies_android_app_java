@@ -38,7 +38,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.content.res.Resources;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -55,7 +54,6 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.MenuInflater;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -72,7 +70,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.exact.CallSoap.CallSoap;
 import com.exact.general.General;
 
 import org.json.JSONArray;
@@ -89,7 +86,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 
 import static android.provider.Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION;
-import static java.security.AccessController.getContext;
 
 
 public class MainActivity extends AppCompatActivity
@@ -136,7 +132,7 @@ public class MainActivity extends AppCompatActivity
         super.onActivityResult(requestCode, resultCode, data);
         //when an image is selected
         if (requestCode == ClientAndroidInterface.RESULT_LOAD_IMG && resultCode == RESULT_OK && data != null) {
-            try{
+            try {
                 //get the image from data
                 Uri selectedImage = data.getData();
                 String[] filePathColumn = {MediaStore.Images.Media.DATA};
@@ -155,14 +151,14 @@ public class MainActivity extends AppCompatActivity
 
                 cursor.close();
                 ClientAndroidInterface.inProgress = false;
-            }catch (Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
             }
 
 
         }
         //mimi
-        else if(requestCode == ClientAndroidInterface.RESULT_SCAN && resultCode == RESULT_OK && data != null) {
+        else if (requestCode == ClientAndroidInterface.RESULT_SCAN && resultCode == RESULT_OK && data != null) {
             this.InsureeNumber = data.getStringExtra("SCAN_RESULT");
 
          /*   if (!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
@@ -192,26 +188,36 @@ public class MainActivity extends AppCompatActivity
                 // ClientAndroidInterface.setInsuranceNo(InsuranceNo);
                 ClientAndroidInterface.inProgress = false;
             }*/
-        }else if(requestCode == 4 && resultCode == RESULT_OK){
+        } else if (requestCode == 4 && resultCode == RESULT_OK) {
             Uri uri = data.getData();
-            String path = "";
-            path = uri.getPath();
-            //File f = new File(path);
-            f = new File(path);
+            int size = 0;
 
+            String[] proj = {MediaStore.Files.FileColumns.SIZE};
+            Cursor c = getContentResolver().query(uri, proj, null, null, null);
+            c.moveToFirst();
+            size = c.getInt(0);
+
+            byte[] b = new byte[size];
+            int bytesRead = 0;
+
+            try {
+                //the only way to read data from android uri
+                bytesRead = getContentResolver().openInputStream(uri).read(b);
+
+                if(size==bytesRead)
+                {
+                    String path = global.getSubdirectory("Database");
+                    f = new File(path,"MasterData.rar");
+                    if(f.exists() || f.createNewFile())
+                        new FileOutputStream(f).write(b);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             ShowDialogTex2();
-
-//          getMasterDataText((f.getName()).toString());
-//            if(calledFrom == "java"){
-//                ConfirmDialog((f.getName()).toString());
-//            }else{
-//                ConfirmDialogPage((f.getName()).toString());
-//            }
-
-        }else if(requestCode == 4 && resultCode == 0){
+        } else if (requestCode == 4 && resultCode == 0) {
             finish();
-        }
-        else{//if user cancels
+        } else {//if user cancels
             ClientAndroidInterface.inProgress = false;
             this.InsureeNumber = null;
             this.ImagePath = null;
@@ -681,7 +687,7 @@ public class MainActivity extends AppCompatActivity
                             public void onClick(DialogInterface dialog, int id) {
                                 try {
                                     etRarPassword = userInput.getText().toString();
-                                    getMasterDataText2(f.getName(), etRarPassword);
+                                    getMasterDataText2(f.getPath(), etRarPassword);
 
                                     if(calledFrom == "java"){
                                         ConfirmDialog((f.getName()).toString());
