@@ -26,6 +26,7 @@
 package org.openimis.imispolicies;
 
 import android.app.Application;
+import android.content.Context;
 import android.os.Environment;
 import android.util.Log;
 
@@ -34,13 +35,16 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import static org.openimis.imispolicies.BuildConfig.APP_DIR;
 
 public class Global extends Application {
+    private static Global GlobalContext;
+
     private String OfficerCode;
     private String OfficerName;
     private int UserId;
@@ -51,7 +55,24 @@ public class Global extends Application {
     private Token JWTToken;
 
     private String MainDirectory;
+    private String AppDirectory;
     private Map<String, String> SubDirectories = new HashMap<>();
+
+    private List<String> ProtectedDirectories = Arrays.asList("Authentications","Database");
+
+    public static Global getGlobal() {
+        return GlobalContext;
+    }
+
+    public static Context getContext() {
+        return GlobalContext.getApplicationContext();
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        GlobalContext = this;
+    }
 
     public Token getJWTToken() {
         return JWTToken;
@@ -133,15 +154,34 @@ public class Global extends Application {
         return MainDirectory;
     }
 
+    public String getAppDirectory() {
+        if (AppDirectory == null) {
+            AppDirectory = createOrCheckDirectory(getApplicationInfo().dataDir);
+
+            if ("".equals(AppDirectory)) {
+                Log.w("DIRS", "App directory could not be created");
+            }
+        }
+        return AppDirectory;
+    }
+
     public String getSubdirectory(String subdirectory) {
         if (!SubDirectories.containsKey(subdirectory)) {
-            String subDir = createOrCheckDirectory(getMainDirectory() + File.separator + subdirectory);
+            String directory;
 
-            if ("".equals(subDir)) {
+            if (ProtectedDirectories.contains(subdirectory)) {
+                directory = getAppDirectory();
+            } else {
+                directory = getMainDirectory();
+            }
+
+            String subDirPath = createOrCheckDirectory(directory + File.separator + subdirectory);
+
+            if ("".equals(subDirPath)) {
                 Log.w("DIRS", subdirectory + " directory could not be created");
                 return null;
             } else {
-                SubDirectories.put(subdirectory, subDir);
+                SubDirectories.put(subdirectory, subDirPath);
             }
         }
         return SubDirectories.get(subdirectory);

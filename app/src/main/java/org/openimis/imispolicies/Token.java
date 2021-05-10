@@ -19,7 +19,7 @@ public class Token {
         if (!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
             //handle case of no SDCARD present
         } else {
-            Global global = new Global();
+            Global global = Global.getGlobal();
             String dir = global.getSubdirectory("Authentications");
 
             File file = new File(dir, "token.txt");
@@ -43,7 +43,7 @@ public class Token {
     public String getTokenText() {
         String aBuffer = "";
         try {
-            Global global = new Global();
+            Global global = Global.getGlobal();
             String dir = global.getSubdirectory("Authentications");
             File myFile = new File(dir, "token.txt");
             if (myFile.exists()) {
