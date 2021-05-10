@@ -4426,16 +4426,28 @@ public class ClientAndroidInterface {
 
     @JavascriptInterface
     public Boolean UploadOfflineFeedbackRenewal(final String ActivityName) {
+        final File[] files,jsonFiles;
+        final String functionName,jsonPropertyName, path;
+        final int totalFiles;
+        final ProgressDialog pd;
+
+        path = global.getMainDirectory();
+
         if (ActivityName.equals("renewal")) {
-            files = GetListOfFiles(Path, "Renewal", null);
-            JSONfiles = GetListOfJSONFiles(Path, "Renewal", null);
+            files = GetListOfFiles(path, "Renewal", null);
+            jsonFiles = GetListOfJSONFiles(path, "Renewal", null);
+            functionName = "policy/renew";
+            jsonPropertyName = "Policy";
         } else {
             files = GetListOfFiles(Path, "Feedback", null);
-            JSONfiles = GetListOfJSONFiles(Path, "Feedback", null);
+            jsonFiles = GetListOfJSONFiles(Path, "Feedback", null);
+            functionName = "feedback";
+            jsonPropertyName = "feedback";
         }
 
-        TotalFiles = files.length;
-        if (TotalFiles == 0) {
+        totalFiles = files.length;
+
+        if (totalFiles == 0) {
             ShowDialog(mContext.getResources().getString(R.string.NoDataAvailable));
             //Clean tables in database as well
             if (ActivityName.equals("renewal")) {
@@ -4446,90 +4458,74 @@ public class ClientAndroidInterface {
 
             return false;
         }
+
         if (!general.isNetworkAvailable(mContext)) {
             ShowDialog(mContext.getResources().getString(R.string.NoInternet));
             return false;
         }
-        final ProgressDialog pd;
+
         pd = ProgressDialog.show(mContext, "", mContext.getResources().getString(R.string.Uploading));
 
         new Thread() {
             public void run() {
-                for (int i = 0; i < JSONfiles.length; i++) {
-                    UploadCounter = i + 1;
-                    //runOnUiThread(ChangeMessage);
+                ToRestApi rest = new ToRestApi();
+                JSONObject obj;
+                int uploadsAccepted=0, uploadsRejected=0, uploadFailed=0;
+                for (int i = 0; i < jsonFiles.length; i++) {
+                    String jsonText = global.getFileText(jsonFiles[i].getPath());
 
-                    String JsonFileName = getFeedRenewalText(JSONfiles[i].getName());
+                    HttpResponse response = null;
+                    int responseCode=-1;
+                    int uploadStatus=-1;
 
-                    JSONObject obj = new JSONObject();
-
-                    ToRestApi rest = new ToRestApi();
-
-                    Boolean serv = null;
-                    int resInt = 2;
-
-                    if (ActivityName.equals("renewal")) {
-                        try {
-                            obj = new JSONObject(JsonFileName).getJSONObject("Policy");
-                        } catch (Exception e) {
+                    try {
+                        obj = new JSONObject(jsonText).getJSONObject(jsonPropertyName);
+                        response = rest.postToRestApiToken(obj,functionName);
+                        if(response!=null) {
+                            responseCode = response.getStatusLine().getStatusCode();
+                            if (responseCode == 200) {
+                                uploadStatus = Integer.parseInt(EntityUtils.toString(response.getEntity()));
+                            }
                         }
-
-                        resInt = Integer.parseInt(rest.postObjectToRestApiObjectToken(obj, "policy/renew"));
-
-                        if (resInt != 2) serv = true;
-                        else serv = false;
-                    } else {
-                        try {
-                            obj = new JSONObject(JsonFileName).getJSONObject("feedback");
-                        } catch (Exception e) {
-                        }
-
-                        try {
-                            resInt = Integer.parseInt(rest.postObjectToRestApiObjectToken(obj, "feedback"));
-                        } catch (Exception e) {
-                        }
-
-                        if (resInt != 2) serv = true;
-                        else serv = false;
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
 
-                    if (serv == true) {
-                        XMLFile = JSONfiles[i];
-
-                        if (XMLFile.getName().contains("RenPolJSON_")) {
-                            if (resInt == 1) {
-                                MoveFile(XMLFile, 1);
-                                MoveFile(files[i], 1);
-                            } else {
-                                MoveFile(XMLFile, 2);
-                                MoveFile(files[i], 2);
-                            }
-                            result = 1;
-                        } else if (XMLFile.getName().contains("feedbackJSON_")) {
-                            if (resInt == 1) {
-                                MoveFile(XMLFile, 1);
-                                MoveFile(files[i], 1);
-                            } else {
-                                MoveFile(XMLFile, 2);
-                                MoveFile(files[i], 2);
-                            }
-                            result = 1;
-                        } else {
-                            result = 2;
+                    if(response == null || responseCode!=200 || uploadStatus==2)
+                    {
+                        uploadFailed += 1;
+                    } else if (responseCode == 200) {
+                        if (uploadStatus == 1) {
+                            uploadsAccepted += 1;
+                            MoveFile(files[i], 1);
+                            MoveFile(jsonFiles[i], 1);
+                        } else //if(uploadStatus==0)
+                        {
+                            uploadsRejected += 1;
+                            MoveFile(files[i], 2);
+                            MoveFile(jsonFiles[i], 2);
                         }
-
-                        ((Activity) mContext).runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                ShowDialog(mContext.getResources().getString(R.string.RenewalUploaded));
-                            }
-                        });
-                    } else {
-                        result = -2;
                     }
+
+//                    final String status = "Accepted: " + uploadsAccepted + "\n" +
+//                            "Rejected: " + uploadsRejected + "\n" +
+//                            "Failed: " + uploadFailed + "\n";
+//
+//                    ((Activity) mContext).runOnUiThread(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            ShowDialog(status);
+//                        }
+//                    });
+
                 }
 
-                new Runnable() {
+                if(uploadsAccepted==0 && uploadsRejected==0)
+                {
+                    result = -2;
+                }
+                
+                ((Activity) mContext).runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         switch (result) {
@@ -4543,8 +4539,7 @@ public class ClientAndroidInterface {
                                 ShowDialog(mContext.getResources().getString(R.string.BulkUpload));
                         }
                     }
-                };
-
+                });
                 pd.dismiss();
             }
 
@@ -4627,19 +4622,19 @@ public class ClientAndroidInterface {
     private void MoveFile(File file, int res) {
         String Accepted = "", Rejected = "";
         if (file.getName().contains("RenPol_") || file.getName().contains("RenPolJSON_")) {
-            Accepted = "AcceptedRenewal/";
-            Rejected = "RejectedRenewal/";
+            Accepted = "AcceptedRenewal";
+            Rejected = "RejectedRenewal";
         } else if (file.getName().contains("feedback_") || file.getName().contains("feedbackJSON_")) {
-            Accepted = "AcceptedFeedback/";
-            Rejected = "RejectedFeedback/";
+            Accepted = "AcceptedFeedback";
+            Rejected = "RejectedFeedback";
         }
 
         switch (res) {
             case 1:
-                file.renameTo(new File(Path + Accepted + file.getName()));
+                file.renameTo(new File(global.getSubdirectory(Accepted), file.getName()));
                 break;
             case 2:
-                file.renameTo(new File(Path + Rejected + file.getName()));
+                file.renameTo(new File(global.getSubdirectory(Rejected), file.getName()));
                 break;
         }
     }

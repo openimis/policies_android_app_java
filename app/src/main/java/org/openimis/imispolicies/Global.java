@@ -29,7 +29,11 @@ import android.app.Application;
 import android.os.Environment;
 import android.util.Log;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -141,5 +145,22 @@ public class Global extends Application {
             }
         }
         return SubDirectories.get(subdirectory);
+    }
+
+    public String getFileText(String path)
+    {
+        String line;
+        StringBuilder stringBuilder = new StringBuilder();
+        File file = new File(path);
+        try {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+            while ((line = reader.readLine()) != null) {
+                stringBuilder.append(line);
+                stringBuilder.append("\n");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return stringBuilder.toString();
     }
 }
