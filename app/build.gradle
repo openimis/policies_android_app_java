@@ -110,7 +110,7 @@ android {
         }
         poralguat {
             applicationId "org.openimis.imispolicies.poralguat"
-            buildConfigField "String", "API_BASE_URL", '"http://196.192.73.26/restapi"'
+            buildConfigField "String", "API_BASE_URL", '"http://196.192.73.26/rest"'
             buildConfigField "String", "RAR_PASSWORD", '")(#$1HsD"'
             buildConfigField "String", "APP_DIR", '"IMIS-PORALGUAT"'
             resValue "string", "app_name_policies", "Policies PORALGUAT"
