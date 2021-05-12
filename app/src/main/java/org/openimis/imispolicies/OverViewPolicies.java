@@ -577,7 +577,11 @@ public class OverViewPolicies extends AppCompatActivity {
         Thread thread = new Thread(){
             public void run() {
                 HttpClient httpClient = new DefaultHttpClient();
-                HttpPost httpPost = new HttpPost(AppInformation.DomainInfo.getDomain()+"payment/GetControlNumber");
+                String domain = AppInformation.DomainInfo.getDomain();
+                if (BuildConfig.API_BASE_URL.equals("http://chf-dev.swisstph-mis.ch/rest/") || BuildConfig.API_BASE_URL.equals("http://196.192.73.26/rest/")) {
+                    domain = domain.replace("/rest/", "/restapi/");
+                }
+                HttpPost httpPost = new HttpPost(domain+"api/GetControlNumber");
 // Request parameters and other properties.
                 try {
                     StringEntity postingString = new StringEntity(order.toString());
@@ -599,7 +603,7 @@ public class OverViewPolicies extends AppCompatActivity {
 
                 HttpResponse response = null;
                 try {
-                    response = toRestApi.postToRestApiToken(order, "payment/GetControlNumber");
+                    response = httpClient.execute(httpPost);
 
                     HttpEntity respEntity = response.getEntity();
                     String content = null;
