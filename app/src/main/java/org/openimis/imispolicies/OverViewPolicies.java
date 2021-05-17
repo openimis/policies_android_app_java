@@ -578,7 +578,7 @@ public class OverViewPolicies extends AppCompatActivity {
             public void run() {
                 HttpClient httpClient = new DefaultHttpClient();
                 String domain = AppInformation.DomainInfo.getDomain();
-                if (BuildConfig.API_BASE_URL.equals("http://chf-dev.swisstph-mis.ch/rest/") || BuildConfig.API_BASE_URL.equals("http://196.192.73.26/rest/")) {
+                if (BuildConfig.APPLICATION_ID .equals("org.openimis.imispolicies.chf") || BuildConfig.APPLICATION_ID.equals("org.openimis.imispolicies.poralguat")) {
                     domain = domain.replace("/rest/", "/restapi/");
                 }
                 HttpPost httpPost = new HttpPost(domain+"api/GetControlNumber");
