@@ -600,7 +600,7 @@ public class NotEnrolledPoliciesOverview extends AppCompatActivity {
                                     LoginDialogBox();
                                     if (tokenl.getTokenText().length() > 1) {
                                         View view = findViewById(R.id.actv);
-                                        Snackbar.make(view, Finalcode + "-" + getResources().getString(R.string.has_no_rights), Snackbar.LENGTH_LONG)
+                                        Snackbar.make(view, Finalcode + "-" + error_message[0], Snackbar.LENGTH_LONG)
                                                 .setAction("Action", null).show();
                                     }
                                 }
