@@ -399,4 +399,6 @@
   <string name="hospitalizationAmountLeft">HospitalizationAmountLeft</string>
   <string name="antenatalAmountLeft">AntenatalAmountLeft</string>
   <string name="deliveryAmountLeft">DeliveryAmountLeft</string>
+  <string name="languageOfSMS">Language Of SMS</string>
+  <string name="approvalOfSMS">Approval Of SMS</string>
 </resources>

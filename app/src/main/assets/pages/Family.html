@@ -41,7 +41,10 @@ In case of dispute arising out or in relation to the use of the program, it is s
                 $('#btnNext').val(Android.getString("Save"));
 
             fillDropdowns();
+            setControls();
 
+            // Display of LanguageOfSMS is same as for ApprovalOfSMS
+            $("#LanguageOfSMS").css("display", $("#ApprovalOfSMS").css("display"));
 
             $('#ddlRegion').change(function(){
                 getDistricts($(this).val());
@@ -109,6 +112,8 @@ In case of dispute arising out or in relation to the use of the program, it is s
             getPovertyStatus();
             getConfirmationTypes();
             getFamilyTypes();
+            getApprovalOfSMS();
+            getLanguageOfSMS();
         }
 
         function saveFamilyLocally(){
@@ -182,6 +187,17 @@ In case of dispute arising out or in relation to the use of the program, it is s
             bindDropdown('ddlGroupType', $FamilyTypes, 'FamilyTypeCode', $textLanguage,0, Android.getString('SelectFamilyType'));
         }
 
+        function getApprovalOfSMS(){
+            var $ApprovalTypes = Android.getApprovalOfSMS();
+            bindDropdown('ddlApprovalOfSMS', $ApprovalTypes, 'value', 'key', "", Android.getString('approvalOfSMS'));
+        }
+
+        function getLanguageOfSMS(){
+            $textLanguage = "LanguageName";
+            var $Languages = Android.getLanguagesOfSMS();
+            bindDropdown('ddlLanguageOfSMS', $Languages, 'LanguageCode', $textLanguage,"", Android.getString('languageOfSMS'));
+        }
+
 
     </script>
 
@@ -230,6 +246,14 @@ In case of dispute arising out or in relation to the use of the program, it is s
         <li id="PermanentAddress">
             <span strName="PermanentAddress">Permanent Address Details</span>
             <textarea id="txtPermanentAddress" datafield="FamilyAddress"></textarea>
+        </li>
+        <li id="ApprovalOfSMS">
+            <span strName="ApprovalOfSMS">Allow SMS Messages</span>
+            <select id="ddlApprovalOfSMS" datafield="ApprovalOfSMS"></select>
+        </li>
+        <li id="LanguageOfSMS">
+            <span strName="LanguageOfSMS">Language of SMS</span>
+            <select id="ddlLanguageOfSMS" datafield="LanguageOfSMS"></select>
         </li>
     </ul>
 
