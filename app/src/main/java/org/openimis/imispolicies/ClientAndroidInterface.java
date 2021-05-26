@@ -499,6 +499,37 @@ public class ClientAndroidInterface {
     }
 
     @JavascriptInterface
+    public String getLanguagesOfSMS() {
+        String tableName = "tblLanguages";
+        String[] columns = {"LanguageCode", "LanguageName"};
+        String where = null;
+        String OrderBy = "SortOrder";
+
+        JSONArray GroupTypes = sqlHandler.getResult(tableName, columns, null, OrderBy);
+
+        return GroupTypes.toString();
+    }
+
+    @JavascriptInterface
+    public String getApprovalOfSMS() {
+        JSONArray selectJsonArray = new JSONArray();
+        try {
+            JSONObject object = new JSONObject();
+            object.put("key", mContext.getResources().getString(R.string.Yes));
+            object.put("value", 1);
+            selectJsonArray.put(object);
+
+            object = new JSONObject();
+            object.put("key", mContext.getResources().getString(R.string.No));
+            object.put("value", 0);
+            selectJsonArray.put(object);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return selectJsonArray.toString();
+    }
+
+    @JavascriptInterface
     public String getGender() {
         String tableName = "tblGender";
         String[] columns = {"Code", "Gender", "AltLanguage"};
@@ -734,8 +765,6 @@ public class ClientAndroidInterface {
                     Poverty = false;
                 }
             }
-//            if (Boolean.parseBoolean(data.get("ddlPovertyStatus")) || !Boolean.parseBoolean(data.get("ddlPovertyStatus")))
-//                Poverty = Boolean.parseBoolean(data.get("ddlPovertyStatus"));
 
             String FamilyType = null;
             if (!TextUtils.isEmpty(data.get("ddlGroupType")) && !data.get("ddlGroupType").equals("0"))
@@ -747,7 +776,12 @@ public class ClientAndroidInterface {
 
             String ConfirmationNo = data.get("txtConfirmationNo");
             String ConfirmationType = data.get("ddlConfirmationType");
-            int isOffline = getFamilyStatus(FamilyId);  // Integer.parseInt(data.get("hfisOffline"));
+            int isOffline = getFamilyStatus(FamilyId);
+
+            Boolean approveSMS = data.get("ddlApprovalOfSMS").equals("1");
+            String languageOfSMS =
+                    data.get("ddlLanguageOfSMS") == "" ? null : data.get("ddlLanguageOfSMS");
+
             values.put("LocationId", LocationId);
             values.put("Poverty", Poverty);
             values.put("FamilyType", FamilyType);
@@ -755,6 +789,8 @@ public class ClientAndroidInterface {
             values.put("Ethnicity", Ethnicity);
             values.put("ConfirmationNo", ConfirmationNo);
             values.put("ConfirmationType", ConfirmationType);
+            values.put("ApprovalOfSMS", approveSMS);
+            values.put("LanguageOfSMS", languageOfSMS);
 
             if (FamilyId == 0) {
                 values.put("isOffline", isOffline);
@@ -3235,7 +3271,7 @@ public class ClientAndroidInterface {
                 args = new String[]{FamilyId};
             }*/
 
-            Query = "SELECT ABS(F.FamilyId) AS FamilyId, ABS(F.InsureeId) AS InsureeId, F.LocationId, I.CHFID AS HOFCHFID, NULLIF(F.Poverty,'null') Poverty, NULLIF(F.FamilyType,'null') FamilyType, NULLIF(F.FamilyAddress,'null') FamilyAddress, NULLIF(F.Ethnicity,'null') Ethnicity, NULLIF(F.ConfirmationNo,'null') ConfirmationNo, F.ConfirmationType ConfirmationType,F.isOffline isOffline FROM tblFamilies F\n" +
+            Query = "SELECT ABS(F.FamilyId) AS FamilyId, ABS(F.InsureeId) AS InsureeId, F.LocationId, I.CHFID AS HOFCHFID, NULLIF(F.Poverty,'null') Poverty, NULLIF(F.FamilyType,'null') FamilyType, NULLIF(F.FamilyAddress,'null') FamilyAddress, NULLIF(F.Ethnicity,'null') Ethnicity, NULLIF(F.ConfirmationNo,'null') ConfirmationNo, F.ConfirmationType ConfirmationType,F.isOffline isOffline, F.ApprovalOfSMS ApprovalOfSMS, F.LanguageOfSMS LanguageOfSMS FROM tblFamilies F\n" +
                     "INNER JOIN tblInsuree I ON I.InsureeId = F.InsureeId WHERE";
 
             if (CallerId != 2) {
@@ -3269,6 +3305,9 @@ public class ClientAndroidInterface {
                 String poverty = ob1.getString("Poverty");
                 String ConfirmationType = ob1.getString("ConfirmationType");
                 String FId = ob1.getString("FamilyId");
+
+                String approvalOfSMS = ob1.getString("ApprovalOfSMS");
+                String languageOfSMS = ob1.getString("LanguageOfSMS");
 
                 String s1 = ob1.getString("isOffline");
                 if (s1.equals("true") || s1.equals("1")) Offline = "1";
