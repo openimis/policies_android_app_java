@@ -95,6 +95,11 @@ In case of dispute arising out or in relation to the use of the program, it is s
                     $("#ddlWard").attr("disabled","disabled");
                     $("#ddlVillage").attr("disabled","disabled");
                 }
+
+                if($Family[0].hasOwnProperty("familySMS")) {
+                    $("#ddlApprovalOfSMS").val($Family[0]["familySMS"]["ApprovalOfSMS"]).trigger("change");
+                    $("#ddlLanguageOfSMS").val($Family[0]["familySMS"]["LanguageOfSMS"]).trigger("change");
+                }
                 //Load remaining fields
                 bindDataFromDatafield(strFamily);
 
