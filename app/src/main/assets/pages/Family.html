@@ -37,7 +37,7 @@ In case of dispute arising out or in relation to the use of the program, it is s
             document.title = Android.getString('AddNewFamily');
             var FamilyId = queryString('f');
 
-            if (parseInt(FamilyId) > 0)
+            if (parseInt(FamilyId) != 0)
                 $('#btnNext').val(Android.getString("Save"));
 
             fillDropdowns();
@@ -78,8 +78,7 @@ In case of dispute arising out or in relation to the use of the program, it is s
 
             //if FamilyId > 0; Load family
 
-            if (parseInt(FamilyId) > 0){
-
+            if (parseInt(FamilyId) != 0){
                 var strFamily = Android.getFamily(parseInt(FamilyId));
 
                 var $Family = $.parseJSON(strFamily);

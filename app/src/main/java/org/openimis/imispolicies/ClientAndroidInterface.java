@@ -26,7 +26,6 @@
 package org.openimis.imispolicies;
 
 import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -44,7 +43,6 @@ import android.graphics.BitmapFactory;
 import android.icu.text.DecimalFormat;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.RequiresApi;
 import android.support.v7.widget.DividerItemDecoration;
@@ -52,6 +50,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Base64;
+import android.util.Log;
 import android.util.Xml;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -66,7 +65,6 @@ import com.exact.uploadfile.UploadFile;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -79,7 +77,6 @@ import java.util.Date;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
-import java.util.Date;
 
 
 import org.json.JSONArray;
@@ -843,7 +840,7 @@ public class ClientAndroidInterface {
 
                 sqlHandler.updateData("tblFamilies", cvUpdate, "FamilyId= ?", whereArgs);
             }
-            addOrUpdateFamilySms(FamilyId, data);
+            addOrUpdateFamilySmsFromDll(FamilyId, data);
 
             return FamilyId;
 
@@ -874,7 +871,7 @@ public class ClientAndroidInterface {
 
     private JSONObject getFamilySMS(String familyId) {
         // tblFamilySMS and tblFamily are in 1:1 relation, therefore only one record is returned
-        String query = "SELECT * FROM tblFamilySMS where FamilyId = ? LIMIT 10;";
+        String query = "SELECT * FROM tblFamilySMS where FamilyId = ? LIMIT 1;";
         String[] queryArgs = {familyId};
         try {
             JSONObject result = sqlHandler.getResult(query, queryArgs).getJSONObject(0);
@@ -889,15 +886,18 @@ public class ClientAndroidInterface {
         return getFamilySMS(String.valueOf(familyId));
     }
 
-    private void addOrUpdateFamilySms(int familyId, HashMap<String, String> familyFormData)
+    private void addOrUpdateFamilySmsFromDll(int familyId, HashMap<String, String> familyFormData)
             throws UserException {
         Boolean approveSMS = familyFormData.get("ddlApprovalOfSMS").equals("1");
         String languageOfSMS =
                 familyFormData.get("ddlLanguageOfSMS") == "" ? null : familyFormData.get("ddlLanguageOfSMS");
+        addOrUpdateFamilySms(familyId, approveSMS, languageOfSMS);
+    }
 
+    public void addOrUpdateFamilySms(int familyId, Boolean approve, String language) throws UserException {
         ContentValues familySmsValues = new ContentValues();
-        familySmsValues.put("ApprovalOfSMS", approveSMS);
-        familySmsValues.put("LanguageOfSMS", languageOfSMS);
+        familySmsValues.put("ApprovalOfSMS", approve);
+        familySmsValues.put("LanguageOfSMS", language);
         familySmsValues.put("FamilyID", familyId);
 
         String query = "SELECT FamilyId FROM tblFamilySMS WHERE FamilyId = ?";
@@ -1387,8 +1387,10 @@ public class ClientAndroidInterface {
         JSONArray Family = sqlHandler.getResult(sSQL, args);
         try {
             JSONObject sms = getFamilySMS(FamilyId);
-            Family.getJSONObject(0).put("ApprovalOfSMS", sms.get("ApprovalOfSMS"));
-            Family.getJSONObject(0).put("LanguageOfSMS", sms.get("LanguageOfSMS"));
+            if (sms != null) {
+                Family.getJSONObject(0).put("ApprovalOfSMS", sms.get("ApprovalOfSMS"));
+                Family.getJSONObject(0).put("LanguageOfSMS", sms.get("LanguageOfSMS"));
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -3304,7 +3306,7 @@ public class ClientAndroidInterface {
 
             if (IsOffline == 2) IsOffline = 0;
 
-            Query = "SELECT ABS(F.FamilyId) AS FamilyId, ABS(F.InsureeId) AS InsureeId, F.LocationId, I.CHFID AS HOFCHFID, NULLIF(F.Poverty,'null') Poverty, NULLIF(F.FamilyType,'null') FamilyType, NULLIF(F.FamilyAddress,'null') FamilyAddress, NULLIF(F.Ethnicity,'null') Ethnicity, NULLIF(F.ConfirmationNo,'null') ConfirmationNo, F.ConfirmationType ConfirmationType,F.isOffline isOffline FROM tblFamilies F\n" +
+            Query = "SELECT F.FamilyId AS FamilyId, F.InsureeId AS InsureeId, F.LocationId, I.CHFID AS HOFCHFID, NULLIF(F.Poverty,'null') Poverty, NULLIF(F.FamilyType,'null') FamilyType, NULLIF(F.FamilyAddress,'null') FamilyAddress, NULLIF(F.Ethnicity,'null') Ethnicity, NULLIF(F.ConfirmationNo,'null') ConfirmationNo, F.ConfirmationType ConfirmationType,F.isOffline isOffline FROM tblFamilies F\n" +
                     "INNER JOIN tblInsuree I ON I.InsureeId = F.InsureeId WHERE";
 
             if (CallerId != 2) {
@@ -3344,9 +3346,9 @@ public class ClientAndroidInterface {
                 else if(s1.equals("2")) Offline = "2";
                 else Offline = "0";
 
-                if (Offline.equals("2")) {
-                    String newFamilyId = "-" + FId;
-                    ob1.put("FamilyId", newFamilyId);
+                if (Offline.equals("2") || Offline.equals("0")) {
+                    // FId = "-" + FId;
+                    ob1.put("FamilyId", FId);
                     ob1.put("isOffline", 0);
                 }
                 if(typeofId == "0"){
@@ -3355,18 +3357,19 @@ public class ClientAndroidInterface {
                 if (ConfirmationType == "0") {
                     ob1.put("ConfirmationType", "");
                 }
-
                 JSONObject familySMS = getFamilySMS(FId);
-//                if (familySMS == null) {
-//                    familySMS = emptyFamilySMS();
-//                }
+                if (familySMS != null) {
+                    // Ensure ApprovalOfSMS Is sent as Boolean
+                    familySMS.put("ApprovalOfSMS",
+                            familySMS.getString("ApprovalOfSMS").equals("1"));
+                }
                 ob1.put("FamilySMS", familySMS);
             }
             newFamilyArray.put(ob1);
             familyArray = newFamilyArray;
 
             //get Insureesf
-            Query = "SELECT ABS(I.InsureeId) AS InsureeId, ABS(I.FamilyId) AS FamilyId, I.CHFID, I.LastName, I.OtherNames, I.DOB, I.Gender, NULLIF(I.Marital,'') Marital, I.isHead, NULLIF(I.IdentificationNumber,'null') IdentificationNumber, NULLIF(I.Phone,'null') Phone, REPLACE(I.PhotoPath, RTRIM(PhotoPath, REPLACE(PhotoPath, '/', '')), '') PhotoPath, NULLIF(I.CardIssued,'null') CardIssued, NULLIF(I.Relationship,'null') Relationship, NULLIF(I.Profession,'null') Profession, NULLIF(I.Education,'null') Education, NULLIF(I.Email,'null') Email, CASE WHEN I.TypeOfId='null' THEN null ELSE I.TypeOfId END TypeOfId, NULLIF(I.HFID,'null') HFID, NULLIF(I.CurrentAddress,'null') CurrentAddress, NULLIF(I.GeoLocation,'null') GeoLocation, NULLIF(I.CurVillage,'null') CurVillage,I.isOffline \n" +
+            Query = "SELECT I.InsureeId AS InsureeId, I.FamilyId AS FamilyId, I.CHFID, I.LastName, I.OtherNames, I.DOB, I.Gender, NULLIF(I.Marital,'') Marital, I.isHead, NULLIF(I.IdentificationNumber,'null') IdentificationNumber, NULLIF(I.Phone,'null') Phone, REPLACE(I.PhotoPath, RTRIM(PhotoPath, REPLACE(PhotoPath, '/', '')), '') PhotoPath, NULLIF(I.CardIssued,'null') CardIssued, NULLIF(I.Relationship,'null') Relationship, NULLIF(I.Profession,'null') Profession, NULLIF(I.Education,'null') Education, NULLIF(I.Email,'null') Email, CASE WHEN I.TypeOfId='null' THEN null ELSE I.TypeOfId END TypeOfId, NULLIF(I.HFID,'null') HFID, NULLIF(I.CurrentAddress,'null') CurrentAddress, NULLIF(I.GeoLocation,'null') GeoLocation, NULLIF(I.CurVillage,'null') CurVillage,I.isOffline \n" +
                     "FROM tblInsuree I \n" + " WHERE ";
             if (CallerId != 2) {
                 Query += " I.FamilyId = " + FamilyId + " \n";
@@ -3426,13 +3429,10 @@ public class ClientAndroidInterface {
                 }
 
                 insureesArray = newInsureesArray;
-            /*    } catch (JSONException e) {
-                    e.printStackTrace();
-                }*/
             }
 
             //get Policies
-            Query = "SELECT ABS(PolicyId) AS PolicyId, ABS(FamilyId) AS FamilyId, EnrollDate, StartDate, NULLIF(EffectiveDate,'null') EffectiveDate, ExpiryDate, Policystatus, PolicyValue, ProdId, OfficerId, PolicyStage, isOffline\n" +
+            Query = "SELECT PolicyId AS PolicyId, FamilyId AS FamilyId, EnrollDate, StartDate, NULLIF(EffectiveDate,'null') EffectiveDate, ExpiryDate, Policystatus, PolicyValue, ProdId, OfficerId, PolicyStage, isOffline\n" +
                     "FROM tblPolicy WHERE ";
             if (CallerId != 2) {
                 Query += " FamilyId = " + FamilyId;
@@ -3536,7 +3536,7 @@ public class ClientAndroidInterface {
                 }
 
                 //get InsureePolicy
-                Query = "SELECT ABS(DISTINCT(IP.InsureeId)) AS InsureeId,IP.PolicyId,IP.EffectiveDate\n" +
+                Query = "SELECT DISTINCT(IP.InsureeId) AS InsureeId,IP.PolicyId,IP.EffectiveDate\n" +
                         "FROM tblInsureePolicy IP\n" +
                         "INNER JOIN tblPolicy PL ON PL.PolicyId = IP.PolicyId";
                 if (CallerId == 0) Query += " AND  IP.InsureeId = " + oInsureeId;
@@ -5963,9 +5963,21 @@ public class ClientAndroidInterface {
             String Columns[] = {"familyId", "familyUUID", "insureeId", "insureeUUID", "locationId", "poverty", "isOffline", "familyType",
                     "familyAddress", "ethnicity", "confirmationNo", "confirmationType"};
             sqlHandler.insertData("tblFamilies", Columns, jsonArray.toString(), "");
+
+            if (object.has("familySMS")) {
+                JSONObject smsData = object.getJSONObject("familySMS");
+                try {
+                    addOrUpdateFamilySms(object.getInt("familyId"),
+                            smsData.getBoolean("approvalOfSMS"),
+                            smsData.getString("languageOfSMS")
+                    );
+                } catch (UserException e) {
+                    e.printStackTrace();
+                    Log.w("ModifyFamily", "No familySMS data in family payload");
+                }
+            }
         }
         return true;
-
     }
 
 
