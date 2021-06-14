@@ -295,7 +295,7 @@
   <string name="MaxInstallment">Il s\'agit du dernier versement selon la définition du Paquet de bénéfice, Prix du contrat pas encore couvert. Veuillez sélectionner l\'action à effectuer.</string>
   <string name="Reports">Rapports</string>
   <string name="SnapshotIndicators">Indicateurs d\'aperçu général</string>
-  <string name="CummulativeIndicators">Indicateurs cumulatifs</string>
+  <string name="CumulativeIndicators">Indicateurs cumulatifs</string>
   <string name="NumberOfFAP">Nombre de familles ayant des contrats actifs</string>
   <string name="NumberOfFEP">Nombre de familles dont le contrat est expiré</string>
   <string name="NumberOfFIP">Nombre de familles ayant des contrats en attente</string>
