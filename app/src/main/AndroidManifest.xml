@@ -99,9 +99,9 @@
             android:label="@string/SnapshotIndicators"
             android:screenOrientation="portrait" />
 
-        <activity android:name="org.openimis.imispolicies.CummulativeIndicators"
+        <activity android:name="org.openimis.imispolicies.CumulativeIndicators"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:label="@string/CummulativeIndicators"
+            android:label="@string/CumulativeIndicators"
             android:screenOrientation="portrait" />
         <activity android:name="org.openimis.imispolicies.ControlNumbers" />
         <activity android:name="org.openimis.imispolicies.SearchOverViewPolicies" />

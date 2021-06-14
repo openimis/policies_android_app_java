@@ -295,7 +295,7 @@
   <string name="MaxInstallment"><![CDATA[Haya ni malipo yako ya mwisho kulingana na mkataba, Bado hujakamilisha malipo. <br/>Tafadhali chagua hatua zifuatazo kuendela.]]></string>
   <string name="Reports">Ripoti</string>
   <string name="SnapshotIndicators">Takwmi za ujumla</string>
-  <string name="CummulativeIndicators">Takwimu kwa kipindi fulani</string>
+  <string name="CumulativeIndicators">Takwimu kwa kipindi fulani</string>
   <string name="NumberOfFAP">Namba ya familia zenye Active Policies</string>
   <string name="NumberOfFEP">Namba ya familia zenye Expired Policies</string>
   <string name="NumberOfFIP">Namba ya familia zenye Idle Policies</string>
