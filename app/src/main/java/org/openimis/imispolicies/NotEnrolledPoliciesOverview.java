@@ -543,7 +543,6 @@ public class NotEnrolledPoliciesOverview extends AppCompatActivity {
     }
 
     private int getControlNumber(final JSONObject order, final String SmsRequired) throws IOException {
-
         Thread thread = new Thread() {
             public void run() {
                 HttpClient httpClient = new DefaultHttpClient();
@@ -567,15 +566,13 @@ public class NotEnrolledPoliciesOverview extends AppCompatActivity {
                     }
                 });
 
-                //Send Request Here
                 HttpResponse response = null;
                 try {
-                    response = httpClient.execute(httpPost);
+                    response = toRestApi.postToRestApiToken(order, "payment/GetControlNumber");
 
                     HttpEntity respEntity = response.getEntity();
                     String content = null;
                     if (respEntity != null) {
-                        //final String[] code = {null};
                         final String[] error_occured = {null};
                         final String[] error_message = {null};
                         final String[] internal_Identifier = {null};
@@ -603,7 +600,7 @@ public class NotEnrolledPoliciesOverview extends AppCompatActivity {
                                     LoginDialogBox();
                                     if (tokenl.getTokenText().length() > 1) {
                                         View view = findViewById(R.id.actv);
-                                        Snackbar.make(view, Finalcode + "-" + error_message[0], Snackbar.LENGTH_LONG)//getResources().getString(R.string.has_no_rights)
+                                        Snackbar.make(view, Finalcode + "-" + error_message[0], Snackbar.LENGTH_LONG)
                                                 .setAction("Action", null).show();
                                     }
                                 }
