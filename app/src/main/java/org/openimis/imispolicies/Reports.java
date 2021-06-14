@@ -7,10 +7,9 @@ import android.os.Bundle;
 import android.view.MenuItem;
 import android.widget.Button;
 
-public class
-Reports extends AppCompatActivity {
+public class Reports extends AppCompatActivity {
     Button SnapshotIndicators;
-    Button CummulativeIndicators;
+    Button CumulativeIndicators;
 
     private ClientAndroidInterface ca;
 
@@ -25,19 +24,19 @@ Reports extends AppCompatActivity {
         ca = new ClientAndroidInterface(this);
 
         SnapshotIndicators = findViewById(R.id.SnapshotIndicators);
-        CummulativeIndicators = findViewById(R.id.CummulativeIndicators);
+        CumulativeIndicators = findViewById(R.id.CumulativeIndicators);
 
         SnapshotIndicators.setOnClickListener((view) -> openSnapshotIndicators());
 
-        CummulativeIndicators.setOnClickListener((view) -> openCummulativeIndicators());
+        CumulativeIndicators.setOnClickListener((view) -> openCumulativeIndicators());
     }
 
     public void openSnapshotIndicators() {
         openReport(SnapshotIndicators.class);
     }
 
-    public void openCummulativeIndicators() {
-        openReport(CummulativeIndicators.class);
+    public void openCumulativeIndicators() {
+        openReport(CumulativeIndicators.class);
     }
 
     protected void openReport(Class<?> reportClass) {

@@ -111,12 +111,9 @@ public class SnapshotIndicators extends AppCompatActivity {
 
         myCalendar = Calendar.getInstance();
 
-        btnPick.setOnClickListener((view) -> {
-            new DatePickerDialog(SnapshotIndicators.this, date, myCalendar
-                    .get(Calendar.YEAR), myCalendar.get(Calendar.MONTH),
-                    myCalendar.get(Calendar.DAY_OF_MONTH)).show();
-
-        });
+        btnPick.setOnClickListener((view) -> new DatePickerDialog(SnapshotIndicators.this, date, myCalendar
+                .get(Calendar.YEAR), myCalendar.get(Calendar.MONTH),
+                myCalendar.get(Calendar.DAY_OF_MONTH)).show());
 
         btnGet.setOnClickListener((view) -> {
             if (!(tvDate.getText()).equals("")) {
@@ -147,9 +144,6 @@ public class SnapshotIndicators extends AppCompatActivity {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        } else {
-            if (!ca.CheckInternetAvailable())
-                return;
         }
     }
 
@@ -170,6 +164,7 @@ public class SnapshotIndicators extends AppCompatActivity {
                 HttpEntity entity = response.getEntity();
                 snapshot = EntityUtils.toString(entity);
             } catch (IOException e) {
+                showToast(R.string.ErrorOccurred, Toast.LENGTH_LONG);
                 e.printStackTrace();
             }
         } else {

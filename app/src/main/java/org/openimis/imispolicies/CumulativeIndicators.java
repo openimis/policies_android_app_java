@@ -26,10 +26,9 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
 
-public class CummulativeIndicators extends AppCompatActivity {
+public class CumulativeIndicators extends AppCompatActivity {
 
     private General _General = new General(AppInformation.DomainInfo.getDomain());
-    private ClientAndroidInterface ca;
 
     Boolean ClickedFrom = false;
     Boolean ClickedTo = false;
@@ -47,7 +46,7 @@ public class CummulativeIndicators extends AppCompatActivity {
     TextView CCC;
 
     private ProgressDialog pd;
-    RelativeLayout CommulativeReport;
+    RelativeLayout CumulativeReport;
 
     String cumulative = null;
 
@@ -61,15 +60,13 @@ public class CummulativeIndicators extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_cummulative_indicators);
+        setContentView(R.layout.activity_cumulative_indicators);
 
         final ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setTitle(getResources().getString(R.string.CummulativeIndicators));
+            actionBar.setTitle(getResources().getString(R.string.CumulativeIndicators));
         }
-
-        ca = new ClientAndroidInterface(this);
 
         DateFrom = findViewById(R.id.DateFrom);
         DateTo = findViewById(R.id.DateTo);
@@ -81,14 +78,14 @@ public class CummulativeIndicators extends AppCompatActivity {
         SPC = findViewById(R.id.SPC);
         CCC = findViewById(R.id.CCC);
 
-        CommulativeReport = findViewById(R.id.CommulativeReport);
+        CumulativeReport = findViewById(R.id.CumulativeReport);
 
         myCalendar = Calendar.getInstance();
 
         DateFrom.setOnClickListener((view) -> {
             ClickedTo = false;
             ClickedFrom = true;
-            new DatePickerDialog(CummulativeIndicators.this, date, myCalendar
+            new DatePickerDialog(CumulativeIndicators.this, date, myCalendar
                     .get(Calendar.YEAR), myCalendar.get(Calendar.MONTH),
                     myCalendar.get(Calendar.DAY_OF_MONTH)).show();
         });
@@ -96,14 +93,14 @@ public class CummulativeIndicators extends AppCompatActivity {
         DateTo.setOnClickListener((view) -> {
             ClickedFrom = false;
             ClickedTo = true;
-            new DatePickerDialog(CummulativeIndicators.this, date, myCalendar
+            new DatePickerDialog(CumulativeIndicators.this, date, myCalendar
                     .get(Calendar.YEAR), myCalendar.get(Calendar.MONTH),
                     myCalendar.get(Calendar.DAY_OF_MONTH)).show();
         });
 
         btnGet.setOnClickListener((view) -> {
             if (!DateFrom.getText().equals("Date From") && !DateTo.getText().equals("Date To")) {
-                GetCommulativeIndicators(String.valueOf(DateFrom.getText()), String.valueOf(DateTo.getText()));
+                getCumulativeIndicators(String.valueOf(DateFrom.getText()), String.valueOf(DateTo.getText()));
             } else {
                 showToast(R.string.pick_date,Toast.LENGTH_LONG);
             }
@@ -121,25 +118,23 @@ public class CummulativeIndicators extends AppCompatActivity {
         }
     }
 
-    public void GetCommulativeIndicators(final String DateFrom, final String DateTo) {
+    public void getCumulativeIndicators(final String DateFrom, final String DateTo) {
         if (_General.isNetworkAvailable(this)) {
-            pd = ProgressDialog.show(CummulativeIndicators.this, "", getResources().getString(R.string.GetingCummulativeReport));
+            pd = ProgressDialog.show(CumulativeIndicators.this, "", getResources().getString(R.string.GetingCummulativeReport));
             try {
                 new Thread(() -> {
-                    getCommulativeIndicators(DateFrom, DateTo);
+                    getCumulativeIndicatorsData(DateFrom, DateTo);
                     runOnUiThread(this::showCumulativeIndicators);
                     pd.dismiss();
                 }).start();
             } catch (Exception e) {
+                showToast(R.string.ErrorOccurred, Toast.LENGTH_LONG);
                 e.printStackTrace();
             }
-        } else {
-            if (!ca.CheckInternetAvailable())
-                return;
         }
     }
 
-    public void getCommulativeIndicators(String DateFrom, String DateTo) {
+    public void getCumulativeIndicatorsData(String DateFrom, String DateTo) {
         JSONObject cumulativeObj = new JSONObject();
         try {
             cumulativeObj.put("FromDate", DateFrom);
@@ -157,6 +152,7 @@ public class CummulativeIndicators extends AppCompatActivity {
                 HttpEntity entity = response.getEntity();
                 cumulative = EntityUtils.toString(entity);
             } catch (IOException e) {
+                showToast(R.string.ErrorOccurred, Toast.LENGTH_LONG);
                 e.printStackTrace();
             }
         } else {
@@ -185,8 +181,9 @@ public class CummulativeIndicators extends AppCompatActivity {
                 SPC.setText(ob.getString("suspendedPolicies"));
                 CCC.setText(ob.getString("collectedContribution"));
 
-                CommulativeReport.setVisibility(View.VISIBLE);
+                CumulativeReport.setVisibility(View.VISIBLE);
             } catch (Exception e) {
+                e.printStackTrace();
                 Toast.makeText(getApplicationContext(), R.string.ErrorOccurred, Toast.LENGTH_LONG).show();
             }
         } else {
