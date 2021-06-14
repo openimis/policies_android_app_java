@@ -37,11 +37,14 @@ In case of dispute arising out or in relation to the use of the program, it is s
             document.title = Android.getString('AddNewFamily');
             var FamilyId = queryString('f');
 
-            if (parseInt(FamilyId) > 0)
+            if (parseInt(FamilyId) != 0)
                 $('#btnNext').val(Android.getString("Save"));
 
             fillDropdowns();
+            setControls();
 
+            // Display of LanguageOfSMS is same as for ApprovalOfSMS
+            $("#LanguageOfSMS").css("display", $("#ApprovalOfSMS").css("display"));
 
             $('#ddlRegion').change(function(){
                 getDistricts($(this).val());
@@ -75,8 +78,7 @@ In case of dispute arising out or in relation to the use of the program, it is s
 
             //if FamilyId > 0; Load family
 
-            if (parseInt(FamilyId) > 0){
-
+            if (parseInt(FamilyId) != 0){
                 var strFamily = Android.getFamily(parseInt(FamilyId));
 
                 var $Family = $.parseJSON(strFamily);
@@ -91,6 +93,11 @@ In case of dispute arising out or in relation to the use of the program, it is s
                     $("#ddlDistrict").attr("disabled","disabled");
                     $("#ddlWard").attr("disabled","disabled");
                     $("#ddlVillage").attr("disabled","disabled");
+                }
+
+                if($Family[0].hasOwnProperty("familySMS")) {
+                    $("#ddlApprovalOfSMS").val($Family[0]["familySMS"]["ApprovalOfSMS"]).trigger("change");
+                    $("#ddlLanguageOfSMS").val($Family[0]["familySMS"]["LanguageOfSMS"]).trigger("change");
                 }
                 //Load remaining fields
                 bindDataFromDatafield(strFamily);
@@ -109,6 +116,8 @@ In case of dispute arising out or in relation to the use of the program, it is s
             getPovertyStatus();
             getConfirmationTypes();
             getFamilyTypes();
+            getApprovalOfSMS();
+            getLanguageOfSMS();
         }
 
         function saveFamilyLocally(){
@@ -182,6 +191,17 @@ In case of dispute arising out or in relation to the use of the program, it is s
             bindDropdown('ddlGroupType', $FamilyTypes, 'FamilyTypeCode', $textLanguage,0, Android.getString('SelectFamilyType'));
         }
 
+        function getApprovalOfSMS(){
+            var $ApprovalTypes = Android.getApprovalOfSMS();
+            bindDropdown('ddlApprovalOfSMS', $ApprovalTypes, 'value', 'key', "", Android.getString('approvalOfSMS'));
+        }
+
+        function getLanguageOfSMS(){
+            $textLanguage = "LanguageName";
+            var $Languages = Android.getLanguagesOfSMS();
+            bindDropdown('ddlLanguageOfSMS', $Languages, 'LanguageCode', $textLanguage,"", Android.getString('languageOfSMS'));
+        }
+
 
     </script>
 
@@ -230,6 +250,14 @@ In case of dispute arising out or in relation to the use of the program, it is s
         <li id="PermanentAddress">
             <span strName="PermanentAddress">Permanent Address Details</span>
             <textarea id="txtPermanentAddress" datafield="FamilyAddress"></textarea>
+        </li>
+        <li id="ApprovalOfSMS">
+            <span strName="ApprovalOfSMS">Allow SMS Messages</span>
+            <select id="ddlApprovalOfSMS" datafield="ApprovalOfSMS"></select>
+        </li>
+        <li id="LanguageOfSMS">
+            <span strName="LanguageOfSMS">Language of SMS</span>
+            <select id="ddlLanguageOfSMS" datafield="LanguageOfSMS"></select>
         </li>
     </ul>
 
