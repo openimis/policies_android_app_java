@@ -73,6 +73,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
+import java.util.Arrays;
 import java.util.Date;
 
 
@@ -922,7 +923,7 @@ public class ClientAndroidInterface {
 
             String IdentificationType = "null";
             if (!TextUtils.isEmpty(data.get("ddlIdentificationType")) && !data.get("ddlIdentificationType").equals(""))
-                IdentificationType = (data.get("ddlIdentificationType")).toString();
+                IdentificationType = (data.get("ddlIdentificationType"));
 
             String PhotoPath = data.get("hfImagePath");
             String newPhotoPath = data.get("hfNewPhotoPath");
@@ -3160,7 +3161,7 @@ public class ClientAndroidInterface {
 
             if (IsOffline == 1) {
                 if (!getRule("AllowInsureeWithoutPhoto")) {
-                    if (PhotoPath.length() == 0 && PhotoPath.equals("null") && PhotoPath == null) {
+                    if (PhotoPath == null || PhotoPath.length() == 0 || PhotoPath.equals("null")) {
                         String chfid = (Insureeobject.getString("CHFID"));
                         String lastname = (Insureeobject.getString("LastName"));
                         String othername = (Insureeobject.getString("OtherNames"));
@@ -4606,19 +4607,14 @@ public class ClientAndroidInterface {
     @JavascriptInterface
     public String GetListOfImagesContain(final String FileName) {
         File[] Photos = null;
-        global = (Global) mContext.getApplicationContext();
+        String newFileName = "";
         File Directory = new File(global.getImageFolder());
 
-        FilenameFilter filter = new FilenameFilter() {
+        Photos = Directory.listFiles((dir,filename)->filename.startsWith(FileName + "_"));
 
-            @Override
-            public boolean accept(File dir, String filename) {
-                return filename.startsWith(FileName + "_");
-            }
-        };
-        Photos = Directory.listFiles(filter);
-        String newFileName = "";
-        if (Photos.length > 0) {
+        if(Photos!=null && Photos.length > 0)
+        {
+            Arrays.sort(Photos,(f1,f2)->f1.getName().compareTo(f2.getName()));
             newFileName = Photos[Photos.length - 1].toString();
         }
         return newFileName;

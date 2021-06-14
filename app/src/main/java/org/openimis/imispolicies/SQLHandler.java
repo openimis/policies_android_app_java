@@ -743,7 +743,8 @@ public class SQLHandler extends SQLiteOpenHelper {
     }
 
     public int updateData(String tableName, ContentValues contentValues, String whereClause, String[] whereArgs) throws UserException {
-        int rowsUpdated;
+        openDatabase();
+        int rowsUpdated = 0;
         try {
             openDatabase();
             rowsUpdated = mDatabase.update(tableName, contentValues, whereClause, whereArgs);
@@ -753,9 +754,9 @@ public class SQLHandler extends SQLiteOpenHelper {
             return rowsUpdated;
         } catch (Exception e) {
             e.printStackTrace();
-            throw e;
         } finally {
             closeDatabase();
+            return  rowsUpdated;
         }
     }
 
