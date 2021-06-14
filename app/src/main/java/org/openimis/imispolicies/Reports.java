@@ -5,53 +5,38 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.Button;
 
-import com.exact.general.General;
-
-import org.openimis.imispolicies.R;
-
-public class Reports extends AppCompatActivity {
+public class
+Reports extends AppCompatActivity {
     Button SnapshotIndicators;
     Button CummulativeIndicators;
 
-    General _General;
     private ClientAndroidInterface ca;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reports);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        _General = new General(AppInformation.DomainInfo.getDomain());
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) actionBar.setDisplayHomeAsUpEnabled(true);
+
         ca = new ClientAndroidInterface(this);
 
-        SnapshotIndicators = (Button) findViewById(R.id.SnapshotIndicators);
-        CummulativeIndicators = (Button) findViewById(R.id.CummulativeIndicators);
+        SnapshotIndicators = findViewById(R.id.SnapshotIndicators);
+        CummulativeIndicators = findViewById(R.id.CummulativeIndicators);
 
+        SnapshotIndicators.setOnClickListener((view) -> openSnapshotIndicators());
 
-        SnapshotIndicators.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                openSnapshotIndicators();
-            }
-        });
-
-        CummulativeIndicators.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                openCummulativeIndicators();
-            }
-        });
+        CummulativeIndicators.setOnClickListener((view) -> openCummulativeIndicators());
     }
 
-    public void openSnapshotIndicators(){
+    public void openSnapshotIndicators() {
         openReport(SnapshotIndicators.class);
     }
 
-    public void openCummulativeIndicators(){
+    public void openCummulativeIndicators() {
         openReport(CummulativeIndicators.class);
     }
 

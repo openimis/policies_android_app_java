@@ -119,7 +119,7 @@ android {
         }
         local {
             applicationId "org.openimis.imispolicies.local"
-            buildConfigField "String", "API_BASE_URL", '"http://10.0.2.2:35788/"'
+            buildConfigField "String", "API_BASE_URL", '"http://10.0.2.2:35787/"'
             buildConfigField "String", "RAR_PASSWORD", '")(#$1HsD"'
             buildConfigField "String", "APP_DIR", '"IMIS-LOCAL"'
             resValue "string", "app_name_policies", "Policies Local"
@@ -144,6 +144,10 @@ android {
             it.java.srcDir 'src/demo/java'
             it.res.srcDir 'src/demo/res'
         }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 }
 

@@ -2,33 +2,29 @@ package org.openimis.imispolicies;
 
 import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
+import android.support.annotation.StringRes;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.DatePicker;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.exact.CallSoap.CallSoap;
 import com.exact.general.General;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
-import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
-
-import org.openimis.imispolicies.R;
-
-import static org.openimis.imispolicies.MainActivity.global;
 
 public class CummulativeIndicators extends AppCompatActivity {
 
@@ -53,7 +49,14 @@ public class CummulativeIndicators extends AppCompatActivity {
     private ProgressDialog pd;
     RelativeLayout CommulativeReport;
 
-    String commulative = null;
+    String cumulative = null;
+
+    DatePickerDialog.OnDateSetListener date = (view, year, monthOfYear, dayOfMonth) -> {
+        myCalendar.set(Calendar.YEAR, year);
+        myCalendar.set(Calendar.MONTH, monthOfYear);
+        myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+        updateLabel();
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,144 +64,138 @@ public class CummulativeIndicators extends AppCompatActivity {
         setContentView(R.layout.activity_cummulative_indicators);
 
         final ActionBar actionBar = getSupportActionBar();
-        actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setTitle(getResources().getString(R.string.CummulativeIndicators));
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setTitle(getResources().getString(R.string.CummulativeIndicators));
+        }
 
         ca = new ClientAndroidInterface(this);
 
-        DateFrom= (Button) findViewById(R.id.DateFrom);
-        DateTo= (Button) findViewById(R.id.DateTo);
-        btnGet= (Button) findViewById(R.id.btnGet);
+        DateFrom = findViewById(R.id.DateFrom);
+        DateTo = findViewById(R.id.DateTo);
+        btnGet = findViewById(R.id.btnGet);
 
-        NPC= (TextView) findViewById(R.id.NPC);
-        RPC= (TextView) findViewById(R.id.RPC);
-        EPC= (TextView) findViewById(R.id.EPC);
-        SPC= (TextView) findViewById(R.id.SPC);
-        CCC= (TextView) findViewById(R.id.CCC);
+        NPC = findViewById(R.id.NPC);
+        RPC = findViewById(R.id.RPC);
+        EPC = findViewById(R.id.EPC);
+        SPC = findViewById(R.id.SPC);
+        CCC = findViewById(R.id.CCC);
 
-        CommulativeReport = (RelativeLayout) findViewById(R.id.CommulativeReport);
+        CommulativeReport = findViewById(R.id.CommulativeReport);
 
         myCalendar = Calendar.getInstance();
 
-        DateFrom.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                ClickedTo = false;
-                ClickedFrom = true;
-                // TODO Auto-generated method stub
-                new DatePickerDialog(CummulativeIndicators.this, date, myCalendar
-                        .get(Calendar.YEAR), myCalendar.get(Calendar.MONTH),
-                        myCalendar.get(Calendar.DAY_OF_MONTH)).show();
-            }
+        DateFrom.setOnClickListener((view) -> {
+            ClickedTo = false;
+            ClickedFrom = true;
+            new DatePickerDialog(CummulativeIndicators.this, date, myCalendar
+                    .get(Calendar.YEAR), myCalendar.get(Calendar.MONTH),
+                    myCalendar.get(Calendar.DAY_OF_MONTH)).show();
         });
-        DateTo.setOnClickListener(new View.OnClickListener() {
 
-            @Override
-            public void onClick(View v) {
-                ClickedFrom = false;
-                ClickedTo = true;
-                // TODO Auto-generated method stub
-                new DatePickerDialog(CummulativeIndicators.this, date, myCalendar
-                        .get(Calendar.YEAR), myCalendar.get(Calendar.MONTH),
-                        myCalendar.get(Calendar.DAY_OF_MONTH)).show();
-            }
+        DateTo.setOnClickListener((view) -> {
+            ClickedFrom = false;
+            ClickedTo = true;
+            new DatePickerDialog(CummulativeIndicators.this, date, myCalendar
+                    .get(Calendar.YEAR), myCalendar.get(Calendar.MONTH),
+                    myCalendar.get(Calendar.DAY_OF_MONTH)).show();
         });
-        btnGet.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if(!DateFrom.getText().equals("Date From") && !DateTo.getText().equals("Date To")){
-                    GetCommulativeIndicators(String.valueOf(DateFrom.getText()),String.valueOf(DateTo.getText()));
-                }else{
-                    Toast.makeText(getApplicationContext(), "Pick dates   then Get.", Toast.LENGTH_SHORT).show();
-                }
+
+        btnGet.setOnClickListener((view) -> {
+            if (!DateFrom.getText().equals("Date From") && !DateTo.getText().equals("Date To")) {
+                GetCommulativeIndicators(String.valueOf(DateFrom.getText()), String.valueOf(DateTo.getText()));
+            } else {
+                showToast(R.string.pick_date,Toast.LENGTH_LONG);
             }
         });
     }
-    DatePickerDialog.OnDateSetListener date = new DatePickerDialog.OnDateSetListener() {
 
-        @Override
-        public void onDateSet(DatePicker view, int year, int monthOfYear,
-                              int dayOfMonth) {
-            // TODO Auto-generated method stub
-            myCalendar.set(Calendar.YEAR, year);
-            myCalendar.set(Calendar.MONTH, monthOfYear);
-            myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-            updateLabel();
-        }
-
-    };
     private void updateLabel() {
-        String myFormat = "yyyy-MM-dd"; //In which you need put here
+        String myFormat = "yyyy-MM-dd";
         SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
 
-        if(ClickedFrom == true){
-            DateFrom.setText(String.valueOf(sdf.format(myCalendar.getTime())));
-        }else{
-            DateTo.setText(String.valueOf(sdf.format(myCalendar.getTime())));
+        if (ClickedFrom) {
+            DateFrom.setText(sdf.format(myCalendar.getTime()));
+        } else {
+            DateTo.setText(sdf.format(myCalendar.getTime()));
         }
     }
+
     public void GetCommulativeIndicators(final String DateFrom, final String DateTo) {
-        if(_General.isNetworkAvailable(this)){
+        if (_General.isNetworkAvailable(this)) {
             pd = ProgressDialog.show(CummulativeIndicators.this, "", getResources().getString(R.string.GetingCummulativeReport));
             try {
-                new Thread() {
-                    public void run() {
-                        getCommulativeIndicators(DateFrom, DateTo);
-                        pd.dismiss();
-                    }
-                }.start();
-
-            }catch (Exception e){
+                new Thread(() -> {
+                    getCommulativeIndicators(DateFrom, DateTo);
+                    runOnUiThread(this::showCumulativeIndicators);
+                    pd.dismiss();
+                }).start();
+            } catch (Exception e) {
                 e.printStackTrace();
             }
-
+        } else {
+            if (!ca.CheckInternetAvailable())
+                return;
         }
     }
 
-    public void getCommulativeIndicators(String DateFrom, String DateTo){
+    public void getCommulativeIndicators(String DateFrom, String DateTo) {
+        JSONObject cumulativeObj = new JSONObject();
         try {
-            if (!ca.CheckInternetAvailable())
-                return;
-
-            JSONObject cumulativeObj = new JSONObject();
             cumulativeObj.put("FromDate", DateFrom);
             cumulativeObj.put("ToDate", DateTo);
-
-
-            ToRestApi rest = new ToRestApi();
-            HttpResponse response = rest.postToRestApiToken(cumulativeObj,"report/indicators/cumulative");
-
-            HttpEntity entity = response.getEntity();
-            commulative = EntityUtils.toString(entity);
-
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    if(commulative.length() != 0){
-                        try {
-                            JSONObject ob = new JSONObject(commulative);
-
-                            NPC.setText(ob.getString("newPolicies"));
-                            RPC.setText(ob.getString("renewedPolicies"));
-                            EPC.setText(ob.getString("expiredPolicies"));
-                            SPC.setText(ob.getString("suspendedPolicies"));
-                            CCC.setText(ob.getString("collectedContribution"));
-
-                            CommulativeReport.setVisibility(View.VISIBLE);
-                        }catch (Exception e){
-                            Toast.makeText(getApplicationContext(), "Something went wrong on the server", Toast.LENGTH_SHORT);
-                        }
-
-                    }else{
-                        Toast.makeText(getApplicationContext(), "Something went wrong on the server", Toast.LENGTH_SHORT);
-                    }
-                }
-            });
-
-        }catch (Exception e){
+        } catch (JSONException e) {
             e.printStackTrace();
+            return;
         }
+
+        ToRestApi rest = new ToRestApi();
+        HttpResponse response = rest.postToRestApiToken(cumulativeObj, "report/indicators/cumulative");
+
+        if (response.getStatusLine().getStatusCode() == 200) {
+            try {
+                HttpEntity entity = response.getEntity();
+                cumulative = EntityUtils.toString(entity);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            switch (response.getStatusLine().getStatusCode()) {
+                case 401:
+                    showToast(R.string.LoginFail, Toast.LENGTH_LONG);
+                    break;
+                case 500:
+                    showToast(R.string.SomethingWrongServer, Toast.LENGTH_LONG);
+                    break;
+                default:
+                    showToast(R.string.ErrorOccurred, Toast.LENGTH_LONG);
+                    break;
+            }
+        }
+    }
+
+    public void showCumulativeIndicators() {
+        if (cumulative != null && cumulative.length() > 0) {
+            try {
+                JSONObject ob = new JSONObject(cumulative);
+
+                NPC.setText(ob.getString("newPolicies"));
+                RPC.setText(ob.getString("renewedPolicies"));
+                EPC.setText(ob.getString("expiredPolicies"));
+                SPC.setText(ob.getString("suspendedPolicies"));
+                CCC.setText(ob.getString("collectedContribution"));
+
+                CommulativeReport.setVisibility(View.VISIBLE);
+            } catch (Exception e) {
+                Toast.makeText(getApplicationContext(), R.string.ErrorOccurred, Toast.LENGTH_LONG).show();
+            }
+        } else {
+            Toast.makeText(getApplicationContext(), R.string.NoData, Toast.LENGTH_LONG).show();
+        }
+    }
+
+    public void showToast(@StringRes int id, int length) {
+        runOnUiThread(() -> Toast.makeText(getApplicationContext(), id, length).show());
     }
 
     @Override
@@ -207,12 +204,8 @@ public class CummulativeIndicators extends AppCompatActivity {
             case android.R.id.home:
                 finish();
                 return true;
-
             default:
-                super.onOptionsItemSelected(item);
+                return super.onOptionsItemSelected(item);
         }
-        return false;
-
     }
-
 }
