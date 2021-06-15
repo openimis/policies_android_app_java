@@ -35,6 +35,7 @@ import com.exact.general.General;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -444,7 +445,7 @@ public class OverViewControlNumbers extends AppCompatActivity {
                                                 }
                                             }
 
-                                            if (response.getStatusLine().getStatusCode() == 200) {
+                                            if (response.getStatusLine().getStatusCode() == HttpURLConnection.HTTP_OK) {
                                                 JSONObject ob = null;
                                                 String token = null;
                                                 try {

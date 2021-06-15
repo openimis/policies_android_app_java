@@ -22,6 +22,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
@@ -147,7 +148,7 @@ public class CumulativeIndicators extends AppCompatActivity {
         ToRestApi rest = new ToRestApi();
         HttpResponse response = rest.postToRestApiToken(cumulativeObj, "report/indicators/cumulative");
 
-        if (response.getStatusLine().getStatusCode() == 200) {
+        if (response.getStatusLine().getStatusCode() == HttpURLConnection.HTTP_OK) {
             try {
                 HttpEntity entity = response.getEntity();
                 cumulative = EntityUtils.toString(entity);
@@ -157,10 +158,10 @@ public class CumulativeIndicators extends AppCompatActivity {
             }
         } else {
             switch (response.getStatusLine().getStatusCode()) {
-                case 401:
+                case HttpURLConnection.HTTP_UNAUTHORIZED:
                     showToast(R.string.LoginFail, Toast.LENGTH_LONG);
                     break;
-                case 500:
+                case HttpURLConnection.HTTP_INTERNAL_ERROR:
                     showToast(R.string.SomethingWrongServer, Toast.LENGTH_LONG);
                     break;
                 default:

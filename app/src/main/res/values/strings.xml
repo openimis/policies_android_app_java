@@ -398,6 +398,8 @@
   <string name="hospitalizationAmountLeft">HospitalizationAmountLeft</string>
   <string name="antenatalAmountLeft">AntenatalAmountLeft</string>
   <string name="deliveryAmountLeft">DeliveryAmountLeft</string>
+  <string name="ImisDirNotCreated">IMIS Directory could not be created.</string>
+  <string name="LogInToCheckRecieptNo">Please login first, to check receipt number.</string>
   <string name="languageOfSMS">Language Of SMS</string>
   <string name="approvalOfSMS">Approval Of SMS</string>
 </resources>

@@ -34,6 +34,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -513,7 +514,7 @@ public class OverViewPolicies extends AppCompatActivity {
                                                     e.printStackTrace();
                                                 }
                                             }
-                                            if(response.getStatusLine().getStatusCode() == 200){
+                                            if(response.getStatusLine().getStatusCode() == HttpURLConnection.HTTP_OK){
                                                 JSONObject ob = null;
                                                 String token = null;
                                                 try {

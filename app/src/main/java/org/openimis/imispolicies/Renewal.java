@@ -63,6 +63,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -354,7 +355,7 @@ public class Renewal extends AppCompatActivity {
             File MyDir = new File(global.getMainDirectory());
 
             //Create File name
-            @SuppressLint("SimpleDateFormat") SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
+            @SuppressLint("SimpleDateFormat") SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
             Calendar cal = Calendar.getInstance();
             String d = format.format(cal.getTime());
             FileName = "RenPol_" + d + "_" + etCHFID.getText().toString() + "_" + etReceiptNo.getText().toString() + ".xml";
@@ -425,7 +426,7 @@ public class Renewal extends AppCompatActivity {
         File MyDir = new File(global.getMainDirectory());
 
         //Create a file name
-        SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
         Calendar cal = Calendar.getInstance();
         String d = format.format(cal.getTime());
         FileName = "RenPolJSON_" + d + "_" + etCHFID.getText().toString() + "_" + etReceiptNo.getText().toString() + ".txt";
@@ -747,45 +748,53 @@ public class Renewal extends AppCompatActivity {
             if (etReceiptNo.getText().toString().trim().length() > 0) {
 //                new Thread() {
 //                    public void run() {
+                HttpResponse response = null;
 
-                boolean isUniqueReceiptNo = false;
-                String entityString = "";
-
-                try{
+                try {
                     JSONObject receiptObj = new JSONObject();
                     receiptObj.put("ReceiptNo", etReceiptNo.getText().toString());
                     receiptObj.put("CHFID", etCHFID.getText().toString());
 
                     ToRestApi rest = new ToRestApi();
-                    HttpResponse response = rest.postToRestApiToken(receiptObj,"premium/receipt");
-
-                    HttpEntity entity = response.getEntity();
-                    entityString = EntityUtils.toString(entity);
-                }catch(Exception e){}
-
-                isUniqueReceiptNo = Boolean.valueOf(entityString);
-
-                if (!isUniqueReceiptNo) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            ca.ShowDialog(getResources().getString(R.string.InvalidReceiptNo));
-                            etReceiptNo.requestFocus();
-                        }
-                    });
-
-                    return false;
+                    response = rest.postToRestApiToken(receiptObj, "premium/receipt");
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
 
-//                    }
-//                }.start();
-
+                if (response != null) {
+                    int responseCode = response.getStatusLine().getStatusCode();
+                    boolean isUniqueReceiptNo = false;
+                    if (responseCode == HttpURLConnection.HTTP_OK) {
+                        try {
+                            isUniqueReceiptNo = Boolean.parseBoolean(EntityUtils.toString(response.getEntity()));
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        if (!isUniqueReceiptNo) {
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    ca.ShowDialog(getResources().getString(R.string.InvalidReceiptNo));
+                                    etReceiptNo.requestFocus();
+                                }
+                            });
+                            return false;
+                        }
+                    } else if (responseCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                ca.ShowDialog(getResources().getString(R.string.LogInToCheckRecieptNo));
+                                etReceiptNo.requestFocus();
+                            }
+                        });
+                        return false;
+                    }
+                }
+            } else {
+                return false;
             }
         }
-//        if(etPayer.getText().length() ==0){
-//          //  ShowDialog(etPayer, getResources().getString(R.string.MissingClaimID));
-//            return false;
-//        }
         return true;
     }
 

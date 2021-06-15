@@ -383,7 +383,7 @@ public class MainActivity extends AppCompatActivity
             OfficerName.setText(global.getOfficerName());
     }
 
-    public static final void SetLogedIn(String Lg, String Lo){
+    public static void SetLogedIn(String Lg, String Lo){
         if(global.getUserId() > 0)
         { Login.setText(Lo);
 
@@ -392,10 +392,15 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void CreateFolders() {
-        global.getMainDirectory();
+        boolean dirsCreated = !"".equals(global.getMainDirectory());
         String[] subdirectories = {"Enrolment", "Photos", "Database", "Authentications", "AcceptedFeedback", "RejectedFeedback", "AcceptedRenewal", "RejectedRenewal", "Family","EnrolmentXML"};
         for (String dir : subdirectories) {
-            global.getSubdirectory(dir);
+            dirsCreated &= !"".equals(global.getSubdirectory(dir));
+        }
+
+        if(!dirsCreated)
+        {
+            Toast.makeText(getApplicationContext(), getResources().getString(R.string.ImisDirNotCreated), Toast.LENGTH_SHORT).show();
         }
     }
 

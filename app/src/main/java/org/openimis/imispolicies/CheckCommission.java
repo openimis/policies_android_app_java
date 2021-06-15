@@ -35,6 +35,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -434,7 +435,7 @@ public class CheckCommission extends AppCompatActivity {
                                     LoginDialogBox();
                                     if(tokenl.getTokenText().length() > 1){
                                         View view = findViewById(R.id.actv);
-                                        if(c == 500){
+                                        if(c == HttpURLConnection.HTTP_INTERNAL_ERROR){
                                             Snackbar.make(view, c + "-"+getResources().getString(R.string.ServerError), Snackbar.LENGTH_LONG)
                                                     .setAction("Action", null).show();
                                         }else{
@@ -624,7 +625,7 @@ public class CheckCommission extends AppCompatActivity {
                                                 }
                                             }
 
-                                            if(response.getStatusLine().getStatusCode() == 200){
+                                            if(response.getStatusLine().getStatusCode() == HttpURLConnection.HTTP_OK){
                                                 JSONObject ob = null;
                                                 String token = null;
                                                 try {
