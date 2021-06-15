@@ -1077,7 +1077,7 @@ public class MainActivity extends AppCompatActivity
             if(_General.isNewVersionAvailable(VersionField,MainActivity.this,getApplicationContext().getPackageName())){
                 //Show notification bar
                 mNotificationManager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
-                //final Notification NotificationDetails = new Notification(R.drawable.ic_launcher, getResources().getString(R.string.NotificationAlertText), System.currentTimeMillis());
+                //final Notification NotificationDetails = new Notification(R.drawable.ic_launcher_policies, getResources().getString(R.string.NotificationAlertText), System.currentTimeMillis());
                 //NotificationDetails.flags = Notification.FLAG_SHOW_LIGHTS | Notification.FLAG_AUTO_CANCEL | Notification.DEFAULT_SOUND | Notification.DEFAULT_VIBRATE;
                 //NotificationDetails.setLatestEventInfo(context, ContentTitle, ContentText, intent);
                 //mNotificationManager.notify(SIMPLE_NOTFICATION_ID, NotificationDetails);
