@@ -40,6 +40,9 @@ android {
         versionName gitVersionName
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         useLibrary('org.apache.http.legacy')
+        vectorDrawables {
+            useSupportLibrary = true
+        }
     }
     buildTypes {
         release {
@@ -128,22 +131,23 @@ android {
         }
     }
     sourceSets {
-
         chfDev.java.srcDir 'src/chf/java'
         chfDev.res.srcDir 'src/chf/res'
 
         mvDev.java.srcDir 'src/master/java'
+        mvDev.res.srcDir 'src/master/java'
 
         local.java.srcDir 'src/master/java'
-        local.res.srcDir 'src/demo/res'
+        local.res.srcDir 'src/master/res'
 
         bephaDev.java.srcDir 'src/bepha/java'
         bephaDev.res.srcDir 'src/bepha/res'
 
-        [demoProd, demoRelease].each {
-            it.java.srcDir 'src/demo/java'
-            it.res.srcDir 'src/demo/res'
-        }
+        demoProd.java.srcDir 'src/demoProd/java'
+        demoProd.res.srcDir 'src/demoProd/res'
+
+        demoRelease.java.srcDir 'src/demoRelease/java'
+        demoRelease.res.srcDir 'src/demoRelease/res'
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
