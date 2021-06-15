@@ -295,7 +295,7 @@
   <string name="MaxInstallment">This is the last installment according to the product definition.<br/>Price of the policy not covered yet. Please select action to perform.</string>
   <string name="Reports">Reports</string>
   <string name="SnapshotIndicators">Snapshot Indicators</string>
-  <string name="CummulativeIndicators">Cumulative Indicators</string>
+  <string name="CumulativeIndicators">Cumulative Indicators</string>
   <string name="NumberOfFAP">Number of Families with Active Policies</string>
   <string name="NumberOfFEP">Number of Families with Expired Policies</string>
   <string name="NumberOfFIP">Number of Families with Idle Policies</string>
@@ -400,4 +400,6 @@
   <string name="deliveryAmountLeft">DeliveryAmountLeft</string>
   <string name="ImisDirNotCreated">IMIS Directory could not be created.</string>
   <string name="LogInToCheckRecieptNo">Please login first, to check receipt number.</string>
+  <string name="languageOfSMS">Language Of SMS</string>
+  <string name="approvalOfSMS">Approval Of SMS</string>
 </resources>

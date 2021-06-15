@@ -43,6 +43,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.xmlpull.v1.XmlSerializer;
 
+import java.io.Console;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -640,6 +641,13 @@ public class SQLHandler extends SQLiteOpenHelper {
                                         serializer.text("");
                                         serializer.endTag(null, cursor.getColumnName(j));
                                     }
+                                }else if(cursor.getColumnName(j).equals("isOffline")){
+                                    String isOffline = cursor.getString(j);
+                                    if (isOffline.equals("2"))
+                                        isOffline = "0";
+                                    serializer.startTag(null, cursor.getColumnName(j));
+                                    serializer.text(isOffline);
+                                    serializer.endTag(null, cursor.getColumnName(j));
                                 }else{
                                     serializer.startTag(null, cursor.getColumnName(j));
                                     serializer.text(cursor.getString(j));
@@ -657,7 +665,10 @@ public class SQLHandler extends SQLiteOpenHelper {
                             serializer.text("");
                             serializer.endTag(null, cursor.getColumnName(j));
                         }
+                    }
+                    if (sublabel.equals("Family")) {
 
+                        serializer = addFamilySmsTag(serializer, cursor.getString(0));
                     }
                     serializer.endTag(null, sublabel);
                     cursor.moveToNext();
@@ -677,6 +688,35 @@ public class SQLHandler extends SQLiteOpenHelper {
 
         return FileName;
 
+    }
+
+    private XmlSerializer addFamilySmsTag(XmlSerializer serializer, String familyId) throws IOException {
+        String[] args = {familyId};
+        serializer.startTag(null, "FamilySMS");
+        try {
+            JSONObject familySMS =
+                    getResult("SELECT * FROM tblFamilySMS where FamilyId = ? LIMIT 1;",
+                            args).getJSONObject(0);
+            serializer.startTag(null, "FamilyId");
+            serializer.text(args[0]);
+            serializer.endTag(null, "FamilyId");
+
+            serializer.startTag(null, "ApprovalOfSMS");
+            serializer.text(
+                    String.valueOf(familySMS.getString("ApprovalOfSMS").equals("1"))
+            );
+            serializer.endTag(null, "ApprovalOfSMS");
+
+            serializer.startTag(null, "LanguageOfSMS");
+            serializer.text(familySMS.getString("LanguageOfSMS"));
+
+            serializer.endTag(null, "LanguageOfSMS");
+        } catch (Exception e) {
+            Log.d("CreateEnrolmentXML", "Failed to create FamilySMS tag in enrolment");
+            e.printStackTrace();
+        }
+        serializer.endTag(null, "FamilySMS");
+        return serializer;
     }
 
 
@@ -743,7 +783,8 @@ public class SQLHandler extends SQLiteOpenHelper {
     }
 
     public int updateData(String tableName, ContentValues contentValues, String whereClause, String[] whereArgs) throws UserException {
-        int rowsUpdated;
+        openDatabase();
+        int rowsUpdated = 0;
         try {
             openDatabase();
             rowsUpdated = mDatabase.update(tableName, contentValues, whereClause, whereArgs);
@@ -753,9 +794,9 @@ public class SQLHandler extends SQLiteOpenHelper {
             return rowsUpdated;
         } catch (Exception e) {
             e.printStackTrace();
-            throw e;
         } finally {
             closeDatabase();
+            return  rowsUpdated;
         }
     }
 

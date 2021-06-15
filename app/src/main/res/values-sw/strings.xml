@@ -295,7 +295,7 @@
   <string name="MaxInstallment"><![CDATA[Haya ni malipo yako ya mwisho kulingana na mkataba, Bado hujakamilisha malipo. <br/>Tafadhali chagua hatua zifuatazo kuendela.]]></string>
   <string name="Reports">Ripoti</string>
   <string name="SnapshotIndicators">Takwmi za ujumla</string>
-  <string name="CummulativeIndicators">Takwimu kwa kipindi fulani</string>
+  <string name="CumulativeIndicators">Takwimu kwa kipindi fulani</string>
   <string name="NumberOfFAP">Namba ya familia zenye Active Policies</string>
   <string name="NumberOfFEP">Namba ya familia zenye Expired Policies</string>
   <string name="NumberOfFIP">Namba ya familia zenye Idle Policies</string>
@@ -399,4 +399,8 @@
   <string name="hospitalizationAmountLeft">HospitalizationAmountLeft</string>
   <string name="antenatalAmountLeft">AntenatalAmountLeft</string>
   <string name="deliveryAmountLeft">DeliveryAmountLeft</string>
+  <string name="languageOfSMS">Language Of SMS</string>
+  <string name="approvalOfSMS">Approval Of SMS</string>
+    <string name="ImisDirNotCreated">IMIS Directory could not be created.</string>
+  <string name="LogInToCheckRecieptNo">Please login first, to check receipt number.</string>
 </resources>

@@ -109,8 +109,8 @@ public class MainActivity extends AppCompatActivity
     private String selectedLanguage;
     public String ImagePath;
     public String InsureeNumber;
-    static   TextView Login;
-    static  TextView OfficerName;
+    static TextView Login;
+    static TextView OfficerName;
     ClientAndroidInterface ca;
     String aBuffer = "";
     String calledFrom = "java";
@@ -119,7 +119,7 @@ public class MainActivity extends AppCompatActivity
     General _General = new General(AppInformation.DomainInfo.getDomain());
 
     final String VersionField = "AppVersionImis";
-    final String ApkFileLocation = _General.getDomain() + "/Apps/IMIS.apk";
+    final String ApkFileLocation = AppInformation.DomainInfo.getDomain() + "/Apps/IMIS.apk";
     final int SIMPLE_NOTFICATION_ID = 98029;
 
     NotificationManager mNotificationManager;

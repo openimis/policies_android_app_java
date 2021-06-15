@@ -58,7 +58,7 @@ public class Global extends Application {
     private String AppDirectory;
     private Map<String, String> SubDirectories = new HashMap<>();
 
-    private List<String> ProtectedDirectories = Arrays.asList("Authentications","Database");
+    private List<String> ProtectedDirectories = Arrays.asList("Authentications","Database","Images");
 
     public static Global getGlobal() {
         return GlobalContext;
