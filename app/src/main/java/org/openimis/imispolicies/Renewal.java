@@ -63,6 +63,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -763,7 +764,7 @@ public class Renewal extends AppCompatActivity {
                 if (response != null) {
                     int responseCode = response.getStatusLine().getStatusCode();
                     boolean isUniqueReceiptNo = false;
-                    if (responseCode == 200) {
+                    if (responseCode == HttpURLConnection.HTTP_OK) {
                         try {
                             isUniqueReceiptNo = Boolean.parseBoolean(EntityUtils.toString(response.getEntity()));
                         } catch (IOException e) {
@@ -779,7 +780,7 @@ public class Renewal extends AppCompatActivity {
                             });
                             return false;
                         }
-                    } else if (responseCode == 401) {
+                    } else if (responseCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {

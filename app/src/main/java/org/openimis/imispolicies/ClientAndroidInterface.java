@@ -4227,7 +4227,7 @@ public class ClientAndroidInterface {
             }
         }
 
-        if (response.getStatusLine().getStatusCode() == 200) {
+        if (response.getStatusLine().getStatusCode() == HttpURLConnection.HTTP_OK) {
             JSONObject ob = null;
             String jwt = null;
             try {
@@ -4426,10 +4426,12 @@ public class ClientAndroidInterface {
 
     @JavascriptInterface
     public Boolean UploadOfflineFeedbackRenewal(final String ActivityName) {
-        final File[] files,jsonFiles;
-        final String functionName,jsonPropertyName, path;
+        final File[] files, jsonFiles;
+        final String functionName, jsonPropertyName, path;
         final int totalFiles;
         final ProgressDialog pd;
+
+        result = ToRestApi.UploadStatus.NO_RESPONSE;
 
         path = global.getMainDirectory();
 
@@ -4466,84 +4468,70 @@ public class ClientAndroidInterface {
 
         pd = ProgressDialog.show(mContext, "", mContext.getResources().getString(R.string.Uploading));
 
-        new Thread() {
-            public void run() {
-                ToRestApi rest = new ToRestApi();
-                JSONObject obj;
-                int uploadsAccepted=0, uploadsRejected=0, uploadFailed=0;
-                for (int i = 0; i < jsonFiles.length; i++) {
-                    String jsonText = global.getFileText(jsonFiles[i].getPath());
+        new Thread(() -> {
+            ToRestApi rest = new ToRestApi();
+            JSONObject obj;
+            int uploadsAccepted = 0, uploadsRejected = 0, uploadFailed = 0;
+            for (int i = 0; i < jsonFiles.length; i++) {
+                String jsonText = global.getFileText(jsonFiles[i].getPath());
 
-                    HttpResponse response = null;
-                    int responseCode=-1;
-                    int uploadStatus=-1;
+                HttpResponse response = null;
+                int responseCode = -1;
+                int uploadStatus = -1;
 
-                    try {
-                        obj = new JSONObject(jsonText).getJSONObject(jsonPropertyName);
-                        response = rest.postToRestApiToken(obj,functionName);
-                        if(response!=null) {
-                            responseCode = response.getStatusLine().getStatusCode();
-                            if (responseCode == 200) {
-                                uploadStatus = Integer.parseInt(EntityUtils.toString(response.getEntity()));
-                            }
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-
-                    if(response == null || responseCode!=200 || uploadStatus==2)
-                    {
-                        uploadFailed += 1;
-                    } else if (responseCode == 200) {
-                        if (uploadStatus == 1) {
-                            uploadsAccepted += 1;
-                            MoveFile(files[i], 1);
-                            MoveFile(jsonFiles[i], 1);
-                        } else //if(uploadStatus==0)
-                        {
-                            uploadsRejected += 1;
-                            MoveFile(files[i], 2);
-                            MoveFile(jsonFiles[i], 2);
+                try {
+                    obj = new JSONObject(jsonText).getJSONObject(jsonPropertyName);
+                    response = rest.postToRestApiToken(obj, functionName);
+                    if (response != null) {
+                        responseCode = response.getStatusLine().getStatusCode();
+                        if (responseCode == HttpURLConnection.HTTP_OK) {
+                            uploadStatus = Integer.parseInt(EntityUtils.toString(response.getEntity()));
                         }
                     }
-
-//                    final String status = "Accepted: " + uploadsAccepted + "\n" +
-//                            "Rejected: " + uploadsRejected + "\n" +
-//                            "Failed: " + uploadFailed + "\n";
-//
-//                    ((Activity) mContext).runOnUiThread(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            ShowDialog(status);
-//                        }
-//                    });
-
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
 
-                if(uploadsAccepted==0 && uploadsRejected==0)
-                {
-                    result = -2;
-                }
-                
-                ((Activity) mContext).runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        switch (result) {
-                            case -1:
-                                ShowDialog(mContext.getResources().getString(R.string.FTPConnectionFailed));
-                                break;
-                            case -2:
-                                ShowDialog(mContext.getResources().getString(R.string.SomethingWrongServer));
-                                break;
-                            default:
-                                ShowDialog(mContext.getResources().getString(R.string.BulkUpload));
-                        }
+                if (response == null || responseCode != HttpURLConnection.HTTP_OK || uploadStatus == ToRestApi.UploadStatus.ERROR) {
+                    uploadFailed += 1;
+                } else if (responseCode == HttpURLConnection.HTTP_OK) {
+                    if (uploadStatus == ToRestApi.UploadStatus.ACCEPTED) {
+                        uploadsAccepted += 1;
+                        MoveFile(files[i], 1);
+                        MoveFile(jsonFiles[i], 1);
+                    } else {
+                        uploadsRejected += 1;
+                        MoveFile(files[i], 2);
+                        MoveFile(jsonFiles[i], 2);
                     }
-                });
-                pd.dismiss();
+                }
             }
 
-        }.start();
+            if (uploadsAccepted == 0 && uploadsRejected == 0) {
+                result = ToRestApi.UploadStatus.ERROR;
+            } else if(uploadsAccepted > 0 && uploadsRejected == 0) {
+                result = ToRestApi.UploadStatus.ACCEPTED;
+            } else if (uploadsAccepted == 0 && uploadsRejected > 0) {
+                result = ToRestApi.UploadStatus.REJECTED;
+            } else {
+                //There are both accepted and rejected entries in a bulk
+                result = ToRestApi.UploadStatus.ACCEPTED;
+            }
+
+            ((Activity) mContext).runOnUiThread(() -> {
+                switch (result) {
+                    case ToRestApi.UploadStatus.NO_RESPONSE:
+                        ShowDialog(mContext.getResources().getString(R.string.FTPConnectionFailed));
+                        break;
+                    case ToRestApi.UploadStatus.ERROR:
+                        ShowDialog(mContext.getResources().getString(R.string.SomethingWrongServer));
+                        break;
+                    default:
+                        ShowDialog(mContext.getResources().getString(R.string.BulkUpload));
+                }
+            });
+            pd.dismiss();
+        }).start();
         return true;
     }
 
