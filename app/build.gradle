@@ -62,7 +62,7 @@ android {
     flavorDimensions 'std'
     productFlavors.all {
         buildConfigField "String", "API_BASE_URL", '"http://demo.openimis.org/rest/"'
-        buildConfigField "boolean", "SHOW_CONTROL_NUMBER_MENU", 'false'
+        buildConfigField "boolean", "SHOW_PAYMENT_MENU", 'false'
         buildConfigField "String", "RAR_PASSWORD", '")(#$1HsD"'
         buildConfigField "String", "APP_DIR", '"IMIS"'
         resValue "string", "app_name_policies", "Policies"
@@ -89,7 +89,7 @@ android {
             applicationId "org.openimis.imispolicies.chf"
             buildConfigField "String", "API_BASE_URL", '"http://chf-dev.swisstph-mis.ch/rest/"'
             buildConfigField "String", "RAR_PASSWORD", '")(#$1HsD"'
-            buildConfigField "boolean", "SHOW_CONTROL_NUMBER_MENU", 'true'
+            buildConfigField "boolean", "SHOW_PAYMENT_MENU", 'true'
             buildConfigField "String", "APP_DIR", '"IMIS-CHFDEV"'
             resValue "string", "app_name_policies", "Policies CHF DEV"
             dimension = 'std'
@@ -98,7 +98,7 @@ android {
             applicationId "org.openimis.imispolicies.mv"
             buildConfigField "String", "API_BASE_URL", '"http://imis-mv.swisstph-mis.ch/rest/"'
             buildConfigField "String", "RAR_PASSWORD", '")(#$1HsD"'
-            buildConfigField "boolean", "SHOW_CONTROL_NUMBER_MENU", 'true'
+            buildConfigField "boolean", "SHOW_PAYMENT_MENU", 'true'
             buildConfigField "String", "APP_DIR", '"IMIS-MVDEV"'
             resValue "string", "app_name_policies", "Policies MV DEV"
             dimension = 'std'
@@ -116,7 +116,7 @@ android {
             buildConfigField "String", "API_BASE_URL", '"http://196.192.73.26/rest/"'
             buildConfigField "String", "RAR_PASSWORD", '")(#$1HsD"'
             buildConfigField "String", "APP_DIR", '"IMIS-PORALGUAT"'
-            buildConfigField "boolean", "SHOW_CONTROL_NUMBER_MENU", 'true'
+            buildConfigField "boolean", "SHOW_PAYMENT_MENU", 'true'
             resValue "string", "app_name_policies", "Policies PORALGUAT"
             dimension = 'std'
         }
@@ -125,6 +125,7 @@ android {
             buildConfigField "String", "API_BASE_URL", '"http://10.0.2.2:35787/"'
             buildConfigField "String", "RAR_PASSWORD", '")(#$1HsD"'
             buildConfigField "String", "APP_DIR", '"IMIS-LOCAL"'
+            buildConfigField "boolean", "SHOW_PAYMENT_MENU", 'true'
             resValue "string", "app_name_policies", "Policies Local"
             dimension = 'std'
             versionCode = gitVersionCodeTime

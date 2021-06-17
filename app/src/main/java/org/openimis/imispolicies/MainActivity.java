@@ -366,15 +366,15 @@ public class MainActivity extends AppCompatActivity
 //        }
 
 
-        hideControlNumberMenuItem();
+        setVisibilityOfPaymentMenu();
 
     }
 
-    private void hideControlNumberMenuItem()
+    private void setVisibilityOfPaymentMenu()
     {
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         Menu nav_Menu = navigationView.getMenu();
-        nav_Menu.findItem(R.id.nav_control_numbers).setVisible(AppInformation.MenuInfo.getShowControlNumberMenu());
+        nav_Menu.findItem(R.id.nav_payment).setVisible(AppInformation.MenuInfo.getShowPaymentNumberMenu());
     }
 
     @Override
@@ -829,8 +829,8 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
-        if (!AppInformation.MenuInfo.getShowControlNumberMenu()) {
-            menu.removeItem(R.id.nav_control_numbers);
+        if (!AppInformation.MenuInfo.getShowPaymentNumberMenu()) {
+            menu.removeItem(R.id.nav_payment);
         }
         return true;
     }
@@ -970,9 +970,9 @@ public class MainActivity extends AppCompatActivity
             }
 
 
-        }else if (id == R.id.nav_control_numbers) {
+        }else if (id == R.id.nav_payment) {
             ClientAndroidInterface ca = new ClientAndroidInterface(context);
-            ca.launchControlNumbers();
+            ca.launchPayment();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
