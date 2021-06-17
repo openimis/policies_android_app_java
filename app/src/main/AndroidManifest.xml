@@ -103,7 +103,7 @@
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/CumulativeIndicators"
             android:screenOrientation="portrait" />
-        <activity android:name="org.openimis.imispolicies.ControlNumbers" />
+        <activity android:name="org.openimis.imispolicies.PaymentOverview" />
         <activity android:name="org.openimis.imispolicies.SearchOverViewPolicies" />
         <activity android:name="org.openimis.imispolicies.OverViewPolicies" />
         <activity android:name="org.openimis.imispolicies.OverViewControlNumbers" />

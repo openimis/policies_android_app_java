@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="org.openimis.imispolicies.tz.co.exact.ControlNumbers">
+    tools:context="org.openimis.imispolicies.PaymentOverview">
 
     <TextView
         android:id="@+id/OverViewPolicies"
@@ -18,7 +18,20 @@
         android:gravity="center"
         android:textColor="@color/white"
         android:background="@color/colorPrimary"
-        android:text="@string/OverViewPolicies"/>
+        android:text="@string/GetPaymentCNOnline"/>
+
+    <TextView
+        android:id="@+id/NotEnrolledPolicies"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_margin="10dp"
+        android:typeface="monospace"
+        android:fontFamily="sans-serif-light"
+        android:textSize="20dp"
+        android:gravity="center"
+        android:textColor="@color/white"
+        android:background="@color/colorPrimary"
+        android:text="@string/GetPaymentCNOffline" />
 
     <TextView
         android:id="@+id/OverViewControlNumber"
@@ -31,7 +44,7 @@
         android:gravity="center"
         android:textColor="@color/white"
         android:background="@color/colorPrimary"
-        android:text="@string/OverViewControlNumber"/>
+        android:text="@string/OverviewPaymentCN"/>
 
     <TextView
         android:id="@+id/CheckCommission"
@@ -45,17 +58,4 @@
         android:textColor="@color/white"
         android:background="@color/colorPrimary"
         android:text="@string/CheckCommission" />
-
-    <TextView
-        android:id="@+id/NotEnrolledPolicies"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_margin="10dp"
-        android:typeface="monospace"
-        android:fontFamily="sans-serif-light"
-        android:textSize="20dp"
-        android:gravity="center"
-        android:textColor="@color/white"
-        android:background="@color/colorPrimary"
-        android:text="@string/not_enrolled_policies" />
 </LinearLayout>

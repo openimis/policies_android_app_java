@@ -6425,8 +6425,8 @@ public class ClientAndroidInterface {
     }
 
     @JavascriptInterface
-    public void launchControlNumbers() {
-        Intent intent = new Intent(mContext, ControlNumbers.class);
+    public void launchPayment() {
+        Intent intent = new Intent(mContext, PaymentOverview.class);
         mContext.startActivity(intent);
     }
 
