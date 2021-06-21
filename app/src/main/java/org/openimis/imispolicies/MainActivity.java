@@ -189,40 +189,42 @@ public class MainActivity extends AppCompatActivity
                 ClientAndroidInterface.inProgress = false;
             }*/
         } else if (requestCode == 4 && resultCode == RESULT_OK) {
+            // When master data file picked, this handles every file picker call so it should be changed when different file needs to be picked
             Uri uri = data.getData();
-            int size = 0;
+            if (uri != null) {
+                int size = 0;
 
-            String[] proj = {MediaStore.Files.FileColumns.SIZE};
-            Cursor c = getContentResolver().query(uri, proj, null, null, null);
-            c.moveToFirst();
-            size = c.getInt(0);
+                String[] proj = {MediaStore.Files.FileColumns.SIZE};
+                Cursor c = getContentResolver().query(uri, proj, null, null, null);
+                c.moveToFirst();
+                size = c.getInt(0);
 
-            byte[] b = new byte[size];
-            int bytesRead = 0;
+                byte[] b = new byte[size];
+                int bytesRead = 0;
 
-            try {
-                //the only way to read data from android uri
-                bytesRead = getContentResolver().openInputStream(uri).read(b);
+                try {
+                    //the only way to read data from android uri
+                    bytesRead = getContentResolver().openInputStream(uri).read(b);
 
-                if(size==bytesRead)
-                {
-                    String path = global.getSubdirectory("Database");
-                    f = new File(path,"MasterData.rar");
-                    if(f.exists() || f.createNewFile())
-                        new FileOutputStream(f).write(b);
+                    if (size == bytesRead) {
+                        String path = global.getSubdirectory("Database");
+                        f = new File(path, "MasterData.rar");
+                        if (f.exists() || f.createNewFile())
+                            new FileOutputStream(f).write(b);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
+                ShowDialogTex2();
             }
-            ShowDialogTex2();
         } else if (requestCode == 4 && resultCode == 0) {
             finish();
-        } else {//if user cancels
+        } else {
+            //if user cancels
             ClientAndroidInterface.inProgress = false;
             this.InsureeNumber = null;
             this.ImagePath = null;
         }
-
     }
 
     @SuppressLint({"AddJavascriptInterface", "SetJavaScriptEnabled"})
@@ -240,7 +242,6 @@ public class MainActivity extends AppCompatActivity
 
         setContentView(R.layout.activity_main);
 
-
         sqlHandler = new SQLHandler(this);
 
         sqlHandler.isPrivate = true;
@@ -253,9 +254,9 @@ public class MainActivity extends AppCompatActivity
         if (!database.exists()) {
             sqlHandler.getReadableDatabase();
             if (copyDatabase(this)) {
-                Toast.makeText(this, "Copy database success", Toast.LENGTH_SHORT);
+                Toast.makeText(this, "Copy database success", Toast.LENGTH_SHORT).show();
             } else {
-                Toast.makeText(this, "Copy database failed", Toast.LENGTH_SHORT);
+                Toast.makeText(this, "Copy database failed", Toast.LENGTH_SHORT).show();
                 return;
             }
         } else 
@@ -264,31 +265,24 @@ public class MainActivity extends AppCompatActivity
         //Create image folder
         createImageFolder();
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+        FloatingActionButton fab = findViewById(R.id.fab);
+        fab.setOnClickListener(view -> Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                .setAction("Action", null).show());
 
-
-            }
-        });
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         //noinspection deprecation
         drawer.setDrawerListener(toggle);
         toggle.syncState();
 
-        navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView = findViewById(R.id.nav_view);
 
         navigationView.setNavigationItemSelectedListener(this);
-        wv = (WebView) findViewById(R.id.webview);
+        wv = findViewById(R.id.webview);
         WebSettings settings = wv.getSettings();
         settings.setJavaScriptEnabled(true);
         //noinspection deprecation
@@ -320,26 +314,23 @@ public class MainActivity extends AppCompatActivity
                 getSupportActionBar().setSubtitle(title);
             }
         });
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        NavigationView navigationView = findViewById(R.id.nav_view);
         View headerview = navigationView.getHeaderView(0);
-          Login =(TextView) headerview.findViewById(R.id.tvLogin);
-        OfficerName =(TextView) headerview.findViewById(R.id.tvOfficerName);
+        Login = headerview.findViewById(R.id.tvLogin);
+        OfficerName = headerview.findViewById(R.id.tvOfficerName);
 
-        Login.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                wv.loadUrl("file:///android_asset/pages/Login.html?s=2");
-                DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-                drawer.closeDrawer(GravityCompat.START);
-                SetLogedIn(getApplication().getResources().getString(R.string.Login),getApplication().getResources().getString(R.string.Logout));
-            }
+        Login.setOnClickListener(v -> {
+            wv.loadUrl("file:///android_asset/pages/Login.html?s=3");
+            DrawerLayout drawer1 = findViewById(R.id.drawer_layout);
+            drawer1.closeDrawer(GravityCompat.START);
+            SetLoggedIn(getApplication().getResources().getString(R.string.Login),getApplication().getResources().getString(R.string.Logout));
         });
         ca = new ClientAndroidInterface(context);
         if(ca.isMasterDataAvailable() > 0){
             loadLanguages();
         }
 
-
+        SetLoggedIn(getResources().getString(R.string.Login), getResources().getString(R.string.Logout));
 
         navigationView.setCheckedItem(R.id.nav_home);
         if (TextUtils.isEmpty(global.getOfficerCode())){
@@ -348,31 +339,12 @@ public class MainActivity extends AppCompatActivity
         }
         _General.isSDCardAvailable();
 
-        //Check if network available
-//        if (_General.isNetworkAvailable(MainActivity.this)){
-//            //Check if any updates available on the server.
-//            new Thread(){
-//                public void run(){
-//                    CheckForUpdates();
-//                }
-//
-//            }.start();
-//tvMode.setText(Html.fromHtml("<font color='green'>Online mode.</font>"));
-
-//        }else{
-//tvMode.setText(Html.fromHtml("<font color='red'>Offline mode.</font>"));
-            //setTitle(getResources().getString(R.string.app_name) + "-" + getResources().getString(R.string.OfflineMode));
-            //setTitleColor(getResources().getColor(R.color.Red));
-//        }
-
-
         hideControlNumberMenuItem();
-
     }
 
     private void hideControlNumberMenuItem()
     {
-        navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView = findViewById(R.id.nav_view);
         Menu nav_Menu = navigationView.getMenu();
         nav_Menu.findItem(R.id.nav_control_numbers).setVisible(AppInformation.MenuInfo.getShowControlNumberMenu());
     }
@@ -383,12 +355,13 @@ public class MainActivity extends AppCompatActivity
             OfficerName.setText(global.getOfficerName());
     }
 
-    public static void SetLogedIn(String Lg, String Lo){
-        if(global.getUserId() > 0)
-        { Login.setText(Lo);
-
+    public static void SetLoggedIn(String Lg, String Lo){
+        if(global.isLoggedIn()) {
+            Login.setText(Lo);
         }
-        else Login.setText(Lg);
+        else {
+            Login.setText(Lg);
+        }
     }
 
     public void CreateFolders() {
@@ -893,89 +866,64 @@ public class MainActivity extends AppCompatActivity
 
         if (id == R.id.nav_home) {
             wv.loadUrl("file:///android_asset/pages/Home.html");
-        }
-        else if (id == R.id.nav_acquire) {
+        } else if (id == R.id.nav_acquire) {
             Intent intent = new Intent(this, Acquire.class);
             startActivity(intent);
-        }
-        else if (id == R.id.nav_enrolment) {
+        } else if (id == R.id.nav_enrolment) {
             wv.loadUrl("file:///android_asset/pages/Enrollment.html");
-        }
-//        else if (id == R.id.nav_login) {
-//            wv.loadUrl("file:///android_asset/pages/Login.html?s=2");
-//        }
-        else if (id == R.id.nav_modify_family) {
-            wv.loadUrl("file:///android_asset/pages/Search.html");
+        } else if (id == R.id.nav_modify_family) {
+            global = (Global) getApplicationContext();
+            if(global.isLoggedIn()){
+                wv.loadUrl("file:///android_asset/pages/Search.html");
+            }else{
+                wv.loadUrl("file:///android_asset/pages/Login.html?s=1");
+            }
+
         } else if (id == R.id.nav_renewal) {
             Intent i = new Intent(this, RenewList.class);
             startActivity(i);
 
         }else if (id == R.id.nav_reports) {
-            Global global = (Global) MainActivity.this.getApplicationContext();
-            int userid = global.getUserId();
-            if(userid > 0){
+            Global global = (Global) getApplicationContext();
+            if(global.isLoggedIn()){
                 Intent i = new Intent(this, Reports.class);
                 startActivity(i);
             }else{
-                LoginDialogBox("Reports");
+                wv.loadUrl("file:///android_asset/pages/Login.html?s=4");
             }
-
-
         } else if (id == R.id.nav_feedback) {
             Intent intent = new Intent(this, FeedbackList.class);
             startActivity(intent);
         } else if (id == R.id.nav_sync) {
-            //general = new General();
-            ClientAndroidInterface ca = new ClientAndroidInterface(context);
-/*            if (!_General.isNetworkAvailable(context)) {
-                ca.ShowDialog(getResources().getString(R.string.NoInternet));
-            } else {
-                wv.loadUrl("file:///android_asset/pages/Sync.html");
-            }*/
             wv.loadUrl("file:///android_asset/pages/Sync.html");
         } else if (id == R.id.nav_about) {
             wv.loadUrl("file:///android_asset/pages/About.html");
-        }
-        else if (id == R.id.nav_settings) {
+        } else if (id == R.id.nav_settings) {
             wv.loadUrl("file:///android_asset/pages/Settings.html");
-        }else if (id == R.id.nav_quit) {
+        } else if (id == R.id.nav_quit) {
             new AlertDialog.Builder(this)
                     .setMessage(getResources().getString(R.string.QuitAppQuestion))
                     .setCancelable(false)
-                    .setPositiveButton(getResources().getString(R.string.Yes), new android.content.DialogInterface.OnClickListener(){
-
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            finish();
-                            System.exit(0);
-                        }
+                    .setPositiveButton(getResources().getString(R.string.Yes), (dialogInterface, i) -> {
+                        finish();
+                        System.exit(0);
                     })
-                    .setNegativeButton(getResources().getString(R.string.No), new DialogInterface.OnClickListener()
-            {
-
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                }
-            }).create().show();
-
+                    .setNegativeButton(getResources().getString(R.string.No), (dialogInterface, i) -> {
+                    }).create().show();
         } else if (id == R.id.nav_enquire) {
-            Global global = new Global();
-            global = (Global) MainActivity.this.getApplicationContext();
-            int userid = global.getUserId();
-            if(userid > 0){
+            global = (Global) getApplicationContext();
+            if(global.isLoggedIn()){
                 Intent intent = new Intent(this, Enquire.class);
                 startActivity(intent);
             }else{
-                LoginDialogBox("Enquire");
+                wv.loadUrl("file:///android_asset/pages/Login.html?s=5");
             }
-
-
         }else if (id == R.id.nav_control_numbers) {
             ClientAndroidInterface ca = new ClientAndroidInterface(context);
             ca.launchControlNumbers();
         }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
@@ -1107,9 +1055,6 @@ public class MainActivity extends AppCompatActivity
             }
         }
     }
-    public Context appContent(){
-        return this.getApplicationContext();
-    }
 
     //Ask for permission
     public void requestPermision(){
@@ -1142,8 +1087,8 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-    public void LoginDialogBox(final String page){
-        if(!ca.CheckInternetAvailable())
+    public void LoginDialogBox(final String page) {
+        if (!ca.CheckInternetAvailable())
             return;
 
         global = (Global) MainActivity.this.getApplicationContext();
@@ -1166,41 +1111,37 @@ public class MainActivity extends AppCompatActivity
                 .setCancelable(false)
                 .setPositiveButton(MainActivity.this.getResources().getString(R.string.button_ok),
                         new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog,int id) {
-                                if(!username.getText().toString().equals("") && !password.getText().toString().equals("")){
+                            public void onClick(DialogInterface dialog, int id) {
+                                if (!username.getText().toString().equals("") && !password.getText().toString().equals("")) {
 
                                     new Thread() {
                                         public void run() {
                                             ClientAndroidInterface cai = new ClientAndroidInterface(context);
-                                            try {
-                                                isUserLogged = cai.LoginToken(username.getText().toString(),password.getText().toString());
-                                            } catch (InterruptedException e) {
-                                                e.printStackTrace();
-                                            }
+                                            isUserLogged = cai.LoginToken(username.getText().toString(), password.getText().toString());
 
                                             runOnUiThread(new Runnable() {
                                                 @Override
                                                 public void run() {
-                                                    SetLogedIn(MainActivity.this.getResources().getString(R.string.Login), MainActivity.this.getResources().getString(R.string.Logout));
+                                                    SetLoggedIn(MainActivity.this.getResources().getString(R.string.Login), MainActivity.this.getResources().getString(R.string.Logout));
                                                 }
                                             });
 
                                             runOnUiThread(new Runnable() {
                                                 @Override
                                                 public void run() {
-                                                    if(isUserLogged){
-                                                        if(page.equals("Enquire")){
+                                                    if (isUserLogged) {
+                                                        if (page.equals("Enquire")) {
                                                             Intent intent = new Intent(MainActivity.this, Enquire.class);
                                                             startActivity(intent);
-                                                            Toast.makeText(MainActivity.this,MainActivity.this.getResources().getString(R.string.Login_Successful),Toast.LENGTH_LONG).show();
+                                                            Toast.makeText(MainActivity.this, MainActivity.this.getResources().getString(R.string.Login_Successful), Toast.LENGTH_LONG).show();
                                                         }
-                                                        if(page.equals("Reports")){
+                                                        if (page.equals("Reports")) {
                                                             Intent intent = new Intent(MainActivity.this, Reports.class);
                                                             startActivity(intent);
-                                                            Toast.makeText(MainActivity.this,MainActivity.this.getResources().getString(R.string.Login_Successful),Toast.LENGTH_LONG).show();
+                                                            Toast.makeText(MainActivity.this, MainActivity.this.getResources().getString(R.string.Login_Successful), Toast.LENGTH_LONG).show();
                                                         }
 
-                                                    }else{
+                                                    } else {
                                                         ca.ShowDialog(MainActivity.this.getResources().getString(R.string.LoginFail));
                                                     }
                                                 }
@@ -1210,8 +1151,8 @@ public class MainActivity extends AppCompatActivity
                                     }.start();
 
 
-                                }else{
-                                    Toast.makeText(MainActivity.this,MainActivity.this.getResources().getString(R.string.Enter_Credentials), Toast.LENGTH_LONG).show();
+                                } else {
+                                    Toast.makeText(MainActivity.this, MainActivity.this.getResources().getString(R.string.Enter_Credentials), Toast.LENGTH_LONG).show();
                                 }
                             }
                         }).setNegativeButton(MainActivity.this.getResources().getString(R.string.button_cancel),
@@ -1227,6 +1168,7 @@ public class MainActivity extends AppCompatActivity
         // show it
         alertDialog.show();
     }
+
     public String getSelectedLanguage(){
         return selectedLanguage;
     }

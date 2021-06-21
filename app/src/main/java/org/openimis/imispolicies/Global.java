@@ -74,13 +74,18 @@ public class Global extends Application {
         GlobalContext = this;
     }
 
-    public Token getJWTToken() {
+    public Token getJWTToken()
+    {
+        if(JWTToken==null)
+            JWTToken = new Token();
         return JWTToken;
     }
 
     public void setJWTToken(Token token) {
         JWTToken = token;
     }
+
+    public boolean isLoggedIn() { return getJWTToken().isTokenValidJWT(); }
 
     public String getOfficerCode() {
         return OfficerCode;

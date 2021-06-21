@@ -627,15 +627,18 @@ public class CheckCommission extends AppCompatActivity {
 
                                             if(response.getStatusLine().getStatusCode() == HttpURLConnection.HTTP_OK){
                                                 JSONObject ob = null;
-                                                String token = null;
+                                                String token = "";
+                                                String validTo = "";
                                                 try {
                                                     ob = new JSONObject(content);
                                                     token = ob.getString("access_token");
+                                                    validTo = ob.getString("expires_on");
+
                                                 } catch (JSONException e) {
                                                     e.printStackTrace();
                                                 }
 
-                                                tokenl.saveTokenText(token.toString());
+                                                tokenl.saveTokenText(token,validTo);
 
                                                 final String finalToken = token;
                                                 runOnUiThread(new Runnable() {
