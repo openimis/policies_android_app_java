@@ -4139,7 +4139,7 @@ public class ClientAndroidInterface {
                 password = decryptRarPwd(trimEncryptedPassword, trimSalt);
             }
         } catch (Exception e) {
-            e.getMessage();
+            e.printStackTrace();
         }
 
         return password;
@@ -4267,13 +4267,28 @@ public class ClientAndroidInterface {
 
     // Login to Api from JavaScript (call method LoginToken)
     @JavascriptInterface
-    public boolean LoginJI(final String Username, final String Password) throws InterruptedException {
-
+    public boolean LoginJI(final String Username, final String Password) {
         return LoginToken(Username, Password);
     }
 
+    @JavascriptInterface
+    public void Logout()
+    {
+        global.getJWTToken().clearToken();
+
+        ((Activity) mContext).runOnUiThread(
+                () -> MainActivity.SetLoggedIn(mContext.getResources().getString(R.string.Login), mContext.getResources().getString(R.string.Logout))
+        );
+    }
+
+    @JavascriptInterface
+    public boolean isLoggedIn()
+    {
+        return global.isLoggedIn();
+    }
+
     // Login to API and get Token JWT
-    public boolean LoginToken(final String Username, final String Password) throws InterruptedException {
+    public boolean LoginToken(final String Username, final String Password) {
         global = (Global) mContext.getApplicationContext();
 
         ToRestApi rest = new ToRestApi();
@@ -4304,29 +4319,24 @@ public class ClientAndroidInterface {
 
         if (response.getStatusLine().getStatusCode() == HttpURLConnection.HTTP_OK) {
             JSONObject ob = null;
-            String jwt = null;
+            String jwt = "";
+            String validTo = "";
             try {
                 ob = new JSONObject(content);
                 jwt = ob.getString("access_token");
+                validTo = ob.getString("expires_on");
             } catch (JSONException e) {
                 e.printStackTrace();
             }
 
-            Token token = new Token();
-            token.saveTokenText(jwt);
+            global.getJWTToken().saveTokenText(jwt,validTo);
 
-            global.setJWTToken(token);
+            ((Activity) mContext).runOnUiThread(
+                    () -> MainActivity.SetLoggedIn(mContext.getResources().getString(R.string.Login), mContext.getResources().getString(R.string.Logout))
+            );
 
             return true;
         }
-
-        ((Activity) mContext).runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                MainActivity.SetLogedIn(mContext.getResources().getString(R.string.Login), mContext.getResources().getString(R.string.Logout));
-            }
-        });
-
         return false;
     }
 
@@ -4340,7 +4350,7 @@ public class ClientAndroidInterface {
         ((Activity) mContext).runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                MainActivity.SetLogedIn(mContext.getResources().getString(R.string.Login), mContext.getResources().getString(R.string.Logout));
+                MainActivity.SetLoggedIn(mContext.getResources().getString(R.string.Login), mContext.getResources().getString(R.string.Logout));
             }
         });
         return UserId;
@@ -4352,12 +4362,9 @@ public class ClientAndroidInterface {
         cs.setFunctionName("isValidLogin");
         UserId = cs.isUserLoggedIn(Username, Password);
         global.setUserId(UserId);
-        ((Activity) mContext).runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                MainActivity.SetLogedIn(mContext.getResources().getString(R.string.Login), mContext.getResources().getString(R.string.Logout));
-            }
-        });
+        ((Activity) mContext).runOnUiThread(
+                () -> MainActivity.SetLoggedIn(mContext.getResources().getString(R.string.Login), mContext.getResources().getString(R.string.Logout))
+        );
         return UserId;
     }
 
@@ -6366,11 +6373,8 @@ public class ClientAndroidInterface {
                                     public void onClick(DialogInterface dialog, int id) {
                                         if (!username.getText().toString().equals("") || !password.getText().toString().equals("")) {
                                             boolean isUserLogged = false;
-                                            try {
-                                                isUserLogged = LoginToken(username.getText().toString(), password.getText().toString());
-                                            } catch (InterruptedException e) {
-                                                e.printStackTrace();
-                                            }
+                                            isUserLogged = LoginToken(username.getText().toString(), password.getText().toString());
+
                                             if (isUserLogged) {
                                                 if (page.equals("Enquire")) {
                                                     ((Enquire) mContext).finish();
@@ -6430,6 +6434,25 @@ public class ClientAndroidInterface {
         mContext.startActivity(intent);
     }
 
+    @JavascriptInterface
+    public void launchActivity(String activity) {
+        if (activity.equals("Enquire")) {
+            Intent intent = new Intent(mContext, Enquire.class);
+            mContext.startActivity(intent);
+        }
+        if (activity.equals("Renewals")) {
+            Intent intent = new Intent(mContext, RenewList.class);
+            mContext.startActivity(intent);
+        }
+        if (activity.equals("Feedbacks")) {
+            Intent intent = new Intent(mContext, FeedbackList.class);
+            mContext.startActivity(intent);
+        }
+        if (activity.equals("Reports")) {
+            Intent intent = new Intent(mContext, Reports.class);
+            mContext.startActivity(intent);
+        }
+    }
     @JavascriptInterface
     public String getSelectedLanguage() {
         return ((MainActivity) mContext).getSelectedLanguage();

@@ -36,19 +36,16 @@ In case of dispute arising out or in relation to the use of the program, it is s
 
        $(document).ready(function(){
         document.title = Android.getString('Login');
-           var isSearch =parseInt(queryString("s"));
-         if(sessionStorage.getItem("UserData") != null && isSearch == 2 ){
+           var page = parseInt(queryString("s"));
+         if(Android.isLoggedIn()){
              sessionStorage.removeItem("UserData");
              sessionStorage.setItem("user","out");
+             Android.Logout();
              Android.isValidLogin('','');
-                window.open("Enrollment.html", "_self");
+             window.open("Home.html", "_self");
          }
          var officer_code = Android.getOfficerCode();
          $("#txtLoginName").val(officer_code);
-        if(sessionStorage.getItem("UserData") != null){
-           window.open("Enrollment.html", "_self");
-         }
-
 
            $('#spPleaseWait').text(Android.getString('PleaseWait'));
            $('#btnLogin').click(function() {
@@ -66,9 +63,21 @@ In case of dispute arising out or in relation to the use of the program, it is s
                 var LoggedIn =  Android.LoginJI(Username, Password);
                   if(LoggedIn > 0){
                         SaveUserLoggedIn();
-                        if(isSearch == 0)window.open('Sync.html', '_self');
-                        else if(isSearch == 1) window.open('Search.html', '_self');
-                        else if(isSearch == 2) window.open('Enrollment.html', '_self');
+                        if(page == 0)window.open('Sync.html', '_self');
+                        else if(page == 1) window.open('Search.html', '_self');
+                        else if(page == 2) window.open('Enrollment.html', '_self');
+                        else if(page == 4)
+                        {
+                            window.open('Home.html', '_self');
+                            Android.launchActivity("Reports");
+                        }
+                        else if(page == 5)
+                        {
+                            window.open('Home.html', '_self');
+                            Android.launchActivity("Enquire");
+                        }
+                        else window.open('Home.html', '_self');
+
                     }
                     else
                         Android.ShowDialog(Android.getString('LoginFail'));

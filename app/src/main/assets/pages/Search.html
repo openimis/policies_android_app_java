@@ -38,8 +38,7 @@ In case of dispute arising out or in relation to the use of the program, it is s
         document.title = Android.getString('Search');
         $('#spPleaseWait').text(Android.getString('DownloadFamily'));
 
-           var userid = Android.getUserId();
-         if(sessionStorage.getItem("UserData") == null && userid <= 0){
+         if(Android.isLoggedIn()){
            window.open("Login.html?s=1", "_self");
          }
 

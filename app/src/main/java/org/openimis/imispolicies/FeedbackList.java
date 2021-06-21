@@ -483,11 +483,7 @@ public class FeedbackList extends AppCompatActivity {
 
                                     new Thread() {
                                         public void run() {
-                                            try {
-                                                isUserLogged = ca.LoginToken(username.getText().toString(), password.getText().toString());
-                                            } catch (InterruptedException e) {
-                                                e.printStackTrace();
-                                            }
+                                            isUserLogged = ca.LoginToken(username.getText().toString(), password.getText().toString());
 
                                             runOnUiThread(new Runnable() {
                                                 @Override

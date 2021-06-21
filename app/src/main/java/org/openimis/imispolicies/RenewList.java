@@ -475,7 +475,7 @@ public class RenewList extends AppCompatActivity {
 
             lv.setAdapter(adapter);
 
-            setTitle("Renewals (" + String.valueOf(lv.getCount()) + ")");
+            setTitle("Renewals (" + lv.getCount() + ")");
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -486,8 +486,8 @@ public class RenewList extends AppCompatActivity {
 
     private void RefreshRenewals() throws IOException, XmlPullParserException {
         if (_general.isNetworkAvailable(this)) {
-            new Thread() {
-                public void run() {
+            if(global.isLoggedIn()) {
+                new Thread(()-> {
                     String result = null;
 
                     try {
@@ -501,15 +501,13 @@ public class RenewList extends AppCompatActivity {
                         ca.InsertRenewals(result);
                     }
 
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            fillRenewals();
-                        }
-                    });
+                    runOnUiThread(this::fillRenewals);
                 }
-            }.start();
-
+                ).start();
+            }
+            else {
+                Toast.makeText(this, getResources().getString(R.string.LogInToDownloadRenewals), Toast.LENGTH_LONG).show();
+            }
         } else {
             openDialogForFeedbackRenewal();
             //Toast.makeText(this, getResources().getString(R.string.NoInternet), Toast.LENGTH_LONG).show();
@@ -543,7 +541,7 @@ public class RenewList extends AppCompatActivity {
         }
     }
 
-    public void LoginDialogBox(final String page){
+    public void LoginDialogBox(final String page) {
         if (!ca.CheckInternetAvailable())
             return;
 
@@ -567,31 +565,27 @@ public class RenewList extends AppCompatActivity {
                 .setCancelable(false)
                 .setPositiveButton(R.string.Ok,
                         new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog,int id) {
-                                if(!username.getText().toString().equals("") && !password.getText().toString().equals("")){
+                            public void onClick(DialogInterface dialog, int id) {
+                                if (!username.getText().toString().equals("") && !password.getText().toString().equals("")) {
 
                                     new Thread() {
                                         public void run() {
 
-                                            try {
-                                                isUserLogged = ca.LoginToken(username.getText().toString(),password.getText().toString());
-                                            } catch (InterruptedException e) {
-                                                e.printStackTrace();
-                                            }
+                                            isUserLogged = ca.LoginToken(username.getText().toString(), password.getText().toString());
 
                                             runOnUiThread(new Runnable() {
                                                 @Override
                                                 public void run() {
-                                                    if(isUserLogged){
-                                                        if(page.equals("Renewals")){
+                                                    if (isUserLogged) {
+                                                        if (page.equals("Renewals")) {
                                                             finish();
                                                             Intent intent = new Intent(RenewList.this, RenewList.class);
                                                             startActivity(intent);
-                                                            Toast.makeText(RenewList.this,RenewList.this.getResources().getString(R.string.Login_Successful),Toast.LENGTH_LONG).show();
+                                                            Toast.makeText(RenewList.this, RenewList.this.getResources().getString(R.string.Login_Successful), Toast.LENGTH_LONG).show();
                                                         }
 
-                                                    }else{
-                                                        Toast.makeText(RenewList.this,RenewList.this.getResources().getString(R.string.LoginFail),Toast.LENGTH_LONG).show();
+                                                    } else {
+                                                        Toast.makeText(RenewList.this, RenewList.this.getResources().getString(R.string.LoginFail), Toast.LENGTH_LONG).show();
                                                         LoginDialogBox(page);
                                                         //ca.ShowDialog(RenewList.this.getResources().getString(R.string.LoginFail));
                                                     }
@@ -602,15 +596,15 @@ public class RenewList extends AppCompatActivity {
                                     }.start();
 
 
-                                }else{
-                                    Toast.makeText(RenewList.this,RenewList.this.getResources().getString(R.string.Enter_Credentials), Toast.LENGTH_LONG).show();
+                                } else {
+                                    Toast.makeText(RenewList.this, RenewList.this.getResources().getString(R.string.Enter_Credentials), Toast.LENGTH_LONG).show();
                                     LoginDialogBox(page);
                                 }
                             }
                         })
                 .setNegativeButton(R.string.Cancel,
                         new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog,int id) {
+                            public void onClick(DialogInterface dialog, int id) {
                                 dialog.cancel();
                             }
                         });

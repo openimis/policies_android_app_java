@@ -401,10 +401,11 @@
   <string name="deliveryAmountLeft">DeliveryAmountLeft</string>
   <string name="languageOfSMS">Language Of SMS</string>
   <string name="approvalOfSMS">Approval Of SMS</string>
-    <string name="ImisDirNotCreated">IMIS Directory could not be created.</string>
+  <string name="ImisDirNotCreated">IMIS Directory could not be created.</string>
   <string name="LogInToCheckRecieptNo">Please login first, to check receipt number.</string>
-    <string name="PaymentOverview">Payment Overview</string>
-    <string name="GetPaymentCNOffline">Get payment CN for offline policies</string>
+  <string name="LogInToDownloadRenewals">Please login first, to download renewals.</string>
+  <string name="PaymentOverview">Payment Overview</string>
+  <string name="GetPaymentCNOffline">Get payment CN for offline policies</string>
   <string name="OverviewPaymentCN">Overview payment CN</string>
   <string name="GetPaymentCNOnline">Get payment CN for online policies</string>
 </resources>
