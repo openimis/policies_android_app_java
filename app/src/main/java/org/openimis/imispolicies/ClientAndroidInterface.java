@@ -4362,12 +4362,9 @@ public class ClientAndroidInterface {
         cs.setFunctionName("isValidLogin");
         UserId = cs.isUserLoggedIn(Username, Password);
         global.setUserId(UserId);
-        ((Activity) mContext).runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                MainActivity.SetLoggedIn(mContext.getResources().getString(R.string.Login), mContext.getResources().getString(R.string.Logout));
-            }
-        });
+        ((Activity) mContext).runOnUiThread(
+                () -> MainActivity.SetLoggedIn(mContext.getResources().getString(R.string.Login), mContext.getResources().getString(R.string.Logout))
+        );
         return UserId;
     }
 
@@ -6432,8 +6429,8 @@ public class ClientAndroidInterface {
     }
 
     @JavascriptInterface
-    public void launchControlNumbers() {
-        Intent intent = new Intent(mContext, ControlNumbers.class);
+    public void launchPayment() {
+        Intent intent = new Intent(mContext, PaymentOverview.class);
         mContext.startActivity(intent);
     }
 

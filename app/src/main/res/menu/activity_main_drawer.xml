@@ -27,9 +27,9 @@
             android:icon="@android:drawable/ic_menu_edit"
             android:title="@string/ModifyFamily" />
         <item
-            android:id="@+id/nav_control_numbers"
+            android:id="@+id/nav_payment"
             android:icon="@android:drawable/ic_menu_send"
-            android:title="@string/ControlNumbers" />
+            android:title="@string/Payment" />
 <!--        <item
             android:id="@+id/nav_login"
             android:icon="@android:drawable/ic_partial_secure"
