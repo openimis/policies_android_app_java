@@ -404,7 +404,7 @@
   <string name="languageOfSMS">Language Of SMS</string>
   <string name="approvalOfSMS">Approval Of SMS</string>
   <string name="PaymentOverview">Payment Overview</string>
-    <string name="GetPaymentCNOnline">Get payment CN for online policies</string>
-    <string name="GetPaymentCNOffline">Get payment CN for offline policies</string>
+  <string name="GetPaymentCNOnline">Get payment CN for online policies</string>
+  <string name="GetPaymentCNOffline">Get payment CN for offline policies</string>
   <string name="OverviewPaymentCN">Overview payment CN</string>
 </resources>

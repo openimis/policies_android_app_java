@@ -2,6 +2,7 @@ package org.openimis.imispolicies;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.design.widget.Snackbar;
@@ -118,8 +119,7 @@ public class NotEnrolledPoliciesOverview extends AppCompatActivity {
                     if (tokenl.getTokenText().length() <= 0) {
                         LoginDialogBox();
                     } else {
-                        Global global = new Global();
-                        global = (Global) getApplicationContext();
+                        Global global = (Global) getApplicationContext();
 
                         try {
                             getControlNumber.put("phone_number", "");
@@ -204,6 +204,17 @@ public class NotEnrolledPoliciesOverview extends AppCompatActivity {
 
             }
         });
+
+        Button selectAllButton = (Button) findViewById(R.id.selectAllButton);
+        selectAllButton.setOnClickListener((view)->{
+            RecyclerView policiesList = (RecyclerView) findViewById(R.id.listOfNotEnrolledPolicies);
+            NotEnrolledPoliciesOverviewAdapter adapter = (NotEnrolledPoliciesOverviewAdapter) policiesList.getAdapter();
+            if(adapter!=null)
+            {
+                adapter.selectAll();
+            }
+        });
+
         clientAndroidInterface = new ClientAndroidInterface(this);
 
         InsuranceNumber = getIntent().getStringExtra("INSURANCE_NUMBER");
@@ -237,7 +248,7 @@ public class NotEnrolledPoliciesOverview extends AppCompatActivity {
         }
     }
 
-/*    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
+    /*    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -279,15 +290,26 @@ public class NotEnrolledPoliciesOverview extends AppCompatActivity {
         super.onBackPressed();
     }
 
+    public void updateSelectAllButton(boolean isAllChecked)
+    {
+        Button selectAllButton = (Button) findViewById(R.id.selectAllButton);
+        if(!isAllChecked)
+        {
+            selectAllButton.setText("Select All");
+        } else {
+            selectAllButton.setText("Deselect All");
+        }
+    }
+
     public void fillRecordedPolicies() {
         policy = clientAndroidInterface.getNotEnrolledPolicies(InsuranceNumber, InsuranceProduct, RadioRenewal);//OrderArray;
         LayoutInflater li = LayoutInflater.from(NotEnrolledPoliciesOverview.this);
         View promptsView = li.inflate(R.layout.activity_over_view_policies1, null);
         PolicyRecyclerView = (RecyclerView) findViewById(R.id.listOfNotEnrolledPolicies);
-        notEnrolledPoliciesOverviewAdapter = new NotEnrolledPoliciesOverviewAdapter<>(this, policy);
+        notEnrolledPoliciesOverviewAdapter = new NotEnrolledPoliciesOverviewAdapter(this, policy);
+        PolicyRecyclerView.setAdapter(notEnrolledPoliciesOverviewAdapter);
         PolicyRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         //PolicyRecyclerView.addItemDecoration(new DividerItemDecoration(this,DividerItemDecoration.VERTICAL));
-        PolicyRecyclerView.setAdapter(notEnrolledPoliciesOverviewAdapter);
     }
 
     public void trackBox(final JSONObject policies, String Number) {
