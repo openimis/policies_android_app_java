@@ -101,7 +101,7 @@
             android:id="@+id/selectAllButton"
             android:layout_width="120dp"
             android:layout_height="35dp"
-            android:text="Select All"
+            android:text="@string/SelectAllButton"
             android:elevation="@dimen/app_bar_height"
             android:background="@color/blue"
             android:textStyle="bold"

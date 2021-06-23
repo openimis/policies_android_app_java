@@ -295,9 +295,9 @@ public class NotEnrolledPoliciesOverview extends AppCompatActivity {
         Button selectAllButton = (Button) findViewById(R.id.selectAllButton);
         if(!isAllChecked)
         {
-            selectAllButton.setText("Select All");
+            selectAllButton.setText(getResources().getString(R.string.SelectAllButton));
         } else {
-            selectAllButton.setText("Deselect All");
+            selectAllButton.setText(getResources().getString(R.string.DeselectAllButton));
         }
     }
 
