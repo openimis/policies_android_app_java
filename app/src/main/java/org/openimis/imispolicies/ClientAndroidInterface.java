@@ -1252,7 +1252,9 @@ public class ClientAndroidInterface {
 //            outputStream.close();
 
             OutputStream outputStream = ResizeImage(selectedPath, outputFileName, 400);
-            assert outputStream != null;
+            if (outputStream == null) {
+                throw new IOException("Family photo output stream is empty");
+            }
             outputStream.flush();
             outputStream.close();
             return outputFileName;
@@ -2972,20 +2974,28 @@ public class ClientAndroidInterface {
 
     @JavascriptInterface
     public void uploadEnrolment() throws Exception {
+        ProgressDialog pd = null;
+        pd = ProgressDialog.show(mContext, mContext.getResources().getString(R.string.Sync), mContext.getResources().getString(R.string.SyncProcessing));
+        final ProgressDialog finalPd = pd;
         try {
             new Thread() {
                 public void run() {
                     try {
                         enrol_result = Enrol(0, 0, 0, 0, 1);
                     } catch (UserException e) {
+                        finalPd.dismiss();
                         e.printStackTrace();
                     } catch (JSONException e) {
+                        finalPd.dismiss();
                         e.printStackTrace();
                     } catch (IOException e) {
+                        finalPd.dismiss();
                         e.printStackTrace();
                     } catch (NumberFormatException e) {
+                        finalPd.dismiss();
                         e.printStackTrace();
                     }
+                    finalPd.dismiss();
                     if (mylist.size() == 0) {
                         ((Activity) mContext).runOnUiThread(new Runnable() {
                             @Override
@@ -3022,6 +3032,9 @@ public class ClientAndroidInterface {
                 }
             }.start();
         } catch (Exception e) {
+            if(finalPd.isShowing()){
+                finalPd.dismiss();
+            }
             e.printStackTrace();
             throw new Exception(e.getMessage());
         }
@@ -3352,10 +3365,10 @@ public class ClientAndroidInterface {
                     ob1.put("FamilyId", FId);
                     ob1.put("isOffline", 0);
                 }
-                if(typeofId == "0"){
+                if(typeofId.equals("0")){
                     ob1.put("FamilyType", "");
                 }
-                if (ConfirmationType == "0") {
+                if (ConfirmationType.equals("0") || ConfirmationType.equals("null") ) {
                     ob1.put("ConfirmationType", "");
                 }
                 JSONObject familySMS = getFamilySMS(FId);
@@ -4500,7 +4513,7 @@ public class ClientAndroidInterface {
             return false;
         }
 
-        pd = ProgressDialog.show(mContext, "", mContext.getResources().getString(R.string.Uploading));
+        pd = ProgressDialog.show(mContext, mContext.getResources().getString(R.string.Sync), mContext.getResources().getString(R.string.SyncProcessing));
 
         new Thread(() -> {
             ToRestApi rest = new ToRestApi();

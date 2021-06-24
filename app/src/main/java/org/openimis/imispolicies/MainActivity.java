@@ -294,6 +294,7 @@ public class MainActivity extends AppCompatActivity
         settings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.SINGLE_COLUMN);
         settings.setUseWideViewPort(true);
         settings.setSaveFormData(true);
+        settings.setAllowFileAccess(true);
         //noinspection deprecation
         settings.setEnableSmoothTransition(true);
         settings.setLoadWithOverviewMode(true);

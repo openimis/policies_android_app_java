@@ -279,6 +279,7 @@
   <string name="Interuption">Process has been interrupted. Please check your internet connection.</string>
   <string name="NoFamilyUploaded">No Family was uploaded</string>
   <string name="NoDataAvailable">No data available</string>
+  <string name="SyncProcessing">Synchronization Processing</string>
   <string name="XmlCreated">XML has been created</string>
   <string name="FailXmlCreation">Failed to create XML</string>
   <string name="NoData">No data was created</string>
