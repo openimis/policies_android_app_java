@@ -2972,20 +2972,28 @@ public class ClientAndroidInterface {
 
     @JavascriptInterface
     public void uploadEnrolment() throws Exception {
+        ProgressDialog pd = null;
+        pd = ProgressDialog.show(mContext, mContext.getResources().getString(R.string.Sync), mContext.getResources().getString(R.string.SyncProcessing));
+        final ProgressDialog finalPd = pd;
         try {
             new Thread() {
                 public void run() {
                     try {
                         enrol_result = Enrol(0, 0, 0, 0, 1);
                     } catch (UserException e) {
+                        finalPd.dismiss();
                         e.printStackTrace();
                     } catch (JSONException e) {
+                        finalPd.dismiss();
                         e.printStackTrace();
                     } catch (IOException e) {
+                        finalPd.dismiss();
                         e.printStackTrace();
                     } catch (NumberFormatException e) {
+                        finalPd.dismiss();
                         e.printStackTrace();
                     }
+                    finalPd.dismiss();
                     if (mylist.size() == 0) {
                         ((Activity) mContext).runOnUiThread(new Runnable() {
                             @Override
@@ -3022,6 +3030,9 @@ public class ClientAndroidInterface {
                 }
             }.start();
         } catch (Exception e) {
+            if(finalPd.isShowing()){
+                finalPd.dismiss();
+            }
             e.printStackTrace();
             throw new Exception(e.getMessage());
         }
