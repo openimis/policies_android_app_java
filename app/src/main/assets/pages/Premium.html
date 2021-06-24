@@ -84,38 +84,28 @@ In case of dispute arising out or in relation to the use of the program, it is s
                 $("#ddlPayType").val($Premium[0]["PayType"]);
                 $("#ddlPhotoFee").val($Premium[0]["IsPhotoFee"]);
                 PreviousAmount = parseInt($Premium[0]["Amount"]);
-                var pp = Android.getPolicyVal(policyId);
+                var policyValue = Android.getPolicyVal(policyId);
                 bindDataFromDatafield(strPremium);
                 var Balance = parseInt($('#spBalance').text());
 
                 var Contribution = parseInt($('#spContribution').text())
 
-                var pp = Android.getPolicyVal(policyId);
+                var policyValue = Android.getPolicyVal(policyId);
                 var prevAmount = parseInt(Android.getSumPrem(policyId));
-                var bb = pp - prevAmount;
+                var currentBalance = policyValue - prevAmount;
 
-
-                var CurrentBalance = bb;
-                var CurrentContribution = Contribution - PreviousAmount;
+                var currentContribution = Contribution - PreviousAmount;
                 var isOffline =  parseInt($Premium[0]["isOffline"]);
 
-                $("#hfBalance").val(bb);
-                $("#hfContribution").val(CurrentContribution);
+                $("#hfBalance").val(currentBalance);
+                $("#hfContribution").val(currentContribution);
 
           }else{
-            var pp = Android.getPolicyVal(policyId);
+            var policyValue = Android.getPolicyVal(policyId);
             var prevAmount = parseInt(Android.getSumPrem(policyId));
-            var bb = pp - prevAmount;
+            var currentBalance = policyValue - prevAmount;
 
-            if($("#ddlPhotoFee").is(":hidden")){
-                $('#txtAmount').val(bb);
-                $('#spContribution').text(bb);
-
-                $('#hfBalance').text(0);
-                $('#spBalance').text(0);
-            }
-
-            if(bb <= 0){
+            if(currentBalance <= 0){
                 $('#div-details').hide();
                 $('.footer').hide();
                 $("#msgAlert").text(Android.getString('PolicyCovered'));
@@ -139,7 +129,6 @@ In case of dispute arising out or in relation to the use of the program, it is s
             }
           }
           $('#txtAmount').change(function(){
-
             if($('#ddlPhotoFee').val()=='true'){
                 $('#spBalance').text($('#hfBalance').val());
                 $('#spContribution').text($('#hfContribution').val());
@@ -150,22 +139,22 @@ In case of dispute arising out or in relation to the use of the program, it is s
                 var Amount = parseInt($('#txtAmount').val() || 0);
                 var policyValue = parseInt($('#txtPolicyValue').text());
                 if(premiumId != 0){
-                    var pp = Android.getPolicyVal(policyId);
+                    var policyValue = Android.getPolicyVal(policyId);
                     var prevAmount = parseInt(Android.getSumPrem(policyId));
-                    var balance = pp - prevAmount;
+                    var balance = policyValue - prevAmount;
                     var newAmt = balance + PreviousAmount;
                     var newBalance = newAmt - Amount;
                 }else{
-                    var pp = Android.getPolicyVal(policyId);
+                    var policyValue = Android.getPolicyVal(policyId);
                     var prevAmount = parseInt(Android.getSumPrem(policyId));
-                    var bb = pp - prevAmount;
-                    var newBalance = bb - Amount;
+                    var currentBalance = policyValue - prevAmount;
+                    var newBalance = currentBalance - Amount;
 
                 }
 
                 var newContribution = Amount + ogContribution;
 
-                $('#spBalance').text(pp-Amount);
+                $('#spBalance').text(policyValue-Amount);
                 $('#spContribution').text(Amount);
             }
         });
@@ -358,18 +347,23 @@ In case of dispute arising out or in relation to the use of the program, it is s
                     photoValue = 0;
                     $('#spContribution').text(0);
                 } else {
-                    if(Balance < 0 || bb < 0) {
+                    if(Balance < 0 || currentBalance < 0) {
                         $('#txtAmount').val(0);
                         Contribution = 0;
                     } else {
-                        $('#txtAmount').val(bb);
-                        Contribution = bb;
+                        $('#txtAmount').val(currentBalance);
+                        Contribution = currentBalance;
                     }
                     $('#spContribution').text(Contribution);
                     $('#txtAmount').change();
                 }
             });
-            $('#spBalance').text(bb);
+
+            $('#spBalance').text(currentBalance);
+
+            if($("#ddlPhotoFee").is(":hidden")){
+                $('#ddlPhotoFee').val('false').trigger('change');
+            }
         });
 
         function confirmPremium(){
