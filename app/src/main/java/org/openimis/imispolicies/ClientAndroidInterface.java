@@ -4511,7 +4511,7 @@ public class ClientAndroidInterface {
             return false;
         }
 
-        pd = ProgressDialog.show(mContext, "", mContext.getResources().getString(R.string.Uploading));
+        pd = ProgressDialog.show(mContext, mContext.getResources().getString(R.string.Sync), mContext.getResources().getString(R.string.SyncProcessing));
 
         new Thread(() -> {
             ToRestApi rest = new ToRestApi();
