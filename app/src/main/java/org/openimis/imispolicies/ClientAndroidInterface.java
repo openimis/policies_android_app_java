@@ -3393,26 +3393,26 @@ public class ClientAndroidInterface {
                     }
                 }
             } else {
+                Query += "I.InsureeId < 0 AND (";
                 for (int j = 0; j < verifiedId.size(); j++) {
                     if (getFamilyStatus(Integer.parseInt(verifiedId.get(j))) == 0) {
-                        Query += "I.InsureeId < 0 AND ( ";
                         if ((verifiedId.size() - j) == 1) {
-                            Query += " I.FamilyId == " + verifiedId.get(j) + " )";
+                            Query += " I.FamilyId == " + verifiedId.get(j) + "";
                         } else {
-                            Query += " I.FamilyId == " + verifiedId.get(j) + " OR";
+                            Query += " I.FamilyId == " + verifiedId.get(j) + " OR ";
                         }
                     } else {
                         if ((verifiedId.size() - j) == 1) {
                             Query += " I.FamilyId == " + verifiedId.get(j) + "";
                         } else {
-                            Query += " I.FamilyId == " + verifiedId.get(j) + " OR";
+                            Query += " I.FamilyId == " + verifiedId.get(j) + " OR ";
                         }
                     }
-
                 }
                 if (verifiedId.size() == 0) {
                     Query += " I.InsureeId != ''";
                 }
+                Query += ")";
             }
 
 
