@@ -3365,10 +3365,10 @@ public class ClientAndroidInterface {
                     ob1.put("FamilyId", FId);
                     ob1.put("isOffline", 0);
                 }
-                if(typeofId == "0"){
+                if(typeofId.equals("0")){
                     ob1.put("FamilyType", "");
                 }
-                if (ConfirmationType == "0") {
+                if (ConfirmationType.equals("0") || ConfirmationType.equals("null") ) {
                     ob1.put("ConfirmationType", "");
                 }
                 JSONObject familySMS = getFamilySMS(FId);
