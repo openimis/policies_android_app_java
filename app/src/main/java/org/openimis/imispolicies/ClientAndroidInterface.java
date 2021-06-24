@@ -1252,7 +1252,9 @@ public class ClientAndroidInterface {
 //            outputStream.close();
 
             OutputStream outputStream = ResizeImage(selectedPath, outputFileName, 400);
-            assert outputStream != null;
+            if (outputStream == null) {
+                throw new IOException("Family photo output stream is empty");
+            }
             outputStream.flush();
             outputStream.close();
             return outputFileName;
