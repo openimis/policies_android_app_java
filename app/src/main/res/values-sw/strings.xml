@@ -408,5 +408,7 @@
   <string name="GetPaymentCNOffline">Get payment CN for offline policies</string>
   <string name="OverviewPaymentCN">Overview payment CN</string>
   <string name="GetPaymentCNOnline">Get payment CN for online policies</string>
+  <string name="SelectAllButton">Select All</string>
+  <string name="DeselectAllButton">Deselect All</string>
   <string name="SyncProcessing">Synchronization processing</string>
 </resources>

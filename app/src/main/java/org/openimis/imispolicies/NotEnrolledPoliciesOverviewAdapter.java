@@ -2,6 +2,7 @@ package org.openimis.imispolicies;
 
 import android.content.Context;
 import android.os.Build;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -15,10 +16,14 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class NotEnrolledPoliciesOverviewAdapter<VH extends TrackSelectionAdapter.ViewHolder> extends RecyclerView.Adapter {
-    NotEnrolledPoliciesOverview overViewPolicies = new NotEnrolledPoliciesOverview();
+import java.util.ArrayList;
+import java.util.List;
+
+public class NotEnrolledPoliciesOverviewAdapter extends RecyclerView.Adapter<NotEnrolledPoliciesOverviewAdapter.Reportmsg> {
     private JSONArray policies;
     private JSONArray newPolicies;
+
+    private List<Reportmsg> items = new ArrayList<>();
 
     String PolicyId = null;
     String Id = null;
@@ -48,26 +53,23 @@ public class NotEnrolledPoliciesOverviewAdapter<VH extends TrackSelectionAdapter
     }
 
     @Override
-    public void onAttachedToRecyclerView(final RecyclerView recyclerView) {
+    public void onAttachedToRecyclerView(@NonNull final RecyclerView recyclerView) {
         super.onAttachedToRecyclerView(recyclerView);
 
         // Handle key up and key down and attempt to move selection
-        recyclerView.setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View v, int keyCode, KeyEvent event) {
-                RecyclerView.LayoutManager lm = recyclerView.getLayoutManager();
+        recyclerView.setOnKeyListener((v, keyCode, event) -> {
+            RecyclerView.LayoutManager lm = recyclerView.getLayoutManager();
 
-                // Return false if scrolled to the bounds and allow focus to move off the list
-                if (event.getAction() == KeyEvent.ACTION_DOWN) {
-                    if (keyCode == KeyEvent.KEYCODE_DPAD_DOWN) {
-                        return tryMoveSelection(lm, 1);
-                    } else if (keyCode == KeyEvent.KEYCODE_DPAD_UP) {
-                        return tryMoveSelection(lm, -1);
-                    }
+            // Return false if scrolled to the bounds and allow focus to move off the list
+            if (event.getAction() == KeyEvent.ACTION_DOWN) {
+                if (keyCode == KeyEvent.KEYCODE_DPAD_DOWN) {
+                    return tryMoveSelection(lm, 1);
+                } else if (keyCode == KeyEvent.KEYCODE_DPAD_UP) {
+                    return tryMoveSelection(lm, -1);
                 }
-
-                return false;
             }
+
+            return false;
         });
     }
 
@@ -86,12 +88,89 @@ public class NotEnrolledPoliciesOverviewAdapter<VH extends TrackSelectionAdapter
         return false;
     }
 
+    public boolean isAllChecked()
+    {
+        boolean isAllChecked = true;
+        int size = items.size();
+        for(int i=0;i<size;i++)
+        {
+            Reportmsg item = items.get(i);
+            if(!item.checked)
+            {
+                isAllChecked = false;
+                break;
+            }
+        }
+
+        return isAllChecked;
+    }
+
+
+    public void selectAll()
+    {
+        boolean isAllChecked = isAllChecked();
+        if(isAllChecked) { // deselect all
+            for(int i=0;i<items.size();i++)
+            {
+                if(items.get(i).checked)
+                {
+                    items.get(i).itemView.callOnClick();
+                }
+            }
+        } else { // select all
+            for(int i=0;i<items.size();i++)
+            {
+                if(!items.get(i).checked)
+                {
+                    items.get(i).itemView.callOnClick();
+                }
+            }
+        }
+
+    }
+
+    @NonNull
     @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public Reportmsg onCreateViewHolder(ViewGroup parent, int viewType) {
         View row = LayoutInflater.from(parent.getContext()).inflate(R.layout.receipt_policy, parent, false);
 
         Reportmsg view = new Reportmsg(row);
+        items.add(view);
         return view;
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull Reportmsg holder, int position) {
+        holder.itemView.setSelected(focusedItem == position);
+        newPolicies = policies;
+
+        try {
+            JSONObject object = newPolicies.getJSONObject(position);
+            Id = object.getString("Id");
+            PolicyId = object.getString("PolicyId");
+            InsuranceNumber = object.getString("InsuranceNumber");
+            LastName = object.getString("LastName");
+            OtherNames = object.getString("OtherNames");
+            ProductCode = object.getString("ProductCode");
+            ProductName = object.getString("ProductName");
+            isDone = object.getString("isDone");
+            PolicyValue = object.getString("PolicyValue");
+            UploadedDate = object.getString("UploadedDate");
+            RequestedDate = object.getString("ControlRequestDate");
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        ((Reportmsg) holder).Id.setText(Id);
+        ((Reportmsg) holder).PolicyId.setText(PolicyId);
+        ((Reportmsg) holder).InsuranceNumber.setText(InsuranceNumber);
+        ((Reportmsg) holder).isDone.setText(isDone);
+        ((Reportmsg) holder).Names.setText(OtherNames + " " + LastName);
+        ((Reportmsg) holder).ProductCode.setText(ProductCode);
+        ((Reportmsg) holder).ProductName.setText(ProductName);
+        ((Reportmsg) holder).UploadedDate.setText(UploadedDate);
+        ((Reportmsg) holder).RequestedDate.setText(RequestedDate);
     }
 
     //Please see newPolicies and query to check Insuaree numbers
@@ -132,42 +211,6 @@ public class NotEnrolledPoliciesOverviewAdapter<VH extends TrackSelectionAdapter
     }
 
     @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-        holder.itemView.setSelected(focusedItem == position);
-        newPolicies = policies;
-
-        try {
-            JSONObject object = newPolicies.getJSONObject(position);
-            Id = object.getString("Id");
-            PolicyId = object.getString("PolicyId");
-            InsuranceNumber = object.getString("InsuranceNumber");
-            LastName = object.getString("LastName");
-            OtherNames = object.getString("OtherNames");
-            ProductCode = object.getString("ProductCode");
-            ProductName = object.getString("ProductName");
-            isDone = object.getString("isDone");
-            PolicyValue = object.getString("PolicyValue");
-            UploadedDate = object.getString("UploadedDate");
-            RequestedDate = object.getString("ControlRequestDate");
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        ((Reportmsg) holder).Id.setText(Id);
-        ((Reportmsg) holder).PolicyId.setText(PolicyId);
-        ((Reportmsg) holder).InsuranceNumber.setText(InsuranceNumber);
-        ((Reportmsg) holder).isDone.setText(isDone);
-        ((Reportmsg) holder).Names.setText(OtherNames + " " + LastName);
-        ((Reportmsg) holder).ProductCode.setText(ProductCode);
-        ((Reportmsg) holder).ProductName.setText(ProductName);
-        ((Reportmsg) holder).UploadedDate.setText(UploadedDate);
-        ((Reportmsg) holder).RequestedDate.setText(RequestedDate);
-
-
-    }
-
-    @Override
     public int getItemCount() {
         return policies.length();
     }
@@ -189,18 +232,24 @@ public class NotEnrolledPoliciesOverviewAdapter<VH extends TrackSelectionAdapter
         public TextView UploadedDate;
         public TextView RequestedDate;
         public ImageView checkbox1;
+        public boolean checked = false;
+
+        private View itemView;
 
         public Reportmsg(final View itemView) {
             super(itemView);
+            this.itemView = itemView;
+
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
 
                     // Redraw the old selection and the new
-                    if (overViewPolicies.num.size() == 0) {
-                        overViewPolicies.num.add(String.valueOf(getLayoutPosition()));
+                    if (NotEnrolledPoliciesOverview.num.size() == 0) {
+                        NotEnrolledPoliciesOverview.num.add(String.valueOf(getLayoutPosition()));
                         //itemView.setBackgroundColor(Color.GRAY);
                         checkbox1.setBackgroundResource(R.drawable.checked);
+                        checked = true;
 
                         try {
                             paymentObject = new JSONObject();
@@ -216,21 +265,22 @@ public class NotEnrolledPoliciesOverviewAdapter<VH extends TrackSelectionAdapter
                                 paymentObject.put("renewal", "1");
                             }
                             paymentDetails.put(paymentObject);
-                            overViewPolicies.paymentDetails = paymentDetails;
+                            NotEnrolledPoliciesOverview.paymentDetails = paymentDetails;
 
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
-                        overViewPolicies.PolicyValueToSend += Integer.parseInt(PolicyValue);
+                        NotEnrolledPoliciesOverview.PolicyValueToSend += Integer.parseInt(PolicyValue);
 
                     } else {
                         int ans = 0;
-                        for (int i = 0; i < overViewPolicies.num.size(); i++) {
-                            if (overViewPolicies.num.get(i).equals(String.valueOf(getLayoutPosition()))) {
+                        for (int i = 0; i < NotEnrolledPoliciesOverview.num.size(); i++) {
+                            if (NotEnrolledPoliciesOverview.num.get(i).equals(String.valueOf(getLayoutPosition()))) {
                                 ans = 1;
-                                overViewPolicies.num.remove(i);
+                                NotEnrolledPoliciesOverview.num.remove(i);
                                 //itemView.setBackgroundColor(Color.WHITE);
                                 checkbox1.setBackgroundResource(R.drawable.unchecked);
+                                checked = false;
 
                                 JSONObject ob = null;
                                 for (int j = 0; j < paymentDetails.length(); j++) {
@@ -247,17 +297,18 @@ public class NotEnrolledPoliciesOverviewAdapter<VH extends TrackSelectionAdapter
                                     }
                                 }
 
-                                overViewPolicies.paymentDetails = paymentDetails;
-                                overViewPolicies.PolicyValueToSend -= Integer.parseInt(PolicyValue);
+                                NotEnrolledPoliciesOverview.paymentDetails = paymentDetails;
+                                NotEnrolledPoliciesOverview.PolicyValueToSend -= Integer.parseInt(PolicyValue);
 
                                 break;
                             }
                             ans = 0;
                         }
                         if (ans == 0) {
-                            overViewPolicies.num.add(String.valueOf(getLayoutPosition()));
+                            NotEnrolledPoliciesOverview.num.add(String.valueOf(getLayoutPosition()));
                             //itemView.setBackgroundColor(Color.GRAY);
                             checkbox1.setBackgroundResource(R.drawable.checked);
+                            checked = true;
 
                             try {
                                 paymentObject = new JSONObject();
@@ -272,15 +323,16 @@ public class NotEnrolledPoliciesOverviewAdapter<VH extends TrackSelectionAdapter
                                     paymentObject.put("renewal", "1");
                                 }
                                 paymentDetails.put(paymentObject);
-                                overViewPolicies.paymentDetails = paymentDetails;
+                                NotEnrolledPoliciesOverview.paymentDetails = paymentDetails;
 
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
-                            overViewPolicies.PolicyValueToSend += Integer.parseInt(PolicyValue);
+                            NotEnrolledPoliciesOverview.PolicyValueToSend += Integer.parseInt(PolicyValue);
                         }
                     }
 
+                    ((NotEnrolledPoliciesOverview)_context).updateSelectAllButton(isAllChecked());
                 }
             });
 

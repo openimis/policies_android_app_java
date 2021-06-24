@@ -387,4 +387,6 @@
   <string name="date_to">Date To</string>
   <string name="send_sms">Send SMS</string>
   <string name="requested_sms">Requested SMS</string>
+  <string name="SelectAllButton">Select All</string>
+  <string name="DeselectAllButton">Deselect All</string>
 </resources>
