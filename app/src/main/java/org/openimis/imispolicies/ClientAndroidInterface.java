@@ -6481,7 +6481,7 @@ public class ClientAndroidInterface {
                 productCodes.add(productCode);
             }
             Set<String> nonRepeatedCodes = new HashSet(productCodes);
-            if (nonRepeatedCodes.size() < productCodes.size()) {
+            if (nonRepeatedCodes.size() != 1) {
                 return false;
             }
         } catch (JSONException e) {
