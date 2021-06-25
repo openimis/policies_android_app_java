@@ -2226,7 +2226,7 @@ public class ClientAndroidInterface {
         return Premiums.toString();
     }
     public JSONArray getRecordedPolicies() {
-        String Query = "SELECT * FROM tblRecordedPolicies WHERE Code = 'N'";
+        String Query = "SELECT * FROM tblRecordedPolicies WHERE ControlNumberId = 'N'";
         JSONArray RecordedPolicies = sqlHandler.getResult(Query, null);
         return RecordedPolicies;
     }
@@ -2239,10 +2239,10 @@ public class ClientAndroidInterface {
             renewal = " AND isDone == '" + radioRenewal + "'";
         }
         if (radioRequested.equals("N")) {
-            requested = " AND Code == 'N'";
+            requested = " AND ControlNumberId == 'N'";
         }
         if (radioRequested.equals("Y")) {
-            requested = " AND typeof(Code) = 'integer'";
+            requested = " AND typeof(ControlNumberId) = 'integer'";
         }
         if (!uploadedFrom.equals("") && !uploadedTo.equals("")) {
             upload = " AND UploadedDate BETWEEN '" + uploadedFrom + "' AND '" + uploadedTo + "'";
@@ -2290,14 +2290,14 @@ public class ClientAndroidInterface {
         if (requestedFrom.equals("") && !requestedTo.equals("")) {
             request = " AND RP.UploadedDate = '" + requestedTo + "'";
         }
-        String Query = "SELECT * FROM tblRecordedPolicies RP INNER JOIN tblControlNumber CN ON RP.Code = CN.Id WHERE RP.InsuranceNumber LIKE '%" + insuranceNumber + "%' AND RP.LastName LIKE '%" + lastName + "%' AND RP.OtherNames LIKE '%" + otherNames + "%' AND RP.ProductName LIKE '%" + insuranceProduct + "%'" + renewal + " " + request + " " + upload + " " + payment_type + "";
+        String Query = "SELECT * FROM tblRecordedPolicies RP INNER JOIN tblControlNumber CN ON RP.ControlNumberId = CN.Id WHERE RP.InsuranceNumber LIKE '%" + insuranceNumber + "%' AND RP.LastName LIKE '%" + lastName + "%' AND RP.OtherNames LIKE '%" + otherNames + "%' AND RP.ProductName LIKE '%" + insuranceProduct + "%'" + renewal + " " + request + " " + upload + " " + payment_type + "";
         JSONArray RecordedPolicies = sqlHandler.getResult(Query, null);
         return RecordedPolicies;
     }
 
     public JSONArray getRecordedPoliciesWithIdentifier(String InternalIdentifier) {
         String code = getCode(InternalIdentifier);
-        String Query = "SELECT * FROM tblRecordedPolicies WHERE Code = '" + code + "'";
+        String Query = "SELECT * FROM tblRecordedPolicies WHERE ControlNumberId = '" + code + "'";
         JSONArray RecordedPolicies = sqlHandler.getResult(Query, null);
         return RecordedPolicies;
     }
@@ -2316,29 +2316,29 @@ public class ClientAndroidInterface {
     }
 
     public JSONArray getRecordedPolicies(String search_string) {
-        String Query = "SELECT * FROM tblRecordedPolicies (WHERE InsuranceNumber LIKE '%"+search_string+"%' OR LastName LIKE '%"+search_string+"%' OR OtherNames LIKE '%"+search_string+"%' OR ProductName LIKE '%"+search_string+"%' OR isDone LIKE '%"+search_string+"%') AND Code = 'N'";
+        String Query = "SELECT * FROM tblRecordedPolicies (WHERE InsuranceNumber LIKE '%"+search_string+"%' OR LastName LIKE '%"+search_string+"%' OR OtherNames LIKE '%"+search_string+"%' OR ProductName LIKE '%"+search_string+"%' OR isDone LIKE '%"+search_string+"%') AND ControlNumberId = 'N'";
         JSONArray RecordedPolicies = sqlHandler.getResult(Query, null);
         return RecordedPolicies;
     }
     public JSONArray getRecordedPolicies(String From, String To) {
-        String Query = "SELECT * FROM tblRecordedPolicies WHERE (UploadedDate BETWEEN '"+From+"' AND '"+To+"') AND Code = 'N'";
+        String Query = "SELECT * FROM tblRecordedPolicies WHERE (UploadedDate BETWEEN '"+From+"' AND '"+To+"') AND ControlNumberId = 'N'";
         JSONArray RecordedPolicies = sqlHandler.getResult(Query, null);
         return RecordedPolicies;
     }
     public JSONArray getPolicyRequestedControlNumber(String search_string) {
-        String Query = "SELECT * FROM tblRecordedPolicies RP LEFT OUTER JOIN tblControlNumber CN on RP.Code = CN.Id WHERE RP.InsuranceNumber LIKE '%"+search_string+"%' OR RP.LastName LIKE '%"+search_string+"%' OR RP.OtherNames LIKE '%"+search_string+"%' OR RP.ProductName LIKE '%"+search_string+"%' OR RP.isDone LIKE '%"+search_string+"%'";
+        String Query = "SELECT * FROM tblRecordedPolicies RP LEFT OUTER JOIN tblControlNumber CN on RP.ControlNumberId = CN.Id WHERE RP.InsuranceNumber LIKE '%"+search_string+"%' OR RP.LastName LIKE '%"+search_string+"%' OR RP.OtherNames LIKE '%"+search_string+"%' OR RP.ProductName LIKE '%"+search_string+"%' OR RP.isDone LIKE '%"+search_string+"%'";
         JSONArray RecordedPolicies = sqlHandler.getResult(Query, null);
         return RecordedPolicies;
     }
 
     public JSONArray getPolicyRequestedControlNumber(String From, String To) {
-        String Query = "SELECT * FROM tblRecordedPolicies RP LEFT OUTER JOIN tblControlNumber CN on RP.Code = CN.Id WHERE RP.UploadedDate BETWEEN '"+From+"' AND '"+To+"'";
+        String Query = "SELECT * FROM tblRecordedPolicies RP LEFT OUTER JOIN tblControlNumber CN on RP.ControlNumberId = CN.Id WHERE RP.UploadedDate BETWEEN '"+From+"' AND '"+To+"'";
         JSONArray RecordedPolicies = sqlHandler.getResult(Query, null);
         return RecordedPolicies;
     }
 
     public JSONArray getPolicyRequestedControlNumber(String From, String To, String i) {
-        String Query = "SELECT * FROM tblRecordedPolicies RP LEFT OUTER JOIN tblControlNumber CN on RP.Code = CN.Id WHERE RP.ControlRequestDate BETWEEN '"+From+"' AND '"+To+"'";
+        String Query = "SELECT * FROM tblRecordedPolicies RP LEFT OUTER JOIN tblControlNumber CN on RP.ControlNumberId = CN.Id WHERE RP.ControlRequestDate BETWEEN '"+From+"' AND '"+To+"'";
         JSONArray RecordedPolicies = sqlHandler.getResult(Query, null);
         return RecordedPolicies;
     }
@@ -2389,12 +2389,12 @@ public class ClientAndroidInterface {
         return true;//Update Success
     }
 
-    public void updateRecordedPolicy(int Id, int Code) {
+    public void updateRecordedPolicy(int Id, int ControlNumberId) {
         @SuppressLint("SimpleDateFormat") SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
         Calendar cal = Calendar.getInstance();
         String d = format.format(cal.getTime());
         ContentValues values = new ContentValues();
-        values.put("Code", Code);
+        values.put("ControlNumberId", ControlNumberId);
         values.put("ControlRequestDate", d);
         try {
             sqlHandler.updateData("tblRecordedPolicies", values, "Id = ?", new String[]{String.valueOf(Id)});
@@ -6496,7 +6496,8 @@ public class ClientAndroidInterface {
             aRenewal = " AND isDone == '"+renewal+"'";
         }
 
-        String query = "SELECT * FROM tblRecordedPolicies WHERE InsuranceNumber LIKE '%"+insuranceNumber+"%' AND ProductCode LIKE '%"+insuranceProduct+"%' "+aRenewal+" AND UploadedDate == '' AND typeof(Code) != 'integer'";
+        String query = "SELECT * FROM tblRecordedPolicies WHERE InsuranceNumber LIKE '%"+insuranceNumber+
+                "%' AND ProductCode LIKE '%"+insuranceProduct+"%' "+aRenewal+" AND UploadedDate == '' AND typeof(ControlNumberId) != 'integer'";
         JSONArray notEnrolledPolicies = sqlHandler.getResult(query, null);
         return notEnrolledPolicies;
     }
