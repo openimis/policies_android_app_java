@@ -237,6 +237,7 @@ public class OverViewPoliciesAdapter<VH extends TrackSelectionAdapter.ViewHolder
                             }else{
                                 paymentObject.put("renewal","1");
                             }
+                            paymentObject.put("amount", String.valueOf(PolicyValue));
                             paymentDetails.put(paymentObject);
                             overViewPolicies.paymentDetails = paymentDetails;
 
@@ -293,6 +294,7 @@ public class OverViewPoliciesAdapter<VH extends TrackSelectionAdapter.ViewHolder
                                 }else{
                                     paymentObject.put("renewal","1");
                                 }
+                                paymentObject.put("amount", String.valueOf(PolicyValue));
                                 paymentDetails.put(paymentObject);
                                 overViewPolicies.paymentDetails = paymentDetails;
 

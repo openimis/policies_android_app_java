@@ -581,7 +581,7 @@ public class OverViewPolicies extends AppCompatActivity {
         Thread thread = new Thread(){
             public void run() {
                 HttpClient httpClient = new DefaultHttpClient();
-                HttpPost httpPost = new HttpPost(AppInformation.DomainInfo.getDomain()+"payment/GetControlNumber");
+                HttpPost httpPost = new HttpPost(AppInformation.DomainInfo.getDomain()+"GetControlNumber");
 // Request parameters and other properties.
                 try {
                     StringEntity postingString = new StringEntity(order.toString());
@@ -603,7 +603,7 @@ public class OverViewPolicies extends AppCompatActivity {
 
                 HttpResponse response = null;
                 try {
-                    response = toRestApi.postToRestApiToken(order, "payment/GetControlNumber");
+                    response = toRestApi.postToRestApiToken(order, "GetControlNumber");
 
                     HttpEntity respEntity = response.getEntity();
                     String content = null;
@@ -709,13 +709,13 @@ public class OverViewPolicies extends AppCompatActivity {
         return 0;
     }
 
-    private void updateAfterRequest(int Code) {
+    private void updateAfterRequest(int ControlNumberId) {
         JSONObject ob = null;
         for(int j = 0;j < paymentDetails.length();j++){
             try {
                 ob = paymentDetails.getJSONObject(j);
                 int Id = Integer.parseInt(ob.getString("Id"));
-                clientAndroidInterface.updateRecordedPolicy(Id,Code);
+                clientAndroidInterface.updateRecordedPolicy(Id,ControlNumberId);
             } catch (JSONException e) {
                 e.printStackTrace();
             }

@@ -541,7 +541,7 @@ public class OverViewControlNumbers extends AppCompatActivity {
 
                 HttpResponse response = null;
                 try {
-                    response = toRestApi.postToRestApiToken(jsonObject, "payment/GetAssignedControlNumbers");
+                    response = toRestApi.postToRestApiToken(jsonObject, "GetAssignedControlNumbers");
 
                     HttpEntity respEntity = response.getEntity();
 

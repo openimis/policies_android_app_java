@@ -264,6 +264,7 @@ public class NotEnrolledPoliciesOverviewAdapter extends RecyclerView.Adapter<Not
                             } else {
                                 paymentObject.put("renewal", "1");
                             }
+                            paymentObject.put("amount", String.valueOf(PolicyValue));
                             paymentDetails.put(paymentObject);
                             NotEnrolledPoliciesOverview.paymentDetails = paymentDetails;
 
@@ -322,6 +323,7 @@ public class NotEnrolledPoliciesOverviewAdapter extends RecyclerView.Adapter<Not
                                 } else {
                                     paymentObject.put("renewal", "1");
                                 }
+                                paymentObject.put("amount", String.valueOf(PolicyValue));
                                 paymentDetails.put(paymentObject);
                                 NotEnrolledPoliciesOverview.paymentDetails = paymentDetails;
 

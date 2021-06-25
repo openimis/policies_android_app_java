@@ -116,7 +116,7 @@ public class NotEnrolledPoliciesOverview extends AppCompatActivity {
                 General _general = new General(AppInformation.DomainInfo.getDomain());
 
                 if (_general.isNetworkAvailable(NotEnrolledPoliciesOverview.this)) {
-                    if (tokenl.getTokenText().length() <= 0) {
+                    if (tokenl.getTokenText() == null || tokenl.getTokenText().length() <= 0) {
                         LoginDialogBox();
                     } else {
                         Global global = (Global) getApplicationContext();
@@ -572,7 +572,7 @@ public class NotEnrolledPoliciesOverview extends AppCompatActivity {
         Thread thread = new Thread() {
             public void run() {
                 HttpClient httpClient = new DefaultHttpClient();
-                HttpPost httpPost = new HttpPost(AppInformation.DomainInfo.getDomain() + "payment/GetControlNumber");
+                HttpPost httpPost = new HttpPost(AppInformation.DomainInfo.getDomain() + "GetControlNumber");
 // Request parameters and other properties.
                 try {
                     StringEntity postingString = new StringEntity(order.toString());
@@ -594,7 +594,7 @@ public class NotEnrolledPoliciesOverview extends AppCompatActivity {
 
                 HttpResponse response = null;
                 try {
-                    response = toRestApi.postToRestApiToken(order, "payment/GetControlNumber");
+                    response = toRestApi.postToRestApiToken(order, "GetControlNumber");
 
                     HttpEntity respEntity = response.getEntity();
                     String content = null;
@@ -706,13 +706,13 @@ public class NotEnrolledPoliciesOverview extends AppCompatActivity {
         return 0;
     }
 
-    public void updateAfterRequest(int Code) {
+    public void updateAfterRequest(int ControlNumberId) {
         JSONObject ob = null;
         for (int j = 0; j < paymentDetails.length(); j++) {
             try {
                 ob = paymentDetails.getJSONObject(j);
                 int Id = Integer.parseInt(ob.getString("Id"));
-                clientAndroidInterface.updateRecordedPolicy(Id, Code);
+                clientAndroidInterface.updateRecordedPolicy(Id, ControlNumberId);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
