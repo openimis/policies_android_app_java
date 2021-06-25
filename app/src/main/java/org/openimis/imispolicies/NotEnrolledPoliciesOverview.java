@@ -206,6 +206,8 @@ public class NotEnrolledPoliciesOverview extends AppCompatActivity {
         });
 
         Button selectAllButton = (Button) findViewById(R.id.selectAllButton);
+        // OTC-316 temporary hide button 'select all'
+        selectAllButton.setVisibility(View.INVISIBLE);
         selectAllButton.setOnClickListener((view)->{
             RecyclerView policiesList = (RecyclerView) findViewById(R.id.listOfNotEnrolledPolicies);
             NotEnrolledPoliciesOverviewAdapter adapter = (NotEnrolledPoliciesOverviewAdapter) policiesList.getAdapter();
