@@ -2226,7 +2226,7 @@ public class ClientAndroidInterface {
         return Premiums.toString();
     }
     public JSONArray getRecordedPolicies() {
-        String Query = "SELECT * FROM tblRecordedPolicies WHERE ControlNumberId = 'N'";
+        String Query = "SELECT * FROM tblRecordedPolicies WHERE ControlNumberId is null";
         JSONArray RecordedPolicies = sqlHandler.getResult(Query, null);
         return RecordedPolicies;
     }
@@ -2239,7 +2239,7 @@ public class ClientAndroidInterface {
             renewal = " AND isDone == '" + radioRenewal + "'";
         }
         if (radioRequested.equals("N")) {
-            requested = " AND ControlNumberId == 'N'";
+            requested = " AND ControlNumberId is null";
         }
         if (radioRequested.equals("Y")) {
             requested = " AND typeof(ControlNumberId) = 'integer'";
@@ -2321,7 +2321,7 @@ public class ClientAndroidInterface {
         return RecordedPolicies;
     }
     public JSONArray getRecordedPolicies(String From, String To) {
-        String Query = "SELECT * FROM tblRecordedPolicies WHERE (UploadedDate BETWEEN '"+From+"' AND '"+To+"') AND ControlNumberId = 'N'";
+        String Query = "SELECT * FROM tblRecordedPolicies WHERE (UploadedDate BETWEEN '"+From+"' AND '"+To+"') AND ControlNumberId is null";
         JSONArray RecordedPolicies = sqlHandler.getResult(Query, null);
         return RecordedPolicies;
     }
