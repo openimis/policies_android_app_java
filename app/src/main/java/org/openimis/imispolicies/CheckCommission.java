@@ -148,9 +148,8 @@ public class CheckCommission extends AppCompatActivity {
 
         // Spinner Drop down elements
         List<String> mode = new ArrayList<String>();
-        mode.add("Paid");
         mode.add("Prescribed");
-
+        mode.add("Paid");
 
         // Creating adapter for spinner
         ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, mode);
@@ -318,16 +317,17 @@ public class CheckCommission extends AppCompatActivity {
 
         return Payer;
     }
+
     private String GetSelectedMode() {
         String Mode = "0";
         Object obj;
-        try{
+        try {
             HashMap<String, String> P = new HashMap<>();
             //noinspection unchecked
             obj = spMode.getSelectedItem();
-            Mode = (obj.toString().equals("Paid"))?"0":"1";
+            Mode = (obj.toString().equals("Prescribed")) ? "0" : "1";
 
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
