@@ -791,13 +791,12 @@ public class SQLHandler extends SQLiteOpenHelper {
             if (rowsUpdated <= 0) {
                 throw new UserException(mContext.getResources().getString(R.string.ErrorUpdate));
             }
-            return rowsUpdated;
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
             closeDatabase();
-            return  rowsUpdated;
         }
+        return  rowsUpdated;
     }
 
 
