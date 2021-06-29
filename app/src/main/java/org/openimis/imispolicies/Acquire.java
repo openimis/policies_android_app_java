@@ -30,6 +30,7 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -50,7 +51,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.exact.general.General;
@@ -60,6 +60,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Locale;
 
 public class Acquire extends AppCompatActivity {
     General _General = new General(AppInformation.DomainInfo.getDomain());
@@ -120,7 +121,7 @@ public class Acquire extends AppCompatActivity {
             public void afterTextChanged(Editable InsNo) {
                 if (!InsNo.toString().isEmpty()) {
                     String files = ca.GetListOfImagesContain(InsNo.toString());
-                    if (files.trim() != "" && InsNo.length() > 0) {
+                    if (!"".equals(files.trim()) && InsNo.length() > 0) {
                         File imgFile = new File(files);
                         Bitmap myBitmap;
                         if (imgFile.exists()) {
@@ -197,7 +198,7 @@ public class Acquire extends AppCompatActivity {
             new Thread(() -> {
                 try {
                     result = SubmitData();
-                } catch (IOException e) {
+                } catch (IOException | UserException e) {
                     e.printStackTrace();
                 }
 
@@ -247,44 +248,30 @@ public class Acquire extends AppCompatActivity {
 
     protected boolean isValidate() {
         if (etCHFID.getText().length() == 0) {
-            ShowDialog(etCHFID, getResources().getString(R.string.MissingCHFID));
+            ShowDialog(getResources().getString(R.string.MissingCHFID),(dialog,which)->etCHFID.requestFocus());
             return false;
         }
 
         if (theImage == null) {
-            ShowDialog(iv, getResources().getString(R.string.MissingImage));
+            ShowDialog(getResources().getString(R.string.MissingImage),(dialog,which)->iv.requestFocus());
             return false;
 
         }
 
         if (!isValidCHFID()) {
-            ShowDialog(etCHFID, getResources().getString(R.string.InvalidInsuranceNumber));
+            ShowDialog(getResources().getString(R.string.InvalidInsuranceNumber),(dialog,which)->etCHFID.requestFocus());
             return false;
         }
 
         return true;
     }
 
-    protected AlertDialog ShowDialog(final TextView tv, String msg) {
-        return new AlertDialog.Builder(this)
-                .setMessage(msg)
-                .setCancelable(false)
-                .setPositiveButton("Ok", (dialog, which) -> tv.requestFocus()).show();
-    }
-
-    protected AlertDialog ShowDialog(final ImageView tv, String msg) {
-        return new AlertDialog.Builder(this)
-                .setMessage(msg)
-                .setCancelable(false)
-                .setPositiveButton("Ok", (dialog, which) -> tv.requestFocus()).show();
-    }
-
-    private int SubmitData() throws IOException {
+    private int SubmitData() throws IOException, UserException {
         int Uploaded = 0;
         File myDir = new File(Path);
 
         //Get current date and format it in yyyyMMdd format
-        SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss");
+        SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss", Locale.US);
         Calendar cal = Calendar.getInstance();
         String d = format.format(cal.getTime());
 
@@ -303,12 +290,8 @@ public class Acquire extends AppCompatActivity {
         contentValues.put("PhotoPath",file.getAbsolutePath());
         String[] whereArgs = {etCHFID.getText().toString()};
 
-        try {
-            sqlHandler.updateData("tblInsuree", contentValues, "CHFID = ?", whereArgs);
-        } catch ( UserException e )
-        {
-            e.printStackTrace();
-        }
+        sqlHandler.updateData("tblInsuree", contentValues, "CHFID = ?", whereArgs);
+
         return Uploaded;
     }
 
@@ -347,11 +330,14 @@ public class Acquire extends AppCompatActivity {
     }
 
     protected AlertDialog ShowDialog(String msg) {
+        return ShowDialog(msg,(dialog,which)->{});
+    }
+
+    protected AlertDialog ShowDialog(String msg, DialogInterface.OnClickListener positiveButtonListener) {
         return new AlertDialog.Builder(this)
                 .setMessage(msg)
                 .setCancelable(false)
-                .setPositiveButton("Ok", (dialog, which) -> {}).show();
-
+                .setPositiveButton("Ok", positiveButtonListener).show();
     }
 
     private boolean isValidCHFID() {
