@@ -159,7 +159,7 @@ public class ClientAndroidInterface {
 
 
     private General general = new General(AppInformation.DomainInfo.getDomain());
-    private ArrayList<String> mylist = new ArrayList<String>();
+    private ArrayList<String> mylist = new ArrayList<>();
 
     private String salt;
 
@@ -278,11 +278,7 @@ public class ClientAndroidInterface {
         return new AlertDialog.Builder(mContext)
                 .setMessage(msg)
                 .setCancelable(false)
-                .setPositiveButton(R.string.Ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-
-                    }
+                .setPositiveButton(R.string.Ok, (dialogInterface, i) -> {
                 }).show();
     }
 
@@ -297,26 +293,20 @@ public class ClientAndroidInterface {
         return new AlertDialog.Builder(mContext)
                 .setMessage(R.string.ExceedThreshold)
                 .setCancelable(false)
-                .setNegativeButton(R.string.No, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        SaveInsureePolicy(InsureId, FamilyId, false, isOffline);
-                        try {
-                            getFamilyPolicies(FamilyId);
-                        } catch (ParseException e) {
-                            e.printStackTrace();
-                        }
+                .setNegativeButton(R.string.No, (dialog, which) -> {
+                    SaveInsureePolicy(InsureId, FamilyId, false, isOffline);
+                    try {
+                        getFamilyPolicies(FamilyId);
+                    } catch (ParseException e) {
+                        e.printStackTrace();
                     }
                 })
-                .setPositiveButton(R.string.Yes, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        SaveInsureePolicy(InsureId, FamilyId, true, isOffline);
-                        try {
-                            getFamilyPolicies(FamilyId);
-                        } catch (ParseException e) {
-                            e.printStackTrace();
-                        }
+                .setPositiveButton(R.string.Yes, (dialogInterface, i) -> {
+                    SaveInsureePolicy(InsureId, FamilyId, true, isOffline);
+                    try {
+                        getFamilyPolicies(FamilyId);
+                    } catch (ParseException e) {
+                        e.printStackTrace();
                     }
                 }).show();
     }
@@ -2244,16 +2234,26 @@ public class ClientAndroidInterface {
         if (radioRequested.equals("Y")) {
             requested = " AND typeof(ControlNumberId) = 'integer'";
         }
-        if (!uploadedFrom.equals("") && !uploadedTo.equals("")) {
-            upload = " AND UploadedDate BETWEEN '" + uploadedFrom + "' AND '" + uploadedTo + "'";
-        } else if (!uploadedFrom.equals("") && uploadedTo.equals("")) {
-            upload = " AND UploadedDate = '" + uploadedFrom + "'";
-        } else if (uploadedFrom.equals("") && !uploadedTo.equals("")) {
-            upload = " AND UploadedDate = '" + uploadedTo + "'";
+
+        String dateFrom;
+        if(uploadedFrom == null || uploadedFrom.equals("")) {
+            dateFrom = "0001-01-01";
         } else {
-            upload = "";
+            dateFrom = uploadedFrom;
         }
-        String Query = "SELECT * FROM tblRecordedPolicies WHERE InsuranceNumber LIKE '%" + insuranceNumber + "%' AND LastName LIKE '%" + lastName + "%' AND OtherNames LIKE '%" + otherNames + "%' AND ProductName LIKE '%" + insuranceProduct + "%'" + renewal + "" + requested + "" + upload + "";
+
+        String dateTo;
+        if(uploadedTo == null || uploadedTo.equals(""))
+        {
+            dateTo = new SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Calendar.getInstance().getTime()); //now
+        } else
+        {
+            dateTo = uploadedTo;
+        }
+
+        upload = " AND UploadedDate BETWEEN '" + dateFrom + "' AND '" + dateTo + "'";
+
+        String Query = "SELECT * FROM tblRecordedPolicies WHERE InsuranceNumber LIKE '%" + insuranceNumber + "%' AND LastName LIKE '%" + lastName + "%' AND OtherNames LIKE '%" + otherNames + "%' AND ProductCode LIKE '%" + insuranceProduct + "%'" + renewal + "" + requested + "" + upload + "";
         JSONArray RecordedPolicies = sqlHandler.getResult(Query, null);
         return RecordedPolicies;
     }
@@ -2290,7 +2290,7 @@ public class ClientAndroidInterface {
         if (requestedFrom.equals("") && !requestedTo.equals("")) {
             request = " AND RP.UploadedDate = '" + requestedTo + "'";
         }
-        String Query = "SELECT * FROM tblRecordedPolicies RP INNER JOIN tblControlNumber CN ON RP.ControlNumberId = CN.Id WHERE RP.InsuranceNumber LIKE '%" + insuranceNumber + "%' AND RP.LastName LIKE '%" + lastName + "%' AND RP.OtherNames LIKE '%" + otherNames + "%' AND RP.ProductName LIKE '%" + insuranceProduct + "%'" + renewal + " " + request + " " + upload + " " + payment_type + "";
+        String Query = "SELECT * FROM tblRecordedPolicies RP INNER JOIN tblControlNumber CN ON RP.ControlNumberId = CN.Id WHERE RP.InsuranceNumber LIKE '%" + insuranceNumber + "%' AND RP.LastName LIKE '%" + lastName + "%' AND RP.OtherNames LIKE '%" + otherNames + "%' AND RP.ProductCode LIKE '%" + insuranceProduct + "%'" + renewal + " " + request + " " + upload + " " + payment_type + "";
         JSONArray RecordedPolicies = sqlHandler.getResult(Query, null);
         return RecordedPolicies;
     }
@@ -2997,38 +2997,28 @@ public class ClientAndroidInterface {
                     }
                     finalPd.dismiss();
                     if (mylist.size() == 0) {
-                        ((Activity) mContext).runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (enrol_result != 999) {
-                                    //if error is encountered
-                                    if (enrolMessages.size() > 0 && enrolMessages != null) {
-                                        CharSequence[] charSequence = enrolMessages.toArray(new CharSequence[(enrolMessages.size())]);
-                                        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-                                        builder.setTitle(mContext.getResources().getString(R.string.UploadFailureReport));
-                                        builder.setCancelable(false);
-                                        builder.setItems(charSequence, null);
-                                        builder.setPositiveButton(mContext.getResources().getString(R.string.Ok), new DialogInterface.OnClickListener() {
-                                            @Override
-                                            public void onClick(DialogInterface dialogInterface, int i) {
-                                                dialogInterface.dismiss();
-                                            }
-                                        });
-                                        AlertDialog dialog = builder.create();
-                                        dialog.show();
-                                        enrolMessages.clear();
+                        ((Activity) mContext).runOnUiThread(() -> {
+                            if (enrol_result != 999) {
+                                //if error is encountered
+                                if (enrolMessages != null && enrolMessages.size() > 0) {
+                                    CharSequence[] charSequence = enrolMessages.toArray(new CharSequence[0]);
+                                    AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                                    builder.setTitle(mContext.getResources().getString(R.string.UploadFailureReport));
+                                    builder.setCancelable(false);
+                                    builder.setItems(charSequence, null);
+                                    builder.setPositiveButton(mContext.getResources().getString(R.string.Ok), (dialogInterface, i) -> dialogInterface.dismiss());
+                                    AlertDialog dialog = builder.create();
+                                    dialog.show();
+                                    enrolMessages.clear();
 
-                                    } else {
-                                        //deleteImage();
-                                        ShowDialog(mContext.getResources().getString(R.string.FamilyUploaded));
-                                    }
                                 } else {
-                                    ShowDialog(mContext.getResources().getString(R.string.NoDataAvailable));
+                                    ShowDialog(mContext.getResources().getString(R.string.FamilyUploaded));
                                 }
+                            } else {
+                                ShowDialog(mContext.getResources().getString(R.string.NoDataAvailable));
                             }
                         });
                     }
-                        //pd.dismiss();
                 }
             }.start();
         } catch (Exception e) {
@@ -4401,6 +4391,8 @@ public class ClientAndroidInterface {
                 add(String.valueOf(FamilyId));
             }};
         }
+
+
         String wherePolicyIdIn = "PolicyId IN (SELECT PolicyId FROM tblPolicy WHERE "
                 + combineFamilyIdsInWhereStatement(FamilyIDs) + ")";
         deleteUploadedTableData("tblPremium", wherePolicyIdIn);
@@ -4455,6 +4447,7 @@ public class ClientAndroidInterface {
             FileInputStream fIn = new FileInputStream(myFile);
             BufferedReader myReader = new BufferedReader(new InputStreamReader(fIn));
             aBuffer = myReader.readLine();
+
 
             myReader.close();
 /*            Scanner in = new Scanner(new FileReader("/"+dir+"/MasterData.txt"));
