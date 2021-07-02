@@ -49,7 +49,6 @@ public class NotEnrolledPoliciesOverviewAdapter extends RecyclerView.Adapter<Not
     public NotEnrolledPoliciesOverviewAdapter(Context rContext, JSONArray _policies) {
         _context = rContext;
         policies = _policies;
-
     }
 
     @Override
@@ -88,15 +87,12 @@ public class NotEnrolledPoliciesOverviewAdapter extends RecyclerView.Adapter<Not
         return false;
     }
 
-    public boolean isAllChecked()
-    {
+    public boolean isAllChecked() {
         boolean isAllChecked = true;
         int size = items.size();
-        for(int i=0;i<size;i++)
-        {
+        for (int i = 0; i < size; i++) {
             Reportmsg item = items.get(i);
-            if(!item.checked)
-            {
+            if (!item.checked) {
                 isAllChecked = false;
                 break;
             }
@@ -106,22 +102,17 @@ public class NotEnrolledPoliciesOverviewAdapter extends RecyclerView.Adapter<Not
     }
 
 
-    public void selectAll()
-    {
+    public void selectAll() {
         boolean isAllChecked = isAllChecked();
-        if(isAllChecked) { // deselect all
-            for(int i=0;i<items.size();i++)
-            {
-                if(items.get(i).checked)
-                {
+        if (isAllChecked) { // deselect all
+            for (int i = 0; i < items.size(); i++) {
+                if (items.get(i).checked) {
                     items.get(i).itemView.callOnClick();
                 }
             }
         } else { // select all
-            for(int i=0;i<items.size();i++)
-            {
-                if(!items.get(i).checked)
-                {
+            for (int i = 0; i < items.size(); i++) {
+                if (!items.get(i).checked) {
                     items.get(i).itemView.callOnClick();
                 }
             }
@@ -162,15 +153,15 @@ public class NotEnrolledPoliciesOverviewAdapter extends RecyclerView.Adapter<Not
             e.printStackTrace();
         }
 
-        ((Reportmsg) holder).Id.setText(Id);
-        ((Reportmsg) holder).PolicyId.setText(PolicyId);
-        ((Reportmsg) holder).InsuranceNumber.setText(InsuranceNumber);
-        ((Reportmsg) holder).isDone.setText(isDone);
-        ((Reportmsg) holder).Names.setText(OtherNames + " " + LastName);
-        ((Reportmsg) holder).ProductCode.setText(ProductCode);
-        ((Reportmsg) holder).ProductName.setText(ProductName);
-        ((Reportmsg) holder).UploadedDate.setText(UploadedDate);
-        ((Reportmsg) holder).RequestedDate.setText(RequestedDate);
+        holder.Id.setText(Id);
+        holder.PolicyId.setText(PolicyId);
+        holder.InsuranceNumber.setText(InsuranceNumber);
+        holder.isDone.setText(isDone);
+        holder.Names.setText(OtherNames + " " + LastName);
+        holder.ProductCode.setText(ProductCode);
+        holder.ProductName.setText(ProductName);
+        holder.UploadedDate.setText(UploadedDate);
+        holder.RequestedDate.setText(RequestedDate);
     }
 
     //Please see newPolicies and query to check Insuaree numbers
@@ -240,12 +231,70 @@ public class NotEnrolledPoliciesOverviewAdapter extends RecyclerView.Adapter<Not
             super(itemView);
             this.itemView = itemView;
 
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
+            itemView.setOnClickListener(view -> {
 
-                    // Redraw the old selection and the new
-                    if (NotEnrolledPoliciesOverview.num.size() == 0) {
+                // Redraw the old selection and the new
+                if (NotEnrolledPoliciesOverview.num.size() == 0) {
+                    NotEnrolledPoliciesOverview.num.add(String.valueOf(getLayoutPosition()));
+                    //itemView.setBackgroundColor(Color.GRAY);
+                    checkbox1.setBackgroundResource(R.drawable.checked);
+                    checked = true;
+
+                    try {
+                        paymentObject = new JSONObject();
+                        paymentObject.put("Position", String.valueOf(getLayoutPosition()));
+                        paymentObject.put("Id", String.valueOf(Id.getText()));
+                        paymentObject.put("PolicyId", String.valueOf(PolicyId.getText()));
+                        paymentObject.put("insurance_number", String.valueOf(InsuranceNumber.getText()));
+                        paymentObject.put("insurance_product_code", String.valueOf(ProductCode.getText()));
+                        paymentObject.put("uploaded_date", String.valueOf(UploadedDate.getText()));
+                        if (String.valueOf(isDone.getText()).equals("N")) {
+                            paymentObject.put("renewal", "0");
+                        } else {
+                            paymentObject.put("renewal", "1");
+                        }
+                        paymentObject.put("amount", String.valueOf(PolicyValue));
+                        paymentDetails.put(paymentObject);
+                        NotEnrolledPoliciesOverview.paymentDetails = paymentDetails;
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    NotEnrolledPoliciesOverview.PolicyValueToSend += Integer.parseInt(PolicyValue);
+
+                } else {
+                    int ans = 0;
+                    for (int i = 0; i < NotEnrolledPoliciesOverview.num.size(); i++) {
+                        if (NotEnrolledPoliciesOverview.num.get(i).equals(String.valueOf(getLayoutPosition()))) {
+                            ans = 1;
+                            NotEnrolledPoliciesOverview.num.remove(i);
+                            //itemView.setBackgroundColor(Color.WHITE);
+                            checkbox1.setBackgroundResource(R.drawable.unchecked);
+                            checked = false;
+
+                            JSONObject ob = null;
+                            for (int j = 0; j < paymentDetails.length(); j++) {
+                                try {
+                                    ob = paymentDetails.getJSONObject(j);
+                                    String position = ob.getString("Position");
+                                    if (position.equals(String.valueOf(getLayoutPosition()))) {
+                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                                            paymentDetails.remove(j);
+                                        }
+                                    }
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+
+                            NotEnrolledPoliciesOverview.paymentDetails = paymentDetails;
+                            NotEnrolledPoliciesOverview.PolicyValueToSend -= Integer.parseInt(PolicyValue);
+
+                            break;
+                        }
+                        ans = 0;
+                    }
+                    if (ans == 0) {
                         NotEnrolledPoliciesOverview.num.add(String.valueOf(getLayoutPosition()));
                         //itemView.setBackgroundColor(Color.GRAY);
                         checkbox1.setBackgroundResource(R.drawable.checked);
@@ -253,7 +302,6 @@ public class NotEnrolledPoliciesOverviewAdapter extends RecyclerView.Adapter<Not
 
                         try {
                             paymentObject = new JSONObject();
-                            paymentObject.put("Position", String.valueOf(getLayoutPosition()));
                             paymentObject.put("Id", String.valueOf(Id.getText()));
                             paymentObject.put("PolicyId", String.valueOf(PolicyId.getText()));
                             paymentObject.put("insurance_number", String.valueOf(InsuranceNumber.getText()));
@@ -272,85 +320,23 @@ public class NotEnrolledPoliciesOverviewAdapter extends RecyclerView.Adapter<Not
                             e.printStackTrace();
                         }
                         NotEnrolledPoliciesOverview.PolicyValueToSend += Integer.parseInt(PolicyValue);
-
-                    } else {
-                        int ans = 0;
-                        for (int i = 0; i < NotEnrolledPoliciesOverview.num.size(); i++) {
-                            if (NotEnrolledPoliciesOverview.num.get(i).equals(String.valueOf(getLayoutPosition()))) {
-                                ans = 1;
-                                NotEnrolledPoliciesOverview.num.remove(i);
-                                //itemView.setBackgroundColor(Color.WHITE);
-                                checkbox1.setBackgroundResource(R.drawable.unchecked);
-                                checked = false;
-
-                                JSONObject ob = null;
-                                for (int j = 0; j < paymentDetails.length(); j++) {
-                                    try {
-                                        ob = paymentDetails.getJSONObject(j);
-                                        String position = ob.getString("Position");
-                                        if (position.equals(String.valueOf(getLayoutPosition()))) {
-                                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                                                paymentDetails.remove(j);
-                                            }
-                                        }
-                                    } catch (JSONException e) {
-                                        e.printStackTrace();
-                                    }
-                                }
-
-                                NotEnrolledPoliciesOverview.paymentDetails = paymentDetails;
-                                NotEnrolledPoliciesOverview.PolicyValueToSend -= Integer.parseInt(PolicyValue);
-
-                                break;
-                            }
-                            ans = 0;
-                        }
-                        if (ans == 0) {
-                            NotEnrolledPoliciesOverview.num.add(String.valueOf(getLayoutPosition()));
-                            //itemView.setBackgroundColor(Color.GRAY);
-                            checkbox1.setBackgroundResource(R.drawable.checked);
-                            checked = true;
-
-                            try {
-                                paymentObject = new JSONObject();
-                                paymentObject.put("Id", String.valueOf(Id.getText()));
-                                paymentObject.put("PolicyId", String.valueOf(PolicyId.getText()));
-                                paymentObject.put("insurance_number", String.valueOf(InsuranceNumber.getText()));
-                                paymentObject.put("insurance_product_code", String.valueOf(ProductCode.getText()));
-                                paymentObject.put("uploaded_date", String.valueOf(UploadedDate.getText()));
-                                if (String.valueOf(isDone.getText()).equals("N")) {
-                                    paymentObject.put("renewal", "0");
-                                } else {
-                                    paymentObject.put("renewal", "1");
-                                }
-                                paymentObject.put("amount", String.valueOf(PolicyValue));
-                                paymentDetails.put(paymentObject);
-                                NotEnrolledPoliciesOverview.paymentDetails = paymentDetails;
-
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                            NotEnrolledPoliciesOverview.PolicyValueToSend += Integer.parseInt(PolicyValue);
-                        }
                     }
-
-                    ((NotEnrolledPoliciesOverview)_context).updateSelectAllButton(isAllChecked());
                 }
+
+                ((NotEnrolledPoliciesOverview) _context).updateSelectAllButton(isAllChecked());
             });
 
 
-            InsuranceNumber = (TextView) itemView.findViewById(R.id.InsuranceNumber);
-            Id = (TextView) itemView.findViewById(R.id.Id);
-            PolicyId = (TextView) itemView.findViewById(R.id.PolicyId);
-            isDone = (TextView) itemView.findViewById(R.id.isDone);
-            Names = (TextView) itemView.findViewById(R.id.Names);
-            ProductCode = (TextView) itemView.findViewById(R.id.ProductCode);
-            ProductName = (TextView) itemView.findViewById(R.id.ProductName);
-            UploadedDate = (TextView) itemView.findViewById(R.id.UploadedDate);
-            RequestedDate = (TextView) itemView.findViewById(R.id.RequestedDate);
-            checkbox1 = (ImageView) itemView.findViewById(R.id.checkbox1);
+            InsuranceNumber = itemView.findViewById(R.id.InsuranceNumber);
+            Id = itemView.findViewById(R.id.Id);
+            PolicyId = itemView.findViewById(R.id.PolicyId);
+            isDone = itemView.findViewById(R.id.isDone);
+            Names = itemView.findViewById(R.id.Names);
+            ProductCode = itemView.findViewById(R.id.ProductCode);
+            ProductName = itemView.findViewById(R.id.ProductName);
+            UploadedDate = itemView.findViewById(R.id.UploadedDate);
+            RequestedDate = itemView.findViewById(R.id.RequestedDate);
+            checkbox1 = itemView.findViewById(R.id.checkbox1);
         }
     }
-
-
 }

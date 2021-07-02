@@ -133,8 +133,8 @@ public class SearchOverViewPolicies extends AppCompatActivity {
 
             Calendar today = Calendar.getInstance();
 
-            uploadedFromCalendar.set(today.get(Calendar.YEAR),today.get(Calendar.MONTH),today.get(Calendar.DAY_OF_MONTH));
-            uploadedToCalendar.set(today.get(Calendar.YEAR),today.get(Calendar.MONTH),today.get(Calendar.DAY_OF_MONTH));
+            uploadedFromCalendar.set(today.get(Calendar.YEAR), today.get(Calendar.MONTH), today.get(Calendar.DAY_OF_MONTH));
+            uploadedToCalendar.set(today.get(Calendar.YEAR), today.get(Calendar.MONTH), today.get(Calendar.DAY_OF_MONTH));
         });
 
         uploadedFromCalendar = Calendar.getInstance();
@@ -173,7 +173,7 @@ public class SearchOverViewPolicies extends AppCompatActivity {
         BindSpinnerProduct();
     }
 
-    public boolean onOptionsItemSelected(MenuItem item){
+    public boolean onOptionsItemSelected(MenuItem item) {
         onBackPressed();
         return true;
     }
@@ -183,8 +183,7 @@ public class SearchOverViewPolicies extends AppCompatActivity {
         super.onBackPressed();
     }
 
-    public void updateLabel(Calendar calendar, TextView view)
-    {
+    public void updateLabel(Calendar calendar, TextView view) {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
 
         view.setText(formatter.format(calendar.getTime()));
@@ -203,7 +202,7 @@ public class SearchOverViewPolicies extends AppCompatActivity {
 
             ProductList.clear();
 
-            if(jsonArray.length() == 0){
+            if (jsonArray.length() == 0) {
                 HashMap<String, String> Product = new HashMap<>();
                 Product.put("ProductCode", "");
                 Product.put("ProductName", getResources().getString(R.string.SelectProduct));
@@ -214,7 +213,7 @@ public class SearchOverViewPolicies extends AppCompatActivity {
                         new int[]{R.id.tvProductCode, R.id.tvProductName});
 
                 Insurance_Product.setAdapter(adapter);
-            }else{
+            } else {
                 for (int i = 0; i < jsonArray.length(); i++) {
                     object = jsonArray.getJSONObject(i);
 
@@ -238,10 +237,8 @@ public class SearchOverViewPolicies extends AppCompatActivity {
                             new int[]{R.id.tvProductCode, R.id.tvProductName});
 
                     Insurance_Product.setAdapter(adapter);
-
                 }
             }
-
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -250,17 +247,15 @@ public class SearchOverViewPolicies extends AppCompatActivity {
 
     private String GetSelectedProduct() {
         String Product = "";
-        try{
+        try {
             HashMap<String, String> P;
             //noinspection unchecked
             P = (HashMap<String, String>) Insurance_Product.getSelectedItem();
-            if(P.get("ProductCode").equals("0") || P.get("ProductCode") == null || P.get("ProductCode").equals("")) {
+            Product = P.get("ProductCode");
+            if (Product == null || ("0").equals(Product)) {
                 Product = "";
-            }else{
-                Product = P.get("ProductCode");
             }
-
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
