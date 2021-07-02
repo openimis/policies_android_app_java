@@ -77,7 +77,7 @@
 
 
         <Button
-            android:id="@+id/fab2"
+            android:id="@+id/deleteButton"
             android:layout_width="80dp"
             android:layout_height="35dp"
             android:text="@string/Delete"
@@ -88,7 +88,7 @@
             android:textColor="@color/white"/>
 
         <Button
-            android:id="@+id/fab"
+            android:id="@+id/requestButton"
             android:layout_width="80dp"
             android:layout_height="35dp"
             android:text="@string/request"

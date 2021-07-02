@@ -2,8 +2,6 @@ package org.openimis.imispolicies;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.ActionBar;
@@ -24,17 +22,12 @@ import android.widget.TextView;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -52,8 +45,6 @@ public class NotEnrolledPoliciesOverview extends AppCompatActivity {
     ClientAndroidInterface clientAndroidInterface;
     RecyclerView PolicyRecyclerView;
     NotEnrolledPoliciesOverviewAdapter notEnrolledPoliciesOverviewAdapter;
-
-    General _General = new General(AppInformation.DomainInfo.getDomain());
 
     ToRestApi toRestApi;
     Token tokenl;
@@ -93,126 +84,118 @@ public class NotEnrolledPoliciesOverview extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.not_enrolled_policies_overview);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         final ActionBar actionBar = getSupportActionBar();
-        actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setTitle(getResources().getString(R.string.not_enrolled_policies));
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setTitle(getResources().getString(R.string.not_enrolled_policies));
+        }
 
         tokenl = new Token();
         toRestApi = new ToRestApi();
 
-        ValueNumberOfPolices = (TextView) findViewById(R.id.numOfFoundPoliciesValue);
-        ValueAmountOfContribution = (TextView) findViewById(R.id.amountOfContributionsValue);
+        ValueNumberOfPolices = findViewById(R.id.numOfFoundPoliciesValue);
+        ValueAmountOfContribution = findViewById(R.id.amountOfContributionsValue);
 
-        NothingFound = (TextView) findViewById(R.id.noPoliciesFound);
+        NothingFound = findViewById(R.id.noPoliciesFound);
 
         final String[] n = {""};
-        Button fab = (Button) findViewById(R.id.requestControlNumberButton);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        Button fab = findViewById(R.id.requestControlNumberButton);
+        fab.setOnClickListener(view -> {
 
-                General _general = new General(AppInformation.DomainInfo.getDomain());
+            General _general = new General(AppInformation.DomainInfo.getDomain());
 
-                if (_general.isNetworkAvailable(NotEnrolledPoliciesOverview.this)) {
-                    if (tokenl.getTokenText() == null || tokenl.getTokenText().length() <= 0) {
-                        LoginDialogBox();
-                    } else {
-                        Global global = (Global) getApplicationContext();
-
-                        try {
-                            getControlNumber.put("phone_number", "");
-                            getControlNumber.put("request_date", dt2);
-                            getControlNumber.put("enrolment_officer_code", global.getOfficerCode());
-                            getControlNumber.put("policies", paymentDetails);
-                            getControlNumber.put("amount_to_be_paid", PolicyValueToSend);
-
-                            n[0] = "";
-                            for (int i = 0; i < num.size(); i++) {
-                                n[0] += num.get(i) + "\n";
-                            }
-                            AmountCalculated = String.valueOf(PolicyValueToSend);
-                            if (num.size() != 0) {
-                                trackBox(getControlNumber, String.valueOf(PolicyValueToSend));
-                            } else {
-                                View view1 = findViewById(R.id.actv);
-                                Snackbar.make(view1, getResources().getString(R.string.select_policy), Snackbar.LENGTH_LONG)
-                                        .setAction("Action", null).show();
-                            }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
+            if (_general.isNetworkAvailable(NotEnrolledPoliciesOverview.this)) {
+                if (tokenl.getTokenText() == null || tokenl.getTokenText().length() <= 0) {
+                    LoginDialogBox();
                 } else {
-                    View view1 = findViewById(R.id.actv);
-                    Snackbar.make(view1, getResources().getString(R.string.NoInternet), Snackbar.LENGTH_LONG)
-                            .setAction("Action", null).show();
-                }
-            }
-        });
+                    Global global = (Global) getApplicationContext();
 
-        Button fab2 = (Button) findViewById(R.id.deleteNotEnrolledPoliciesButton);
-        fab2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (paymentDetails.length() > 0) {
-                    String unDeletedPolicies = "";
-                    int unDeletedPoliciesCount = 0;
-                    int totalPolicies = paymentDetails.length();
+                    try {
+                        getControlNumber.put("phone_number", "");
+                        getControlNumber.put("request_date", dt2);
+                        getControlNumber.put("enrolment_officer_code", global.getOfficerCode());
+                        getControlNumber.put("policies", paymentDetails);
+                        getControlNumber.put("amount_to_be_paid", PolicyValueToSend);
 
-                    for (int i = 0; i < paymentDetails.length(); i++) {
-                        try {
-                            JSONObject payment = paymentDetails.getJSONObject(0);
-                            String policyid = payment.getString("PolicyId");
-                            String uploaded_date = payment.getString("uploaded_date");
-                            if (uploaded_date.equals("")) {
-                                unDeletedPoliciesCount++;
-                                unDeletedPolicies += policyid;
-                            } else {
-                                clientAndroidInterface.deleteRecodedPolicy(policyid);
-                            }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
+                        n[0] = "";
+                        for (int i = 0; i < num.size(); i++) {
+                            n[0] += num.get(i) + "\n";
                         }
-                    }
-
-                    if (unDeletedPoliciesCount > 0) {
-                        String sms = "";
-                        if (totalPolicies == 1) {
-                            sms = getResources().getString(R.string.cant_be_deleted);
+                        AmountCalculated = String.valueOf(PolicyValueToSend);
+                        if (num.size() != 0) {
+                            trackBox(getControlNumber, String.valueOf(PolicyValueToSend));
                         } else {
-                            sms = unDeletedPoliciesCount + " " + getResources().getString(R.string.of) + " " + totalPolicies + " " + getResources().getString(R.string.notUploaded);
-                        }
-                        num.clear();
-                        policyDeleteDialogReport(sms);
-                    } else {
-                        num.clear();
-                        policyDeleteDialogReport(getResources().getString(R.string.dataDeleted));
-                    }
-
-                } else {
-                    runOnUiThread(new Runnable() {
-                        public void run() {
-                            pd.dismiss();
-                            View view = findViewById(R.id.actv);
-                            Snackbar.make(view, getResources().getString(R.string.no_data_delete), Snackbar.LENGTH_LONG)
+                            View view1 = findViewById(R.id.actv);
+                            Snackbar.make(view1, getResources().getString(R.string.select_policy), Snackbar.LENGTH_LONG)
                                     .setAction("Action", null).show();
                         }
-                    });
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                 }
-
+            } else {
+                View view1 = findViewById(R.id.actv);
+                Snackbar.make(view1, getResources().getString(R.string.NoInternet), Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
             }
         });
 
-        Button selectAllButton = (Button) findViewById(R.id.selectAllButton);
+        Button fab2 = findViewById(R.id.deleteNotEnrolledPoliciesButton);
+        fab2.setOnClickListener(view -> {
+            if (paymentDetails.length() > 0) {
+                String unDeletedPolicies = "";
+                int unDeletedPoliciesCount = 0;
+                int totalPolicies = paymentDetails.length();
+
+                for (int i = 0; i < paymentDetails.length(); i++) {
+                    try {
+                        JSONObject payment = paymentDetails.getJSONObject(0);
+                        String policyid = payment.getString("PolicyId");
+                        String uploaded_date = payment.getString("uploaded_date");
+                        if (uploaded_date.equals("")) {
+                            unDeletedPoliciesCount++;
+                            unDeletedPolicies += policyid;
+                        } else {
+                            clientAndroidInterface.deleteRecodedPolicy(policyid);
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                if (unDeletedPoliciesCount > 0) {
+                    String sms = "";
+                    if (totalPolicies == 1) {
+                        sms = getResources().getString(R.string.cant_be_deleted);
+                    } else {
+                        sms = unDeletedPoliciesCount + " " + getResources().getString(R.string.of) + " " + totalPolicies + " " + getResources().getString(R.string.notUploaded);
+                    }
+                    num.clear();
+                    policyDeleteDialogReport(sms);
+                } else {
+                    num.clear();
+                    policyDeleteDialogReport(getResources().getString(R.string.dataDeleted));
+                }
+
+            } else {
+                runOnUiThread(() -> {
+                    pd.dismiss();
+                    View view12 = findViewById(R.id.actv);
+                    Snackbar.make(view12, getResources().getString(R.string.no_data_delete), Snackbar.LENGTH_LONG)
+                            .setAction("Action", null).show();
+                });
+            }
+
+        });
+
+        Button selectAllButton = findViewById(R.id.selectAllButton);
         // OTC-316 temporary hide button 'select all'
         selectAllButton.setVisibility(View.INVISIBLE);
-        selectAllButton.setOnClickListener((view)->{
-            RecyclerView policiesList = (RecyclerView) findViewById(R.id.listOfNotEnrolledPolicies);
+        selectAllButton.setOnClickListener((view) -> {
+            RecyclerView policiesList = findViewById(R.id.listOfNotEnrolledPolicies);
             NotEnrolledPoliciesOverviewAdapter adapter = (NotEnrolledPoliciesOverviewAdapter) policiesList.getAdapter();
-            if(adapter!=null)
-            {
+            if (adapter != null) {
                 adapter.selectAll();
             }
         });
@@ -250,38 +233,6 @@ public class NotEnrolledPoliciesOverview extends AppCompatActivity {
         }
     }
 
-    /*    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.options_menu, menu);
-
-        // Associate searchable configuration with the SearchView
-        SearchManager searchManager =
-                (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        SearchView searchView =
-                (SearchView) menu.findItem(R.id.search).getActionView();
-        searchView.setSearchableInfo(
-                searchManager.getSearchableInfo(getComponentName()));
-
-
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-
-            @Override
-            public boolean onQueryTextSubmit(String s) {
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String s) {
-                //overViewPoliciesAdapter.getFilter().filter(s);
-                return true;
-            }
-        });
-
-        return true;
-    }*/
-
     public boolean onOptionsItemSelected(MenuItem item) {
         onBackPressed();
         return true;
@@ -292,11 +243,9 @@ public class NotEnrolledPoliciesOverview extends AppCompatActivity {
         super.onBackPressed();
     }
 
-    public void updateSelectAllButton(boolean isAllChecked)
-    {
+    public void updateSelectAllButton(boolean isAllChecked) {
         Button selectAllButton = (Button) findViewById(R.id.selectAllButton);
-        if(!isAllChecked)
-        {
+        if (!isAllChecked) {
             selectAllButton.setText(getResources().getString(R.string.SelectAllButton));
         } else {
             selectAllButton.setText(getResources().getString(R.string.DeselectAllButton));
@@ -306,8 +255,8 @@ public class NotEnrolledPoliciesOverview extends AppCompatActivity {
     public void fillRecordedPolicies() {
         policy = clientAndroidInterface.getNotEnrolledPolicies(InsuranceNumber, InsuranceProduct, RadioRenewal);//OrderArray;
         LayoutInflater li = LayoutInflater.from(NotEnrolledPoliciesOverview.this);
-        View promptsView = li.inflate(R.layout.activity_over_view_policies1, null);
-        PolicyRecyclerView = (RecyclerView) findViewById(R.id.listOfNotEnrolledPolicies);
+        li.inflate(R.layout.activity_over_view_policies, null);
+        PolicyRecyclerView = findViewById(R.id.listOfNotEnrolledPolicies);
         notEnrolledPoliciesOverviewAdapter = new NotEnrolledPoliciesOverviewAdapter(this, policy);
         PolicyRecyclerView.setAdapter(notEnrolledPoliciesOverviewAdapter);
         PolicyRecyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -325,71 +274,60 @@ public class NotEnrolledPoliciesOverview extends AppCompatActivity {
         // set prompts.xml to alertdialog builder
         alertDialogBuilder.setView(promptsView);
 
-        final EditText amount = (EditText) promptsView.findViewById(R.id.display);
-        final EditText phoneNumber = (EditText) promptsView.findViewById(R.id.phonenumber);
-        final Spinner paymentType = (Spinner) promptsView.findViewById(R.id.payment_type2);
-        final CheckBox sendSms = (CheckBox) promptsView.findViewById(R.id.send_sms);
+        final EditText finalAmount = promptsView.findViewById(R.id.display);
+        final EditText phoneNumber = promptsView.findViewById(R.id.phonenumber);
+        final Spinner paymentType = promptsView.findViewById(R.id.payment_type2);
+        final CheckBox sendSms = promptsView.findViewById(R.id.send_sms);
 
-        sendSms.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (((CompoundButton) view).isChecked()) {
-                    SmsRequired = 1;
-                }
+        sendSms.setOnClickListener(view -> {
+            if (((CompoundButton) view).isChecked()) {
+                SmsRequired = 1;
             }
         });
 
         addItemsOnSpinner2(paymentType);
         addListenerOnSpinnerItemSelection(paymentType);
 
-        amount.setText(Number);
+        finalAmount.setText(Number);
         if (clientAndroidInterface.getSpecificControl("TotalAmount").equals("R")) {
-            amount.setEnabled(false);
+            finalAmount.setEnabled(false);
         }
-
-        final EditText finalAmount = (EditText) promptsView.findViewById(R.id.display);
 
         // set dialog message
         alertDialogBuilder
                 .setCancelable(false)
                 .setPositiveButton(getResources().getString(R.string.Get_Control_Number),
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                try {
-                                    policies.put("phone_number", phoneNumber.getText().toString());
-                                    policies.put("amount_to_be_paid", finalAmount.getText().toString());
-                                    policies.put("SmsRequired", SmsRequired);
+                        (dialog, id) -> {
+                            try {
+                                policies.put("phone_number", phoneNumber.getText().toString());
+                                policies.put("amount_to_be_paid", finalAmount.getText().toString());
+                                policies.put("SmsRequired", SmsRequired);
 
-                                    if (PayType.toString().equals("Mobile Phone")) {
-                                        policies.put("type_of_payment", "MobilePhone");
-                                    } else if (PayType.toString().equals("Bank Transfer")) {
-                                        policies.put("type_of_payment", "BankTransfer");
-                                    }
-                                    amountConfirmed = finalAmount.getText().toString();
-                                    PaymentType = PayType.toString();
-
-                                    if (SmsRequired == 1 && phoneNumber.getText().toString().equals("")) {
-                                        clientAndroidInterface.ShowDialog(getResources().getString(R.string.phone_number_not_provided));
-                                    } else {
-                                        if (!clientAndroidInterface.isProductsListUnique(policies)) {
-                                            policyDeleteDialogReport(getResources().getString(R.string.not_unique_products));
-                                        } else {
-                                            getControlNumber(policies, String.valueOf(SmsRequired));
-                                        }
-                                    }
-                                } catch (JSONException e) {
-                                    e.printStackTrace();
-                                } catch (IOException e) {
-                                    e.printStackTrace();
+                                if (PayType.toString().equals("Mobile Phone")) {
+                                    policies.put("type_of_payment", "MobilePhone");
+                                } else if (PayType.toString().equals("Bank Transfer")) {
+                                    policies.put("type_of_payment", "BankTransfer");
                                 }
+                                amountConfirmed = finalAmount.getText().toString();
+                                PaymentType = PayType.toString();
+
+                                if (SmsRequired == 1 && phoneNumber.getText().toString().equals("")) {
+                                    clientAndroidInterface.ShowDialog(getResources().getString(R.string.phone_number_not_provided));
+                                } else {
+                                    if (!clientAndroidInterface.isProductsListUnique(policies)) {
+                                        policyDeleteDialogReport(getResources().getString(R.string.not_unique_products));
+                                    } else {
+                                        getControlNumber(policies, String.valueOf(SmsRequired));
+                                    }
+                                }
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            } catch (IOException e) {
+                                e.printStackTrace();
                             }
                         })
                 .setNegativeButton(getResources().getString(R.string.button_cancel),
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                dialog.cancel();
-                            }
-                        });
+                        (dialog, id) -> dialog.cancel());
 
         // create alert dialog
         AlertDialog alertDialog = alertDialogBuilder.create();
@@ -399,13 +337,13 @@ public class NotEnrolledPoliciesOverview extends AppCompatActivity {
     }
 
     public void addItemsOnSpinner2(Spinner PaymentSpinner) {
-        List<String> list = new ArrayList<String>();
+        List<String> list = new ArrayList<>();
         list.add("Mobile Phone");
         list.add("Bank Transfer");
 
-        TextView tv = (TextView) findViewById(R.id.type1);
+        TextView tv = findViewById(R.id.type1);
 
-        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this,
+        ArrayAdapter<String> dataAdapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_item, list);
         dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         PaymentSpinner.setAdapter(dataAdapter);
@@ -426,27 +364,25 @@ public class NotEnrolledPoliciesOverview extends AppCompatActivity {
         // set prompts.xml to alertdialog builder
         alertDialogBuilder.setView(promptsView);
 
-        final TextView report_message = (TextView) promptsView.findViewById(R.id.report_message);
+        final TextView report_message = promptsView.findViewById(R.id.report_message);
         report_message.setText(message);
 
         // set dialog message
         alertDialogBuilder
                 .setCancelable(false)
                 .setPositiveButton(getResources().getString(R.string.button_ok),
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                finish();
-                                Intent intent = new Intent(NotEnrolledPoliciesOverview.this, NotEnrolledPoliciesOverview.class);
-                                intent.putExtra("RENEWAL", RadioRenewal);
-                                intent.putExtra("INSURANCE_NUMBER", InsuranceNumber);
-                                intent.putExtra("OTHER_NAMES", OtherNames);
-                                intent.putExtra("LAST_NAME", LastName);
-                                intent.putExtra("INSURANCE_PRODUCT", InsuranceProduct);
-                                intent.putExtra("UPLOADED_FROM", UploadedFrom);
-                                intent.putExtra("UPLOADED_TO", UploadedTo);
-                                intent.putExtra("REQUESTED_YES_NO", RadioRequested);
-                                startActivity(intent);
-                            }
+                        (dialog, id) -> {
+                            finish();
+                            Intent intent = new Intent(NotEnrolledPoliciesOverview.this, NotEnrolledPoliciesOverview.class);
+                            intent.putExtra("RENEWAL", RadioRenewal);
+                            intent.putExtra("INSURANCE_NUMBER", InsuranceNumber);
+                            intent.putExtra("OTHER_NAMES", OtherNames);
+                            intent.putExtra("LAST_NAME", LastName);
+                            intent.putExtra("INSURANCE_PRODUCT", InsuranceProduct);
+                            intent.putExtra("UPLOADED_FROM", UploadedFrom);
+                            intent.putExtra("UPLOADED_TO", UploadedTo);
+                            intent.putExtra("REQUESTED_YES_NO", RadioRequested);
+                            startActivity(intent);
                         });
 
         // create alert dialog
@@ -472,98 +408,83 @@ public class NotEnrolledPoliciesOverview extends AppCompatActivity {
         // set prompts.xml to alertdialog builder
         alertDialogBuilder.setView(promptsView);
 
-        final TextView username = (TextView) promptsView.findViewById(R.id.UserName);
-        final TextView password = (TextView) promptsView.findViewById(R.id.Password);
+        final TextView username = promptsView.findViewById(R.id.UserName);
+        final TextView password = promptsView.findViewById(R.id.Password);
         String officer_code = global.getOfficerCode();
         username.setText(String.valueOf(officer_code));
         // set dialog message
         alertDialogBuilder
                 .setCancelable(false)
                 .setPositiveButton(getResources().getString(R.string.Ok),
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                if (!username.getText().toString().equals("") && !password.getText().toString().equals("")) {
-                                    pd = ProgressDialog.show(NotEnrolledPoliciesOverview.this, getResources().getString(R.string.Login), getResources().getString(R.string.InProgress));
+                        (dialog, id) -> {
+                            if (!username.getText().toString().equals("") && !password.getText().toString().equals("")) {
+                                pd = ProgressDialog.show(NotEnrolledPoliciesOverview.this, getResources().getString(R.string.Login), getResources().getString(R.string.InProgress));
 
-                                    new Thread() {
-                                        public void run() {
-/*                                            CallSoap callSoap = new CallSoap();
-                                            callSoap.setFunctionName("isValidLogin");
-                                            userid[0] = callSoap.isUserLoggedIn(username.getText().toString(),password.getText().toString());*/
-                                            JSONObject object = new JSONObject();
+                                new Thread() {
+                                    public void run() {
+                                        JSONObject object = new JSONObject();
+                                        try {
+                                            object.put("userName", username.getText().toString());
+                                            object.put("password", password.getText().toString());
+                                        } catch (JSONException e) {
+                                            e.printStackTrace();
+                                        }
+                                        String functionName = "login";
+                                        HttpResponse response = toRestApi.postToRestApi(object, functionName);
+
+                                        String content = null;
+                                        HttpEntity respEntity = response.getEntity();
+                                        if (respEntity != null) {
+                                            final String[] code = {null};
+                                            // EntityUtils to get the response content
                                             try {
-                                                object.put("userName", username.getText().toString());
-                                                object.put("password", password.getText().toString());
+                                                content = EntityUtils.toString(respEntity);
+                                            } catch (IOException e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+                                        if (response.getStatusLine().getStatusCode() == HttpURLConnection.HTTP_OK) {
+                                            JSONObject ob = null;
+                                            String token = "";
+                                            String validTo = "";
+                                            try {
+                                                ob = new JSONObject(content);
+                                                token = ob.getString("access_token");
+                                                validTo = ob.getString("expires_on");
+
                                             } catch (JSONException e) {
                                                 e.printStackTrace();
                                             }
-                                            String functionName = "login";
-                                            HttpResponse response = toRestApi.postToRestApi(object, functionName);
 
-                                            String content = null;
-                                            HttpEntity respEntity = response.getEntity();
-                                            if (respEntity != null) {
-                                                final String[] code = {null};
-                                                // EntityUtils to get the response content
-                                                try {
-                                                    content = EntityUtils.toString(respEntity);
-                                                } catch (IOException e) {
-                                                    e.printStackTrace();
+                                            tokenl.saveTokenText(token, validTo);
+
+                                            final String finalToken = token;
+                                            runOnUiThread(() -> {
+                                                if (finalToken.length() > 0) {
+                                                    pd.dismiss();
+                                                    Toast.makeText(NotEnrolledPoliciesOverview.this, NotEnrolledPoliciesOverview.this.getResources().getString(R.string.Login_Successful), Toast.LENGTH_LONG).show();
+                                                } else {
+                                                    pd.dismiss();
+                                                    Toast.makeText(NotEnrolledPoliciesOverview.this, NotEnrolledPoliciesOverview.this.getResources().getString(R.string.LoginFail), Toast.LENGTH_LONG).show();
+                                                    LoginDialogBox();
                                                 }
-                                            }
-                                            if (response.getStatusLine().getStatusCode() == HttpURLConnection.HTTP_OK) {
-                                                JSONObject ob = null;
-                                                String token = "";
-                                                String validTo = "";
-                                                try {
-                                                    ob = new JSONObject(content);
-                                                    token = ob.getString("access_token");
-                                                    validTo = ob.getString("expires_on");
-
-                                                } catch (JSONException e) {
-                                                    e.printStackTrace();
-                                                }
-
-                                                tokenl.saveTokenText(token,validTo);
-
-                                                final String finalToken = token;
-                                                runOnUiThread(new Runnable() {
-                                                    @Override
-                                                    public void run() {
-                                                        if (finalToken.length() > 0) {
-                                                            pd.dismiss();
-                                                            Toast.makeText(NotEnrolledPoliciesOverview.this, NotEnrolledPoliciesOverview.this.getResources().getString(R.string.Login_Successful), Toast.LENGTH_LONG).show();
-                                                        } else {
-                                                            pd.dismiss();
-                                                            Toast.makeText(NotEnrolledPoliciesOverview.this, NotEnrolledPoliciesOverview.this.getResources().getString(R.string.LoginFail), Toast.LENGTH_LONG).show();
-                                                            LoginDialogBox();
-                                                        }
-                                                    }
-                                                });
-                                            } else {
-                                                runOnUiThread(new Runnable() {
-                                                    @Override
-                                                    public void run() {
-                                                        pd.dismiss();
-                                                        Toast.makeText(NotEnrolledPoliciesOverview.this, NotEnrolledPoliciesOverview.this.getResources().getString(R.string.LoginFail), Toast.LENGTH_LONG).show();
-                                                        LoginDialogBox();
-                                                    }
-                                                });
-                                            }
+                                            });
+                                        } else {
+                                            runOnUiThread(() -> {
+                                                pd.dismiss();
+                                                Toast.makeText(NotEnrolledPoliciesOverview.this, NotEnrolledPoliciesOverview.this.getResources().getString(R.string.LoginFail), Toast.LENGTH_LONG).show();
+                                                LoginDialogBox();
+                                            });
                                         }
-                                    }.start();
-                                } else {
-                                    LoginDialogBox();
-                                    Toast.makeText(NotEnrolledPoliciesOverview.this, NotEnrolledPoliciesOverview.this.getResources().getString(R.string.Enter_Credentials), Toast.LENGTH_LONG).show();
-                                }
+                                    }
+                                }.start();
+                            } else {
+                                LoginDialogBox();
+                                Toast.makeText(NotEnrolledPoliciesOverview.this, NotEnrolledPoliciesOverview.this.getResources().getString(R.string.Enter_Credentials), Toast.LENGTH_LONG).show();
                             }
                         })
                 .setNegativeButton(R.string.Cancel,
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                dialog.cancel();
-                            }
-                        });
+                        (dialog, id) -> dialog.cancel());
 
         // create alert dialog
         AlertDialog alertDialog = alertDialogBuilder.create();
@@ -573,26 +494,7 @@ public class NotEnrolledPoliciesOverview extends AppCompatActivity {
     private int getControlNumber(final JSONObject order, final String SmsRequired) throws IOException {
         Thread thread = new Thread() {
             public void run() {
-                HttpClient httpClient = new DefaultHttpClient();
-                HttpPost httpPost = new HttpPost(AppInformation.DomainInfo.getDomain() + "GetControlNumber");
-// Request parameters and other properties.
-                try {
-                    StringEntity postingString = new StringEntity(order.toString());
-                    httpPost.setEntity(postingString);
-                    httpPost.setHeader("Content-type", "application/json");
-                    httpPost.setHeader("Authorization", "bearer " + tokenl.getTokenText());
-                } catch (UnsupportedEncodingException e) {
-                    // writing error to Log
-                    e.printStackTrace();
-                }
-                /*
-                 * Execute the HTTP Request
-                 */
-                runOnUiThread(new Runnable() {
-                    public void run() {
-                        pd = ProgressDialog.show(NotEnrolledPoliciesOverview.this, "", getResources().getString(R.string.Get_Control_Number));
-                    }
-                });
+                runOnUiThread(() -> pd = ProgressDialog.show(NotEnrolledPoliciesOverview.this, "", getResources().getString(R.string.Get_Control_Number)));
 
                 HttpResponse response = null;
                 try {
@@ -621,16 +523,13 @@ public class NotEnrolledPoliciesOverview extends AppCompatActivity {
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    pd.dismiss();
-                                    LoginDialogBox();
-                                    if (tokenl.getTokenText().length() > 1) {
-                                        View view = findViewById(R.id.actv);
-                                        Snackbar.make(view, Finalcode + "-" + error_message[0], Snackbar.LENGTH_LONG)
-                                                .setAction("Action", null).show();
-                                    }
+                            runOnUiThread(() -> {
+                                pd.dismiss();
+                                LoginDialogBox();
+                                if (tokenl.getTokenText().length() > 1) {
+                                    View view = findViewById(R.id.actv);
+                                    Snackbar.make(view, Finalcode + "-" + error_message[0], Snackbar.LENGTH_LONG)
+                                            .setAction("Action", null).show();
                                 }
                             });
 
@@ -640,12 +539,7 @@ public class NotEnrolledPoliciesOverview extends AppCompatActivity {
                                 ob = new JSONObject(content);
                                 error_occured[0] = ob.getString("error_occured");
                                 if (error_occured[0].equals("true")) {
-                                    runOnUiThread(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            pd.dismiss();
-                                        }
-                                    });
+                                    runOnUiThread(() -> pd.dismiss());
                                     error_message[0] = ob.getString("error_message");
 
                                     View view = findViewById(R.id.actv);
@@ -656,46 +550,25 @@ public class NotEnrolledPoliciesOverview extends AppCompatActivity {
                                     control_number[0] = ob.getString("control_number");
                                     int id = insertAfterRequest(amountConfirmed, control_number[0], internal_Identifier[0], PaymentType, SmsRequired);
                                     updateAfterRequest(id);
-                                    runOnUiThread(new Runnable() {
-                                        public void run() {
-                                            pd.dismiss();
-                                            num.clear();
-                                            policyDeleteDialogReport(getResources().getString(R.string.requestSent));
-
-/*                                            View view = findViewById(R.id.actv);
-                                            Snackbar.make(view, getResources().getString(R.string.success), Snackbar.LENGTH_LONG)
-                                                    .setAction("Action", null).show();*/
-                                        }
+                                    runOnUiThread(() -> {
+                                        pd.dismiss();
+                                        num.clear();
+                                        policyDeleteDialogReport(getResources().getString(R.string.requestSent));
                                     });
                                 }
                             } catch (JSONException e) {
-                                runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        pd.dismiss();
-                                    }
-                                });
+                                runOnUiThread(() -> pd.dismiss());
                                 e.printStackTrace();
                             }
                         }
                     } else {
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                pd.dismiss();
-                            }
-                        });
+                        runOnUiThread(() -> pd.dismiss());
                         View view = findViewById(R.id.actv);
                         Snackbar.make(view, getResources().getString(R.string.NoInternet), Snackbar.LENGTH_LONG)
                                 .setAction("Action", null).show();
                     }
                 } catch (Exception e) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            pd.dismiss();
-                        }
-                    });
+                    runOnUiThread(() -> pd.dismiss());
                     View view = findViewById(R.id.actv);
                     Snackbar.make(view, getResources().getString(R.string.NoInternet), Snackbar.LENGTH_LONG)
                             .setAction("Action", null).show();
