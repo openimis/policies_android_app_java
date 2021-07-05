@@ -2253,8 +2253,8 @@ public class ClientAndroidInterface {
 
     public JSONArray getRecordedPolicies(String insuranceNumber, String otherNames, String lastName, String insuranceProduct, String uploadedFrom, String uploadedTo, String radioRenewal, String requestedFrom, String requestedTo, String PaymentType) {
         String renewal = "";
-        String request = "";
-        String upload = "";
+        String request;
+        String upload;
         String payment_type = "";
 
         if (!radioRenewal.equals("")) {
@@ -2273,8 +2273,14 @@ public class ClientAndroidInterface {
         String dateRequestedFrom = getOrDefault(requestedFrom, earlyDate);
         String dateRequestedTo = getOrDefault(requestedTo, today);
 
-        upload = " AND RP.UploadedDate BETWEEN '" + dateUploadedFrom + "' AND '" + dateUploadedTo + "'";
-        request = " AND RP.UploadedDate BETWEEN '" + dateRequestedFrom + "' AND '" + dateRequestedTo + "'";
+        if("".equals(uploadedFrom) && "".equals(uploadedTo))
+        {
+            upload = "";
+        } else {
+            upload = " AND RP.UploadedDate BETWEEN '" + dateUploadedFrom + "' AND '" + dateUploadedTo + "'";
+        }
+
+        request = " AND RP.ControlRequestDate BETWEEN '" + dateRequestedFrom + "' AND '" + dateRequestedTo + "'";
 
         String Query = "SELECT * FROM tblRecordedPolicies RP INNER JOIN tblControlNumber CN ON RP.ControlNumberId = CN.Id WHERE RP.InsuranceNumber LIKE '%" + insuranceNumber + "%' AND RP.LastName LIKE '%" + lastName + "%' AND RP.OtherNames LIKE '%" + otherNames + "%' AND RP.ProductCode LIKE '%" + insuranceProduct + "%'" + renewal + " " + request + " " + upload + " " + payment_type + "";
         JSONArray RecordedPolicies = sqlHandler.getResult(Query, null);
