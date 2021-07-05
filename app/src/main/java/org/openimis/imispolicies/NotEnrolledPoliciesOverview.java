@@ -100,8 +100,8 @@ public class NotEnrolledPoliciesOverview extends AppCompatActivity {
         NothingFound = findViewById(R.id.noPoliciesFound);
 
         final String[] n = {""};
-        Button fab = findViewById(R.id.requestControlNumberButton);
-        fab.setOnClickListener(view -> {
+        Button requestButton = findViewById(R.id.requestControlNumberButton);
+        requestButton.setOnClickListener(view -> {
 
             General _general = new General(AppInformation.DomainInfo.getDomain());
 
@@ -141,10 +141,9 @@ public class NotEnrolledPoliciesOverview extends AppCompatActivity {
             }
         });
 
-        Button fab2 = findViewById(R.id.deleteNotEnrolledPoliciesButton);
-        fab2.setOnClickListener(view -> {
+        Button deleteButton = findViewById(R.id.deleteNotEnrolledPoliciesButton);
+        deleteButton.setOnClickListener(view -> {
             if (paymentDetails.length() > 0) {
-                String unDeletedPolicies = "";
                 int unDeletedPoliciesCount = 0;
                 int totalPolicies = paymentDetails.length();
 
@@ -155,7 +154,6 @@ public class NotEnrolledPoliciesOverview extends AppCompatActivity {
                         String uploaded_date = payment.getString("uploaded_date");
                         if (uploaded_date.equals("")) {
                             unDeletedPoliciesCount++;
-                            unDeletedPolicies += policyid;
                         } else {
                             clientAndroidInterface.deleteRecodedPolicy(policyid);
                         }
@@ -165,7 +163,7 @@ public class NotEnrolledPoliciesOverview extends AppCompatActivity {
                 }
 
                 if (unDeletedPoliciesCount > 0) {
-                    String sms = "";
+                    String sms;
                     if (totalPolicies == 1) {
                         sms = getResources().getString(R.string.cant_be_deleted);
                     } else {
@@ -208,7 +206,7 @@ public class NotEnrolledPoliciesOverview extends AppCompatActivity {
         fillRecordedPolicies();
 
         int PolicyValue = 0;
-        JSONObject ob = null;
+        JSONObject ob;
         if (policy != null) {
             for (int j = 0; j < policy.length(); j++) {
                 try {
@@ -222,8 +220,8 @@ public class NotEnrolledPoliciesOverview extends AppCompatActivity {
             search_count = notEnrolledPoliciesOverviewAdapter.getCount();
             if (search_count == 0) {
                 NothingFound.setVisibility(View.VISIBLE);
-                fab.setVisibility(View.GONE);
-                fab2.setVisibility(View.GONE);
+                requestButton.setVisibility(View.GONE);
+                deleteButton.setVisibility(View.GONE);
             }
             ValueNumberOfPolices.setText(String.valueOf(search_count));
             ValueAmountOfContribution.setText(String.valueOf(PolicyValue));
@@ -303,13 +301,13 @@ public class NotEnrolledPoliciesOverview extends AppCompatActivity {
                                 policies.put("amount_to_be_paid", finalAmount.getText().toString());
                                 policies.put("SmsRequired", SmsRequired);
 
-                                if (PayType.toString().equals("Mobile Phone")) {
+                                if (PayType.equals("Mobile Phone")) {
                                     policies.put("type_of_payment", "MobilePhone");
-                                } else if (PayType.toString().equals("Bank Transfer")) {
+                                } else if (PayType.equals("Bank Transfer")) {
                                     policies.put("type_of_payment", "BankTransfer");
                                 }
                                 amountConfirmed = finalAmount.getText().toString();
-                                PaymentType = PayType.toString();
+                                PaymentType = PayType;
 
                                 if (SmsRequired == 1 && phoneNumber.getText().toString().equals("")) {
                                     clientAndroidInterface.ShowDialog(getResources().getString(R.string.phone_number_not_provided));
@@ -321,8 +319,6 @@ public class NotEnrolledPoliciesOverview extends AppCompatActivity {
                                     }
                                 }
                             } catch (JSONException e) {
-                                e.printStackTrace();
-                            } catch (IOException e) {
                                 e.printStackTrace();
                             }
                         })
@@ -340,8 +336,6 @@ public class NotEnrolledPoliciesOverview extends AppCompatActivity {
         List<String> list = new ArrayList<>();
         list.add("Mobile Phone");
         list.add("Bank Transfer");
-
-        TextView tv = findViewById(R.id.type1);
 
         ArrayAdapter<String> dataAdapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_item, list);
@@ -491,17 +485,18 @@ public class NotEnrolledPoliciesOverview extends AppCompatActivity {
         alertDialog.show();
     }
 
-    private int getControlNumber(final JSONObject order, final String SmsRequired) throws IOException {
-        Thread thread = new Thread() {
+    private int getControlNumber(final JSONObject order, final String SmsRequired) {
+        new Thread() {
             public void run() {
                 runOnUiThread(() -> pd = ProgressDialog.show(NotEnrolledPoliciesOverview.this, "", getResources().getString(R.string.Get_Control_Number)));
 
-                HttpResponse response = null;
+                HttpResponse response;
                 try {
                     response = toRestApi.postToRestApiToken(order, "GetControlNumber");
+                    int code = response.getStatusLine().getStatusCode();
 
                     HttpEntity respEntity = response.getEntity();
-                    String content = null;
+                    String content;
                     if (respEntity != null) {
                         final String[] error_occured = {null};
                         final String[] error_message = {null};
@@ -510,79 +505,58 @@ public class NotEnrolledPoliciesOverview extends AppCompatActivity {
                         // EntityUtils to get the response content
                         content = EntityUtils.toString(respEntity);
 
-                        int cod = response.getStatusLine().getStatusCode();
-                        final int Finalcode = cod;
-                        if (cod >= 400) {
-                            JSONObject ob = null;
-                            try {
-                                ob = new JSONObject(content);
-                                error_occured[0] = ob.getString("error_occured");
-                                if (error_occured[0].equals("true")) {
-                                    error_message[0] = ob.getString("error_message");
-                                }
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                            runOnUiThread(() -> {
-                                pd.dismiss();
+                        try {
+                            JSONObject res = new JSONObject(content);
+
+                            error_occured[0] = res.getString("error_occured");
+                            if ("true".equals(error_occured[0])) {
+                                error_message[0] = res.getString("error_message");
+                                showSnackbar(error_message[0]);
+                            } else if (code == HttpURLConnection.HTTP_UNAUTHORIZED) {
                                 LoginDialogBox();
-                                if (tokenl.getTokenText().length() > 1) {
-                                    View view = findViewById(R.id.actv);
-                                    Snackbar.make(view, Finalcode + "-" + error_message[0], Snackbar.LENGTH_LONG)
-                                            .setAction("Action", null).show();
-                                }
-                            });
-
-                        } else {
-                            JSONObject ob = null;
-                            try {
-                                ob = new JSONObject(content);
-                                error_occured[0] = ob.getString("error_occured");
-                                if (error_occured[0].equals("true")) {
-                                    runOnUiThread(() -> pd.dismiss());
-                                    error_message[0] = ob.getString("error_message");
-
-                                    View view = findViewById(R.id.actv);
-                                    Snackbar.make(view, error_message[0], Snackbar.LENGTH_LONG)
-                                            .setAction("Action", null).show();
-                                } else {
-                                    internal_Identifier[0] = ob.getString("internal_identifier");
-                                    control_number[0] = ob.getString("control_number");
-                                    int id = insertAfterRequest(amountConfirmed, control_number[0], internal_Identifier[0], PaymentType, SmsRequired);
-                                    updateAfterRequest(id);
-                                    runOnUiThread(() -> {
-                                        pd.dismiss();
-                                        num.clear();
-                                        policyDeleteDialogReport(getResources().getString(R.string.requestSent));
-                                    });
-                                }
-                            } catch (JSONException e) {
-                                runOnUiThread(() -> pd.dismiss());
-                                e.printStackTrace();
+                                showSnackbar(getResources().getString(R.string.has_no_rights));
+                            } else if (code == HttpURLConnection.HTTP_INTERNAL_ERROR) {
+                                showSnackbar(getResources().getString(R.string.SomethingWrongServer));
+                            } else if (code >= 400) { // for compatibility, but should not be needed
+                                showSnackbar(getResources().getString(R.string.SomethingWrongServer));
+                            } else {
+                                internal_Identifier[0] = res.getString("internal_identifier");
+                                control_number[0] = res.getString("control_number");
+                                int id = insertAfterRequest(amountConfirmed, control_number[0], internal_Identifier[0], PaymentType, SmsRequired);
+                                updateAfterRequest(id);
+                                runOnUiThread(() -> {
+                                    pd.dismiss();
+                                    num.clear();
+                                    policyDeleteDialogReport(getResources().getString(R.string.requestSent));
+                                });
                             }
+                        } catch (JSONException e) {
+                            runOnUiThread(() -> pd.dismiss());
+                            showSnackbar(getResources().getString(R.string.SomethingWrongServer));
                         }
                     } else {
                         runOnUiThread(() -> pd.dismiss());
-                        View view = findViewById(R.id.actv);
-                        Snackbar.make(view, getResources().getString(R.string.NoInternet), Snackbar.LENGTH_LONG)
-                                .setAction("Action", null).show();
+                        showSnackbar(getResources().getString(R.string.NoInternet));
                     }
-                } catch (Exception e) {
+                } catch (IOException e) {
                     runOnUiThread(() -> pd.dismiss());
-                    View view = findViewById(R.id.actv);
-                    Snackbar.make(view, getResources().getString(R.string.NoInternet), Snackbar.LENGTH_LONG)
-                            .setAction("Action", null).show();
+                    showSnackbar(getResources().getString(R.string.NoInternet));
                 }
             }
-        };
-
-        thread.start();
+        }.start();
 
         return 0;
     }
 
+    public void showSnackbar(String message)
+    {
+        View activity = findViewById(R.id.actv);
+        Snackbar.make(activity, message, Snackbar.LENGTH_LONG)
+                .setAction("Action", null).show();
+    }
+
     public void updateAfterRequest(int ControlNumberId) {
-        JSONObject ob = null;
+        JSONObject ob;
         for (int j = 0; j < paymentDetails.length(); j++) {
             try {
                 ob = paymentDetails.getJSONObject(j);

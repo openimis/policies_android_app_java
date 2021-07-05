@@ -84,7 +84,6 @@ public class OverViewPolicies extends AppCompatActivity {
     String RadioRequested = "";
     static String PayType = "";
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -136,7 +135,6 @@ public class OverViewPolicies extends AppCompatActivity {
                             Snackbar.make(view1, getResources().getString(R.string.select_policy), Snackbar.LENGTH_LONG)
                                     .setAction("Action", null).show();
                         }
-
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -146,7 +144,6 @@ public class OverViewPolicies extends AppCompatActivity {
                 Snackbar.make(view1, getResources().getString(R.string.NoInternet), Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
             }
-
         });
 
         Button deleteButton = findViewById(R.id.deleteButton);
@@ -186,7 +183,6 @@ public class OverViewPolicies extends AppCompatActivity {
                     num.clear();
                     policyDeleteDialogReport(getResources().getString(R.string.dataDeleted));
                 }
-
             } else {
                 runOnUiThread(() -> {
                     pd.dismiss();
@@ -194,12 +190,9 @@ public class OverViewPolicies extends AppCompatActivity {
                     Snackbar.make(view12, getResources().getString(R.string.no_data_delete), Snackbar.LENGTH_LONG)
                             .setAction("Action", null).show();
                 });
-
             }
-
         });
         clientAndroidInterface = new ClientAndroidInterface(this);
-
 
         InsuranceNumber = getIntent().getStringExtra("INSURANCE_NUMBER");
         OtherNames = getIntent().getStringExtra("OTHER_NAMES");
@@ -239,38 +232,6 @@ public class OverViewPolicies extends AppCompatActivity {
         }
     }
 
-/*    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.options_menu, menu);
-
-        // Associate searchable configuration with the SearchView
-        SearchManager searchManager =
-                (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        SearchView searchView =
-                (SearchView) menu.findItem(R.id.search).getActionView();
-        searchView.setSearchableInfo(
-                searchManager.getSearchableInfo(getComponentName()));
-
-
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-
-            @Override
-            public boolean onQueryTextSubmit(String s) {
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String s) {
-                //overViewPoliciesAdapter.getFilter().filter(s);
-                return true;
-            }
-        });
-
-        return true;
-    }*/
-
     public boolean onOptionsItemSelected(MenuItem item) {
         onBackPressed();
         return true;
@@ -307,7 +268,6 @@ public class OverViewPolicies extends AppCompatActivity {
         final EditText phoneNumber = promptsView.findViewById(R.id.phonenumber);
         final Spinner payment_type = promptsView.findViewById(R.id.payment_type2);
         final CheckBox send_sms = promptsView.findViewById(R.id.send_sms);
-
 
         send_sms.setOnClickListener(view -> {
             if (((CompoundButton) view).isChecked()) {
@@ -354,8 +314,6 @@ public class OverViewPolicies extends AppCompatActivity {
                                 }
                             } catch (JSONException e) {
                                 e.printStackTrace();
-                            } catch (IOException e) {
-                                e.printStackTrace();
                             }
                         })
                 .setNegativeButton(getResources().getString(R.string.button_cancel),
@@ -373,7 +331,6 @@ public class OverViewPolicies extends AppCompatActivity {
         List<String> list = new ArrayList<>();
         list.add("Mobile Phone");
         list.add("Bank Transfer");
-
 
         TextView tv = findViewById(R.id.type1);
 
@@ -429,7 +386,6 @@ public class OverViewPolicies extends AppCompatActivity {
     public void LoginDialogBox() {
         if (!clientAndroidInterface.CheckInternetAvailable())
             return;
-
 
         Global global = (Global) OverViewPolicies.this.getApplicationContext();
 
@@ -511,17 +467,12 @@ public class OverViewPolicies extends AppCompatActivity {
                                             LoginDialogBox();
                                         });
                                     }
-
-
                                 }
                                 ).start();
-
-
                             } else {
                                 LoginDialogBox();
                                 Toast.makeText(OverViewPolicies.this, OverViewPolicies.this.getResources().getString(R.string.Enter_Credentials), Toast.LENGTH_LONG).show();
                             }
-
                         })
                 .setNegativeButton(R.string.Cancel,
                         (dialog, id) -> dialog.cancel());
@@ -531,7 +482,7 @@ public class OverViewPolicies extends AppCompatActivity {
         alertDialog.show();
     }
 
-    private int getControlNumber(final JSONObject order, final String SmsRequired) throws IOException {
+    private int getControlNumber(final JSONObject order, final String SmsRequired) {
         new Thread() {
             public void run() {
                 runOnUiThread(() -> pd = ProgressDialog.show(OverViewPolicies.this, "", getResources().getString(R.string.Get_Control_Number)));
@@ -539,6 +490,7 @@ public class OverViewPolicies extends AppCompatActivity {
                 HttpResponse response;
                 try {
                     response = toRestApi.postToRestApiToken(order, "GetControlNumber");
+                    int code = response.getStatusLine().getStatusCode();
 
                     HttpEntity respEntity = response.getEntity();
                     String content;
@@ -550,73 +502,42 @@ public class OverViewPolicies extends AppCompatActivity {
                         // EntityUtils to get the response content
                         content = EntityUtils.toString(respEntity);
 
-                        int cod = response.getStatusLine().getStatusCode();
-                        final int Finalcode = cod;
-                        if (cod >= 400) {
-                            JSONObject ob = null;
-                            try {
-                                ob = new JSONObject(content);
-                                error_occured[0] = ob.getString("error_occured");
-                                if (error_occured[0].equals("true")) {
-                                    error_message[0] = ob.getString("error_message");
-                                }
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                            runOnUiThread(() -> {
-                                pd.dismiss();
+                        try {
+                            JSONObject res = new JSONObject(content);
+
+                            error_occured[0] = res.getString("error_occured");
+                            if ("true".equals(error_occured[0])) {
+                                error_message[0] = res.getString("error_message");
+                                showSnackbar(error_message[0]);
+                            } else if (code == HttpURLConnection.HTTP_UNAUTHORIZED) {
                                 LoginDialogBox();
-                                if (tokenl.getTokenText().length() > 1) {
-                                    View view = findViewById(R.id.actv);
-                                    Snackbar.make(view, Finalcode + "-" + getResources().getString(R.string.has_no_rights), Snackbar.LENGTH_LONG)
-                                            .setAction("Action", null).show();
-                                }
-                            });
-
-                        } else {
-                            JSONObject ob;
-                            try {
-                                ob = new JSONObject(content);
-                                error_occured[0] = ob.getString("error_occured");
-                                if (error_occured[0].equals("true")) {
-                                    runOnUiThread(() -> pd.dismiss());
-                                    error_message[0] = ob.getString("error_message");
-
-                                    View view = findViewById(R.id.actv);
-                                    Snackbar.make(view, error_message[0], Snackbar.LENGTH_LONG)
-                                            .setAction("Action", null).show();
-                                } else {
-                                    internal_Identifier[0] = ob.getString("internal_identifier");
-                                    control_number[0] = ob.getString("control_number");
-                                    int id = insertAfterRequest(amountConfirmed, control_number[0], internal_Identifier[0], PaymentType, SmsRequired);
-                                    updateAfterRequest(id);
-                                    runOnUiThread(() -> {
-                                        pd.dismiss();
-
-                                        num.clear();
-                                        policyDeleteDialogReport(getResources().getString(R.string.requestSent));
-
-/*                                            View view = findViewById(R.id.actv);
-                                        Snackbar.make(view, getResources().getString(R.string.success), Snackbar.LENGTH_LONG)
-                                                .setAction("Action", null).show();*/
-                                    });
-                                }
-                            } catch (JSONException e) {
-                                runOnUiThread(() -> pd.dismiss());
-                                e.printStackTrace();
+                                showSnackbar(getResources().getString(R.string.has_no_rights));
+                            } else if (code == HttpURLConnection.HTTP_INTERNAL_ERROR) {
+                                showSnackbar(getResources().getString(R.string.SomethingWrongServer));
+                            } else if (code >= 400) { // for compatibility, but should not be needed
+                                showSnackbar(getResources().getString(R.string.SomethingWrongServer));
+                            } else {
+                                internal_Identifier[0] = res.getString("internal_identifier");
+                                control_number[0] = res.getString("control_number");
+                                int id = insertAfterRequest(amountConfirmed, control_number[0], internal_Identifier[0], PaymentType, SmsRequired);
+                                updateAfterRequest(id);
+                                runOnUiThread(() -> {
+                                    pd.dismiss();
+                                    num.clear();
+                                    policyDeleteDialogReport(getResources().getString(R.string.requestSent));
+                                });
                             }
+                        } catch (JSONException e) {
+                            runOnUiThread(() -> pd.dismiss());
+                            showSnackbar(getResources().getString(R.string.SomethingWrongServer));
                         }
                     } else {
                         runOnUiThread(() -> pd.dismiss());
-                        View view = findViewById(R.id.actv);
-                        Snackbar.make(view, getResources().getString(R.string.NoInternet), Snackbar.LENGTH_LONG)
-                                .setAction("Action", null).show();
+                        showSnackbar(getResources().getString(R.string.NoInternet));
                     }
-                } catch (Exception e) {
+                } catch (IOException e) {
                     runOnUiThread(() -> pd.dismiss());
-                    View view = findViewById(R.id.actv);
-                    Snackbar.make(view, getResources().getString(R.string.NoInternet), Snackbar.LENGTH_LONG)
-                            .setAction("Action", null).show();
+                    showSnackbar(getResources().getString(R.string.NoInternet));
                 }
             }
         }.start();
@@ -624,8 +545,15 @@ public class OverViewPolicies extends AppCompatActivity {
         return 0;
     }
 
+    public void showSnackbar(String message)
+    {
+        View activity = findViewById(R.id.actv);
+        Snackbar.make(activity, message, Snackbar.LENGTH_LONG)
+                .setAction("Action", null).show();
+    }
+
     private void updateAfterRequest(int ControlNumberId) {
-        JSONObject ob = null;
+        JSONObject ob;
         for (int j = 0; j < paymentDetails.length(); j++) {
             try {
                 ob = paymentDetails.getJSONObject(j);

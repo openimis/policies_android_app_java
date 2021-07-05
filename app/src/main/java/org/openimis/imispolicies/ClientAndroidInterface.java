@@ -6484,7 +6484,7 @@ public class ClientAndroidInterface {
         }
 
         String query = "SELECT * FROM tblRecordedPolicies WHERE InsuranceNumber LIKE '%" + insuranceNumber +
-                "%' AND ProductCode LIKE '%" + insuranceProduct + "%' " + aRenewal + " AND UploadedDate == '' AND typeof(ControlNumberId) != 'integer'";
+                "%' AND ProductCode LIKE '%" + insuranceProduct + "%' " + aRenewal + " AND UploadedDate == ''";
         JSONArray notEnrolledPolicies = sqlHandler.getResult(query, null);
         return notEnrolledPolicies;
     }

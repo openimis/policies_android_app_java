@@ -307,14 +307,12 @@ public class OverViewControlNumbers extends AppCompatActivity {
         // set dialog message
         alertDialogBuilder
                 .setCancelable(false)
-                .setPositiveButton("Get Control Number",
-                        (dialog, id) -> {
-                            try {
-                                getControlNumber(policies);
-                            } catch (IOException | JSONException e) {
-                                e.printStackTrace();
-                            }
-                        })
+                .setPositiveButton("Get Control Number", (dialog, id) -> {
+                    if (clientAndroidInterface.isLoggedIn())
+                        getControlNumber(policies);
+                    else
+                        LoginDialogBox();
+                })
                 .setNegativeButton("Cancel",
                         (dialog, id) -> dialog.cancel());
 
@@ -427,7 +425,7 @@ public class OverViewControlNumbers extends AppCompatActivity {
         alertDialog.show();
     }
 
-    private int getControlNumber(final JSONArray order) throws IOException, JSONException {
+    private int getControlNumber(final JSONArray order) {
         final JSONObject jsonObject = new JSONObject();
 
         try {
@@ -438,13 +436,13 @@ public class OverViewControlNumbers extends AppCompatActivity {
         new Thread(() -> {
             runOnUiThread(() -> pd = ProgressDialog.show(OverViewControlNumbers.this, "", getResources().getString(R.string.Get_Control_Number)));
 
-            HttpResponse response = null;
+            HttpResponse response;
             try {
                 response = toRestApi.postToRestApiToken(jsonObject, "GetAssignedControlNumbers");
 
                 HttpEntity respEntity = response.getEntity();
 
-                int cod = response.getStatusLine().getStatusCode();
+                int code = response.getStatusLine().getStatusCode();
 
                 if (respEntity != null) {
                     final String[] error_occured = {null};
@@ -452,84 +450,66 @@ public class OverViewControlNumbers extends AppCompatActivity {
                     final String[] internal_Identifier = {null};
                     final String[] control_number = {null};
                     // EntityUtils to get the response content
-                    String content = null;
+                    String content;
                     content = EntityUtils.toString(respEntity);
 
                     try {
                         JSONObject res = new JSONObject(content);
-                        JSONObject ob = null;
 
-                        if (cod >= 400) {
-                            runOnUiThread(() -> {
-                                pd.dismiss();
-                                LoginDialogBox();
-                                if (tokenl.getTokenText().length() > 1) {
-                                    View view = findViewById(R.id.actv);
-                                    Snackbar.make(view, getResources().getString(R.string.has_no_rights), Snackbar.LENGTH_LONG)
-                                            .setAction("Action", null).show();
-                                }
-                            });
-                        } else {
-                            runOnUiThread(() -> pd.dismiss());
-                            if (error_occured.equals("true")) {
-                                String erroroccured = res.getString("error_occured");
-                                error_message[0] = res.getString("error_message");
-
-                                View view = findViewById(R.id.actv);
-                                Snackbar.make(view, error_message[0], Snackbar.LENGTH_LONG)
-                                        .setAction("Action", null).show();
-                            } else {
-                                String assignedcontrolnumbers = res.getString("assigned_control_numbers");
-                                JSONArray arr = new JSONArray(assignedcontrolnumbers);
-                                for (int j = 0; j < arr.length(); j++) {
-                                    try {
-                                        ob = arr.getJSONObject(j);
-                                        internal_Identifier[0] = ob.getString("internal_identifier");
-                                        control_number[0] = ob.getString("control_number");
-                                        updateAfterRequest(internal_Identifier[0], control_number[0]);
-
-                                    } catch (JSONException e) {
-                                        e.printStackTrace();
-                                        runOnUiThread(() -> pd.dismiss());
-                                        View view = findViewById(R.id.actv);
-                                        Snackbar.make(view, String.valueOf(e), Snackbar.LENGTH_LONG)
-                                                .setAction("Action", null).show();
-                                    }
-                                }
-                                runOnUiThread(() -> {
-                                    pd.dismiss();
-                                    policyDeleteDialogReport(getResources().getString(R.string.requestSent));
-                                });
-                            }
-                        }
-                    } catch (JSONException e) {
-                        runOnUiThread(() -> {
-                            pd.dismiss();
+                        error_occured[0] = res.getString("error_occured");
+                        if ("true".equals(error_occured[0])) {
+                            error_message[0] = res.getString("error_message");
+                            showSnackbar(error_message[0]);
+                        } else if (code == HttpURLConnection.HTTP_UNAUTHORIZED) {
                             LoginDialogBox();
-                            if (tokenl.getTokenText().length() > 1) {
-                                View view = findViewById(R.id.actv);
-                                Snackbar.make(view, getResources().getString(R.string.has_no_rights), Snackbar.LENGTH_LONG)
-                                        .setAction("Action", null).show();
+                            showSnackbar(getResources().getString(R.string.has_no_rights));
+                        } else if (code == HttpURLConnection.HTTP_INTERNAL_ERROR) {
+                            showSnackbar(getResources().getString(R.string.SomethingWrongServer));
+                        } else if (code >= 400) { // for compatibility, but should not be needed
+                            showSnackbar(getResources().getString(R.string.SomethingWrongServer));
+                        } else {
+                            JSONObject ob;
+                            String assignedcontrolnumbers = res.getString("assigned_control_numbers");
+                            JSONArray arr = new JSONArray(assignedcontrolnumbers);
+                            for (int j = 0; j < arr.length(); j++) {
+                                try {
+                                    ob = arr.getJSONObject(j);
+                                    internal_Identifier[0] = ob.getString("internal_identifier");
+                                    control_number[0] = ob.getString("control_number");
+                                    updateAfterRequest(internal_Identifier[0], control_number[0]);
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                    showSnackbar(String.valueOf(e));
+                                }
                             }
-                        });
+                            runOnUiThread(() -> policyDeleteDialogReport(getResources().getString(R.string.requestSent)));
+                        }
+                        runOnUiThread(() -> pd.dismiss());
+                    } catch (JSONException e) {
+                        runOnUiThread(() -> pd.dismiss());
+                        showSnackbar(getResources().getString(R.string.SomethingWrongServer));
                     }
                 } else {
                     runOnUiThread(() -> pd.dismiss());
-                    View view = findViewById(R.id.actv);
-                    Snackbar.make(view, getResources().getString(R.string.NoInternet), Snackbar.LENGTH_LONG)
-                            .setAction("Action", null).show();
+                    showSnackbar(getResources().getString(R.string.NoInternet));
                 }
             } catch (IOException e) {
                 runOnUiThread(() -> pd.dismiss());
-                View view = findViewById(R.id.actv);
-                Snackbar.make(view, getResources().getString(R.string.NoInternet), Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                showSnackbar(getResources().getString(R.string.NoInternet));
             }
         }
         ).start();
 
         return 0;
     }
+
+    public void showSnackbar(String message)
+    {
+        View activity = findViewById(R.id.actv);
+        Snackbar.make(activity, message, Snackbar.LENGTH_LONG)
+                .setAction("Action", null).show();
+    }
+
 
     private void updateAfterRequest(String InternalIdentifier, String ControlNumber) {
         clientAndroidInterface.assignControlNumber(InternalIdentifier, ControlNumber);
