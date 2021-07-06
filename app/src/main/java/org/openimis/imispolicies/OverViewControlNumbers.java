@@ -497,8 +497,7 @@ public class OverViewControlNumbers extends AppCompatActivity {
                 runOnUiThread(() -> pd.dismiss());
                 showSnackbar(getResources().getString(R.string.NoInternet));
             }
-        }
-        ).start();
+        }).start();
 
         return 0;
     }

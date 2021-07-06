@@ -486,64 +486,62 @@ public class NotEnrolledPoliciesOverview extends AppCompatActivity {
     }
 
     private int getControlNumber(final JSONObject order, final String SmsRequired) {
-        new Thread() {
-            public void run() {
-                runOnUiThread(() -> pd = ProgressDialog.show(NotEnrolledPoliciesOverview.this, "", getResources().getString(R.string.Get_Control_Number)));
+        new Thread(() -> {
+            runOnUiThread(() -> pd = ProgressDialog.show(NotEnrolledPoliciesOverview.this, "", getResources().getString(R.string.Get_Control_Number)));
 
-                HttpResponse response;
-                try {
-                    response = toRestApi.postToRestApiToken(order, "GetControlNumber");
-                    int code = response.getStatusLine().getStatusCode();
+            HttpResponse response;
+            try {
+                response = toRestApi.postToRestApiToken(order, "GetControlNumber");
+                int code = response.getStatusLine().getStatusCode();
 
-                    HttpEntity respEntity = response.getEntity();
-                    String content;
-                    if (respEntity != null) {
-                        final String[] error_occured = {null};
-                        final String[] error_message = {null};
-                        final String[] internal_Identifier = {null};
-                        final String[] control_number = {null};
-                        // EntityUtils to get the response content
-                        content = EntityUtils.toString(respEntity);
+                HttpEntity respEntity = response.getEntity();
+                String content;
+                if (respEntity != null) {
+                    final String[] error_occured = {null};
+                    final String[] error_message = {null};
+                    final String[] internal_Identifier = {null};
+                    final String[] control_number = {null};
+                    // EntityUtils to get the response content
+                    content = EntityUtils.toString(respEntity);
 
-                        try {
-                            JSONObject res = new JSONObject(content);
+                    try {
+                        JSONObject res = new JSONObject(content);
 
-                            error_occured[0] = res.getString("error_occured");
-                            if ("true".equals(error_occured[0])) {
-                                error_message[0] = res.getString("error_message");
-                                showSnackbar(error_message[0]);
-                            } else if (code == HttpURLConnection.HTTP_UNAUTHORIZED) {
-                                LoginDialogBox();
-                                showSnackbar(getResources().getString(R.string.has_no_rights));
-                            } else if (code == HttpURLConnection.HTTP_INTERNAL_ERROR) {
-                                showSnackbar(getResources().getString(R.string.SomethingWrongServer));
-                            } else if (code >= 400) { // for compatibility, but should not be needed
-                                showSnackbar(getResources().getString(R.string.SomethingWrongServer));
-                            } else {
-                                internal_Identifier[0] = res.getString("internal_identifier");
-                                control_number[0] = res.getString("control_number");
-                                int id = insertAfterRequest(amountConfirmed, control_number[0], internal_Identifier[0], PaymentType, SmsRequired);
-                                updateAfterRequest(id);
-                                runOnUiThread(() -> {
-                                    pd.dismiss();
-                                    num.clear();
-                                    policyDeleteDialogReport(getResources().getString(R.string.requestSent));
-                                });
-                            }
-                        } catch (JSONException e) {
-                            runOnUiThread(() -> pd.dismiss());
+                        error_occured[0] = res.getString("error_occured");
+                        if ("true".equals(error_occured[0])) {
+                            error_message[0] = res.getString("error_message");
+                            showSnackbar(error_message[0]);
+                        } else if (code == HttpURLConnection.HTTP_UNAUTHORIZED) {
+                            LoginDialogBox();
+                            showSnackbar(getResources().getString(R.string.has_no_rights));
+                        } else if (code == HttpURLConnection.HTTP_INTERNAL_ERROR) {
                             showSnackbar(getResources().getString(R.string.SomethingWrongServer));
+                        } else if (code >= 400) { // for compatibility, but should not be needed
+                            showSnackbar(getResources().getString(R.string.SomethingWrongServer));
+                        } else {
+                            internal_Identifier[0] = res.getString("internal_identifier");
+                            control_number[0] = res.getString("control_number");
+                            int id = insertAfterRequest(amountConfirmed, control_number[0], internal_Identifier[0], PaymentType, SmsRequired);
+                            updateAfterRequest(id);
+                            runOnUiThread(() -> {
+                                num.clear();
+                                policyDeleteDialogReport(getResources().getString(R.string.requestSent));
+                            });
                         }
-                    } else {
                         runOnUiThread(() -> pd.dismiss());
-                        showSnackbar(getResources().getString(R.string.NoInternet));
+                    } catch (JSONException e) {
+                        runOnUiThread(() -> pd.dismiss());
+                        showSnackbar(getResources().getString(R.string.SomethingWrongServer));
                     }
-                } catch (IOException e) {
+                } else {
                     runOnUiThread(() -> pd.dismiss());
                     showSnackbar(getResources().getString(R.string.NoInternet));
                 }
+            } catch (IOException e) {
+                runOnUiThread(() -> pd.dismiss());
+                showSnackbar(getResources().getString(R.string.NoInternet));
             }
-        }.start();
+        }).start();
 
         return 0;
     }
