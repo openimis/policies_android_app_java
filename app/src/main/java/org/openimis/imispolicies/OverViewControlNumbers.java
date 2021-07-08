@@ -3,7 +3,10 @@ package org.openimis.imispolicies;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -78,6 +81,31 @@ public class OverViewControlNumbers extends AppCompatActivity {
     String RadioRenewal = "";
     String RadioSms = "";
     String PaymentType = "";
+
+    BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            handleRequestResult(intent);
+        }
+    };
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(ControlNumberService.ACTION_REQUEST_SUCCESS);
+        intentFilter.addAction(ControlNumberService.ACTION_REQUEST_ERROR);
+
+        registerReceiver(broadcastReceiver, intentFilter);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        unregisterReceiver(broadcastReceiver);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -257,22 +285,7 @@ public class OverViewControlNumbers extends AppCompatActivity {
         alertDialogBuilder
                 .setCancelable(false)
                 .setPositiveButton(getResources().getString(R.string.button_ok),
-                        (dialog, id) -> {
-                            finish();
-                            Intent intent = new Intent(OverViewControlNumbers.this, OverViewControlNumbers.class);
-                            intent.putExtra("RENEWAL", RadioRenewal);
-                            intent.putExtra("INSURANCE_NUMBER", InsuranceNumber);
-                            intent.putExtra("OTHER_NAMES", OtherNames);
-                            intent.putExtra("LAST_NAME", LastName);
-                            intent.putExtra("INSURANCE_PRODUCT", InsuranceProduct);
-                            intent.putExtra("UPLOADED_FROM", UploadedFrom);
-                            intent.putExtra("UPLOADED_TO", UploadedTo);
-                            intent.putExtra("REQUESTED_FROM", RequestedFrom);
-                            intent.putExtra("REQUESTED_TO", RequestedTo);
-                            intent.putExtra("PAYMENT_TYPE", PaymentType);
-                            intent.putExtra("SMS", RadioSms);
-                            startActivity(intent);
-                        });
+                        (dialog, id) -> refresh());
 
         // create alert dialog
         AlertDialog alertDialog = alertDialogBuilder.create();
@@ -307,14 +320,12 @@ public class OverViewControlNumbers extends AppCompatActivity {
         // set dialog message
         alertDialogBuilder
                 .setCancelable(false)
-                .setPositiveButton("Get Control Number",
-                        (dialog, id) -> {
-                            try {
-                                getControlNumber(policies);
-                            } catch (IOException | JSONException e) {
-                                e.printStackTrace();
-                            }
-                        })
+                .setPositiveButton("Get Control Number", (dialog, id) -> {
+                    if (clientAndroidInterface.isLoggedIn())
+                        getControlNumber(policies);
+                    else
+                        LoginDialogBox();
+                })
                 .setNegativeButton("Cancel",
                         (dialog, id) -> dialog.cancel());
 
@@ -427,112 +438,29 @@ public class OverViewControlNumbers extends AppCompatActivity {
         alertDialog.show();
     }
 
-    private int getControlNumber(final JSONArray order) throws IOException, JSONException {
-        final JSONObject jsonObject = new JSONObject();
-
-        try {
-            jsonObject.put("requests", order);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        new Thread(() -> {
-            runOnUiThread(() -> pd = ProgressDialog.show(OverViewControlNumbers.this, "", getResources().getString(R.string.Get_Control_Number)));
-
-            HttpResponse response = null;
-            try {
-                response = toRestApi.postToRestApiToken(jsonObject, "GetAssignedControlNumbers");
-
-                HttpEntity respEntity = response.getEntity();
-
-                int cod = response.getStatusLine().getStatusCode();
-
-                if (respEntity != null) {
-                    final String[] error_occured = {null};
-                    final String[] error_message = {null};
-                    final String[] internal_Identifier = {null};
-                    final String[] control_number = {null};
-                    // EntityUtils to get the response content
-                    String content = null;
-                    content = EntityUtils.toString(respEntity);
-
-                    try {
-                        JSONObject res = new JSONObject(content);
-                        JSONObject ob = null;
-
-                        if (cod >= 400) {
-                            runOnUiThread(() -> {
-                                pd.dismiss();
-                                LoginDialogBox();
-                                if (tokenl.getTokenText().length() > 1) {
-                                    View view = findViewById(R.id.actv);
-                                    Snackbar.make(view, getResources().getString(R.string.has_no_rights), Snackbar.LENGTH_LONG)
-                                            .setAction("Action", null).show();
-                                }
-                            });
-                        } else {
-                            runOnUiThread(() -> pd.dismiss());
-                            if (error_occured.equals("true")) {
-                                String erroroccured = res.getString("error_occured");
-                                error_message[0] = res.getString("error_message");
-
-                                View view = findViewById(R.id.actv);
-                                Snackbar.make(view, error_message[0], Snackbar.LENGTH_LONG)
-                                        .setAction("Action", null).show();
-                            } else {
-                                String assignedcontrolnumbers = res.getString("assigned_control_numbers");
-                                JSONArray arr = new JSONArray(assignedcontrolnumbers);
-                                for (int j = 0; j < arr.length(); j++) {
-                                    try {
-                                        ob = arr.getJSONObject(j);
-                                        internal_Identifier[0] = ob.getString("internal_identifier");
-                                        control_number[0] = ob.getString("control_number");
-                                        updateAfterRequest(internal_Identifier[0], control_number[0]);
-
-                                    } catch (JSONException e) {
-                                        e.printStackTrace();
-                                        runOnUiThread(() -> pd.dismiss());
-                                        View view = findViewById(R.id.actv);
-                                        Snackbar.make(view, String.valueOf(e), Snackbar.LENGTH_LONG)
-                                                .setAction("Action", null).show();
-                                    }
-                                }
-                                runOnUiThread(() -> {
-                                    pd.dismiss();
-                                    policyDeleteDialogReport(getResources().getString(R.string.requestSent));
-                                });
-                            }
-                        }
-                    } catch (JSONException e) {
-                        runOnUiThread(() -> {
-                            pd.dismiss();
-                            LoginDialogBox();
-                            if (tokenl.getTokenText().length() > 1) {
-                                View view = findViewById(R.id.actv);
-                                Snackbar.make(view, getResources().getString(R.string.has_no_rights), Snackbar.LENGTH_LONG)
-                                        .setAction("Action", null).show();
-                            }
-                        });
-                    }
-                } else {
-                    runOnUiThread(() -> pd.dismiss());
-                    View view = findViewById(R.id.actv);
-                    Snackbar.make(view, getResources().getString(R.string.NoInternet), Snackbar.LENGTH_LONG)
-                            .setAction("Action", null).show();
-                }
-            } catch (IOException e) {
-                runOnUiThread(() -> pd.dismiss());
-                View view = findViewById(R.id.actv);
-                Snackbar.make(view, getResources().getString(R.string.NoInternet), Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        }
-        ).start();
-
-        return 0;
+    private void getControlNumber(final JSONArray order) {
+        pd = ProgressDialog.show(this, "", getResources().getString(R.string.Get_Control_Number));
+        ControlNumberService.getAssignedControlNumber(this, order);
     }
 
-    private void updateAfterRequest(String InternalIdentifier, String ControlNumber) {
-        clientAndroidInterface.assignControlNumber(InternalIdentifier, ControlNumber);
+    private void handleRequestResult(Intent intent) {
+        if (intent.getAction().equals(ControlNumberService.ACTION_REQUEST_SUCCESS)) {
+            policyDeleteDialogReport(getResources().getString(R.string.requestSent));
+        } else if (intent.getAction().equals(ControlNumberService.ACTION_REQUEST_ERROR)) {
+            String errorMessage = intent.getStringExtra(ControlNumberService.FIELD_ERROR_MESSAGE);
+            showSnackbar(errorMessage);
+        }
+        pd.dismiss();
+    }
+
+    public void showSnackbar(String message) {
+        View activity = findViewById(R.id.actv);
+        Snackbar.make(activity, message, Snackbar.LENGTH_LONG)
+                .setAction("Action", null).show();
+    }
+
+    public void refresh() {
+        finish();
+        startActivity(getIntent());
     }
 }
-

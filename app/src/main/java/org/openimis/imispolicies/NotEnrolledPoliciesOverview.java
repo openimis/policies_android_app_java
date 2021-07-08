@@ -2,7 +2,10 @@ package org.openimis.imispolicies;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -12,6 +15,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -71,14 +75,34 @@ public class NotEnrolledPoliciesOverview extends AppCompatActivity {
     private String PaymentType = "";
 
     String InsuranceNumber = "";
-    String OtherNames = "";
-    String LastName = "";
     String InsuranceProduct = "";
-    String UploadedFrom = "";
-    String UploadedTo = "";
     String RadioRenewal = "";
-    String RadioRequested = "";
     static String PayType = "";
+
+    BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            handleRequestResult(intent);
+        }
+    };
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(ControlNumberService.ACTION_REQUEST_SUCCESS);
+        intentFilter.addAction(ControlNumberService.ACTION_REQUEST_ERROR);
+
+        registerReceiver(broadcastReceiver, intentFilter);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        unregisterReceiver(broadcastReceiver);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,8 +124,8 @@ public class NotEnrolledPoliciesOverview extends AppCompatActivity {
         NothingFound = findViewById(R.id.noPoliciesFound);
 
         final String[] n = {""};
-        Button fab = findViewById(R.id.requestControlNumberButton);
-        fab.setOnClickListener(view -> {
+        Button requestButton = findViewById(R.id.requestControlNumberButton);
+        requestButton.setOnClickListener(view -> {
 
             General _general = new General(AppInformation.DomainInfo.getDomain());
 
@@ -141,10 +165,9 @@ public class NotEnrolledPoliciesOverview extends AppCompatActivity {
             }
         });
 
-        Button fab2 = findViewById(R.id.deleteNotEnrolledPoliciesButton);
-        fab2.setOnClickListener(view -> {
+        Button deleteButton = findViewById(R.id.deleteNotEnrolledPoliciesButton);
+        deleteButton.setOnClickListener(view -> {
             if (paymentDetails.length() > 0) {
-                String unDeletedPolicies = "";
                 int unDeletedPoliciesCount = 0;
                 int totalPolicies = paymentDetails.length();
 
@@ -155,7 +178,6 @@ public class NotEnrolledPoliciesOverview extends AppCompatActivity {
                         String uploaded_date = payment.getString("uploaded_date");
                         if (uploaded_date.equals("")) {
                             unDeletedPoliciesCount++;
-                            unDeletedPolicies += policyid;
                         } else {
                             clientAndroidInterface.deleteRecodedPolicy(policyid);
                         }
@@ -165,7 +187,7 @@ public class NotEnrolledPoliciesOverview extends AppCompatActivity {
                 }
 
                 if (unDeletedPoliciesCount > 0) {
-                    String sms = "";
+                    String sms;
                     if (totalPolicies == 1) {
                         sms = getResources().getString(R.string.cant_be_deleted);
                     } else {
@@ -208,7 +230,7 @@ public class NotEnrolledPoliciesOverview extends AppCompatActivity {
         fillRecordedPolicies();
 
         int PolicyValue = 0;
-        JSONObject ob = null;
+        JSONObject ob;
         if (policy != null) {
             for (int j = 0; j < policy.length(); j++) {
                 try {
@@ -222,8 +244,8 @@ public class NotEnrolledPoliciesOverview extends AppCompatActivity {
             search_count = notEnrolledPoliciesOverviewAdapter.getCount();
             if (search_count == 0) {
                 NothingFound.setVisibility(View.VISIBLE);
-                fab.setVisibility(View.GONE);
-                fab2.setVisibility(View.GONE);
+                requestButton.setVisibility(View.GONE);
+                deleteButton.setVisibility(View.GONE);
             }
             ValueNumberOfPolices.setText(String.valueOf(search_count));
             ValueAmountOfContribution.setText(String.valueOf(PolicyValue));
@@ -244,7 +266,7 @@ public class NotEnrolledPoliciesOverview extends AppCompatActivity {
     }
 
     public void updateSelectAllButton(boolean isAllChecked) {
-        Button selectAllButton = (Button) findViewById(R.id.selectAllButton);
+        Button selectAllButton = findViewById(R.id.selectAllButton);
         if (!isAllChecked) {
             selectAllButton.setText(getResources().getString(R.string.SelectAllButton));
         } else {
@@ -282,6 +304,8 @@ public class NotEnrolledPoliciesOverview extends AppCompatActivity {
         sendSms.setOnClickListener(view -> {
             if (((CompoundButton) view).isChecked()) {
                 SmsRequired = 1;
+            } else {
+                SmsRequired = 0;
             }
         });
 
@@ -303,13 +327,15 @@ public class NotEnrolledPoliciesOverview extends AppCompatActivity {
                                 policies.put("amount_to_be_paid", finalAmount.getText().toString());
                                 policies.put("SmsRequired", SmsRequired);
 
-                                if (PayType.toString().equals("Mobile Phone")) {
+                                if (PayType.equals("Mobile Phone")) {
                                     policies.put("type_of_payment", "MobilePhone");
-                                } else if (PayType.toString().equals("Bank Transfer")) {
+                                } else if (PayType.equals("Bank Transfer")) {
                                     policies.put("type_of_payment", "BankTransfer");
+                                } else {
+                                    policies.put("type_of_payment", "");
                                 }
                                 amountConfirmed = finalAmount.getText().toString();
-                                PaymentType = PayType.toString();
+                                PaymentType = PayType;
 
                                 if (SmsRequired == 1 && phoneNumber.getText().toString().equals("")) {
                                     clientAndroidInterface.ShowDialog(getResources().getString(R.string.phone_number_not_provided));
@@ -317,12 +343,10 @@ public class NotEnrolledPoliciesOverview extends AppCompatActivity {
                                     if (!clientAndroidInterface.isProductsListUnique(policies)) {
                                         policyDeleteDialogReport(getResources().getString(R.string.not_unique_products));
                                     } else {
-                                        getControlNumber(policies, String.valueOf(SmsRequired));
+                                        getControlNumber(policies);
                                     }
                                 }
                             } catch (JSONException e) {
-                                e.printStackTrace();
-                            } catch (IOException e) {
                                 e.printStackTrace();
                             }
                         })
@@ -341,8 +365,6 @@ public class NotEnrolledPoliciesOverview extends AppCompatActivity {
         list.add("Mobile Phone");
         list.add("Bank Transfer");
 
-        TextView tv = findViewById(R.id.type1);
-
         ArrayAdapter<String> dataAdapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_item, list);
         dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -350,7 +372,16 @@ public class NotEnrolledPoliciesOverview extends AppCompatActivity {
     }
 
     public void addListenerOnSpinnerItemSelection(Spinner PaymentSpinner) {
-        PaymentSpinner.setOnItemSelectedListener(new CustomOnItemSelectedListener());
+        PaymentSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                PayType = parent.getItemAtPosition(position).toString();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
     }
 
     public void policyDeleteDialogReport(String message) {
@@ -371,19 +402,7 @@ public class NotEnrolledPoliciesOverview extends AppCompatActivity {
         alertDialogBuilder
                 .setCancelable(false)
                 .setPositiveButton(getResources().getString(R.string.button_ok),
-                        (dialog, id) -> {
-                            finish();
-                            Intent intent = new Intent(NotEnrolledPoliciesOverview.this, NotEnrolledPoliciesOverview.class);
-                            intent.putExtra("RENEWAL", RadioRenewal);
-                            intent.putExtra("INSURANCE_NUMBER", InsuranceNumber);
-                            intent.putExtra("OTHER_NAMES", OtherNames);
-                            intent.putExtra("LAST_NAME", LastName);
-                            intent.putExtra("INSURANCE_PRODUCT", InsuranceProduct);
-                            intent.putExtra("UPLOADED_FROM", UploadedFrom);
-                            intent.putExtra("UPLOADED_TO", UploadedTo);
-                            intent.putExtra("REQUESTED_YES_NO", RadioRequested);
-                            startActivity(intent);
-                        });
+                        (dialog, id) -> refresh());
 
         // create alert dialog
         AlertDialog alertDialog = alertDialogBuilder.create();
@@ -393,7 +412,7 @@ public class NotEnrolledPoliciesOverview extends AppCompatActivity {
     }
 
     public void LoginDialogBox() {
-        Global global = (Global) NotEnrolledPoliciesOverview.this.getApplicationContext();
+        Global global = (Global) getApplicationContext();
         if (!clientAndroidInterface.CheckInternetAvailable()) {
             return;
         }
@@ -491,110 +510,31 @@ public class NotEnrolledPoliciesOverview extends AppCompatActivity {
         alertDialog.show();
     }
 
-    private int getControlNumber(final JSONObject order, final String SmsRequired) throws IOException {
-        Thread thread = new Thread() {
-            public void run() {
-                runOnUiThread(() -> pd = ProgressDialog.show(NotEnrolledPoliciesOverview.this, "", getResources().getString(R.string.Get_Control_Number)));
-
-                HttpResponse response = null;
-                try {
-                    response = toRestApi.postToRestApiToken(order, "GetControlNumber");
-
-                    HttpEntity respEntity = response.getEntity();
-                    String content = null;
-                    if (respEntity != null) {
-                        final String[] error_occured = {null};
-                        final String[] error_message = {null};
-                        final String[] internal_Identifier = {null};
-                        final String[] control_number = {null};
-                        // EntityUtils to get the response content
-                        content = EntityUtils.toString(respEntity);
-
-                        int cod = response.getStatusLine().getStatusCode();
-                        final int Finalcode = cod;
-                        if (cod >= 400) {
-                            JSONObject ob = null;
-                            try {
-                                ob = new JSONObject(content);
-                                error_occured[0] = ob.getString("error_occured");
-                                if (error_occured[0].equals("true")) {
-                                    error_message[0] = ob.getString("error_message");
-                                }
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                            runOnUiThread(() -> {
-                                pd.dismiss();
-                                LoginDialogBox();
-                                if (tokenl.getTokenText().length() > 1) {
-                                    View view = findViewById(R.id.actv);
-                                    Snackbar.make(view, Finalcode + "-" + error_message[0], Snackbar.LENGTH_LONG)
-                                            .setAction("Action", null).show();
-                                }
-                            });
-
-                        } else {
-                            JSONObject ob = null;
-                            try {
-                                ob = new JSONObject(content);
-                                error_occured[0] = ob.getString("error_occured");
-                                if (error_occured[0].equals("true")) {
-                                    runOnUiThread(() -> pd.dismiss());
-                                    error_message[0] = ob.getString("error_message");
-
-                                    View view = findViewById(R.id.actv);
-                                    Snackbar.make(view, error_message[0], Snackbar.LENGTH_LONG)
-                                            .setAction("Action", null).show();
-                                } else {
-                                    internal_Identifier[0] = ob.getString("internal_identifier");
-                                    control_number[0] = ob.getString("control_number");
-                                    int id = insertAfterRequest(amountConfirmed, control_number[0], internal_Identifier[0], PaymentType, SmsRequired);
-                                    updateAfterRequest(id);
-                                    runOnUiThread(() -> {
-                                        pd.dismiss();
-                                        num.clear();
-                                        policyDeleteDialogReport(getResources().getString(R.string.requestSent));
-                                    });
-                                }
-                            } catch (JSONException e) {
-                                runOnUiThread(() -> pd.dismiss());
-                                e.printStackTrace();
-                            }
-                        }
-                    } else {
-                        runOnUiThread(() -> pd.dismiss());
-                        View view = findViewById(R.id.actv);
-                        Snackbar.make(view, getResources().getString(R.string.NoInternet), Snackbar.LENGTH_LONG)
-                                .setAction("Action", null).show();
-                    }
-                } catch (Exception e) {
-                    runOnUiThread(() -> pd.dismiss());
-                    View view = findViewById(R.id.actv);
-                    Snackbar.make(view, getResources().getString(R.string.NoInternet), Snackbar.LENGTH_LONG)
-                            .setAction("Action", null).show();
-                }
-            }
-        };
-
-        thread.start();
-
-        return 0;
+    private void getControlNumber(final JSONObject order) {
+        pd = ProgressDialog.show(this, "", getResources().getString(R.string.Get_Control_Number));
+        ControlNumberService.requestControlNumber(this, order, paymentDetails);
     }
 
-    public void updateAfterRequest(int ControlNumberId) {
-        JSONObject ob = null;
-        for (int j = 0; j < paymentDetails.length(); j++) {
-            try {
-                ob = paymentDetails.getJSONObject(j);
-                int Id = Integer.parseInt(ob.getString("Id"));
-                clientAndroidInterface.updateRecordedPolicy(Id, ControlNumberId);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+    private void handleRequestResult(Intent intent) {
+        if (intent.getAction().equals(ControlNumberService.ACTION_REQUEST_SUCCESS)) {
+            policyDeleteDialogReport(getResources().getString(R.string.requestSent));
         }
+        else if (intent.getAction().equals(ControlNumberService.ACTION_REQUEST_ERROR)) {
+            String errorMessage = intent.getStringExtra(ControlNumberService.FIELD_ERROR_MESSAGE);
+            showSnackbar(errorMessage);
+        }
+        pd.dismiss();
     }
 
-    public int insertAfterRequest(String amountCalculated, String control_number, String InternalIdentifier, String PaymentType, String SmsRequired) {
-        return clientAndroidInterface.insertRecordedPolicy(amountCalculated, amountConfirmed, control_number, InternalIdentifier, PaymentType, SmsRequired);
+    public void showSnackbar(String message) {
+        View activity = findViewById(R.id.actv);
+        Snackbar.make(activity, message, Snackbar.LENGTH_LONG)
+                .setAction("Action", null).show();
+    }
+
+    public void refresh()
+    {
+        finish();
+        startActivity(getIntent());
     }
 }
