@@ -515,8 +515,7 @@ public class OverViewPolicies extends AppCompatActivity {
 
     private void handleRequestResult(Intent intent) {
         if (intent.getAction().equals(ControlNumberService.ACTION_REQUEST_SUCCESS)) {
-            showSnackbar(getResources().getString(R.string.requestSent));
-            refresh();
+            policyDeleteDialogReport(getResources().getString(R.string.requestSent));
         } else if (intent.getAction().equals(ControlNumberService.ACTION_REQUEST_ERROR)) {
             String errorMessage = intent.getStringExtra(ControlNumberService.FIELD_ERROR_MESSAGE);
             showSnackbar(errorMessage);
