@@ -2353,7 +2353,7 @@ public class ClientAndroidInterface {
         return RecordedPolicies.toString();
     }
 
-    public int insertRecordedPolicy(String amountCalculated, String amountConfirmed, String control_number, String InternalIdentifier, String PaymentType, String SmsRequired) {
+    public int insertControlNumber(String amountCalculated, String amountConfirmed, String control_number, String InternalIdentifier, String PaymentType, String SmsRequired) {
         ContentValues values = new ContentValues();
         values.put("AmountCalculated", String.valueOf(amountCalculated));
         values.put("AmountConfirmed", String.valueOf(amountConfirmed));
