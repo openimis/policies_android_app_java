@@ -42,6 +42,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.icu.text.DecimalFormat;
 import android.net.Uri;
+import android.net.http.DelegatingSSLSession;
 import android.os.Build;
 import android.provider.MediaStore;
 import android.support.annotation.RequiresApi;
@@ -501,6 +502,25 @@ public class ClientAndroidInterface {
     }
 
     @JavascriptInterface
+    public String getVulnerability() {
+        JSONArray selectJsonArray = new JSONArray();
+        try {
+            JSONObject object = new JSONObject();
+            object.put("key", mContext.getResources().getString(R.string.Yes));
+            object.put("value", 1);
+            selectJsonArray.put(object);
+
+            object = new JSONObject();
+            object.put("key", mContext.getResources().getString(R.string.No));
+            object.put("value", 0);
+            selectJsonArray.put(object);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return selectJsonArray.toString();
+    }
+
+    @JavascriptInterface
     public String getApprovalOfSMS() {
         JSONArray selectJsonArray = new JSONArray();
         try {
@@ -749,11 +769,7 @@ public class ClientAndroidInterface {
 
             Boolean Poverty = null;
             if (!TextUtils.isEmpty(data.get("ddlPovertyStatus"))) {
-                if (data.get("ddlPovertyStatus").equals("1")) {
-                    Poverty = true;
-                } else {
-                    Poverty = false;
-                }
+                Poverty = data.get("ddlPovertyStatus").equals("1");
             }
 
             String FamilyType = null;
@@ -1022,7 +1038,7 @@ public class ClientAndroidInterface {
             values.put("IdentificationNumber", data.get("txtIdentificationNumber"));
             values.put("Phone", data.get("txtPhoneNumber"));
             if (isOffline == 0 || isOffline == 2)
-                PhotoPath = PhotoPath.toString().substring(PhotoPath.toString().lastIndexOf("/") + 1);
+                PhotoPath = PhotoPath.substring(PhotoPath.lastIndexOf("/") + 1);
             values.put("PhotoPath", PhotoPath);
             values.put("CardIssued", CardIssued);
 
@@ -1032,6 +1048,12 @@ public class ClientAndroidInterface {
             values.put("Education", Education);
             values.put("Email", data.get("txtEmail"));
             values.put("TypeOfId", IdentificationType);
+
+            if (data.get("ddlVulnerability") != null && !data.get("ddlVulnerability").equals("")) {
+                values.put("Vulnerability", data.get("ddlVulnerability"));
+            } else {
+                values.put("Vulnerability", data.get("0"));
+            }
 
             if (data.get("ddlFSP") != null)
                 values.put("HFID", Integer.valueOf(data.get("ddlFSP")));
@@ -1047,12 +1069,14 @@ public class ClientAndroidInterface {
                 if (isOffline == 0 || isOffline == 2) {
                     if (isOffline == 2) isOffline = 0;
                     if (general.isNetworkAvailable(mContext)) {
-
-                        //Existing family
-                        CallSoap cs = new CallSoap();
-                        cs.setFunctionName("InsureeNumberExist");
-                        //check if insuree exist online
-                        res = cs.InsureeNumberExist(String.valueOf(data.get("txtInsuranceNumber")));
+//                          THIS SHOULD NOT BE HERE
+//                        //Existing family
+//                        CallSoap cs = new CallSoap();
+//                        cs.setFunctionName("InsureeNumberExist");
+//                        //check if insuree exist online
+//                        res = cs.InsureeNumberExist(String.valueOf(data.get("txtInsuranceNumber")));
+//
+                        res = false;
 
                         if (res == false) {
                             //if (isOffline == 0){
@@ -1085,8 +1109,8 @@ public class ClientAndroidInterface {
                                 }
                             }
                         } else {
-                            String ErrMsg = null;
-                            ErrMsg = "[" + String.valueOf(data.get("txtInsuranceNumber")) + "] " + mContext.getString(R.string.DuplicateInsuranceNumber);
+                            String ErrMsg;
+                            ErrMsg = "[" + data.get("txtInsuranceNumber") + "] " + mContext.getString(R.string.DuplicateInsuranceNumber);
                             ShowDialog(ErrMsg);
 
                             return 6;
@@ -1323,7 +1347,7 @@ public class ClientAndroidInterface {
 
     @JavascriptInterface
     public String getInsuree(int InsureeId) {
-        String Query = "SELECT InsureeId, FamilyId, CHFID, LastName, OtherNames, DOB, Gender, Marital, isHead, IdentificationNumber, Phone, isOffline , PhotoPath, CardIssued, Relationship, Profession, Education, Email, TypeOfId, I.HFID, CurrentAddress,R.LocationId CurRegion, D.LocationId CurDistrict, W.LocationId CurWard,  I.CurVillage, HFR.LocationId FSPRegion, HFD.LocationId FSPDistrict, HF.HFLevel FSPCategory\n" +
+        String Query = "SELECT InsureeId, FamilyId, CHFID, LastName, OtherNames, DOB, Gender, Marital, isHead, IdentificationNumber, Phone, isOffline , PhotoPath, CardIssued, Relationship, Profession, Education, Email, TypeOfId, I.HFID, CurrentAddress,R.LocationId CurRegion, D.LocationId CurDistrict, W.LocationId CurWard,  I.CurVillage, HFR.LocationId FSPRegion, HFD.LocationId FSPDistrict, HF.HFLevel FSPCategory, I.Vulnerability\n" +
                 "FROM tblInsuree I\n" +
                 "LEFT OUTER JOIN tblLocations V ON V.LocationId = I.CurVillage\n" +
                 "LEFT OUTER JOIN tblLocations W ON W.LocationId = V.ParentLocationId\n" +
@@ -1346,7 +1370,7 @@ public class ClientAndroidInterface {
     public String getInsureesForFamily(int FamilyId) {
         String Query = "SELECT I.InsureeId, I.CHFID, I.Othernames ||\" \"|| I.LastName InsureeName, " +
                 "CASE I.Gender WHEN 'M' THEN '" + mContext.getResources().getString(R.string.Male) + "' WHEN 'F' THEN '" + mContext.getResources().getString(R.string.Female) + "' ELSE '" + mContext.getResources().getString(R.string.Other) + "' END Gender, " +
-                "I.DOB , I.isHead, isOffline FROM tblInsuree I WHERE FamilyId = ? ORDER BY I.isHead DESC, I.InsureeId ASC";
+                "I.DOB , I.isHead, isOffline, I.Vulnerability FROM tblInsuree I WHERE FamilyId = ? ORDER BY I.isHead DESC, I.InsureeId ASC";
         String[] arg = {String.valueOf(FamilyId)};
         JSONArray Insurees = sqlHandler.getResult(Query, arg);
         return Insurees.toString();
@@ -2254,7 +2278,7 @@ public class ClientAndroidInterface {
     public JSONArray getRecordedPolicies(String insuranceNumber, String otherNames, String lastName, String insuranceProduct, String uploadedFrom, String uploadedTo, String radioRenewal, String requestedFrom, String requestedTo, String PaymentType) {
         String renewal = "";
         String request;
-        String upload;
+        String upload = "";
         String payment_type = "";
 
         if (!radioRenewal.equals("")) {
@@ -3381,7 +3405,7 @@ public class ClientAndroidInterface {
             familyArray = newFamilyArray;
 
             //get Insureesf
-            Query = "SELECT I.InsureeId AS InsureeId, I.FamilyId AS FamilyId, I.CHFID, I.LastName, I.OtherNames, I.DOB, I.Gender, NULLIF(I.Marital,'') Marital, I.isHead, NULLIF(I.IdentificationNumber,'null') IdentificationNumber, NULLIF(I.Phone,'null') Phone, REPLACE(I.PhotoPath, RTRIM(PhotoPath, REPLACE(PhotoPath, '/', '')), '') PhotoPath, NULLIF(I.CardIssued,'null') CardIssued, NULLIF(I.Relationship,'null') Relationship, NULLIF(I.Profession,'null') Profession, NULLIF(I.Education,'null') Education, NULLIF(I.Email,'null') Email, CASE WHEN I.TypeOfId='null' THEN null ELSE I.TypeOfId END TypeOfId, NULLIF(I.HFID,'null') HFID, NULLIF(I.CurrentAddress,'null') CurrentAddress, NULLIF(I.GeoLocation,'null') GeoLocation, NULLIF(I.CurVillage,'null') CurVillage,I.isOffline \n" +
+            Query = "SELECT I.InsureeId AS InsureeId, I.FamilyId AS FamilyId, I.CHFID, I.LastName, I.OtherNames, I.DOB, I.Gender, NULLIF(I.Marital,'') Marital, I.isHead, NULLIF(I.IdentificationNumber,'null') IdentificationNumber, NULLIF(I.Phone,'null') Phone, REPLACE(I.PhotoPath, RTRIM(PhotoPath, REPLACE(PhotoPath, '/', '')), '') PhotoPath, NULLIF(I.CardIssued,'null') CardIssued, NULLIF(I.Relationship,'null') Relationship, NULLIF(I.Profession,'null') Profession, NULLIF(I.Education,'null') Education, NULLIF(I.Email,'null') Email, CASE WHEN I.TypeOfId='null' THEN null ELSE I.TypeOfId END TypeOfId, NULLIF(I.HFID,'null') HFID, NULLIF(I.CurrentAddress,'null') CurrentAddress, NULLIF(I.GeoLocation,'null') GeoLocation, NULLIF(I.CurVillage,'null') CurVillage,I.isOffline, I.Vulnerability \n" +
                     "FROM tblInsuree I \n" + " WHERE ";
             if (CallerId != 2) {
                 Query += " I.FamilyId = " + FamilyId + " \n";
