@@ -223,7 +223,8 @@ public class SQLHandler extends SQLiteOpenHelper {
                             "HFID NUMERIC," +
                             "CurrentAddress TEXT," +
                             "GeoLocation TEXT," +
-                            "CurVillage NUMERIC" + ")"
+                            "CurVillage NUMERIC," +
+                            "Vulnerability BOOLEAN" + ")"
             );
             sqLiteDatabase.execSQL(
                     "CREATE TABLE 'tblInsureePolicy' (" +

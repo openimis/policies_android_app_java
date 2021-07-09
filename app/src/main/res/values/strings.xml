@@ -410,4 +410,6 @@
   <string name="OverviewPaymentCN">Overview payment CN</string>
   <string name="SelectAllButton">Select All</string>
   <string name="DeselectAllButton">Deselect All</string>
+  <string name="Vulnerability">Vulnerability</string>
+  <string name="SelectVulnerability">Select Vulnerability</string>
 </resources>

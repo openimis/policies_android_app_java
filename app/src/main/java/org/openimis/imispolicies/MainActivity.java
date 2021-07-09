@@ -396,44 +396,27 @@ public class MainActivity extends AppCompatActivity
             e.printStackTrace();
         }
     }
-    //PUT By HERMAN
+
     public void openDialog() {
-        AlertDialog.Builder alertDialog2 = new AlertDialog.Builder(
-                MainActivity.this);
-
-// Setting Dialog Title
-        alertDialog2.setTitle(getResources().getString(R.string.NoInternetTitle));
-        alertDialog2.setMessage(getResources().getString(R.string.DoImport));
-        alertDialog2.setCancelable(false);
-
-// Setting Icon to Dialog
-       // alertDialog2.setIcon(R.drawable.delete);
-
-// Setting Positive "Yes" Btn
-        alertDialog2.setPositiveButton(getResources().getString(R.string.Yes),
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-
-                        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-                        intent.addCategory(Intent.CATEGORY_OPENABLE);
-                        intent.setType("*/*");
-                        try{
-                            startActivityForResult(intent, 4);
-                        } catch (ActivityNotFoundException e){
-                            Toast.makeText(getApplicationContext(), getResources().getString(R.string.NoFileExporerInstalled), Toast.LENGTH_SHORT).show();
-                        }
-                        // Write your code here to execute after dialog
-                    }
-                }).setNegativeButton(getResources().getString(R.string.No),
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        dialog.cancel();
-                        finish();
-                    }
-                });
-
-// Showing Alert Dialog
-        alertDialog2.show();
+        new AlertDialog.Builder(MainActivity.this)
+                .setTitle(getResources().getString(R.string.NoInternetTitle))
+                .setMessage(getResources().getString(R.string.DoImport))
+                .setCancelable(false)
+                .setPositiveButton(getResources().getString(R.string.Yes),
+                        (dialog, which) -> {
+                            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                            intent.addCategory(Intent.CATEGORY_OPENABLE);
+                            intent.setType("*/*");
+                            try{
+                                startActivityForResult(intent, 4);
+                            } catch (ActivityNotFoundException e){
+                                Toast.makeText(getApplicationContext(), getResources().getString(R.string.NoFileExporerInstalled), Toast.LENGTH_SHORT).show();
+                            }
+                        }).setNegativeButton(getResources().getString(R.string.No),
+                        (dialog, id) -> {
+                            dialog.cancel();
+                            finish();
+                        }).show();
     }
     public void openDialogFromPage() {
         AlertDialog.Builder alertDialog2 = new AlertDialog.Builder(
@@ -639,7 +622,6 @@ public class MainActivity extends AppCompatActivity
 
         // show it
         alertDialog.show();
-
     }
 
 

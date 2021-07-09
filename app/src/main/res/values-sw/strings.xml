@@ -411,4 +411,5 @@
   <string name="SelectAllButton">Select All</string>
   <string name="DeselectAllButton">Deselect All</string>
   <string name="SyncProcessing">Synchronization processing</string>
+    <string name="Vulnerability">Vulnerability</string>
 </resources>
