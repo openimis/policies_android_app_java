@@ -16,6 +16,8 @@ $(document).ready(function () {
         });
     };
 
+    $("#dialog-confirm").attr("title", Android.getString('Confirm'));
+
     var photoValue = 1;
     var LocationId = queryString("l");
     var FamilyId = queryString("f");
@@ -271,18 +273,32 @@ $(document).ready(function () {
                         }
 
                     } else if (PolicyBalance < 0) {
-                        if (!confirm(Android.getString('ExceedsPolicy'))) {
-                            results = false;
-                            return false;
-                        }
-                        if (results == true) {
-                            var PremiumId = Android.SavePremiums(jsonPremium, parseInt(policyId), parseInt(premiumId), parseInt(FamilyId));
-                            policystatus = ActivePolicy;
-                            Paydate = $('#txtPayDate').val();
-                            Android.UpdatePolicy(parseInt(policyId), Paydate, policystatus);
-                            Android.UpdateInsureePolicy(parseInt(policyId));
-                            window.open('PolicyPremium.html?p=' + policyId + '&l=' + LocationId + '&f=' + FamilyId + '&r=' + RegionId + '&d=' + DistrictId, "_self");
-                        }
+                        $("#msgAlert").text(Android.getString('ExceedsPolicy'));
+                        $("#dialog-confirm").dialog({
+                            resizable: false,
+                            height: "auto",
+                            width: 300,
+                            modal: true,
+                            buttons: [
+                                {
+                                    text: Android.getString("Ok"),
+                                    click: function () {
+                                        var PremiumId = Android.SavePremiums(jsonPremium, parseInt(policyId), parseInt(premiumId), parseInt(FamilyId));
+                                        policystatus = ActivePolicy;
+                                        Paydate = $('#txtPayDate').val();
+                                        Android.UpdatePolicy(parseInt(policyId), Paydate, policystatus);
+                                        Android.UpdateInsureePolicy(parseInt(policyId));
+                                        window.open('PolicyPremium.html?p=' + policyId + '&l=' + LocationId + '&f=' + FamilyId + '&r=' + RegionId + '&d=' + DistrictId, "_self");
+                                    }
+                                },
+                                {
+                                    text: Android.getString("Cancel"),
+                                    click: function () {
+                                        $(this).dialog("close");
+                                    }
+                                }
+                            ]
+                        });
                     } else if (results == true) {
                         var PremiumId = Android.SavePremiums(jsonPremium, parseInt(policyId), parseInt(premiumId), parseInt(FamilyId));
                         policystatus = ActivePolicy;
@@ -292,8 +308,6 @@ $(document).ready(function () {
                         window.open('PolicyPremium.html?p=' + policyId + '&l=' + LocationId + '&f=' + FamilyId + '&r=' + RegionId + '&d=' + DistrictId, "_self");
                     }
                 }
-
-
             } else {
                 Android.ShowDialog(Android.getString('ReceiptNotUnique'));
             }
