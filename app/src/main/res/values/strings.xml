@@ -270,7 +270,6 @@
   <string name="LoginToDeleteOnlineData">Please login first, to delete online data</string>
   <string name="DeletePolicyPremium">Deleting policy will also delete premium on it</string>
   <string name="DeleteFamily">Deleting of family will also Delete all Insurees, Policies and Premiums of this Family</string>
-  <string name="Confirm">Delete</string>
   <string name="Logout">Logout</string>
   <string name="FamilyExists">Family already exists in phone</string>
   <string name="ContentTitle">New release of openIMIS Policies is now available.</string>
@@ -412,4 +411,5 @@
   <string name="DeselectAllButton">Deselect All</string>
   <string name="Vulnerability">Vulnerability</string>
   <string name="SelectVulnerability">Select Vulnerability</string>
+  <string name="Confirm">Confirm</string>
 </resources>

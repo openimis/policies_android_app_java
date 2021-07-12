@@ -270,8 +270,7 @@
   <string name="LoginToDeleteOnlineData">Tafadhali ingia kwanza uweze kufuta data iliyopo kompuyta kuu</string>
   <string name="DeletePolicyPremium">Ukifuta mkataba na kiasi kilicholipwa kitafutika</string>
   <string name="DeleteFamily">Ukifuta familia, wanachama, mkataba na fedha zitafutika, </string>
-  <string name="Confirm">Futa</string>
-  <string name="Logout">Toka</string>
+    <string name="Logout">Toka</string>
   <string name="FamilyExists">Familia tayari ipo kwenye simu</string>
   <string name="ContentTitle">Kuna toleo jipya la openIMIS sasa</string>
   <string name="ContentText">Bofya hapa kupakua</string>
@@ -411,5 +410,6 @@
   <string name="SelectAllButton">Select All</string>
   <string name="DeselectAllButton">Deselect All</string>
   <string name="SyncProcessing">Synchronization processing</string>
-    <string name="Vulnerability">Vulnerability</string>
+  <string name="Vulnerability">Vulnerability</string>
+  <string name="Confirm">Confirm</string>
 </resources>

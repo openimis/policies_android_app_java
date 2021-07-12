@@ -270,7 +270,7 @@
   <string name="LoginToDeleteOnlineData">Tafadhali ingia kwanza kufuta data iliyopo mtandaoni</string>
   <string name="DeletePolicyPremium">Ukifuta mkataba na kiasi kilicholipwa kitafutika</string>
   <string name="DeleteFamily">Ukifuta familia, wanachama, mkataba na fedha zitafutika, </string>
-  <string name="Confirm">Futa</string>
+  <string name="Confirm">Confirm</string>
   <string name="Logout">Toka</string>
   <string name="FamilyExists">Familia tayari ipo kwenye simu</string>
   <string name="ContentTitle">Kuna toleo jipya la openIMIS sasa</string>
