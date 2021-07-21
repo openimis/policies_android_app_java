@@ -270,7 +270,6 @@
   <string name="LoginToDeleteOnlineData">Veuillez d\'abord vous connecter pour supprimer les données en ligne.</string>
   <string name="DeletePolicyPremium">La suppression d\'un contrat supprimera également les contributions qui s\'y trouvent.</string>
   <string name="DeleteFamily">La suppression de la famille supprimera également tous les assurés, les polices et les cotisations de cette famille.</string>
-  <string name="Confirm">Supprimer</string>
   <string name="Logout">Déconnexion</string>
   <string name="FamilyExists">La famille existe déjà dans le téléphone</string>
   <string name="ContentTitle">La nouvelle version du IMIS est maintenant disponible.</string>
@@ -410,5 +409,6 @@
   <string name="SelectAllButton">Select All</string>
   <string name="DeselectAllButton">Deselect All</string>
   <string name="SyncProcessing">Synchronization processing</string>
-    <string name="Vulnerability">Vulnerability</string>
+  <string name="Vulnerability">Vulnerability</string>
+  <string name="Confirm">Confirm</string>
 </resources>

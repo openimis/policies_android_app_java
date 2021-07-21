@@ -270,7 +270,7 @@
   <string name="LoginToDeleteOnlineData">Please login first, to delete online data</string>
   <string name="DeletePolicyPremium">Deleting policy will also delete premium on it</string>
   <string name="DeleteFamily">Deleting of household will also Delete all Adherents, Policies and Premiums of this Household</string>
-  <string name="Confirm">Delete</string>
+  <string name="Confirm">Confirm</string>
   <string name="Logout">Logout</string>
   <string name="FamilyExists">Household already exists in phone</string>
   <string name="ContentTitle">New release of BEPHA Policies is now available.</string>
