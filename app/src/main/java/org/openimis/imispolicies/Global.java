@@ -148,7 +148,7 @@ public class Global extends Application {
     }
 
     public String getMainDirectory() {
-        if (MainDirectory == null) {
+        if (MainDirectory == null || "".equals(MainDirectory)) {
             String documentsDir = createOrCheckDirectory(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS).toString());
             MainDirectory = createOrCheckDirectory(documentsDir + File.separator + APP_DIR);
 
@@ -160,7 +160,7 @@ public class Global extends Application {
     }
 
     public String getAppDirectory() {
-        if (AppDirectory == null) {
+        if (AppDirectory == null || "".equals(AppDirectory)) {
             AppDirectory = createOrCheckDirectory(getApplicationInfo().dataDir);
 
             if ("".equals(AppDirectory)) {
@@ -171,7 +171,7 @@ public class Global extends Application {
     }
 
     public String getSubdirectory(String subdirectory) {
-        if (!SubDirectories.containsKey(subdirectory)) {
+        if (!SubDirectories.containsKey(subdirectory) || "".equals(SubDirectories.get(subdirectory))) {
             String directory;
 
             if (ProtectedDirectories.contains(subdirectory)) {
