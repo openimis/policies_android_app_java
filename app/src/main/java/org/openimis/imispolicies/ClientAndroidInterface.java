@@ -3638,15 +3638,21 @@ public class ClientAndroidInterface {
                         familyObj.put("insurees", tempInsureesArray);
 
                         // Policy + premium
-                        JSONArray tempPoliciesArray = new JSONArray();
 
                         for (int j = 0; j < policiesArray.length(); j++) {
-                            tempPoliciesArray = policiesArray;
-                            JSONObject premiumObj = premiumsArray.getJSONObject(j);
-                            tempPoliciesArray.getJSONObject(j).put("premium", premiumObj);
+                            JSONObject policyObject = policiesArray.getJSONObject(j);
+                            JSONArray policyPremiums = new JSONArray();
+                            String policyId = policyObject.getString("PolicyId");
+                            for(int k = 0; k < premiumsArray.length(); k++) {
+                                JSONObject premiumObject = premiumsArray.getJSONObject(k);
+                                if(policyId.equals(premiumObject.getString("PolicyId"))) {
+                                    policyPremiums.put(premiumObject);
+                                }
+                            }
+                            policyObject.put("premium", policyPremiums);
                         }
 
-                        familyObj.put("policies", tempPoliciesArray);
+                        familyObj.put("policies", policiesArray);
 
                         if (mylist.size() != 0) {
                             addCategoryBox();
