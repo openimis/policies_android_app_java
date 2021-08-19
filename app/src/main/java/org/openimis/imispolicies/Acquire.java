@@ -28,22 +28,26 @@ package org.openimis.imispolicies;
 import android.Manifest;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.ActivityNotFoundException;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -54,6 +58,8 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.exact.general.General;
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -62,7 +68,13 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
 
+import static android.provider.MediaStore.EXTRA_OUTPUT;
+
 public class Acquire extends AppCompatActivity {
+    private static final String LOG_TAG = "ACQUIRE";
+    private static final int SCAN_QR_REQUEST_CODE = 0;
+    private static final int TAKE_PHOTO_REQUEST_CODE = 1;
+
     General _General = new General(AppInformation.DomainInfo.getDomain());
     Global global;
 
@@ -75,7 +87,6 @@ public class Acquire extends AppCompatActivity {
     String Path = null;
     int result = 0;
 
-
     String msg = "";
     double Longitude, Latitude;
     LocationManager lm;
@@ -83,11 +94,33 @@ public class Acquire extends AppCompatActivity {
     ClientAndroidInterface ca;
     SQLHandler sqlHandler;
 
+    File tempPhotoFile;
+    Uri tempPhotoUri;
+
+    Picasso picasso;
+
+    Target imageTarget = new Target() {
+        @Override
+        public void onBitmapLoaded(final Bitmap bitmap, Picasso.LoadedFrom from) {
+            theImage = bitmap;
+            iv.setImageBitmap(bitmap);
+        }
+
+        @Override
+        public void onBitmapFailed(Drawable errorDrawable) {
+            Log.e(LOG_TAG, "Loading acquired photo failed");
+        }
+
+        @Override
+        public void onPrepareLoad(Drawable placeHolderDrawable) {
+        }
+    };
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.acquire_main);
+
         final ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setTitle(getResources().getString(R.string.Acquire));
@@ -96,7 +129,26 @@ public class Acquire extends AppCompatActivity {
         global = (Global) getApplicationContext();
         ca = new ClientAndroidInterface(this);
 
+        picasso = new Picasso.Builder(this)
+                .listener((picasso, uri, exception) -> Log.e(LOG_TAG, String.format("Image load failed: %s", uri.toString()), exception))
+                .loggingEnabled(BuildConfig.LOG)
+                .build();
+
         Path = global.getSubdirectory("Images") + "/";
+        tempPhotoFile = new File(Path, "temp.jpg");
+        try {
+            if (tempPhotoFile.delete()) {
+                Log.i(LOG_TAG, "Leftover temp image deleted");
+            }
+            if (!tempPhotoFile.createNewFile()) {
+                Log.w(LOG_TAG, "Temp photo file already exists");
+            }
+            tempPhotoUri = FileProvider.getUriForFile(this,
+                    "org.openimis.fileprovider",
+                    tempPhotoFile);
+        } catch (IOException e) {
+            Log.e(LOG_TAG, "Temp photo file creation failed", e);
+        }
 
         etCHFID = findViewById(R.id.etCHFID);
         iv = findViewById(R.id.imageView);
@@ -109,32 +161,26 @@ public class Acquire extends AppCompatActivity {
         etCHFID.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
             }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-
             }
 
             @Override
             public void afterTextChanged(Editable InsNo) {
+                String path = null;
                 if (!InsNo.toString().isEmpty()) {
-                    String files = ca.GetListOfImagesContain(InsNo.toString());
-                    if (!"".equals(files.trim()) && InsNo.length() > 0) {
-                        File imgFile = new File(files);
-                        Bitmap myBitmap;
-                        if (imgFile.exists()) {
-                            myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
-                            iv.setImageBitmap(myBitmap);
-                        } else {
-                            iv.setImageResource(R.drawable.person);
-                        }
-                    } else {
-                        iv.setImageResource(R.drawable.person);
-                    }
+                    path = ca.GetListOfImagesContain(InsNo.toString());
+                }
+                if (path != null && !"".equals(path)) {
+                    File file = new File(path);
+                    picasso.load(file)
+                            .placeholder(R.drawable.person)
+                            .error(R.drawable.person)
+                            .into(iv);
                 } else {
-                    iv.setImageResource(R.drawable.person);
+                    picasso.load(R.drawable.person).into(iv);
                 }
             }
         });
@@ -166,22 +212,27 @@ public class Acquire extends AppCompatActivity {
             Toast.makeText(Acquire.this, "No providers found", Toast.LENGTH_LONG).show();
         }
 
-        iv.setOnClickListener(v -> {});
+        iv.setOnClickListener(v -> {
+        });
 
         btnTakePhoto.setOnClickListener(v -> {
             try {
                 Intent intent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-                startActivityForResult(intent, 0);
-            } catch (Exception e) {
-                e.printStackTrace();
+                intent.putExtra(EXTRA_OUTPUT, tempPhotoUri);
+                startActivityForResult(intent, TAKE_PHOTO_REQUEST_CODE);
+            } catch (ActivityNotFoundException e) {
+                Log.e(LOG_TAG, "Image capture activity not found", e);
             }
-
         });
 
         btnScan.setOnClickListener(v -> {
-            Intent intent = new Intent("com.google.zxing.client.android.SCAN");
-            intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
-            startActivityForResult(intent, 1);
+            try {
+                Intent intent = new Intent("com.google.zxing.client.android.SCAN");
+                intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
+                startActivityForResult(intent, SCAN_QR_REQUEST_CODE);
+            } catch (ActivityNotFoundException e) {
+                Log.e(LOG_TAG, "QR Scan activity not found", e);
+            }
         });
 
         btnSubmit.setOnClickListener(v -> {
@@ -212,7 +263,7 @@ public class Acquire extends AppCompatActivity {
                             break;
                     }
 
-                    Toast.makeText(Acquire.this, msg, Toast.LENGTH_LONG).show();
+                    Toast.makeText(Acquire.this, getResources().getString(R.string.PhotoSaved), Toast.LENGTH_LONG).show();
 
                     etCHFID.setText("");
                     iv.setImageResource(R.drawable.person);
@@ -225,41 +276,49 @@ public class Acquire extends AppCompatActivity {
     }
 
     @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        if (!tempPhotoFile.delete()) {
+            Log.w(LOG_TAG, "Temp photo file deletion failed");
+        }
+    }
+
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        try {
-            switch (requestCode) {
-                case 0:
-                    theImage = (Bitmap) data.getExtras().get("data");
-                    iv.setImageBitmap(theImage);
-
-                    break;
-                case 1:
-                    if (resultCode == RESULT_OK) {
-                        String CHFID = data.getStringExtra("SCAN_RESULT");
-                        etCHFID.setText(CHFID);
-                    }
-
-                    break;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+        switch (requestCode) {
+            case TAKE_PHOTO_REQUEST_CODE:
+                if (resultCode == RESULT_OK) {
+                    picasso.invalidate(tempPhotoUri);
+                    picasso.load(tempPhotoUri)
+                            .resize(global.getIntSetting("image_width_limit", 400),
+                                    global.getIntSetting("image_height_limit", 400))
+                            .centerInside()
+                            .into(imageTarget);
+                }
+                break;
+            case SCAN_QR_REQUEST_CODE:
+                if (resultCode == RESULT_OK) {
+                    String insureeNumber = data.getStringExtra("SCAN_RESULT");
+                    etCHFID.setText(insureeNumber);
+                }
+                break;
         }
     }
 
     protected boolean isValidate() {
         if (etCHFID.getText().length() == 0) {
-            ShowDialog(getResources().getString(R.string.MissingCHFID),(dialog,which)->etCHFID.requestFocus());
+            ShowDialog(getResources().getString(R.string.MissingCHFID), (dialog, which) -> etCHFID.requestFocus());
             return false;
         }
 
         if (theImage == null) {
-            ShowDialog(getResources().getString(R.string.MissingImage),(dialog,which)->iv.requestFocus());
+            ShowDialog(getResources().getString(R.string.MissingImage), (dialog, which) -> iv.requestFocus());
             return false;
-
         }
 
         if (!isValidCHFID()) {
-            ShowDialog(getResources().getString(R.string.InvalidInsuranceNumber),(dialog,which)->etCHFID.requestFocus());
+            ShowDialog(getResources().getString(R.string.InvalidInsuranceNumber), (dialog, which) -> etCHFID.requestFocus());
             return false;
         }
 
@@ -281,13 +340,13 @@ public class Acquire extends AppCompatActivity {
         if (file.exists()) file.delete();
         Uploaded = 1;
         FileOutputStream out = new FileOutputStream(file);
-        theImage.compress(Bitmap.CompressFormat.JPEG, 90, out);
+        theImage.compress(Bitmap.CompressFormat.JPEG, global.getIntSetting("image_jpeg_quality", 40), out);
 
         out.flush();
         out.close();
 
         ContentValues contentValues = new ContentValues();
-        contentValues.put("PhotoPath",file.getAbsolutePath());
+        contentValues.put("PhotoPath", file.getAbsolutePath());
         String[] whereArgs = {etCHFID.getText().toString()};
 
         sqlHandler.updateData("tblInsuree", contentValues, "CHFID = ?", whereArgs);
@@ -305,7 +364,7 @@ public class Acquire extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case android.R.id.home:
+            case R.id.home:
                 finish();
                 return true;
 
@@ -322,7 +381,7 @@ public class Acquire extends AppCompatActivity {
                 }
 
                 Intent Stats = new Intent(Acquire.this, Statistics.class);
-                 startActivity(Stats);
+                startActivity(Stats);
 
                 return true;
         }
@@ -330,7 +389,8 @@ public class Acquire extends AppCompatActivity {
     }
 
     protected AlertDialog ShowDialog(String msg) {
-        return ShowDialog(msg,(dialog,which)->{});
+        return ShowDialog(msg, (dialog, which) -> {
+        });
     }
 
     protected AlertDialog ShowDialog(String msg, DialogInterface.OnClickListener positiveButtonListener) {
@@ -344,6 +404,6 @@ public class Acquire extends AppCompatActivity {
         Escape escape = new Escape();
         int result = escape.CheckInsuranceNumber(etCHFID.getText().toString());
 
-        return  (result == 0);
+        return (result == 0);
     }
 }

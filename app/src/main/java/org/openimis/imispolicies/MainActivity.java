@@ -72,6 +72,7 @@ import android.widget.Toast;
 
 import com.exact.general.General;
 
+import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -102,7 +103,7 @@ public class MainActivity extends AppCompatActivity
     //private General general;
     private static final int MENU_LANGUAGE_1 = Menu.FIRST;
     private static final int MENU_LANGUAGE_2 = Menu.FIRST + 1;
-    private  String Language1 = "";
+    private String Language1 = "";
     private String Language2 = "";
     private String LanguageCode1 = "";
     private String LanguageCode2 = "";
@@ -130,88 +131,21 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        //when an image is selected
+
         if (requestCode == ClientAndroidInterface.RESULT_LOAD_IMG && resultCode == RESULT_OK && data != null) {
-            try {
-                //get the image from data
-                Uri selectedImage = data.getData();
-                String[] filePathColumn = {MediaStore.Images.Media.DATA};
-
-                //get the cursor
-                Cursor cursor = getContentResolver().query(selectedImage, filePathColumn, null, null, null);
-
-                //move to first row
-                assert cursor != null;
-                cursor.moveToFirst();
-
-                int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
-                selectedFilePath = cursor.getString(columnIndex);
-
-                this.ImagePath = selectedFilePath;
-
-                cursor.close();
-                ClientAndroidInterface.inProgress = false;
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-
-        }
-        //mimi
-        else if (requestCode == ClientAndroidInterface.RESULT_SCAN && resultCode == RESULT_OK && data != null) {
+            Uri selectedImage = data.getData();
+            wv.evaluateJavascript(String.format("selectImageCallback(\"%s\");", selectedImage), null);
+        } else if (requestCode == ClientAndroidInterface.RESULT_SCAN && resultCode == RESULT_OK && data != null) {
             this.InsureeNumber = data.getStringExtra("SCAN_RESULT");
-
-         /*   if (!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-                //handle case of no SDCARD present
-            } else {
-                String dir = global.getSubdirectory("scanned");
-                //create folder
-                File folder = new File(dir); //folder name
-                folder.mkdirs();
-
-                //create file
-                File file = new File(dir, "values.txt");
-                try {
-                    file.createNewFile();
-                    FileOutputStream fOut = new FileOutputStream(file);
-                    OutputStreamWriter myOutWriter =new OutputStreamWriter(fOut);
-                    myOutWriter.append(InsuranceNo);
-                    myOutWriter.close();
-                    fOut.close();
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-
-                // ClientAndroidInterface.InsuranceNo = InsuranceNo;
-                // ClientAndroidInterface.setInsuranceNo(InsuranceNo);
-                ClientAndroidInterface.inProgress = false;
-            }*/
         } else if (requestCode == 4 && resultCode == RESULT_OK) {
-            // When master data file picked, this handles every file picker call so it should be changed when different file needs to be picked
             Uri uri = data.getData();
             if (uri != null) {
-                int size = 0;
-
-                String[] proj = {MediaStore.Files.FileColumns.SIZE};
-                Cursor c = getContentResolver().query(uri, proj, null, null, null);
-                c.moveToFirst();
-                size = c.getInt(0);
-
-                byte[] b = new byte[size];
-                int bytesRead = 0;
-
                 try {
-                    //the only way to read data from android uri
-                    bytesRead = getContentResolver().openInputStream(uri).read(b);
-
-                    if (size == bytesRead) {
-                        String path = global.getSubdirectory("Database");
-                        f = new File(path, "MasterData.rar");
-                        if (f.exists() || f.createNewFile())
-                            new FileOutputStream(f).write(b);
-                    }
+                    byte[] bytes = IOUtils.toByteArray(getContentResolver().openInputStream(uri));
+                    String path = global.getSubdirectory("Database");
+                    f = new File(path, "MasterData.rar");
+                    if (f.exists() || f.createNewFile())
+                        new FileOutputStream(f).write(bytes);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -232,7 +166,7 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
 
         //Check if user has language set
-        SharedPreferences spHF = getSharedPreferences(PREFS_NAME,MODE_PRIVATE);
+        SharedPreferences spHF = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         selectedLanguage = spHF.getString("Language", "en");
         changeLanguage(selectedLanguage, false);
         super.onCreate(savedInstanceState);
@@ -259,7 +193,7 @@ public class MainActivity extends AppCompatActivity
                 Toast.makeText(this, "Copy database failed", Toast.LENGTH_SHORT).show();
                 return;
             }
-        } else 
+        } else
             sqlHandler.getReadableDatabase();
 
         //Create image folder
@@ -324,27 +258,26 @@ public class MainActivity extends AppCompatActivity
             wv.loadUrl("file:///android_asset/pages/Login.html?s=3");
             DrawerLayout drawer1 = findViewById(R.id.drawer_layout);
             drawer1.closeDrawer(GravityCompat.START);
-            SetLoggedIn(getApplication().getResources().getString(R.string.Login),getApplication().getResources().getString(R.string.Logout));
+            SetLoggedIn(getApplication().getResources().getString(R.string.Login), getApplication().getResources().getString(R.string.Logout));
         });
         ca = new ClientAndroidInterface(context);
-        if(ca.isMasterDataAvailable() > 0){
+        if (ca.isMasterDataAvailable() > 0) {
             loadLanguages();
         }
 
         SetLoggedIn(getResources().getString(R.string.Login), getResources().getString(R.string.Logout));
 
         navigationView.setCheckedItem(R.id.nav_home);
-        if (TextUtils.isEmpty(global.getOfficerCode())){
+        if (TextUtils.isEmpty(global.getOfficerCode())) {
             //Edited By HERMAN
-                ShowDialogTex();
+            ShowDialogTex();
         }
         _General.isSDCardAvailable();
 
         setVisibilityOfPaymentMenu();
     }
 
-    private void setVisibilityOfPaymentMenu()
-    {
+    private void setVisibilityOfPaymentMenu() {
         navigationView = findViewById(R.id.nav_view);
         Menu nav_Menu = navigationView.getMenu();
         nav_Menu.findItem(R.id.nav_payment).setVisible(AppInformation.MenuInfo.getShowPaymentNumberMenu());
@@ -353,41 +286,39 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
-            OfficerName.setText(global.getOfficerName());
+        OfficerName.setText(global.getOfficerName());
     }
 
-    public static void SetLoggedIn(String Lg, String Lo){
-        if(global.isLoggedIn()) {
+    public static void SetLoggedIn(String Lg, String Lo) {
+        if (global.isLoggedIn()) {
             Login.setText(Lo);
-        }
-        else {
+        } else {
             Login.setText(Lg);
         }
     }
 
     public void CreateFolders() {
         boolean dirsCreated = !"".equals(global.getMainDirectory());
-        String[] subdirectories = {"Enrolment", "Photos", "Database", "Authentications", "AcceptedFeedback", "RejectedFeedback", "AcceptedRenewal", "RejectedRenewal", "Family","EnrolmentXML"};
+        String[] subdirectories = {"Enrolment", "Photos", "Database", "Authentications", "AcceptedFeedback", "RejectedFeedback", "AcceptedRenewal", "RejectedRenewal", "Family", "EnrolmentXML"};
         for (String dir : subdirectories) {
             dirsCreated &= !"".equals(global.getSubdirectory(dir));
         }
 
-        if(!dirsCreated)
-        {
+        if (!dirsCreated) {
             Toast.makeText(getApplicationContext(), getResources().getString(R.string.ImisDirNotCreated), Toast.LENGTH_SHORT).show();
         }
     }
 
-    private void loadLanguages(){
+    private void loadLanguages() {
         ClientAndroidInterface ca = new ClientAndroidInterface(context);
-        JSONArray Languages=ca.getLanguage();
+        JSONArray Languages = ca.getLanguage();
         JSONObject LanguageObject = null;
 
         try {
             LanguageObject = Languages.getJSONObject(0);
             Language1 = (LanguageObject.getString("LanguageName"));
             LanguageCode1 = (LanguageObject.getString("LanguageCode"));
-            if (Languages.length()>1) {
+            if (Languages.length() > 1) {
                 LanguageObject = Languages.getJSONObject(1);
                 Language2 = (LanguageObject.getString("LanguageName"));
                 LanguageCode2 = (LanguageObject.getString("LanguageCode"));
@@ -407,17 +338,18 @@ public class MainActivity extends AppCompatActivity
                             Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
                             intent.addCategory(Intent.CATEGORY_OPENABLE);
                             intent.setType("*/*");
-                            try{
+                            try {
                                 startActivityForResult(intent, 4);
-                            } catch (ActivityNotFoundException e){
+                            } catch (ActivityNotFoundException e) {
                                 Toast.makeText(getApplicationContext(), getResources().getString(R.string.NoFileExporerInstalled), Toast.LENGTH_SHORT).show();
                             }
                         }).setNegativeButton(getResources().getString(R.string.No),
-                        (dialog, id) -> {
-                            dialog.cancel();
-                            finish();
-                        }).show();
+                (dialog, id) -> {
+                    dialog.cancel();
+                    finish();
+                }).show();
     }
+
     public void openDialogFromPage() {
         AlertDialog.Builder alertDialog2 = new AlertDialog.Builder(
                 MainActivity.this);
@@ -437,9 +369,9 @@ public class MainActivity extends AppCompatActivity
                         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
                         intent.addCategory(Intent.CATEGORY_OPENABLE);
                         intent.setType("*/*");
-                        try{
+                        try {
                             startActivityForResult(intent, 4);
-                        } catch (ActivityNotFoundException e){
+                        } catch (ActivityNotFoundException e) {
                             Toast.makeText(getApplicationContext(), getResources().getString(R.string.NoFileExporerInstalled), Toast.LENGTH_SHORT).show();
                         }
                         // Write your code here to execute after dialog
@@ -454,6 +386,7 @@ public class MainActivity extends AppCompatActivity
 // Showing Alert Dialog
         alertDialog2.show();
     }
+
     public void ConfirmDialog(String filename) {
         AlertDialog.Builder alertDialog2 = new AlertDialog.Builder(
                 MainActivity.this);
@@ -516,6 +449,7 @@ public class MainActivity extends AppCompatActivity
 // Showing Alert Dialog
         alertDialog2.show();
     }
+
     public void openDialogMsg(String msg) {
         AlertDialog.Builder alertDialog2 = new AlertDialog.Builder(
                 MainActivity.this);
@@ -538,6 +472,7 @@ public class MainActivity extends AppCompatActivity
 // Showing Alert Dialog
         alertDialog2.show();
     }
+
     public void ShowDialogTex() {
         final ClientAndroidInterface ca = new ClientAndroidInterface(context);
         final int MasterData = ca.isMasterDataAvailable();
@@ -556,21 +491,21 @@ public class MainActivity extends AppCompatActivity
         final EditText userInput = (EditText) promptsView.findViewById(R.id.txtOfficerCode);
         final TextView tVDialogTile = (TextView) promptsView.findViewById(R.id.tvDialogTitle);
 
-            if (MasterData == 0) {
-                tVDialogTile.setText(getResources().getString(R.string.MasterDataNotFound));
-                userInput.setVisibility(View.GONE);
-            }
+        if (MasterData == 0) {
+            tVDialogTile.setText(getResources().getString(R.string.MasterDataNotFound));
+            userInput.setVisibility(View.GONE);
+        }
 
 
         // set dialog message
         final String result = "";
 
         int positiveButton, negativeButton;
-        if(MasterData > 0) {
+        if (MasterData > 0) {
             positiveButton = R.string.Ok;
             negativeButton = R.string.Cancel;
 
-        }else {
+        } else {
             positiveButton = R.string.Yes;
             negativeButton = R.string.No;
         }
@@ -594,9 +529,9 @@ public class MainActivity extends AppCompatActivity
                                             ca.ShowDialog(getResources().getString(R.string.IncorrectOfficerCode));
                                         }
                                     } else {
-                                        if(!_General.isNetworkAvailable(MainActivity.this)){
+                                        if (!_General.isNetworkAvailable(MainActivity.this)) {
                                             openDialog();
-                                        }else{
+                                        } else {
                                             MasterDataAsync masterDataAsync = new MasterDataAsync();
                                             masterDataAsync.execute();
 
@@ -650,15 +585,14 @@ public class MainActivity extends AppCompatActivity
                                     etRarPassword = userInput.getText().toString();
                                     getMasterDataText2(f.getPath(), etRarPassword);
 
-                                    if(calledFrom == "java"){
+                                    if (calledFrom == "java") {
                                         ConfirmDialog((f.getName()).toString());
-                                    } else{
+                                    } else {
                                         ConfirmDialogPage((f.getName()).toString());
                                     }
+                                } catch (Exception e) {
+                                    e.getMessage();
                                 }
-                                catch (Exception e) {
-                                        e.getMessage();
-                                    }
                             }
 
                         })
@@ -683,7 +617,7 @@ public class MainActivity extends AppCompatActivity
         String fname = "MasterData.txt";
         try {
             String dir = global.getSubdirectory("Database");
-            File myFile = new File(dir,fname);//"/"+dir+"/MasterData.txt"
+            File myFile = new File(dir, fname);//"/"+dir+"/MasterData.txt"
 //            BufferedReader myReader = new BufferedReader(
 //                    new InputStreamReader(
 //                            new FileInputStream(myFile), "UTF32"));
@@ -705,12 +639,12 @@ public class MainActivity extends AppCompatActivity
         return aBuffer;
     }
 
-    public String getMasterDataText(String filename){
+    public String getMasterDataText(String filename) {
         ca.unZip(filename);
         String fname = "MasterData.txt";
         try {
             String dir = global.getSubdirectory("Database");
-            File myFile = new File(dir,fname);//"/"+dir+"/MasterData.txt"
+            File myFile = new File(dir, fname);//"/"+dir+"/MasterData.txt"
 //            BufferedReader myReader = new BufferedReader(
 //                    new InputStreamReader(
 //                            new FileInputStream(myFile), "UTF32"));
@@ -796,19 +730,19 @@ public class MainActivity extends AppCompatActivity
         // Inflate the acquire_menu; this adds items to the action bar if it is present.
         //getMenuInflater().inflate(R.acquire_menu.language, acquire_menu);
         super.onCreateOptionsMenu(menu);
-        menu.add(0, MENU_LANGUAGE_1, 0, Language1) ;
+        menu.add(0, MENU_LANGUAGE_1, 0, Language1);
         if (!Language2.equals("")) {
             menu.add(0, MENU_LANGUAGE_2, 0, Language2);
         }
         return true;
     }
 
-    private void changeLanguage(String LanguageCode, boolean withRefresh){
+    private void changeLanguage(String LanguageCode, boolean withRefresh) {
 
         //General gen = new General();
         _General.ChangeLanguage(this, LanguageCode);
 
-        if(withRefresh) {
+        if (withRefresh) {
             //Restart the activity for change to be affected
             Intent refresh = new Intent(MainActivity.this, MainActivity.class);
             startActivity(refresh);
@@ -829,11 +763,11 @@ public class MainActivity extends AppCompatActivity
                 selectedLanguage = LanguageCode1;
                 changeLanguage(selectedLanguage, true);
 
-                return  true;
+                return true;
             case MENU_LANGUAGE_2:
                 selectedLanguage = LanguageCode2;
                 changeLanguage(selectedLanguage, true);
-               return  true;
+                return true;
         }
 
 
@@ -856,9 +790,9 @@ public class MainActivity extends AppCompatActivity
             wv.loadUrl("file:///android_asset/pages/Enrollment.html");
         } else if (id == R.id.nav_modify_family) {
             global = (Global) getApplicationContext();
-            if(global.isLoggedIn()){
+            if (global.isLoggedIn()) {
                 wv.loadUrl("file:///android_asset/pages/Search.html");
-            }else{
+            } else {
                 wv.loadUrl("file:///android_asset/pages/Login.html?s=1");
             }
 
@@ -866,12 +800,12 @@ public class MainActivity extends AppCompatActivity
             Intent i = new Intent(this, RenewList.class);
             startActivity(i);
 
-        }else if (id == R.id.nav_reports) {
+        } else if (id == R.id.nav_reports) {
             Global global = (Global) getApplicationContext();
-            if(global.isLoggedIn()){
+            if (global.isLoggedIn()) {
                 Intent i = new Intent(this, Reports.class);
                 startActivity(i);
-            }else{
+            } else {
                 wv.loadUrl("file:///android_asset/pages/Login.html?s=4");
             }
         } else if (id == R.id.nav_feedback) {
@@ -895,10 +829,10 @@ public class MainActivity extends AppCompatActivity
                     }).create().show();
         } else if (id == R.id.nav_enquire) {
             global = (Global) getApplicationContext();
-            if(global.isLoggedIn()){
+            if (global.isLoggedIn()) {
                 Intent intent = new Intent(this, Enquire.class);
                 startActivity(intent);
-            }else{
+            } else {
                 wv.loadUrl("file:///android_asset/pages/Login.html?s=5");
             }
         } else if (id == R.id.nav_payment) {
@@ -917,8 +851,8 @@ public class MainActivity extends AppCompatActivity
             switch (keyCode) {
                 case KeyEvent.KEYCODE_BACK:
                     if (wv.canGoBack()) {
-                        if(global.getCurrentUrl() != null)
-                            wv.loadUrl("file:///android_asset/pages/"+global.getCurrentUrl());
+                        if (global.getCurrentUrl() != null)
+                            wv.loadUrl("file:///android_asset/pages/" + global.getCurrentUrl());
                         else
                             wv.goBack();
                     } else {
@@ -930,8 +864,9 @@ public class MainActivity extends AppCompatActivity
         return super.onKeyDown(keyCode, event);
     }
 
-    public class MasterDataAsync extends AsyncTask<Void, Void, Void>{
+    public class MasterDataAsync extends AsyncTask<Void, Void, Void> {
         ProgressDialog pd = null;
+
         @Override
         protected void onPreExecute() {
 
@@ -949,7 +884,6 @@ public class MainActivity extends AppCompatActivity
 
             return null;
         }
-
 
 
         @Override
@@ -984,6 +918,7 @@ public class MainActivity extends AppCompatActivity
 
             return null;
         }
+
         @Override
         protected void onPostExecute(Void aVoid) {
             pd.dismiss();
@@ -997,22 +932,24 @@ public class MainActivity extends AppCompatActivity
     }
 
 
-    private void setPreferences(){
+    private void setPreferences() {
         SharedPreferences Lang = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         SharedPreferences.Editor editor = Lang.edit();
         editor.putString("Language", selectedLanguage);
         editor.apply();
     }
+
     @Override
     protected void onStop() {
         super.onStop();
         setPreferences();
     }
-    private void CheckForUpdates(){
-        if(_General.isNetworkAvailable(MainActivity.this)){
-            if(_General.isNewVersionAvailable(VersionField,MainActivity.this,getApplicationContext().getPackageName())){
+
+    private void CheckForUpdates() {
+        if (_General.isNetworkAvailable(MainActivity.this)) {
+            if (_General.isNewVersionAvailable(VersionField, MainActivity.this, getApplicationContext().getPackageName())) {
                 //Show notification bar
-                mNotificationManager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+                mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
                 //final Notification NotificationDetails = new Notification(R.drawable.ic_launcher_policies, getResources().getString(R.string.NotificationAlertText), System.currentTimeMillis());
                 //NotificationDetails.flags = Notification.FLAG_SHOW_LIGHTS | Notification.FLAG_AUTO_CANCEL | Notification.DEFAULT_SOUND | Notification.DEFAULT_VIBRATE;
                 //NotificationDetails.setLatestEventInfo(context, ContentTitle, ContentText, intent);
@@ -1021,9 +958,9 @@ public class MainActivity extends AppCompatActivity
                 CharSequence ContentTitle = getResources().getString(R.string.ContentTitle);
                 CharSequence ContentText = getResources().getString(R.string.ContentText);
 
-                Intent NotifyIntent = new Intent(Intent.ACTION_VIEW,Uri.parse(ApkFileLocation));
+                Intent NotifyIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(ApkFileLocation));
 
-                PendingIntent intent = PendingIntent.getActivity(MainActivity.this, 0, NotifyIntent,0);
+                PendingIntent intent = PendingIntent.getActivity(MainActivity.this, 0, NotifyIntent, 0);
                 NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "M_CH_ID");
                 builder.setAutoCancel(false);
                 builder.setContentTitle(ContentTitle);
@@ -1033,32 +970,33 @@ public class MainActivity extends AppCompatActivity
                 builder.setOngoing(false);
 
                 mNotificationManager.notify(SIMPLE_NOTFICATION_ID, builder.build());
-                vibrator = (Vibrator)getSystemService(VIBRATOR_SERVICE);
+                vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
                 vibrator.vibrate(500);
             }
         }
     }
 
     //Ask for permission
-    public void requestPermision(){
+    public void requestPermision() {
         int PERMISSION_ALL = 1;
         String[] PERMISSIONS = {Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.VIBRATE, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.INTERNET, Manifest.permission.CAMERA, Manifest.permission.ACCESS_NETWORK_STATE, Manifest.permission.ACCESS_WIFI_STATE, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.CHANGE_WIFI_STATE};
-        if(!hasPermissions(this, PERMISSIONS)){
+        if (!hasPermissions(this, PERMISSIONS)) {
             ActivityCompat.requestPermissions(this, PERMISSIONS, PERMISSION_ALL);
         }
 
         // Ask for "Manage External Storage" permission, required in Android 11
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             String[] Android11Permissions = {Manifest.permission.MANAGE_EXTERNAL_STORAGE};
-            if(!hasPermissions(this, Android11Permissions)){
+            if (!hasPermissions(this, Android11Permissions)) {
                 ActivityCompat.requestPermissions(this, Android11Permissions, PERMISSION_ALL);
-                if(!Environment.isExternalStorageManager()) {
+                if (!Environment.isExternalStorageManager()) {
                     Intent intent = new Intent(ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
                     startActivity(intent);
                 }
             }
         }
     }
+
     public static boolean hasPermissions(Context context, String... permissions) {
         if (context != null && permissions != null) {
             for (String permission : permissions) {
@@ -1152,7 +1090,7 @@ public class MainActivity extends AppCompatActivity
         alertDialog.show();
     }
 
-    public String getSelectedLanguage(){
+    public String getSelectedLanguage() {
         return selectedLanguage;
     }
 }
