@@ -76,6 +76,7 @@ import java.util.Arrays;
 import java.util.Date;
 
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
@@ -3640,16 +3641,15 @@ public class ClientAndroidInterface {
                         // Policy + premium
 
                         for (int j = 0; j < policiesArray.length(); j++) {
-                            JSONObject policyObject = policiesArray.getJSONObject(j);
                             JSONArray policyPremiums = new JSONArray();
-                            String policyId = policyObject.getString("PolicyId");
+                            String policyId = policiesArray.getJSONObject(j).getString("PolicyId");
                             for(int k = 0; k < premiumsArray.length(); k++) {
                                 JSONObject premiumObject = premiumsArray.getJSONObject(k);
-                                if(policyId.equals(premiumObject.getString("PolicyId"))) {
+                                if(StringUtils.equals(policyId,premiumObject.getString("PolicyId"))) {
                                     policyPremiums.put(premiumObject);
                                 }
                             }
-                            policyObject.put("premium", policyPremiums);
+                            policiesArray.getJSONObject(j).put("premium", policyPremiums);
                         }
 
                         familyObj.put("policies", policiesArray);
