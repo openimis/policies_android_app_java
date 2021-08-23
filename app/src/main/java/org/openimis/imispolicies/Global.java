@@ -27,16 +27,22 @@ package org.openimis.imispolicies;
 
 import android.app.Application;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Environment;
 import android.util.Log;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -44,6 +50,9 @@ import static org.openimis.imispolicies.BuildConfig.APP_DIR;
 
 public class Global extends Application {
     private static Global GlobalContext;
+    private static final String PREF_NAME = "CMPref";
+    private static final String PREF_LOG_TAG = "PREFS";
+    private static final String FILE_IO_LOG_TAG = "FILEIO";
 
     private String OfficerCode;
     private String OfficerName;
@@ -56,9 +65,8 @@ public class Global extends Application {
 
     private String MainDirectory;
     private String AppDirectory;
-    private Map<String, String> SubDirectories = new HashMap<>();
-
-    private List<String> ProtectedDirectories = Arrays.asList("Authentications","Database","Images");
+    private Map<String, String> SubDirectories;
+    private List<String> ProtectedDirectories;
 
     public static Global getGlobal() {
         return GlobalContext;
@@ -72,11 +80,36 @@ public class Global extends Application {
     public void onCreate() {
         super.onCreate();
         GlobalContext = this;
+        SubDirectories = new HashMap<>();
+        ProtectedDirectories = Arrays.asList("Authentications", "Database", "Images");
+        initSharedPrefsInts();
     }
 
-    public Token getJWTToken()
-    {
-        if(JWTToken==null)
+    private void initSharedPrefsInts() {
+        SharedPreferences sp = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
+        SharedPreferences.Editor editor = sp.edit();
+        try {
+            String text = getInputStreamText(getAssets().open("JSON/default_ints.json"));
+            JSONObject intDefaults = new JSONObject(text);
+
+            for (Iterator<String> it = intDefaults.keys(); it.hasNext(); ) {
+                String key = it.next();
+
+                if (!sp.contains(key)) {
+                    editor.putInt(key, intDefaults.getInt(key));
+                }
+            }
+        } catch (IOException e) {
+            Log.e(FILE_IO_LOG_TAG, "Reading int defaults failed", e);
+        } catch (JSONException e) {
+            Log.e(FILE_IO_LOG_TAG, "Parsing int defaults failed", e);
+        } finally {
+            editor.apply();
+        }
+    }
+
+    public Token getJWTToken() {
+        if (JWTToken == null)
             JWTToken = new Token();
         return JWTToken;
     }
@@ -85,7 +118,9 @@ public class Global extends Application {
         JWTToken = token;
     }
 
-    public boolean isLoggedIn() { return getJWTToken().isTokenValidJWT(); }
+    public boolean isLoggedIn() {
+        return getJWTToken().isTokenValidJWT();
+    }
 
     public String getOfficerCode() {
         return OfficerCode;
@@ -153,7 +188,7 @@ public class Global extends Application {
             MainDirectory = createOrCheckDirectory(documentsDir + File.separator + APP_DIR);
 
             if ("".equals(documentsDir) || "".equals(MainDirectory)) {
-                Log.w("DIRS", "Main directory could not be created");
+                Log.w(FILE_IO_LOG_TAG, "Main directory could not be created");
             }
         }
         return MainDirectory;
@@ -164,7 +199,7 @@ public class Global extends Application {
             AppDirectory = createOrCheckDirectory(getApplicationInfo().dataDir);
 
             if ("".equals(AppDirectory)) {
-                Log.w("DIRS", "App directory could not be created");
+                Log.w(FILE_IO_LOG_TAG, "App directory could not be created");
             }
         }
         return AppDirectory;
@@ -183,7 +218,7 @@ public class Global extends Application {
             String subDirPath = createOrCheckDirectory(directory + File.separator + subdirectory);
 
             if ("".equals(subDirPath)) {
-                Log.w("DIRS", subdirectory + " directory could not be created");
+                Log.w(FILE_IO_LOG_TAG, String.format("%s directory could not be created", subdirectory));
                 return null;
             } else {
                 SubDirectories.put(subdirectory, subDirPath);
@@ -192,20 +227,47 @@ public class Global extends Application {
         return SubDirectories.get(subdirectory);
     }
 
-    public String getFileText(String path)
-    {
+    public String getFileText(String path) {
+        String result = "";
+        try {
+            InputStream inputStream = new FileInputStream(path);
+            result = getInputStreamText(inputStream);
+        } catch (IOException e) {
+            Log.e(FILE_IO_LOG_TAG, String.format("Creating input stream for path: %s failed", path), e);
+        }
+        return result;
+    }
+
+    public String getInputStreamText(InputStream inputStream) {
         String line;
         StringBuilder stringBuilder = new StringBuilder();
-        File file = new File(path);
         try {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
             while ((line = reader.readLine()) != null) {
                 stringBuilder.append(line);
                 stringBuilder.append("\n");
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.e(FILE_IO_LOG_TAG, "Reading text from input stream failed", e);
         }
         return stringBuilder.toString();
+    }
+
+    public int getIntSetting(String key, int defaultValue) {
+        try {
+            return getSharedPreferences(PREF_NAME, MODE_PRIVATE).getInt(key, defaultValue);
+        } catch (ClassCastException e) {
+            Log.e(PREF_LOG_TAG, String.format("%s key is not an int", key), e);
+        }
+        return defaultValue;
+    }
+
+    public String getStringSetting(String key, String defaultValue) {
+        try {
+            return getSharedPreferences(PREF_NAME, MODE_PRIVATE).getString(key, defaultValue);
+        } catch (ClassCastException e) {
+            Log.e(PREF_LOG_TAG, String.format("%s key is not a string", key), e);
+        }
+        return defaultValue;
     }
 }
