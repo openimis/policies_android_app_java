@@ -831,7 +831,7 @@ public class SQLHandler extends SQLiteOpenHelper {
         int result = 0;
         try (Cursor c = mDatabase.query(tblBulkControlNumbers,
                 new String[]{"COUNT(*)"},
-                "PolicyId IS NOT NULL AND (ProdId = ? OR ? = 0) AND OfficerCode = ??",
+                "PolicyId IS NOT NULL AND (ProdId = ? OR ? = 0) AND OfficerCode = ?",
                 new String[]{productId, productId, officerCode},
                 null,
                 null,
@@ -852,7 +852,7 @@ public class SQLHandler extends SQLiteOpenHelper {
         int result = 0;
         try (Cursor c = mDatabase.query(tblBulkControlNumbers,
                 new String[]{"COUNT(*)"},
-                "PolicyId IS NULL AND (ProdId = ? OR ? = 0) AND OfficerCode = ??",
+                "PolicyId IS NULL AND (ProdId = ? OR ? = 0) AND OfficerCode = ?",
                 new String[]{productId, productId, officerCode},
                 null,
                 null,
