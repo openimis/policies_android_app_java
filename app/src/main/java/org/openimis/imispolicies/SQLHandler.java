@@ -867,4 +867,44 @@ public class SQLHandler extends SQLiteOpenHelper {
         }
         return result;
     }
+
+    public JSONArray getAvailableProducts(String officerCode) {
+        openDatabase();
+        JSONArray result;
+        try {
+            String query = "SELECT DISTINCT p.ProdId, p.ProductCode, p.ProductName " +
+                    "FROM tblOfficer o INNER JOIN tblLocations ld ON o.LocationId=ld.LocationId " +
+                    "INNER JOIN tblLocations lr ON ld.ParentLocationId=lr.LocationId " +
+                    "INNER JOIN tblProduct p ON (ld.LocationId=p.LocationId OR lr.LocationId=p.LocationId OR p.LocationId='null') " +
+                    "WHERE o.Code=?";
+
+            Cursor c = mDatabase.rawQuery(query, new String[]{officerCode});
+            result = cursorToJsonArray(c);
+        } catch (Exception e) {
+            e.printStackTrace();
+            result = new JSONArray();
+        }
+        return result;
+    }
+
+    private JSONArray cursorToJsonArray(Cursor cursor) {
+        JSONArray resultSet = new JSONArray();
+        cursor.moveToFirst();
+        try {
+            while (!cursor.isAfterLast()) {
+                int totalColumn = cursor.getColumnCount();
+                JSONObject rowObject = new JSONObject();
+                for (int i = 0; i < totalColumn; i++) {
+                    if (cursor.getColumnName(i) != null) {
+                        rowObject.put(cursor.getColumnName(i), cursor.getString(i));
+                    }
+                }
+                resultSet.put(rowObject);
+                cursor.moveToNext();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return resultSet;
+    }
 }

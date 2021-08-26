@@ -127,6 +127,7 @@
         <activity android:name=".CheckCommission" />
         <activity android:name=".SearchNotEnrolledPolicies" />
         <activity android:name=".NotEnrolledPoliciesOverview" />
+        <activity android:name=".BulkControlNumbersActivity" />
     </application>
 
 </manifest>
