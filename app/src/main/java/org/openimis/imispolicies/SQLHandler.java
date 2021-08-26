@@ -32,8 +32,6 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.os.Build;
-import android.os.Environment;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Xml;
@@ -43,14 +41,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.xmlpull.v1.XmlSerializer;
 
-import java.io.Console;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-
-import org.openimis.imispolicies.R;
 
 public class SQLHandler extends SQLiteOpenHelper {
 
@@ -420,7 +415,8 @@ public class SQLHandler extends SQLiteOpenHelper {
                             "ProdId INTEGER," +
                             "OfficerCode TEXT," +
                             "ControlNUmber TEXT," +
-                            "Amount REAL" + ")"
+                            "Amount REAL," +
+                            "PolicyId INTEGER" + ")"
             );
         } catch (Exception e) {
             e.printStackTrace();
@@ -830,10 +826,16 @@ public class SQLHandler extends SQLiteOpenHelper {
         return path;
     }
 
-    public int getAssignedCNCount() {
+    public int getAssignedCNCount(String productId, String officerCode) {
         openDatabase();
         int result = 0;
-        try (Cursor c = mDatabase.query(tblBulkControlNumbers, new String[]{"count(*)"}, "FamilyId is not NULL", null, null, null, null)) {
+        try (Cursor c = mDatabase.query(tblBulkControlNumbers,
+                new String[]{"COUNT(*)"},
+                "PolicyId IS NOT NULL AND (ProdId = ? OR ? = 0) AND OfficerCode = ??",
+                new String[]{productId, productId, officerCode},
+                null,
+                null,
+                null)) {
             c.moveToFirst();
             result = c.getInt(0);
         } catch (Exception e) {
@@ -845,10 +847,16 @@ public class SQLHandler extends SQLiteOpenHelper {
         return result;
     }
 
-    public int getFreeCNCount() {
+    public int getFreeCNCount(String productId, String officerCode) {
         openDatabase();
         int result = 0;
-        try (Cursor c = mDatabase.query(tblBulkControlNumbers, new String[]{"count(*)"}, "FamilyId is NULL", null, null, null, null)) {
+        try (Cursor c = mDatabase.query(tblBulkControlNumbers,
+                new String[]{"COUNT(*)"},
+                "PolicyId IS NULL AND (ProdId = ? OR ? = 0) AND OfficerCode = ??",
+                new String[]{productId, productId, officerCode},
+                null,
+                null,
+                null)) {
             c.moveToFirst();
             result = c.getInt(0);
         } catch (Exception e) {
@@ -859,5 +867,4 @@ public class SQLHandler extends SQLiteOpenHelper {
         }
         return result;
     }
-
 }
