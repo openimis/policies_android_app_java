@@ -2298,8 +2298,7 @@ public class ClientAndroidInterface {
         String dateRequestedFrom = getOrDefault(requestedFrom, earlyDate);
         String dateRequestedTo = getOrDefault(requestedTo, today);
 
-        if("".equals(uploadedFrom) && "".equals(uploadedTo))
-        {
+        if ("".equals(uploadedFrom) && "".equals(uploadedTo)) {
             upload = "";
         } else {
             upload = " AND RP.UploadedDate BETWEEN '" + dateUploadedFrom + "' AND '" + dateUploadedTo + "'";
@@ -3643,9 +3642,9 @@ public class ClientAndroidInterface {
                         for (int j = 0; j < policiesArray.length(); j++) {
                             JSONArray policyPremiums = new JSONArray();
                             String policyId = policiesArray.getJSONObject(j).getString("PolicyId");
-                            for(int k = 0; k < premiumsArray.length(); k++) {
+                            for (int k = 0; k < premiumsArray.length(); k++) {
                                 JSONObject premiumObject = premiumsArray.getJSONObject(k);
-                                if(StringUtils.equals(policyId,premiumObject.getString("PolicyId"))) {
+                                if (StringUtils.equals(policyId, premiumObject.getString("PolicyId"))) {
                                     policyPremiums.put(premiumObject);
                                 }
                             }
