@@ -22,7 +22,7 @@ import java.util.Locale;
  */
 
 public class Token {
-    public void saveTokenText(String token,String validTo) {
+    public void saveTokenText(String token, String validTo) {
         Global global = Global.getGlobal();
         String dir = global.getSubdirectory("Authentications");
 
@@ -81,46 +81,48 @@ public class Token {
 
             SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSXXX", Locale.getDefault());
 
-            if(validTo!=null)
-            try {
-                Date expiryDate = format.parse(validTo);
-                Date now = new Date();
+            if (validTo != null)
+                try {
+                    Date expiryDate = format.parse(validTo);
+                    Date now = new Date();
 
-                if(now.after(expiryDate))
-                {
-                    clearToken();
-                    token = null;
+                    if (now.after(expiryDate)) {
+                        clearToken();
+                        token = null;
+                    }
+                } catch (ParseException | NullPointerException e) {
+                    e.printStackTrace();
                 }
-            } catch ( ParseException | NullPointerException e ) {
-                e.printStackTrace();
-            }
 
         } catch (IOException e) {
             e.printStackTrace();
+        }
+
+        if (token == null) {
+            return "";
         }
         return token;
     }
 
     public void clearToken() {
-        saveTokenText("","");
+        saveTokenText("", "");
     }
 
     //How to validate JWT:
     //https://datatracker.ietf.org/doc/html/rfc7519#section-7.2
-    public boolean isTokenValidJWT()
-    {
+    public boolean isTokenValidJWT() {
         String token = getTokenText();
-        if(token==null)
+        if (token == null)
             return false;
 
         int indexOfFirstDot = token.indexOf('.');
-        if(indexOfFirstDot==-1)
+        if (indexOfFirstDot == -1)
             return false;
 
-        String tokenHeader = token.substring(0 , indexOfFirstDot);
+        String tokenHeader = token.substring(0, indexOfFirstDot);
         try {
             JSONObject headerObject = new JSONObject(new String(Base64.decode(tokenHeader, Base64.DEFAULT)));
-            if(!"JWT".equals(headerObject.getString("typ")))
+            if (!"JWT".equals(headerObject.getString("typ")))
                 return false;
         } catch (JSONException e) {
             return false;

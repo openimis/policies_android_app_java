@@ -28,6 +28,8 @@ package org.openimis.imispolicies;
 import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Environment;
 import android.util.Log;
 
@@ -170,6 +172,13 @@ public class Global extends Application {
 
     public void setOfficerName(String officerName) {
         OfficerName = officerName;
+    }
+
+    public boolean isNetworkAvailable() {
+        ConnectivityManager cm = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo ni = cm.getActiveNetworkInfo();
+
+        return (ni != null && ni.isConnected());
     }
 
     private String createOrCheckDirectory(String path) {

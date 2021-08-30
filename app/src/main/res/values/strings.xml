@@ -417,4 +417,6 @@
   <string name="AssignedCN">Assigned Control Numbers:</string>
   <string name="FreeCN">Free Control Numbers:</string>
   <string name="FetchBulkCN">Fetch Bulk Control Numbers</string>
+  <string name="Fetch">Fetch</string>
+  <string name="LogInToFetchCn">Please log in first, to fetch control numbers.</string>
 </resources>

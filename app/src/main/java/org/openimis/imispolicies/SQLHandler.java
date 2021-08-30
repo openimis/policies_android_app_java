@@ -87,7 +87,7 @@ public class SQLHandler extends SQLiteOpenHelper {
     private static final String tblRecordedPolicies = "tblRecordedPolicies";
     private static final String tblRelations = "tblRelations";
     private static final String tblRenewals = "tblRenewals";
-    private static final String tblBulkControlNumbers = "tblBulkControlNumbers";
+    public static final String tblBulkControlNumbers = "tblBulkControlNumbers";
 
 
     public SQLHandler(Context context) {
@@ -412,9 +412,9 @@ public class SQLHandler extends SQLiteOpenHelper {
                     "CREATE TABLE " + tblBulkControlNumbers + "(" +
                             "Id INTEGER," +
                             "BillId INTEGER," +
-                            "ProdId INTEGER," +
+                            "ProductCode TEXT," +
                             "OfficerCode TEXT," +
-                            "ControlNUmber TEXT," +
+                            "ControlNumber TEXT," +
                             "Amount REAL," +
                             "PolicyId INTEGER" + ")"
             );
@@ -775,7 +775,7 @@ public class SQLHandler extends SQLiteOpenHelper {
 
     }
 
-    public int insertData(String tableName, ContentValues contentValues) throws UserException {
+    public int insertData(String tableName, ContentValues contentValues) {
         try {
             openDatabase();
             Long lastInsertedId = mDatabase.insertOrThrow(tableName, null, contentValues);
@@ -826,13 +826,13 @@ public class SQLHandler extends SQLiteOpenHelper {
         return path;
     }
 
-    public int getAssignedCNCount(String productId, String officerCode) {
+    public int getCount(String table, String selection, String[] selectionArgs) {
         openDatabase();
         int result = 0;
-        try (Cursor c = mDatabase.query(tblBulkControlNumbers,
+        try (Cursor c = mDatabase.query(table,
                 new String[]{"COUNT(*)"},
-                "PolicyId IS NOT NULL AND (ProdId = ? OR ? = 0) AND OfficerCode = ?",
-                new String[]{productId, productId, officerCode},
+                selection,
+                selectionArgs,
                 null,
                 null,
                 null)) {
@@ -847,25 +847,28 @@ public class SQLHandler extends SQLiteOpenHelper {
         return result;
     }
 
-    public int getFreeCNCount(String productId, String officerCode) {
-        openDatabase();
-        int result = 0;
-        try (Cursor c = mDatabase.query(tblBulkControlNumbers,
-                new String[]{"COUNT(*)"},
-                "PolicyId IS NULL AND (ProdId = ? OR ? = 0) AND OfficerCode = ?",
-                new String[]{productId, productId, officerCode},
-                null,
-                null,
-                null)) {
-            c.moveToFirst();
-            result = c.getInt(0);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw e;
-        } finally {
-            closeDatabase();
-        }
-        return result;
+    public int getAssignedCNCount(String officerCode, String productCode) {
+        return getCount(tblBulkControlNumbers,
+                "PolicyId IS NOT NULL AND ProductCode = ? AND OfficerCode = ?",
+                new String[]{productCode, officerCode});
+    }
+
+    public int getFreeCNCount(String officerCode, String productCode) {
+        return getCount(tblBulkControlNumbers,
+                "PolicyId IS NULL AND ProductCode = ? AND OfficerCode = ?",
+                new String[]{productCode, officerCode});
+    }
+
+    public int getAssignedCNCount(String officerCode) {
+        return getCount(tblBulkControlNumbers,
+                "PolicyId IS NOT NULL AND OfficerCode = ?",
+                new String[]{officerCode});
+    }
+
+    public int getFreeCNCount(String officerCode) {
+        return getCount(tblBulkControlNumbers,
+                "PolicyId IS NULL AND OfficerCode = ?",
+                new String[]{officerCode});
     }
 
     public JSONArray getAvailableProducts(String officerCode) {
@@ -883,6 +886,8 @@ public class SQLHandler extends SQLiteOpenHelper {
         } catch (Exception e) {
             e.printStackTrace();
             result = new JSONArray();
+        } finally {
+            closeDatabase();
         }
         return result;
     }
