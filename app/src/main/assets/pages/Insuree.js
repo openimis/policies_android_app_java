@@ -9,7 +9,7 @@ $(document).ready(function () {
 
     document.title = Android.getString('AddEditInsuree');
     Android.shutDownProgress();
-
+    $("#hfNewPhotoPath").val("");
 
     var FSPDistrictCss = $('#FSPDistrict').css('display');
     if (FSPDistrictCss == 'none') $('#FSPRegion').css("display", "none");
@@ -54,9 +54,9 @@ $(document).ready(function () {
             $('#imgInsuree').attr('src', 'file://' + ImagePath);
         } else {
             $('#imgInsuree').attr('src', '');
-            $("#hfNewPhotoPath").val("");
         }
 
+        $("#hfNewPhotoPath").val("");
     });
 
 
@@ -193,13 +193,8 @@ $(document).ready(function () {
     }
 
     $("#imgInsuree").click(function () {
-        var imagePath = Android.selectPicture();
-        if (imagePath != "") {
-            $("#hfNewPhotoPath").val(imagePath);
-            $(this).attr('src', imagePath);
-        }
+        Android.selectPicture();
     });
-
 
     $('#btnScan').click(function () {
         var InsuranceNo = Android.getScannedNumber();
@@ -235,6 +230,14 @@ function fillDropdowns() {
     fillFSPDistricts();
     fillFSPCategory();
     fillVulnerability();
+}
+
+// called from java after the image was selected by the user
+function selectImageCallback(imagePath) {
+    if (imagePath != "") {
+        $("#hfNewPhotoPath").val(imagePath);
+        $("#imgInsuree").attr('src', imagePath);
+    }
 }
 
 function fillRelationship() {

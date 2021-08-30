@@ -63,6 +63,8 @@ import com.exact.CallSoap.CallSoap;
 import com.exact.InsureeImages;
 import com.exact.general.General;
 import com.exact.uploadfile.UploadFile;
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
@@ -75,12 +77,11 @@ import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Date;
 
-
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
-
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -125,8 +126,6 @@ public class ClientAndroidInterface {
     private int Uploaded;
     private HashMap<String, String> controls = new HashMap<>();
     private String Path;
-
-
     private File[] files;
     private File[] JSONfiles;
     private int TotalFiles;
@@ -165,6 +164,9 @@ public class ClientAndroidInterface {
 
     private String salt;
 
+    Picasso picassoInstance;
+    Target imageTarget;
+
     ClientAndroidInterface(Context c) {
         mContext = c;
         global = (Global) mContext.getApplicationContext();
@@ -175,7 +177,10 @@ public class ClientAndroidInterface {
         filePath = database.getPath();
         database.close();
         // activity = (Activity) c.getApplicationContext();
-
+        picassoInstance = new Picasso.Builder(mContext)
+                .listener((picasso, path, exception) -> Log.e("Images", String.format("Image load failed: %s", path.toString()), exception))
+                .loggingEnabled(BuildConfig.LOG)
+                .build();
     }
 
 
@@ -1004,21 +1009,11 @@ public class ClientAndroidInterface {
 
             String PhotoPath = data.get("hfImagePath");
             String newPhotoPath = data.get("hfNewPhotoPath");
-            if (GetListOfImagesContain(data.get("txtInsuranceNumber")).length() > 0) {
-                File file = new File(newPhotoPath);
-                if (file.exists()) {
-                    copyImageFromGalleryToApplication(newPhotoPath, data.get("txtInsuranceNumber"));
-                    PhotoPath = GetListOfImagesContain(data.get("txtInsuranceNumber"));
-                }
-            } else {
-                if (!String.valueOf(PhotoPath).equals(newPhotoPath))
-                    try {
-                        PhotoPath = copyImageFromGalleryToApplication(newPhotoPath, data.get("txtInsuranceNumber"));
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
 
+            if (!"".equals(newPhotoPath)) {
+                PhotoPath = copyImageFromGalleryToApplication(newPhotoPath, data.get("txtInsuranceNumber"));
             }
+
             values.put("FamilyId", FamilyId);
             values.put("CHFID", data.get("txtInsuranceNumber"));
             values.put("LastName", data.get("txtLastName"));
@@ -1243,43 +1238,37 @@ public class ClientAndroidInterface {
     }
 
     private String copyImageFromGalleryToApplication(String selectedPath, String InsuranceNumber) {
-        try {
-            //Get current date and format it in yyyyMMdd format
-            global = (Global) mContext.getApplicationContext();
+        String result = "";
 
-            @SuppressLint("SimpleDateFormat") SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss");
+        try {
+            SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss", Locale.US);
             Calendar cal = Calendar.getInstance();
             String d = format.format(cal.getTime());
 
-            String Extension = selectedPath.substring(selectedPath.lastIndexOf("."));
-            //Resize the image before saving
-//            InputStream inputStream = new FileInputStream(selectedPath);
-            String outputFileName = global.getImageFolder() + InsuranceNumber + "_" + global.getOfficerCode() + "_" + d + "_0_0" + Extension;
-//            OutputStream outputStream = new FileOutputStream(outputFileName);
-//
-//            byte[] buffer = new byte[1024];
-//            int length = 0;
-//
-//            while ((length = inputStream.read(buffer)) > 0) {
-//                outputStream.write(buffer, 0, length);
-//            }
-//            outputStream.flush();
-//            outputStream.close();
+            String outputFileName = global.getImageFolder() + InsuranceNumber + "_" + global.getOfficerCode() + "_" + d + "_0_0.jpg";
+            File outputFile = new File(outputFileName);
 
-            OutputStream outputStream = ResizeImage(selectedPath, outputFileName, 400);
-            if (outputStream == null) {
-                throw new IOException("Family photo output stream is empty");
+            if (!outputFile.createNewFile()) {
+                Log.e("IMAGES", "Creating image copy failed");
             }
-            outputStream.flush();
-            outputStream.close();
-            return outputFileName;
 
-
+            FileOutputStream outputStream = new FileOutputStream(outputFile);
+            imageTarget = new OutputStreamImageTarget(outputStream, global.getIntSetting("image_jpeg_quality", 40));
+            try {
+                ((Activity) mContext).runOnUiThread(() -> picassoInstance.load(selectedPath)
+                        .resize(global.getIntSetting("image_width_limit", 400),
+                                global.getIntSetting("image_height_limit", 400))
+                        .centerInside()
+                        .into(imageTarget));
+            } catch (ClassCastException e) {
+                Log.e("IMAGES", "copyImageFromGalleryToApplication can only be run in context of Activity");
+            }
+            result = outputFileName;
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        return "";
+        return result;
     }
 
     @JavascriptInterface
@@ -1537,22 +1526,9 @@ public class ClientAndroidInterface {
     public static boolean inProgress = true;
 
     @JavascriptInterface
-    public String selectPicture() {
-        try {
-            inProgress = true;
-            Intent galleryIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-            ((Activity) mContext).startActivityForResult(galleryIntent, RESULT_LOAD_IMG);
-
-            ((MainActivity) mContext).ImagePath = "";
-            int count = 0;
-            while (((MainActivity) mContext).ImagePath == "") {
-                count++;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return ((MainActivity) mContext).ImagePath;
+    public void selectPicture() {
+        Intent galleryIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        ((Activity) mContext).startActivityForResult(galleryIntent, RESULT_LOAD_IMG);
     }
 
     @JavascriptInterface
@@ -5260,42 +5236,6 @@ public class ClientAndroidInterface {
         return P;
     }
 
-    private OutputStream ResizeImage(String ImagePath, String outputFileName, int newSize) {
-        try {
-            File file = new File(ImagePath);
-
-
-            BitmapFactory.Options options = new BitmapFactory.Options();
-            options.inJustDecodeBounds = true;
-            BitmapFactory.decodeStream(new FileInputStream(file), null, options);
-
-            int scale = 1;
-            while (options.outWidth / scale / 2 >= newSize && options.outHeight / scale / 2 >= newSize) {
-                scale *= 2;
-            }
-
-            BitmapFactory.Options options1 = new BitmapFactory.Options();
-            options1.inJustDecodeBounds = false;
-            options1.inSampleSize = scale;
-
-            //String outputFileName = IMAGE_FOLDER + "TestImageSize" + "_" + "OfficerCode_"  + "_0_0.jpeg";
-            OutputStream outputStream = new FileOutputStream(outputFileName);
-
-
-            Bitmap bitmap = BitmapFactory.decodeStream(new FileInputStream(file), null, options1);
-
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 30, outputStream);
-
-            return outputStream;
-
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return null;
-    }
-
     public static void setInsuranceNo(String insuranceNo) {
         InsuranceNo = insuranceNo;
 
@@ -6554,7 +6494,4 @@ public class ClientAndroidInterface {
                             " for table " + tableName);
         }
     }
-
 }
-
-
