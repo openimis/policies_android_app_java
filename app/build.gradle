@@ -102,7 +102,7 @@ android {
             buildConfigField "String", "API_BASE_URL", '"https://imis-mv.swisstph-mis.ch/rest/"'
             buildConfigField "boolean", "SHOW_PAYMENT_MENU", 'true'
             buildConfigField "String", "APP_DIR", '"IMIS-MVDEV"'
-            buildConfigField "String", "API_VERSION", '"2"'
+            buildConfigField "String", "API_VERSION", '"3"'
             resValue "string", "app_name_policies", "Policies MV DEV"
             dimension = 'std'
         }
