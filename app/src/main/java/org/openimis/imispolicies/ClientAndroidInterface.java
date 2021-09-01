@@ -2366,12 +2366,9 @@ public class ClientAndroidInterface {
         values.put("InternalIdentifier", String.valueOf(InternalIdentifier));
         values.put("PaymentType", String.valueOf(PaymentType));
         values.put("SmsRequired", String.valueOf(SmsRequired));
-        try {//Update to new policy value
-            sqlHandler.insertData("tblControlNumber", values);
 
-        } catch (UserException e) {
-            e.printStackTrace();
-        }
+        sqlHandler.insertData("tblControlNumber", values);
+
         return getMaxId();
     }
 
@@ -2780,11 +2777,7 @@ public class ClientAndroidInterface {
         values.put("UploadedDate", "");
         values.put("ControlRequestDate", "");
 
-        try {
-            sqlHandler.insertData("tblRecordedPolicies", values);
-        } catch (UserException e) {
-            e.printStackTrace();
-        }
+        sqlHandler.insertData("tblRecordedPolicies", values);
     }
 
     private JSONArray getProductName(String prodId) {
@@ -5567,16 +5560,8 @@ public class ClientAndroidInterface {
                 values.put("ExpiryDate", ExpiryDate);
                 values.put("isOffline", isOffline);
 
+                sqlHandler.insertData("tblInsureePolicy", values);
 
-/*                   String SavePolicyInsuree = "INSERT INTO tblInsureePolicy(InsureePolicyId,InsureeId,PolicyId,EnrollmentDate,StartDate,EffectiveDate,ExpiryDate,isOffline)\n" +
-                           "SELECT " + MaxInsureePolicyId + "," + InsureId + "," + PolicyId + ",EnrollDate,StartDate," + EffectiveDate + ",ExpiryDate," + isOffline + "\n" +
-                           "FROM tblPolicy WHERE PolicyID =" + PolicyId;*/
-
-                try {
-                    sqlHandler.insertData("tblInsureePolicy", values);
-                } catch (UserException e) {
-                    e.printStackTrace();
-                }
             }
         }
     }

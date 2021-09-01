@@ -12,10 +12,8 @@
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:layout_margin="10dp"
-        android:background="@color/colorPrimary"
         android:fontFamily="sans-serif-light"
         android:orientation="horizontal"
-        android:textColor="@color/white"
         android:textSize="20sp"
         android:typeface="monospace">
 
@@ -27,8 +25,8 @@
             android:fontFamily="sans-serif-light"
             android:gravity="start|center_vertical"
             android:text="@string/AssignedCN"
-            android:textColor="@color/white"
             android:textSize="20sp"
+            android:textStyle="bold"
             android:typeface="monospace" />
 
         <TextView
@@ -40,7 +38,6 @@
             android:fontFamily="sans-serif-light"
             android:gravity="center_vertical|end"
             android:text="0"
-            android:textColor="@color/white"
             android:textSize="20sp"
             android:typeface="monospace" />
     </LinearLayout>
@@ -54,10 +51,8 @@
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:layout_margin="10dp"
-        android:background="@color/colorPrimary"
         android:fontFamily="sans-serif-light"
         android:orientation="horizontal"
-        android:textColor="@color/white"
         android:textSize="20sp"
         android:typeface="monospace">
 
@@ -69,8 +64,8 @@
             android:fontFamily="sans-serif-light"
             android:gravity="start|center_vertical"
             android:text="@string/FreeCN"
-            android:textColor="@color/white"
             android:textSize="20sp"
+            android:textStyle="bold"
             android:typeface="monospace" />
 
         <TextView
@@ -81,7 +76,6 @@
             android:fontFamily="sans-serif-light"
             android:gravity="center_vertical|end"
             android:text="0"
-            android:textColor="@color/white"
             android:textSize="20sp"
             android:typeface="monospace" />
     </LinearLayout>
@@ -95,7 +89,7 @@
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:layout_marginHorizontal="10dp"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="30dp"
         android:background="@color/colorPrimary"
         android:fontFamily="sans-serif-light"
         android:orientation="horizontal"
@@ -105,11 +99,10 @@
 
         <TextView
             android:id="@+id/FetchBulkCn"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginStart="20dp"
             android:fontFamily="sans-serif-light"
-            android:gravity="start|center_vertical"
+            android:gravity="center"
             android:text="@string/FetchBulkCN"
             android:textColor="@color/white"
             android:textSize="20sp"

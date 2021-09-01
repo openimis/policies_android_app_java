@@ -6,8 +6,8 @@ import static org.openimis.imispolicies.BuildConfig.API_VERSION;
 import static org.openimis.imispolicies.BuildConfig.SHOW_PAYMENT_MENU;
 import static org.openimis.imispolicies.BuildConfig.SHOW_BULK_CN_MENU;
 
-public class AppInformation {
-    public static class DomainInfo {
+public final class AppInformation {
+    public final static class DomainInfo {
         public static String getDomain() {
             return API_BASE_URL;
         }
@@ -19,9 +19,12 @@ public class AppInformation {
         public static String getApiVersion() {
             return API_VERSION;
         }
+
+        private DomainInfo() {
+        }
     }
 
-    public static class MenuInfo {
+    public final static class MenuInfo {
         public static boolean getShowPaymentNumberMenu() {
             return SHOW_PAYMENT_MENU;
         }
@@ -29,5 +32,11 @@ public class AppInformation {
         public static boolean getShowBulkCNMenu() {
             return SHOW_BULK_CN_MENU;
         }
+
+        private MenuInfo() {
+        }
+    }
+
+    private AppInformation() {
     }
 }
