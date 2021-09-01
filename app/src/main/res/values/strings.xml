@@ -413,4 +413,8 @@
   <string name="Vulnerability">Vulnerability</string>
   <string name="SelectVulnerability">Select Vulnerability</string>
   <string name="Confirm">Confirm</string>
+  <string name="BulkCN">Bulk Control Numbers</string>
+  <string name="AssignedCN">Assigned Control Numbers:</string>
+  <string name="FreeCN">Free Control Numbers:</string>
+  <string name="FetchBulkCN">Fetch Bulk Control Numbers</string>
 </resources>

@@ -65,7 +65,9 @@ android {
     productFlavors.all {
         buildConfigField "String", "API_BASE_URL", '"https://demo.openimis.org/rest/"'
         buildConfigField "boolean", "SHOW_PAYMENT_MENU", 'false'
+        buildConfigField "boolean", "SHOW_BULK_CN_MENU", 'false'
         buildConfigField "String", "RAR_PASSWORD", '")(#$1HsD"'
+        buildConfigField "String", "API_VERSION", '"3"'
         buildConfigField "String", "APP_DIR", '"IMIS"'
         resValue "string", "app_name_policies", "Policies"
         resValue "string", "ReleaseDateValue", getDate()
@@ -74,7 +76,6 @@ android {
         demoProd {
             applicationId "org.openimis.imispolicies.demoProd"
             buildConfigField "String", "API_BASE_URL", '"https://demo.openimis.org/rest/"'
-            buildConfigField "String", "RAR_PASSWORD", '")(#$1HsD"'
             buildConfigField "String", "APP_DIR", '"IMIS-DEMOPROD"'
             resValue "string", "app_name_policies", "Policies Demo"
             dimension = 'std'
@@ -90,8 +91,8 @@ android {
         chfDev {
             applicationId "org.openimis.imispolicies.chf"
             buildConfigField "String", "API_BASE_URL", '"http://chf-dev.swisstph-mis.ch/rest/"'
-            buildConfigField "String", "RAR_PASSWORD", '")(#$1HsD"'
             buildConfigField "boolean", "SHOW_PAYMENT_MENU", 'true'
+            buildConfigField "boolean", "SHOW_BULK_CN_MENU", 'true'
             buildConfigField "String", "APP_DIR", '"IMIS-CHFDEV"'
             resValue "string", "app_name_policies", "Policies CHF DEV"
             dimension = 'std'
@@ -99,16 +100,15 @@ android {
         mvDev {
             applicationId "org.openimis.imispolicies.mv"
             buildConfigField "String", "API_BASE_URL", '"https://imis-mv.swisstph-mis.ch/rest/"'
-            buildConfigField "String", "RAR_PASSWORD", '")(#$1HsD"'
             buildConfigField "boolean", "SHOW_PAYMENT_MENU", 'true'
             buildConfigField "String", "APP_DIR", '"IMIS-MVDEV"'
+            buildConfigField "String", "API_VERSION", '"2"'
             resValue "string", "app_name_policies", "Policies MV DEV"
             dimension = 'std'
         }
         bephaDev {
             applicationId "org.openimis.imispolicies.bepha"
             buildConfigField "String", "API_BASE_URL", '"http://149.210.235.40/devupgrade/rest/"'
-            buildConfigField "String", "RAR_PASSWORD", '")(#$1HsD"'
             buildConfigField "String", "APP_DIR", '"IMIS-BEPHADEV"'
             resValue "string", "app_name_policies", "Policies BEPHA DEV"
             dimension = 'std'
@@ -116,17 +116,27 @@ android {
         local {
             applicationId "org.openimis.imispolicies.local"
             buildConfigField "String", "API_BASE_URL", '"http://10.0.2.2:35787/"'
-            buildConfigField "String", "RAR_PASSWORD", '")(#$1HsD"'
             buildConfigField "String", "APP_DIR", '"IMIS-LOCAL"'
             buildConfigField "boolean", "SHOW_PAYMENT_MENU", 'true'
             resValue "string", "app_name_policies", "Policies Local"
             dimension = 'std'
             versionCode = gitVersionCodeTime
         }
+        chfsit {
+            applicationId "org.openimis.imispolicies.chfsit"
+            buildConfigField "String", "API_BASE_URL", '"http://196.192.73.26/restapi/"'
+            buildConfigField "String", "APP_DIR", '"IMIS-CHFSIT"'
+            buildConfigField "boolean", "SHOW_PAYMENT_MENU", 'true'
+            buildConfigField "boolean", "SHOW_BULK_CN_MENU", 'true'
+            resValue "string", "app_name_policies", "Policies CHF SIT"
+        }
     }
     sourceSets {
         chfDev.java.srcDir 'src/chf/java'
         chfDev.res.srcDir 'src/chf/res'
+
+        chfsit.java.srcDir 'src/chf/java'
+        chfsit.res.srcDir 'src/chf/res'
 
         mvDev.java.srcDir 'src/master/java'
         mvDev.res.srcDirs 'src/master/res'

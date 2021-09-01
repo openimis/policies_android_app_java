@@ -32,8 +32,6 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.os.Build;
-import android.os.Environment;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Xml;
@@ -43,14 +41,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.xmlpull.v1.XmlSerializer;
 
-import java.io.Console;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-
-import org.openimis.imispolicies.R;
 
 public class SQLHandler extends SQLiteOpenHelper {
 
@@ -92,7 +87,7 @@ public class SQLHandler extends SQLiteOpenHelper {
     private static final String tblRecordedPolicies = "tblRecordedPolicies";
     private static final String tblRelations = "tblRelations";
     private static final String tblRenewals = "tblRenewals";
-
+    private static final String tblBulkControlNumbers = "tblBulkControlNumbers";
 
 
     public SQLHandler(Context context) {
@@ -125,7 +120,7 @@ public class SQLHandler extends SQLiteOpenHelper {
             sqLiteDatabase.execSQL(
                     "CREATE TABLE " + tblControls + "("
                             + "FieldName TEXT,"
-                            + "Adjustibility TEXT"+ ")"
+                            + "Adjustibility TEXT" + ")"
             );
             sqLiteDatabase.execSQL(
                     "CREATE TABLE " + tblEducations + "("
@@ -413,7 +408,17 @@ public class SQLHandler extends SQLiteOpenHelper {
                             "LocationTyPe" +
                             " FROM tbllocations " +
                             "where LocationTyPe ='D'");
-        }catch (Exception e){
+            sqLiteDatabase.execSQL(
+                    "CREATE TABLE " + tblBulkControlNumbers + "(" +
+                            "Id INTEGER," +
+                            "BillId INTEGER," +
+                            "ProdId INTEGER," +
+                            "OfficerCode TEXT," +
+                            "ControlNUmber TEXT," +
+                            "Amount REAL," +
+                            "PolicyId INTEGER" + ")"
+            );
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -453,7 +458,7 @@ public class SQLHandler extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + tblRecordedPolicies);
         db.execSQL("DROP TABLE IF EXISTS " + tblRelations);
         db.execSQL("DROP TABLE IF EXISTS " + tblRenewals);
-        if (oldVersion < 2){
+        if (oldVersion < 2) {
             String sql = "ALTER TABLE tblRenewals ADD COLUMN LocationId INTEGER;";
             db.execSQL(sql);
             Log.d("Upgrade", "DB Version upgraded from 1 to 2");
@@ -542,7 +547,7 @@ public class SQLHandler extends SQLiteOpenHelper {
                 cursor.moveToNext();
             }
             cursor.close();
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -552,7 +557,7 @@ public class SQLHandler extends SQLiteOpenHelper {
 
     }
 
-    public String getResultXML2(String QueryF,String QueryI,String QueryPL,String QueryPR,String QueryIP,String OfficerCode, int OfficerId) throws IOException {
+    public String getResultXML2(String QueryF, String QueryI, String QueryPL, String QueryPR, String QueryIP, String OfficerCode, int OfficerId) throws IOException {
         String Query = null;
         String label = null;
         String sublabel = null;
@@ -566,12 +571,12 @@ public class SQLHandler extends SQLiteOpenHelper {
 
 
         //Here we are giving name to the XML file
-        String FileName = "Enrolment_"+OfficerCode+"_"+d+".xml";
+        String FileName = "Enrolment_" + OfficerCode + "_" + d + ".xml";
 
         //Here we are creating file in that directory
-        File EnrollmentXML = new File(Dir,FileName);
+        File EnrollmentXML = new File(Dir, FileName);
         //Here we are creating outputstream
-        FileOutputStream fos = new FileOutputStream(EnrollmentXML,true);
+        FileOutputStream fos = new FileOutputStream(EnrollmentXML, true);
         XmlSerializer serializer = Xml.newSerializer();
 
         serializer.setOutput(fos, "UTF-8");
@@ -592,25 +597,25 @@ public class SQLHandler extends SQLiteOpenHelper {
         serializer.endTag(null, "FileInfo");
 
 
-        try{
-            for(int i = 1; i <= 5; i++){
-                if(i == 1){
+        try {
+            for (int i = 1; i <= 5; i++) {
+                if (i == 1) {
                     Query = QueryF;
                     label = "Families";
                     sublabel = "Family";
-                }else if(i == 2){
+                } else if (i == 2) {
                     Query = QueryI;
                     label = "Insurees";
                     sublabel = "Insuree";
-                }else if(i == 3){
+                } else if (i == 3) {
                     Query = QueryPL;
                     label = "Policies";
                     sublabel = "Policy";
-                }else if(i == 4){
+                } else if (i == 4) {
                     Query = QueryIP;
                     label = "InsureePolicies";
                     sublabel = "InsureePolicy";
-                }else if(i == 5){
+                } else if (i == 5) {
                     Query = QueryPR;
                     label = "Premiums";
                     sublabel = "Premium";
@@ -626,42 +631,42 @@ public class SQLHandler extends SQLiteOpenHelper {
                     serializer.startTag(null, sublabel);
                     for (int j = 0; j < totalColumns; j++) {
 
-                        if (cursor.getString(j) != null){
+                        if (cursor.getString(j) != null) {
 
-                            if(label.equals("Families")){
-                                if(cursor.getColumnName(j) == "FamilyType"){
-                                    if(cursor.getString(j).equals("0")){
+                            if (label.equals("Families")) {
+                                if (cursor.getColumnName(j) == "FamilyType") {
+                                    if (cursor.getString(j).equals("0")) {
                                         serializer.startTag(null, cursor.getColumnName(j));
                                         serializer.text("");
                                         serializer.endTag(null, cursor.getColumnName(j));
                                     }
 
-                                }else if(cursor.getColumnName(j) == "ConfirmationType"){
-                                    if(cursor.getString(j).equals("0")){
+                                } else if (cursor.getColumnName(j) == "ConfirmationType") {
+                                    if (cursor.getString(j).equals("0")) {
                                         serializer.startTag(null, cursor.getColumnName(j));
                                         serializer.text("");
                                         serializer.endTag(null, cursor.getColumnName(j));
                                     }
-                                }else if(cursor.getColumnName(j).equals("isOffline")){
+                                } else if (cursor.getColumnName(j).equals("isOffline")) {
                                     String isOffline = cursor.getString(j);
                                     if (isOffline.equals("2"))
                                         isOffline = "0";
                                     serializer.startTag(null, cursor.getColumnName(j));
                                     serializer.text(isOffline);
                                     serializer.endTag(null, cursor.getColumnName(j));
-                                }else{
+                                } else {
                                     serializer.startTag(null, cursor.getColumnName(j));
                                     serializer.text(cursor.getString(j));
                                     serializer.endTag(null, cursor.getColumnName(j));
                                 }
-                            }else {
+                            } else {
                                 serializer.startTag(null, cursor.getColumnName(j));
                                 serializer.text(cursor.getString(j));
                                 serializer.endTag(null, cursor.getColumnName(j));
                             }
 
 
-                        } else{
+                        } else {
                             serializer.startTag(null, cursor.getColumnName(j));
                             serializer.text("");
                             serializer.endTag(null, cursor.getColumnName(j));
@@ -678,7 +683,7 @@ public class SQLHandler extends SQLiteOpenHelper {
                 cursor.close();
                 closeDatabase();
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -730,28 +735,28 @@ public class SQLHandler extends SQLiteOpenHelper {
 
             array = new JSONArray(data);
 
-            if(array.length()==0)
+            if (array.length() == 0)
                 return;
 
 
-            if(!mDatabase.isOpen()){
+            if (!mDatabase.isOpen()) {
                 openDatabase();
             }
 
-            if (!TextUtils.isEmpty(PreExecute)){
+            if (!TextUtils.isEmpty(PreExecute)) {
                 mDatabase.execSQL(PreExecute);
             }
 
 
             mDatabase.beginTransaction();
-            for(int i= 0;i < array.length();i++){
+            for (int i = 0; i < array.length(); i++) {
                 try {
                     object = array.getJSONObject(i);
                     ContentValues cv = new ContentValues();
-                    for(String c: Columns){
-                        cv.put(c,  object.getString(c));
+                    for (String c : Columns) {
+                        cv.put(c, object.getString(c));
                     }
-                    mDatabase.insert(TableName,null,cv);
+                    mDatabase.insert(TableName, null, cv);
 
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -761,10 +766,10 @@ public class SQLHandler extends SQLiteOpenHelper {
             mDatabase.setTransactionSuccessful();
             mDatabase.endTransaction();
             mDatabase.close();
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
-        if(mDatabase.isOpen()){
+        if (mDatabase.isOpen()) {
             closeDatabase();
         }
 
@@ -797,7 +802,7 @@ public class SQLHandler extends SQLiteOpenHelper {
         } finally {
             closeDatabase();
         }
-        return  rowsUpdated;
+        return rowsUpdated;
     }
 
 
@@ -813,7 +818,7 @@ public class SQLHandler extends SQLiteOpenHelper {
         }
     }
 
-    public String getDatabasePath(Context context){
+    public String getDatabasePath(Context context) {
         SQLHandler helper = new SQLHandler(this.mContext);
         SQLiteDatabase database = helper.getReadableDatabase();
         String path = database.getPath();
@@ -821,4 +826,85 @@ public class SQLHandler extends SQLiteOpenHelper {
         return path;
     }
 
+    public int getAssignedCNCount(String productId, String officerCode) {
+        openDatabase();
+        int result = 0;
+        try (Cursor c = mDatabase.query(tblBulkControlNumbers,
+                new String[]{"COUNT(*)"},
+                "PolicyId IS NOT NULL AND (ProdId = ? OR ? = 0) AND OfficerCode = ?",
+                new String[]{productId, productId, officerCode},
+                null,
+                null,
+                null)) {
+            c.moveToFirst();
+            result = c.getInt(0);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        } finally {
+            closeDatabase();
+        }
+        return result;
+    }
+
+    public int getFreeCNCount(String productId, String officerCode) {
+        openDatabase();
+        int result = 0;
+        try (Cursor c = mDatabase.query(tblBulkControlNumbers,
+                new String[]{"COUNT(*)"},
+                "PolicyId IS NULL AND (ProdId = ? OR ? = 0) AND OfficerCode = ?",
+                new String[]{productId, productId, officerCode},
+                null,
+                null,
+                null)) {
+            c.moveToFirst();
+            result = c.getInt(0);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        } finally {
+            closeDatabase();
+        }
+        return result;
+    }
+
+    public JSONArray getAvailableProducts(String officerCode) {
+        openDatabase();
+        JSONArray result;
+        try {
+            String query = "SELECT DISTINCT p.ProdId, p.ProductCode, p.ProductName " +
+                    "FROM tblOfficer o INNER JOIN tblLocations ld ON o.LocationId=ld.LocationId " +
+                    "INNER JOIN tblLocations lr ON ld.ParentLocationId=lr.LocationId " +
+                    "INNER JOIN tblProduct p ON (ld.LocationId=p.LocationId OR lr.LocationId=p.LocationId OR p.LocationId='null') " +
+                    "WHERE o.Code=?";
+
+            Cursor c = mDatabase.rawQuery(query, new String[]{officerCode});
+            result = cursorToJsonArray(c);
+        } catch (Exception e) {
+            e.printStackTrace();
+            result = new JSONArray();
+        }
+        return result;
+    }
+
+    private JSONArray cursorToJsonArray(Cursor cursor) {
+        JSONArray resultSet = new JSONArray();
+        cursor.moveToFirst();
+        try {
+            while (!cursor.isAfterLast()) {
+                int totalColumn = cursor.getColumnCount();
+                JSONObject rowObject = new JSONObject();
+                for (int i = 0; i < totalColumn; i++) {
+                    if (cursor.getColumnName(i) != null) {
+                        rowObject.put(cursor.getColumnName(i), cursor.getString(i));
+                    }
+                }
+                resultSet.put(rowObject);
+                cursor.moveToNext();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return resultSet;
+    }
 }
