@@ -17,6 +17,7 @@ import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,25 +27,32 @@ import java.util.Map;
 
 public class BulkControlNumbersActivity extends AppCompatActivity {
     private static final String LOG_TAG = "BULKCN";
-    TextView assignedCNCount;
-    ListView assignedCNDetails;
-    TextView freeCNCount;
-    ListView freeCNDetails;
-    TextView fetchBulkCn;
-    SQLHandler sqlHandler;
-    Global global;
+    private static final String CN_COUNT_INITIAL_VALUE = "0";
+    private TextView assignedCNCount;
+    private ListView assignedCNDetails;
+    private TextView freeCNCount;
+    private ListView freeCNDetails;
+    private TextView fetchBulkCn;
+    private SQLHandler sqlHandler;
+    private Global global;
 
-    String officerCode;
-    JSONArray availableProducts;
+    private String officerCode;
+    private JSONArray availableProducts;
 
-    String[] productNames;
-    String[] productCodes;
+    private String[] productNames;
+    private String[] productCodes;
 
-    View productDropDown;
-    TextView dropdownDescription;
-    Spinner dropdownSpinner;
+    private View productDropDown;
+    private TextView dropdownDescription;
+    private Spinner dropdownSpinner;
 
-    AlertDialog productDialog;
+    private AlertDialog productDialog;
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,11 +74,11 @@ public class BulkControlNumbersActivity extends AppCompatActivity {
         assignedCNDetails = findViewById(R.id.AssignedCNDetails);
         freeCNDetails = findViewById(R.id.FreeCNDetails);
 
-        assignedCNCount.setText("0");
-        freeCNCount.setText("0");
+        assignedCNCount.setText(CN_COUNT_INITIAL_VALUE);
+        freeCNCount.setText(CN_COUNT_INITIAL_VALUE);
 
         fetchBulkCn.setOnClickListener((view) -> {
-            if(global.isNetworkAvailable() && global.isLoggedIn())
+            if (global.isNetworkAvailable() && global.isLoggedIn())
                 productDialog.show();
             else {
                 Toast.makeText(this, R.string.LogInToFetchCn, Toast.LENGTH_LONG).show();
@@ -88,12 +96,6 @@ public class BulkControlNumbersActivity extends AppCompatActivity {
         refreshCNCount();
     }
 
-    @Override
-    public boolean onSupportNavigateUp() {
-        onBackPressed();
-        return true;
-    }
-
     protected void refreshCNCount() {
         assignedCNCount.setText(String.format(Locale.US, "%d", sqlHandler.getAssignedCNCount(officerCode)));
         freeCNCount.setText(String.format(Locale.US, "%d", sqlHandler.getFreeCNCount(officerCode)));
@@ -103,46 +105,45 @@ public class BulkControlNumbersActivity extends AppCompatActivity {
 
         try {
             for (int i = 0; i < availableProducts.length(); i++) {
-                int assignedCount = sqlHandler.getAssignedCNCount(officerCode, availableProducts.getJSONObject(i).getString("ProductCode"));
-                if (assignedCount >= 0) {
-                    Map<String, String> row = new HashMap<>();
-                    row.put("ProductName", String.format("%s - %s",
-                            availableProducts.getJSONObject(i).getString("ProductCode"),
-                            availableProducts.getJSONObject(i).getString("ProductName")));
-                    row.put("CNAmount", String.valueOf(assignedCount));
-
-                    assignedCNDetailsData.add(row);
-                }
-                int freeCount = sqlHandler.getFreeCNCount(officerCode, availableProducts.getJSONObject(i).getString("ProductCode"));
-                if (freeCount >= 0) {
-                    Map<String, String> row = new HashMap<>();
-                    row.put("ProductName", String.format("%s - %s",
-                            availableProducts.getJSONObject(i).getString("ProductCode"),
-                            availableProducts.getJSONObject(i).getString("ProductName")));
-                    row.put("CNAmount", String.valueOf(freeCount));
-
-                    freeCNDetailsData.add(row);
-                }
+                JSONObject product = availableProducts.getJSONObject(i);
+                assignedCNDetailsData.add(createAssignedCnDetailsEntry(product));
+                freeCNDetailsData.add(createFreeCnDetailsEntry(product));
             }
         } catch (JSONException e) {
             Log.e(LOG_TAG, "Parsing CN details failed", e);
         }
 
-        assignedCNDetails.setAdapter(new SimpleAdapter(
-                this,
-                assignedCNDetailsData,
-                R.layout.bulk_cn_product_details,
-                new String[]{"ProductName", "CNAmount"},
-                new int[]{R.id.AssignedCNProductName, R.id.AssignedCNProductCount}
-        ));
+        assignedCNDetails.setAdapter(createCnDetailsAdapter(assignedCNDetailsData));
+        freeCNDetails.setAdapter(createCnDetailsAdapter(freeCNDetailsData));
+    }
 
-        freeCNDetails.setAdapter(new SimpleAdapter(
+    protected Map<String, String> createFreeCnDetailsEntry(JSONObject product) throws JSONException {
+        int assignedCount = sqlHandler.getAssignedCNCount(officerCode, product.getString("ProductCode"));
+        return createCnDetailsEntry(product, assignedCount);
+    }
+
+    protected Map<String, String> createAssignedCnDetailsEntry(JSONObject product) throws JSONException {
+        int freeCount = sqlHandler.getFreeCNCount(officerCode, product.getString("ProductCode"));
+        return createCnDetailsEntry(product, freeCount);
+    }
+
+    protected Map<String, String> createCnDetailsEntry(JSONObject product, int cnAmount) throws JSONException {
+        Map<String, String> row = new HashMap<>();
+        row.put("ProductName", String.format("%s - %s",
+                product.getString("ProductCode"),
+                product.getString("ProductName")));
+        row.put("CNAmount", String.valueOf(cnAmount));
+        return row;
+    }
+
+    protected SimpleAdapter createCnDetailsAdapter(List<Map<String, String>> data) {
+        return new SimpleAdapter(
                 this,
-                freeCNDetailsData,
+                data,
                 R.layout.bulk_cn_product_details,
                 new String[]{"ProductName", "CNAmount"},
-                new int[]{R.id.AssignedCNProductName, R.id.AssignedCNProductCount}
-        ));
+                new int[]{R.id.CNProductName, R.id.CNProductCount}
+        );
     }
 
     protected AlertDialog createProductDialog() {

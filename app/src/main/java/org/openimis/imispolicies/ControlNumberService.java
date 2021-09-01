@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.Context;
 import android.util.Log;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
@@ -151,7 +152,7 @@ public class ControlNumberService extends IntentService {
 
             JSONObject responseContent = new JSONObject(content);
             errorMessage = getErrorMessage(responseCode, responseContent);
-            if ("".equals(errorMessage)) {
+            if (StringUtils.isEmpty(errorMessage)) {
                 String assignedControlNumbers = responseContent.getString("assigned_control_numbers");
                 updateAssignedControlNumbers(assignedControlNumbers);
 
@@ -182,7 +183,7 @@ public class ControlNumberService extends IntentService {
         String errorMessage = "";
 
         if (responseContent != null && responseContent.has("error_occured")) {
-            if ("true".equals(responseContent.getString("error_occured"))) {
+            if (responseContent.getBoolean("error_occured")) {
                 errorMessage = responseContent.getString("error_message");
             }
         } else if (responseCode == HttpURLConnection.HTTP_UNAUTHORIZED) {

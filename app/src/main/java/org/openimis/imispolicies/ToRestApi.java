@@ -3,11 +3,13 @@ package org.openimis.imispolicies;
 import android.util.Log;
 
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
@@ -24,30 +26,33 @@ public class ToRestApi {
         public static final int ERROR = 2;
     }
 
+    public static final String FUNCTION_PREFIX = "api/";
+    public static final String API_VERSION_HEADER_NAME = "api-version";
+
     private final Token token;
     private final String uri;
     private final String apiVersion;
 
     public ToRestApi() {
         token = Global.getGlobal().getJWTToken();
-        uri = AppInformation.DomainInfo.getDomain() + "api/";
+        uri = AppInformation.DomainInfo.getDomain() + FUNCTION_PREFIX;
         apiVersion = AppInformation.DomainInfo.getApiVersion();
     }
 
     public HttpResponse getFromRestApi(String functionName, boolean addToken) {
         HttpClient httpClient = new DefaultHttpClient();
         HttpGet httpGet = new HttpGet(uri + functionName);
-        httpGet.setHeader("Content-Type", "application/json");
-        httpGet.setHeader("accept", "application/json");
-        httpGet.setHeader("api-version", apiVersion);
+        httpGet.setHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
+        httpGet.setHeader(HttpHeaders.ACCEPT, ContentType.APPLICATION_JSON.getMimeType());
+        httpGet.setHeader(API_VERSION_HEADER_NAME, apiVersion);
         if (addToken) {
-            httpGet.setHeader("Authorization", "bearer " + token.getTokenText().trim());
+            httpGet.setHeader(HttpHeaders.AUTHORIZATION, "bearer " + token.getTokenText().trim());
         }
 
         try {
             HttpResponse response = httpClient.execute(httpGet);
-            if (addToken && response != null && response.getStatusLine().getStatusCode() == HttpURLConnection.HTTP_UNAUTHORIZED) {
-                token.clearToken();
+            if (addToken) {
+                checkToken(response);
             }
             int responseCode = response.getStatusLine().getStatusCode();
             Log.i("HTTP_GET", uri + functionName + " - " + responseCode);
@@ -62,11 +67,11 @@ public class ToRestApi {
         HttpClient httpClient = new DefaultHttpClient();
 
         HttpPost httpPost = new HttpPost(uri + functionName);
-        httpPost.setHeader("Content-type", "application/json");
-        httpPost.setHeader("accept", "application/json");
-        httpPost.setHeader("api-version", apiVersion);
+        httpPost.setHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
+        httpPost.setHeader(HttpHeaders.ACCEPT, ContentType.APPLICATION_JSON.getMimeType());
+        httpPost.setHeader(API_VERSION_HEADER_NAME, apiVersion);
         if (addToken) {
-            httpPost.setHeader("Authorization", "bearer " + token.getTokenText().trim());
+            httpPost.setHeader(HttpHeaders.AUTHORIZATION, "bearer " + token.getTokenText().trim());
         }
 
         try {
@@ -75,9 +80,10 @@ public class ToRestApi {
                 httpPost.setEntity(postingString);
             }
             HttpResponse response = httpClient.execute(httpPost);
-            if (addToken && response != null && response.getStatusLine().getStatusCode() == HttpURLConnection.HTTP_UNAUTHORIZED) {
-                token.clearToken();
+            if (addToken) {
+                checkToken(response);
             }
+
             int responseCode = response.getStatusLine().getStatusCode();
             Log.i("HTTP_POST", uri + functionName + " - " + responseCode);
             return response;
@@ -148,5 +154,11 @@ public class ToRestApi {
         }
 
         return content;
+    }
+
+    private void checkToken(HttpResponse response) {
+        if (response != null && response.getStatusLine().getStatusCode() == HttpURLConnection.HTTP_UNAUTHORIZED) {
+            token.clearToken();
+        }
     }
 }
