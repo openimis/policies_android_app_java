@@ -68,6 +68,7 @@ public class BulkControlNumbersActivity extends AppCompatActivity {
 
         assignedCNCount.setText("0");
         freeCNCount.setText("0");
+
         fetchBulkCn.setOnClickListener((view) -> {
             if(global.isNetworkAvailable() && global.isLoggedIn())
                 productDialog.show();

@@ -102,7 +102,7 @@ android {
             buildConfigField "String", "API_BASE_URL", '"https://imis-mv.swisstph-mis.ch/rest/"'
             buildConfigField "boolean", "SHOW_PAYMENT_MENU", 'true'
             buildConfigField "String", "APP_DIR", '"IMIS-MVDEV"'
-            buildConfigField "String", "API_VERSION", '"2"'
+            buildConfigField "String", "API_VERSION", '"3"'
             resValue "string", "app_name_policies", "Policies MV DEV"
             dimension = 'std'
         }
@@ -168,6 +168,8 @@ dependencies {
     implementation 'commons-io:commons-io:2.11.0'
     implementation 'com.android.support:support-v4:28.0.0'
     implementation 'com.android.support:recyclerview-v7:28.0.0'
+    implementation 'org.apache.commons:commons-lang3:3.12.0'
+
 
     androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'

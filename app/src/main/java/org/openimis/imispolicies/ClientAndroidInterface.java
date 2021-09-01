@@ -77,12 +77,11 @@ import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Date;
 
-
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
-
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -321,8 +320,13 @@ public class ClientAndroidInterface {
 
     @JavascriptInterface
     public String getString(String str) {
-        Resources resources = mContext.getResources();
-        return resources.getString(resources.getIdentifier(str, "string", mContext.getPackageName()));
+        try {
+            Resources resources = mContext.getResources();
+            return resources.getString(resources.getIdentifier(str, "string", mContext.getPackageName()));
+        } catch (Resources.NotFoundException e) {
+            Log.e("RESOURCES", String.format("Resource \"%s\" not found", str), e);
+        }
+        return "";
     }
 
 
@@ -3608,15 +3612,20 @@ public class ClientAndroidInterface {
                         familyObj.put("insurees", tempInsureesArray);
 
                         // Policy + premium
-                        JSONArray tempPoliciesArray = new JSONArray();
 
                         for (int j = 0; j < policiesArray.length(); j++) {
-                            tempPoliciesArray = policiesArray;
-                            JSONObject premiumObj = premiumsArray.getJSONObject(j);
-                            tempPoliciesArray.getJSONObject(j).put("premium", premiumObj);
+                            JSONArray policyPremiums = new JSONArray();
+                            String policyId = policiesArray.getJSONObject(j).getString("PolicyId");
+                            for (int k = 0; k < premiumsArray.length(); k++) {
+                                JSONObject premiumObject = premiumsArray.getJSONObject(k);
+                                if (StringUtils.equals(policyId, premiumObject.getString("PolicyId"))) {
+                                    policyPremiums.put(premiumObject);
+                                }
+                            }
+                            policiesArray.getJSONObject(j).put("premium", policyPremiums);
                         }
 
-                        familyObj.put("policies", tempPoliciesArray);
+                        familyObj.put("policies", policiesArray);
 
                         if (mylist.size() != 0) {
                             addCategoryBox();
@@ -3640,13 +3649,35 @@ public class ClientAndroidInterface {
                         HttpEntity entity = response.getEntity();
                         String responseString = EntityUtils.toString(entity);
 
-                        EnrolResult = Integer.parseInt(responseString);
+                        boolean parsingErrorOccured = false;
+                        try {
+                            JSONObject responseObject = new JSONObject(responseString);
+                            if (responseObject.has("error_occured") && "true".equals(responseObject.getString("error_occured"))) {
+                                EnrolResult = -400;
+                                enrolMessages.add(responseObject.getString("error_message"));
+                            } else if (responseObject.has("response")) {
+                                EnrolResult = responseObject.getInt("response");
+                            } else {
+                                throw new JSONException("Response does not have required information");
+                            }
+                        } catch (JSONException e) {
+                            EnrolResult = -400;
+                            parsingErrorOccured = true;
+                        }
+
+                        if (parsingErrorOccured) {
+                            try {
+                                EnrolResult = Integer.parseInt(responseString);
+                            } catch (NumberFormatException e) {
+                                Log.e("ENROLL", "Sync response is not a valid json or int");
+                            }
+                        }
                     } else {
                         addCategoryBox();
                         break;
                     }
                 } else {
-                    if (QueryF != "") {
+                    if (!"".equals(QueryF)) {
                         fname = sqlHandler.getResultXML2(QueryF, QueryI, QueryPL, QueryPR, QueryIP, global.getOfficerCode(), global.getOfficerId());
                         FamilyPictures(insureesArray, 2);
                     }
