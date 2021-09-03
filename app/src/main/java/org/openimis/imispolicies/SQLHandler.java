@@ -963,7 +963,7 @@ public class SQLHandler extends SQLiteOpenHelper {
         return false;
     }
 
-    public boolean clearCnAfterPolicyDeleted(int policyId) {
+    public boolean clearCnAssignedToPolicy(int policyId) {
         openDatabase();
         ContentValues values = new ContentValues();
         values.put("PolicyId", (String) null);

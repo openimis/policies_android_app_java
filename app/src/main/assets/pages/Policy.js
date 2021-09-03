@@ -88,7 +88,11 @@ $(document).ready(function () {
     $('#ddlProduct').change(function () {
         if(Android.IsBulkCNUsed()) {
             var productId = $('#ddlProduct').val();
-            if(productId == '0') return;
+            if(productId == '0') {
+                $('#txtControlNumber').text('');
+                $('#AssignedControlNumber').val('');
+                return;
+            }
             var controlNumber = Android.GetNextBulkCn(productId);
             if(typeof controlNumber === 'undefined') {
                 Android.ShowDialog(Android.getString('noBulkCNAvailable'));

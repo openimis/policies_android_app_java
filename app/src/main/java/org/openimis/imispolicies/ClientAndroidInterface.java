@@ -42,7 +42,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.icu.text.DecimalFormat;
 import android.net.Uri;
-import android.net.http.DelegatingSSLSession;
 import android.os.Build;
 import android.provider.MediaStore;
 import android.support.annotation.RequiresApi;
@@ -78,7 +77,6 @@ import java.util.Arrays;
 import java.util.Date;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
@@ -1941,6 +1939,7 @@ public class ClientAndroidInterface {
                 }
                 sqlHandler.updateData("tblPolicy", values, "PolicyId = ? AND (isOffline = ? OR isOffline = ?) ", new String[]{String.valueOf(PolicyId), String.valueOf(isOffline), String.valueOf(Online)});
                 if (IsBulkCNUsed()) {
+                    sqlHandler.clearCnAssignedToPolicy(PolicyId);
                     sqlHandler.assignCnToPolicy(PolicyId, controlNumber);
                 }
             }
@@ -2541,7 +2540,7 @@ public class ClientAndroidInterface {
         sqlHandler.deleteData(SQLHandler.tblRecordedPolicies, selector, arg);
         sqlHandler.deleteData(SQLHandler.tblInsureePolicy, selector, arg);
         sqlHandler.deleteData(SQLHandler.tblPolicy, selector, arg);
-        sqlHandler.clearCnAfterPolicyDeleted(PolicyId);
+        sqlHandler.clearCnAssignedToPolicy(PolicyId);
         return 1;
     }
 
