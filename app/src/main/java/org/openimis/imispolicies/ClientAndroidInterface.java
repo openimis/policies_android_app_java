@@ -1883,13 +1883,25 @@ public class ClientAndroidInterface {
     }
 
     @JavascriptInterface
+    public boolean IsBulkCNUsed() {
+        return BuildConfig.SHOW_BULK_CN_MENU;
+    }
+
+    @JavascriptInterface
+    public String GetNextBulkCn(String productId) {
+        String productCode = sqlHandler.getProductCode(productId);
+        if (productCode != null) {
+            return sqlHandler.getNextFreeCn(global.getOfficerCode(), productCode);
+        }
+        return null;
+    }
+
+    @JavascriptInterface
     public int SavePolicy(String PolicyData, int FamilyId, int PolicyId) throws Exception {
         inProgress = true;
-        int MaxPolicyId = 0;
+        int MaxPolicyId;
         rtPolicyId = PolicyId;
         int isOffline = 1;
-        String nullify = null;
-        global = (Global) mContext.getApplicationContext();
         try {
             MaxPolicyId = getNextAvailablePolicyId();
 
@@ -1906,6 +1918,8 @@ public class ClientAndroidInterface {
             values.put("PolicyValue", data.get("hfPolicyValue"));
             values.put("ProdId", data.get("ddlProduct"));
             values.put("OfficerId", data.get("ddlOfficer"));
+
+            String controlNumber = data.get("AssignedControlNumber");
             if (isOffline == 2) isOffline = 0;
             values.put("isOffline", isOffline);
 
@@ -1915,9 +1929,10 @@ public class ClientAndroidInterface {
                 sqlHandler.insertData("tblPolicy", values);
                 rtPolicyId = MaxPolicyId;
                 InsertPolicyInsuree(rtPolicyId, 1);
-
+                if (IsBulkCNUsed()) {
+                    sqlHandler.assignCnToPolicy(rtPolicyId, controlNumber);
+                }
                 InsertRecordedPolicies("new", String.valueOf(FamilyId), data.get("ddlProduct"), data.get("hfPolicyValue"), MaxPolicyId);
-
             } else {
                 int Online = 2;
                 if (isOffline == 0 || isOffline == 2) {
@@ -1925,36 +1940,11 @@ public class ClientAndroidInterface {
                     Online = 2;
                 }
                 sqlHandler.updateData("tblPolicy", values, "PolicyId = ? AND (isOffline = ? OR isOffline = ?) ", new String[]{String.valueOf(PolicyId), String.valueOf(isOffline), String.valueOf(Online)});
-
+                if (IsBulkCNUsed()) {
+                    sqlHandler.assignCnToPolicy(PolicyId, controlNumber);
+                }
             }
-            if (isOffline == 0 || isOffline == 2) {//Automatic sync
- /*
-                if(global.getUserId() > 0){
-                    pd = new ProgressDialog(mContext);
-                    pd = ProgressDialog.show(mContext, "", mContext.getResources().getString(R.string.Uploading));
-                    final int FinalFamilyId = FamilyId;
-                    final int FinalPolicyId = rtPolicyId;
-                    new Thread() {
-                        public void run() {
-                            try {
-                                rtPolicyId = Enrol(FinalFamilyId, 0, FinalPolicyId, 0, 0);
-                                inProgress = false;
-                            } catch (UserException e) {
-                                e.printStackTrace();
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                            pd.dismiss();
-                        }
-                    }.start();
-                }*/
-
-            } else {
-                inProgress = false;
-            }
-
+            inProgress = false;
         } catch (NumberFormatException e) {
             e.printStackTrace();
         } catch (UserException e) {
@@ -2030,13 +2020,14 @@ public class ClientAndroidInterface {
         }
 
 
-        String Query = "SELECT  P.PolicyId, ProductCode, ProductName, EffectiveDate, PolicyValue, StartDate, EnrollDate, \n" +
+        String Query = "SELECT  P.PolicyId, Prod.ProductCode, ProductName, EffectiveDate, PolicyValue, StartDate, EnrollDate, bcn.ControlNumber, \n" +
                 "   CASE    WHEN PolicyStatus = 1 THEN '" + mContext.getResources().getString(R.string.Idle) + "'   " +
                 "   WHEN PolicyStatus = 2 THEN '" + mContext.getResources().getString(R.string.Active) + "'  " +
                 "   WHEN PolicyStatus = 4 THEN '" + mContext.getResources().getString(R.string.Suspended) + "'  " +
                 "   WHEN PolicyStatus = 8 THEN '" + mContext.getResources().getString(R.string.Expired) + "'  END  PolicyStatus, " +
                 "   PolicyStatus PolicyStatusValue, P.ExpiryDate, isOffline FROM tblPolicy P \n" +
                 "   INNER JOIN tblProduct Prod ON P.ProdId=Prod.ProdId  \n " +
+                "   LEFT JOIN tblBulkControlNumbers bcn on P.PolicyId=bcn.PolicyId " +
                 "   WHERE FamilyId = ?";
 
         String[] arg = {String.valueOf(FamilyId)};
@@ -2046,16 +2037,7 @@ public class ClientAndroidInterface {
         final Double finalNewPolicyValue = NewPolicyValue;
         final String finalPolicyValue = PolicyValue;
         if (finalIsValueChanged) {
-            ((Activity) mContext).runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-
-                    ShowDialog(mContext.getResources().getString(R.string.PolicyValueChange) + finalEnrollDate + "," + "has been changed from " + finalPolicyValue + " to " + finalNewPolicyValue);
-
-
-                }
-
-            });
+            ((Activity) mContext).runOnUiThread(() -> ShowDialog(mContext.getResources().getString(R.string.PolicyValueChange) + finalEnrollDate + "," + "has been changed from " + finalPolicyValue + " to " + finalNewPolicyValue));
         }
 
         return Policies.toString();
@@ -2063,7 +2045,7 @@ public class ClientAndroidInterface {
 
     @JavascriptInterface
     public String getPolicy(int PolicyId) {
-        String Query = "SELECT  P.PolicyId, P.ProdId, OfficerId , ProductCode, ProductName, PolicyStage, EffectiveDate, IFNULL(PolicyValue,0) PolicyValue, StartDate, EnrollDate, \n" +
+        String Query = "SELECT  P.PolicyId, P.ProdId, OfficerId , Prod.ProductCode, ProductName, PolicyStage, EffectiveDate, IFNULL(PolicyValue,0) PolicyValue, StartDate, EnrollDate, bcn.ControlNumber, \n" +
                 "   CASE    WHEN PolicyStatus = 1 THEN '" + mContext.getResources().getString(R.string.Idle) + "'   " +
                 "   WHEN PolicyStatus = 2 THEN '" + mContext.getResources().getString(R.string.Active) + "'  " +
                 "   WHEN PolicyStatus = 4 THEN '" + mContext.getResources().getString(R.string.Suspended) + "'  " +
@@ -2073,6 +2055,7 @@ public class ClientAndroidInterface {
                 "   LEFT JOIN (SELECT MAX(PolicyId) PolicyId, IFNULL(Sum(Amount),0) Contribution ,PremiumId " +
                 "   FROM  tblPremium WHERE PolicyId = " + PolicyId + " AND isPhotoFee = 'false' ) " +
                 "   Pre ON Pre.PolicyId=P.PolicyId \n " +
+                "   LEFT JOIN tblBulkControlNumbers bcn on P.PolicyId=bcn.PolicyId " +
                 "   WHERE P.PolicyId = ?";
 
         String[] arg = {String.valueOf(PolicyId)};
@@ -2552,19 +2535,14 @@ public class ClientAndroidInterface {
 
     @JavascriptInterface
     public int DeletePolicy(int PolicyId) {
-        String PremiumQuery = "DELETE FROM tblPremium WHERE PolicyId=?";
-        String arg[] = {String.valueOf(PolicyId)};
-        JSONArray Premiums = sqlHandler.getResult(PremiumQuery, arg);
-        //Premiums.toString();
-        String PolicyQuery = "DELETE FROM tblPolicy WHERE PolicyId=?";
-        String PolicyArg[] = {String.valueOf(PolicyId)};
-        JSONArray Policy = sqlHandler.getResult(PolicyQuery, PolicyArg);
-        deleteRecodedPolicy(String.valueOf(PolicyId));
-        //Policy.toString();
-        //Added by salum 12.12.2017
-        DeleteInsureePolicy(PolicyId, 0);
+        String[] arg = {String.valueOf(PolicyId)};
+        String selector = "PolicyId=?";
+        sqlHandler.deleteData(SQLHandler.tblPremium, selector, arg);
+        sqlHandler.deleteData(SQLHandler.tblRecordedPolicies, selector, arg);
+        sqlHandler.deleteData(SQLHandler.tblInsureePolicy, selector, arg);
+        sqlHandler.deleteData(SQLHandler.tblPolicy, selector, arg);
+        sqlHandler.clearCnAfterPolicyDeleted(PolicyId);
         return 1;
-
     }
 
     @JavascriptInterface
@@ -2724,15 +2702,10 @@ public class ClientAndroidInterface {
         return String.valueOf(1);
     }
 
-    public Boolean deleteRecodedPolicy(String Result) {
-        String TableName = "tblRecordedPolicies";
+    public Boolean deleteRecodedPolicy(String policyId) {
         String Where = "PolicyId = ?";
-        String[] WhereArg = {Result};
-        try {
-            sqlHandler.deleteData(TableName, Where, WhereArg);
-        } catch (Exception e) {
-            return false;
-        }
+        String[] WhereArg = {policyId};
+        sqlHandler.deleteData(SQLHandler.tblRecordedPolicies, Where, WhereArg);
 
         return true;
     }
@@ -3442,8 +3415,8 @@ public class ClientAndroidInterface {
             }
 
             //get Policies
-            Query = "SELECT PolicyId AS PolicyId, FamilyId AS FamilyId, EnrollDate, StartDate, NULLIF(EffectiveDate,'null') EffectiveDate, ExpiryDate, Policystatus, PolicyValue, ProdId, OfficerId, PolicyStage, isOffline\n" +
-                    "FROM tblPolicy WHERE ";
+            Query = "SELECT p.PolicyId AS PolicyId, FamilyId AS FamilyId, EnrollDate, StartDate, NULLIF(EffectiveDate,'null') EffectiveDate, ExpiryDate, Policystatus, PolicyValue, ProdId, OfficerId, PolicyStage, isOffline, bcn.ControlNumber \n" +
+                    "FROM tblPolicy p LEFT JOIN tblBulkControlNumbers bcn on p.PolicyId=bcn.PolicyId WHERE ";
             if (CallerId != 2) {
                 Query += " FamilyId = " + FamilyId;
             } else {
@@ -4426,12 +4399,13 @@ public class ClientAndroidInterface {
 
         String wherePolicyIdIn = "PolicyId IN (SELECT PolicyId FROM tblPolicy WHERE "
                 + combineFamilyIdsInWhereStatement(FamilyIDs) + ")";
-        deleteUploadedTableData("tblPremium", wherePolicyIdIn);
-        deleteUploadedTableData("tblInsureePolicy", wherePolicyIdIn);
-        deleteUploadedTableData("tblPolicy", FamilyIDs);
-        deleteUploadedTableData("tblInsuree", FamilyIDs);
-        deleteUploadedTableData("tblFamilySMS", FamilyIDs);
-        deleteUploadedTableData("tblFamilies", FamilyIDs);
+        deleteUploadedTableData(SQLHandler.tblPremium, wherePolicyIdIn);
+        deleteUploadedTableData(SQLHandler.tblInsureePolicy, wherePolicyIdIn);
+        deleteUploadedTableData(SQLHandler.tblBulkControlNumbers, wherePolicyIdIn);
+        deleteUploadedTableData(SQLHandler.tblPolicy, FamilyIDs);
+        deleteUploadedTableData(SQLHandler.tblInsuree, FamilyIDs);
+        deleteUploadedTableData(SQLHandler.tblFamilySMS, FamilyIDs);
+        deleteUploadedTableData(SQLHandler.tblFamilies, FamilyIDs);
     }
 
     private void deleteUploadedTableData(String tableName, int familyId) {
@@ -4466,34 +4440,6 @@ public class ClientAndroidInterface {
         String query = "DELETE FROM " + tableName + " WHERE " + where;
         sqlHandler.getResult(query, null);
     }
-
-    public String getFeedRenewalText(String fileName) {
-        String aBuffer = "";
-        try {
-            String dir = global.getMainDirectory();
-            File myFile = new File(dir, fileName);//"/"+dir+"/MasterData.txt"
-//            BufferedReader myReader = new BufferedReader(
-//                    new InputStreamReader(
-//                            new FileInputStream(myFile), "UTF32"));
-            FileInputStream fIn = new FileInputStream(myFile);
-            BufferedReader myReader = new BufferedReader(new InputStreamReader(fIn));
-            aBuffer = myReader.readLine();
-
-
-            myReader.close();
-/*            Scanner in = new Scanner(new FileReader("/"+dir+"/MasterData.txt"));
-            StringBuilder sb = new StringBuilder();
-            while(in.hasNext()) {
-                sb.append(in.next());
-            }
-            in.close();
-            aBuffer = sb.toString();*/
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return aBuffer;
-    }
-
 
     @JavascriptInterface
     public Boolean UploadOfflineFeedbackRenewal(final String ActivityName) {

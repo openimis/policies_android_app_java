@@ -1,6 +1,10 @@
 $(document).ready(function () {
     document.title = Android.getString('AddEditPolicy');
 
+    if(!Android.IsBulkCNUsed()) {
+        $('#txtControlNumber').hide();
+    }
+
     var LocationId = parseInt(queryString("l"));
     var FamilyId = parseInt(queryString("f"));
     var strOfficerLocation = Android.getOfficerLocation();
@@ -33,10 +37,16 @@ $(document).ready(function () {
         var ProdId = parseInt($Policy[0]["ProdId"]);
         var CurrentPolicyValue = $Policy[0]["PolicyValue"];
         var isOffline = parseInt($Policy[0]["isOffline"]);
+
         bindDataFromDatafield(strPolicy);
 
         $('#txtStartDate').val((StartDate));
         $('#txtExpiryDate').val(ExpiryDate);
+
+        if(Android.IsBulkCNUsed()) {
+            $('#txtControlNumber').text($Policy[0]["ControlNumber"]);
+            $('#AssignedControlNumber').val($Policy[0]["ControlNumber"]);
+        }
 
         var HSCycle = false;
         if ($('#hfHasCycle').val()) HSCycle = true;
@@ -75,10 +85,30 @@ $(document).ready(function () {
 
     });
 
+    $('#ddlProduct').change(function () {
+        if(Android.IsBulkCNUsed()) {
+            var productId = $('#ddlProduct').val();
+            if(productId == '0') return;
+            var controlNumber = Android.GetNextBulkCn(productId);
+            if(typeof controlNumber === 'undefined') {
+                Android.ShowDialog(Android.getString('noBulkCNAvailable'));
+            } else {
+                $('#txtControlNumber').text(controlNumber);
+                $('#AssignedControlNumber').val(controlNumber);
+            }
+        }
+    });
+
     $('#btnSave').click(function () {
         var passed = isFormValidated();
         var jsonPolicy = createJSONString();
+
         if (passed == true) {
+            if(Android.IsBulkCNUsed() && $('#AssignedControlNumber').val() === '') {
+                Android.ShowDialog(Android.getString('noBulkCNAssigned'));
+                return;
+            }
+
             var PPolicyId = Android.SavePolicy(jsonPolicy, parseInt(FamilyId), parseInt(policyId));
             window.open('FamilyPolicies.html?f=' + FamilyId + '&l=' + LocationId + '&r=' + RegionId + '&d=' + DistrictId, "_self");
             $('#btnSave').attr("disabled", "disabled")

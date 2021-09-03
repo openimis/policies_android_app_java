@@ -419,4 +419,7 @@
   <string name="FetchBulkCN">Fetch Bulk Control Numbers</string>
   <string name="Fetch">Fetch</string>
   <string name="LogInToFetchCn">Please log in first, to fetch control numbers.</string>
+  <string name="noBulkCNAvailable">No control numbers left for this product. Please fetch control numbers first.</string>
+  <string name="noBulkCNAssigned">No control number assigned to this policy. Please fetch control numbers first.</string>
+  <string name="controlNumberLabel">Control Number :</string>
 </resources>

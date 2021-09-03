@@ -44,8 +44,8 @@ In case of dispute arising out or in relation to the use of the program, it is s
             <input datafield="PolicyValue" type="hidden" value="0" id="hfPolicyValue"/>
             <input datafield="PolicyStatusValue" type="hidden" value="1" id="hfPolicyStatus"/>
             <input datafield="isOffline" type="hidden" value="1" id="hfOffline"/>
-            <span  strName="EnrolmentDate">Enrolment date</span>
-            <input datafield="EnrollDate"  type="date" id="txtEnrolmentDate" required/>
+            <span strName="EnrolmentDate">Enrolment date</span>
+            <input datafield="EnrollDate" type="date" id="txtEnrolmentDate" required/>
         </li>
         <li id="Product">
             <span strName="Product">Product</span>
@@ -53,7 +53,7 @@ In case of dispute arising out or in relation to the use of the program, it is s
         </li>
         <li>
             <span strName="EffectiveDate">Effective date</span>
-            <input datafield="EffectiveDate" type="date" id="txtEffectiveDate" />
+            <input datafield="EffectiveDate" type="date" id="txtEffectiveDate"/>
         </li>
 
         <li>
@@ -69,24 +69,26 @@ In case of dispute arising out or in relation to the use of the program, it is s
             <span strName="Officer">Officer</span>
             <input type='hidden' datafield="OfficerId" type="date" id="ddlOfficer" required/>
         </li>
-
         <li>
             <span strName="PolicyStatus">Policy Status :</span>
             <span datafield="PolicyStatus" type="text" id="txtPolicyStatus"></span>
         </li>
+        <li id="ControlNumber">
+            <span strName="controlNumberLabel">Control Number :</span>
+            <span type="text" id="txtControlNumber"></span>
+            <input datafield="AssignedControlNumber" type="hidden" value=""
+                   id="AssignedControlNumber">
+        </li>
         <li>
             <span strName="PolicyValue">Policy Value :</span>
             <span datafield="PolicyValue" type="text" id="spPolicyValue">0</span>
-
         </li>
-
         <li>
             <span strName="Contribution">Contribution :</span>
             <span datafield="Contribution" type="text" id="spContribution">0</span>
             <span strName="Balance">Balance : </span>
             <span datafield="Balance" type="text" id="spBalance">0</span>
         </li>
-
     </ul>
 </div>
 <div class="footer">

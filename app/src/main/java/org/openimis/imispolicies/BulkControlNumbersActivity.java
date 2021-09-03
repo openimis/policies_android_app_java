@@ -1,5 +1,10 @@
 package org.openimis.imispolicies;
 
+import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
@@ -32,7 +37,6 @@ public class BulkControlNumbersActivity extends AppCompatActivity {
     private ListView assignedCNDetails;
     private TextView freeCNCount;
     private ListView freeCNDetails;
-    private TextView fetchBulkCn;
     private SQLHandler sqlHandler;
     private Global global;
 
@@ -42,11 +46,17 @@ public class BulkControlNumbersActivity extends AppCompatActivity {
     private String[] productNames;
     private String[] productCodes;
 
-    private View productDropDown;
-    private TextView dropdownDescription;
     private Spinner dropdownSpinner;
 
     private AlertDialog productDialog;
+    private ProgressDialog progressDialog;
+
+    BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            handleRequestResult(intent);
+        }
+    };
 
     @Override
     public boolean onSupportNavigateUp() {
@@ -70,7 +80,7 @@ public class BulkControlNumbersActivity extends AppCompatActivity {
 
         assignedCNCount = findViewById(R.id.AssignedCNCount);
         freeCNCount = findViewById(R.id.FreeCNCount);
-        fetchBulkCn = findViewById(R.id.FetchBulkCn);
+        TextView fetchBulkCn = findViewById(R.id.FetchBulkCn);
         assignedCNDetails = findViewById(R.id.AssignedCNDetails);
         freeCNDetails = findViewById(R.id.FreeCNDetails);
 
@@ -93,6 +103,25 @@ public class BulkControlNumbersActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(ControlNumberService.ACTION_REQUEST_SUCCESS);
+        intentFilter.addAction(ControlNumberService.ACTION_REQUEST_ERROR);
+        registerReceiver(broadcastReceiver, intentFilter);
+        refreshCNCount();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(broadcastReceiver);
+    }
+
+    private void handleRequestResult(Intent intent) {
+        if (intent.getAction().equals(ControlNumberService.ACTION_REQUEST_ERROR)) {
+            String errorMessage = intent.getStringExtra(ControlNumberService.FIELD_ERROR_MESSAGE);
+            Toast.makeText(this,errorMessage,Toast.LENGTH_LONG).show();
+        }
+        progressDialog.dismiss();
         refreshCNCount();
     }
 
@@ -118,12 +147,12 @@ public class BulkControlNumbersActivity extends AppCompatActivity {
     }
 
     protected Map<String, String> createFreeCnDetailsEntry(JSONObject product) throws JSONException {
-        int assignedCount = sqlHandler.getAssignedCNCount(officerCode, product.getString("ProductCode"));
+        int assignedCount = sqlHandler.getFreeCNCount(officerCode, product.getString("ProductCode"));
         return createCnDetailsEntry(product, assignedCount);
     }
 
     protected Map<String, String> createAssignedCnDetailsEntry(JSONObject product) throws JSONException {
-        int freeCount = sqlHandler.getFreeCNCount(officerCode, product.getString("ProductCode"));
+        int freeCount = sqlHandler.getAssignedCNCount(officerCode, product.getString("ProductCode"));
         return createCnDetailsEntry(product, freeCount);
     }
 
@@ -148,9 +177,9 @@ public class BulkControlNumbersActivity extends AppCompatActivity {
 
     protected AlertDialog createProductDialog() {
         LayoutInflater li = LayoutInflater.from(this);
-        productDropDown = li.inflate(R.layout.dropdown_dialog, (ViewGroup) null);
+        View productDropDown = li.inflate(R.layout.dropdown_dialog, (ViewGroup) null);
 
-        dropdownDescription = productDropDown.findViewById(R.id.description);
+        TextView dropdownDescription = productDropDown.findViewById(R.id.description);
         dropdownDescription.setText(R.string.SelectProduct);
 
         dropdownSpinner = productDropDown.findViewById(R.id.dropdown);
@@ -176,8 +205,10 @@ public class BulkControlNumbersActivity extends AppCompatActivity {
 
         return alertDialogBuilder
                 .setPositiveButton(getResources().getString(R.string.Fetch),
-                        (dialog, id) -> ControlNumberService.fetchBulkControlNumbers(this,
-                                productCodes[dropdownSpinner.getSelectedItemPosition()]))
+                        (dialog, id) -> {
+                            progressDialog = ProgressDialog.show(this, "", getResources().getString(R.string.FetchBulkCN));
+                            ControlNumberService.fetchBulkControlNumbers(this, productCodes[dropdownSpinner.getSelectedItemPosition()]);
+                        })
                 .setNegativeButton(getResources().getString(R.string.Cancel),
                         (dialog, id) -> dialog.cancel())
                 .create();

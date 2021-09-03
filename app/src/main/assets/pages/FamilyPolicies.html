@@ -38,7 +38,8 @@ In case of dispute arising out or in relation to the use of the program, it is s
 </head>
 <body>
 <div id="dialog-confirm" title="Confirm" style="display:none">
-    <p><span id="msgAlert" class="ui-icon-alert" style="float:left; margin:2px 2px 2px 0;"></span></p>
+    <p><span id="msgAlert" class="ui-icon-alert" style="float:left; margin:2px 2px 2px 0;"></span>
+    </p>
 </div>
 <div class="topPanel">
     <img src="../images/plus.png" alt="New" class="plusButton"/>
@@ -54,30 +55,34 @@ In case of dispute arising out or in relation to the use of the program, it is s
                 <h3 class="right" id="PolicyStatus"></h3>
                 <div class="dropdown">
                     <div id="menuDrop" class="dropdown-content">
-                       <ul class="ulMenu">
-                           <li id="liEdit">Edit</li>
-                           <li id="liDelete">Delete</li>
-                           <li id="liPay">Payment</li>
+                        <ul class="ulMenu">
+                            <li id="liEdit">Edit</li>
+                            <li id="liDelete">Delete</li>
+                            <li id="liPay">Payment</li>
 
-                       </ul>
+                        </ul>
                     </div>
                     <div class="clearFix"></div>
                 </div>
             </div>
 
 
-            <h4 id="ProductName"> </h4>
+            <h4 id="ProductName"></h4>
             <p>
-                <span  class="spLabel" >Effective Date : </span>
+                <span class="spLabel">Effective Date : </span>
                 <span id="EffectiveDate"></span>
-                <span  class="spLabel">Expire Date :</span>
+                <span class="spLabel">Expire Date :</span>
                 <span id="ExpireDate"></span>
             </p>
             <p>
                 <span class="spLabel">Start Date : </span>
-                <span   id="StartDate"></span>
-                <span  class="spLabel">Policy Value : </span>
+                <span id="StartDate"></span>
+                <span class="spLabel">Policy Value : </span>
                 <label id="PolicyValue"></label>
+            </p>
+            <p id="ControlNumberSection">
+                <span class="spLabel">Control Number : </span>
+                <span id="ControlNumber"></span>
             </p>
 
         </li>
