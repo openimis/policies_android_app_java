@@ -2030,7 +2030,7 @@ public class ClientAndroidInterface {
                 "   WHERE FamilyId = ?";
 
         String[] arg = {String.valueOf(FamilyId)};
-        JSONArray Policies = sqlHandler.getResult(Query, arg);
+        JSONArray Policies = sqlHandler.getResult(Query, arg, "");
         final boolean finalIsValueChanged = isValueChanged;
         final String finalEnrollDate = enrollDate;
         final Double finalNewPolicyValue = NewPolicyValue;
@@ -2058,7 +2058,7 @@ public class ClientAndroidInterface {
                 "   WHERE P.PolicyId = ?";
 
         String[] arg = {String.valueOf(PolicyId)};
-        JSONArray Policies = sqlHandler.getResult(Query, arg);
+        JSONArray Policies = sqlHandler.getResult(Query, arg, "");
         return Policies.toString();
     }
 
@@ -2577,32 +2577,38 @@ public class ClientAndroidInterface {
 
     @JavascriptInterface
     public int DeleteFamily(int FamilyId) {
+        String[] familyIdArgument = new String[]{String.valueOf(FamilyId)};
+        String policyIdSubquery = "(SELECT PolicyId FROM tblPolicy WHERE FamilyId = ?)";
 
-        String PremiumQuery = "DELETE FROM tblPremium   \n" +
+        String updateFetchedCNQuery = "UPDATE " + SQLHandler.tblBulkControlNumbers + " " +
+                "SET PolicyId = NULL WHERE Id IS NOT NULL AND PolicyId IN " +
+                policyIdSubquery;
+        sqlHandler.getResult(updateFetchedCNQuery, familyIdArgument);
+
+        String deleteInsertedCNQuery = "DELETE FROM " + SQLHandler.tblBulkControlNumbers + " " +
+                "WHERE Id IS NULL AND PolicyId IN " +
+                policyIdSubquery;
+        sqlHandler.getResult(deleteInsertedCNQuery, familyIdArgument);
+
+        String PremiumQuery = "DELETE FROM tblPremium \n" +
                 "WHERE PolicyId IN \n" +
-                "(SELECT PolicyId FROM tblPolicy WHERE FamilyId = " + FamilyId + " )";
-        sqlHandler.getResult(PremiumQuery, null);
+                policyIdSubquery;
+        sqlHandler.getResult(PremiumQuery, familyIdArgument);
         //Premium.toString();
 
-        String InsureePolicyQuery = "DELETE FROM tblInsureePolicy   \n" +
+        String InsureePolicyQuery = "DELETE FROM tblInsureePolicy \n" +
                 "WHERE PolicyId IN \n" +
-                "(SELECT PolicyId FROM tblPolicy WHERE FamilyId = " + FamilyId + " )";
-        sqlHandler.getResult(InsureePolicyQuery, null);
+                policyIdSubquery;
+        sqlHandler.getResult(InsureePolicyQuery, familyIdArgument);
 
-        String PolicyQuery = "DELETE FROM tblPolicy WHERE FamilyId=?";
-        String PolicyArg[] = {String.valueOf(FamilyId)};
-        sqlHandler.getResult(PolicyQuery, PolicyArg);
-        //Policy.toString();
+        String PolicyQuery = "DELETE FROM tblPolicy WHERE FamilyId = ?";
+        sqlHandler.getResult(PolicyQuery, familyIdArgument);
 
+        String InsureeQuery = "DELETE FROM  tblInsuree WHERE FamilyId = ?";
+        sqlHandler.getResult(InsureeQuery, familyIdArgument);
 
-        String InsureeQuery = "DELETE FROM  tblInsuree WHERE FamilyId=?";
-        String arg[] = {String.valueOf(FamilyId)};
-        sqlHandler.getResult(InsureeQuery, arg);
-        //Insuree.toString();
-
-        String FamilyQuery = "DELETE FROM  tblfamilies WHERE FamilyId=?";
-        String Familyarg[] = {String.valueOf(FamilyId)};
-        sqlHandler.getResult(FamilyQuery, arg);
+        String FamilyQuery = "DELETE FROM  tblFamilies WHERE FamilyId = ?";
+        sqlHandler.getResult(FamilyQuery, familyIdArgument);
         //Families.toString();
         return 1;
     }
@@ -3624,7 +3630,7 @@ public class ClientAndroidInterface {
                         boolean parsingErrorOccured = false;
                         try {
                             JSONObject responseObject = new JSONObject(responseString);
-                            if (responseObject.has("error_occured") && "true".equals(responseObject.getString("error_occured"))) {
+                            if (responseObject.has("error_occured") && responseObject.getBoolean("error_occured")) {
                                 EnrolResult = -400;
                                 enrolMessages.add(responseObject.getString("error_message"));
                             } else if (responseObject.has("response")) {

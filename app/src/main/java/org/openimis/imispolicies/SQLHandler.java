@@ -492,13 +492,9 @@ public class SQLHandler extends SQLiteOpenHelper {
         }
     }
 
-
-    //get result in JSON format
-    public JSONArray getResult(String tableName, String[] columns, String Where, String OrderBy) {
+    public JSONArray getResult(String tableName, String[] columns, String Where, String OrderBy, String nullOverride) {
         openDatabase();
-
         JSONArray resultSet = new JSONArray();
-
         Cursor cursor = mDatabase.query(tableName, columns, Where, null, null, null, OrderBy);
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
@@ -509,7 +505,7 @@ public class SQLHandler extends SQLiteOpenHelper {
                     if (cursor.getString(i) != null)
                         rowObject.put(cursor.getColumnName(i), cursor.getString(i));
                     else
-                        rowObject.put(cursor.getColumnName(i), "");
+                        rowObject.put(cursor.getColumnName(i), nullOverride);
                 } catch (Exception e) {
                     Log.d("Tag Name ", e.getMessage());
                 }
@@ -523,7 +519,12 @@ public class SQLHandler extends SQLiteOpenHelper {
         return resultSet;
     }
 
-    public JSONArray getResult(String Query, String[] args) {
+    //get result in JSON format
+    public JSONArray getResult(String tableName, String[] columns, String where, String orderBy) {
+        return getResult(tableName, columns, where, orderBy, "0");
+    }
+
+    public JSONArray getResult(String Query, String[] args, String nullOverride) {
         openDatabase();
         JSONArray resultSet = new JSONArray();
         try {
@@ -533,13 +534,11 @@ public class SQLHandler extends SQLiteOpenHelper {
                 int totalColumns = cursor.getColumnCount();
                 JSONObject rowObject = new JSONObject();
                 for (int i = 0; i < totalColumns; i++) {
-
                     try {
-
                         if (cursor.getString(i) != null)
                             rowObject.put(cursor.getColumnName(i), cursor.getString(i));
                         else
-                            rowObject.put(cursor.getColumnName(i), "0");
+                            rowObject.put(cursor.getColumnName(i), nullOverride);
                     } catch (JSONException e) {
                         e.printStackTrace();
                         Log.d("Tag Name", e.getMessage());
@@ -553,10 +552,12 @@ public class SQLHandler extends SQLiteOpenHelper {
             e.printStackTrace();
         }
 
-
         closeDatabase();
         return resultSet;
+    }
 
+    public JSONArray getResult(String Query, String[] args) {
+        return getResult(Query, args, "0");
     }
 
     public String getResultXML2(String QueryF, String QueryI, String QueryPL, String QueryPR, String QueryIP, String OfficerCode, int OfficerId) throws IOException {
@@ -944,17 +945,36 @@ public class SQLHandler extends SQLiteOpenHelper {
     }
 
     public boolean assignCnToPolicy(int policyId, String controlNumber) {
-        openDatabase();
-        ContentValues values = new ContentValues();
-        values.put("PolicyId", policyId);
-
         try {
-            int updatedRecords = mDatabase.update(tblBulkControlNumbers,
-                    values,
-                    "ControlNumber = ?",
-                    new String[]{controlNumber});
+            if (isFetchedControlNumber(controlNumber)) {
+                openDatabase();
+                ContentValues values = new ContentValues();
+                values.put("PolicyId", policyId);
+                mDatabase.update(tblBulkControlNumbers,
+                        values,
+                        "ControlNumber = ?",
+                        new String[]{controlNumber});
+            } else {
+                openDatabase();
+                JSONArray policyData = cursorToJsonArray(mDatabase.rawQuery(
+                        "SELECT po.PolicyValue, pr.ProductCode FROM tblPolicy po INNER JOIN tblProduct pr on pr.ProdId=po.ProdId WHERE PolicyId = ?",
+                        new String[]{String.valueOf(policyId)}));
 
-            return updatedRecords == 1;
+                if (policyData.length() == 0) {
+                    return false;
+                }
+
+                ContentValues values = new ContentValues();
+                values.put("OfficerCode", global.getOfficerCode());
+                values.put("PolicyId", policyId);
+                values.put("Amount", policyData.getJSONObject(0).getString("PolicyValue"));
+                values.put("ProductCode", policyData.getJSONObject(0).getString("ProductCode"));
+                values.put("ControlNumber", controlNumber);
+
+                return mDatabase.insert(tblBulkControlNumbers, null, values) > 0;
+            }
+
+            return true;
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -971,16 +991,26 @@ public class SQLHandler extends SQLiteOpenHelper {
         try {
             int updatedRecords = mDatabase.update(tblBulkControlNumbers,
                     values,
-                    "PolicyId = ?",
+                    "PolicyId = ? and Id IS NOT NULL",
                     new String[]{String.valueOf(policyId)});
 
-            return updatedRecords == 1;
+            int deletedRecords = mDatabase.delete(tblBulkControlNumbers,
+                    "PolicyId = ? and Id IS NULL",
+                    new String[]{String.valueOf(policyId)});
+
+            return updatedRecords + deletedRecords > 0;
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
             closeDatabase();
         }
         return false;
+    }
+
+    public boolean isFetchedControlNumber(String controlNumber) {
+        return getCount(tblBulkControlNumbers,
+                "ControlNumber = ? AND Id IS NOT NULL",
+                new String[]{controlNumber}) > 0;
     }
 
     private JSONArray cursorToJsonArray(Cursor cursor) {

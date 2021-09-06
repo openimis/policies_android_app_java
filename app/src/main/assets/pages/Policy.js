@@ -2,7 +2,7 @@ $(document).ready(function () {
     document.title = Android.getString('AddEditPolicy');
 
     if(!Android.IsBulkCNUsed()) {
-        $('#txtControlNumber').hide();
+        $('#ControlNumber').hide();
     }
 
     var LocationId = parseInt(queryString("l"));
@@ -44,8 +44,12 @@ $(document).ready(function () {
         $('#txtExpiryDate').val(ExpiryDate);
 
         if(Android.IsBulkCNUsed()) {
-            $('#txtControlNumber').text($Policy[0]["ControlNumber"]);
-            $('#AssignedControlNumber').val($Policy[0]["ControlNumber"]);
+            console.log(typeof $Policy[0]["ControlNumber"]);
+            if($Policy[0]["ControlNumber"]) {
+                $('#AssignedControlNumber').val($Policy[0]["ControlNumber"]).prop('readonly', true);
+            } else {
+                $('#AssignedControlNumber').val('').prop('readonly', false);
+            }
         }
 
         var HSCycle = false;
@@ -89,16 +93,15 @@ $(document).ready(function () {
         if(Android.IsBulkCNUsed()) {
             var productId = $('#ddlProduct').val();
             if(productId == '0') {
-                $('#txtControlNumber').text('');
-                $('#AssignedControlNumber').val('');
+                $('#AssignedControlNumber').val('').prop('readonly', false);
                 return;
             }
             var controlNumber = Android.GetNextBulkCn(productId);
             if(typeof controlNumber === 'undefined') {
                 Android.ShowDialog(Android.getString('noBulkCNAvailable'));
+                $('#AssignedControlNumber').val('').prop('readonly', false);
             } else {
-                $('#txtControlNumber').text(controlNumber);
-                $('#AssignedControlNumber').val(controlNumber);
+                $('#AssignedControlNumber').val(controlNumber).prop('readonly', true);
             }
         }
     });
@@ -108,8 +111,9 @@ $(document).ready(function () {
         var jsonPolicy = createJSONString();
 
         if (passed == true) {
-            if(Android.IsBulkCNUsed() && $('#AssignedControlNumber').val() === '') {
+            if(Android.IsBulkCNUsed() && !$('#AssignedControlNumber').val()) {
                 Android.ShowDialog(Android.getString('noBulkCNAssigned'));
+                $('#AssignedControlNumber').val('').prop('readonly', false);
                 return;
             }
 

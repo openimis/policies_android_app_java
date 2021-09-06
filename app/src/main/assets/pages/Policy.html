@@ -51,6 +51,10 @@ In case of dispute arising out or in relation to the use of the program, it is s
             <span strName="Product">Product</span>
             <select datafield="ProdId" id="ddlProduct" required></select>
         </li>
+        <li id="ControlNumber">
+            <span strName="controlNumberLabel">Control Number :</span>
+            <input datafield="AssignedControlNumber" type="text" id="AssignedControlNumber">
+        </li>
         <li>
             <span strName="EffectiveDate">Effective date</span>
             <input datafield="EffectiveDate" type="date" id="txtEffectiveDate"/>
@@ -59,7 +63,6 @@ In case of dispute arising out or in relation to the use of the program, it is s
         <li>
             <span strName="StartDate">Start date</span>
             <input datafield="StartDate" type="date" id="txtStartDate" required/>
-
         </li>
         <li>
             <span strName="ExpireDate">Expire date</span>
@@ -72,12 +75,6 @@ In case of dispute arising out or in relation to the use of the program, it is s
         <li>
             <span strName="PolicyStatus">Policy Status :</span>
             <span datafield="PolicyStatus" type="text" id="txtPolicyStatus"></span>
-        </li>
-        <li id="ControlNumber">
-            <span strName="controlNumberLabel">Control Number :</span>
-            <span type="text" id="txtControlNumber"></span>
-            <input datafield="AssignedControlNumber" type="hidden" value=""
-                   id="AssignedControlNumber">
         </li>
         <li>
             <span strName="PolicyValue">Policy Value :</span>
