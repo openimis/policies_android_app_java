@@ -1,9 +1,12 @@
 package org.openimis.imispolicies;
 
 import android.app.IntentService;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.content.Context;
+import android.util.Log;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
@@ -15,10 +18,13 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 
 public class ControlNumberService extends IntentService {
+    private static final String LOG_TAG = "CNSERVICE";
 
     private static final String ACTION_REQUEST_CN = "ControlNumberService.ACTION_REQUEST_CN";
     private static final String ACTION_GET_ASSIGNED_CN = "ControlNumberService.ACTION_GET_ASSIGNED_CN";
+    private static final String ACTION_FETCH_BULK_CN = "ControlNumberService.FETCH_BULK_CN";
 
+    private static final String FIELD_PRODUCT_CODE = "FIELD_PRODUCT_CODE";
     private static final String FIELD_PAYLOAD = "FIELD_PAYLOAD";
     private static final String FIELD_PAYMENT_DETAILS = "FIELD_PAYMENT_DETAILS";
 
@@ -29,6 +35,7 @@ public class ControlNumberService extends IntentService {
 
     private ToRestApi toRestApi;
     private ClientAndroidInterface ca;
+    private SQLHandler sqlHandler;
 
     public ControlNumberService() {
         super("ControlNumberService");
@@ -49,10 +56,18 @@ public class ControlNumberService extends IntentService {
         context.startService(intent);
     }
 
+    public static void fetchBulkControlNumbers(Context context, String productCode) {
+        Intent intent = new Intent(context, ControlNumberService.class);
+        intent.setAction(ACTION_FETCH_BULK_CN);
+        intent.putExtra(FIELD_PRODUCT_CODE, productCode);
+        context.startService(intent);
+    }
+
     @Override
     protected void onHandleIntent(Intent intent) {
         toRestApi = new ToRestApi();
         ca = new ClientAndroidInterface(this);
+        sqlHandler = new SQLHandler(this);
 
         if (intent != null) {
             final String action = intent.getAction();
@@ -63,7 +78,33 @@ public class ControlNumberService extends IntentService {
             } else if (ACTION_GET_ASSIGNED_CN.equals(action)) {
                 final String order = intent.getStringExtra(FIELD_PAYLOAD);
                 handleActionGetAssignedCN(order);
+            } else if (ACTION_FETCH_BULK_CN.equals(action)) {
+                final String productCode = intent.getStringExtra(FIELD_PRODUCT_CODE);
+                handleActionFetchBulkCN(productCode);
             }
+        }
+    }
+
+    private void handleActionFetchBulkCN(String productCode) {
+        String errorMessage;
+        try {
+            HttpEntity respEntity;
+            HttpResponse response = toRestApi.postToRestApiToken(null, String.format("GetControlNumbersForEO?productCode=%s", productCode));
+            int responseCode = response.getStatusLine().getStatusCode();
+            respEntity = response.getEntity();
+            String content = EntityUtils.toString(respEntity);
+            JSONArray responseContent = new JSONArray(content);
+
+            errorMessage = getErrorMessage(responseCode, null);
+            if ("".equals(errorMessage)) {
+                insertBulkControlNumbers(responseContent);
+                broadcastSuccess();
+            } else {
+                broadcastError(errorMessage);
+            }
+        } catch (IOException | JSONException e) {
+            Log.e(LOG_TAG, "Error during bulk CN requesting", e);
+            broadcastError(getResources().getString(R.string.SomethingWrongServer));
         }
     }
 
@@ -111,7 +152,7 @@ public class ControlNumberService extends IntentService {
 
             JSONObject responseContent = new JSONObject(content);
             errorMessage = getErrorMessage(responseCode, responseContent);
-            if ("".equals(errorMessage)) {
+            if (StringUtils.isEmpty(errorMessage)) {
                 String assignedControlNumbers = responseContent.getString("assigned_control_numbers");
                 updateAssignedControlNumbers(assignedControlNumbers);
 
@@ -128,27 +169,31 @@ public class ControlNumberService extends IntentService {
     private void broadcastSuccess() {
         Intent successIntent = new Intent(ACTION_REQUEST_SUCCESS);
         sendBroadcast(successIntent);
+        Log.i(LOG_TAG, String.format("ControlNumberService finished with %s", ACTION_REQUEST_SUCCESS));
     }
 
     private void broadcastError(String errorMessage) {
         Intent errorIntent = new Intent(ACTION_REQUEST_ERROR);
         errorIntent.putExtra(FIELD_ERROR_MESSAGE, errorMessage);
         sendBroadcast(errorIntent);
+        Log.i(LOG_TAG, String.format("ControlNumberService finished with %s, error message: %s", ACTION_REQUEST_ERROR, errorMessage));
     }
 
     private String getErrorMessage(int responseCode, JSONObject responseContent) throws JSONException {
-        String errorMessage;
-        if ("true".equals(responseContent.getString("error_occured"))) {
-            errorMessage = responseContent.getString("error_message");
+        String errorMessage = "";
+
+        if (responseContent != null && responseContent.has("error_occured")) {
+            if (responseContent.getBoolean("error_occured")) {
+                errorMessage = responseContent.getString("error_message");
+            }
         } else if (responseCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
             errorMessage = getResources().getString(R.string.has_no_rights);
         } else if (responseCode == HttpURLConnection.HTTP_INTERNAL_ERROR) {
             errorMessage = getResources().getString(R.string.SomethingWrongServer);
         } else if (responseCode >= 400) { // for compatibility, but should not be needed
             errorMessage = getResources().getString(R.string.SomethingWrongServer);
-        } else {
-            errorMessage = "";
         }
+
         return errorMessage;
     }
 
@@ -179,6 +224,27 @@ public class ControlNumberService extends IntentService {
             String internalIdentifier = ob.getString("internal_identifier");
             String controlNumber = ob.getString("control_number");
             ca.assignControlNumber(internalIdentifier, controlNumber);
+        }
+    }
+
+    private void insertBulkControlNumbers(JSONArray controlNumbers) throws JSONException {
+        if (controlNumbers == null || controlNumbers.length() == 0) {
+            Log.i(LOG_TAG, "0 numbers fetched");
+        } else {
+            Log.i(LOG_TAG, String.format("%d numbers fetched", controlNumbers.length()));
+            for (int i = 0; i < controlNumbers.length(); i++) {
+                ContentValues cv = new ContentValues();
+                JSONObject object = controlNumbers.getJSONObject(i);
+
+                cv.put("Id", object.getString("controlNumberId"));
+                cv.put("BillId", object.getString("billId"));
+                cv.put("ProductCode", object.getString("productCode"));
+                cv.put("OfficerCode", object.getString("officerCode"));
+                cv.put("ControlNUmber", object.getString("controlNumber"));
+                cv.put("Amount", object.getString("amount"));
+
+                sqlHandler.insertData(SQLHandler.tblBulkControlNumbers, cv);
+            }
         }
     }
 }

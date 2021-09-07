@@ -1,148 +1,135 @@
 package org.openimis.imispolicies;
 
+import android.util.Log;
+
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 
 public class ToRestApi {
-    public static class UploadStatus
-    {
+    public static class UploadStatus {
         public static final int NO_RESPONSE = -1;
         public static final int REJECTED = 0;
         public static final int ACCEPTED = 1;
         public static final int ERROR = 2;
     }
 
-    Token tokenl = new Token();
-    private String uri = AppInformation.DomainInfo.getDomain()+"api/";
+    public static final String FUNCTION_PREFIX = "api/";
+    public static final String API_VERSION_HEADER_NAME = "api-version";
 
-    // Post without Token, returned response
-    public HttpResponse postToRestApi(final JSONObject object, final String functionName) {
-        HttpClient httpClient = new DefaultHttpClient();
-        HttpPost httpPost = new HttpPost(uri+functionName);
-        try {
-            StringEntity postingString = new StringEntity(object.toString());
-            httpPost.setEntity(postingString);
-            httpPost.setHeader("Content-type", "application/json");
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
+    private final Token token;
+    private final String uri;
+    private final String apiVersion;
 
-        HttpResponse response = null;
-        try {
-            response = httpClient.execute(httpPost);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return response;
+    public ToRestApi() {
+        token = Global.getGlobal().getJWTToken();
+        uri = AppInformation.DomainInfo.getDomain() + FUNCTION_PREFIX;
+        apiVersion = AppInformation.DomainInfo.getApiVersion();
     }
 
-    // Post without Token, returned object
-    public String postObjectToRestApiObject(final JSONObject object, final String functionName) {
-        HttpClient httpClient = new DefaultHttpClient();
-        HttpPost httpPost = new HttpPost(uri + functionName);
-        try {
-            StringEntity postingString = new StringEntity(object.toString());
-            httpPost.setEntity(postingString);
-            httpPost.setHeader("Content-type", "application/json");
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-
-        HttpResponse response = null;
-        try {
-            response = httpClient.execute(httpPost);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return getContent(response);
-    }
-
-    // Post with Token JWT, returned response
-    public HttpResponse postToRestApiToken(final JSONObject object, final String functionName) {
-        HttpClient httpClient = new DefaultHttpClient();
-        HttpPost httpPost = new HttpPost(uri+functionName);
-        try {
-            StringEntity postingString = new StringEntity(object.toString());
-            httpPost.setEntity(postingString);
-            httpPost.setHeader("Content-type", "application/json");
-            httpPost.setHeader("Authorization", "bearer "+tokenl.getTokenText());
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-
-        HttpResponse response = null;
-        try {
-            response = httpClient.execute(httpPost);
-            if (response != null && response.getStatusLine().getStatusCode() == HttpURLConnection.HTTP_UNAUTHORIZED) {
-                tokenl.clearToken();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return response;
-    }
-
-    // Get without Token, returned object
-    public String getObjectFromRestApi(final String functionName) {
+    public HttpResponse getFromRestApi(String functionName, boolean addToken) {
         HttpClient httpClient = new DefaultHttpClient();
         HttpGet httpGet = new HttpGet(uri + functionName);
-        httpGet.setHeader("Content-type", "application/json");
-
-        HttpResponse response = null;
-        try {
-            response = httpClient.execute(httpGet);
-        } catch (IOException e) {
-            e.printStackTrace();
+        httpGet.setHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
+        httpGet.setHeader(HttpHeaders.ACCEPT, ContentType.APPLICATION_JSON.getMimeType());
+        httpGet.setHeader(API_VERSION_HEADER_NAME, apiVersion);
+        if (addToken) {
+            httpGet.setHeader(HttpHeaders.AUTHORIZATION, "bearer " + token.getTokenText().trim());
         }
 
-        return getContent(response);
+        try {
+            HttpResponse response = httpClient.execute(httpGet);
+            if (addToken) {
+                checkToken(response);
+            }
+            int responseCode = response.getStatusLine().getStatusCode();
+            Log.i("HTTP_GET", uri + functionName + " - " + responseCode);
+            return response;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
-    // Get with Token JWT, returned object
-    public String getObjectFromRestApiToken(final String functionName) {
+    public HttpResponse postToRestApi(JSONObject object, String functionName, boolean addToken) {
         HttpClient httpClient = new DefaultHttpClient();
-        HttpGet httpGet = new HttpGet(uri+functionName);
-        httpGet.setHeader("Content-type", "application/json");
-        httpGet.setHeader("Authorization", "bearer "+tokenl.getTokenText());
 
-        HttpResponse response = null;
-        try {
-            response = httpClient.execute(httpGet);
-            if (response != null && response.getStatusLine().getStatusCode() == HttpURLConnection.HTTP_UNAUTHORIZED) {
-                tokenl.clearToken();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+        HttpPost httpPost = new HttpPost(uri + functionName);
+        httpPost.setHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
+        httpPost.setHeader(HttpHeaders.ACCEPT, ContentType.APPLICATION_JSON.getMimeType());
+        httpPost.setHeader(API_VERSION_HEADER_NAME, apiVersion);
+        if (addToken) {
+            httpPost.setHeader(HttpHeaders.AUTHORIZATION, "bearer " + token.getTokenText().trim());
         }
 
-        return getContent(response);
+        try {
+            if (object != null) {
+                StringEntity postingString = new StringEntity(object.toString());
+                httpPost.setEntity(postingString);
+            }
+            HttpResponse response = httpClient.execute(httpPost);
+            if (addToken) {
+                checkToken(response);
+            }
+
+            int responseCode = response.getStatusLine().getStatusCode();
+            Log.i("HTTP_POST", uri + functionName + " - " + responseCode);
+            return response;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public HttpResponse postToRestApi(final JSONObject object, final String functionName) {
+        return postToRestApi(object, functionName, false);
+    }
+
+    public String postObjectToRestApiObject(final JSONObject object, final String functionName) {
+        return getContent(postToRestApi(object, functionName, false));
+    }
+
+    public HttpResponse postToRestApiToken(final JSONObject object, final String functionName) {
+        return postToRestApi(object, functionName, true);
+    }
+
+    public String getObjectFromRestApi(final String functionName) {
+        return getContent(getFromRestApi(functionName, false));
+    }
+
+    public String getObjectFromRestApiToken(final String functionName) {
+        return getContent(getFromRestApi(functionName, true));
+    }
+
+    public HttpResponse getFromRestApiToken(final String functionName) {
+        return getFromRestApi(functionName, true);
     }
 
     public String deleteFromRestApiToken(final String functionName) {
         HttpClient httpClient = new DefaultHttpClient();
-        HttpDelete httpDelete = new HttpDelete(uri+functionName);
+        HttpDelete httpDelete = new HttpDelete(uri + functionName);
         httpDelete.setHeader("Content-type", "application/json");
-        httpDelete.setHeader("Authorization", "bearer "+tokenl.getTokenText());
+        httpDelete.setHeader("Authorization", "bearer " + token.getTokenText());
+        httpDelete.setHeader("accept", "application/json");
+        httpDelete.setHeader("api-version", apiVersion);
 
         HttpResponse response = null;
         try {
             response = httpClient.execute(httpDelete);
             if (response != null && response.getStatusLine().getStatusCode() == HttpURLConnection.HTTP_UNAUTHORIZED) {
-                tokenl.clearToken();
+                token.clearToken();
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -151,9 +138,8 @@ public class ToRestApi {
         return getContent(response);
     }
 
-    public String getContent(HttpResponse response)
-    {
-        if(response==null)
+    public String getContent(HttpResponse response) {
+        if (response == null)
             return null;
 
         String content = null;
@@ -168,5 +154,11 @@ public class ToRestApi {
         }
 
         return content;
+    }
+
+    private void checkToken(HttpResponse response) {
+        if (response != null && response.getStatusLine().getStatusCode() == HttpURLConnection.HTTP_UNAUTHORIZED) {
+            token.clearToken();
+        }
     }
 }

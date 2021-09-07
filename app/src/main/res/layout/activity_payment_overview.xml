@@ -12,50 +12,63 @@
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:layout_margin="10dp"
-        android:typeface="monospace"
-        android:fontFamily="sans-serif-light"
-        android:textSize="20dp"
-        android:gravity="center"
-        android:textColor="@color/white"
         android:background="@color/colorPrimary"
-        android:text="@string/GetPaymentCNOnline"/>
+        android:fontFamily="sans-serif-light"
+        android:gravity="center"
+        android:text="@string/GetPaymentCNOnline"
+        android:textColor="@color/white"
+        android:textSize="20dp"
+        android:typeface="monospace" />
 
     <TextView
         android:id="@+id/NotEnrolledPolicies"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:layout_margin="10dp"
-        android:typeface="monospace"
-        android:fontFamily="sans-serif-light"
-        android:textSize="20dp"
-        android:gravity="center"
-        android:textColor="@color/white"
         android:background="@color/colorPrimary"
-        android:text="@string/GetPaymentCNOffline" />
+        android:fontFamily="sans-serif-light"
+        android:gravity="center"
+        android:text="@string/GetPaymentCNOffline"
+        android:textColor="@color/white"
+        android:textSize="20dp"
+        android:typeface="monospace" />
 
     <TextView
         android:id="@+id/OverViewControlNumber"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:layout_margin="10dp"
-        android:typeface="monospace"
-        android:fontFamily="sans-serif-light"
-        android:textSize="20dp"
-        android:gravity="center"
-        android:textColor="@color/white"
         android:background="@color/colorPrimary"
-        android:text="@string/OverviewPaymentCN"/>
+        android:fontFamily="sans-serif-light"
+        android:gravity="center"
+        android:text="@string/OverviewPaymentCN"
+        android:textColor="@color/white"
+        android:textSize="20dp"
+        android:typeface="monospace" />
+
+    <TextView
+        android:id="@+id/BulkControlNumber"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_margin="10dp"
+        android:background="@color/colorPrimary"
+        android:fontFamily="sans-serif-light"
+        android:gravity="center"
+        android:text="@string/BulkCN"
+        android:textColor="@color/white"
+        android:textSize="20dp"
+        android:typeface="monospace" />
 
     <TextView
         android:id="@+id/CheckCommission"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:layout_margin="10dp"
-        android:typeface="monospace"
-        android:fontFamily="sans-serif-light"
-        android:textSize="20dp"
-        android:gravity="center"
-        android:textColor="@color/white"
         android:background="@color/colorPrimary"
-        android:text="@string/CheckCommission" />
+        android:fontFamily="sans-serif-light"
+        android:gravity="center"
+        android:text="@string/CheckCommission"
+        android:textColor="@color/white"
+        android:textSize="20dp"
+        android:typeface="monospace" />
 </LinearLayout>

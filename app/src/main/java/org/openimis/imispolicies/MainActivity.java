@@ -86,6 +86,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 
+import static org.openimis.imispolicies.BuildConfig.SHOW_PAYMENT_MENU;
 import static android.provider.Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION;
 
 
@@ -279,8 +280,8 @@ public class MainActivity extends AppCompatActivity
 
     private void setVisibilityOfPaymentMenu() {
         navigationView = findViewById(R.id.nav_view);
-        Menu nav_Menu = navigationView.getMenu();
-        nav_Menu.findItem(R.id.nav_payment).setVisible(AppInformation.MenuInfo.getShowPaymentNumberMenu());
+        MenuItem navPayment = navigationView.getMenu().findItem(R.id.nav_payment);
+        navPayment.setVisible(AppInformation.MenuInfo.getShowPaymentNumberMenu());
     }
 
     @Override
@@ -719,9 +720,6 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
-        if (!AppInformation.MenuInfo.getShowPaymentNumberMenu()) {
-            menu.removeItem(R.id.nav_payment);
-        }
         return true;
     }
 
