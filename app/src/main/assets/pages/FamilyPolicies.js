@@ -1,6 +1,10 @@
 $(document).ready(function () {
     document.title = Android.getString('FamilyAndPolicies');
 
+    if(!Android.IsBulkCNUsed()) {
+        $('#ControlNumberSection').hide();
+    }
+
     var FamilyId = queryString("f");
     var LocationId = parseInt(queryString("l"));
     var RegionId = parseInt(queryString("r"));
@@ -87,8 +91,8 @@ $(document).ready(function () {
 
 function LoadFamilyPolicies(FamilyId) {
     var Policies = Android.getFamilyPolicies(FamilyId);
-    var ctls = ["ProductCode", "ProductName", "StartDate", "ExpireDate", "PolicyValue", "PolicyStatus", "EffectiveDate", "hfPolicyId", "PolicyId", "hfIsOffline"];
-    var Columns = ["ProductCode", "ProductName", "StartDate", "ExpiryDate", "PolicyValue", "PolicyStatus", "EffectiveDate", "PolicyId", "PolicyId", "isOffline"];
+    var ctls = ["ProductCode", "ProductName", "StartDate", "ExpireDate", "PolicyValue", "PolicyStatus", "EffectiveDate", "hfPolicyId", "PolicyId", "hfIsOffline", "ControlNumber"];
+    var Columns = ["ProductCode", "ProductName", "StartDate", "ExpiryDate", "PolicyValue", "PolicyStatus", "EffectiveDate", "PolicyId", "PolicyId", "isOffline", "ControlNumber"];
     LoadList(Policies, '.ulList', ctls, Columns);
 }
 

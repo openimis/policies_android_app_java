@@ -88,8 +88,11 @@ public class ControlNumberService extends IntentService {
     private void handleActionFetchBulkCN(String productCode) {
         String errorMessage;
         try {
+            JSONObject object = new JSONObject();
+            object.put("productCode", productCode);
+
             HttpEntity respEntity;
-            HttpResponse response = toRestApi.postToRestApiToken(null, String.format("GetControlNumbersForEO?productCode=%s", productCode));
+            HttpResponse response = toRestApi.postToRestApiToken(object, "GetControlNumbersForEO");
             int responseCode = response.getStatusLine().getStatusCode();
             respEntity = response.getEntity();
             String content = EntityUtils.toString(respEntity);
