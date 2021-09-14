@@ -144,7 +144,7 @@ public class Acquire extends AppCompatActivity {
                 Log.w(LOG_TAG, "Temp photo file already exists");
             }
             tempPhotoUri = FileProvider.getUriForFile(this,
-                    "org.openimis.fileprovider",
+                    String.format("%s.fileprovider", BuildConfig.APPLICATION_ID),
                     tempPhotoFile);
         } catch (IOException e) {
             Log.e(LOG_TAG, "Temp photo file creation failed", e);
@@ -386,6 +386,12 @@ public class Acquire extends AppCompatActivity {
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
     }
 
     protected AlertDialog ShowDialog(String msg) {
