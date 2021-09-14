@@ -851,13 +851,13 @@ public class SQLHandler extends SQLiteOpenHelper {
 
     public int getAssignedCNCount(String officerCode, String productCode) {
         return getCount(tblBulkControlNumbers,
-                "PolicyId IS NOT NULL AND ProductCode = ? AND OfficerCode = ?",
+                "PolicyId IS NOT NULL AND UPPER(ProductCode) = UPPER(?) AND UPPER(OfficerCode) = UPPER(?)",
                 new String[]{productCode, officerCode});
     }
 
     public int getFreeCNCount(String officerCode, String productCode) {
         return getCount(tblBulkControlNumbers,
-                "PolicyId IS NULL AND ProductCode = ? AND OfficerCode = ?",
+                "PolicyId IS NULL AND UPPER(ProductCode) = UPPER(?) AND UPPER(OfficerCode) = UPPER(?)",
                 new String[]{productCode, officerCode});
     }
 
@@ -877,7 +877,7 @@ public class SQLHandler extends SQLiteOpenHelper {
         openDatabase();
         String productCode = null;
         try (Cursor cursor = mDatabase.query(tblProduct,
-                new String[]{"ProductCode"},
+                new String[]{"UPPER(ProductCode)"},
                 "ProdId = ?",
                 new String[]{productId},
                 null,
@@ -907,7 +907,7 @@ public class SQLHandler extends SQLiteOpenHelper {
                     "FROM tblOfficer o INNER JOIN tblLocations ld ON o.LocationId=ld.LocationId " +
                     "INNER JOIN tblLocations lr ON ld.ParentLocationId=lr.LocationId " +
                     "INNER JOIN tblProduct p ON (ld.LocationId=p.LocationId OR lr.LocationId=p.LocationId OR p.LocationId='null') " +
-                    "WHERE o.Code=? and ? <= p.DateTo";
+                    "WHERE UPPER(o.Code)=UPPER(?) and ? <= p.DateTo";
 
             Cursor c = mDatabase.rawQuery(query, new String[]{officerCode, date});
             result = cursorToJsonArray(c);
@@ -926,7 +926,7 @@ public class SQLHandler extends SQLiteOpenHelper {
         String result = null;
         try (Cursor c = mDatabase.query(tblBulkControlNumbers,
                 new String[]{"ControlNumber"},
-                "PolicyId IS NULL AND ProductCode = ? AND OfficerCode = ?",
+                "PolicyId IS NULL AND UPPER(ProductCode) = UPPER(?) AND UPPER(OfficerCode) = UPPER(?)",
                 new String[]{productCode, officerCode},
                 null,
                 null,
@@ -957,7 +957,7 @@ public class SQLHandler extends SQLiteOpenHelper {
             } else {
                 openDatabase();
                 JSONArray policyData = cursorToJsonArray(mDatabase.rawQuery(
-                        "SELECT po.PolicyValue, pr.ProductCode FROM tblPolicy po INNER JOIN tblProduct pr on pr.ProdId=po.ProdId WHERE PolicyId = ?",
+                        "SELECT po.PolicyValue, UPPER(pr.ProductCode) FROM tblPolicy po INNER JOIN tblProduct pr on pr.ProdId=po.ProdIdgit s WHERE PolicyId = ?",
                         new String[]{String.valueOf(policyId)}));
 
                 if (policyData.length() == 0) {
