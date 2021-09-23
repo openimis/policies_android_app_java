@@ -239,7 +239,7 @@ public class Enquire extends AppCompatActivity {
                     if (global.isNetworkAvailable()) {
                         String photo_url_str = "";
                         try {
-                            if (jsonObject.has("photoBase64")) {
+                            if (jsonObject.has("photoBase64") && !jsonObject.isNull("photoBase64") && !"null".equals(jsonObject.getString("photoBase64"))) {
                                 try {
                                     byte[] imageBytes = Base64.decode(jsonObject.getString("photoBase64").getBytes(), Base64.DEFAULT);
                                     Bitmap image = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
@@ -248,20 +248,19 @@ public class Enquire extends AppCompatActivity {
                                     Log.e(LOG_TAG, "Error while processing Base64 image", e);
                                     iv.setImageDrawable(getResources().getDrawable(R.drawable.person));
                                 }
-                            } else if (jsonObject.has("photoPath")) {
+                            } else if (jsonObject.has("photoPath") && !jsonObject.isNull("photoPath") && !"null".equals(jsonObject.getString("photoPath"))) {
                                 photo_url_str = AppInformation.DomainInfo.getDomain() + jsonObject.getString("photoPath");
                                 iv.setImageResource(R.drawable.person);
                                 Picasso.with(this)
                                         .load(photo_url_str)
                                         .placeholder(R.drawable.person)
                                         .error(R.drawable.person).into(iv);
+                            } else {
+                                iv.setImageDrawable(getResources().getDrawable(R.drawable.person));
                             }
-
-
                         } catch (Exception e) {
                             Log.e(LOG_TAG, "Fetching image failed", e);
                         }
-
                     } else {
                         if (ca.theImage != null) {
                             iv.setImageBitmap(ca.theImage);
@@ -433,7 +432,7 @@ public class Enquire extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
-            case 1:
+            case REQUEST_SCAN_QR_CODE:
                 if (resultCode == RESULT_OK) {
                     String CHFID = data.getStringExtra("SCAN_RESULT");
                     etCHFID.setText(CHFID);
