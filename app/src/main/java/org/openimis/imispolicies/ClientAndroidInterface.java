@@ -5734,9 +5734,7 @@ public class ClientAndroidInterface {
             IsFamilyAvailable = 2;
             inProgress = false;
         } else {
-
             try {
-
                 ToRestApi rest = new ToRestApi();
                 String MD = rest.getObjectFromRestApiToken("family/" + InsuranceNumber);
 
@@ -5803,20 +5801,11 @@ public class ClientAndroidInterface {
 
         for (int j = 0; j < familyArray.length(); j++) {
             JSONObject ob = familyArray.getJSONObject(j);
-            String Poverty = ob.getString("poverty");
+            String poverty = ob.getString("poverty");
             String isOffline = ob.getString("isOffline");
 
-            if (isOffline.equals("true") || isOffline.equals("1")) {
-                ob.put("isOffline", 1);
-            } else {
-                ob.put("isOffline", 0);
-            }
-
-            if (Poverty.equals("true") || Poverty.equals("1")) {
-                ob.put("poverty", 1);
-            } else {
-                ob.put("poverty", 0);
-            }
+            ob.put("poverty", "true".equals(poverty) || "1".equals(poverty) ? 1 : 0);
+            ob.put("isOffline", "true".equals(isOffline) || "1".equals(isOffline) ? 1 : 0);
 
             newFamilyArr.put(ob);
         }
@@ -5824,12 +5813,11 @@ public class ClientAndroidInterface {
         for (int j = 0; j < Insuree.length(); j++) {
             JSONObject ob = Insuree.getJSONObject(j);
             String isOffline = ob.getString("isOffline");
+            String isHead = ob.getString("isHead");
 
-            if (isOffline.equals("true") || isOffline.equals("1")) {
-                ob.put("isOffline", 1);
-            } else {
-                ob.put("isOffline", 0);
-            }
+            ob.put("isOffline", "true".equals(isOffline) || "1".equals(isOffline) ? 1 : 0);
+            ob.put("isHead", "true".equals(isHead) || "1".equals(isHead) ? 1 : 0);
+
             newInsureeArr.put(ob);
         }
 
