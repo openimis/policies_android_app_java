@@ -25,12 +25,9 @@
 
 package org.openimis.imispolicies;
 
-import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.content.DialogInterface;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -39,7 +36,6 @@ import android.view.View;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ListAdapter;
 import android.widget.SimpleAdapter;
@@ -50,13 +46,11 @@ import android.widget.Toast;
 import com.exact.CallSoap.CallSoap;
 import com.exact.general.General;
 
-import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
 import java.io.File;
@@ -68,8 +62,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
-
-import org.openimis.imispolicies.R;
 
 public class Renewal extends AppCompatActivity {
 
@@ -120,9 +112,9 @@ public class Renewal extends AppCompatActivity {
         etAmount = (EditText) findViewById(R.id.etAmount);
         btnSubmit = (Button) findViewById(R.id.btnSubmit);
         chkDiscontinue = (CheckBox) findViewById(R.id.chkDiscontinue);
-        PolicyValue =(EditText) findViewById(R.id.txtPolicyValue);
+        PolicyValue = (EditText) findViewById(R.id.txtPolicyValue);
 
-        if(getIntent().getStringExtra("CHFID").equals(getResources().getString(R.string.UnlistedRenewalPolicies))){
+        if (getIntent().getStringExtra("CHFID").equals(getResources().getString(R.string.UnlistedRenewalPolicies))) {
 
             etOfficer.setClickable(true);
             etOfficer.setCursorVisible(true);
@@ -150,7 +142,7 @@ public class Renewal extends AppCompatActivity {
             chkDiscontinue.setVisibility(View.GONE);
             PolicyValue.setVisibility(View.GONE);
 
-        }else{
+        } else {
             etCHFID.setText(getIntent().getStringExtra("CHFID"));
         }
 
@@ -167,10 +159,10 @@ public class Renewal extends AppCompatActivity {
         spProduct = (Spinner) findViewById(R.id.spProduct);
         etPayer = (AutoCompleteTextView) findViewById(R.id.etOfficer);
 
-        if(getIntent().getStringExtra("CHFID").equals(getResources().getString(R.string.UnlistedRenewalPolicies))){
+        if (getIntent().getStringExtra("CHFID").equals(getResources().getString(R.string.UnlistedRenewalPolicies))) {
             BindSpinnerPayersXXXX(LocationId);
             BindSpinnerProduct();
-        }else{
+        } else {
             spProduct.setVisibility(View.GONE);
             BindSpinnerPayers();
         }
@@ -182,114 +174,61 @@ public class Renewal extends AppCompatActivity {
 
         etPayer.setOnItemClickListener(adapter);
 
-        chkDiscontinue.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (chkDiscontinue.isChecked())
-                    DiscontinuePolicy();
-            }
+        chkDiscontinue.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (chkDiscontinue.isChecked())
+                DiscontinuePolicy();
         });
 
-        btnSubmit.setOnClickListener(new View.OnClickListener() {
+        btnSubmit.setOnClickListener(v -> {
+            if (!chkDiscontinue.isChecked()) {
 
-            @Override
-            public void onClick(View v) {
-                if (!chkDiscontinue.isChecked()) {
+                pd = ProgressDialog.show(Renewal.this, "", getResources().getString(R.string.Uploading));
+                final String[] renewal = {null};
 
-                    pd = ProgressDialog.show(Renewal.this, "", getResources().getString(R.string.Uploading));
-                    final String[] renewal = {null};
+                new Thread(() -> {
+                    if (getIntent().getStringExtra("CHFID").equals(getResources().getString(R.string.UnlistedRenewalPolicies))) {
+                        GetSelectedProduct();
+                    }
 
-                    new Thread() {
-                        public void run() {
-                            if(getIntent().getStringExtra("CHFID").equals(getResources().getString(R.string.UnlistedRenewalPolicies))){
-                                GetSelectedProduct();
-                            }
+                    if (!isValidate()) {
+                        pd.dismiss();
+                        return;
+                    }
+                    renewal[0] = WriteJSON();
+                    WriteXML();
+                    result = 3;
 
-                            if (!isValidate()) {
-                                pd.dismiss();
-                                return;
-                            }
-                            renewal[0] = WriteJSON();
-                            WriteXML();
-
-                            //Upload if internet is available
-/*                            if (_General.isNetworkAvailable(Renewal.this)) {
-
-                                CallSoap cs = new CallSoap();
-                                cs.setFunctionName("UploadRenewal");
-                                Boolean res = cs.UploadRenewal(renewal[0], PolicyXML.getName());
-                                if(res == true){
-                                    int server = ServerResponse();
-                                    if (server == 1) {
-                                        result = 1;
-                                    } else if(server == 0){
-                                        result = 2;
-                                    }else{
-                                        result = -1;
-                                    }
-                                }else{
-                                    result = 3;
-                                }
-
-                                File file = PolicyXML;
-                                File JSONfile = PolicyJSON;
-
-                                MoveFile(JSONfile);
-                                MoveFile(file);
-
-                            } else {*/
-                            result = 3;
-                            //}
-
-                            runOnUiThread(new Runnable() {
-
-                                @Override
-                                public void run() {
-                                    ca = new ClientAndroidInterface(Renewal.this);
-                                    switch (result) {
-                                        case 1:
-                                            DeleteRow(RenewalId);
-
-                                            //ca.ShowDialog(getResources().getString(R.string.UploadedSuccessfully));
-                                            Toast.makeText(getApplicationContext(), getResources().getString(R.string.UploadedSuccessfully), Toast.LENGTH_LONG).show();
-                                            break;
-                                        case 2:
-                                            DeleteRow(RenewalId);
-
-                                            //ca.ShowDialog(getResources().getString(R.string.ServerRejected));
-                                            Toast.makeText(getApplicationContext(), getResources().getString(R.string.ServerRejected), Toast.LENGTH_LONG).show();
-                                            break;
-                                        case 3:
-                                            UpdateRow(RenewalId);
-
-                                            //ca.ShowDialog(getResources().getString(R.string.SavedOnSDCard));
-                                            Toast.makeText(getApplicationContext(), getResources().getString(R.string.SavedOnSDCard), Toast.LENGTH_LONG).show();
-                                            break;
-                                        case -1:
-                                            //ca.ShowDialog(getResources().getString(R.string.RenewalNotUploaded));
-                                            Toast.makeText(getApplicationContext(), getResources().getString(R.string.RenewalNotUploaded), Toast.LENGTH_LONG).show();
-                                            break;
-                                    }
-                                    //Go back to the previous activity.
-                                    finish();
-                                }
-                            });
-
-                            pd.dismiss();
+                    runOnUiThread(() -> {
+                        ca = new ClientAndroidInterface(Renewal.this);
+                        switch (result) {
+                            case 1:
+                                DeleteRow(RenewalId);
+                                Toast.makeText(getApplicationContext(), getResources().getString(R.string.UploadedSuccessfully), Toast.LENGTH_LONG).show();
+                                break;
+                            case 2:
+                                DeleteRow(RenewalId);
+                                Toast.makeText(getApplicationContext(), getResources().getString(R.string.ServerRejected), Toast.LENGTH_LONG).show();
+                                break;
+                            case 3:
+                                UpdateRow(RenewalId);
+                                Toast.makeText(getApplicationContext(), getResources().getString(R.string.SavedOnSDCard), Toast.LENGTH_LONG).show();
+                                break;
+                            case -1:
+                                Toast.makeText(getApplicationContext(), getResources().getString(R.string.RenewalNotUploaded), Toast.LENGTH_LONG).show();
+                                break;
                         }
-                    }.start();
-                }
-// else {
-//                    DiscontinuePolicy();
-//                }
+                        //Go back to the previous activity.
+                        finish();
+                    });
 
+                    pd.dismiss();
+                }).start();
             }
         });
 
         etOfficer.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
             }
 
             @Override
@@ -303,26 +242,23 @@ public class Renewal extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable s) {
-
             }
         });
-
     }
-
 
     private String GetSelectedPayer() {
         String Payer = "0";
-        try{
-            HashMap<String, String> P = new HashMap<>();
+        try {
+            HashMap<String, String> P;
             //noinspection unchecked
             P = (HashMap<String, String>) spPayer.getSelectedItem();
-            if(P.get("PayerId") == null) {
+            if (P.get("PayerId") == null) {
                 Payer = "0";
-            }else{
+            } else {
                 Payer = P.get("PayerId");
             }
 
-        }catch (Exception e){
+        } catch (Exception e) {
             // e.printStackTrace();
         }
 
@@ -331,18 +267,18 @@ public class Renewal extends AppCompatActivity {
 
     private String GetSelectedProduct() {
         String Product = "0";
-        try{
-            HashMap<String, String> P = new HashMap<>();
+        try {
+            HashMap<String, String> P;
             //noinspection unchecked
             P = (HashMap<String, String>) spProduct.getSelectedItem();
-            if(P.get("ProductCode") == null) {
+            if (P.get("ProductCode") == null) {
                 Product = "0";
-            }else{
+            } else {
                 Product = P.get("ProductCode");
                 etProductCode.setText(Product);
             }
 
-        }catch (Exception e){
+        } catch (Exception e) {
             // e.printStackTrace();
         }
 
@@ -355,7 +291,7 @@ public class Renewal extends AppCompatActivity {
             File MyDir = new File(global.getMainDirectory());
 
             //Create File name
-            @SuppressLint("SimpleDateFormat") SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+            SimpleDateFormat format = AppInformation.DateTimeInfo.getDefaultDateFormatter();
             Calendar cal = Calendar.getInstance();
             String d = format.format(cal.getTime());
             FileName = "RenPol_" + d + "_" + etCHFID.getText().toString() + "_" + etReceiptNo.getText().toString() + ".xml";
@@ -420,13 +356,14 @@ public class Renewal extends AppCompatActivity {
         }
 
     }
-    public String WriteJSON(){
+
+    public String WriteJSON() {
 
         //Create all the directories required
         File MyDir = new File(global.getMainDirectory());
 
         //Create a file name
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat format = AppInformation.DateTimeInfo.getDefaultDateFormatter();
         Calendar cal = Calendar.getInstance();
         String d = format.format(cal.getTime());
         FileName = "RenPolJSON_" + d + "_" + etCHFID.getText().toString() + "_" + etReceiptNo.getText().toString() + ".txt";
@@ -451,11 +388,11 @@ public class Renewal extends AppCompatActivity {
             RenewalObject.put("Discontinue", String.valueOf(chkDiscontinue.isChecked()));
             RenewalObject.put("PayerId", PayerId);
 
-            FullObject.put("Policy",RenewalObject);
+            FullObject.put("Policy", RenewalObject);
 
             try {
                 FileOutputStream fOut = new FileOutputStream(PolicyJSON);
-                OutputStreamWriter myOutWriter =new OutputStreamWriter(fOut);
+                OutputStreamWriter myOutWriter = new OutputStreamWriter(fOut);
                 myOutWriter.append(FullObject.toString());
                 myOutWriter.close();
                 fOut.close();
@@ -463,7 +400,7 @@ public class Renewal extends AppCompatActivity {
                 e.printStackTrace();
             }
 
-        }catch (IllegalStateException e) {
+        } catch (IllegalStateException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         } catch (JSONException e) {
@@ -480,12 +417,12 @@ public class Renewal extends AppCompatActivity {
     }
 
     private void MoveFile(File file) {
-        switch(result){
+        switch (result) {
             case 1:
-                file.renameTo(new File(global.getSubdirectory("AcceptedRenewal"),file.getName()));
+                file.renameTo(new File(global.getSubdirectory("AcceptedRenewal"), file.getName()));
                 break;
             case 2:
-                file.renameTo(new File(global.getSubdirectory("RejectedRenewal"),file.getName()));
+                file.renameTo(new File(global.getSubdirectory("RejectedRenewal"), file.getName()));
                 break;
         }
     }
@@ -493,50 +430,36 @@ public class Renewal extends AppCompatActivity {
     private void DiscontinuePolicy() {
         new AlertDialog.Builder(this)
                 .setMessage(R.string.DiscontinuePolicyQ)
-                .setPositiveButton(R.string.Yes, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                        pd = ProgressDialog.show(Renewal.this, "", getResources().getString(R.string.Uploading));
-                        new Thread() {
-                            @Override
-                            public void run() {
-                                ToRestApi rest = new ToRestApi();
-                                try {
-                                    if(_General.isNetworkAvailable(getApplicationContext())){
-                                        String result = rest.deleteFromRestApiToken("policy/renew/" + RenewalUUID);
-                                        DeleteRow(RenewalId);
-                                        pd.dismiss();
-                                        finish();
-                                    }else {
-                                        WriteXML();
-                                        DeleteRow(RenewalId);
-                                        pd.dismiss();
-                                        finish();
-                                    }
-
-                                } catch (final Exception e) {
-                                    e.printStackTrace();
-                                    pd.dismiss();
-                                    runOnUiThread(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            chkDiscontinue.setChecked(false);
-                                            ca.ShowDialog(e.toString());
-                                        }
-                                    });
-                                }
+                .setPositiveButton(R.string.Yes, (dialog, which) -> {
+                    dialog.dismiss();
+                    pd = ProgressDialog.show(Renewal.this, "", getResources().getString(R.string.Uploading));
+                    new Thread(() -> {
+                        ToRestApi rest = new ToRestApi();
+                        try {
+                            if (_General.isNetworkAvailable(getApplicationContext())) {
+                                String result = rest.deleteFromRestApiToken("policy/renew/" + RenewalUUID);
+                                DeleteRow(RenewalId);
+                                pd.dismiss();
+                                finish();
+                            } else {
+                                WriteXML();
+                                DeleteRow(RenewalId);
+                                pd.dismiss();
+                                finish();
                             }
-                        }.start();
 
-                    }
+                        } catch (final Exception e) {
+                            e.printStackTrace();
+                            pd.dismiss();
+                            runOnUiThread(() -> {
+                                chkDiscontinue.setChecked(false);
+                                ca.ShowDialog(e.toString());
+                            });
+                        }
+                    }).start();
+
                 })
-                .setNegativeButton(R.string.No, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        chkDiscontinue.setChecked(false);
-                    }
-                }).show();
+                .setNegativeButton(R.string.No, (dialog, which) -> chkDiscontinue.setChecked(false)).show();
     }
 
     private void UpdateRow(int RenewalId) {
@@ -553,7 +476,7 @@ public class Renewal extends AppCompatActivity {
         ca = new ClientAndroidInterface(this);
         String result = ca.getPayersByDistrictId(LocationId);
 
-        JSONArray jsonArray = null;
+        JSONArray jsonArray;
         JSONObject object;
 
         try {
@@ -578,7 +501,7 @@ public class Renewal extends AppCompatActivity {
 
                 PayersList.add(Payer);
 
-                adapter  = new SimpleAdapter(Renewal.this, PayersList, R.layout.spinnerpayer,
+                adapter = new SimpleAdapter(Renewal.this, PayersList, R.layout.spinnerpayer,
                         new String[]{"PayerId", "PayerName"},
                         new int[]{R.id.tvPayerId, R.id.tvPayerName});
 
@@ -591,12 +514,13 @@ public class Renewal extends AppCompatActivity {
         }
 
     }
+
     private void BindSpinnerPayers() {
 
         ca = new ClientAndroidInterface(this);
         String result = ca.getPayer(LocationId);
 
-        JSONArray jsonArray = null;
+        JSONArray jsonArray;
         JSONObject object;
 
         try {
@@ -635,6 +559,7 @@ public class Renewal extends AppCompatActivity {
         }
 
     }
+
     private void BindSpinnerProduct() {
 
         ca = new ClientAndroidInterface(this);
@@ -684,24 +609,18 @@ public class Renewal extends AppCompatActivity {
     private boolean isValidate() {
 
         if (etOfficer.getText().length() == 0) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    ca.ShowDialog(getResources().getString(R.string.MissingOfficer));
-                    etOfficer.requestFocus();
-                }
+            runOnUiThread(() -> {
+                ca.ShowDialog(getResources().getString(R.string.MissingOfficer));
+                etOfficer.requestFocus();
             });
 
             return false;
         }
 
         if (etCHFID.getText().length() == 0) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    ca.ShowDialog(getResources().getString(R.string.MissingCHFID));
-                    etCHFID.requestFocus();
-                }
+            runOnUiThread(() -> {
+                ca.ShowDialog(getResources().getString(R.string.MissingCHFID));
+                etCHFID.requestFocus();
             });
 
             return false;
@@ -709,36 +628,27 @@ public class Renewal extends AppCompatActivity {
 
 
         if (etReceiptNo.getText().length() == 0) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    ca.ShowDialog(getResources().getString(R.string.MissingReceiptNo));
-                    etReceiptNo.requestFocus();
-                }
+            runOnUiThread(() -> {
+                ca.ShowDialog(getResources().getString(R.string.MissingReceiptNo));
+                etReceiptNo.requestFocus();
             });
 
             return false;
         }
 
         if (etProductCode.getText().length() == 0) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    ca.ShowDialog(getResources().getString(R.string.MissingProductCode));
-                    etProductCode.requestFocus();
-                }
+            runOnUiThread(() -> {
+                ca.ShowDialog(getResources().getString(R.string.MissingProductCode));
+                etProductCode.requestFocus();
             });
 
             return false;
         }
 
         if (etAmount.getText().length() == 0) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    ca.ShowDialog(getResources().getString(R.string.MissingAmount));
-                    etAmount.requestFocus();
-                }
+            runOnUiThread(() -> {
+                ca.ShowDialog(getResources().getString(R.string.MissingAmount));
+                etAmount.requestFocus();
             });
 
             return false;
@@ -746,8 +656,6 @@ public class Renewal extends AppCompatActivity {
 
         if (_General.isNetworkAvailable(Renewal.this)) {
             if (etReceiptNo.getText().toString().trim().length() > 0) {
-//                new Thread() {
-//                    public void run() {
                 HttpResponse response = null;
 
                 try {
@@ -771,22 +679,16 @@ public class Renewal extends AppCompatActivity {
                             e.printStackTrace();
                         }
                         if (!isUniqueReceiptNo) {
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    ca.ShowDialog(getResources().getString(R.string.InvalidReceiptNo));
-                                    etReceiptNo.requestFocus();
-                                }
+                            runOnUiThread(() -> {
+                                ca.ShowDialog(getResources().getString(R.string.InvalidReceiptNo));
+                                etReceiptNo.requestFocus();
                             });
                             return false;
                         }
                     } else if (responseCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                ca.ShowDialog(getResources().getString(R.string.LogInToCheckRecieptNo));
-                                etReceiptNo.requestFocus();
-                            }
+                        runOnUiThread(() -> {
+                            ca.ShowDialog(getResources().getString(R.string.LogInToCheckRecieptNo));
+                            etReceiptNo.requestFocus();
                         });
                         return false;
                     }
@@ -797,6 +699,4 @@ public class Renewal extends AppCompatActivity {
         }
         return true;
     }
-
-
 }

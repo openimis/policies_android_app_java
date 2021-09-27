@@ -219,12 +219,12 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
         wv = findViewById(R.id.webview);
         WebSettings settings = wv.getSettings();
+        wv.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
         settings.setJavaScriptEnabled(true);
         //noinspection deprecation
-        wv.getSettings().setRenderPriority(WebSettings.RenderPriority.HIGH);
-        wv.getSettings().setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
-        wv.getSettings().setAppCacheEnabled(true);
-        wv.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
+        settings.setRenderPriority(WebSettings.RenderPriority.HIGH);
+        settings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
+        settings.setAppCacheEnabled(true);
         settings.setDomStorageEnabled(true);
         settings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.SINGLE_COLUMN);
         settings.setUseWideViewPort(true);

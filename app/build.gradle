@@ -15,7 +15,7 @@ if ( keystorePropertiesFile.exists() ) {
 //generate date
 static def getDate() {
     LocalDateTime date = LocalDateTime.now()
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern('dd MMMM yyyy HH:mm').withLocale(Locale.UK)
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern('yyyy-MM-dd HH:mm:ss').withLocale(Locale.US)
     return date.format(formatter)
 }
 

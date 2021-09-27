@@ -61,9 +61,7 @@ public class OverViewControlNumbers extends AppCompatActivity {
 
     public static int PolicyValueToSend = 0;
     public static JSONObject getControlNumber = new JSONObject();
-
-    @SuppressLint("SimpleDateFormat")
-    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+    SimpleDateFormat format = AppInformation.DateTimeInfo.getDefaultDateFormatter();;
     Calendar cal = Calendar.getInstance();
     String dt = format.format(cal.getTime());
     private String AmountCalculated;

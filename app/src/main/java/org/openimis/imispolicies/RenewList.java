@@ -288,7 +288,7 @@ public class RenewList extends AppCompatActivity {
 
     private void fillRenewals() {
         RenewalList.clear();
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat format = AppInformation.DateTimeInfo.getDefaultDateFormatter();
         Calendar cal = Calendar.getInstance();
         String d = format.format(cal.getTime());
 

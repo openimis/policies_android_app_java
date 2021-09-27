@@ -963,7 +963,6 @@ public class ClientAndroidInterface {
             if (validation > 0) {
                 ShowDialog(mContext.getResources().getString(validation));
                 return 7;
-                //throw new UserException(mContext.getResources().getString(validation)); //commented by Rogers
             }
 
             MaxInsureeId = getNextAvailableInsureeId();
@@ -990,9 +989,7 @@ public class ClientAndroidInterface {
                 } else {
                     CardIssued = false;
                 }
-
             }
-
 
             Integer Relation = null;
             if (!TextUtils.isEmpty(data.get("ddlRelationship")) && !data.get("ddlRelationship").equals("0"))
@@ -1068,52 +1065,34 @@ public class ClientAndroidInterface {
                 if (isOffline == 0 || isOffline == 2) {
                     if (isOffline == 2) isOffline = 0;
                     if (general.isNetworkAvailable(mContext)) {
-//                          THIS SHOULD NOT BE HERE
-//                        //Existing family
-//                        CallSoap cs = new CallSoap();
-//                        cs.setFunctionName("InsureeNumberExist");
-//                        //check if insuree exist online
-//                        res = cs.InsureeNumberExist(String.valueOf(data.get("txtInsuranceNumber")));
-//
-                        res = false;
+                        //if (isOffline == 0){
+                        MaxInsureeId = -MaxInsureeId;
+                        newInsureeId = MaxInsureeId;
+                        //}
+                        values.put("InsureeId", MaxInsureeId);
 
-                        if (res == false) {
-                            //if (isOffline == 0){
-                            MaxInsureeId = -MaxInsureeId;
-                            newInsureeId = MaxInsureeId;
-                            //}
-                            values.put("InsureeId", MaxInsureeId);
-
-                            sqlHandler.insertData("tblInsuree", values);
-                            if (PolicyId > 0 && isHead == 0) {
-                                getFamilyPolicies(FamilyId);
+                        sqlHandler.insertData("tblInsuree", values);
+                        if (PolicyId > 0 && isHead == 0) {
+                            getFamilyPolicies(FamilyId);
+                        }
+                        inProgress = false;
+                        rtInsureeId = MaxInsureeId;
+                        if (ExceedThreshold == 1) {
+                            if (isOffline == 0 || isOffline == 2) {
+                                if (isOffline == 2) isOffline = 0;
+                                int InsId = -rtInsureeId;
+                                ShowDialogYesNo(InsId, FamilyId, Activate, isOffline);
+                            } else {
+                                ShowDialogYesNo(rtInsureeId, FamilyId, Activate, isOffline);
                             }
-                            inProgress = false;
-                            rtInsureeId = MaxInsureeId;
-                            if (ExceedThreshold == 1) {
-                                if (isOffline == 0 || isOffline == 2) {
-                                    if (isOffline == 2) isOffline = 0;
-                                    int InsId = -rtInsureeId;
-                                    ShowDialogYesNo(InsId, FamilyId, Activate, isOffline);
-                                } else {
-                                    ShowDialogYesNo(rtInsureeId, FamilyId, Activate, isOffline);
-                                }
-                            } else if (ExceedThreshold == 0) {
-                                if (isOffline == 0 || isOffline == 2) {
-                                    if (isOffline == 2) isOffline = 0;
-                                    int InsId = -rtInsureeId;
-                                    SaveInsureePolicy(InsId, FamilyId, true, isOffline);
-                                } else {
-                                    SaveInsureePolicy(rtInsureeId, FamilyId, true, isOffline);
-                                }
+                        } else if (ExceedThreshold == 0) {
+                            if (isOffline == 0 || isOffline == 2) {
+                                if (isOffline == 2) isOffline = 0;
+                                int InsId = -rtInsureeId;
+                                SaveInsureePolicy(InsId, FamilyId, true, isOffline);
+                            } else {
+                                SaveInsureePolicy(rtInsureeId, FamilyId, true, isOffline);
                             }
-                        } else {
-                            String ErrMsg;
-                            ErrMsg = "[" + data.get("txtInsuranceNumber") + "] " + mContext.getString(R.string.DuplicateInsuranceNumber);
-                            ShowDialog(ErrMsg);
-
-                            return 6;
-
                         }
                     } else {
                         sqlHandler.insertData("tblInsuree", values);
@@ -1147,68 +1126,15 @@ public class ClientAndroidInterface {
                 if (isOffline == 0 || isOffline == 2) {
                     if (isOffline == 2) isOffline = 0;
                     if (global.getUserId() > 0) {
-                        final int FinalFamilyId = FamilyId;
-                        final int FinalInsureeId = rtInsureeId;
                         if (rtInsureeId > 0) {
                             newInsureeId = -rtInsureeId;
                         } else {
                             newInsureeId = rtInsureeId;
                         }
-                        if (rtInsureeId == 0 && res == true) {
+                        if (rtInsureeId == 0 && res) {
                             inProgress = false;
-                        } else {//Automatic sync
-  /*                          try {
-                                int ReturnValue = Enrol(FinalFamilyId, newInsureeId, 0, 0, 0);//fetches from sqlite database
-                                //Update insureeId to positive becouse its already online now.
-                                if(ReturnValue == 0){
-                                    if(newInsureeId < 0){
-                                        values.put("InsureeId", -newInsureeId);
-                                        InsureePolicyvalues.put("InsureeId", -newInsureeId);
-                                        if(isHead == 1){
-                                            FamilyValues.put("InsureeId", -newInsureeId);
-                                        }
-                                    }else{
-                                        values.put("InsureeId", newInsureeId);
-                                        if(isHead == 1){
-                                            FamilyValues.put("InsureeId", newInsureeId);
-                                        }
-                                    }
-
-                                    int ins = 0;
-                                    if(newInsureeId < 0){
-                                        ins = newInsureeId;
-                                    }else{
-                                        ins = -newInsureeId;
-                                    }
-
-                                    values.put("isOffline", 0);
-                                    sqlHandler.updateData("tblInsuree", values, "InsureeId = ?", new String[]{String.valueOf(ins)});
-                                    if(doInsureeExisttblInsPolicy(ins) > 0){
-                                        sqlHandler.updateData("tblInsureePolicy", InsureePolicyvalues, "InsureeId = ?", new String[]{String.valueOf(ins)});
-                                    }
-
-                                    if(isHead == 1){
-                                        sqlHandler.updateData("tblFamilies", FamilyValues, "FamilyId = ? AND (isOffline = ?)", new String[]{String.valueOf(FamilyId), String.valueOf(isOffline)});
-                                    }
-                                }
-                                inProgress = false;
-                            } catch (UserException e) {
-                                e.printStackTrace();
-                            }*/
+                        } else {
                         }
-
-    /*                new Thread() {
-                        public void run() {
-                            try {
-                                rtInsureeId = Enrol(FinalFamilyId, FinalInsureeId, 0, 0, 0);
-                                inProgress = false;
-                            } catch (UserException e) {
-                                e.printStackTrace();
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    }.start();*/
                         inProgress = false;
                     }
                     inProgress = false;
@@ -1408,7 +1334,7 @@ public class ClientAndroidInterface {
     }
 
     private String getYear(Date date) {
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat format = new SimpleDateFormat("yyyy");
+        SimpleDateFormat format = new SimpleDateFormat("yyyy", Locale.US);
         return format.format(date);
     }
 
@@ -1436,7 +1362,7 @@ public class ClientAndroidInterface {
     @JavascriptInterface
     public String getPolicyPeriod(int ProdId, String EnrollDate) throws ParseException, JSONException {
 
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat format = AppInformation.DateTimeInfo.getDefaultDateFormatter();
         Date dEnrollDate = format.parse(EnrollDate);
 
         String sSQL = "SELECT IFNULL(AdministrationPeriod, 0) AdministrationPeriod, StartCycle1, StartCycle2, StartCycle3, StartCycle4, InsurancePeriod, IFNULL(GracePeriod, 0)GracePeriod\n" +
@@ -1451,7 +1377,8 @@ public class ClientAndroidInterface {
 
         String EnrollYear = getYear(dEnrollDate);
 
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
+        String startCycleFormat = "dd-MM-yyyy";
+        SimpleDateFormat sdf = new SimpleDateFormat(startCycleFormat, Locale.US);
         Date StartCycle1 = null;
         Date StartCycle2 = null;
         Date StartCycle3 = null;
@@ -1507,8 +1434,7 @@ public class ClientAndroidInterface {
 
         ExpiryDate = addDay(addMonth(StartDate, InsurancePeriod), -1);
 
-        SimpleDateFormat ymd = new SimpleDateFormat("yyyy-MM-dd");
-
+        SimpleDateFormat ymd = AppInformation.DateTimeInfo.getDefaultDateFormatter();
 
         JSONArray period = new JSONArray();
         JSONObject o = new JSONObject();
@@ -1638,7 +1564,7 @@ public class ClientAndroidInterface {
         if ((AdultMembers + ChildMembers + OAdultMembers + OChildMembers) >= MemberCount)
             OAdultMembers = MemberCount - (AdultMembers + ChildMembers + OAdultMembers);
 
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat format = AppInformation.DateTimeInfo.getDefaultDateFormatter();
         //Get   Previous Expiry Date
         if (PreviousPolicyId > 0) {
             String PED_Query = "SELECT ExpiryDate FROM tblPolicy WHERE  PolicyId =" + PreviousPolicyId;
@@ -1847,8 +1773,7 @@ public class ClientAndroidInterface {
     }
 
     public String getProductsByDistrict(int DistrictId) {
-
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat format = AppInformation.DateTimeInfo.getDefaultDateFormatter();
         Calendar cal = Calendar.getInstance();
         String dt = format.format(cal.getTime());
 
@@ -1864,8 +1789,7 @@ public class ClientAndroidInterface {
     }
 
     public String getProducts() {
-
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat format = AppInformation.DateTimeInfo.getDefaultDateFormatter();
         Calendar cal = Calendar.getInstance();
         String dt = format.format(cal.getTime());
 
@@ -2227,7 +2151,7 @@ public class ClientAndroidInterface {
             requested = " AND typeof(ControlNumberId) = 'integer'";
         }
 
-        String today = new SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Calendar.getInstance().getTime());
+        String today = AppInformation.DateTimeInfo.getDefaultDateFormatter().format(Calendar.getInstance().getTime());
 
         String dateFrom = getOrDefault(uploadedFrom, "0001-01-01");
         String dateTo = getOrDefault(uploadedTo, today);
@@ -2252,7 +2176,7 @@ public class ClientAndroidInterface {
             payment_type = " AND CN.PaymentType == '" + PaymentType + "'";
         }
 
-        String today = new SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Calendar.getInstance().getTime());
+        String today = AppInformation.DateTimeInfo.getDefaultDateFormatter().format(Calendar.getInstance().getTime());
         String earlyDate = "0001-01-01";
 
         String dateUploadedFrom = getOrDefault(uploadedFrom, earlyDate);
@@ -2379,7 +2303,8 @@ public class ClientAndroidInterface {
     }
 
     public void updateRecordedPolicy(int Id, int ControlNumberId) {
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat format = AppInformation.DateTimeInfo.getDefaultDateFormatter();
+        ;
         Calendar cal = Calendar.getInstance();
         String d = format.format(cal.getTime());
         ContentValues values = new ContentValues();
@@ -2393,7 +2318,7 @@ public class ClientAndroidInterface {
     }
 
     public void assignControlNumber(String InternalIdentifier, String ControlNumber) {
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat format = AppInformation.DateTimeInfo.getDefaultDateFormatter();
         Calendar cal = Calendar.getInstance();
         String d = format.format(cal.getTime());
         ContentValues values = new ContentValues();
@@ -2805,7 +2730,7 @@ public class ClientAndroidInterface {
     }
 
     public void updateUploadedDate(int PolicyId) {
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat format = AppInformation.DateTimeInfo.getDefaultDateFormatter();
         Calendar cal = Calendar.getInstance();
         String d = format.format(cal.getTime());
         ContentValues values = new ContentValues();
@@ -2918,7 +2843,7 @@ public class ClientAndroidInterface {
     @JavascriptInterface
     public int UpdatePolicy(int PolicyId, String PayDate, int policystatus) throws ParseException {
         ContentValues values = new ContentValues();
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat format = AppInformation.DateTimeInfo.getDefaultDateFormatter();
         String PolicyQuery = "SELECT StartDate FROM tblPolicy WHERE PolicyId = " + PolicyId;
         JSONArray Policy = sqlHandler.getResult(PolicyQuery, null);
         String StartDate = null;
@@ -3193,7 +3118,7 @@ public class ClientAndroidInterface {
                 if (!VerifyPhoto(insureesArray)) {
                     result = false;
                 }
-                if (result == true) {
+                if (result) {
                     FamilyIDs.add(FamilyId);
                 }
             }
@@ -5551,7 +5476,7 @@ public class ClientAndroidInterface {
     @JavascriptInterface
     public void UpdateInsureePolicy(int PolicyId) {//herman new
         ContentValues values = new ContentValues();
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat format = AppInformation.DateTimeInfo.getDefaultDateFormatter();
         String PolicyQuery = "SELECT EffectiveDate FROM tblPolicy WHERE PolicyId = " + PolicyId;
         JSONArray Policy = sqlHandler.getResult(PolicyQuery, null);
         String EffectiveDate = null;

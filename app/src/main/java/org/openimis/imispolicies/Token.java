@@ -79,7 +79,7 @@ public class Token {
                 myReader.close();
             }
 
-            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSXXX", Locale.getDefault());
+            SimpleDateFormat format = AppInformation.DateTimeInfo.getDefaultIsoDatetimeFormatter();
 
             if (validTo != null)
                 try {

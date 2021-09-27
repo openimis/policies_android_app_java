@@ -897,7 +897,7 @@ public class SQLHandler extends SQLiteOpenHelper {
     }
 
     public JSONArray getAvailableProducts(String officerCode) {
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+        SimpleDateFormat format = AppInformation.DateTimeInfo.getDefaultDateFormatter();
         String date = format.format(Calendar.getInstance().getTime());
 
         openDatabase();
