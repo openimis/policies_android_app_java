@@ -1,5 +1,8 @@
 package org.openimis.imispolicies;
 
+import java.text.SimpleDateFormat;
+import java.util.Locale;
+
 import static org.openimis.imispolicies.BuildConfig.API_BASE_URL;
 import static org.openimis.imispolicies.BuildConfig.RAR_PASSWORD;
 import static org.openimis.imispolicies.BuildConfig.API_VERSION;
@@ -34,6 +37,27 @@ public final class AppInformation {
         }
 
         private MenuInfo() {
+        }
+    }
+
+    public final static class DateTimeInfo {
+        public static String getDateFormat() {
+            return "yyyy-MM-dd";
+        }
+
+        public static String getISODatetimeFormat() {
+            return "yyyy-MM-dd'T'HH:mm:ss.SSSSSSSXXX";
+        }
+
+        public static SimpleDateFormat getDefaultDateFormatter() {
+            return new SimpleDateFormat(getDateFormat(), Locale.US);
+        }
+
+        public static SimpleDateFormat getDefaultIsoDatetimeFormatter() {
+            return new SimpleDateFormat(getISODatetimeFormat(), Locale.US);
+        }
+
+        private DateTimeInfo() {
         }
     }
 

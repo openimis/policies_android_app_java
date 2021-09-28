@@ -314,8 +314,7 @@ public class SearchOverViewControlNumber extends AppCompatActivity {
     }
 
     public void updateLabel(Calendar calendar, TextView view) {
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
-
+        SimpleDateFormat formatter = AppInformation.DateTimeInfo.getDefaultDateFormatter();
         view.setText(formatter.format(calendar.getTime()));
     }
 
