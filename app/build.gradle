@@ -130,6 +130,12 @@ android {
             buildConfigField "boolean", "SHOW_BULK_CN_MENU", 'true'
             resValue "string", "app_name_policies", "Policies CHF SIT"
         }
+        niger {
+            applicationId "org.openimis.imispolicies.niger"
+            buildConfigField "String", "API_BASE_URL", '"http://oiniger.bluesquare.org/rest/"'
+            buildConfigField "String", "APP_DIR", '"IMIS-NIGER"'
+            resValue "string", "app_name_policies", "Polices Niger"
+        }
     }
     sourceSets {
         chfDev.java.srcDir 'src/chf/java'
@@ -146,6 +152,9 @@ android {
 
         bephaDev.java.srcDir 'src/bepha/java'
         bephaDev.res.srcDir 'src/bepha/res'
+
+        niger.java.srcDir 'src/niger/java'
+        niger.res.srcDir 'src/niger/res'
 
         demoProd.java.srcDir 'src/master/java'
         demoProd.res.srcDir 'src/demoProd/res'
