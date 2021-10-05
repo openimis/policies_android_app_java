@@ -3727,7 +3727,17 @@ public class ClientAndroidInterface {
                 args = new String[]{FamilyId};
             }*/
 
-            Query = "SELECT ABS(F.FamilyId) AS FamilyId, ABS(F.InsureeId) AS InsureeId, F.LocationId, I.CHFID AS HOFCHFID, NULLIF(F.Poverty,'null') Poverty, NULLIF(F.FamilyType,'null') FamilyType, NULLIF(F.FamilyAddress,'null') FamilyAddress, NULLIF(F.Ethnicity,'null') Ethnicity, NULLIF(F.ConfirmationNo,'null') ConfirmationNo, F.ConfirmationType ConfirmationType,F.isOffline isOffline FROM tblFamilies F\n" +
+            Query = "SELECT ABS(F.FamilyId) AS FamilyId, " +
+                    "ABS(F.InsureeId) AS InsureeId, " +
+                    "F.LocationId, " +
+                    "I.CHFID AS HOFCHFID, " +
+                    "NULLIF(F.Poverty,'null') Poverty, " +
+                    "NULLIF(F.FamilyType,'null') FamilyType, " +
+                    "NULLIF(F.FamilyAddress,'null') FamilyAddress, " +
+                    "NULLIF(F.Ethnicity,'null') Ethnicity, " +
+                    "NULLIF(F.ConfirmationNo,'null') ConfirmationNo, " +
+                    "F.ConfirmationType ConfirmationType," +
+                    "F.isOffline isOffline FROM tblFamilies F\n" +
                     "INNER JOIN tblInsuree I ON I.InsureeId = F.InsureeId WHERE";
 
             if (CallerId != 2) {
@@ -3783,7 +3793,94 @@ public class ClientAndroidInterface {
             familyArray = newFamilyArray;
 
             //get Insureesf
-            Query = "SELECT ABS(I.InsureeId) AS InsureeId, ABS(I.FamilyId) AS FamilyId, I.CHFID, I.LastName, I.OtherNames, I.DOB, I.Gender, NULLIF(I.Marital,'') Marital, I.isHead, NULLIF(I.IdentificationNumber,'null') IdentificationNumber, NULLIF(I.Phone,'null') Phone, REPLACE(I.PhotoPath, RTRIM(PhotoPath, REPLACE(PhotoPath, '/', '')), '') PhotoPath, NULLIF(I.CardIssued,'null') CardIssued, NULLIF(I.Relationship,'null') Relationship, NULLIF(I.Profession,'null') Profession, NULLIF(I.Education,'null') Education, NULLIF(I.Email,'null') Email, CASE WHEN I.TypeOfId='null' THEN null ELSE I.TypeOfId END TypeOfId, NULLIF(I.HFID,'null') HFID, NULLIF(I.CurrentAddress,'null') CurrentAddress, NULLIF(I.GeoLocation,'null') GeoLocation, NULLIF(I.CurVillage,'null') CurVillage,I.isOffline \n" +
+            Query = "SELECT ABS(I.InsureeId) AS InsureeId, " +
+                    "ABS(I.FamilyId) AS FamilyId, " +
+                    "I.CHFID, " +
+                    "I.LastName, " +
+                    "I.OtherNames, " +
+                    "I.DOB," +
+                    " I.Gender," +
+                    " NULLIF(I.Marital,'') Marital, " +
+                    "I.isHead, " +
+                    "NULLIF(I.IdentificationNumber,'null') IdentificationNumber, " +
+                    "NULLIF(I.Phone,'null') Phone, " +
+                    "REPLACE(I.PhotoPath, RTRIM(PhotoPath, REPLACE(PhotoPath, '/', '')), '') PhotoPath, " +
+                    "NULLIF(I.CardIssued,'null') CardIssued, " +
+                    "NULLIF(I.Relationship,'null') Relationship, " +
+                    "NULLIF(I.Profession,'null') Profession, " +
+                    "NULLIF(I.Education,'null') Education, " +
+                    "NULLIF(I.Email,'null') Email, " +
+                    "CASE WHEN I.TypeOfId='null' THEN null ELSE I.TypeOfId END TypeOfId, " +
+                    "NULLIF(I.HFID,'null') HFID, " +
+                    "NULLIF(I.CurrentAddress,'null') CurrentAddress, " +
+                    "NULLIF(I.GeoLocation,'null') GeoLocation, " +
+                    "NULLIF(I.CurVillage,'null') CurVillage," +
+                    "NULLIF(I.IsHeadPhone1,'null') IsHeadPhone1," +
+                    "NULLIF(I.IsHeadPhone2,'null') IsHeadPhone2," +
+                    "NULLIF(I.AltPhone,'null') AltPhone," +
+                    "NULLIF(I.NetWorkProvider1,'null') NetWorkProvider1," +
+                    "NULLIF(I.NetWorkProvider2,'null') NetWorkProvider2," +
+                    "NULLIF(I.PreferredPaiementMode,'null') PreferredPaiementMode," +
+                    "NULLIF(I.HeadStatus,'null') HeadStatus," +
+                    "NULLIF(I.LengthPresentLocation,'null') LengthPresentLocation," +
+                    "NULLIF(I.MaleLivingHoushold,'null') MaleLivingHoushold," +
+                    "NULLIF(I.FemaleLivingHoushold,'null') FemaleLivingHoushold," +
+                    "NULLIF(I.PersonLivingHoushold,'null') PersonLivingHoushold," +
+                    "NULLIF(I.HHNBChildrenLivingM,'null') HHNBChildrenLivingM," +
+                    "NULLIF(I.HHNBChildrenLivingF,'null') HHNBChildrenLivingF," +
+                    "NULLIF(I.HHNBChildrenLivingT,'null') HHNBChildrenLivingT," +
+                    "NULLIF(I.HHNBChildrenSchoolLivingM,'null') HHNBChildrenSchoolLivingM," +
+                    "NULLIF(I.HHNBChildrenSchoolLivingF,'null') HHNBChildrenSchoolLivingF," +
+                    "NULLIF(I.HHNBChildrenSchoolLivingT,'null') HHNBChildrenSchoolLivingT," +
+                    "NULLIF(I.HHNBChildrenCompleteSchoolLivingT,'null') HHNBChildrenCompleteSchoolLivingT," +
+                    "NULLIF(I.CHParentalStatus,'null') CHParentalStatus," +
+                    "NULLIF(I.HHNBChildrenCompleteSchoolLivingM,'null') HHNBChildrenCompleteSchoolLivingM," +
+                    "NULLIF(I.HHNBChildrenCompleteSchoolLivingF,'null') HHNBChildrenCompleteSchoolLivingF," +
+                    "NULLIF(I.HHNBChildrenDropSchoolLivingM,'null') HHNBChildrenDropSchoolLivingM," +
+                    "NULLIF(I.HHNBChildrenDropSchoolLivingF,'null') HHNBChildrenDropSchoolLivingF," +
+                    "NULLIF(I.HHNBChildrenDropSchoolLivingT,'null') HHNBChildrenDropSchoolLivingT," +
+                    "NULLIF(I.HHNBGirlsMarried,'null') HHNBGirlsMarried," +
+                    "NULLIF(I.HHNBChildrenBirthCertifM,'null') HHNBChildrenBirthCertifM," +
+                    "NULLIF(I.HHNBChildrenBirthCertifF,'null') HHNBChildrenBirthCertifF," +
+                    "NULLIF(I.HHNBChildrenBirthCertifT,'null') HHNBChildrenBirthCertifT," +
+                    "NULLIF(I.HHHealthStatus,'null') HHHealthStatus," +
+                    "NULLIF(I.HHExpenditure,'null') HHExpenditure," +
+                    "NULLIF(I.HHExpenditurePerH,'null') HHExpenditurePerH," +
+                    "NULLIF(I.HHNutritionalStatus,'null') HHNutritionalStatus," +
+                    "NULLIF(I.HHMentalPhysicalDisability,'null') HHMentalPhysicalDisability," +
+                    "NULLIF(I.HHMentalPhysicalDisabilityM,'null') HHMentalPhysicalDisabilityM," +
+                    "NULLIF(I.HHMentalPhysicalDisabilityF,'null') HHMentalPhysicalDisabilityF," +
+                    "NULLIF(I.HHMentalPhysicalDisabilityT,'null') HHMentalPhysicalDisabilityT," +
+                    "NULLIF(I.HHMentalPhysicalDisabilityO1,'null') HHMentalPhysicalDisabilityO1," +
+                    "NULLIF(I.HHMentalPhysicalDisabilityO2,'null') HHMentalPhysicalDisabilityO2," +
+                    "NULLIF(I.HHMentalPhysicalDisabilityO3,'null') HHMentalPhysicalDisabilityO3," +
+                    "NULLIF(I.HHMentalPhysicalDisabilityO4,'null') HHMentalPhysicalDisabilityO4," +
+                    "NULLIF(I.CHEnrolmentStatus,'null') CHEnrolmentStatus," +
+                    "NULLIF(I.ChildSchoolName,'null') ChildSchoolName," +
+                    "NULLIF(I.CHEnrolmentWhichClass,'null') CHEnrolmentWhichClass," +
+                    "NULLIF(I.CHEnrolmentOutofSchool,'null') CHEnrolmentOutofSchool," +
+                    "NULLIF(I.CHBirthCertificate,'null') CHBirthCertificate," +
+                    "NULLIF(I.DateInconnueChild,'null') DateInconnueChild," +
+                    "NULLIF(I.CHEnrolmentScore,'null') CHEnrolmentScore," +
+                    "NULLIF(I.ResidentialStatus1,'null') ResidentialStatus1," +
+                    "NULLIF(I.ResidentialStatus2,'null') ResidentialStatus2," +
+                    "NULLIF(I.ResidentialStatus3,'null') ResidentialStatus3," +
+                    "NULLIF(I.ResidentialStatus4,'null') ResidentialStatus4," +
+                    "NULLIF(I.ResidentialStatus5,'null') ResidentialStatus5," +
+                    "NULLIF(I.ResidentialStatus6,'null') ResidentialStatus6," +
+                    "NULLIF(I.CHSpecialNeeds1,'null') CHSpecialNeeds1," +
+                    "NULLIF(I.CHSpecialNeeds2,'null') CHSpecialNeeds2," +
+                    "NULLIF(I.CHSpecialNeeds3,'null') CHSpecialNeeds3," +
+                    "NULLIF(I.CHSpecialNeeds4,'null') CHSpecialNeeds4," +
+                    "NULLIF(I.CHSpecialNeeds5,'null') CHSpecialNeeds5," +
+                    "NULLIF(I.CHSpecialNeeds6,'null') CHSpecialNeeds6," +
+                    "NULLIF(I.HHOriginRegion,'null') HHOriginRegion," +
+                    "NULLIF(I.DOB_unknow,'null') DOB_unknow," +
+                    "NULLIF(I.noPhone1,'null') noPhone1," +
+                    "NULLIF(I.noPhone2,'null') noPhone2," +
+                    "NULLIF(I.identificationIdkCheck,'null') identificationIdkCheck," +
+                    "NULLIF(I.noHHNBGirlMarried,'null') noHHNBGirlMarried," +
+                    "I.isOffline \n" +
                     "FROM tblInsuree I \n" + " WHERE ";
             if (CallerId != 2) {
                 Query += " I.FamilyId = " + FamilyId + " \n";
@@ -4059,10 +4156,12 @@ public class ClientAndroidInterface {
 
                         ToRestApi rest = new ToRestApi();
                         HttpResponse response = rest.postToRestApiToken(resultObj, "family");
-
+                        System.out.println("Resultat Object Sent");
+                        System.out.println(resultObj);
                         HttpEntity entity = response.getEntity();
                         String responseString = EntityUtils.toString(entity);
-
+                        System.out.println("Reponse Object Sent");
+                        System.out.println(responseString);
                         EnrolResult = Integer.parseInt(responseString);
                     } else {
                         addCategoryBox();
