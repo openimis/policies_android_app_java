@@ -28,9 +28,12 @@ package org.openimis.imispolicies;
 import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Environment;
+import android.util.DisplayMetrics;
 import android.util.Log;
 
 import org.json.JSONException;
@@ -46,6 +49,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import static org.openimis.imispolicies.BuildConfig.APP_DIR;
@@ -179,6 +183,23 @@ public class Global extends Application {
         NetworkInfo ni = cm.getActiveNetworkInfo();
 
         return (ni != null && ni.isConnected());
+    }
+
+    public int isSDCardAvailable() {
+        String State = Environment.getExternalStorageState();
+        if (State.equals("mounted_ro")) {
+            return 0;
+        } else {
+            return !State.equals("mounted") ? -1 : 1;
+        }
+    }
+
+    public void changeLanguage(Context ctx, String Language) {
+        Resources res = ctx.getResources();
+        DisplayMetrics dm = res.getDisplayMetrics();
+        Configuration config = res.getConfiguration();
+        config.locale = new Locale(Language.toLowerCase());
+        res.updateConfiguration(config, dm);
     }
 
     private String createOrCheckDirectory(String path) {

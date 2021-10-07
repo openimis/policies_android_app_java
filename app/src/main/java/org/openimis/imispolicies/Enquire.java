@@ -49,7 +49,6 @@ import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.util.Base64;
 
-import com.exact.general.General;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
@@ -64,7 +63,6 @@ public class Enquire extends AppCompatActivity {
     private static final String LOG_TAG = "ENQUIRE";
     private static final int REQUEST_SCAN_QR_CODE = 1;
     private Global global;
-    private General general;
     private Escape escape;
     private ClientAndroidInterface ca;
     private EditText etCHFID;
@@ -92,7 +90,6 @@ public class Enquire extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
             actionBar.setTitle(getResources().getString(R.string.Enquire));
         }
-        general = new General(AppInformation.DomainInfo.getDomain());
         global = (Global) getApplicationContext();
         ca = new ClientAndroidInterface(this);
         escape = new Escape();
@@ -162,17 +159,16 @@ public class Enquire extends AppCompatActivity {
 
     }
 
-
     private void isSDCardAvailable() {
 
-        if (general.isSDCardAvailable() == 0) {
+        if (global.isSDCardAvailable() == 0) {
             new AlertDialog.Builder(this)
                     .setMessage(getResources().getString(R.string.ReadOnly))
                     .setCancelable(false)
                     .setPositiveButton(getResources().getString(R.string.ForceClose), (dialog, which) -> finish()).show();
 
         }
-        if (general.isSDCardAvailable() == -1) {
+        if (global.isSDCardAvailable() == -1) {
             new AlertDialog.Builder(this)
                     .setMessage(getResources().getString(R.string.NoSDCard))
                     .setCancelable(false)
@@ -262,19 +258,14 @@ public class Enquire extends AppCompatActivity {
                             Log.e(LOG_TAG, "Fetching image failed", e);
                         }
                     } else {
-                        if (ca.theImage != null) {
-                            iv.setImageBitmap(ca.theImage);
+                        byte[] photo = jsonObject.getString("photoPath").getBytes();
+                        ByteArrayInputStream is = new ByteArrayInputStream(photo);
+                        theImage = BitmapFactory.decodeStream(is);
+                        if (theImage != null) {
+                            iv.setImageBitmap(theImage);
                         } else {
-                            byte[] photo = jsonObject.getString("photoPath").getBytes();
-                            ByteArrayInputStream is = new ByteArrayInputStream(photo);
-                            theImage = BitmapFactory.decodeStream(is);
-                            if (theImage != null) {
-                                iv.setImageBitmap(theImage);
-                            } else {
-                                iv.setImageResource(R.drawable.person);
-                            }
+                            iv.setImageResource(R.drawable.person);
                         }
-
                     }
 
                     jsonArray = jsonObject.getJSONArray("details");
@@ -336,29 +327,17 @@ public class Enquire extends AppCompatActivity {
                         Policy.put("SubItem2", Ded);
                         Policy.put("SubItem3", Ceiling);
 
-                        String TotalAdmissionsLeft = "";
-                        String TotalVisitsLeft = "";
-                        String TotalConsultationsLeft = "";
-                        String TotalSurgeriesLeft = "";
-                        String TotalDeliveriesLeft = "";
-                        String TotalAntenatalLeft = "";
-                        String ConsultationAmountLeft = "";
-                        String SurgeryAmountLeft = "";
-                        String HospitalizationAmountLeft = "";
-                        String AntenatalAmountLeft = "";
-                        String DeliveryAmountLeft = "";
-
-                        TotalAdmissionsLeft = buildEnquireValue(jsonObject, "totalAdmissionsLeft", R.string.totalAdmissionsLeft);
-                        TotalVisitsLeft = buildEnquireValue(jsonObject, "totalVisitsLeft", R.string.totalVisitsLeft);
-                        TotalConsultationsLeft = buildEnquireValue(jsonObject, "totalConsultationsLeft", R.string.totalConsultationsLeft);
-                        TotalSurgeriesLeft = buildEnquireValue(jsonObject, "totalSurgeriesLeft", R.string.totalSurgeriesLeft);
-                        TotalDeliveriesLeft = buildEnquireValue(jsonObject, "totalDelivieriesLeft", R.string.totalDeliveriesLeft);
-                        TotalAntenatalLeft = buildEnquireValue(jsonObject, "totalAntenatalLeft", R.string.totalAntenatalLeft);
-                        ConsultationAmountLeft = buildEnquireValue(jsonObject, "consultationAmountLeft", R.string.consultationAmountLeft);
-                        SurgeryAmountLeft = buildEnquireValue(jsonObject, "surgeryAmountLeft", R.string.surgeryAmountLeft);
-                        HospitalizationAmountLeft = buildEnquireValue(jsonObject, "hospitalizationAmountLeft", R.string.hospitalizationAmountLeft);
-                        AntenatalAmountLeft = buildEnquireValue(jsonObject, "antenatalAmountLeft", R.string.antenatalAmountLeft);
-                        DeliveryAmountLeft = buildEnquireValue(jsonObject, "deliveryAmountLeft", R.string.deliveryAmountLeft);
+                        String TotalAdmissionsLeft = buildEnquireValue(jsonObject, "totalAdmissionsLeft", R.string.totalAdmissionsLeft);
+                        String TotalVisitsLeft = buildEnquireValue(jsonObject, "totalVisitsLeft", R.string.totalVisitsLeft);
+                        String TotalConsultationsLeft = buildEnquireValue(jsonObject, "totalConsultationsLeft", R.string.totalConsultationsLeft);
+                        String TotalSurgeriesLeft = buildEnquireValue(jsonObject, "totalSurgeriesLeft", R.string.totalSurgeriesLeft);
+                        String TotalDeliveriesLeft = buildEnquireValue(jsonObject, "totalDelivieriesLeft", R.string.totalDeliveriesLeft);
+                        String TotalAntenatalLeft = buildEnquireValue(jsonObject, "totalAntenatalLeft", R.string.totalAntenatalLeft);
+                        String ConsultationAmountLeft = buildEnquireValue(jsonObject, "consultationAmountLeft", R.string.consultationAmountLeft);
+                        String SurgeryAmountLeft = buildEnquireValue(jsonObject, "surgeryAmountLeft", R.string.surgeryAmountLeft);
+                        String HospitalizationAmountLeft = buildEnquireValue(jsonObject, "hospitalizationAmountLeft", R.string.hospitalizationAmountLeft);
+                        String AntenatalAmountLeft = buildEnquireValue(jsonObject, "antenatalAmountLeft", R.string.antenatalAmountLeft);
+                        String DeliveryAmountLeft = buildEnquireValue(jsonObject, "deliveryAmountLeft", R.string.deliveryAmountLeft);
 
                         if (!ca.getSpecificControl("TotalAdmissionsLeft").equals("N")) {
                             Policy.put("SubItem4", TotalAdmissionsLeft);

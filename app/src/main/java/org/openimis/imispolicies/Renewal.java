@@ -43,9 +43,6 @@ import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
 import android.widget.Toast;
 
-import com.exact.CallSoap.CallSoap;
-import com.exact.general.General;
-
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
@@ -64,8 +61,6 @@ import java.util.Calendar;
 import java.util.HashMap;
 
 public class Renewal extends AppCompatActivity {
-
-    private General _General = new General(AppInformation.DomainInfo.getDomain());
     private Global global;
 
     private ClientAndroidInterface ca;
@@ -105,14 +100,14 @@ public class Renewal extends AppCompatActivity {
 
         setContentView(R.layout.renewal);
 
-        etOfficer = (EditText) findViewById(R.id.etofficer);
-        etCHFID = (EditText) findViewById(R.id.etCHFID);
-        etReceiptNo = (EditText) findViewById(R.id.etReceiptNo);
-        etProductCode = (EditText) findViewById(R.id.etProductCode);
-        etAmount = (EditText) findViewById(R.id.etAmount);
-        btnSubmit = (Button) findViewById(R.id.btnSubmit);
-        chkDiscontinue = (CheckBox) findViewById(R.id.chkDiscontinue);
-        PolicyValue = (EditText) findViewById(R.id.txtPolicyValue);
+        etOfficer = findViewById(R.id.etofficer);
+        etCHFID = findViewById(R.id.etCHFID);
+        etReceiptNo = findViewById(R.id.etReceiptNo);
+        etProductCode = findViewById(R.id.etProductCode);
+        etAmount = findViewById(R.id.etAmount);
+        btnSubmit = findViewById(R.id.btnSubmit);
+        chkDiscontinue = findViewById(R.id.chkDiscontinue);
+        PolicyValue = findViewById(R.id.txtPolicyValue);
 
         if (getIntent().getStringExtra("CHFID").equals(getResources().getString(R.string.UnlistedRenewalPolicies))) {
 
@@ -155,9 +150,9 @@ public class Renewal extends AppCompatActivity {
         LocationId = Integer.parseInt(getIntent().getStringExtra("LocationId"));
         PolicyValue.setText(getIntent().getStringExtra("PolicyValue"));
 
-        spPayer = (Spinner) findViewById(R.id.spPayer);
-        spProduct = (Spinner) findViewById(R.id.spProduct);
-        etPayer = (AutoCompleteTextView) findViewById(R.id.etOfficer);
+        spPayer = findViewById(R.id.spPayer);
+        spProduct = findViewById(R.id.spProduct);
+        etPayer = findViewById(R.id.etOfficer);
 
         if (getIntent().getStringExtra("CHFID").equals(getResources().getString(R.string.UnlistedRenewalPolicies))) {
             BindSpinnerPayersXXXX(LocationId);
@@ -410,23 +405,6 @@ public class Renewal extends AppCompatActivity {
         return FullObject.toString();
     }
 
-    private int ServerResponse() {
-        CallSoap cs = new CallSoap();
-        cs.setFunctionName("isValidRenewal");
-        return cs.isPolicyAccepted(PolicyXML.getName());
-    }
-
-    private void MoveFile(File file) {
-        switch (result) {
-            case 1:
-                file.renameTo(new File(global.getSubdirectory("AcceptedRenewal"), file.getName()));
-                break;
-            case 2:
-                file.renameTo(new File(global.getSubdirectory("RejectedRenewal"), file.getName()));
-                break;
-        }
-    }
-
     private void DiscontinuePolicy() {
         new AlertDialog.Builder(this)
                 .setMessage(R.string.DiscontinuePolicyQ)
@@ -436,17 +414,17 @@ public class Renewal extends AppCompatActivity {
                     new Thread(() -> {
                         ToRestApi rest = new ToRestApi();
                         try {
-                            if (_General.isNetworkAvailable(getApplicationContext())) {
-                                String result = rest.deleteFromRestApiToken("policy/renew/" + RenewalUUID);
-                                DeleteRow(RenewalId);
-                                pd.dismiss();
-                                finish();
+                            String result;
+                            if (global.isNetworkAvailable()) {
+                                HttpResponse response = rest.deleteFromRestApiToken("policy/renew/" + RenewalUUID);
+                                int responseCode = response.getStatusLine().getStatusCode();
+                                result = rest.getContent(response);
                             } else {
                                 WriteXML();
-                                DeleteRow(RenewalId);
-                                pd.dismiss();
-                                finish();
                             }
+                            DeleteRow(RenewalId);
+                            pd.dismiss();
+                            finish();
 
                         } catch (final Exception e) {
                             e.printStackTrace();
@@ -463,7 +441,6 @@ public class Renewal extends AppCompatActivity {
     }
 
     private void UpdateRow(int RenewalId) {
-
         ca.UpdateRenewTable(RenewalId);
     }
 
@@ -506,17 +483,13 @@ public class Renewal extends AppCompatActivity {
                         new int[]{R.id.tvPayerId, R.id.tvPayerName});
 
                 spPayer.setAdapter((SpinnerAdapter) adapter);
-
             }
-
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
     }
 
     private void BindSpinnerPayers() {
-
         ca = new ClientAndroidInterface(this);
         String result = ca.getPayer(LocationId);
 
@@ -525,7 +498,6 @@ public class Renewal extends AppCompatActivity {
 
         try {
             jsonArray = new JSONArray(result);
-
             PayersList.clear();
 
             for (int i = 0; i < jsonArray.length(); i++) {
@@ -543,7 +515,6 @@ public class Renewal extends AppCompatActivity {
                 Payer.put("PayerId", object.getString("PayerId"));
                 Payer.put("PayerName", object.getString("PayerName"));
 
-
                 PayersList.add(Payer);
 
                 SimpleAdapter adapter = new SimpleAdapter(Renewal.this, PayersList, R.layout.spinnerpayer,
@@ -551,17 +522,13 @@ public class Renewal extends AppCompatActivity {
                         new int[]{R.id.tvPayerId, R.id.tvPayerName});
 
                 spPayer.setAdapter(adapter);
-
             }
-
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
     }
 
     private void BindSpinnerProduct() {
-
         ca = new ClientAndroidInterface(this);
         String result = ca.getProductsRD();
 
@@ -596,15 +563,11 @@ public class Renewal extends AppCompatActivity {
                         new int[]{R.id.tvProductCode, R.id.tvProductName});
 
                 spProduct.setAdapter(adapter);
-
             }
-
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
     }
-
 
     private boolean isValidate() {
 
@@ -654,7 +617,7 @@ public class Renewal extends AppCompatActivity {
             return false;
         }
 
-        if (_General.isNetworkAvailable(Renewal.this)) {
+        if (global.isNetworkAvailable()) {
             if (etReceiptNo.getText().toString().trim().length() > 0) {
                 HttpResponse response = null;
 

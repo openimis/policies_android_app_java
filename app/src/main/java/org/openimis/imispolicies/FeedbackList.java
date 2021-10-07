@@ -27,12 +27,10 @@ package org.openimis.imispolicies;
 
 import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -52,12 +50,6 @@ import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.exact.CallSoap.CallSoap;
-import com.exact.general.General;
-
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -71,16 +63,13 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.openimis.imispolicies.R;
-
 public class FeedbackList extends AppCompatActivity {
     private ListView lv;
     private SwipeRefreshLayout swipe;
     private ArrayList<HashMap<String, String>> FeedbackList = new ArrayList<>();
     private String OfficerCode;
-    String aBuffer = "";
+    private String aBuffer = "";
 
-    private General _general = new General(AppInformation.DomainInfo.getDomain());
     private ClientAndroidInterface ca;
     private Global global;
     private EditText etFeedbackSearch;
@@ -125,9 +114,6 @@ public class FeedbackList extends AppCompatActivity {
                     public void run() {
                         try {
                             swipe.setRefreshing(false);
-                            Global global = new Global();
-                            global = (Global) FeedbackList.this.getApplicationContext();
-
                             Token token = null;
 
                             try {
@@ -320,7 +306,7 @@ public class FeedbackList extends AppCompatActivity {
                 finish();
                 return true;
             case R.id.mnuStatistics:
-                if (!_general.isNetworkAvailable(this)) {
+                if (!global.isNetworkAvailable()) {
                     ca.ShowDialog(getResources().getString(R.string.InternetRequired));
                     return false;
                 }

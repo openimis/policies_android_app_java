@@ -99,7 +99,7 @@ android {
         }
         mvDev {
             applicationId "org.openimis.imispolicies.mv"
-            buildConfigField "String", "API_BASE_URL", '"https://imis-mv.swisstph-mis.ch/rest/"'
+            buildConfigField "String", "API_BASE_URL", '"http://imis-mv.swisstph-mis.ch/rest/"'
             buildConfigField "boolean", "SHOW_PAYMENT_MENU", 'true'
             buildConfigField "String", "APP_DIR", '"IMIS-MVDEV"'
             buildConfigField "String", "API_VERSION", '"3"'
