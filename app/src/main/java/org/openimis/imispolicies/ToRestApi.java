@@ -3,13 +3,11 @@ package org.openimis.imispolicies;
 import android.util.Log;
 
 import org.apache.http.HttpEntity;
-import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
@@ -26,8 +24,19 @@ public class ToRestApi {
         public static final int ERROR = 2;
     }
 
+    public static class Headers {
+        public static final String CONTENT_TYPE = "Content-Type";
+        public static final String ACCEPT = "Accept";
+        public static final String AUTHORIZATION = "Authorization";
+        public static final String API_VERSION = "api-version";
+    }
+
+    public static class MimeTypes {
+        public static final String APPLICATION_JSON = "application/json";
+    }
+
     public static final String FUNCTION_PREFIX = "api/";
-    public static final String API_VERSION_HEADER_NAME = "api-version";
+
 
     private final Token token;
     private final String uri;
@@ -42,11 +51,11 @@ public class ToRestApi {
     public HttpResponse getFromRestApi(String functionName, boolean addToken) {
         HttpClient httpClient = new DefaultHttpClient();
         HttpGet httpGet = new HttpGet(uri + functionName);
-        httpGet.setHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
-        httpGet.setHeader(HttpHeaders.ACCEPT, ContentType.APPLICATION_JSON.getMimeType());
-        httpGet.setHeader(API_VERSION_HEADER_NAME, apiVersion);
+        httpGet.setHeader(Headers.CONTENT_TYPE, MimeTypes.APPLICATION_JSON);
+        httpGet.setHeader(Headers.ACCEPT, MimeTypes.APPLICATION_JSON);
+        httpGet.setHeader(Headers.API_VERSION, apiVersion);
         if (addToken) {
-            httpGet.setHeader(HttpHeaders.AUTHORIZATION, "bearer " + token.getTokenText().trim());
+            httpGet.setHeader(Headers.AUTHORIZATION, buildTokenHeader());
         }
 
         try {
@@ -67,11 +76,11 @@ public class ToRestApi {
         HttpClient httpClient = new DefaultHttpClient();
 
         HttpPost httpPost = new HttpPost(uri + functionName);
-        httpPost.setHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
-        httpPost.setHeader(HttpHeaders.ACCEPT, ContentType.APPLICATION_JSON.getMimeType());
-        httpPost.setHeader(API_VERSION_HEADER_NAME, apiVersion);
+        httpPost.setHeader(Headers.CONTENT_TYPE, MimeTypes.APPLICATION_JSON);
+        httpPost.setHeader(Headers.ACCEPT, MimeTypes.APPLICATION_JSON);
+        httpPost.setHeader(Headers.API_VERSION, apiVersion);
         if (addToken) {
-            httpPost.setHeader(HttpHeaders.AUTHORIZATION, "bearer " + token.getTokenText().trim());
+            httpPost.setHeader(Headers.AUTHORIZATION, buildTokenHeader());
         }
 
         try {
@@ -117,13 +126,13 @@ public class ToRestApi {
         return getFromRestApi(functionName, true);
     }
 
-    public String deleteFromRestApiToken(final String functionName) {
+    public HttpResponse deleteFromRestApiToken(final String functionName) {
         HttpClient httpClient = new DefaultHttpClient();
         HttpDelete httpDelete = new HttpDelete(uri + functionName);
-        httpDelete.setHeader("Content-type", "application/json");
-        httpDelete.setHeader("Authorization", "bearer " + token.getTokenText());
-        httpDelete.setHeader("accept", "application/json");
-        httpDelete.setHeader("api-version", apiVersion);
+        httpDelete.setHeader(Headers.CONTENT_TYPE, MimeTypes.APPLICATION_JSON);
+        httpDelete.setHeader(Headers.AUTHORIZATION, buildTokenHeader());
+        httpDelete.setHeader(Headers.ACCEPT, MimeTypes.APPLICATION_JSON);
+        httpDelete.setHeader(Headers.API_VERSION, apiVersion);
 
         HttpResponse response = null;
         try {
@@ -135,7 +144,7 @@ public class ToRestApi {
             e.printStackTrace();
         }
 
-        return getContent(response);
+        return response;
     }
 
     public String getContent(HttpResponse response) {
@@ -160,5 +169,13 @@ public class ToRestApi {
         if (response != null && response.getStatusLine().getStatusCode() == HttpURLConnection.HTTP_UNAUTHORIZED) {
             token.clearToken();
         }
+    }
+
+    private String buildTokenHeader() {
+        String tokenText = token.getTokenText();
+        if (tokenText != null) {
+            return String.format("bearer %s", tokenText.trim());
+        }
+        return "";
     }
 }

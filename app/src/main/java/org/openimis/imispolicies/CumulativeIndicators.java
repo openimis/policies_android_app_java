@@ -13,8 +13,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.exact.general.General;
-
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
@@ -28,30 +26,29 @@ import java.util.Calendar;
 import java.util.Locale;
 
 public class CumulativeIndicators extends AppCompatActivity {
+    private Global global;
 
-    private General _General = new General(AppInformation.DomainInfo.getDomain());
+    private Boolean ClickedFrom = false;
+    private Boolean ClickedTo = false;
 
-    Boolean ClickedFrom = false;
-    Boolean ClickedTo = false;
+    private Calendar myCalendar;
 
-    Calendar myCalendar;
+    private Button DateFrom;
+    private Button DateTo;
+    private Button btnGet;
 
-    Button DateFrom;
-    Button DateTo;
-    Button btnGet;
-
-    TextView NPC;
-    TextView RPC;
-    TextView EPC;
-    TextView SPC;
-    TextView CCC;
+    private TextView NPC;
+    private TextView RPC;
+    private TextView EPC;
+    private TextView SPC;
+    private TextView CCC;
 
     private ProgressDialog pd;
-    RelativeLayout CumulativeReport;
+    private RelativeLayout CumulativeReport;
 
-    String cumulative = null;
+    private String cumulative = null;
 
-    DatePickerDialog.OnDateSetListener date = (view, year, monthOfYear, dayOfMonth) -> {
+    private DatePickerDialog.OnDateSetListener date = (view, year, monthOfYear, dayOfMonth) -> {
         myCalendar.set(Calendar.YEAR, year);
         myCalendar.set(Calendar.MONTH, monthOfYear);
         myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
@@ -62,6 +59,8 @@ public class CumulativeIndicators extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cumulative_indicators);
+
+        global = (Global) getApplicationContext();
 
         final ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
@@ -103,7 +102,7 @@ public class CumulativeIndicators extends AppCompatActivity {
             if (!DateFrom.getText().equals("Date From") && !DateTo.getText().equals("Date To")) {
                 getCumulativeIndicators(String.valueOf(DateFrom.getText()), String.valueOf(DateTo.getText()));
             } else {
-                showToast(R.string.pick_date,Toast.LENGTH_LONG);
+                showToast(R.string.pick_date, Toast.LENGTH_LONG);
             }
         });
     }
@@ -120,7 +119,7 @@ public class CumulativeIndicators extends AppCompatActivity {
     }
 
     public void getCumulativeIndicators(final String DateFrom, final String DateTo) {
-        if (_General.isNetworkAvailable(this)) {
+        if (global.isNetworkAvailable()) {
             pd = ProgressDialog.show(CumulativeIndicators.this, "", getResources().getString(R.string.GetingCummulativeReport));
             try {
                 new Thread(() -> {

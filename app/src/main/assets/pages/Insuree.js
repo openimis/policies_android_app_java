@@ -124,10 +124,6 @@ $(document).ready(function () {
 
     });
 
-
-
-
-
     $(window).bind("onbeforeunload", function () {
         Android.showDialog('bye');
     });
@@ -214,7 +210,6 @@ $(document).ready(function () {
     }
 
 });
-
 
 function fillDropdowns() {
     fillRelationship();

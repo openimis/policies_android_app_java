@@ -28,7 +28,6 @@ package org.openimis.imispolicies;
 import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Xml;
 import android.view.View;
@@ -38,9 +37,6 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.RatingBar;
 import android.widget.Toast;
-
-import com.exact.CallSoap.CallSoap;
-import com.exact.general.General;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -52,10 +48,7 @@ import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
-import org.openimis.imispolicies.R;
-
 public class Feedback extends AppCompatActivity {
-    private General _General = new General(AppInformation.DomainInfo.getDomain());
     private Global global;
 
     private EditText etOfficer;
@@ -309,14 +302,6 @@ public class Feedback extends AppCompatActivity {
         }
 
         return FullObject.toString();
-    }
-
-    private int ServerResponse() {
-
-        CallSoap cs = new CallSoap();
-        cs.setFunctionName("isValidFeedback");
-        return cs.isFeedbackAccepted(FeedbackXML.getName());
-
     }
 
     private void MoveFile(File file) {

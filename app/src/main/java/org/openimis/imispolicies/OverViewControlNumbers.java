@@ -1,6 +1,5 @@
 package org.openimis.imispolicies;
 
-import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
@@ -27,8 +26,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.exact.general.General;
-
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.text.SimpleDateFormat;
@@ -38,20 +35,19 @@ import java.util.List;
 
 public class OverViewControlNumbers extends AppCompatActivity {
     public SQLHandler sqlHandler;
+    private Global global;
 
-    ToRestApi toRestApi;
-    Token tokenl;
-    ProgressDialog pd;
+    private ToRestApi toRestApi;
+    private Token tokenl;
+    private ProgressDialog pd;
 
-    JSONArray policy;
-    ClientAndroidInterface clientAndroidInterface;
-    RecyclerView PolicyRecyclerView;
-    OverViewControlNumberAdapter overViewControlNumberAdapter;
+    private JSONArray policy;
+    private ClientAndroidInterface clientAndroidInterface;
+    private RecyclerView PolicyRecyclerView;
+    private OverViewControlNumberAdapter overViewControlNumberAdapter;
 
-    General _General = new General(AppInformation.DomainInfo.getDomain());
-
-    TextView ValueNumberOfPolices;
-    TextView ValueAmountOfContribution;
+    private TextView ValueNumberOfPolices;
+    private TextView ValueAmountOfContribution;
 
     public static int search_count = 0;
 
@@ -61,26 +57,27 @@ public class OverViewControlNumbers extends AppCompatActivity {
 
     public static int PolicyValueToSend = 0;
     public static JSONObject getControlNumber = new JSONObject();
-    SimpleDateFormat format = AppInformation.DateTimeInfo.getDefaultDateFormatter();;
-    Calendar cal = Calendar.getInstance();
-    String dt = format.format(cal.getTime());
+    private SimpleDateFormat format = AppInformation.DateTimeInfo.getDefaultDateFormatter();
+
+    private Calendar cal = Calendar.getInstance();
+    private String dt = format.format(cal.getTime());
     private String AmountCalculated;
     private String amountConfirmed;
-    TextView NothingFound;
+    private TextView NothingFound;
 
-    String InsuranceNumber = "";
-    String OtherNames = "";
-    String LastName = "";
-    String InsuranceProduct = "";
-    String UploadedFrom = "";
-    String UploadedTo = "";
-    String RequestedFrom = "";
-    String RequestedTo = "";
-    String RadioRenewal = "";
-    String RadioSms = "";
-    String PaymentType = "";
+    private String InsuranceNumber = "";
+    private String OtherNames = "";
+    private String LastName = "";
+    private String InsuranceProduct = "";
+    private String UploadedFrom = "";
+    private String UploadedTo = "";
+    private String RequestedFrom = "";
+    private String RequestedTo = "";
+    private String RadioRenewal = "";
+    private String RadioSms = "";
+    private String PaymentType = "";
 
-    BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             handleRequestResult(intent);
@@ -109,6 +106,8 @@ public class OverViewControlNumbers extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_over_view_control_numbers);
+        global = (Global) getApplicationContext();
+
         final ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
@@ -128,9 +127,8 @@ public class OverViewControlNumbers extends AppCompatActivity {
         final String[] n = {""};
         Button requestButton = findViewById(R.id.requestButton);
         requestButton.setOnClickListener(view -> {
-            General _general = new General(AppInformation.DomainInfo.getDomain());
 
-            if (_general.isNetworkAvailable(OverViewControlNumbers.this)) {
+            if (global.isNetworkAvailable()) {
                 if (tokenl.getTokenText().length() <= 0) {
                     LoginDialogBox();
                 } else {
@@ -335,7 +333,7 @@ public class OverViewControlNumbers extends AppCompatActivity {
     }
 
     public void LoginDialogBox() {
-        if (!_General.isNetworkAvailable(this)) {
+        if (!global.isNetworkAvailable()) {
             clientAndroidInterface.ShowDialog(getResources().getString(R.string.NoInternet));
             return;
         }

@@ -29,8 +29,6 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.ActionBar;
 import android.app.AlertDialog;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -38,18 +36,14 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.Vibrator;
-import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -70,8 +64,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.exact.general.General;
-
 import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -86,7 +78,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 
-import static org.openimis.imispolicies.BuildConfig.SHOW_PAYMENT_MENU;
 import static android.provider.Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION;
 
 
@@ -99,9 +90,7 @@ public class MainActivity extends AppCompatActivity
     private SQLHandler sqlHandler;
     private WebView wv;
     private final Context context = this;
-    private String selectedFilePath;
     static Global global;
-    //private General general;
     private static final int MENU_LANGUAGE_1 = Menu.FIRST;
     private static final int MENU_LANGUAGE_2 = Menu.FIRST + 1;
     private String Language1 = "";
@@ -117,15 +106,6 @@ public class MainActivity extends AppCompatActivity
     String aBuffer = "";
     String calledFrom = "java";
     public File f;
-
-    General _General = new General(AppInformation.DomainInfo.getDomain());
-
-    final String VersionField = "AppVersionImis";
-    final String ApkFileLocation = AppInformation.DomainInfo.getDomain() + "/Apps/IMIS.apk";
-    final int SIMPLE_NOTFICATION_ID = 98029;
-
-    NotificationManager mNotificationManager;
-    Vibrator vibrator;
     public String etRarPassword = "";
     boolean isUserLogged = false;
 
@@ -138,7 +118,7 @@ public class MainActivity extends AppCompatActivity
             wv.evaluateJavascript(String.format("selectImageCallback(\"%s\");", selectedImage), null);
         } else if (requestCode == ClientAndroidInterface.RESULT_SCAN && resultCode == RESULT_OK && data != null) {
             this.InsureeNumber = data.getStringExtra("SCAN_RESULT");
-        } else if (requestCode == 4 && resultCode == RESULT_OK) {
+        } else if (requestCode == 4 && resultCode == RESULT_OK && data != null) {
             Uri uri = data.getData();
             if (uri != null) {
                 try {
@@ -165,7 +145,7 @@ public class MainActivity extends AppCompatActivity
     @SuppressLint({"AddJavascriptInterface", "SetJavaScriptEnabled"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
+        global = (Global) getApplicationContext();
         //Check if user has language set
         SharedPreferences spHF = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         selectedLanguage = spHF.getString("Language", "en");
@@ -180,7 +160,6 @@ public class MainActivity extends AppCompatActivity
         sqlHandler = new SQLHandler(this);
 
         sqlHandler.isPrivate = true;
-        global = (Global) getApplicationContext();
         //Set the Image folder path
         global.setImageFolder(getApplicationContext().getApplicationInfo().dataDir + "/Images/");
         CreateFolders();
@@ -273,7 +252,7 @@ public class MainActivity extends AppCompatActivity
             //Edited By HERMAN
             ShowDialogTex();
         }
-        _General.isSDCardAvailable();
+        global.isSDCardAvailable();
 
         setVisibilityOfPaymentMenu();
     }
@@ -530,7 +509,7 @@ public class MainActivity extends AppCompatActivity
                                             ca.ShowDialog(getResources().getString(R.string.IncorrectOfficerCode));
                                         }
                                     } else {
-                                        if (!_General.isNetworkAvailable(MainActivity.this)) {
+                                        if (!global.isNetworkAvailable()) {
                                             openDialog();
                                         } else {
                                             MasterDataAsync masterDataAsync = new MasterDataAsync();
@@ -738,7 +717,7 @@ public class MainActivity extends AppCompatActivity
     private void changeLanguage(String LanguageCode, boolean withRefresh) {
 
         //General gen = new General();
-        _General.ChangeLanguage(this, LanguageCode);
+        global.changeLanguage(this, LanguageCode);
 
         if (withRefresh) {
             //Restart the activity for change to be affected
@@ -943,36 +922,36 @@ public class MainActivity extends AppCompatActivity
         setPreferences();
     }
 
-    private void CheckForUpdates() {
-        if (_General.isNetworkAvailable(MainActivity.this)) {
-            if (_General.isNewVersionAvailable(VersionField, MainActivity.this, getApplicationContext().getPackageName())) {
-                //Show notification bar
-                mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-                //final Notification NotificationDetails = new Notification(R.drawable.ic_launcher_policies, getResources().getString(R.string.NotificationAlertText), System.currentTimeMillis());
-                //NotificationDetails.flags = Notification.FLAG_SHOW_LIGHTS | Notification.FLAG_AUTO_CANCEL | Notification.DEFAULT_SOUND | Notification.DEFAULT_VIBRATE;
-                //NotificationDetails.setLatestEventInfo(context, ContentTitle, ContentText, intent);
-                //mNotificationManager.notify(SIMPLE_NOTFICATION_ID, NotificationDetails);
-                Context context = getApplicationContext();
-                CharSequence ContentTitle = getResources().getString(R.string.ContentTitle);
-                CharSequence ContentText = getResources().getString(R.string.ContentText);
-
-                Intent NotifyIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(ApkFileLocation));
-
-                PendingIntent intent = PendingIntent.getActivity(MainActivity.this, 0, NotifyIntent, 0);
-                NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "M_CH_ID");
-                builder.setAutoCancel(false);
-                builder.setContentTitle(ContentTitle);
-                builder.setContentText(ContentText);
-                builder.setSmallIcon(R.drawable.ic_statistics);
-                builder.setContentIntent(intent);
-                builder.setOngoing(false);
-
-                mNotificationManager.notify(SIMPLE_NOTFICATION_ID, builder.build());
-                vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
-                vibrator.vibrate(500);
-            }
-        }
-    }
+//    private void CheckForUpdates() {
+//        if (global.isNetworkAvailable()) {
+//            if (_General.isNewVersionAvailable(VersionField, MainActivity.this, getApplicationContext().getPackageName())) {
+//                //Show notification bar
+//                mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+//                //final Notification NotificationDetails = new Notification(R.drawable.ic_launcher_policies, getResources().getString(R.string.NotificationAlertText), System.currentTimeMillis());
+//                //NotificationDetails.flags = Notification.FLAG_SHOW_LIGHTS | Notification.FLAG_AUTO_CANCEL | Notification.DEFAULT_SOUND | Notification.DEFAULT_VIBRATE;
+//                //NotificationDetails.setLatestEventInfo(context, ContentTitle, ContentText, intent);
+//                //mNotificationManager.notify(SIMPLE_NOTFICATION_ID, NotificationDetails);
+//                Context context = getApplicationContext();
+//                CharSequence ContentTitle = getResources().getString(R.string.ContentTitle);
+//                CharSequence ContentText = getResources().getString(R.string.ContentText);
+//
+//                Intent NotifyIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(ApkFileLocation));
+//
+//                PendingIntent intent = PendingIntent.getActivity(MainActivity.this, 0, NotifyIntent, 0);
+//                NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "M_CH_ID");
+//                builder.setAutoCancel(false);
+//                builder.setContentTitle(ContentTitle);
+//                builder.setContentText(ContentText);
+//                builder.setSmallIcon(R.drawable.ic_statistics);
+//                builder.setContentIntent(intent);
+//                builder.setOngoing(false);
+//
+//                mNotificationManager.notify(SIMPLE_NOTFICATION_ID, builder.build());
+//                vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
+//                vibrator.vibrate(500);
+//            }
+//        }
+//    }
 
     //Ask for permission
     public void requestPermision() {

@@ -60,7 +60,6 @@ import android.widget.Toast;
 
 import com.exact.CallSoap.CallSoap;
 import com.exact.InsureeImages;
-import com.exact.general.General;
 import com.exact.uploadfile.UploadFile;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
@@ -68,9 +67,7 @@ import com.squareup.picasso.Target;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
-import java.io.InputStream;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.util.Arrays;
@@ -106,7 +103,6 @@ import java.util.Random;
 import java.util.UUID;
 import java.util.Set;
 import java.util.regex.Pattern;
-import java.util.Formatter;
 
 import org.xmlpull.v1.XmlSerializer;
 
@@ -114,7 +110,6 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 
 import static android.database.sqlite.SQLiteDatabase.openOrCreateDatabase;
-import static java.lang.Math.abs;
 
 public class ClientAndroidInterface {
     private Context mContext;
@@ -141,23 +136,19 @@ public class ClientAndroidInterface {
     private int rtInsureeId = 0;
     private int rtEnrolledId = 0;
     private int enrol_result;
-    Bitmap myBitmap;
-    String resu;
-    String fname = null;
-    Bitmap theImage;
+    private Bitmap myBitmap;
+    private String resu;
+    private String fname = null;
+    private Bitmap theImage;
 
-    SQLiteDatabase db;
+    private SQLiteDatabase db;
 
     static public String filePath = null;
 
-    RecyclerView.LayoutManager myLayoutManger;
     EnrollmentReport enrollmentReport;
 
     StringBuffer buffer = new StringBuffer();
-    Formatter formatter = new Formatter(buffer, Locale.US);
 
-
-    private General general = new General(AppInformation.DomainInfo.getDomain());
     private ArrayList<String> mylist = new ArrayList<>();
 
     private String salt;
@@ -717,10 +708,18 @@ public class ClientAndroidInterface {
 
     @JavascriptInterface
     public String getHF(int DistrictId, String HFLevel) {
-        String Query = "SELECT HFID,  HFCode ||\" : \"||  HFName HF FROM tblHF WHERE LocationId = ? AND HFLevel = ?";
-        String[] args = {String.valueOf(DistrictId), HFLevel};
+        JSONArray HFs;
+        if (HFLevel != null) {
+            String Query = "SELECT HFID,  HFCode ||\" : \"||  HFName HF FROM tblHF WHERE LocationId = ? AND HFLevel = ?";
+            String[] args = {String.valueOf(DistrictId), HFLevel};
 
-        JSONArray HFs = sqlHandler.getResult(Query, args);
+            HFs = sqlHandler.getResult(Query, args);
+        } else {
+            String Query = "SELECT HFID,  HFCode ||\" : \"||  HFName HF FROM tblHF WHERE LocationId = ?";
+            String[] args = {String.valueOf(DistrictId)};
+
+            HFs = sqlHandler.getResult(Query, args);
+        }
 
         return HFs.toString();
     }
@@ -1064,7 +1063,7 @@ public class ClientAndroidInterface {
                 values.put("isOffline", 1);
                 if (isOffline == 0 || isOffline == 2) {
                     if (isOffline == 2) isOffline = 0;
-                    if (general.isNetworkAvailable(mContext)) {
+                    if (global.isNetworkAvailable()) {
                         //if (isOffline == 0){
                         MaxInsureeId = -MaxInsureeId;
                         newInsureeId = MaxInsureeId;
@@ -1122,7 +1121,7 @@ public class ClientAndroidInterface {
                 values.put("isOffline", insureeIsOffline);
                 sqlHandler.updateData("tblInsuree", values, "InsureeId = ? AND (isOffline = ?)", new String[]{String.valueOf(InsureeId), String.valueOf(insureeIsOffline)});
             }
-            if (general.isNetworkAvailable(mContext)) {
+            if (global.isNetworkAvailable()) {
                 if (isOffline == 0 || isOffline == 2) {
                     if (isOffline == 2) isOffline = 0;
                     if (global.getUserId() > 0) {
@@ -2347,8 +2346,7 @@ public class ClientAndroidInterface {
             e.printStackTrace();
         }
 
-        //General general = new General();
-        if (general.isNetworkAvailable(mContext) && isOffline == 0) {
+        if (global.isNetworkAvailable() && isOffline == 0) {
             CallSoap cs = new CallSoap();
             cs.setFunctionName("isUniqueReceiptNo");
             if (!cs.isUniqueReceiptNo(ReceiptNo.trim(), CHFID)) {
@@ -2373,7 +2371,7 @@ public class ClientAndroidInterface {
 
     @JavascriptInterface
     public String checkNet() {
-        if (general.isNetworkAvailable(mContext)) {
+        if (global.isNetworkAvailable()) {
             return "true";
         } else {
             return "false";
@@ -4408,7 +4406,7 @@ public class ClientAndroidInterface {
             return false;
         }
 
-        if (!general.isNetworkAvailable(mContext)) {
+        if (!global.isNetworkAvailable()) {
             ShowDialog(mContext.getResources().getString(R.string.NoInternet));
             return false;
         }
@@ -5743,50 +5741,39 @@ public class ClientAndroidInterface {
             ob.put("isOffline", "true".equals(isOffline) || "1".equals(isOffline) ? 1 : 0);
             ob.put("isHead", "true".equals(isHead) || "1".equals(isHead) ? 1 : 0);
 
+
             newInsureeArr.put(ob);
         }
 
-        InsertFamilyDataFromOnline(newFamilyArr);
-        InsertInsureeDataFromOnline(newInsureeArr);
-
         //Iterate insuree array and download image for each Insuree
         for (int i = 0; i < newInsureeArr.length(); i++) {
-            JSONObject ins = newInsureeArr.getJSONObject(i);
-            String PhotoPath = ins.getString("photoPath");
-            if (PhotoPath.length() > 0) {
-                Bitmap insureeImage = GetImageFromUrl(AppInformation.DomainInfo.getDomain() + "/Images/Updated/" + PhotoPath);
-                if (insureeImage != null) {
-                    FileOutputStream stream = null;
+            JSONObject insureeObj = newInsureeArr.getJSONObject(i);
+
+            if (insureeObj.has("photoPath") && !insureeObj.isNull("photoPath") && !"null".equals(insureeObj.getString("photoPath"))) {
+                String photoName = insureeObj.getString("photoPath");
+                String imagePath = global.getImageFolder() + photoName;
+                insureeObj.put("photoPath", imagePath);
+                OutputStream imageOutputStream = new FileOutputStream(imagePath);
+                if (insureeObj.has("photoBase64") && !insureeObj.isNull("photoBase64") && !"null".equals(insureeObj.getString("photoBase64"))) {
                     try {
-                        stream = new FileOutputStream(global.getImageFolder() + PhotoPath);
-                        insureeImage.compress(Bitmap.CompressFormat.JPEG, 100, stream);
-                    } catch (FileNotFoundException e) {
-                        e.printStackTrace();
-                    } finally {
-                        if (stream != null)
-                            stream.close();
+                        byte[] imageBytes = Base64.decode(insureeObj.getString("photoBase64").getBytes(), Base64.DEFAULT);
+                        Bitmap image = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+                        image.compress(Bitmap.CompressFormat.JPEG, 100, imageOutputStream);
+                    } catch (Exception e) {
+                        Log.e("MODIFYFAMILY", "Error while processing Base64 image", e);
+                    }
+                } else {
+                    if (photoName.length() > 0) {
+                        String photoUrl = String.format("%sImages/Updated/%s", AppInformation.DomainInfo.getDomain(), photoName);
+                        imageTarget = new OutputStreamImageTarget(imageOutputStream, 100);
+                        ((Activity) mContext).runOnUiThread(() -> picassoInstance.load(photoUrl).into(imageTarget));
                     }
                 }
             }
         }
-    }
 
-    private Bitmap GetImageFromUrl(String ImagePath) {
-        try {
-            java.net.URL url = new java.net.URL(ImagePath);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setDoInput(true);
-            connection.connect();
-            InputStream input = connection.getInputStream();
-            Bitmap bitmap = BitmapFactory.decodeStream(input);
-            return bitmap;
-
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
+        InsertFamilyDataFromOnline(newFamilyArr);
+        InsertInsureeDataFromOnline(newInsureeArr);
     }
 
     private boolean InsertFamilyDataFromOnline(JSONArray jsonArray) throws JSONException {
@@ -6187,8 +6174,7 @@ public class ClientAndroidInterface {
     @JavascriptInterface
     public boolean CheckInternetAvailable() {
         // check internet connection
-        General _General = new General(AppInformation.DomainInfo.getDomain());
-        if (!_General.isNetworkAvailable(mContext)) {
+        if (!global.isNetworkAvailable()) {
             ShowDialog(mContext.getResources().getString(R.string.NoInternet));
             return false;
         }
