@@ -309,9 +309,8 @@ public class NotEnrolledPoliciesOverview extends AppCompatActivity {
         addListenerOnSpinnerItemSelection(paymentType);
 
         finalAmount.setText(Number);
-        if (clientAndroidInterface.getSpecificControl("TotalAmount").equals("R")) {
-            finalAmount.setEnabled(false);
-        }
+        String totalAmountControl = clientAndroidInterface.getSpecificControl("TotalAmount");
+        finalAmount.setEnabled(!"M".equals(totalAmountControl) && !"R".equals(totalAmountControl));
 
         // set dialog message
         alertDialogBuilder

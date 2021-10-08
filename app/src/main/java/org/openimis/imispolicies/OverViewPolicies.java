@@ -301,10 +301,8 @@ public class OverViewPolicies extends AppCompatActivity {
         addItemsOnSpinner2(payment_type);
         addListenerOnSpinnerItemSelection(payment_type);
 
-        amount.setText(Number);
-        if (clientAndroidInterface.getSpecificControl("TotalAmount").equals("R")) {
-            amount.setEnabled(false);
-        }
+        String totalAmountControl = clientAndroidInterface.getSpecificControl("TotalAmount");
+        amount.setEnabled(!"M".equals(totalAmountControl) && !"R".equals(totalAmountControl));
 
         // set dialog message
         alertDialogBuilder
