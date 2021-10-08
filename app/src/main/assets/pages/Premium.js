@@ -3,7 +3,7 @@ $(document).ready(function () {
     document.title = Android.getString('AddEditPremium');
 
     var adj = Android.getSpecificControlHtml("TotalAmount");
-    if (adj == "R") {
+    if (adj == "M" || adj == "R") {
         $('#txtAmount').attr('readonly', 'readonly');
     }
 
