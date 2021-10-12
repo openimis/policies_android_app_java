@@ -5,11 +5,6 @@ apply plugin: 'com.android.application'
 apply from: "$project.rootDir/script-git-version.gradle"
 apply plugin: 'com.android.application'
 
-// Apply custom flavours
-if(file('custom-flavours.gradle').exists()){
-    apply from: 'custom-flavours.gradle'
-}
-
 // Load keystore
 def keystorePropertiesFile = file("keystore.properties");
 def keystoreProperties = new Properties()
@@ -168,6 +163,12 @@ android {
         demoRelease.java.srcDir 'src/master/java'
         demoRelease.res.srcDir 'src/demoRelease/res'
     }
+
+// Apply custom flavours
+    if(file('custom-flavours.gradle').exists()){
+        apply from: 'custom-flavours.gradle'
+    }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
