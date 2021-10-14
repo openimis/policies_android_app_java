@@ -1,6 +1,5 @@
 package org.openimis.imispolicies;
 
-import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -38,29 +37,26 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-
 import android.app.ProgressDialog;
 import android.widget.Toast;
 
-import com.exact.general.General;
-
 public class OverViewPolicies extends AppCompatActivity {
+    private  Global global;
+    private  JSONArray policy;
+    private ClientAndroidInterface clientAndroidInterface;
+    private RecyclerView PolicyRecyclerView;
+    private OverViewPoliciesAdapter overViewPoliciesAdapter;
 
-    JSONArray policy;
-    ClientAndroidInterface clientAndroidInterface;
-    RecyclerView PolicyRecyclerView;
-    OverViewPoliciesAdapter overViewPoliciesAdapter;
+    private ToRestApi toRestApi;
+    private Token tokenl;
+    private ProgressDialog pd;
 
-    ToRestApi toRestApi;
-    Token tokenl;
-    ProgressDialog pd;
+    private TextView ValueNumberOfPolices;
+    private TextView ValueAmountOfContribution;
+    private TextView NothingFound;
 
-    TextView ValueNumberOfPolices;
-    TextView ValueAmountOfContribution;
-    TextView NothingFound;
-
-    CheckBox send_sms;
-    int SmsRequired = 0;
+    private CheckBox send_sms;
+    private int SmsRequired = 0;
 
     public static int search_count = 0;
 
@@ -70,24 +66,24 @@ public class OverViewPolicies extends AppCompatActivity {
 
     public static int PolicyValueToSend = 0;
     public static JSONObject getControlNumber = new JSONObject();
-    SimpleDateFormat format = AppInformation.DateTimeInfo.getDefaultDateFormatter();
-    Calendar cal = Calendar.getInstance();
-    String dt = format.format(cal.getTime());
+    private SimpleDateFormat format = AppInformation.DateTimeInfo.getDefaultDateFormatter();
+    private Calendar cal = Calendar.getInstance();
+    private String dt = format.format(cal.getTime());
     private String AmountCalculated;
     private String amountConfirmed;
     private String PaymentType = "";
 
-    String InsuranceNumber = "";
-    String OtherNames = "";
-    String LastName = "";
-    String InsuranceProduct = "";
-    String UploadedFrom = "";
-    String UploadedTo = "";
-    String RadioRenewal = "";
-    String RadioRequested = "";
+    private String InsuranceNumber = "";
+    private String OtherNames = "";
+    private String LastName = "";
+    private String InsuranceProduct = "";
+    private String UploadedFrom = "";
+    private String UploadedTo = "";
+    private String RadioRenewal = "";
+    private String RadioRequested = "";
     static String PayType = "";
 
-    BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             handleRequestResult(intent);
@@ -116,11 +112,13 @@ public class OverViewPolicies extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_over_view_policies);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        global = (Global) getApplicationContext();
 
         final ActionBar actionBar = getSupportActionBar();
-        actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setTitle(getResources().getString(R.string.policies));
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setTitle(getResources().getString(R.string.policies));
+        }
 
         tokenl = new Token();
         toRestApi = new ToRestApi();
@@ -135,10 +133,7 @@ public class OverViewPolicies extends AppCompatActivity {
         final String[] n = {""};
         Button requestButton = findViewById(R.id.requestButton);
         requestButton.setOnClickListener(view -> {
-
-            General _general = new General(AppInformation.DomainInfo.getDomain());
-
-            if (_general.isNetworkAvailable(OverViewPolicies.this)) {
+            if (global.isNetworkAvailable()) {
                 if (tokenl.getTokenText().length() <= 0) {
                     LoginDialogBox();
                 } else {
@@ -306,10 +301,8 @@ public class OverViewPolicies extends AppCompatActivity {
         addItemsOnSpinner2(payment_type);
         addListenerOnSpinnerItemSelection(payment_type);
 
-        amount.setText(Number);
-        if (clientAndroidInterface.getSpecificControl("TotalAmount").equals("R")) {
-            amount.setEnabled(false);
-        }
+        String totalAmountControl = clientAndroidInterface.getSpecificControl("TotalAmount");
+        amount.setEnabled(!"M".equals(totalAmountControl) && !"R".equals(totalAmountControl));
 
         // set dialog message
         alertDialogBuilder

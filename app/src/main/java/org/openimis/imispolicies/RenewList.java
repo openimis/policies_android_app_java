@@ -25,7 +25,6 @@
 
 package org.openimis.imispolicies;
 
-import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
@@ -69,7 +68,7 @@ import java.util.HashMap;
 public class RenewList extends AppCompatActivity {
     private static final int REQUEST_OPEN_DOCUMENT_CODE = 1;
     private Global global;
-    String aBuffer = "";
+    private String aBuffer = "";
     private ListView lv;
     private SwipeRefreshLayout swipe;
     private ArrayList<HashMap<String, String>> RenewalList = new ArrayList<>();

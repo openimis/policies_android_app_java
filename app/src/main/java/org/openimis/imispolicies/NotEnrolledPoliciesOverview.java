@@ -41,10 +41,8 @@ import java.util.List;
 import android.app.ProgressDialog;
 import android.widget.Toast;
 
-import com.exact.general.General;
-
 public class NotEnrolledPoliciesOverview extends AppCompatActivity {
-
+    private Global global;
     JSONArray policy;
     ClientAndroidInterface clientAndroidInterface;
     RecyclerView PolicyRecyclerView;
@@ -108,7 +106,7 @@ public class NotEnrolledPoliciesOverview extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.not_enrolled_policies_overview);
-
+        global = (Global) getApplicationContext();
         final ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
@@ -127,9 +125,7 @@ public class NotEnrolledPoliciesOverview extends AppCompatActivity {
         Button requestButton = findViewById(R.id.requestControlNumberButton);
         requestButton.setOnClickListener(view -> {
 
-            General _general = new General(AppInformation.DomainInfo.getDomain());
-
-            if (_general.isNetworkAvailable(NotEnrolledPoliciesOverview.this)) {
+            if (global.isNetworkAvailable()) {
                 if (tokenl.getTokenText() == null || tokenl.getTokenText().length() <= 0) {
                     LoginDialogBox();
                 } else {
@@ -313,9 +309,8 @@ public class NotEnrolledPoliciesOverview extends AppCompatActivity {
         addListenerOnSpinnerItemSelection(paymentType);
 
         finalAmount.setText(Number);
-        if (clientAndroidInterface.getSpecificControl("TotalAmount").equals("R")) {
-            finalAmount.setEnabled(false);
-        }
+        String totalAmountControl = clientAndroidInterface.getSpecificControl("TotalAmount");
+        finalAmount.setEnabled(!"M".equals(totalAmountControl) && !"R".equals(totalAmountControl));
 
         // set dialog message
         alertDialogBuilder

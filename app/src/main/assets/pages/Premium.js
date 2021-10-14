@@ -3,7 +3,7 @@ $(document).ready(function () {
     document.title = Android.getString('AddEditPremium');
 
     var adj = Android.getSpecificControlHtml("TotalAmount");
-    if (adj == "R") {
+    if (adj == "M" || adj == "R") {
         $('#txtAmount').attr('readonly', 'readonly');
     }
 
@@ -113,13 +113,12 @@ $(document).ready(function () {
                 var prevAmount = parseInt(Android.getSumPrem(policyId));
                 var currentBalance = policyValue - prevAmount;
                 var newBalance = currentBalance - Amount;
-
             }
 
             var newContribution = Amount + ogContribution;
 
-            $('#spBalance').text(policyValue - Amount);
-            $('#spContribution').text(Amount);
+            $('#spBalance').text(newBalance);
+            $('#spContribution').text(newContribution);
         }
     });
 
@@ -301,7 +300,7 @@ $(document).ready(function () {
                         });
                     } else if (results == true) {
                         var PremiumId = Android.SavePremiums(jsonPremium, parseInt(policyId), parseInt(premiumId), parseInt(FamilyId));
-                        policystatus = ActivePolicy;
+                        policystatus = PolicyBalance > 0 ? IdlePolicy : ActivePolicy;
                         Paydate = $('#txtPayDate').val();
                         Android.UpdatePolicy(parseInt(policyId), Paydate, policystatus);
                         Android.UpdateInsureePolicy(parseInt(policyId));

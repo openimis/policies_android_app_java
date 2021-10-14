@@ -57,7 +57,6 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.exact.general.General;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
@@ -75,31 +74,30 @@ public class Acquire extends AppCompatActivity {
     private static final int SCAN_QR_REQUEST_CODE = 0;
     private static final int TAKE_PHOTO_REQUEST_CODE = 1;
 
-    General _General = new General(AppInformation.DomainInfo.getDomain());
-    Global global;
+    private Global global;
 
-    ImageButton btnScan, btnTakePhoto;
-    Button btnSubmit;
-    EditText etCHFID;
-    ImageView iv;
-    ProgressDialog pd;
-    Bitmap theImage;
-    String Path = null;
-    int result = 0;
+    private ImageButton btnScan, btnTakePhoto;
+    private Button btnSubmit;
+    private EditText etCHFID;
+    private ImageView iv;
+    private ProgressDialog pd;
+    private Bitmap theImage;
+    private String Path = null;
+    private int result = 0;
 
-    String msg = "";
-    double Longitude, Latitude;
-    LocationManager lm;
-    String towers;
-    ClientAndroidInterface ca;
-    SQLHandler sqlHandler;
+    private String msg = "";
+    private double Longitude, Latitude;
+    private LocationManager lm;
+    private String towers;
+    private ClientAndroidInterface ca;
+    private SQLHandler sqlHandler;
 
-    File tempPhotoFile;
-    Uri tempPhotoUri;
+    private File tempPhotoFile;
+    private Uri tempPhotoUri;
 
-    Picasso picasso;
+    private Picasso picasso;
 
-    Target imageTarget = new Target() {
+    private Target imageTarget = new Target() {
         @Override
         public void onBitmapLoaded(final Bitmap bitmap, Picasso.LoadedFrom from) {
             theImage = bitmap;
@@ -371,7 +369,7 @@ public class Acquire extends AppCompatActivity {
             case R.id.mnuStatistics:
                 Statistics acquire = new Statistics();
                 acquire.IsEnrolment = true;
-                if (!_General.isNetworkAvailable(Acquire.this)) {
+                if (!global.isNetworkAvailable()) {
                     ShowDialog(getResources().getString(R.string.InternetRequired));
                     return false;
                 }

@@ -42,8 +42,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.exact.general.General;
-
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
@@ -57,27 +55,25 @@ import java.util.Calendar;
 import java.util.Locale;
 
 public class SnapshotIndicators extends AppCompatActivity {
-
-    private General _General = new General(AppInformation.DomainInfo.getDomain());
-    private ClientAndroidInterface ca;
+    private Global global;
     private ProgressDialog pd;
 
-    Calendar myCalendar;
+    private Calendar myCalendar;
 
-    Button btnPick;
-    Button btnGet;
+    private Button btnPick;
+    private Button btnGet;
 
-    TextView tvDate;
-    TextView FAPC;
-    TextView FEPC;
-    TextView FIPC;
-    TextView FSPC;
+    private TextView tvDate;
+    private TextView FAPC;
+    private TextView FEPC;
+    private TextView FIPC;
+    private TextView FSPC;
 
-    RelativeLayout snapshotReport;
+    private RelativeLayout snapshotReport;
 
-    String snapshot = null;
+    private String snapshot = null;
 
-    DatePickerDialog.OnDateSetListener date = (view,year,monthOfYear,dayOfMonth)-> {
+    private DatePickerDialog.OnDateSetListener date = (view, year, monthOfYear, dayOfMonth) -> {
         myCalendar.set(Calendar.YEAR, year);
         myCalendar.set(Calendar.MONTH, monthOfYear);
         myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
@@ -89,13 +85,13 @@ public class SnapshotIndicators extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_snapshot_indicators);
 
+        global = (Global) getApplicationContext();
+
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
             actionBar.setTitle(getResources().getString(R.string.SnapshotIndicators));
         }
-
-        ca = new ClientAndroidInterface(this);
 
         btnPick = findViewById(R.id.btnPick);
         btnGet = findViewById(R.id.btnGet);
@@ -120,7 +116,7 @@ public class SnapshotIndicators extends AppCompatActivity {
             if (!(tvDate.getText()).equals("")) {
                 GetSnapshotIndicators(String.valueOf(tvDate.getText()));
             } else {
-                showToast(R.string.pick_date,Toast.LENGTH_LONG);
+                showToast(R.string.pick_date, Toast.LENGTH_LONG);
             }
         });
     }
@@ -134,7 +130,7 @@ public class SnapshotIndicators extends AppCompatActivity {
 
 
     private void GetSnapshotIndicators(final String today) {
-        if (_General.isNetworkAvailable(this)) {
+        if (global.isNetworkAvailable()) {
             pd = ProgressDialog.show(SnapshotIndicators.this, "", getResources().getString(R.string.GetingSnapShotReport));
             try {
                 new Thread(() -> {
@@ -183,8 +179,7 @@ public class SnapshotIndicators extends AppCompatActivity {
         }
     }
 
-    public void showSnapshot()
-    {
+    public void showSnapshot() {
         if (snapshot != null && snapshot.length() > 0) {
             try {
                 JSONObject ob = new JSONObject(snapshot);
@@ -198,14 +193,12 @@ public class SnapshotIndicators extends AppCompatActivity {
                 e.printStackTrace();
                 showToast(R.string.ErrorOccurred, Toast.LENGTH_LONG);
             }
-        }
-        else {
+        } else {
             showToast(R.string.NoDataAvailable, Toast.LENGTH_LONG);
         }
     }
 
-    public void showToast(@StringRes int id,int length)
-    {
+    public void showToast(@StringRes int id, int length) {
         runOnUiThread(() -> Toast.makeText(getApplicationContext(), id, length).show());
     }
 

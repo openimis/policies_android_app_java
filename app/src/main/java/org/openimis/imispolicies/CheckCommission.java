@@ -3,7 +3,6 @@ package org.openimis.imispolicies;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -14,13 +13,10 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ListAdapter;
 import android.widget.SimpleAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.exact.general.General;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -40,30 +36,26 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import org.openimis.imispolicies.R;
-
 public class CheckCommission extends AppCompatActivity {
 
-    Spinner spPayer;
-    Spinner spProduct;
-    Spinner spMonth;
-    Spinner spMode;
-    ClientAndroidInterface ca;
+    private Spinner spPayer;
+    private Spinner spProduct;
+    private Spinner spMonth;
+    private Spinner spMode;
+    private ClientAndroidInterface ca;
 
-    EditText edYear;
+    private EditText edYear;
 
-    Button btnClear;
-    Button btnCheck;
+    private Button btnClear;
+    private Button btnCheck;
 
-    Token tokenl;
-    ToRestApi toRestApi;
-    ProgressDialog pd;
+    private Token tokenl;
+    private ToRestApi toRestApi;
+    private ProgressDialog pd;
 
 
     private ArrayList<HashMap<String, String>> PayersList = new ArrayList<>();
     private ArrayList<HashMap<String, String>> ProductList = new ArrayList<>();
-
-    private General _General = new General(AppInformation.DomainInfo.getDomain());
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
