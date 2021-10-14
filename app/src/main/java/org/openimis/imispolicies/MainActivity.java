@@ -430,29 +430,6 @@ public class MainActivity extends AppCompatActivity
         alertDialog2.show();
     }
 
-    public void openDialogMsg(String msg) {
-        AlertDialog.Builder alertDialog2 = new AlertDialog.Builder(
-                MainActivity.this);
-
-// Setting Dialog Title
-        alertDialog2.setTitle(getResources().getString(R.string.Incomplete));
-        alertDialog2.setMessage(msg);
-
-// Setting Icon to Dialog
-        // alertDialog2.setIcon(R.drawable.delete);
-
-// Setting Positive "Yes" Btn
-        alertDialog2.setPositiveButton(getResources().getString(R.string.Ok),
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        // Write your code here to execute after dialog
-                    }
-                });
-
-// Showing Alert Dialog
-        alertDialog2.show();
-    }
-
     public void ShowDialogTex() {
         final ClientAndroidInterface ca = new ClientAndroidInterface(context);
         final int MasterData = ca.isMasterDataAvailable();
@@ -618,44 +595,6 @@ public class MainActivity extends AppCompatActivity
         }
         return aBuffer;
     }
-
-    public String getMasterDataText(String filename) {
-        ca.unZip(filename);
-        String fname = "MasterData.txt";
-        try {
-            String dir = global.getSubdirectory("Database");
-            File myFile = new File(dir, fname);//"/"+dir+"/MasterData.txt"
-//            BufferedReader myReader = new BufferedReader(
-//                    new InputStreamReader(
-//                            new FileInputStream(myFile), "UTF32"));
-            FileInputStream fIn = new FileInputStream(myFile);
-            BufferedReader myReader = new BufferedReader(new InputStreamReader(fIn));
-            aBuffer = myReader.readLine();
-
-            myReader.close();
-/*            Scanner in = new Scanner(new FileReader("/"+dir+"/MasterData.txt"));
-            StringBuilder sb = new StringBuilder();
-            while(in.hasNext()) {
-                sb.append(in.next());
-            }
-            in.close();
-            aBuffer = sb.toString();*/
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return aBuffer;
-    }
-
-    private int getCheckedMenuItem() {
-        Menu menu = navigationView.getMenu();
-        for (int i = 0; i < menu.size(); i++) {
-            MenuItem menuItem = menu.getItem(i);
-            if (menuItem.isChecked())
-                return menuItem.getItemId();
-        }
-        return -1;
-    }
-
 
     private boolean copyDatabase(Context context) {
         try {
@@ -983,88 +922,6 @@ public class MainActivity extends AppCompatActivity
             }
         }
         return true;
-    }
-
-    public void LoginDialogBox(final String page) {
-        if (!ca.CheckInternetAvailable())
-            return;
-
-        global = (Global) MainActivity.this.getApplicationContext();
-        // get prompts.xml view
-        LayoutInflater li = LayoutInflater.from(this);
-        View promptsView = li.inflate(R.layout.login_dialog, null);
-
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-
-        // set prompts.xml to alertdialog builder
-        alertDialogBuilder.setView(promptsView);
-
-        final TextView username = (TextView) promptsView.findViewById(R.id.UserName);
-        final TextView password = (TextView) promptsView.findViewById(R.id.Password);
-
-        username.setText(global.getOfficerCode());
-
-        // set dialog message
-        alertDialogBuilder
-                .setCancelable(false)
-                .setPositiveButton(MainActivity.this.getResources().getString(R.string.button_ok),
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                if (!username.getText().toString().equals("") && !password.getText().toString().equals("")) {
-
-                                    new Thread() {
-                                        public void run() {
-                                            ClientAndroidInterface cai = new ClientAndroidInterface(context);
-                                            isUserLogged = cai.LoginToken(username.getText().toString(), password.getText().toString());
-
-                                            runOnUiThread(new Runnable() {
-                                                @Override
-                                                public void run() {
-                                                    SetLoggedIn(MainActivity.this.getResources().getString(R.string.Login), MainActivity.this.getResources().getString(R.string.Logout));
-                                                }
-                                            });
-
-                                            runOnUiThread(new Runnable() {
-                                                @Override
-                                                public void run() {
-                                                    if (isUserLogged) {
-                                                        if (page.equals("Enquire")) {
-                                                            Intent intent = new Intent(MainActivity.this, Enquire.class);
-                                                            startActivity(intent);
-                                                            Toast.makeText(MainActivity.this, MainActivity.this.getResources().getString(R.string.Login_Successful), Toast.LENGTH_LONG).show();
-                                                        }
-                                                        if (page.equals("Reports")) {
-                                                            Intent intent = new Intent(MainActivity.this, Reports.class);
-                                                            startActivity(intent);
-                                                            Toast.makeText(MainActivity.this, MainActivity.this.getResources().getString(R.string.Login_Successful), Toast.LENGTH_LONG).show();
-                                                        }
-
-                                                    } else {
-                                                        ca.ShowDialog(MainActivity.this.getResources().getString(R.string.LoginFail));
-                                                    }
-                                                }
-                                            });
-
-                                        }
-                                    }.start();
-
-
-                                } else {
-                                    Toast.makeText(MainActivity.this, MainActivity.this.getResources().getString(R.string.Enter_Credentials), Toast.LENGTH_LONG).show();
-                                }
-                            }
-                        }).setNegativeButton(MainActivity.this.getResources().getString(R.string.button_cancel),
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        dialog.cancel();
-                    }
-                });
-
-        // create alert dialog
-        AlertDialog alertDialog = alertDialogBuilder.create();
-
-        // show it
-        alertDialog.show();
     }
 
     public String getSelectedLanguage() {

@@ -44,7 +44,6 @@ $(document).ready(function () {
         $('#txtExpiryDate').val(ExpiryDate);
 
         if(Android.IsBulkCNUsed()) {
-            console.log(typeof $Policy[0]["ControlNumber"]);
             if($Policy[0]["ControlNumber"]) {
                 $('#AssignedControlNumber').val($Policy[0]["ControlNumber"]).prop('readonly', true);
             } else {

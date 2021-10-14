@@ -863,13 +863,13 @@ public class SQLHandler extends SQLiteOpenHelper {
 
     public int getAssignedCNCount(String officerCode) {
         return getCount(tblBulkControlNumbers,
-                "PolicyId IS NOT NULL AND OfficerCode = ?",
+                "PolicyId IS NOT NULL AND UPPER(OfficerCode) = UPPER(?)",
                 new String[]{officerCode});
     }
 
     public int getFreeCNCount(String officerCode) {
         return getCount(tblBulkControlNumbers,
-                "PolicyId IS NULL AND OfficerCode = ?",
+                "PolicyId IS NULL AND UPPER(OfficerCode) = UPPER(?)",
                 new String[]{officerCode});
     }
 
@@ -957,7 +957,7 @@ public class SQLHandler extends SQLiteOpenHelper {
             } else {
                 openDatabase();
                 JSONArray policyData = cursorToJsonArray(mDatabase.rawQuery(
-                        "SELECT po.PolicyValue, UPPER(pr.ProductCode) FROM tblPolicy po INNER JOIN tblProduct pr on pr.ProdId=po.ProdIdgit s WHERE PolicyId = ?",
+                        "SELECT po.PolicyValue, UPPER(pr.ProductCode) as ProductCode FROM tblPolicy po INNER JOIN tblProduct pr on pr.ProdId=po.ProdId WHERE PolicyId = ?",
                         new String[]{String.valueOf(policyId)}));
 
                 if (policyData.length() == 0) {
