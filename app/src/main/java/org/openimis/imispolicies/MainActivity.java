@@ -32,7 +32,6 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -41,6 +40,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
@@ -84,6 +84,9 @@ import static android.provider.Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSIO
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
+    private static final int REQUEST_ALL_FILES_ACCESS_CODE = 7;
+    private static final int REQUEST_PERMISSIONS_CODE = 1;
+    private static final int REQUEST_PICK_MD_FILE = 4;
     private static final String PREFS_NAME = "CMPref";
     private NavigationView navigationView;
 
@@ -107,7 +110,6 @@ public class MainActivity extends AppCompatActivity
     String calledFrom = "java";
     public File f;
     public String etRarPassword = "";
-    boolean isUserLogged = false;
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -118,27 +120,40 @@ public class MainActivity extends AppCompatActivity
             wv.evaluateJavascript(String.format("selectImageCallback(\"%s\");", selectedImage), null);
         } else if (requestCode == ClientAndroidInterface.RESULT_SCAN && resultCode == RESULT_OK && data != null) {
             this.InsureeNumber = data.getStringExtra("SCAN_RESULT");
-        } else if (requestCode == 4 && resultCode == RESULT_OK && data != null) {
-            Uri uri = data.getData();
-            if (uri != null) {
-                try {
-                    byte[] bytes = IOUtils.toByteArray(getContentResolver().openInputStream(uri));
-                    String path = global.getSubdirectory("Database");
-                    f = new File(path, "MasterData.rar");
-                    if (f.exists() || f.createNewFile())
-                        new FileOutputStream(f).write(bytes);
-                } catch (IOException e) {
-                    e.printStackTrace();
+        } else if (requestCode == REQUEST_PICK_MD_FILE) {
+            if (resultCode == RESULT_OK && data != null) {
+                Uri uri = data.getData();
+                if (uri != null) {
+                    try {
+                        byte[] bytes = IOUtils.toByteArray(getContentResolver().openInputStream(uri));
+                        String path = global.getSubdirectory("Database");
+                        f = new File(path, "MasterData.rar");
+                        if (f.exists() || f.createNewFile())
+                            new FileOutputStream(f).write(bytes);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    ShowDialogTex2();
                 }
-                ShowDialogTex2();
+            } else {
+                finish();
             }
-        } else if (requestCode == 4 && resultCode == 0) {
-            finish();
+        } else if (requestCode == REQUEST_ALL_FILES_ACCESS_CODE) {
+            if (checkRequirements()) {
+                onAllRequirementsMet();
+            }
         } else {
             //if user cancels
             ClientAndroidInterface.inProgress = false;
             this.InsureeNumber = null;
             this.ImagePath = null;
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (checkRequirements()) {
+            onAllRequirementsMet();
         }
     }
 
@@ -151,20 +166,14 @@ public class MainActivity extends AppCompatActivity
         selectedLanguage = spHF.getString("Language", "en");
         changeLanguage(selectedLanguage, false);
         super.onCreate(savedInstanceState);
-        //Request for camera permission//
-        //By Herman 20/2/2018
-        requestPermision();
-
         setContentView(R.layout.activity_main);
-
         sqlHandler = new SQLHandler(this);
-
         sqlHandler.isPrivate = true;
         //Set the Image folder path
-        global.setImageFolder(getApplicationContext().getApplicationInfo().dataDir + "/Images/");
+        global.setImageFolder(global.getApplicationInfo().dataDir + "/Images/");
         CreateFolders();
         //Check if database exists
-        File database = getApplicationContext().getDatabasePath(SQLHandler.DBNAME);
+        File database = global.getDatabasePath(SQLHandler.DBNAME);
         if (!database.exists()) {
             sqlHandler.getReadableDatabase();
             if (copyDatabase(this)) {
@@ -248,11 +257,10 @@ public class MainActivity extends AppCompatActivity
         SetLoggedIn(getResources().getString(R.string.Login), getResources().getString(R.string.Logout));
 
         navigationView.setCheckedItem(R.id.nav_home);
-        if (TextUtils.isEmpty(global.getOfficerCode())) {
-            //Edited By HERMAN
-            ShowDialogTex();
+
+        if (checkRequirements()) {
+            onAllRequirementsMet();
         }
-        global.isSDCardAvailable();
 
         setVisibilityOfPaymentMenu();
     }
@@ -308,7 +316,7 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    public void openDialog() {
+    public void PickMasterDataFileDialog() {
         new AlertDialog.Builder(MainActivity.this)
                 .setTitle(getResources().getString(R.string.NoInternetTitle))
                 .setMessage(getResources().getString(R.string.DoImport))
@@ -319,7 +327,7 @@ public class MainActivity extends AppCompatActivity
                             intent.addCategory(Intent.CATEGORY_OPENABLE);
                             intent.setType("*/*");
                             try {
-                                startActivityForResult(intent, 4);
+                                startActivityForResult(intent, REQUEST_PICK_MD_FILE);
                             } catch (ActivityNotFoundException e) {
                                 Toast.makeText(getApplicationContext(), getResources().getString(R.string.NoFileExporerInstalled), Toast.LENGTH_SHORT).show();
                             }
@@ -330,72 +338,49 @@ public class MainActivity extends AppCompatActivity
                 }).show();
     }
 
-    public void openDialogFromPage() {
+    public void PickMasterDataFileDialogFromPage() {
         AlertDialog.Builder alertDialog2 = new AlertDialog.Builder(
                 MainActivity.this);
 
-// Setting Dialog Title
         alertDialog2.setTitle(getResources().getString(R.string.NoInternetTitle));
         alertDialog2.setMessage(getResources().getString(R.string.DoImport));
 
-// Setting Icon to Dialog
-        // alertDialog2.setIcon(R.drawable.delete);
-
-// Setting Positive "Yes" Btn
         alertDialog2.setPositiveButton(getResources().getString(R.string.Yes),
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
+                (dialog, which) -> {
 
-                        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-                        intent.addCategory(Intent.CATEGORY_OPENABLE);
-                        intent.setType("*/*");
-                        try {
-                            startActivityForResult(intent, 4);
-                        } catch (ActivityNotFoundException e) {
-                            Toast.makeText(getApplicationContext(), getResources().getString(R.string.NoFileExporerInstalled), Toast.LENGTH_SHORT).show();
-                        }
-                        // Write your code here to execute after dialog
+                    Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                    intent.addCategory(Intent.CATEGORY_OPENABLE);
+                    intent.setType("*/*");
+                    try {
+                        startActivityForResult(intent, REQUEST_PICK_MD_FILE);
+                    } catch (ActivityNotFoundException e) {
+                        Toast.makeText(getApplicationContext(), getResources().getString(R.string.NoFileExporerInstalled), Toast.LENGTH_SHORT).show();
                     }
+                    // Write your code here to execute after dialog
                 }).setNegativeButton(getResources().getString(R.string.No),
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        dialog.cancel();
-                    }
-                });
+                (dialog, id) -> dialog.cancel());
 
-// Showing Alert Dialog
         alertDialog2.show();
     }
 
-    public void ConfirmDialog(String filename) {
+    public void ConfirmMasterDataDialog(String filename) {
         AlertDialog.Builder alertDialog2 = new AlertDialog.Builder(
                 MainActivity.this);
 
-// Setting Dialog Title
         alertDialog2.setTitle(getResources().getString(R.string.LoadFile));
         alertDialog2.setMessage(filename);
         alertDialog2.setCancelable(false);
 
-// Setting Icon to Dialog
-        // alertDialog2.setIcon(R.drawable.delete);
-
-// Setting Positive "Yes" Btn
         alertDialog2.setPositiveButton(getResources().getString(R.string.Ok),
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        MasterDataLocalAsync masterDataLocalAsync = new MasterDataLocalAsync();
-                        masterDataLocalAsync.execute();
-                        // Write your code here to execute after dialog
-                    }
+                (dialog, which) -> {
+                    MasterDataLocalAsync masterDataLocalAsync = new MasterDataLocalAsync();
+                    masterDataLocalAsync.execute();
                 }).setNegativeButton(getResources().getString(R.string.Quit),
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        dialog.cancel();
-                        finish();
-                    }
+                (dialog, id) -> {
+                    dialog.cancel();
+                    finish();
                 });
 
-// Showing Alert Dialog
         alertDialog2.show();
     }
 
@@ -403,34 +388,21 @@ public class MainActivity extends AppCompatActivity
         AlertDialog.Builder alertDialog2 = new AlertDialog.Builder(
                 MainActivity.this);
 
-// Setting Dialog Title
         alertDialog2.setTitle(getResources().getString(R.string.LoadFile));
         alertDialog2.setMessage(filename);
         alertDialog2.setCancelable(false);
 
-// Setting Icon to Dialog
-        // alertDialog2.setIcon(R.drawable.delete);
-
-// Setting Positive "Yes" Btn
         alertDialog2.setPositiveButton(getResources().getString(R.string.Ok),
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        MasterDataLocalAsync masterDataLocalAsync = new MasterDataLocalAsync();
-                        masterDataLocalAsync.execute();
-                        // Write your code here to execute after dialog
-                    }
+                (dialog, which) -> {
+                    MasterDataLocalAsync masterDataLocalAsync = new MasterDataLocalAsync();
+                    masterDataLocalAsync.execute();
                 }).setNegativeButton(getResources().getString(R.string.Quit),
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        dialog.cancel();
-                    }
-                });
+                (dialog, id) -> dialog.cancel());
 
-// Showing Alert Dialog
         alertDialog2.show();
     }
 
-    public void ShowDialogTex() {
+    public void ShowEnrolmentOfficerDialog() {
         final ClientAndroidInterface ca = new ClientAndroidInterface(context);
         final int MasterData = ca.isMasterDataAvailable();
 
@@ -453,10 +425,6 @@ public class MainActivity extends AppCompatActivity
             userInput.setVisibility(View.GONE);
         }
 
-
-        // set dialog message
-        final String result = "";
-
         int positiveButton, negativeButton;
         if (MasterData > 0) {
             positiveButton = R.string.Ok;
@@ -470,50 +438,64 @@ public class MainActivity extends AppCompatActivity
         alertDialogBuilder
                 .setCancelable(false)
                 .setPositiveButton(getResources().getString(positiveButton),
-                        new DialogInterface.OnClickListener() {
-
-                            public void onClick(DialogInterface dialog, int id) {
-                                try {
-                                    if (MasterData > 0) {
-                                        if (ca.isOfficerCodeValid(userInput.getText().toString())) {
-                                            global.setOfficerCode(userInput.getText().toString());
-                                            OfficerName.setText(global.getOfficerName());
+                        (dialog, id) -> {
+                            try {
+                                if (MasterData > 0) {
+                                    if (ca.isOfficerCodeValid(userInput.getText().toString())) {
+                                        global.setOfficerCode(userInput.getText().toString());
+                                        OfficerName.setText(global.getOfficerName());
 //                                            if(_General.isNetworkAvailable(MainActivity.this)){
 //                                                ca.getOfficerVillages(userInput.getText().toString());
 //                                            }
-                                        } else {
-                                            ShowDialogTex();
-                                            ca.ShowDialog(getResources().getString(R.string.IncorrectOfficerCode));
-                                        }
                                     } else {
-                                        if (!global.isNetworkAvailable()) {
-                                            openDialog();
-                                        } else {
-                                            MasterDataAsync masterDataAsync = new MasterDataAsync();
-                                            masterDataAsync.execute();
-
-                                        }
-                                        //ca.downloadMasterData();
-                                        //ShowDialogTex();
+                                        ShowEnrolmentOfficerDialog();
+                                        ca.ShowDialog(getResources().getString(R.string.IncorrectOfficerCode));
                                     }
-                                } catch (JSONException e) {
-                                    e.printStackTrace();
+                                } else {
+                                    if (!global.isNetworkAvailable()) {
+                                        PickMasterDataFileDialog();
+                                    } else {
+                                        MasterDataAsync masterDataAsync = new MasterDataAsync();
+                                        masterDataAsync.execute();
+
+                                    }
+                                    //ca.downloadMasterData();
+                                    //ShowDialogTex();
                                 }
+                            } catch (JSONException e) {
+                                e.printStackTrace();
                             }
                         })
                 .setNegativeButton(getResources().getString(negativeButton),
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                dialog.cancel();
-                                finish();
-                            }
+                        (dialog, id) -> {
+                            dialog.cancel();
+                            finish();
                         });
 
-        // create alert dialog
-        alertDialog = alertDialogBuilder.create();
+        alertDialog = alertDialogBuilder.show();
+    }
 
-        // show it
-        alertDialog.show();
+    public void ShowMasterDataDialog() {
+        new AlertDialog.Builder(context)
+                .setTitle(R.string.MasterData)
+                .setMessage(R.string.MasterDataNotFound)
+                .setCancelable(false)
+                .setPositiveButton(R.string.Yes,
+                        (dialog, id) -> {
+                                if (!global.isNetworkAvailable()) {
+                                    PickMasterDataFileDialog();
+                                } else {
+                                    MasterDataAsync masterDataAsync = new MasterDataAsync();
+                                    masterDataAsync.execute();
+
+                                }
+                        })
+                .setNegativeButton(R.string.ForceClose,
+                        (dialog, id) -> {
+                            dialog.cancel();
+                            finish();
+                        })
+                .show();
     }
 
 
@@ -535,30 +517,24 @@ public class MainActivity extends AppCompatActivity
         alertDialogBuilder
                 .setCancelable(false)
                 .setPositiveButton(getResources().getString(R.string.Yes),
-                        new DialogInterface.OnClickListener() {
+                        (dialog, id) -> {
+                            try {
+                                etRarPassword = userInput.getText().toString();
+                                getMasterDataText2(f.getPath(), etRarPassword);
 
-                            public void onClick(DialogInterface dialog, int id) {
-                                try {
-                                    etRarPassword = userInput.getText().toString();
-                                    getMasterDataText2(f.getPath(), etRarPassword);
-
-                                    if (calledFrom == "java") {
-                                        ConfirmDialog((f.getName()).toString());
-                                    } else {
-                                        ConfirmDialogPage((f.getName()).toString());
-                                    }
-                                } catch (Exception e) {
-                                    e.getMessage();
+                                if (calledFrom == "java") {
+                                    ConfirmMasterDataDialog((f.getName()));
+                                } else {
+                                    ConfirmDialogPage((f.getName()));
                                 }
+                            } catch (Exception e) {
+                                e.getMessage();
                             }
-
                         })
                 .setNegativeButton(getResources().getString(R.string.No),
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                dialog.cancel();
-                                finish();
-                            }
+                        (dialog, id) -> {
+                            dialog.cancel();
+                            finish();
                         });
 
         // create alert dialog
@@ -805,7 +781,6 @@ public class MainActivity extends AppCompatActivity
         @Override
         protected void onPostExecute(Void aVoid) {
             pd.dismiss();
-            ShowDialogTex();
 
             Intent refresh = new Intent(MainActivity.this, MainActivity.class);
             startActivity(refresh);
@@ -819,7 +794,6 @@ public class MainActivity extends AppCompatActivity
 
         @Override
         protected void onPreExecute() {
-
             pd = ProgressDialog.show(context, context.getResources().getString(R.string.Sync), context.getResources().getString(R.string.DownloadingMasterData));
         }
 
@@ -838,7 +812,6 @@ public class MainActivity extends AppCompatActivity
         @Override
         protected void onPostExecute(Void aVoid) {
             pd.dismiss();
-            ShowDialogTex();
 
             Intent refresh = new Intent(MainActivity.this, MainActivity.class);
             startActivity(refresh);
@@ -892,36 +865,82 @@ public class MainActivity extends AppCompatActivity
 //        }
 //    }
 
-    //Ask for permission
-    public void requestPermision() {
-        int PERMISSION_ALL = 1;
-        String[] PERMISSIONS = {Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.VIBRATE, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.INTERNET, Manifest.permission.CAMERA, Manifest.permission.ACCESS_NETWORK_STATE, Manifest.permission.ACCESS_WIFI_STATE, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.CHANGE_WIFI_STATE};
-        if (!hasPermissions(this, PERMISSIONS)) {
-            ActivityCompat.requestPermissions(this, PERMISSIONS, PERMISSION_ALL);
-        }
-
-        // Ask for "Manage External Storage" permission, required in Android 11
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            String[] Android11Permissions = {Manifest.permission.MANAGE_EXTERNAL_STORAGE};
-            if (!hasPermissions(this, Android11Permissions)) {
-                ActivityCompat.requestPermissions(this, Android11Permissions, PERMISSION_ALL);
-                if (!Environment.isExternalStorageManager()) {
-                    Intent intent = new Intent(ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
-                    startActivity(intent);
-                }
-            }
-        }
-    }
-
     public static boolean hasPermissions(Context context, String... permissions) {
         if (context != null && permissions != null) {
             for (String permission : permissions) {
-                if (ActivityCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED) {
+                if (ActivityCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED
+                        && !permission.equals(Manifest.permission.MANAGE_EXTERNAL_STORAGE)) {
+                    // MANAGE_EXTERNAL_STORAGE always report as denied by design
                     return false;
                 }
             }
         }
         return true;
+    }
+
+    public void externalStorageAccessDialog() {
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context)
+                .setTitle(R.string.ExternalStorageAccess)
+                .setMessage(getResources().getString(R.string.ExternalStorageAccessInfo,getResources().getString(R.string.app_name_policies)))
+                .setCancelable(false)
+                .setPositiveButton(R.string.Ok,
+                        (dialog, id) -> {
+                            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+                                Intent intent = new Intent(ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
+                                startActivityForResult(intent, REQUEST_ALL_FILES_ACCESS_CODE);
+                            }
+                        })
+                .setNegativeButton(R.string.ForceClose,
+                        (dialog, id) -> {
+                            dialog.cancel();
+                            finish();
+                        });
+
+        alertDialogBuilder.show();
+    }
+
+    public void PermissionsDialog() {
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context)
+                .setTitle(R.string.Permissions)
+                .setMessage(getResources().getString(R.string.PermissionsInfo,getResources().getString(R.string.app_name_policies)))
+                .setCancelable(false)
+                .setPositiveButton(R.string.Ok,
+                        (dialog, id) -> ActivityCompat.requestPermissions(this, global.getPermissions(), REQUEST_PERMISSIONS_CODE))
+                .setNegativeButton(R.string.ForceClose,
+                        (dialog, id) -> {
+                            dialog.cancel();
+                            finish();
+                        });
+
+        alertDialogBuilder.show();
+    }
+
+    public boolean checkRequirements() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            if (!Environment.isExternalStorageManager()) {
+                externalStorageAccessDialog();
+                return false;
+            }
+        }
+
+        if (!hasPermissions(this, global.getPermissions())) {
+            PermissionsDialog();
+            return false;
+        }
+
+        if (ca.isMasterDataAvailable() < 1) {
+            ShowMasterDataDialog();
+            return false;
+        }
+
+        return true;
+    }
+
+    public void onAllRequirementsMet() {
+        if (TextUtils.isEmpty(global.getOfficerCode())) {
+            ShowEnrolmentOfficerDialog();
+        }
+        global.isSDCardAvailable();
     }
 
     public String getSelectedLanguage() {
