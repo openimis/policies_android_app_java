@@ -32,6 +32,9 @@ public class PaymentOverview extends AppCompatActivity {
         CheckCommission = findViewById(R.id.CheckCommission);
         BulkControlNumber = findViewById(R.id.BulkControlNumber);
 
+        OverViewPolicies.setVisibility(AppInformation.MenuInfo.getShowPaymentNumberMenu() ? View.VISIBLE : View.GONE);
+        NotEnrolledPolicies.setVisibility(AppInformation.MenuInfo.getShowPaymentNumberMenu() ? View.VISIBLE : View.GONE);
+        OverViewControlNumber.setVisibility(AppInformation.MenuInfo.getShowPaymentNumberMenu() ? View.VISIBLE : View.GONE);
         BulkControlNumber.setVisibility(AppInformation.MenuInfo.getShowBulkCNMenu() ? View.VISIBLE : View.GONE);
 
         OverViewPolicies.setOnClickListener(view -> openPage(SearchOverViewPolicies.class));

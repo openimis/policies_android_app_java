@@ -80,7 +80,6 @@ import java.io.OutputStream;
 
 import static android.provider.Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION;
 
-
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -268,7 +267,8 @@ public class MainActivity extends AppCompatActivity
     private void setVisibilityOfPaymentMenu() {
         navigationView = findViewById(R.id.nav_view);
         MenuItem navPayment = navigationView.getMenu().findItem(R.id.nav_payment);
-        navPayment.setVisible(AppInformation.MenuInfo.getShowPaymentNumberMenu());
+        navPayment.setVisible(AppInformation.MenuInfo.getShowPaymentNumberMenu()
+                || AppInformation.MenuInfo.getShowBulkCNMenu());
     }
 
     @Override
@@ -482,13 +482,13 @@ public class MainActivity extends AppCompatActivity
                 .setCancelable(false)
                 .setPositiveButton(R.string.Yes,
                         (dialog, id) -> {
-                                if (!global.isNetworkAvailable()) {
-                                    PickMasterDataFileDialog();
-                                } else {
-                                    MasterDataAsync masterDataAsync = new MasterDataAsync();
-                                    masterDataAsync.execute();
+                            if (!global.isNetworkAvailable()) {
+                                PickMasterDataFileDialog();
+                            } else {
+                                MasterDataAsync masterDataAsync = new MasterDataAsync();
+                                masterDataAsync.execute();
 
-                                }
+                            }
                         })
                 .setNegativeButton(R.string.ForceClose,
                         (dialog, id) -> {
@@ -881,7 +881,7 @@ public class MainActivity extends AppCompatActivity
     public void externalStorageAccessDialog() {
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context)
                 .setTitle(R.string.ExternalStorageAccess)
-                .setMessage(getResources().getString(R.string.ExternalStorageAccessInfo,getResources().getString(R.string.app_name_policies)))
+                .setMessage(getResources().getString(R.string.ExternalStorageAccessInfo, getResources().getString(R.string.app_name_policies)))
                 .setCancelable(false)
                 .setPositiveButton(R.string.Ok,
                         (dialog, id) -> {
@@ -902,7 +902,7 @@ public class MainActivity extends AppCompatActivity
     public void PermissionsDialog() {
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context)
                 .setTitle(R.string.Permissions)
-                .setMessage(getResources().getString(R.string.PermissionsInfo,getResources().getString(R.string.app_name_policies)))
+                .setMessage(getResources().getString(R.string.PermissionsInfo, getResources().getString(R.string.app_name_policies)))
                 .setCancelable(false)
                 .setPositiveButton(R.string.Ok,
                         (dialog, id) -> ActivityCompat.requestPermissions(this, global.getPermissions(), REQUEST_PERMISSIONS_CODE))
