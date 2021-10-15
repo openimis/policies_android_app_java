@@ -137,6 +137,19 @@ android {
             buildConfigField "boolean", "SHOW_BULK_CN_MENU", 'true'
             resValue "string", "app_name_policies", "Policies CHF SIT"
         }
+        niger {
+            applicationId "org.openimis.imispolicies.niger"
+            buildConfigField "String", "API_BASE_URL", '"http://oiniger.bluesquare.org/rest/"'
+            buildConfigField "String", "APP_DIR", '"IMIS-NIGER"'
+            resValue "string", "app_name_policies", "Polices Niger"
+        }
+        cli {
+            applicationIdSuffix System.getenv("APPLICATION_ID") ?: "org.openimis.imispolicies.cli"
+            buildConfigField "String", "API_BASE_URL", '"' + (System.getenv("API_BASE_URL") ?: 'http://10.0.2.2:35787/') + '"'
+            buildConfigField "String", "APP_DIR", '"' + (System.getenv("CLI_APP_DIR") ?: 'IMIS-CLI') + '"'
+            resValue "string", "app_name_claims", System.getenv("CLI_APP_NAME") ?: "Policies CLI"
+            dimension 'std'
+        }
     }
     sourceSets {
         chfDev.java.srcDir 'src/chf/java'
@@ -154,6 +167,9 @@ android {
         bephaDev.java.srcDir 'src/bepha/java'
         bephaDev.res.srcDir 'src/bepha/res'
 
+        niger.java.srcDir 'src/niger/java'
+        niger.res.srcDir 'src/niger/res'
+
         tchadDev.java.srcDir 'src/tchad/java'
         tchadDev.res.srcDir 'src/tchad/res'
 
@@ -162,6 +178,9 @@ android {
 
         demoRelease.java.srcDir 'src/master/java'
         demoRelease.res.srcDir 'src/demoRelease/res'
+
+        cli.java.srcDir System.getenv("CLI_JAVA_DIR") ?: 'src/master/java'
+        cli.res.srcDir System.getenv("CLI_RES_DIR") ?: 'src/demoProd/res'
     }
 
 // Apply custom flavours
