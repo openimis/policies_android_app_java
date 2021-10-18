@@ -149,6 +149,14 @@ android {
             buildConfigField "String", "APP_DIR", '"' + (System.getenv("CLI_APP_DIR") ?: 'IMIS-CLI') + '"'
             resValue "string", "app_name_claims", System.getenv("CLI_APP_NAME") ?: "Policies CLI"
             dimension 'std'
+        mauritaniaTrain {
+            applicationId "org.openimis.policies.mauritaniaTrain"
+            buildConfigField "String", "API_BASE_URL", '"http://formation.cnass-mauritanie.swisstph-mis.ch/rest/"'
+            buildConfigField "boolean", "SHOW_PAYMENT_MENU", 'false'
+            buildConfigField "boolean", "SHOW_BULK_CN_MENU", 'false'
+            buildConfigField "String", "APP_DIR", '"IMIS-MAURITANIA-TRAIN"'
+            resValue "string", "app_name_policies", "Policies CNASS TRAIN"
+            dimension = 'std'
         }
     }
     sourceSets {
@@ -181,6 +189,8 @@ android {
 
         cli.java.srcDir System.getenv("CLI_JAVA_DIR") ?: 'src/master/java'
         cli.res.srcDir System.getenv("CLI_RES_DIR") ?: 'src/demoProd/res'
+
+        mauritaniaTrain.java.srcDir 'src/master/java'
     }
 
 // Apply custom flavours
