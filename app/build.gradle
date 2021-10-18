@@ -149,6 +149,7 @@ android {
             buildConfigField "String", "APP_DIR", '"' + (System.getenv("CLI_APP_DIR") ?: 'IMIS-CLI') + '"'
             resValue "string", "app_name_claims", System.getenv("CLI_APP_NAME") ?: "Policies CLI"
             dimension 'std'
+        }
         mauritaniaTrain {
             applicationId "org.openimis.policies.mauritaniaTrain"
             buildConfigField "String", "API_BASE_URL", '"http://formation.cnass-mauritanie.swisstph-mis.ch/rest/"'
