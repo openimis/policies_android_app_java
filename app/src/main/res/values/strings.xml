@@ -422,4 +422,9 @@
   <string name="noBulkCNAvailable">No control numbers left for this product. Please fetch control numbers or provide control number from other source.</string>
   <string name="controlNumberLabel">Control Number :</string>
   <string name="noBulkCNAssigned">No control number assigned to this policy. Please fetch control numbers or provide control number from other source.</string>
+  <string name="MasterData">Master Data</string>
+  <string name="ExternalStorageAccess">External Storage Access</string>
+  <string name="ExternalStorageAccessInfo">To work correctly, %1$s requires external storage access. Please allow it for %1$s in next screen in order to use the application.</string>
+  <string name="Permissions">Permissions</string>
+  <string name="PermissionsInfo">To work correctly, %1$s requires multiple permissions. Please allow them in next screen in order to use the application.</string>
 </resources>

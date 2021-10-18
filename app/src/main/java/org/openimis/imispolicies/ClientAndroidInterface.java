@@ -2384,7 +2384,7 @@ public class ClientAndroidInterface {
         ((Activity) mContext).runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                ((MainActivity) mContext).openDialogFromPage();
+                ((MainActivity) mContext).PickMasterDataFileDialogFromPage();
                 ((MainActivity) mContext).calledFrom = "htmlpage";
             }
         });
@@ -4622,7 +4622,7 @@ public class ClientAndroidInterface {
 
     @JavascriptInterface
     public void popUpOfficerDialog() {
-        ((MainActivity) mContext).ShowDialogTex();
+        ((MainActivity) mContext).ShowEnrolmentOfficerDialog();
     }
 
     @JavascriptInterface
@@ -4636,17 +4636,14 @@ public class ClientAndroidInterface {
                     startDownloading();
                     finalPd.dismiss();
 
-                    ((Activity) mContext).runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            ShowDialog(mContext.getResources().getString(R.string.DataDownloadedSuccess));
-                            Global global = Global.getGlobal();
-                            global.setOfficerCode("");
+                    ((Activity) mContext).runOnUiThread(() -> {
+                        ShowDialog(mContext.getResources().getString(R.string.DataDownloadedSuccess));
+                        Global global = Global.getGlobal();
+                        global.setOfficerCode("");
 //                            Intent refresh = new Intent(mContext, MainActivity.class);
 //                            ((MainActivity)mContext).startActivity(refresh);
 //                            ((MainActivity)mContext).finish();
-                            ((MainActivity) mContext).ShowDialogTex();
-                        }
+                        ((MainActivity) mContext).ShowEnrolmentOfficerDialog();
                     });
 
                 } catch (JSONException e) {
