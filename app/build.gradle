@@ -46,7 +46,7 @@ android {
     }
     flavorDimensions 'std'
     productFlavors.all {
-        buildConfigField "String", "API_BASE_URL", '"http://3.238.179.83:89/rest/"'
+        buildConfigField "String", "API_BASE_URL", '"http://educash.y-note.cm/rest/"'
         buildConfigField "boolean", "SHOW_CONTROL_NUMBER_MENU", 'false'
         buildConfigField "String", "RAR_PASSWORD", '")(#$1HsD"'
         resValue "string", "app_name", "Educash"
@@ -55,7 +55,7 @@ android {
     productFlavors {
         demoProd {
             applicationId "cm.ynote.rhemacare.demoProd"
-            buildConfigField "String", "API_BASE_URL", '"http://3.238.179.83:89/rest/"'
+            buildConfigField "String", "API_BASE_URL", '"http://educash.y-note.cm/rest/"'
             buildConfigField "String", "RAR_PASSWORD", '")(#$1HsD"'
             resValue "string", "app_name", "Educash"
             dimension = 'std'
