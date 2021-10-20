@@ -1,4 +1,4 @@
-# openIMIS - IMIS Android Application
+# openIMIS - IMIS Android Application - Educash
 
 The openIMIS IMIS Android Application is the mobile client used by
 the Enrollment Officers to easily enter and register, renew and manage 
