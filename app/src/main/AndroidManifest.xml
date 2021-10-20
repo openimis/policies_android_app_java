@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="cm.ynote.rhemacare"
+    package="cm.ynote.educash"
     android:versionCode="2"
     android:versionName="2.0.2">
 
@@ -17,14 +17,18 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
+    <uses-permission android:name="android.permission.READ_CALL_LOG" tools:node="remove" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" tools:node="remove" />
+
     <uses-feature
         android:name="android.hardware.camera"
         android:required="true" />
 
     <application
-        android:name="cm.ynote.rhemacare.Global"
+        android:name="cm.ynote.educash.Global"
         android:allowBackup="true"
         android:fullBackupContent="@xml/backup_descriptor"
+        android:networkSecurityConfig="@xml/network_security_config"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher"
@@ -37,7 +41,7 @@
             android:name="org.apache.http.legacy"
             android:required="false"/>
         <activity
-            android:name="cm.ynote.rhemacare.MainActivity"
+            android:name="cm.ynote.educash.MainActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/app_name"
             android:screenOrientation="portrait"
@@ -49,62 +53,64 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="cm.ynote.rhemacare.Enquire"
+            android:name="cm.ynote.educash.Enquire"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/Enquire"
             android:screenOrientation="portrait" />
         <activity
-            android:name="cm.ynote.rhemacare.RenewList"
+            android:name="cm.ynote.educash.RenewList"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/Renewal"
             android:screenOrientation="portrait" />
         <activity
-            android:name="cm.ynote.rhemacare.Renewal"
+            android:name="cm.ynote.educash.Renewal"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/Renewal"
-            android:parentActivityName="cm.ynote.rhemacare.RenewList"
+            android:parentActivityName="cm.ynote.educash.RenewList"
             android:screenOrientation="portrait"
             tools:targetApi="jelly_bean" />
         <activity
-            android:name="cm.ynote.rhemacare.FeedbackList"
+            android:name="cm.ynote.educash.FeedbackList"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:screenOrientation="portrait" />
         <activity
-            android:name="cm.ynote.rhemacare.Feedback"
+            android:name="cm.ynote.educash.Feedback"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:parentActivityName="cm.ynote.rhemacare.FeedbackList"
+            android:parentActivityName="cm.ynote.educash.FeedbackList"
             android:screenOrientation="portrait"
             tools:targetApi="jelly_bean" />
         <activity
-            android:name="cm.ynote.rhemacare.Statistics"
+            android:name="cm.ynote.educash.Statistics"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:screenOrientation="portrait" />
         <activity
-            android:name="cm.ynote.rhemacare.Acquire"
+            android:name="cm.ynote.educash.Acquire"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/Acquire"
             android:screenOrientation="portrait" />
-        <activity android:name="cm.ynote.rhemacare.Reports"
+        <activity android:name="cm.ynote.educash.Reports"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/Reports"
             android:screenOrientation="portrait" />
         <activity
-            android:name="cm.ynote.rhemacare.SnapshotIndicators"
+            android:name="cm.ynote.educash.SnapshotIndicators"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/SnapshotIndicators"
             android:screenOrientation="portrait" />
 
-        <activity android:name="cm.ynote.rhemacare.CummulativeIndicators"
+        <activity android:name="cm.ynote.educash.CummulativeIndicators"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/CummulativeIndicators"
             android:screenOrientation="portrait" />
-        <activity android:name="cm.ynote.rhemacare.ControlNumbers" />
-        <activity android:name="cm.ynote.rhemacare.SearchOverViewPolicies" />
-        <activity android:name="cm.ynote.rhemacare.OverViewPolicies1" />
-        <activity android:name="cm.ynote.rhemacare.OverViewControlNumbers" />
-        <activity android:name="cm.ynote.rhemacare.SearchOverViewControlNumber" />
-        <activity android:name="cm.ynote.rhemacare.ViewPolicies" />
-        <activity android:name="cm.ynote.rhemacare.CheckCommission"></activity>
+        <activity android:name="org.openimis.imispolicies.ControlNumbers" />
+        <activity android:name="org.openimis.imispolicies.SearchOverViewPolicies" />
+        <activity android:name="org.openimis.imispolicies.OverViewPolicies" />
+        <activity android:name="org.openimis.imispolicies.OverViewControlNumbers" />
+        <activity android:name="org.openimis.imispolicies.SearchOverViewControlNumber" />
+        <activity android:name="org.openimis.imispolicies.ViewPolicies" />
+        <activity android:name="org.openimis.imispolicies.CheckCommission"></activity>
+        <activity android:name="org.openimis.imispolicies.SearchNotEnrolledPolicies"></activity>
+        <activity android:name="org.openimis.imispolicies.NotEnrolledPoliciesOverview"></activity>
     </application>
 
 </manifest>

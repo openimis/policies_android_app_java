@@ -61,6 +61,9 @@ In case of dispute arising out or in relation to the use of the program, it is s
                   else if(Result == 0){
                      Android.ShowDialog(Android.getString('InsuranceNumberNotFound'));
                    }
+                  else if(Result == 3){
+                     Android.ShowDialog(Android.getString('NoInternet'));
+                   }
               $("#divProgress").hide();
          }, 500)
        }

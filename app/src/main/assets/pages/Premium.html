@@ -3,22 +3,22 @@
 The program users must agree to the following terms:
 
 Copyright notices
-This program is free software: you can redistribute it and/or modify it under the terms of the GNU AGPL v3 License as published by the 
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU AGPL v3 License as published by the
 Free Software Foundation, version 3 of the License.
-This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of 
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU AGPL v3 License for more details www.gnu.org.
 
 Disclaimer of Warranty
-There is no warranty for the program, to the extent permitted by applicable law; except when otherwise stated in writing the copyright 
-holders and/or other parties provide the program "as is" without warranty of any kind, either expressed or implied, including, but not 
-limited to, the implied warranties of merchantability and fitness for a particular purpose. The entire risk as to the quality and 
+There is no warranty for the program, to the extent permitted by applicable law; except when otherwise stated in writing the copyright
+holders and/or other parties provide the program "as is" without warranty of any kind, either expressed or implied, including, but not
+limited to, the implied warranties of merchantability and fitness for a particular purpose. The entire risk as to the quality and
 performance of the program is with you. Should the program prove defective, you assume the cost of all necessary servicing, repair or correction.
 
-Limitation of Liability 
-In no event unless required by applicable law or agreed to in writing will any copyright holder, or any other party who modifies and/or 
-conveys the program as permitted above, be liable to you for damages, including any general, special, incidental or consequential damages 
-arising out of the use or inability to use the program (including but not limited to loss of data or data being rendered inaccurate or losses 
-sustained by you or third parties or a failure of the program to operate with any other programs), even if such holder or other party has been 
+Limitation of Liability
+In no event unless required by applicable law or agreed to in writing will any copyright holder, or any other party who modifies and/or
+conveys the program as permitted above, be liable to you for damages, including any general, special, incidental or consequential damages
+arising out of the use or inability to use the program (including but not limited to loss of data or data being rendered inaccurate or losses
+sustained by you or third parties or a failure of the program to operate with any other programs), even if such holder or other party has been
 advised of the possibility of such damages.
 
 In case of dispute arising out or in relation to the use of the program, it is subject to the public law of Switzerland. The place of jurisdiction is Berne.-->
@@ -39,6 +39,11 @@ In case of dispute arising out or in relation to the use of the program, it is s
         $(document).ready(function(){
 
             document.title = Android.getString('AddEditPremium');
+
+            var adj = Android.getSpecificControlHtml("TotalAmount");
+            if(adj == "R"){
+                   $('#txtAmount').attr('readonly','readonly');
+            }
 
             if($("#ddlPhotoFee").is(":visible")){
                 $("#txtAmount").keyup(function(){
@@ -61,7 +66,12 @@ In case of dispute arising out or in relation to the use of the program, it is s
 
             var Paydate = null;
             var premiumId = parseInt($.trim(queryString("pr")));
-            
+
+            var IdlePolicy = 1;
+            var ActivePolicy = 2;
+            var SuspendedPolicy = 4;
+            var ExpiredPolicy = 8;
+            var ReadyPolicy = 16;
 
             getPolicyValue(policyId);
 
@@ -96,6 +106,15 @@ In case of dispute arising out or in relation to the use of the program, it is s
             var pp = Android.getPolicyVal(policyId);
             var prevAmount = parseInt(Android.getSumPrem(policyId));
             var bb = pp - prevAmount;
+
+            if($("#ddlPhotoFee").is(":hidden")){
+                $('#txtAmount').val(bb);
+                $('#spContribution').text(bb);
+
+                $('#hfBalance').text(0);
+                $('#spBalance').text(0);
+            }
+
             if(bb <= 0){
                 $('#div-details').hide();
                 $('.footer').hide();
@@ -113,10 +132,10 @@ In case of dispute arising out or in relation to the use of the program, it is s
                         },
                         No: function() {
                             window.open('PolicyPremium.html?p=' + policyId + '&l=' + LocationId +'&f=' + FamilyId + '&r='+ RegionId  + '&d='+ DistrictId , "_self");
-                            $( this ).dialog( "close" );                                        
+                            $( this ).dialog( "close" );
                         }
                     }
-                });                  
+                });
             }
           }
           $('#txtAmount').change(function(){
@@ -146,7 +165,7 @@ In case of dispute arising out or in relation to the use of the program, it is s
 
                 var newContribution = Amount + ogContribution;
 
-                $('#spBalance').text(newBalance);
+                $('#spBalance').text(pp-Amount);
                 $('#spContribution').text(Amount);
             }
         });
@@ -156,10 +175,10 @@ In case of dispute arising out or in relation to the use of the program, it is s
         });
 
 
-            var policystatus = 1;
+            var policystatus = IdlePolicy;
 
         $('#btnSave').click(function(){
-           var results = "yes";
+           var results = true;
             var ReceiptNo = $('#txtReceipt').val();
             var passed = isFormValidated();
             var jsonPremium = createJSONString();
@@ -170,158 +189,159 @@ In case of dispute arising out or in relation to the use of the program, it is s
                  var PolicyBalance  =   $('#spBalance').text();
                 if (IsReceiptUnique == true || premiumId != 0 ){
 
-                    if((parseInt($.trim(queryString("pr")))) <= 0 &&  PolicyBalance > 0 ){
+                    if($('#ddlPhotoFee').val()=='true'){
+                            var PremiumId = Android.SavePremiums(jsonPremium,parseInt(policyId),parseInt(premiumId),parseInt(FamilyId));
+                            window.open('PolicyPremium.html?p=' + policyId + '&l=' + LocationId +'&f=' + FamilyId + '&r='+ RegionId  + '&d='+ DistrictId , "_self");
+                        }else{
+                                if((parseInt($.trim(queryString("pr")))) <= 0 &&  PolicyBalance > 0 ){
 
                         var maxInstallments = Android.getMaxInstallments(policyId);
                         var totalPremiums = Android.getCountPremiums(policyId);
-                        if($('#ddlPhotoFee').val()=='true'){
-                            var PremiumId = Android.SavePremiums(jsonPremium,parseInt(policyId),parseInt(premiumId),parseInt(FamilyId));
-                            window.open('PolicyPremium.html?p=' + policyId + '&l=' + LocationId +'&f=' + FamilyId + '&r='+ RegionId  + '&d='+ DistrictId , "_self");                              
-                        }else{
-                            if(PolicyBalance > 0 && totalPremiums < maxInstallments){
 
-                                if(totalPremiums == (maxInstallments - 1) && $("#ddlPhotoFee").val() == 'false'){
+                        if(PolicyBalance > 0 && totalPremiums < maxInstallments){
 
-                                    $("#msgAlert").text(Android.getString('MaxInstallment'));
-                                    $( "#dialog-confirm" ).dialog({
-                                        resizable: false,
-                                        height: "auto",
-                                        width: 300,
-                                        modal: true,
-                                        buttons: {
-                                            Wait: function() {
-                                                policystatus = 1;
-                                                var PremiumId = Android.SavePremiums(jsonPremium,parseInt(policyId),parseInt(premiumId),parseInt(FamilyId));
-                                                Paydate = $('#txtPayDate').val();
-                                                Android.UpdatePolicy(parseInt(policyId), Paydate, policystatus);
-                                                Android.UpdateInsureePolicy(parseInt(policyId));
-                                                window.open('PolicyPremium.html?p=' + policyId + '&l=' + LocationId +'&f=' + FamilyId + '&r='+ RegionId  + '&d='+ DistrictId , "_self");                                                               
-                                                $( this ).dialog( "close" );                                                            
-                                            },
-                                            Suspend: function() {
-                                                policystatus = 4;
-                                                var PremiumId = Android.SavePremiums(jsonPremium,parseInt(policyId),parseInt(premiumId),parseInt(FamilyId));
-                                                Paydate = $('#txtPayDate').val();
-                                                Android.UpdatePolicy(parseInt(policyId), Paydate, policystatus);
-                                                Android.UpdateInsureePolicy(parseInt(policyId));
-                                                window.open('PolicyPremium.html?p=' + policyId + '&l=' + LocationId +'&f=' + FamilyId + '&r='+ RegionId  + '&d='+ DistrictId , "_self");                                                               
-                                                $( this ).dialog( "close" );                                                       
-                                            },
-                                            Enforce: function() {
-                                                policystatus = 2;
-                                                var PremiumId = Android.SavePremiums(jsonPremium,parseInt(policyId),parseInt(premiumId),parseInt(FamilyId));
-                                                Paydate = $('#txtPayDate').val();
-                                                Android.UpdatePolicy(parseInt(policyId), Paydate, policystatus);
-                                                Android.UpdateInsureePolicy(parseInt(policyId));
-                                                window.open('PolicyPremium.html?p=' + policyId + '&l=' + LocationId +'&f=' + FamilyId + '&r='+ RegionId  + '&d='+ DistrictId , "_self");                                                           
-                                                $( this ).dialog( "close" );                                                        
-                                            },
-                                            No: function() {
-                                                $( this ).dialog( "close" );
-                                            }
+                            if(totalPremiums == (maxInstallments - 1) && $("#ddlPhotoFee").val() == 'false'){
+
+                                $("#msgAlert").text(Android.getString('MaxInstallment'));
+                                $( "#dialog-confirm" ).dialog({
+                                    resizable: false,
+                                    height: "auto",
+                                    width: 300,
+                                    modal: true,
+                                    buttons: {
+                                        Wait: function() {
+                                            policystatus = IdlePolicy;
+                                            var PremiumId = Android.SavePremiums(jsonPremium,parseInt(policyId),parseInt(premiumId),parseInt(FamilyId));
+                                            Paydate = $('#txtPayDate').val();
+                                            Android.UpdatePolicy(parseInt(policyId), Paydate, policystatus);
+                                            Android.UpdateInsureePolicy(parseInt(policyId));
+                                            window.open('PolicyPremium.html?p=' + policyId + '&l=' + LocationId +'&f=' + FamilyId + '&r='+ RegionId  + '&d='+ DistrictId , "_self");
+                                            $( this ).dialog( "close" );
+                                        },
+                                        Suspend: function() {
+                                            policystatus = SuspendedPolicy;
+                                            var PremiumId = Android.SavePremiums(jsonPremium,parseInt(policyId),parseInt(premiumId),parseInt(FamilyId));
+                                            Paydate = $('#txtPayDate').val();
+                                            Android.UpdatePolicy(parseInt(policyId), Paydate, policystatus);
+                                            Android.UpdateInsureePolicy(parseInt(policyId));
+                                            window.open('PolicyPremium.html?p=' + policyId + '&l=' + LocationId +'&f=' + FamilyId + '&r='+ RegionId  + '&d='+ DistrictId , "_self");
+                                            $( this ).dialog( "close" );
+                                        },
+                                        Enforce: function() {
+                                            policystatus = ActivePolicy;
+                                            var PremiumId = Android.SavePremiums(jsonPremium,parseInt(policyId),parseInt(premiumId),parseInt(FamilyId));
+                                            Paydate = $('#txtPayDate').val();
+                                            Android.UpdatePolicy(parseInt(policyId), Paydate, policystatus);
+                                            Android.UpdateInsureePolicy(parseInt(policyId));
+                                            window.open('PolicyPremium.html?p=' + policyId + '&l=' + LocationId +'&f=' + FamilyId + '&r='+ RegionId  + '&d='+ DistrictId , "_self");
+                                            $( this ).dialog( "close" );
+                                        },
+                                        No: function() {
+                                            $( this ).dialog( "close" );
                                         }
-                                    });                                                
-                                }else{
-                                    $("#msgAlert").text(Android.getString('PriceBelow'));
-                                    $("#dialog-confirm").dialog({
-                                        resizable: false,
-                                        height: "auto",
-                                        width: 300,
-                                        modal: true,
-                                        buttons: {
-                                            OK: function() {
-                                                policystatus = 1;
-                                                var PremiumId = Android.SavePremiums(jsonPremium,parseInt(policyId),parseInt(premiumId),parseInt(FamilyId));                                                 
-                                                Paydate = $('#txtPayDate').val();
-                                                Android.UpdatePolicy(parseInt(policyId), Paydate, policystatus);
-                                                Android.UpdateInsureePolicy(parseInt(policyId));
-                                                window.open('PolicyPremium.html?p=' + policyId + '&l=' + LocationId +'&f=' + FamilyId + '&r='+ RegionId  + '&d='+ DistrictId , "_self"); 
-                                                $( this ).dialog( "close" );
-                                            },
-                                            Enforce: function() {
-                                                policystatus = 2;
-                                                var PremiumId = Android.SavePremiums(jsonPremium,parseInt(policyId),parseInt(premiumId),parseInt(FamilyId));
-                                                $('#btnSave').attr("disabled", "disabled");
-                                                Paydate = $('#txtPayDate').val();
-                                                Android.UpdatePolicy(parseInt(policyId), Paydate, policystatus);
-                                                Android.UpdateInsureePolicy(parseInt(policyId));
-                                                window.open('PolicyPremium.html?p=' + policyId + '&l=' + LocationId +'&f=' + FamilyId + '&r='+ RegionId  + '&d='+ DistrictId , "_self");
-                                                $( this ).dialog( "close" );                                        
-                                            },
-                                            No: function() {
-                                                $( this ).dialog( "close" );
-                                            }
+                                    }
+                                });
+                            }else{
+                                $("#msgAlert").text(Android.getString('PriceBelow'));
+                                $("#dialog-confirm").dialog({
+                                    resizable: false,
+                                    height: "auto",
+                                    width: 300,
+                                    modal: true,
+                                    buttons: {
+                                        OK: function() {
+                                            policystatus = IdlePolicy;
+                                            var PremiumId = Android.SavePremiums(jsonPremium,parseInt(policyId),parseInt(premiumId),parseInt(FamilyId));
+                                            Paydate = $('#txtPayDate').val();
+                                            Android.UpdatePolicy(parseInt(policyId), Paydate, policystatus);
+                                            Android.UpdateInsureePolicy(parseInt(policyId));
+                                            window.open('PolicyPremium.html?p=' + policyId + '&l=' + LocationId +'&f=' + FamilyId + '&r='+ RegionId  + '&d='+ DistrictId , "_self");
+                                            $( this ).dialog( "close" );
+                                        },
+                                        Enforce: function() {
+                                            policystatus = ActivePolicy;
+                                            var PremiumId = Android.SavePremiums(jsonPremium,parseInt(policyId),parseInt(premiumId),parseInt(FamilyId));
+                                            $('#btnSave').attr("disabled", "disabled");
+                                            Paydate = $('#txtPayDate').val();
+                                            Android.UpdatePolicy(parseInt(policyId), Paydate, policystatus);
+                                            Android.UpdateInsureePolicy(parseInt(policyId));
+                                            window.open('PolicyPremium.html?p=' + policyId + '&l=' + LocationId +'&f=' + FamilyId + '&r='+ RegionId  + '&d='+ DistrictId , "_self");
+                                            $( this ).dialog( "close" );
+                                        },
+                                        No: function() {
+                                            $( this ).dialog( "close" );
                                         }
-                                    });                                    
-                                }
+                                    }
+                                });
+                            }
 
-                                }else{
-                                if(PolicyBalance <= 0 ){
-                                    policystatus = 2;
-                                    Paydate = $('#txtPayDate').val();
-                                    Android.UpdatePolicy(parseInt(policyId), Paydate, policystatus);
-                                    Android.UpdateInsureePolicy(parseInt(policyId));
-                                    window.open('PolicyPremium.html?p=' + policyId + '&l=' + LocationId +'&f=' + FamilyId + '&r='+ RegionId  + '&d='+ DistrictId , "_self");
-                                }else if( PolicyBalance > 0 ){
-                                    $("#msgAlert").text(Android.getString('PriceBelow'));
-                                    $("#dialog-confirm").dialog({
-                                        resizable: false,
-                                        height: "auto",
-                                        width: 300,
-                                        modal: true,
-                                        buttons: {
-                                            OK: function() {
-                                                policystatus = 1;
-                                                var PremiumId = Android.SavePremiums(jsonPremium,parseInt(policyId),parseInt(premiumId),parseInt(FamilyId));                                                 
-                                                Paydate = $('#txtPayDate').val();
-                                                Android.UpdatePolicy(parseInt(policyId), Paydate, policystatus);
-                                                Android.UpdateInsureePolicy(parseInt(policyId));
-                                                window.open('PolicyPremium.html?p=' + policyId + '&l=' + LocationId +'&f=' + FamilyId + '&r='+ RegionId  + '&d='+ DistrictId , "_self"); 
-                                                $( this ).dialog( "close" );
-                                            },
-                                            Enforce: function() {
-                                                policystatus = 2;
-                                                var PremiumId = Android.SavePremiums(jsonPremium,parseInt(policyId),parseInt(premiumId),parseInt(FamilyId));
-                                                $('#btnSave').attr("disabled", "disabled");
-                                                Paydate = $('#txtPayDate').val();
-                                                Android.UpdatePolicy(parseInt(policyId), Paydate, policystatus);
-                                                Android.UpdateInsureePolicy(parseInt(policyId));
-                                                window.open('PolicyPremium.html?p=' + policyId + '&l=' + LocationId +'&f=' + FamilyId + '&r='+ RegionId  + '&d='+ DistrictId , "_self");
-                                                $( this ).dialog( "close" );                                        
-                                            },
-                                            No: function() {
-                                                $( this ).dialog( "close" );
-                                            }
+                            }else{
+                            if(PolicyBalance <= 0 ){
+                                policystatus = ActivePolicy;
+                                Paydate = $('#txtPayDate').val();
+                                Android.UpdatePolicy(parseInt(policyId), Paydate, policystatus);
+                                Android.UpdateInsureePolicy(parseInt(policyId));
+                                window.open('PolicyPremium.html?p=' + policyId + '&l=' + LocationId +'&f=' + FamilyId + '&r='+ RegionId  + '&d='+ DistrictId , "_self");
+                            }else if( PolicyBalance > 0 ){
+                                $("#msgAlert").text(Android.getString('PriceBelow'));
+                                $("#dialog-confirm").dialog({
+                                    resizable: false,
+                                    height: "auto",
+                                    width: 300,
+                                    modal: true,
+                                    buttons: {
+                                        OK: function() {
+                                            policystatus = IdlePolicy;
+                                            var PremiumId = Android.SavePremiums(jsonPremium,parseInt(policyId),parseInt(premiumId),parseInt(FamilyId));
+                                            Paydate = $('#txtPayDate').val();
+                                            Android.UpdatePolicy(parseInt(policyId), Paydate, policystatus);
+                                            Android.UpdateInsureePolicy(parseInt(policyId));
+                                            window.open('PolicyPremium.html?p=' + policyId + '&l=' + LocationId +'&f=' + FamilyId + '&r='+ RegionId  + '&d='+ DistrictId , "_self");
+                                            $( this ).dialog( "close" );
+                                        },
+                                        Enforce: function() {
+                                            policystatus = ActivePolicy;
+                                            var PremiumId = Android.SavePremiums(jsonPremium,parseInt(policyId),parseInt(premiumId),parseInt(FamilyId));
+                                            $('#btnSave').attr("disabled", "disabled");
+                                            Paydate = $('#txtPayDate').val();
+                                            Android.UpdatePolicy(parseInt(policyId), Paydate, policystatus);
+                                            Android.UpdateInsureePolicy(parseInt(policyId));
+                                            window.open('PolicyPremium.html?p=' + policyId + '&l=' + LocationId +'&f=' + FamilyId + '&r='+ RegionId  + '&d='+ DistrictId , "_self");
+                                            $( this ).dialog( "close" );
+                                        },
+                                        No: function() {
+                                            $( this ).dialog( "close" );
                                         }
-                                    });   
-                                }else if(results != "no"){
-                                    window.open('PolicyPremium.html?p=' + policyId + '&l=' + LocationId +'&f=' + FamilyId + '&r='+ RegionId  + '&d='+ DistrictId , "_self");
-                                }
-                            }                            
-                        }  
-
+                                    }
+                                });
+                            }else if(results != false){
+                                window.open('PolicyPremium.html?p=' + policyId + '&l=' + LocationId +'&f=' + FamilyId + '&r='+ RegionId  + '&d='+ DistrictId , "_self");
+                            }
+                        }
 
                     }else if(PolicyBalance < 0){
                         if(!confirm(Android.getString('ExceedsPolicy'))){
-                            results = "no";
+                            results = false;
                             return false;
                         }
-                        if(results == "yes"){
+                        if(results == true){
                             var PremiumId = Android.SavePremiums(jsonPremium,parseInt(policyId),parseInt(premiumId),parseInt(FamilyId));
-                            policystatus = 2;
+                            policystatus = ActivePolicy;
                             Paydate = $('#txtPayDate').val();
                             Android.UpdatePolicy(parseInt(policyId), Paydate, policystatus);
                             Android.UpdateInsureePolicy(parseInt(policyId));
                             window.open('PolicyPremium.html?p=' + policyId + '&l=' + LocationId +'&f=' + FamilyId + '&r='+ RegionId  + '&d='+ DistrictId , "_self");
                         }
-                    }else if(results == "yes"){
+                    }else if(results == true){
                         var PremiumId = Android.SavePremiums(jsonPremium,parseInt(policyId),parseInt(premiumId),parseInt(FamilyId));
-                        policystatus = 2;
+                        policystatus = ActivePolicy;
                         Paydate = $('#txtPayDate').val();
                         Android.UpdatePolicy(parseInt(policyId), Paydate, policystatus);
                         Android.UpdateInsureePolicy(parseInt(policyId));
-                        window.open('PolicyPremium.html?p=' + policyId + '&l=' + LocationId +'&f=' + FamilyId + '&r='+ RegionId  + '&d='+ DistrictId , "_self");                        
+                        window.open('PolicyPremium.html?p=' + policyId + '&l=' + LocationId +'&f=' + FamilyId + '&r='+ RegionId  + '&d='+ DistrictId , "_self");
                     }
+                        }
+
 
                 }else{
                     Android.ShowDialog(Android.getString('ReceiptNotUnique'));
@@ -331,30 +351,24 @@ In case of dispute arising out or in relation to the use of the program, it is s
             }
         });
 
-
-            $('#ddlPhotoFee').change(function(){
-                if($('#ddlPhotoFee').val()=='true'){
+            $('#ddlPhotoFee').change(function() {
+            var Balance = parseInt($('#hfBalance').val());
+            var Contribution = parseInt($('#hfContribution').val());
+                if ($('#ddlPhotoFee').val()=='true') {
                     photoValue = 0;
-                    var Balance = parseInt($('#hfBalance').val());
-                    var Contribution = parseInt($('#hfContribution').val());
-                    $('#spBalance').text(Balance);
-                    $('#spContribution').text(Contribution);
-                }else{
-                    photoValue = 1;
-                    var Balance = parseInt($('#hfBalance').val());
-                    var Contribution = parseInt($('#hfContribution').val());
-                    $('#spBalance').text(Balance);
-                    if(Balance < 0){
+                    $('#spContribution').text(0);
+                } else {
+                    if(Balance < 0 || bb < 0) {
                         $('#txtAmount').val(0);
-                    }else{
-                        $('#txtAmount').val(Balance);
+                        Contribution = 0;
+                    } else {
+                        $('#txtAmount').val(bb);
+                        Contribution = bb;
                     }
-                    
                     $('#spContribution').text(Contribution);
                     $('#txtAmount').change();
                 }
             });
-
             $('#spBalance').text(bb);
         });
 
@@ -400,7 +414,7 @@ In case of dispute arising out or in relation to the use of the program, it is s
         </li>
         <li>
             <span strName="Amount"> </span>
-            <input type="number" dataField="Amount" value="0" text="0"  id="txtAmount" min="0" required/>
+            <input type="number" dataField="Amount" id="txtAmount" required/>
         </li>
         <li>
             <span strName="Receipt">Receipt</span>

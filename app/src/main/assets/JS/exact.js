@@ -103,10 +103,13 @@ $(document).ready(function(){
         var $mandatory = $('[required]');
         var passed = true;
         $mandatory.each(function(){
-            if($(this).val() == "" || $(this).val() == 0){//|| $(this).val() == 0
+            //if($(this).val() == "" || $(this).val() == 0){//|| $(this).val() == 0
+            // Fix : 0 is a Value for input field
+              if($(this).val() == ""){
                 // if(sessionStorage.getItem("FamilyData") == null){
                 //     passed = false;
                 // }
+                console.log($(this).attr("id"));
                 passed = false;
             }
          });
@@ -117,10 +120,17 @@ $(document).ready(function(){
         var $lis = $(Container).find("input, select, textarea");
         var array = [];
         $lis.each(function(){
-            array.push({
-                id: $(this).attr("id"),
-                value: $(this).val()
-            });
+            if($(this).attr("type")=="checkbox"){
+                 array.push({
+                        id: $(this).attr("id"),
+                        value:  $(this).is(":checked")
+                 });
+            }else{
+                array.push({
+                    id: $(this).attr("id"),
+                    value: $(this).val()
+                });
+            }
         });
 
         var jsonData = JSON.stringify(array);
@@ -172,9 +182,15 @@ $(document).ready(function(){
 
         $.each(ctls, function(){
             var key = $(this).attr("dataField");
-
+            var typeField = $(this).attr("type");
             if($(this).is('input, select, textarea'))
-                $(this).val(dataSource[0][''+ key +'']);
+                if(typeField=="checkbox"){
+                    if(dataSource[0][''+ key +'']=='true'){
+                        $(this).prop('checked', true);
+                    }
+                }else{
+                    $(this).val(dataSource[0][''+ key +'']);
+                }
             else
                 $(this).text(dataSource[0][''+ key +'']);
         });

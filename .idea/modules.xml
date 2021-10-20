@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/openimis_android_app_java.iml" filepath="$PROJECT_DIR$/.idea/modules/openimis_android_app_java.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/openimis_android_app_java.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/openimis_android_app_java.app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/policies_android_app_java.iml" filepath="$PROJECT_DIR$/.idea/modules/policies_android_app_java.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/policies_android_app_java.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/policies_android_app_java.app.iml" />
     </modules>
   </component>
 </project>
