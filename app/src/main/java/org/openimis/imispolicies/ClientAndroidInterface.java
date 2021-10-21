@@ -110,6 +110,8 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 
 import static android.database.sqlite.SQLiteDatabase.openOrCreateDatabase;
+import static org.openimis.imispolicies.Util.JsonUtil.isStringEmpty;
+import static org.openimis.imispolicies.Util.StringUtil.isEmpty;
 
 public class ClientAndroidInterface {
     private Context mContext;
@@ -5644,7 +5646,7 @@ public class ClientAndroidInterface {
     }
 
     @JavascriptInterface
-    public int ModifyFamily(final String InsuranceNumber) {//herman change
+    public int ModifyFamily(final String InsuranceNumber) {
         IsFamilyAvailable = 0;
         inProgress = true;
         String Query = "SELECT * FROM tblInsuree WHERE Trim(CHFID) = '" + InsuranceNumber + "'";
@@ -5656,20 +5658,17 @@ public class ClientAndroidInterface {
         } else {
             try {
                 ToRestApi rest = new ToRestApi();
-                String MD = rest.getObjectFromRestApiToken("family/" + InsuranceNumber);
-
-                JSONObject FamilyData = new JSONObject(MD);
-
-                if (FamilyData.length() == 0) {
-                    IsFamilyAvailable = 0;
-                    inProgress = false;
-                } else {
-                    DownloadFamilyData(FamilyData);
-                    IsFamilyAvailable = 1;
-                    inProgress = false;
+                String MD = rest.getObjectFromRestApiToken("family/" + InsuranceNumber.trim());
+                if (!isEmpty(MD)) {
+                    JSONObject FamilyData = new JSONObject(MD);
+                    if (FamilyData.length() == 0) {
+                        IsFamilyAvailable = 0;
+                    } else {
+                        DownloadFamilyData(FamilyData);
+                        IsFamilyAvailable = 1;
+                    }
                 }
                 inProgress = false;
-
             } catch (JSONException e) {
                 inProgress = false;
                 e.printStackTrace();
@@ -5746,12 +5745,12 @@ public class ClientAndroidInterface {
         for (int i = 0; i < newInsureeArr.length(); i++) {
             JSONObject insureeObj = newInsureeArr.getJSONObject(i);
 
-            if (insureeObj.has("photoPath") && !insureeObj.isNull("photoPath") && !"null".equals(insureeObj.getString("photoPath"))) {
+            if (!isStringEmpty(insureeObj, "photoPath", true)) {
                 String photoName = insureeObj.getString("photoPath");
                 String imagePath = global.getImageFolder() + photoName;
                 insureeObj.put("photoPath", imagePath);
                 OutputStream imageOutputStream = new FileOutputStream(imagePath);
-                if (insureeObj.has("photoBase64") && !insureeObj.isNull("photoBase64") && !"null".equals(insureeObj.getString("photoBase64"))) {
+                if (!isStringEmpty(insureeObj, "photoBase64", true)) {
                     try {
                         byte[] imageBytes = Base64.decode(insureeObj.getString("photoBase64").getBytes(), Base64.DEFAULT);
                         Bitmap image = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);

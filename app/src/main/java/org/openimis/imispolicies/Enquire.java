@@ -59,6 +59,8 @@ import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import static org.openimis.imispolicies.Util.JsonUtil.isStringEmpty;
+
 public class Enquire extends AppCompatActivity {
     private static final String LOG_TAG = "ENQUIRE";
     private static final int REQUEST_SCAN_QR_CODE = 1;
@@ -235,7 +237,7 @@ public class Enquire extends AppCompatActivity {
                     if (global.isNetworkAvailable()) {
                         String photo_url_str = "";
                         try {
-                            if (jsonObject.has("photoBase64") && !jsonObject.isNull("photoBase64") && !"null".equals(jsonObject.getString("photoBase64"))) {
+                            if (!isStringEmpty(jsonObject, "photoBase64", true)) {
                                 try {
                                     byte[] imageBytes = Base64.decode(jsonObject.getString("photoBase64").getBytes(), Base64.DEFAULT);
                                     Bitmap image = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
@@ -244,7 +246,7 @@ public class Enquire extends AppCompatActivity {
                                     Log.e(LOG_TAG, "Error while processing Base64 image", e);
                                     iv.setImageDrawable(getResources().getDrawable(R.drawable.person));
                                 }
-                            } else if (jsonObject.has("photoPath") && !jsonObject.isNull("photoPath") && !"null".equals(jsonObject.getString("photoPath"))) {
+                            } else if (!isStringEmpty(jsonObject, "photoPath", true)) {
                                 photo_url_str = AppInformation.DomainInfo.getDomain() + jsonObject.getString("photoPath");
                                 iv.setImageResource(R.drawable.person);
                                 Picasso.with(this)
