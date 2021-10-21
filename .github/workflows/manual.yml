@@ -43,6 +43,10 @@ jobs:
           gradle --version
           echo url ${{ github.event.inputs.api_base_url }}
           echo app name ${{ github.event.inputs.app_name }}
+          echo app dir ${{ github.event.inputs.app_dir }}
+          echo CLI_JAVA_DIR "${{ github.event.inputs.cli_java_dir }}"
+          echo CLI_RES_DIR "${{ github.event.inputs.cli_res_dir }}"
+          echo APPLICATION_ID "${{ github.event.inputs.application_id }}"
 
       - name: build
         run: |

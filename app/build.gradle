@@ -6,7 +6,7 @@ apply from: "$project.rootDir/script-git-version.gradle"
 apply plugin: 'com.android.application'
 
 // Load keystore
-def keystorePropertiesFile = file("keystore.properties");
+def keystorePropertiesFile = file("keystore.properties")
 def keystoreProperties = new Properties()
 if ( keystorePropertiesFile.exists() ) {
     keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
@@ -149,6 +149,8 @@ android {
             resValue "string", "app_name_policies", "Policies CHF SIT"
         }
         niger {
+            print("Building niger flavour" + "API_BASE_URL" + '"' + (System.getenv("API_BASE_URL") ?: 'http://192.168.0.100/') + '"')
+            print("App name: " + System.getenv("CLI_APP_NAME") ?: "Polices Niger")
             applicationId "org.openimis.imispolicies.niger"
             buildConfigField "String", "API_BASE_URL", '"' + (System.getenv("API_BASE_URL") ?: 'http://192.168.0.100/') + '"'
             buildConfigField "String", "APP_DIR", '"' + (System.getenv("CLI_APP_DIR") ?: 'IMIS-POL') + '"'
