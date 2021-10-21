@@ -237,7 +237,7 @@ public class Enquire extends AppCompatActivity {
                     if (global.isNetworkAvailable()) {
                         String photo_url_str = "";
                         try {
-                            if (isStringEmpty(jsonObject, "photoBase64", true)) {
+                            if (!isStringEmpty(jsonObject, "photoBase64", true)) {
                                 try {
                                     byte[] imageBytes = Base64.decode(jsonObject.getString("photoBase64").getBytes(), Base64.DEFAULT);
                                     Bitmap image = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
@@ -246,7 +246,7 @@ public class Enquire extends AppCompatActivity {
                                     Log.e(LOG_TAG, "Error while processing Base64 image", e);
                                     iv.setImageDrawable(getResources().getDrawable(R.drawable.person));
                                 }
-                            } else if (isStringEmpty(jsonObject, "photoPath", true)) {
+                            } else if (!isStringEmpty(jsonObject, "photoPath", true)) {
                                 photo_url_str = AppInformation.DomainInfo.getDomain() + jsonObject.getString("photoPath");
                                 iv.setImageResource(R.drawable.person);
                                 Picasso.with(this)

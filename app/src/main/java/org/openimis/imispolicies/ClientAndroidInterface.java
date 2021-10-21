@@ -5745,12 +5745,12 @@ public class ClientAndroidInterface {
         for (int i = 0; i < newInsureeArr.length(); i++) {
             JSONObject insureeObj = newInsureeArr.getJSONObject(i);
 
-            if (isStringEmpty(insureeObj, "photoPath", true)) {
+            if (!isStringEmpty(insureeObj, "photoPath", true)) {
                 String photoName = insureeObj.getString("photoPath");
                 String imagePath = global.getImageFolder() + photoName;
                 insureeObj.put("photoPath", imagePath);
                 OutputStream imageOutputStream = new FileOutputStream(imagePath);
-                if (isStringEmpty(insureeObj, "photoBase64", true)) {
+                if (!isStringEmpty(insureeObj, "photoBase64", true)) {
                     try {
                         byte[] imageBytes = Base64.decode(insureeObj.getString("photoBase64").getBytes(), Base64.DEFAULT);
                         Bitmap image = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
