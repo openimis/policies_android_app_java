@@ -152,7 +152,7 @@ android {
         }
         mauritaniaTrain {
             applicationId "org.openimis.policies.mauritaniaTrain"
-            buildConfigField "String", "API_BASE_URL", '"http://formation.cnass-mauritanie.swisstph-mis.ch/rest/"'
+            buildConfigField "String", "API_BASE_URL", '"https://formation.cnass-mauritanie.swisstph-mis.ch/rest/"'
             buildConfigField "boolean", "SHOW_PAYMENT_MENU", 'false'
             buildConfigField "boolean", "SHOW_BULK_CN_MENU", 'false'
             buildConfigField "String", "APP_DIR", '"IMIS-MAURITANIA-TRAIN"'
