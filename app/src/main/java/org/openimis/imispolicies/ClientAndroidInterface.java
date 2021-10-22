@@ -3030,6 +3030,11 @@ public class ClientAndroidInterface {
                 }
             }
         }*/
+    public boolean isContributionRequired() {
+        return !getRule("AllowPolicyWithoutPremium")
+                && getRule("ShowPaymentOption");
+    }
+
     public ArrayList<String> VerifyFamily() throws JSONException {
         ArrayList<String> FamilyIDs = new ArrayList<String>();
         boolean result = true;
@@ -3094,7 +3099,7 @@ public class ClientAndroidInterface {
                 Query += " WHERE FamilyId = " + FamilyId;
                 JSONArray premiumsArray = sqlHandler.getResult(Query, null);
                 if (IsOffline == 1) {
-                    if (!getRule("AllowPolicyWithoutPremium")) {
+                    if (isContributionRequired()) {
                         if (premiumsArray.length() == 0) {
                             JSONObject family = familyArray.getJSONObject(0);
                             String chfid = family.getString("HOFCHFID");
@@ -3104,7 +3109,7 @@ public class ClientAndroidInterface {
                     }
                 } else {
                     if (policiesArray.length() != 0) {
-                        if (!getRule("AllowPolicyWithoutPremium")) {
+                        if (isContributionRequired()) {
                             if (premiumsArray.length() == 0) {
                                 JSONObject family = familyArray.getJSONObject(0);
                                 String chfid = family.getString("HOFCHFID");
@@ -3401,7 +3406,7 @@ public class ClientAndroidInterface {
                 if (CallerId == 1 || CallerId == 2) {
                     if (IsOffline == 1) {
                         if (premiumsArray.length() == 0) {
-                            if (!getRule("AllowPolicyWithoutPremium")) {
+                            if (isContributionRequired()) {
                                 String chfid = null;
                                 String lastname = null;
                                 String othername = null;
@@ -3428,7 +3433,7 @@ public class ClientAndroidInterface {
                             policiesArray = newpoliciesArray;
 
                             if (premiumsArray.length() == 0) {
-                                if (!getRule("AllowPolicyWithoutPremium")) {
+                                if (isContributionRequired()) {
                                     String chfid = null;
                                     String lastname = null;
                                     String othername = null;
@@ -6150,6 +6155,7 @@ public class ClientAndroidInterface {
         }
     }
 
+    @JavascriptInterface
     public boolean getRule(String rulename) {
         boolean rule = false;
         String Query = "SELECT RuleValue FROM tblIMISDefaultsPhone WHERE RuleName=?";

@@ -1,7 +1,7 @@
 $(document).ready(function () {
     document.title = Android.getString('FamilyAndPolicies');
 
-    if(!Android.IsBulkCNUsed()) {
+    if (!Android.IsBulkCNUsed()) {
         $('#ControlNumberSection').hide();
     }
 
@@ -25,16 +25,14 @@ $(document).ready(function () {
 
     });
 
-
     $('.ulList li').click(function () {
         PolicyId = parseInt($(this).find('#hfPolicyId').val());
         //window.open("PolicyPremium.html?p=" + PolicyId + "&f=" + FamilyId + "&l=" + LocationId + '&r=' + RegionId + '&d=' + DistrictId, "_self");
     });
 
-
-
     AssignDotClass();
-    contextMenu.createContextMenu([Android.getString('Edit'), Android.getString('Delete'), Android.getString('Payment')], function () {
+
+    contextMenuHandler = function () {
         var clicked = $(this).text();
         if (clicked == Android.getString('Edit')) {
             var url = 'FamilyPolicies.html?f=' + FamilyId + '&l=' + LocationId + '&r=' + RegionId + '&d=' + DistrictId;
@@ -84,9 +82,14 @@ $(document).ready(function () {
                 }
             });
         }
-    });
+    }
 
+    contextMenuList = [Android.getString('Edit'), Android.getString('Delete')];
+    if(Android.getRule('ShowPaymentOption')) {
+        contextMenuList.push(Android.getString('Payment'));
+    }
 
+    contextMenu.createContextMenu(contextMenuList, contextMenuHandler);
 });
 
 function LoadFamilyPolicies(FamilyId) {
