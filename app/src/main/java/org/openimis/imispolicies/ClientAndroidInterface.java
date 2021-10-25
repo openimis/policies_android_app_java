@@ -1731,7 +1731,7 @@ public class ClientAndroidInterface {
 
         String ProductQuery = "SELECT  ProdId, ProductCode ||\" - \"|| ProductName ProductCode, ProductName \n" +
                 "FROM tblProduct P\n" +
-                "INNER JOIN  uvwLocations L ON (P.LocationId = L.LocationId) OR (P.LocationId = 'null' OR P.LocationId = '') \n" +
+                "INNER JOIN  uvwLocations L ON (P.LocationId = L.LocationId) \n" +
                 "WHERE  ((L.RegionId = " + RegionId + " OR L.RegionId ='null') AND (L.DistrictId =  " + DistrictId + " OR L.DistrictId ='null') OR L.LocationId='null') AND " +
                 "( '" + EnrolmentDate + "'  BETWEEN P.DateFrom AND P.DateTo OR IFNULL(" + EnrolmentDate + ",0) = 0 )  \n" +
                 "ORDER BY  L.LocationId DESC";
