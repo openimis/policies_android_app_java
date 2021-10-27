@@ -241,7 +241,7 @@ public class SQLHandler extends SQLiteOpenHelper {
                             "SortOrder NUMERIC" + ")"
             );
             sqLiteDatabase.execSQL(
-                    "CREATE TABLE 'tblLocations' (" +
+                    "CREATE TABLE " + tblLocations + " (" +
                             "LocationId NUMERIC," +
                             "LocationCode TEXT," +
                             "LocationName TEXT," +
@@ -1032,5 +1032,28 @@ public class SQLHandler extends SQLiteOpenHelper {
             e.printStackTrace();
         }
         return resultSet;
+    }
+
+    public int getRegionId(int districtId) {
+        openDatabase();
+        int result = 0;
+        try (Cursor c = mDatabase.query(tblLocations,
+                new String[]{"ParentLocationId"},
+                "LocationId = ?",
+                new String[]{Integer.toString(districtId)},
+                null,
+                null,
+                null,
+                "1")) {
+            c.moveToFirst();
+            if (!c.isAfterLast()) {
+                result = c.getInt(0);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            closeDatabase();
+        }
+        return result;
     }
 }
