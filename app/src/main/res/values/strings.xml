@@ -427,4 +427,5 @@
   <string name="ExternalStorageAccessInfo">To work correctly, %1$s requires external storage access. Please allow it for %1$s in next screen in order to use the application.</string>
   <string name="Permissions">Permissions</string>
   <string name="PermissionsInfo">To work correctly, %1$s requires multiple permissions. Please allow them in next screen in order to use the application.</string>
+  <string name="EmptyMonth">Please fill the month</string>
 </resources>

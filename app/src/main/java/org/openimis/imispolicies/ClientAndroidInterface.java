@@ -1729,7 +1729,7 @@ public class ClientAndroidInterface {
     @JavascriptInterface
     public String getProducts(int RegionId, int DistrictId, String EnrolmentDate) {
 
-        String ProductQuery = "SELECT  ProdId, ProductCode ||\" - \"|| ProductName ProductCode, ProductName \n" +
+        String ProductQuery = "SELECT  ProdId, ProductCode, ProductName, ProductCode ||\" - \"|| ProductName ProductNameCombined  \n" +
                 "FROM tblProduct P\n" +
                 "INNER JOIN  uvwLocations L ON (P.LocationId = L.LocationId) \n" +
                 "WHERE  ((L.RegionId = " + RegionId + " OR L.RegionId ='null') AND (L.DistrictId =  " + DistrictId + " OR L.DistrictId ='null') OR L.LocationId='null') AND " +
@@ -1773,36 +1773,9 @@ public class ClientAndroidInterface {
         return Products.toString();
     }
 
-    public String getProductsByDistrict(int DistrictId) {
-        SimpleDateFormat format = AppInformation.DateTimeInfo.getDefaultDateFormatter();
-        Calendar cal = Calendar.getInstance();
-        String dt = format.format(cal.getTime());
-
-        String ProductQuery = "SELECT  P.ProductCode, P.ProductCode ||\" - \"|| P.ProductName ProductName\n" +
-                " FROM tblProduct P \n" +
-                " LEFT OUTER JOIN  tblLocations L ON (P.LocationId = L.LocationId) \n" +
-                " WHERE  (P.LocationId =  " + DistrictId + " OR P.LocationId ='null' OR P.LocationId ='' OR P.LocationId = L.ParentLocationId) AND " +
-                "( '" + dt + "'  BETWEEN P.DateFrom AND P.Dateto )  \n" +
-                " ORDER BY  L.LocationId DESC";
-
-        JSONArray Products = sqlHandler.getResult(ProductQuery, null);
-        return Products.toString();
-    }
-
-    public String getProducts() {
-        SimpleDateFormat format = AppInformation.DateTimeInfo.getDefaultDateFormatter();
-        Calendar cal = Calendar.getInstance();
-        String dt = format.format(cal.getTime());
-
-        String ProductQuery = "SELECT P.ProductCode ProductCode, P.ProductName ProductName\n" +
-                " FROM tblProduct P \n" +
-                " LEFT OUTER JOIN  tblLocations L ON (P.LocationId = L.LocationId) \n" +
-                //" WHERE  (P.LocationId ='null' OR P.LocationId ='' OR P.LocationId = L.ParentLocationId) AND " +
-                " WHERE ( '" + dt + "'  BETWEEN P.DateFrom AND P.Dateto )  \n" +
-                " ORDER BY  L.LocationId DESC";
-
-        JSONArray Products = sqlHandler.getResult(ProductQuery, null);
-        return Products.toString();
+    public String getProductsByDistrict(int districtId, String date) {
+        int regionId = sqlHandler.getRegionId(districtId);
+        return getProducts(regionId, districtId, date);
     }
 
     @JavascriptInterface
@@ -3032,7 +3005,7 @@ public class ClientAndroidInterface {
         }*/
     public boolean isContributionRequired() {
         return !getRule("AllowPolicyWithoutPremium")
-                && getRule("ShowPaymentOption");
+                && getRule("ShowPaymentOption", true);
     }
 
     public ArrayList<String> VerifyFamily() throws JSONException {
@@ -5054,70 +5027,36 @@ public class ClientAndroidInterface {
         return TotalPremiums;
     }
 
-//    @JavascriptInterface
-//    public Bitmap ResizeImage(String ImagePath, int newSize) {
-//        try {
-//            File file = new File(ImagePath);
-//            //Decode image size
-//            BitmapFactory.Options options = new BitmapFactory.Options();
-//            options.inJustDecodeBounds = true;
-//
-//            BitmapFactory.decodeStream(new FileInputStream(file), null, options);
-//
-//
-//            //Docode with new size
-//            BitmapFactory.Options options1 = new BitmapFactory.Options();
-//          //  options1.inSampleSize = scale;
-//
-//            Bitmap newImage = BitmapFactory.decodeStream(new FileInputStream(file), null, options1);
-//            String outputFileName = global.getImageFolder() + "TestImageSize" + "_" + "OfficerCode_"  + "_0_0.jpeg";
-//           Bitmap lastBit= Bitmap.createScaledBitmap(newImage,(int)(newImage.getWidth()*0.8), (int)(newImage.getHeight()*0.8), true);
-//            OutputStream outputStream = new FileOutputStream(outputFileName);
-//          //  lastBit.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
-//
-//            outputStream.close();
-//
-//        } catch (FileNotFoundException e) {
-//            e.printStackTrace();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//        return  null;
-//    }
-
-
     public String getPayer(int LocationId) {
-        String Query = "SELECT D.LocationId DistrictId , R.LocationId RegionId  FROM tblLocations V\n" +
-                "\tINNER JOIN tblLocations W ON W.LocationId = V.ParentLocationId \n" +
-                "\tINNER JOIN tblLocations D ON D.LocationId = W.ParentLocationId \n" +
-                "\tINNER JOIN tblLocations R ON R.LocationId = D.ParentLocationId \n" +
-                "\tWHERE V.locationId =" + LocationId;
+        String Query = "SELECT D.LocationId DistrictId , R.LocationId RegionId  FROM tblLocations V " +
+                "INNER JOIN tblLocations W ON W.LocationId = V.ParentLocationId " +
+                "INNER JOIN tblLocations D ON D.LocationId = W.ParentLocationId " +
+                "INNER JOIN tblLocations R ON R.LocationId = D.ParentLocationId " +
+                "WHERE V.LocationId = " + LocationId + " OR W.LocationId = " + LocationId +
+                " OR D.LocationId = " + LocationId + " OR R.LocationId = " + LocationId;
         int RegionId = 0;
         int DistrictId = 0;
 
         JSONArray RD = sqlHandler.getResult(Query, null);
-        JSONObject object = null;
-        try {
-            object = RD.getJSONObject(0);
-            RegionId = Integer.parseInt(object.getString("RegionId"));
-            DistrictId = Integer.parseInt(object.getString("DistrictId"));
-        } catch (JSONException e) {
-            e.printStackTrace();
+        JSONObject object;
+        JSONArray Payers;
+        if (RD.length() > 0) {
+            try {
+                object = RD.getJSONObject(0);
+                RegionId = Integer.parseInt(object.getString("RegionId"));
+                DistrictId = Integer.parseInt(object.getString("DistrictId"));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            String PayerQuery = "SELECT PayerId, PayerName,P.LocationId FROM tblPayer P \n" +
+                    "INNER JOIN uvwLocations L ON P.LocationId = L.LocationId\n" +
+                    "WHERE (L.RegionId = " + RegionId + " OR L.RegionId ='null' OR L.RegionId ='') AND (L.DistrictId = " + DistrictId + " OR L.DistrictId ='null' OR L.DistrictId ='')  " +
+                    "ORDER BY L.LocationId";
+            Payers = sqlHandler.getResult(PayerQuery, null);
+        } else {
+            Payers = new JSONArray();
         }
-/*String PayerQuery = "SELECT PayerId, PayerName,P.LocationId FROM tblPayer P\n" +
-        "INNER JOIN uvwLocations L ON P.LocationId = L.LocationId\n" +
-        "WHERE \n" +
-        "(\n" +
-        "L.RegionId = CASE WHEN "+ RegionId +" IS NULL THEN NULL ELSE "+ RegionId +" END  \n" +
-        "OR L.RegionId is null\n" +
-        "OR L.DistrictId = CASE WHEN "+ DistrictId +" IS NULL THEN "+ RegionId +" ELSE "+ DistrictId +" END  \n" +
-        ") \n" +
-        "ORDER BY L.LocationId";*/
-        String PayerQuery = "SELECT PayerId, PayerName,P.LocationId FROM tblPayer P \n" +
-                "INNER JOIN uvwLocations L ON P.LocationId = L.LocationId\n" +
-                "WHERE (L.RegionId = " + RegionId + " OR L.RegionId ='null' OR L.RegionId ='') AND (L.DistrictId = " + DistrictId + " OR L.DistrictId ='null' OR L.DistrictId ='')  " +
-                "ORDER BY L.LocationId";
-        JSONArray Payers = sqlHandler.getResult(PayerQuery, null);
         return Payers.toString();
     }
 
@@ -6157,16 +6096,24 @@ public class ClientAndroidInterface {
 
     @JavascriptInterface
     public boolean getRule(String rulename) {
+        return getRule(rulename, false);
+    }
+
+    @JavascriptInterface
+    public boolean getRule(String rulename, boolean defaultValue) {
         boolean rule = false;
         String Query = "SELECT RuleValue FROM tblIMISDefaultsPhone WHERE RuleName=?";
         String arg[] = {rulename};
         JSONArray rulevalue = sqlHandler.getResult(Query, arg);
 
         try {
-            JSONObject RuleObject = rulevalue.getJSONObject(0);
+            if (rulevalue.length() > 0) {
+                JSONObject RuleObject = rulevalue.getJSONObject(0);
 
-            rule = RuleObject.getBoolean("RuleValue");
-
+                rule = RuleObject.getBoolean("RuleValue");
+            } else {
+                rule = defaultValue;
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         }

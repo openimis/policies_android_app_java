@@ -85,7 +85,7 @@ $(document).ready(function () {
     }
 
     contextMenuList = [Android.getString('Edit'), Android.getString('Delete')];
-    if(Android.getRule('ShowPaymentOption')) {
+    if(Android.getRule('ShowPaymentOption', true)) {
         contextMenuList.push(Android.getString('Payment'));
     }
 
