@@ -97,6 +97,17 @@ android {
             resValue "string", "app_name_policies", "Policies CHF DEV"
             dimension = 'std'
         }
+
+        chfProd {
+            applicationId "org.openimis.imispolicies.chf"
+            buildConfigField "String", "API_BASE_URL", '"http://chf-imis.or.tz/restapi/"'
+            buildConfigField "boolean", "SHOW_PAYMENT_MENU", 'true'
+            buildConfigField "boolean", "SHOW_BULK_CN_MENU", 'true'
+            buildConfigField "String", "APP_DIR", '"IMIS-CHFPROD"'
+            resValue "string", "app_name_policies", "Policies CHF"
+            dimension = 'std'
+        }
+
         mvDev {
             applicationId "org.openimis.imispolicies.mv"
             buildConfigField "String", "API_BASE_URL", '"http://imis-mv.swisstph-mis.ch/rest/"'
@@ -163,6 +174,9 @@ android {
     sourceSets {
         chfDev.java.srcDir 'src/chf/java'
         chfDev.res.srcDir 'src/chf/res'
+
+        chfProd.java.srcDir 'src/chf/java'
+        chfProd.res.srcDir 'src/chf/res'
 
         chfsit.java.srcDir 'src/chf/java'
         chfsit.res.srcDir 'src/chf/res'
