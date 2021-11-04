@@ -95,8 +95,13 @@ public class ToRestApi {
 
             int responseCode = response.getStatusLine().getStatusCode();
             Log.i("HTTP_POST", uri + functionName + " - " + responseCode);
-            if (object != null && (responseCode == 400 || responseCode >= 500)) {
+            if (object != null && responseCode >= 400) {
                 Log.e("HTTP_POST", object.toString());
+                HttpEntity entity = response.getEntity();
+                if (entity != null) {
+                    String errorPayload = EntityUtils.toString(entity);
+                    Log.e("HTTP_POST", "error payload" + errorPayload);
+                }
             }
             return response;
         } catch (IOException e) {
