@@ -160,7 +160,7 @@ android {
             applicationIdSuffix System.getenv("APPLICATION_ID") ?: "org.openimis.imispolicies.cli"
             buildConfigField "String", "API_BASE_URL", '"' + (System.getenv("API_BASE_URL") ?: 'http://10.0.2.2:35787/') + '"'
             buildConfigField "String", "APP_DIR", '"' + (System.getenv("CLI_APP_DIR") ?: 'IMIS-CLI') + '"'
-            resValue "string", "app_name_claims", System.getenv("CLI_APP_NAME") ?: "Policies CLI"
+            resValue "string", "app_name_policies", System.getenv("CLI_APP_NAME") ?: "Policies CLI"
             dimension 'std'
         }
         mauritaniaTrain {
