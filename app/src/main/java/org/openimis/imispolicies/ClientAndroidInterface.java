@@ -1759,7 +1759,7 @@ public class ClientAndroidInterface {
                 }
             }
 
-            String ProductQuery = "SELECT  ProductCode, ProductName \n" +
+            String ProductQuery = "SELECT ProdId, ProductCode, ProductName \n" +
                     "FROM tblProduct P\n" +
                     "INNER JOIN  uvwLocations L ON (P.LocationId = L.LocationId) OR (P.LocationId = 'null' OR P.LocationId = '') \n" +
                     "WHERE  ((L.RegionId = " + RegionId + " OR L.RegionId ='null') AND (L.DistrictId =  " + DistrictId + " OR L.DistrictId ='null') OR L.LocationId='null') " +
@@ -1790,6 +1790,10 @@ public class ClientAndroidInterface {
             return sqlHandler.getNextFreeCn(global.getOfficerCode(), productCode);
         }
         return null;
+    }
+
+    public void deleteBulkCn(String controlNumber) {
+        sqlHandler.deleteData("tblBulkControlNumbers", "ControlNumber = ?", new String[]{controlNumber});
     }
 
     @JavascriptInterface
@@ -5061,54 +5065,17 @@ public class ClientAndroidInterface {
     }
 
     public String getPayersByDistrictId(int OfficeLocationId) {
-        String P = "";
         String PayerQuery = "SELECT P.PayerId, P.PayerName, P.LocationId FROM tblPayer P\n" +
                 " LEFT OUTER JOIN tblLocations L ON P.LocationId = L.LocationId\n" +
                 " WHERE (P.LocationId = " + OfficeLocationId + " OR L.ParentLocationId = P.LocationId OR P.LocationId = 'null' OR P.LocationId = '')  " +
                 " ORDER BY L.LocationId";
         JSONArray Payers = sqlHandler.getResult(PayerQuery, null);
-        if (Payers.length() > 0) {
-            P = Payers.toString();
-        }
-        return P;
+        return Payers.toString();
     }
 
     public static void setInsuranceNo(String insuranceNo) {
         InsuranceNo = insuranceNo;
 
-    }
-
-    ArrayList<String> scanned = new ArrayList<String>();
-    String aBuffer = "";
-
-    @JavascriptInterface
-    public void clearBuffer() {
-// empty the current content
-        try {
-            String dir = global.getSubdirectory("scanned");
-            FileOutputStream fOut = new FileOutputStream(new File(dir, "/values.txt"));
-            OutputStreamWriter myOutWriter = new OutputStreamWriter(fOut);
-            myOutWriter.append("");
-            myOutWriter.close();
-            fOut.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @JavascriptInterface
-    public String getInsuranceNo() {
-        try {
-            String dir = global.getSubdirectory("scanned");
-            File myFile = new File(dir, "values.txt");
-            FileInputStream fIn = new FileInputStream(myFile);
-            BufferedReader myReader = new BufferedReader(new InputStreamReader(fIn));
-            aBuffer = myReader.readLine();
-            myReader.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return aBuffer;
     }
 
     @JavascriptInterface
@@ -5128,24 +5095,6 @@ public class ClientAndroidInterface {
         }
 
         return ((MainActivity) mContext).InsureeNumber;
-    }
-
-    public void clearXml() {
-        String dir = global.getSubdirectory("scanned");
-
-        //create file
-        File file = new File(dir, "values.txt");
-        try {
-            file.createNewFile();
-            FileOutputStream fOut = new FileOutputStream(file);
-            OutputStreamWriter myOutWriter = new OutputStreamWriter(fOut);
-            myOutWriter.append("");
-            myOutWriter.close();
-            fOut.close();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     @JavascriptInterface
