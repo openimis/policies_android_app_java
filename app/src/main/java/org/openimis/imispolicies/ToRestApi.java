@@ -65,13 +65,6 @@ public class ToRestApi {
             }
             int responseCode = response.getStatusLine().getStatusCode();
             Log.i("HTTP_GET", uri + functionName + " - " + responseCode);
-            if (responseCode >= 400) {
-                HttpEntity entity = response.getEntity();
-                if (entity != null) {
-                    String errorPayload = EntityUtils.toString(entity);
-                    Log.e("HTTP_POST", "error payload" + errorPayload);
-                }
-            }
             return response;
         } catch (IOException e) {
             e.printStackTrace();
@@ -103,12 +96,11 @@ public class ToRestApi {
             int responseCode = response.getStatusLine().getStatusCode();
             Log.i("HTTP_POST", uri + functionName + " - " + responseCode);
             if (object != null && responseCode >= 400) {
-                Log.e("HTTP_POST", object.toString());
-                HttpEntity entity = response.getEntity();
-                if (entity != null) {
-                    String errorPayload = EntityUtils.toString(entity);
-                    Log.e("HTTP_POST", "error payload" + errorPayload);
+                String body = object.toString();
+                if (body.length() > 1000) {
+                    body = body.substring(0,1000);
                 }
+                Log.e("HTTP_POST", "Body: " + body);
             }
             return response;
         } catch (IOException e) {
@@ -172,6 +164,10 @@ public class ToRestApi {
         if (respEntity != null) {
             try {
                 content = EntityUtils.toString(respEntity);
+                if (content != null && content.length() > 0
+                        && response.getStatusLine().getStatusCode() >= 400) {
+                    Log.e("HTTP", "Error response: " + content);
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
