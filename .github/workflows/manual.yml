@@ -41,10 +41,15 @@ jobs:
       - uses: actions/cache@v2
         with:
           path: |
-            ~/.android
             ~/.gradle/caches
             ~/.gradle/wrapper
           key: ${{ runner.os }}-${{ github.event.inputs.application_id }}-${{ hashFiles('**/*.gradle*') }}-${{ hashFiles('**/gradle/wrapper/gradle-wrapper.properties') }}-${{ hashFiles('**/buildSrc/**/*.kt') }}
+
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.android
+          key: ${{ runner.os }}-${{ github.event.inputs.application_id }}
 
       - name: Environment info
         run: |
