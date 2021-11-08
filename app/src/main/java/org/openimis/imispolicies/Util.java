@@ -1,6 +1,7 @@
 package org.openimis.imispolicies;
 
 import android.support.annotation.NonNull;
+import android.text.TextUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -11,7 +12,7 @@ public class Util {
          * @param string String to be checked
          * @return is string null or empty
          */
-        public static boolean isEmpty(String string) {
+        public static boolean isEmpty(CharSequence string) {
             return isEmpty(string, false);
         }
 
@@ -20,10 +21,14 @@ public class Util {
          * @param checkNullString Should "null" string be considered empty
          * @return is string null or empty
          */
-        public static boolean isEmpty(String string, boolean checkNullString) {
+        public static boolean isEmpty(CharSequence string, boolean checkNullString) {
             return string == null
                     || string.equals("")
                     || (string.equals("null") && checkNullString);
+        }
+
+        public static boolean equals(CharSequence s1, CharSequence s2) {
+            return TextUtils.equals(s1, s2);
         }
     }
 

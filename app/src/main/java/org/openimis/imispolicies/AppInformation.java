@@ -49,12 +49,20 @@ public final class AppInformation {
             return "yyyy-MM-dd'T'HH:mm:ss.SSSSSSSXXX";
         }
 
+        public static String getFileDatetimeFormat() {
+            return "yyyy-MM-dd'T'HH-mm-ss";
+        }
+
         public static SimpleDateFormat getDefaultDateFormatter() {
             return new SimpleDateFormat(getDateFormat(), Locale.US);
         }
 
         public static SimpleDateFormat getDefaultIsoDatetimeFormatter() {
             return new SimpleDateFormat(getISODatetimeFormat(), Locale.US);
+        }
+
+        public static SimpleDateFormat getDefaultFileDatetimeFormatter() {
+            return new SimpleDateFormat(getFileDatetimeFormat(), Locale.US);
         }
 
         private DateTimeInfo() {
