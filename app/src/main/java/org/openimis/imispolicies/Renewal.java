@@ -176,15 +176,16 @@ public class Renewal extends AppCompatActivity {
                 pd = ProgressDialog.show(Renewal.this, "", getResources().getString(R.string.Uploading));
                 final String[] renewal = {null};
 
-                new Thread(() -> {
-                    if (getIntent().getStringExtra("CHFID").equals(getResources().getString(R.string.UnlistedRenewalPolicies))) {
-                        etProductCode.setText(GetSelectedProduct());
-                    }
+                if (getIntent().getStringExtra("CHFID").equals(getResources().getString(R.string.UnlistedRenewalPolicies))) {
+                    etProductCode.setText(GetSelectedProduct());
+                }
 
-                    if (!isValidate()) {
-                        pd.dismiss();
-                        return;
-                    }
+                if (!isValidate()) {
+                    pd.dismiss();
+                    return;
+                }
+
+                new Thread(() -> {
                     renewal[0] = WriteJSON();
                     WriteXML();
                     result = 3;
