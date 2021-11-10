@@ -89,7 +89,7 @@ android {
         }
 
         chfDev {
-            applicationId "org.openimis.imispolicies.chf"
+            applicationId "org.openimis.imispolicies.chfdev"
             buildConfigField "String", "API_BASE_URL", '"http://chf-dev.swisstph-mis.ch/rest/"'
             buildConfigField "boolean", "SHOW_PAYMENT_MENU", 'true'
             buildConfigField "boolean", "SHOW_BULK_CN_MENU", 'true'
@@ -101,7 +101,7 @@ android {
         chfProd {
             applicationId "org.openimis.imispolicies.chf"
             buildConfigField "String", "API_BASE_URL", '"http://chf-imis.or.tz/restapi/"'
-            buildConfigField "boolean", "SHOW_PAYMENT_MENU", 'true'
+            buildConfigField "boolean", "SHOW_PAYMENT_MENU", 'false'
             buildConfigField "boolean", "SHOW_BULK_CN_MENU", 'true'
             buildConfigField "String", "APP_DIR", '"IMIS-CHFPROD"'
             resValue "string", "app_name_policies", "Policies CHF"

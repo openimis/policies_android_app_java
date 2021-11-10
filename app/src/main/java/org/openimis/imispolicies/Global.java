@@ -58,9 +58,9 @@ import static org.openimis.imispolicies.BuildConfig.APP_DIR;
 
 public class Global extends Application {
     private static Global GlobalContext;
-    private static final String PREF_NAME = "CMPref";
-    private static final String PREF_LOG_TAG = "PREFS";
-    private static final String FILE_IO_LOG_TAG = "FILEIO";
+    public static final String PREF_NAME = "CMPref";
+    public static final String PREF_LOG_TAG = "PREFS";
+    public static final String FILE_IO_LOG_TAG = "FILEIO";
 
     private String OfficerCode;
     private String OfficerName;

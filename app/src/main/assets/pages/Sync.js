@@ -33,7 +33,7 @@ $(document).ready(function () {
                     if (!Android.isLoggedIn()) {
                         window.open("Login.html?s=0", "_self");
                     } else {
-                        Android.UploadOfflineFeedbackRenewal('renewal');
+                        Android.uploadRenewals();
                     }
 
                     break;
