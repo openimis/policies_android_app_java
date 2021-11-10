@@ -82,15 +82,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -99,21 +96,26 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import org.openimis.imispolicies.Util.AndroidUtil;
 import org.xmlpull.v1.XmlSerializer;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
+import javax.net.ssl.HttpsURLConnection;
 
 import static android.database.sqlite.SQLiteDatabase.openOrCreateDatabase;
 import static org.openimis.imispolicies.Util.JsonUtil.isStringEmpty;
 import static org.openimis.imispolicies.Util.StringUtil.isEmpty;
 
 public class ClientAndroidInterface {
+    private static final String LOG_TAG_RENEWAL = "RENEWAL";
+
     private Context mContext;
 
     private SQLHandler sqlHandler;
@@ -268,24 +270,14 @@ public class ClientAndroidInterface {
 
     @JavascriptInterface
     public void ShowToast(String msg) {
-        Toast.makeText(mContext, msg, Toast.LENGTH_SHORT).show();
+        AndroidUtil.showToast(mContext, msg);
     }
 
     @JavascriptInterface
     public AlertDialog ShowDialog(String msg) {
-        return new AlertDialog.Builder(mContext)
-                .setMessage(msg)
-                .setCancelable(false)
-                .setPositiveButton(R.string.Ok, (dialogInterface, i) -> {
-                }).show();
+        return AndroidUtil.showDialog(mContext, msg);
     }
 
-
-    //    public int  getDialogResult(final String msg){
-//        ShowDialogYesNo(msg);
-//        while (inProgress){}
-//        return  DialogResult;
-//    }
     @JavascriptInterface
     public AlertDialog ShowDialogYesNo(final int InsureId, final int FamilyId, Boolean Activate, final int isOffline) {
         return new AlertDialog.Builder(mContext)
@@ -4464,21 +4456,129 @@ public class ClientAndroidInterface {
         return true;
     }
 
+    @JavascriptInterface
+    public void uploadRenewals() {
+        final String path;
+        final int totalFiles;
+        final ProgressDialog pd;
+
+        path = global.getMainDirectory();
+        File[] files = GetListOfFiles(path, "Renewal", null);
+        File[] jsonFiles = GetListOfJSONFiles(path, "Renewal", null);
+
+        totalFiles = jsonFiles.length;
+
+        if (totalFiles == 0) {
+            ShowDialog(mContext.getResources().getString(R.string.NoDataAvailable));
+            DeleteRenewals();
+            return;
+        }
+
+        if (!global.isNetworkAvailable()) {
+            ShowDialog(mContext.getResources().getString(R.string.NoInternet));
+            return;
+        }
+
+        pd = AndroidUtil.showProgressDialog(mContext, R.string.Sync, R.string.SyncProcessing);
+
+        new Thread(() -> {
+            StringBuilder messageBuilder = new StringBuilder();
+            String messageFormat = "[%s] %s\n";
+            Map<Integer, String> messages = new HashMap<>();
+            messages.put(ToRestApi.RenewalStatus.ACCEPTED, mContext.getResources().getString(R.string.RenewalAccepted));
+            messages.put(ToRestApi.RenewalStatus.ALREADY_ACCEPTED, mContext.getResources().getString(R.string.RenewalAlreadyAccepted));
+            messages.put(ToRestApi.RenewalStatus.REJECTED, mContext.getResources().getString(R.string.RenewalRejected));
+            messages.put(ToRestApi.RenewalStatus.DUPLICATE_RECEIPT, mContext.getResources().getString(R.string.DuplicateReceiptNumber));
+            messages.put(ToRestApi.RenewalStatus.GRACE_PERIOD_EXPIRED, mContext.getResources().getString(R.string.GracePeriodExpied));
+            messages.put(ToRestApi.RenewalStatus.CONTROL_NUMBER_ERROR, mContext.getResources().getString(R.string.ControlNumberError));
+            messages.put(ToRestApi.RenewalStatus.UNEXPECTED_EXCEPTION, mContext.getResources().getString(R.string.UnexpectedException));
+
+            ToRestApi rest = new ToRestApi();
+            JSONObject obj;
+
+            int acceptedRenewals = 0;
+            for (int i = 0; i < jsonFiles.length; i++) {
+                String jsonText = global.getFileText(jsonFiles[i].getPath());
+                String renewalInsureeNo = "";
+
+                HttpResponse response;
+                int responseCode;
+                int uploadStatus = -1;
+
+                try {
+                    obj = new JSONObject(jsonText).getJSONObject("Policy");
+                    renewalInsureeNo = obj.getString("CHFID");
+
+                    response = rest.postToRestApiToken(obj, "policy/renew");
+                    if (response != null) {
+                        responseCode = response.getStatusLine().getStatusCode();
+                        if (responseCode == HttpURLConnection.HTTP_OK) {
+                            uploadStatus = Integer.parseInt(EntityUtils.toString(response.getEntity()));
+                        } else {
+                            if (responseCode == HttpURLConnection.HTTP_BAD_REQUEST) {
+                                throw new JSONException("Renewal file caused 400 BAD REQUEST");
+                            } else if (responseCode == HttpsURLConnection.HTTP_UNAUTHORIZED) {
+                                messageBuilder.append(String.format(messageFormat, renewalInsureeNo, mContext.getResources().getString(R.string.LoginFail)));
+                                break;
+                            } else if (responseCode == HttpURLConnection.HTTP_INTERNAL_ERROR) {
+                                throw new IOException("500 INTERNAL ERROR");
+                            }
+                        }
+                    } else {
+                        Log.e(LOG_TAG_RENEWAL, "Server not responding");
+                        messageBuilder.append(String.format(messageFormat, renewalInsureeNo, mContext.getResources().getString(R.string.SomethingWrongServer)));
+                        break;
+                    }
+                } catch (JSONException e) {
+                    Log.e(LOG_TAG_RENEWAL, "Invalid renewal json format", e);
+                    messageBuilder.append(String.format(messageFormat, renewalInsureeNo, mContext.getResources().getString(R.string.InvalidRenewalFile)));
+                    continue;
+                } catch (IOException e) {
+                    Log.e(LOG_TAG_RENEWAL, "Error while sending renewal", e);
+                    messageBuilder.append(String.format(messageFormat, renewalInsureeNo, mContext.getResources().getString(R.string.SomethingWrongServer)));
+                    continue;
+                }
+
+
+                if (messages.containsKey(uploadStatus)) {
+                    if (uploadStatus == ToRestApi.RenewalStatus.ACCEPTED || uploadStatus == ToRestApi.RenewalStatus.ALREADY_ACCEPTED) {
+                        MoveFile(files[i], 1);
+                        MoveFile(jsonFiles[i], 1);
+                        acceptedRenewals++;
+                    } else {
+                        MoveFile(files[i], 2);
+                        MoveFile(jsonFiles[i], 2);
+                        messageBuilder.append(String.format(messageFormat, renewalInsureeNo, messages.get(uploadStatus)));
+                    }
+                }
+            }
+
+            String successMessage = mContext.getResources().getString(R.string.BulkUpload);
+
+            String resultMessage;
+            if (acceptedRenewals != jsonFiles.length) {
+                resultMessage = successMessage + "\n" + messageBuilder.toString();
+            } else {
+                resultMessage = successMessage;
+            }
+
+            ((Activity) mContext).runOnUiThread(() -> AndroidUtil.showDialog(mContext, resultMessage));
+
+            pd.dismiss();
+        }).start();
+    }
+
     private File[] GetListOfFiles(String DirectoryPath, final String FileType, final String FileName) {
         File Directory = new File(DirectoryPath);
         final Pattern p = Pattern.compile("(RenPol_)");
-        FilenameFilter filter = new FilenameFilter() {
-
-            @Override
-            public boolean accept(File dir, String filename) {
-                if (FileType.equals("Image")) {
-                    //  return filename.equalsIgnoreCase(FileName);
-                    return filename.endsWith(".jpg");
-                } else if (FileType.equals("Feedback")) {
-                    return filename.startsWith("feedback_");
-                } else {
-                    return filename.startsWith("RenPol_");
-                }
+        FilenameFilter filter = (dir, filename) -> {
+            if (FileType.equals("Image")) {
+                //  return filename.equalsIgnoreCase(FileName);
+                return filename.endsWith(".jpg");
+            } else if (FileType.equals("Feedback")) {
+                return filename.startsWith("feedback_");
+            } else {
+                return filename.startsWith("RenPol_");
             }
         };
         return Directory.listFiles(filter);
@@ -4541,13 +4641,18 @@ public class ClientAndroidInterface {
             Rejected = "RejectedFeedback";
         }
 
+        boolean status = false;
         switch (res) {
             case 1:
-                file.renameTo(new File(global.getSubdirectory(Accepted), file.getName()));
+                status = file.renameTo(new File(global.getSubdirectory(Accepted), file.getName()));
                 break;
             case 2:
-                file.renameTo(new File(global.getSubdirectory(Rejected), file.getName()));
+                status = file.renameTo(new File(global.getSubdirectory(Rejected), file.getName()));
                 break;
+        }
+
+        if (!status) {
+            Log.w(Global.FILE_IO_LOG_TAG, "Moving file failed: " + file.getAbsolutePath());
         }
     }
 

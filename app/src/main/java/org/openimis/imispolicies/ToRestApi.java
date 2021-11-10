@@ -15,6 +15,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.util.HashMap;
 
 public class ToRestApi {
     public static class UploadStatus {
@@ -22,6 +23,16 @@ public class ToRestApi {
         public static final int REJECTED = 0;
         public static final int ACCEPTED = 1;
         public static final int ERROR = 2;
+    }
+
+    public static class RenewalStatus {
+        public static final int ACCEPTED = 3001;
+        public static final int ALREADY_ACCEPTED = 3002;
+        public static final int REJECTED = 3003;
+        public static final int DUPLICATE_RECEIPT = 3004;
+        public static final int GRACE_PERIOD_EXPIRED = 3005;
+        public static final int CONTROL_NUMBER_ERROR = 3006;
+        public static final int UNEXPECTED_EXCEPTION = 3999;
     }
 
     public static class Headers {
