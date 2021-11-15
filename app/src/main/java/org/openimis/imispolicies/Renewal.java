@@ -441,11 +441,11 @@ public class Renewal extends AppCompatActivity {
     }
 
     private void UpdateRow(int RenewalId) {
-        ca.UpdateRenewTable(RenewalId);
+        ca.updateRenewTable(RenewalId);
     }
 
     private void DeleteRow(int RenewalId) {
-        ca.DeleteRenewalOfflineRow(RenewalId);
+        ca.deleteRenewalOfflineRow(RenewalId);
     }
 
     private void BindSpinnerPayersXXXX(int LocationId) {

@@ -2090,7 +2090,7 @@ public class ClientAndroidInterface {
                 "CASE PayType WHEN 'C' THEN '" + mContext.getResources().getString(R.string.Cash) + "' WHEN 'B' THEN '" + mContext.getResources().getString(R.string.BankTransfer) + "' WHEN 'M' THEN '" + mContext.getResources().getString(R.string.MobilePhone) + "' END PayType, " +
                 "isOffline,IsPhotoFee \n" +
                 "FROM tblPremium WHERE PolicyId=?";
-        String arg[] = {String.valueOf(PolicyId)};
+        String[] arg = {String.valueOf(PolicyId)};
         JSONArray Premiums = sqlHandler.getResult(Query, arg);
         return Premiums.toString();
     }
@@ -2099,7 +2099,7 @@ public class ClientAndroidInterface {
     public String getPremium(int PremiumId) {
         String Query = "SELECT PremiumId, PayerId, Amount, Receipt , PayDate, PayType,isOffline,IsPhotoFee \n" +
                 "FROM tblPremium WHERE PremiumId=?";
-        String arg[] = {String.valueOf(PremiumId)};
+        String[] arg = {String.valueOf(PremiumId)};
         JSONArray Premiums = sqlHandler.getResult(Query, arg);
         return Premiums.toString();
     }
@@ -2233,7 +2233,7 @@ public class ClientAndroidInterface {
     public String getRecordedPoliciesById(int RenewalId) {
         String Query = "SELECT RenewalId, PolicyId, OfficerId, OfficerCode , InsuranceNumber, LastName,OtherNames,ProductCode,ProductName \n" +
                 "RenewalPromptDate, isDone, LocationId, PolicyValue, UploadedDate, ControlRequestDate FROM tblRecordedPolicies WHERE RenewalId=?";
-        String arg[] = {String.valueOf(RenewalId)};
+        String[] arg = {String.valueOf(RenewalId)};
         JSONArray RecordedPolicies = sqlHandler.getResult(Query, arg);
         return RecordedPolicies.toString();
     }
@@ -2309,10 +2309,11 @@ public class ClientAndroidInterface {
         String CHFID = "";
         int isOffline = 0;
         int isHead = 1;
-        Boolean res = true;
-        String CHFIDQUERY = "SELECT CHFID,isOffline FROM tblInsuree WHERE isHead = " + isHead + " AND FamilyId = " + FamilyId;
+        boolean res = true;
+        String cHFIdQuery = "SELECT CHFID, isOffline FROM tblInsuree " +
+                "WHERE isHead = " + isHead + " AND FamilyId = " + FamilyId;
 
-        JSONArray JsonCHFID = sqlHandler.getResult(CHFIDQUERY, null);
+        JSONArray JsonCHFID = sqlHandler.getResult(cHFIdQuery, null);
         try {
             JSONObject JsonCHFIDJSONObject = JsonCHFID.getJSONObject(0);
             CHFID = JsonCHFIDJSONObject.getString("CHFID");
@@ -2333,10 +2334,9 @@ public class ClientAndroidInterface {
                 "FROM tblPremium WHERE Receipt=?";*/
 
         String Query = "SELECT * FROM tblPremium WHERE LOWER(Receipt)=?";
-        String arg[] = {(ReceiptNo.toLowerCase()).trim()};
-        JSONArray Premiums = sqlHandler.getResult(Query, arg);
-        Premiums.toString();
-        int Count = Premiums.length();
+        String[] arg = {(ReceiptNo.toLowerCase()).trim()};
+        JSONArray premiums = sqlHandler.getResult(Query, arg);
+        int Count = premiums.length();
 
         if (Count > 0) {
             res = false;
@@ -2576,7 +2576,7 @@ public class ClientAndroidInterface {
     public String OfflineEnquire(String CHFID) {
         sqlHandler.isPrivate = false;
         String Query = "SELECT CHFID ,Photo ,InsureeName,DOB,Gender,ProductCode,ProductName,ExpiryDate,Status,DedType,Ded1,Ded2,Ceiling1,Ceiling2 FROM tblPolicyInquiry WHERE  Trim(CHFID) = ?";
-        String arg[] = {CHFID};
+        String[] arg = {CHFID};
         JSONArray Insuree = sqlHandler.getResult(Query, arg);
         return Insuree.toString();
     }
@@ -2584,7 +2584,7 @@ public class ClientAndroidInterface {
     public String OfflineRenewals(String OfficerCode) {
         String Query = "SELECT RenewalId, PolicyId, OfficerId, OfficerCode, CHFID, LastName, OtherNames, ProductCode, ProductName, VillageName, RenewalPromptDate, IMEI, Phone,LocationId,PolicyValue, EnrollDate, RenewalUUID " +
                 " FROM tblRenewals WHERE LOWER(OfficerCode)=? AND isDone = ? ";
-        String arg[] = {OfficerCode.toLowerCase(), "N"};
+        String[] arg = {OfficerCode.toLowerCase(), "N"};
         JSONArray Renews = sqlHandler.getResult(Query, arg);
         return Renews.toString();
     }
@@ -2660,39 +2660,39 @@ public class ClientAndroidInterface {
         String Query = "SELECT ProductName " +
                 "FROM  tblProduct WHERE prodId = ? ";
         String arg[] = {prodId};
-        JSONArray ProductName = sqlHandler.getResult(Query, arg);
-        return ProductName;
+        JSONArray productName = sqlHandler.getResult(Query, arg);
+        return productName;
     }
 
     private JSONArray getProductCode(String prodId) {
         String Query = "SELECT ProductCode " +
                 "FROM  tblProduct WHERE prodId = ? ";
-        String arg[] = {prodId};
-        JSONArray ProductCode = sqlHandler.getResult(Query, arg);
-        return ProductCode;
+        String[] arg = {prodId};
+        JSONArray productCode = sqlHandler.getResult(Query, arg);
+        return productCode;
     }
 
     private JSONArray getOtherNames(String familyId) {
         String Query = "SELECT OtherNames " +
                 "FROM  tblInsuree WHERE FamilyId = ? AND isHead = 1 ";
-        String arg[] = {familyId};
-        JSONArray OtherNames = sqlHandler.getResult(Query, arg);
-        return OtherNames;
+        String[] arg = {familyId};
+        JSONArray otherNames = sqlHandler.getResult(Query, arg);
+        return otherNames;
     }
 
     private JSONArray getLastName(String familyId) {
         String Query = "SELECT LastName " +
                 "FROM  tblInsuree WHERE FamilyId = ? AND isHead = 1 ";
-        String arg[] = {familyId};
-        JSONArray LastName = sqlHandler.getResult(Query, arg);
-        return LastName;
+        String[] arg = {familyId};
+        JSONArray lastName = sqlHandler.getResult(Query, arg);
+        return lastName;
     }
 
     private JSONArray getInsuranceNumber(String familyId) {
         JSONArray InsuranceNumber = null;
         String Query = "SELECT CHFID " +
                 "FROM  tblInsuree WHERE FamilyId = ? AND isHead  = 1";
-        String arg[] = {familyId};
+        String[] arg = {familyId};
         try {
             InsuranceNumber = sqlHandler.getResult(Query, arg);
         } catch (Exception e) {
@@ -2715,15 +2715,15 @@ public class ClientAndroidInterface {
         }
     }
 
-    public int DeleteRenewalOfflineRow(Integer RenewalId) {
+    public int deleteRenewalOfflineRow(Integer RenewalId) {
         String Query = "DELETE FROM tblRenewals WHERE RenewalId=?";
-        String arg[] = {String.valueOf(RenewalId)};
-        JSONArray Renewal = sqlHandler.getResult(Query, arg);
-        Renewal.toString();
+        String[] arg = {String.valueOf(RenewalId)};
+        JSONArray renewal = sqlHandler.getResult(Query, arg);
+        Log.d("deleteRenewalOfflineRow", renewal.toString());
         return 1; //Delete Success
     }
 
-    public int UpdateRenewTable(int RenewalId) {
+    public int updateRenewTable(int RenewalId) {
         ContentValues values = new ContentValues();
         values.put("isDone", "Y");
         try {
@@ -2743,13 +2743,13 @@ public class ClientAndroidInterface {
     }
 
     public Boolean InsertFeedbacks(String Result) {
-        String TableName = "tblFeedbacks";
-        String[] Columns = {"claimUUID", "officerId", "officerCode", "chfid", "lastName", "otherNames", "hfCode", "hfName", "claimCode", "dateFrom", "dateTo", "phone", "feedbackPromptDate"};
-        String Where = "isDone = ?";
-        String[] WhereArg = {"N"};
-        sqlHandler.deleteData(TableName, Where, WhereArg);
+        String tableName = "tblFeedbacks";
+        String[] columns = {"claimUUID", "officerId", "officerCode", "chfid", "lastName", "otherNames", "hfCode", "hfName", "claimCode", "dateFrom", "dateTo", "phone", "feedbackPromptDate"};
+        String where = "isDone = ?";
+        String[] whereArg = {"N"};
+        sqlHandler.deleteData(tableName, where, whereArg);
         try {
-            sqlHandler.insertData(TableName, Columns, Result, "");
+            sqlHandler.insertData(tableName, columns, Result, "");
         } catch (JSONException e) {
             e.printStackTrace();
             return false;
@@ -2759,7 +2759,7 @@ public class ClientAndroidInterface {
 
 
     public Cursor SearchPayer(String InputText, String LocationId) {
-        String Query = "WITH RECURSIVE AllLocations(LocationId, ParentLocationId) AS\n" +
+        String query = "WITH RECURSIVE AllLocations(LocationId, ParentLocationId) AS\n" +
                 "(\n" +
                 " SELECT 0 LocationId, NULL ParentLocationId FROM tbllocations\n" +
                 " UNION \n" +
@@ -2773,7 +2773,7 @@ public class ClientAndroidInterface {
                 "INNER JOIN ALLLocations AL ON IFNULL(P.LocationId,0) =IFNULL(AL.LocationId,0) \n" +
                 "WHERE PayerName LIKE '%" + InputText + "%' \n" +
                 "ORDER BY AL.ParentLocationId ,AL.LocationId";
-        Cursor c = (Cursor) sqlHandler.getResult(Query, null);
+        Cursor c = (Cursor) sqlHandler.getResult(query, null);
         if (c != null) {
             c.moveToFirst();
         }

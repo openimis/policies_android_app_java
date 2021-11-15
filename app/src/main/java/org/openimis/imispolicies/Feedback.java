@@ -207,20 +207,11 @@ public class Feedback extends AppCompatActivity {
 
 
     private void WriteXML(String Officer, String ClaimUUID, String CHFID, String Answers) throws IllegalArgumentException, IllegalStateException, IOException {
-        //Here we are creating a directory
+        // Create the main directory if it does not exist
         File MyDir = new File(global.getMainDirectory());
-
-        //Here we are giving name to the XML file
         FileName = "feedback_" + etClaimCode.getText() + ".xml";
-
-        //Here we are creating file in that directory
         FeedbackXML = new File(MyDir, FileName);
-
-
-        //Here we are creating outputstream
         FileOutputStream fos = new FileOutputStream(FeedbackXML);
-
-
         XmlSerializer serializer = Xml.newSerializer();
 
         serializer.setOutput(fos, "UTF-8");

@@ -561,7 +561,7 @@ public class SQLHandler extends SQLiteOpenHelper {
     }
 
     public String getResultXML2(String QueryF, String QueryI, String QueryPL, String QueryPR, String QueryIP, String OfficerCode, int OfficerId) throws IOException {
-        String Query = null;
+        String query = null;
         String label = null;
         String sublabel = null;
 
@@ -603,30 +603,30 @@ public class SQLHandler extends SQLiteOpenHelper {
         try {
             for (int i = 1; i <= 5; i++) {
                 if (i == 1) {
-                    Query = QueryF;
+                    query = QueryF;
                     label = "Families";
                     sublabel = "Family";
                 } else if (i == 2) {
-                    Query = QueryI;
+                    query = QueryI;
                     label = "Insurees";
                     sublabel = "Insuree";
                 } else if (i == 3) {
-                    Query = QueryPL;
+                    query = QueryPL;
                     label = "Policies";
                     sublabel = "Policy";
                 } else if (i == 4) {
-                    Query = QueryIP;
+                    query = QueryIP;
                     label = "InsureePolicies";
                     sublabel = "InsureePolicy";
-                } else if (i == 5) {
-                    Query = QueryPR;
+                } else { // Always 5 because of the `for`
+                    query = QueryPR;
                     label = "Premiums";
                     sublabel = "Premium";
                 }
 
                 serializer.startTag(null, label);
                 openDatabase();
-                Cursor cursor = mDatabase.rawQuery(Query, null);
+                Cursor cursor = mDatabase.rawQuery(query, null);
                 cursor.moveToFirst();
 
                 while (!cursor.isAfterLast()) {
@@ -729,7 +729,7 @@ public class SQLHandler extends SQLiteOpenHelper {
     }
 
 
-    public void insertData(String TableName, String[] Columns, String data, String PreExecute) throws JSONException {
+    public void insertData(String tableName, String[] columns, String data, String preExecute) throws JSONException {
         String dbPath = ClientAndroidInterface.filePath;
         mDatabase = SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READWRITE);
         try {
@@ -746,8 +746,8 @@ public class SQLHandler extends SQLiteOpenHelper {
                 openDatabase();
             }
 
-            if (!TextUtils.isEmpty(PreExecute)) {
-                mDatabase.execSQL(PreExecute);
+            if (!TextUtils.isEmpty(preExecute)) {
+                mDatabase.execSQL(preExecute);
             }
 
 
@@ -756,10 +756,13 @@ public class SQLHandler extends SQLiteOpenHelper {
                 try {
                     object = array.getJSONObject(i);
                     ContentValues cv = new ContentValues();
-                    for (String c : Columns) {
+                    for (String c : columns) {
                         cv.put(c, object.getString(c));
                     }
-                    mDatabase.insert(TableName, null, cv);
+                    long insertResult = mDatabase.insert(tableName, null, cv);
+                    if (insertResult < 0) {
+                        Log.e("RENEWAL", "Renewal insert failed " + insertResult);
+                    }
 
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -781,8 +784,8 @@ public class SQLHandler extends SQLiteOpenHelper {
     public int insertData(String tableName, ContentValues contentValues) {
         try {
             openDatabase();
-            Long lastInsertedId = mDatabase.insertOrThrow(tableName, null, contentValues);
-            return (int) (long) lastInsertedId;
+            long lastInsertedId = mDatabase.insertOrThrow(tableName, null, contentValues);
+            return (int) lastInsertedId;
         } catch (SQLException e) {
             e.printStackTrace();
             throw e;
