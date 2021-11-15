@@ -2735,11 +2735,11 @@ public class ClientAndroidInterface {
     }
 
     public String getOfflineFeedBack(String OfficerCode) {
-        String Query = "SELECT ClaimId,OfficerId,OfficerCode,CHFID,LastName,OtherNames,HFCode,HFName,ClaimCode,DateFrom,DateTo,IMEI, Phone,FeedbackPromptDate " +
-                "FROM  tblFeedbacks WHERE LOWER(OfficerCode) = ?  AND  isDone = ?";
-        String arg[] = {OfficerCode.toLowerCase(), "N"};
-        JSONArray FeedBacks = sqlHandler.getResult(Query, arg);
-        return FeedBacks.toString();
+        String query = "SELECT ClaimUUID,OfficerId,OfficerCode,CHFID,LastName,OtherNames,HFCode,HFName,ClaimCode,DateFrom,DateTo,IMEI,Phone,FeedbackPromptDate " +
+                "FROM  tblFeedbacks WHERE LOWER(OfficerCode) = ? AND isDone = ?";
+        String[] arg = {OfficerCode.toLowerCase(), "N"};
+        JSONArray feedBacks = sqlHandler.getResult(query, arg);
+        return feedBacks.toString();
     }
 
     public Boolean InsertFeedbacks(String Result) {
@@ -2780,18 +2780,18 @@ public class ClientAndroidInterface {
         return c;
     }
 
-    public String CleanFeedBackTable(String ClaimId) {
-        String Query = "DELETE FROM tblFeedbacks WHERE ClaimId = ?";
-        String arg[] = {ClaimId};
+    public String CleanFeedBackTable(String ClaimUUID) {
+        String Query = "DELETE FROM tblFeedbacks WHERE ClaimUUID = ?";
+        String[] arg = {ClaimUUID};
         JSONArray Feedback = sqlHandler.getResult(Query, arg);
         return Feedback.toString();
     }
 
-    public boolean UpdateFeedBack(int ClaimId) {
+    public boolean UpdateFeedBack(String ClaimUUID) {
         ContentValues values = new ContentValues();
         values.put("isDone", "Y");
         try {
-            sqlHandler.updateData("tblFeedbacks", values, "ClaimId = ?", new String[]{String.valueOf(ClaimId)});
+            sqlHandler.updateData("tblFeedbacks", values, "ClaimUUID = ?", new String[]{ClaimUUID});
         } catch (UserException e) {
             e.printStackTrace();
         }

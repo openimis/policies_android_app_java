@@ -189,7 +189,7 @@ public class FeedbackList extends AppCompatActivity {
                 }
 
                 intent.putExtra("CHFID", oItem.get("CHFID"));
-                intent.putExtra("ClaimId", oItem.get("ClaimId"));
+                //intent.putExtra("ClaimId", oItem.get("ClaimId"));
                 intent.putExtra("ClaimUUID", claimUUID);
                 intent.putExtra("ClaimCode", oItem.get("ClaimCode"));
                 intent.putExtra("OfficerCode", OfficerCode);
@@ -225,7 +225,7 @@ public class FeedbackList extends AppCompatActivity {
                     feedback.put("ClaimCode", object.getString("ClaimCode"));
                     feedback.put("DateFromTo", object.getString("DateFrom") + " - " + object.getString("DateTo"));
                     feedback.put("FeedbackPromptDate", object.getString("FeedbackPromptDate"));
-                    feedback.put("ClaimId", object.getString("ClaimId"));
+                    feedback.put("ClaimUUID", object.getString("ClaimUUID"));
                     FeedbackList.add(feedback);
                 }
 

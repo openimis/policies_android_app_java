@@ -157,7 +157,7 @@
   <string name="GetStats">Omba taarifa</string>
   <string name="NoStatFound">Hakuna taarifa iliyopatikana</string>
   <string name="Statistics">Takwimu</string>
-  <string name="ClaimId">Namba ya dai</string>
+  <string name="ClaimUUID">Namba ya dai</string>
   <string name="Question1">Umewahi kutibiwa kwenye hicho kituo?</string>
   <string name="Question2">Uliombwa utoe fedha za matibabu kwenye kituo?</string>
   <string name="Question3">Je, uliandikiwa dawa?</string>
@@ -166,7 +166,7 @@
   <string name="UploadingFeedback">Tuma maoni…</string>
   <string name="UploadAllFeedback">Tuma maoni yote</string>
   <string name="MissingOfficer">Tafadhali ingiza Namba ya Afisa mwandikishaji</string>
-  <string name="MissingClaimID">Tafadhali jaza namba ya dai</string>
+  <string name="MissingClaimUUID">Tafadhali jaza namba ya dai</string>
   <string name="MissingInsureeNumber">Jaza CHFID</string>
   <string name="MissingAnswers">Maswali yote yanatakiwa yajibiwe.</string>
   <string name="EndDate">Tarehe ya mwisho</string>

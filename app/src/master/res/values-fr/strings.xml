@@ -157,7 +157,7 @@
   <string name="GetStats">Aperçu</string>
   <string name="NoStatFound">Aucune donnée trouvée</string>
   <string name="Statistics">Statistiques</string>
-  <string name="ClaimId">Code de réclamation</string>
+  <string name="ClaimUUID">Code de réclamation</string>
   <string name="Question1">Avez-vous été traité à l\'établissement à cette date ?</string>
   <string name="Question2">Vous a-t-on demandé un paiement à l\'établissement par le personnel ?</string>
   <string name="Question3">Vous a-t-on prescrit des médicaments ?</string>
@@ -166,7 +166,7 @@
   <string name="UploadingFeedback">Téléversement des retours...</string>
   <string name="UploadAllFeedback">Téléverser tous les retours</string>
   <string name="MissingOfficer">Veuillez entrer le code de l\'agent</string>
-  <string name="MissingClaimID">Veuillez entrer le numéro de la prestation</string>
+  <string name="MissingClaimUUID">Veuillez entrer le numéro de la prestation</string>
   <string name="MissingInsureeNumber">Veuillez entrer le numéro d\'assurance</string>
   <string name="MissingAnswers">Il faut répondre à toutes les questions.</string>
   <string name="EndDate">Date de fin</string>

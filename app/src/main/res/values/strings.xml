@@ -157,7 +157,7 @@
   <string name="GetStats">Preview</string>
   <string name="NoStatFound">No data found</string>
   <string name="Statistics">Statistics</string>
-  <string name="ClaimId">Claim Code</string>
+  <string name="ClaimUUID">Claim Code</string>
   <string name="Question1">Have you been treated at the facility on the said date?</string>
   <string name="Question2">Have you been asked for a payment to the facility or staff?</string>
   <string name="Question3">Have drugs been prescribed to you?</string>
@@ -166,7 +166,7 @@
   <string name="UploadingFeedback">Uploading feedback…</string>
   <string name="UploadAllFeedback">Upload all feedback</string>
   <string name="MissingOfficer">Please enter Enrolment Officer Code</string>
-  <string name="MissingClaimID">Please enter Claim ID</string>
+  <string name="MissingClaimUUID">Please enter Claim ID</string>
   <string name="MissingInsureeNumber">Please enter the Insuree number</string>
   <string name="MissingAnswers">All the questions must be answered.</string>
   <string name="EndDate">End Date</string>
@@ -428,4 +428,5 @@
   <string name="Permissions">Permissions</string>
   <string name="PermissionsInfo">To work correctly, %1$s requires multiple permissions. Please allow them in next screen in order to use the application.</string>
   <string name="EmptyMonth">Please fill the month</string>
+    <string name="star_rating">Star rating</string>
 </resources>

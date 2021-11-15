@@ -47,6 +47,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Locale;
 
 public class Feedback extends AppCompatActivity {
     private Global global;
@@ -70,7 +71,6 @@ public class Feedback extends AppCompatActivity {
     private ProgressDialog pd;
     private Button btnSubmit;
 
-    private int ClaimId;
     private String ClaimUUID;
     private File FeedbackXML;
     private File FeedbackJSON;
@@ -100,7 +100,6 @@ public class Feedback extends AppCompatActivity {
         btnSubmit = (Button) findViewById(R.id.btnSubmit);
         OfficerCode = getIntent().getStringExtra("OfficerCode");
         etOfficer.setText(OfficerCode);
-        ClaimId = Integer.parseInt(getIntent().getStringExtra("ClaimId"));
         ClaimUUID = getIntent().getStringExtra("ClaimUUID");
         etClaimCode.setText(getIntent().getStringExtra("ClaimCode"));
         etCHFID.setText(getIntent().getStringExtra("CHFID"));
@@ -120,10 +119,7 @@ public class Feedback extends AppCompatActivity {
                         try {
                             feed[0] = WriteJSON(String.valueOf(etOfficer.getText()), ClaimUUID, etCHFID.getText().toString(), Answers);
                             WriteXML(String.valueOf(etOfficer.getText()), ClaimUUID, etCHFID.getText().toString(), Answers);
-                        } catch (IllegalArgumentException | IllegalStateException e) {
-                            e.printStackTrace();
-                            return;
-                        } catch (IOException e) {
+                        } catch (IllegalArgumentException | IllegalStateException | IOException e) {
                             e.printStackTrace();
                             return;
                         }
@@ -158,17 +154,17 @@ public class Feedback extends AppCompatActivity {
                             public void run() {
                                 switch (msgType) {
                                     case 1:
-                                        DeleteRow(ClaimId);
+                                        DeleteRow(ClaimUUID);
                                         //ca.ShowDialog(getResources().getString(R.string.UploadedSuccessfully));
                                         Toast.makeText(getApplicationContext(), getResources().getString(R.string.UploadedSuccessfully), Toast.LENGTH_LONG).show();
                                         break;
                                     case 2:
-                                        DeleteRow(ClaimId);
+                                        DeleteRow(ClaimUUID);
                                         //ca. ShowDialog(getResources().getString(R.string.ServerRejected));
                                         Toast.makeText(getApplicationContext(), getResources().getString(R.string.ServerRejected), Toast.LENGTH_LONG).show();
                                         break;
                                     case 3:
-                                        UpdateRow(ClaimId);
+                                        UpdateRow(ClaimUUID);
                                         //ca. ShowDialog(getResources().getString(R.string.SavedOnSDCard));
                                         Toast.makeText(getApplicationContext(), getResources().getString(R.string.SavedOnSDCard), Toast.LENGTH_LONG).show();
                                         break;
@@ -197,12 +193,12 @@ public class Feedback extends AppCompatActivity {
     }
 
 
-    private void DeleteRow(int ClaimId) {
-        ca.CleanFeedBackTable(String.valueOf(ClaimId));
+    private void DeleteRow(String ClaimUUID) {
+        ca.CleanFeedBackTable(ClaimUUID);
     }
 
-    private void UpdateRow(int ClaimId) {
-        ca.UpdateFeedBack(ClaimId);
+    private void UpdateRow(String ClaimUUID) {
+        ca.UpdateFeedBack(ClaimUUID);
     }
 
 
@@ -236,7 +232,7 @@ public class Feedback extends AppCompatActivity {
         serializer.endTag(null, "Answers");
 
         serializer.startTag(null, "Date");
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd", Locale.US);
         Calendar cal = Calendar.getInstance();
         String d = formatter.format(cal.getTime());
         serializer.text(d);
@@ -256,10 +252,10 @@ public class Feedback extends AppCompatActivity {
         File MyDir = new File(global.getMainDirectory());
 
         //Create a file name
-        SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
         Calendar cal = Calendar.getInstance();
         String d = format.format(cal.getTime());
-        FileName = "feedbackJSON_" + etClaimCode.getText() + ".txt";
+        FileName = "feedbackJSON_" + etClaimCode.getText() + ".txt"; // TODO use UUID
         FeedbackJSON = new File(MyDir, FileName);
 
         JSONObject FullObject = new JSONObject();
@@ -340,7 +336,7 @@ public class Feedback extends AppCompatActivity {
             return false;
         }
         if (etClaimCode.getText().length() == 0) {
-            ca.ShowDialog(getResources().getString(R.string.MissingClaimID));
+            ca.ShowDialog(getResources().getString(R.string.MissingClaimUUID));
             etClaimCode.requestFocus();
             return false;
         }
