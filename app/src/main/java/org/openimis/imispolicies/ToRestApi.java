@@ -106,6 +106,13 @@ public class ToRestApi {
 
             int responseCode = response.getStatusLine().getStatusCode();
             Log.i("HTTP_POST", uri + functionName + " - " + responseCode);
+            if (object != null && responseCode >= 400) {
+                String body = object.toString();
+                if (body.length() > 1000) {
+                    body = body.substring(0,1000);
+                }
+                Log.e("HTTP_POST", "Body: " + body);
+            }
             return response;
         } catch (IOException e) {
             e.printStackTrace();
@@ -168,6 +175,10 @@ public class ToRestApi {
         if (respEntity != null) {
             try {
                 content = EntityUtils.toString(respEntity);
+                if (content != null && content.length() > 0
+                        && response.getStatusLine().getStatusCode() >= 400) {
+                    Log.e("HTTP", "Error response: " + content);
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }

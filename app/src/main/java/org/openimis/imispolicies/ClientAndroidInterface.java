@@ -4223,6 +4223,10 @@ public class ClientAndroidInterface {
         if (respEntity != null) {
             try {
                 content = EntityUtils.toString(respEntity);
+                if (content != null && content.length() > 0
+                        && response.getStatusLine().getStatusCode() >= 400) {
+                    Log.e("HTTP", "Error response: " + content);
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
