@@ -132,7 +132,7 @@ public class SQLHandler extends SQLiteOpenHelper {
                             + "AltLanguage TEXT" + ")"
             );
             sqLiteDatabase.execSQL(
-                    "CREATE TABLE 'tblFamilies' (" +
+                    "CREATE TABLE " + tblFamilies + "(" +
                             "FamilyId INTEGER," +
                             "InsureeId NUMERIC," +
                             "LocationId NUMERIC," +
@@ -145,15 +145,16 @@ public class SQLHandler extends SQLiteOpenHelper {
                             "ConfirmationType TEXT" + ")"
             );
             sqLiteDatabase.execSQL(
-                    "CREATE TABLE 'tblFamilyTypes' (" +
+                    "CREATE TABLE " + tblFamilyTypes + "(" +
                             "FamilyTypeCode TEXT," +
                             "FamilyType TEXT," +
                             "SortOrder NUMERIC," +
                             "AltLanguage TEXT" + ")"
             );
             sqLiteDatabase.execSQL(
-                    "CREATE TABLE 'tblFeedbacks' (" +
+                    "CREATE TABLE " + tblFeedbacks + "(" +
                             "ClaimId INTEGER," +
+                            "ClaimUUID TEXT," +
                             "OfficerId INTEGER," +
                             "OfficerCode TEXT," +
                             "CHFID TEXT," +

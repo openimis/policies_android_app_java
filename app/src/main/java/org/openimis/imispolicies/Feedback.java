@@ -25,12 +25,10 @@
 
 package org.openimis.imispolicies;
 
-import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Xml;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioButton;
@@ -70,7 +68,6 @@ public class Feedback extends AppCompatActivity {
     private ProgressDialog pd;
     private Button btnSubmit;
 
-    private int ClaimId;
     private String ClaimUUID;
     private File FeedbackXML;
     private File FeedbackJSON;
@@ -86,141 +83,92 @@ public class Feedback extends AppCompatActivity {
         setContentView(R.layout.feedback);
 
         ca = new ClientAndroidInterface(this);
-        etOfficer = (EditText) findViewById(R.id.etOfficer);
-        etClaimCode = (EditText) findViewById(R.id.etClaimCode);
-        etCHFID = (EditText) findViewById(R.id.etCHFID);
-        rbYes1 = (RadioButton) findViewById(R.id.rYes1);
-        rbYes2 = (RadioButton) findViewById(R.id.rYes2);
-        rbYes3 = (RadioButton) findViewById(R.id.rYes3);
-        rbYes4 = (RadioButton) findViewById(R.id.rYes4);
-        rbNo1 = (RadioButton) findViewById(R.id.rNo1);
-        rbNo2 = (RadioButton) findViewById(R.id.rNo2);
-        rbNo3 = (RadioButton) findViewById(R.id.rNo3);
-        rbNo4 = (RadioButton) findViewById(R.id.rNo4);
-        btnSubmit = (Button) findViewById(R.id.btnSubmit);
+        etOfficer = findViewById(R.id.etOfficer);
+        etClaimCode = findViewById(R.id.etClaimCode);
+        etCHFID = findViewById(R.id.etCHFID);
+        rbYes1 = findViewById(R.id.rYes1);
+        rbYes2 = findViewById(R.id.rYes2);
+        rbYes3 = findViewById(R.id.rYes3);
+        rbYes4 = findViewById(R.id.rYes4);
+        rbNo1 = findViewById(R.id.rNo1);
+        rbNo2 = findViewById(R.id.rNo2);
+        rbNo3 = findViewById(R.id.rNo3);
+        rbNo4 = findViewById(R.id.rNo4);
+        btnSubmit = findViewById(R.id.btnSubmit);
         OfficerCode = getIntent().getStringExtra("OfficerCode");
         etOfficer.setText(OfficerCode);
-        ClaimId = Integer.parseInt(getIntent().getStringExtra("ClaimId"));
         ClaimUUID = getIntent().getStringExtra("ClaimUUID");
         etClaimCode.setText(getIntent().getStringExtra("ClaimCode"));
         etCHFID.setText(getIntent().getStringExtra("CHFID"));
 
-        btnSubmit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        btnSubmit.setOnClickListener(v -> {
 
-                if (!isValidate()) return;
-                pd = ProgressDialog.show(Feedback.this, "", getResources().getString(R.string.UploadingFeedback));
-                final String[] feed = {null};
+            if (!isValidate()) return;
+            pd = ProgressDialog.show(Feedback.this, "", getResources().getString(R.string.UploadingFeedback));
+            final String[] feed = {null};
 
-                new Thread() {
-                    public void run() {
-
-                        String Answers = Answers();
-                        try {
-                            feed[0] = WriteJSON(String.valueOf(etOfficer.getText()), ClaimUUID, etCHFID.getText().toString(), Answers);
-                            WriteXML(String.valueOf(etOfficer.getText()), ClaimUUID, etCHFID.getText().toString(), Answers);
-                        } catch (IllegalArgumentException | IllegalStateException e) {
-                            e.printStackTrace();
-                            return;
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                            return;
-                        }
-
-
-/*                        if(_General.isNetworkAvailable(Feedback.this)){
-                            CallSoap cs = new CallSoap();
-                            cs.setFunctionName("UploadFeedback");
-                            Boolean res = cs.UploadFeedback(feed[0], FeedbackXML.getName());
-                            if(res == true){
-                                int server = ServerResponse();
-                                if(server == 1){
-                                    msgType = 1;
-                                }else if (server == 0){
-                                    msgType = 2;
-                                } else{
-                                    msgType = -1;
-                                }
-                            }else{
-                                msgType = 3;
-                            }
-                            File file = FeedbackXML;
-                            File fileJSON = FeedbackJSON;
-                            MoveFile(file);
-                            MoveFile(fileJSON);
-                        }else{*/
-                        msgType = 3;
-                        //}
-
-
-                        runOnUiThread(new Runnable() {
-                            public void run() {
-                                switch (msgType) {
-                                    case 1:
-                                        DeleteRow(ClaimId);
-                                        //ca.ShowDialog(getResources().getString(R.string.UploadedSuccessfully));
-                                        Toast.makeText(getApplicationContext(), getResources().getString(R.string.UploadedSuccessfully), Toast.LENGTH_LONG).show();
-                                        break;
-                                    case 2:
-                                        DeleteRow(ClaimId);
-                                        //ca. ShowDialog(getResources().getString(R.string.ServerRejected));
-                                        Toast.makeText(getApplicationContext(), getResources().getString(R.string.ServerRejected), Toast.LENGTH_LONG).show();
-                                        break;
-                                    case 3:
-                                        UpdateRow(ClaimId);
-                                        //ca. ShowDialog(getResources().getString(R.string.SavedOnSDCard));
-                                        Toast.makeText(getApplicationContext(), getResources().getString(R.string.SavedOnSDCard), Toast.LENGTH_LONG).show();
-                                        break;
-                                    case -1:
-                                        //ca. ShowDialog(getResources().getString(R.string.FeedBackNotUploaded));
-                                        Toast.makeText(getApplicationContext(), getResources().getString(R.string.FeedBackNotUploaded), Toast.LENGTH_LONG).show();
-                                        break;
-                                }
-
-                                finish();
-
-                            }
-
-
-                        });
-
-
-                        pd.dismiss();
+            new Thread() {
+                public void run() {
+                    String Answers = Answers();
+                    try {
+                        feed[0] = WriteJSON(String.valueOf(etOfficer.getText()), ClaimUUID, etCHFID.getText().toString(), Answers);
+                        WriteXML(String.valueOf(etOfficer.getText()), ClaimUUID, etCHFID.getText().toString(), Answers);
+                    } catch (IllegalArgumentException | IllegalStateException e) {
+                        e.printStackTrace();
+                        return;
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        return;
                     }
 
-                }.start();
+                    msgType = 3;
 
-
-            }
+                    runOnUiThread(() -> {
+                        switch (msgType) {
+                            case 1:
+                                DeleteRow(ClaimUUID);
+                                //ca.ShowDialog(getResources().getString(R.string.UploadedSuccessfully));
+                                Toast.makeText(getApplicationContext(), getResources().getString(R.string.UploadedSuccessfully), Toast.LENGTH_LONG).show();
+                                break;
+                            case 2:
+                                DeleteRow(ClaimUUID);
+                                //ca. ShowDialog(getResources().getString(R.string.ServerRejected));
+                                Toast.makeText(getApplicationContext(), getResources().getString(R.string.ServerRejected), Toast.LENGTH_LONG).show();
+                                break;
+                            case 3:
+                                UpdateRow(ClaimUUID);
+                                //ca. ShowDialog(getResources().getString(R.string.SavedOnSDCard));
+                                Toast.makeText(getApplicationContext(), getResources().getString(R.string.SavedOnSDCard), Toast.LENGTH_LONG).show();
+                                break;
+                            case -1:
+                                //ca. ShowDialog(getResources().getString(R.string.FeedBackNotUploaded));
+                                Toast.makeText(getApplicationContext(), getResources().getString(R.string.FeedBackNotUploaded), Toast.LENGTH_LONG).show();
+                                break;
+                        }
+                        finish();
+                    });
+                    pd.dismiss();
+                }
+            }.start();
         });
     }
 
 
-    private void DeleteRow(int ClaimId) {
-        ca.CleanFeedBackTable(String.valueOf(ClaimId));
+    private void DeleteRow(String ClaimUUID) {
+        ca.CleanFeedBackTable(ClaimUUID);
     }
 
-    private void UpdateRow(int ClaimId) {
-        ca.UpdateFeedBack(ClaimId);
+    private void UpdateRow(String ClaimUUID) {
+        ca.UpdateFeedBack(ClaimUUID);
     }
 
 
     private void WriteXML(String Officer, String ClaimUUID, String CHFID, String Answers) throws IllegalArgumentException, IllegalStateException, IOException {
-        //Here we are creating a directory
         File MyDir = new File(global.getMainDirectory());
-
-        //Here we are giving name to the XML file
         FileName = "feedback_" + etClaimCode.getText() + ".xml";
-
-        //Here we are creating file in that directory
         FeedbackXML = new File(MyDir, FileName);
 
-
-        //Here we are creating outputstream
         FileOutputStream fos = new FileOutputStream(FeedbackXML);
-
-
         XmlSerializer serializer = Xml.newSerializer();
 
         serializer.setOutput(fos, "UTF-8");
@@ -245,7 +193,7 @@ public class Feedback extends AppCompatActivity {
         serializer.endTag(null, "Answers");
 
         serializer.startTag(null, "Date");
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+        SimpleDateFormat formatter = AppInformation.DateTimeInfo.getDefaultDateFormatter();
         Calendar cal = Calendar.getInstance();
         String d = formatter.format(cal.getTime());
         serializer.text(d);
@@ -260,12 +208,8 @@ public class Feedback extends AppCompatActivity {
     }
 
     private String WriteJSON(String Officer, String ClaimUUID, String CHFID, String Answers) {
-
-        //Create all the directories required
         File MyDir = new File(global.getMainDirectory());
-
-        //Create a file name
-        SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
+        SimpleDateFormat format = AppInformation.DateTimeInfo.getDefaultDateFormatter();
         Calendar cal = Calendar.getInstance();
         String d = format.format(cal.getTime());
         FileName = "feedbackJSON_" + etClaimCode.getText() + ".txt";
@@ -317,13 +261,13 @@ public class Feedback extends AppCompatActivity {
 
     private String Answers() {
         String Ans = "";
-        rg1 = (RadioGroup) findViewById(R.id.radioGroup1);
+        rg1 = findViewById(R.id.radioGroup1);
         int Ans1 = rg1.getCheckedRadioButtonId();
-        rg2 = (RadioGroup) findViewById(R.id.radioGroup2);
+        rg2 = findViewById(R.id.radioGroup2);
         int Ans2 = rg2.getCheckedRadioButtonId();
-        rg3 = (RadioGroup) findViewById(R.id.radioGroup3);
+        rg3 = findViewById(R.id.radioGroup3);
         int Ans3 = rg3.getCheckedRadioButtonId();
-        rg4 = (RadioGroup) findViewById(R.id.radioGroup4);
+        rg4 = findViewById(R.id.radioGroup4);
         int Ans4 = rg4.getCheckedRadioButtonId();
 
         if (Ans1 == R.id.rYes1) Ans = "1";
@@ -335,9 +279,8 @@ public class Feedback extends AppCompatActivity {
         if (Ans4 == R.id.rYes4) Ans = Ans + "1";
         else Ans = Ans + "0";
 
-        //Read rating
-        rb1 = (RatingBar) findViewById(R.id.ratingBar1);
-        Ans = Ans + String.valueOf((int) rb1.getRating());
+        rb1 = findViewById(R.id.ratingBar1);
+        Ans = Ans + (int) rb1.getRating();
         return Ans;
     }
 
