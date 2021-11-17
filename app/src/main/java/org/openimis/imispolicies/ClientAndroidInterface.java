@@ -2731,9 +2731,9 @@ public class ClientAndroidInterface {
     }
 
     public String getOfflineFeedBack(String OfficerCode) {
-        String Query = "SELECT ClaimId,OfficerId,OfficerCode,CHFID,LastName,OtherNames,HFCode,HFName,ClaimCode,DateFrom,DateTo,IMEI, Phone,FeedbackPromptDate " +
+        String Query = "SELECT ClaimId,ClaimUUID,OfficerId,OfficerCode,CHFID,LastName,OtherNames,HFCode,HFName,ClaimCode,DateFrom,DateTo,IMEI,Phone,FeedbackPromptDate " +
                 "FROM  tblFeedbacks WHERE LOWER(OfficerCode) = ?  AND  isDone = ?";
-        String arg[] = {OfficerCode.toLowerCase(), "N"};
+        String[] arg = {OfficerCode.toLowerCase(), "N"};
         JSONArray FeedBacks = sqlHandler.getResult(Query, arg);
         return FeedBacks.toString();
     }
@@ -2776,18 +2776,18 @@ public class ClientAndroidInterface {
         return c;
     }
 
-    public String CleanFeedBackTable(String ClaimId) {
-        String Query = "DELETE FROM tblFeedbacks WHERE ClaimId = ?";
-        String arg[] = {ClaimId};
+    public String CleanFeedBackTable(String ClaimUUID) {
+        String Query = "DELETE FROM tblFeedbacks WHERE ClaimUUID = ?";
+        String arg[] = {ClaimUUID};
         JSONArray Feedback = sqlHandler.getResult(Query, arg);
         return Feedback.toString();
     }
 
-    public boolean UpdateFeedBack(int ClaimId) {
+    public boolean UpdateFeedBack(String ClaimUUID) {
         ContentValues values = new ContentValues();
         values.put("isDone", "Y");
         try {
-            sqlHandler.updateData("tblFeedbacks", values, "ClaimId = ?", new String[]{String.valueOf(ClaimId)});
+            sqlHandler.updateData("tblFeedbacks", values, "ClaimUUID = ?", new String[]{ClaimUUID});
         } catch (UserException e) {
             e.printStackTrace();
         }
@@ -4406,7 +4406,7 @@ public class ClientAndroidInterface {
                     if (response != null) {
                         responseCode = response.getStatusLine().getStatusCode();
                         if (responseCode == HttpURLConnection.HTTP_OK) {
-                            uploadStatus = Integer.parseInt(EntityUtils.toString(response.getEntity()));
+                            uploadStatus = Integer.parseInt(rest.getContent(response));
                         }
                     }
                 } catch (Exception e) {
@@ -4489,7 +4489,7 @@ public class ClientAndroidInterface {
             messages.put(ToRestApi.RenewalStatus.ALREADY_ACCEPTED, mContext.getResources().getString(R.string.RenewalAlreadyAccepted));
             messages.put(ToRestApi.RenewalStatus.REJECTED, mContext.getResources().getString(R.string.RenewalRejected));
             messages.put(ToRestApi.RenewalStatus.DUPLICATE_RECEIPT, mContext.getResources().getString(R.string.DuplicateReceiptNumber));
-            messages.put(ToRestApi.RenewalStatus.GRACE_PERIOD_EXPIRED, mContext.getResources().getString(R.string.GracePeriodExpied));
+            messages.put(ToRestApi.RenewalStatus.GRACE_PERIOD_EXPIRED, mContext.getResources().getString(R.string.GracePeriodExpired));
             messages.put(ToRestApi.RenewalStatus.CONTROL_NUMBER_ERROR, mContext.getResources().getString(R.string.ControlNumberError));
             messages.put(ToRestApi.RenewalStatus.UNEXPECTED_EXCEPTION, mContext.getResources().getString(R.string.UnexpectedException));
 
