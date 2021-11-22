@@ -57,7 +57,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -172,8 +171,6 @@ public class Renewal extends AppCompatActivity {
 
         btnSubmit.setOnClickListener(v -> {
             if (!chkDiscontinue.isChecked()) {
-
-                pd = ProgressDialog.show(Renewal.this, "", getResources().getString(R.string.Uploading));
                 final String[] renewal = {null};
 
                 if (getIntent().getStringExtra("CHFID").equals(getResources().getString(R.string.UnlistedRenewalPolicies))) {
@@ -185,36 +182,24 @@ public class Renewal extends AppCompatActivity {
                     return;
                 }
 
-                new Thread(() -> {
+                Runnable saveRenewal = () -> new Thread(() -> {
                     renewal[0] = WriteJSON();
                     WriteXML();
-                    result = 3;
 
                     runOnUiThread(() -> {
+                        UpdateRow(RenewalId);
+                        Toast.makeText(getApplicationContext(), getResources().getString(R.string.SavedOnSDCard), Toast.LENGTH_LONG).show();
 
-                        switch (result) {
-                            case 1:
-                                DeleteRow(RenewalId);
-                                Toast.makeText(getApplicationContext(), getResources().getString(R.string.UploadedSuccessfully), Toast.LENGTH_LONG).show();
-                                break;
-                            case 2:
-                                DeleteRow(RenewalId);
-                                Toast.makeText(getApplicationContext(), getResources().getString(R.string.ServerRejected), Toast.LENGTH_LONG).show();
-                                break;
-                            case 3:
-                                UpdateRow(RenewalId);
-                                Toast.makeText(getApplicationContext(), getResources().getString(R.string.SavedOnSDCard), Toast.LENGTH_LONG).show();
-                                break;
-                            case -1:
-                                Toast.makeText(getApplicationContext(), getResources().getString(R.string.RenewalNotUploaded), Toast.LENGTH_LONG).show();
-                                break;
-                        }
                         //Go back to the previous activity.
                         finish();
                     });
-
-                    pd.dismiss();
                 }).start();
+
+                if (ca.IsBulkCNUsed() && !ca.isFetchedControlNumber(etControlNumber.getText().toString())) {
+                    ConfirmControlNumber(saveRenewal);
+                } else {
+                    saveRenewal.run();
+                }
             }
         });
 
@@ -425,6 +410,15 @@ public class Renewal extends AppCompatActivity {
 
                 })
                 .setNegativeButton(R.string.No, (dialog, which) -> chkDiscontinue.setChecked(false)).show();
+    }
+
+    private void ConfirmControlNumber(Runnable onConfirmed) {
+        String message = getResources().getString(R.string.ConfirmControlNumber, etControlNumber.getText().toString());
+        new AlertDialog.Builder(this)
+                .setMessage(message)
+                .setPositiveButton(R.string.Yes, (dialog, which) -> onConfirmed.run())
+                .setNegativeButton(R.string.No, (dialog, which) -> {
+                }).show();
     }
 
     private void UpdateRow(int RenewalId) {
@@ -647,15 +641,12 @@ public class Renewal extends AppCompatActivity {
             String controlNumber = sqlHandler.getNextFreeCn(etOfficer.getText().toString(), productCode);
             if (controlNumber != null) {
                 etControlNumber.setText(controlNumber);
-                setEditable(etControlNumber, false);
             } else {
                 showInfoDialog(R.string.noBulkCNAvailable);
                 etControlNumber.setText("");
-                setEditable(etControlNumber, true);
             }
         } else {
             etControlNumber.setText("");
-            setEditable(etControlNumber, true);
         }
     }
 

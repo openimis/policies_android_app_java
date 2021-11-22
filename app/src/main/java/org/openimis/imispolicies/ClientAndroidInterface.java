@@ -312,6 +312,17 @@ public class ClientAndroidInterface {
         return "";
     }
 
+    @JavascriptInterface
+    public String getStringWithArgument(String str, String arg) {
+        try {
+            Resources resources = mContext.getResources();
+            return resources.getString(resources.getIdentifier(str, "string", mContext.getPackageName()), arg);
+        } catch (Resources.NotFoundException e) {
+            Log.e("RESOURCES", String.format("Resource \"%s\" not found", str), e);
+        }
+        return "";
+    }
+
 
     @JavascriptInterface
     public boolean isValidInsuranceNumber(String InsuranceNumber) {
@@ -1786,6 +1797,11 @@ public class ClientAndroidInterface {
 
     public void deleteBulkCn(String controlNumber) {
         sqlHandler.deleteData("tblBulkControlNumbers", "ControlNumber = ?", new String[]{controlNumber});
+    }
+
+    @JavascriptInterface
+    public boolean isFetchedControlNumber(String controlNumber) {
+        return sqlHandler.isFetchedControlNumber(controlNumber);
     }
 
     @JavascriptInterface
