@@ -5,6 +5,8 @@ $(document).ready(function () {
         $('#ControlNumber').hide();
     }
 
+    $("#dialog-confirm").attr("title", Android.getString('Confirm'));
+
     var LocationId = parseInt(queryString("l"));
     var FamilyId = parseInt(queryString("f"));
     var strOfficerLocation = Android.getOfficerLocation();
@@ -45,9 +47,9 @@ $(document).ready(function () {
 
         if(Android.IsBulkCNUsed()) {
             if($Policy[0]["ControlNumber"]) {
-                $('#AssignedControlNumber').val($Policy[0]["ControlNumber"]).prop('readonly', true);
+                $('#AssignedControlNumber').val($Policy[0]["ControlNumber"]);
             } else {
-                $('#AssignedControlNumber').val('').prop('readonly', false);
+                $('#AssignedControlNumber').val('');
             }
         }
 
@@ -92,33 +94,57 @@ $(document).ready(function () {
         if(Android.IsBulkCNUsed()) {
             var productId = $('#ddlProduct').val();
             if(productId == '0') {
-                $('#AssignedControlNumber').val('').prop('readonly', false);
+                $('#AssignedControlNumber').val('');
                 return;
             }
             var controlNumber = Android.GetNextBulkCn(productId);
             if(typeof controlNumber === 'undefined') {
                 Android.ShowDialog(Android.getString('noBulkCNAvailable'));
-                $('#AssignedControlNumber').val('').prop('readonly', false);
+                $('#AssignedControlNumber').val('');
             } else {
-                $('#AssignedControlNumber').val(controlNumber).prop('readonly', true);
+                $('#AssignedControlNumber').val(controlNumber);
             }
         }
     });
 
+    function savePolicy() {
+        var jsonPolicy = createJSONString();
+        var PPolicyId = Android.SavePolicy(jsonPolicy, parseInt(FamilyId), parseInt(policyId));
+        window.open('FamilyPolicies.html?f=' + FamilyId + '&l=' + LocationId + '&r=' + RegionId + '&d=' + DistrictId, "_self");
+        $('#btnSave').attr("disabled", "disabled")
+    }
+
     $('#btnSave').click(function () {
         var passed = isFormValidated();
-        var jsonPolicy = createJSONString();
 
         if (passed == true) {
             if(Android.IsBulkCNUsed() && !$('#AssignedControlNumber').val()) {
                 Android.ShowDialog(Android.getString('noBulkCNAssigned'));
-                $('#AssignedControlNumber').val('').prop('readonly', false);
+                $('#AssignedControlNumber').val('');
                 return;
             }
 
-            var PPolicyId = Android.SavePolicy(jsonPolicy, parseInt(FamilyId), parseInt(policyId));
-            window.open('FamilyPolicies.html?f=' + FamilyId + '&l=' + LocationId + '&r=' + RegionId + '&d=' + DistrictId, "_self");
-            $('#btnSave').attr("disabled", "disabled")
+            if(Android.IsBulkCNUsed() && !Android.isFetchedControlNumber($('#AssignedControlNumber').val())) {
+                $("#msgAlert").text(Android.getStringWithArgument('ConfirmControlNumber', $('#AssignedControlNumber').val()));
+                $("#dialog-confirm").dialog({
+                    resizable: false,
+                    height: "auto",
+                    width: 300,
+                    modal: true,
+                    buttons: {
+                        Yes: function () {
+                            savePolicy();
+                            $(this).dialog("close");
+                        },
+                        No: function () {
+                            $(this).dialog("close");
+                        }
+                    }
+                });
+            }
+            else {
+                savePolicy()
+            }
         }
         else {
             Android.ShowDialog(Android.getString('FieldRequired'));
