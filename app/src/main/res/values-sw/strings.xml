@@ -433,7 +433,7 @@
     <string name="RenewalRejected">Taarifa za kuhuisha zimekataliwa</string>
     <string name="GracePeriodExpired">Muda wa matazamio umeisha</string>
     <string name="ControlNumberError">Kuna makosa kwenye namba ya malipo</string>
-    <string name="UnexpectedException">Unexpected exception</string>
-    <string name="InvalidRenewalFile">Invalid renewal file</string>
-    <string name="ConfirmControlNumber">Control number \"%1$s\" is not present in phone memory. Please confirm that this control number is correct.</string>
+    <string name="UnexpectedException">Hitilafu isiyotarajiwa</string>
+    <string name="InvalidRenewalFile">Faili la kuhuisha ni batili</string>
+    <string name="ConfirmControlNumber">Namba ya malipo \"%1$s\" haipo kwenye simu,tafadhali hakiki namba kabla ya kuendelea.</string>
 </resources>
