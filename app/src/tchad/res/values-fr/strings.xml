@@ -435,5 +435,5 @@
     <string name="ControlNumberError">Control number error</string>
     <string name="UnexpectedException">Unexpected exception</string>
     <string name="InvalidRenewalFile">Invalid renewal file</string>
-    <string name="ConfirmControlNumber">Control number \\"%1$s\\" is not present in phone memory. Please confirm that this control number is correct.</string>
+    <string name="ConfirmControlNumber">Control number \"%1$s\" is not present in phone memory. Please confirm that this control number is correct.</string>
 </resources>

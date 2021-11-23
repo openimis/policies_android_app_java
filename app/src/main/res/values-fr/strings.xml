@@ -435,5 +435,5 @@
     <string name="ControlNumberError">Control number error</string>
     <string name="UnexpectedException">Exception inattendue</string>
     <string name="InvalidRenewalFile">Fichier de renouvellements invalide</string>
-    <string name="ConfirmControlNumber">Le numéro de contrôle \\"%1$s\\" n\'est pas présent dans la mémoire du téléphone. Veuillez confirmer que ce numéro est correct.</string>
+    <string name="ConfirmControlNumber">Le numéro de contrôle \"%1$s\" n\'est pas présent dans la mémoire du téléphone. Veuillez confirmer que ce numéro est correct.</string>
 </resources>
