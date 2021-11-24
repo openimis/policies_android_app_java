@@ -37,7 +37,7 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 1.8
-
+          
       - uses: actions/cache@v2
         with:
           path: |
@@ -56,6 +56,7 @@ jobs:
           gradle --version
           echo url ${{ github.event.inputs.api_base_url }}
           echo app name ${{ github.event.inputs.app_name }}
+
           echo app dir ${{ github.event.inputs.app_dir }}
           echo CLI_JAVA_DIR "${{ github.event.inputs.cli_java_dir }}"
           echo CLI_RES_DIR "${{ github.event.inputs.cli_res_dir }}"
