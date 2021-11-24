@@ -30,176 +30,15 @@ In case of dispute arising out or in relation to the use of the program, it is s
     <script src="../JS/jquery-3.2.1.min.js"></script>
     <script src="../JS/exact.js"></script>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no" charset="utf-8"/>
+    <link href="../CSS/jquery-ui.css" rel="stylesheet" type="text/css"/>
+    <script src="../JS/jquery-ui.js"></script>
+    <script type="text/javascript" src="Policy.js"></script>
 
-
-    <script type="text/javascript">
-        $(document).ready(function(){
-
-
-        document.title = Android.getString('AddEditPolicy');
-
-            var LocationId =parseInt(queryString("l"));
-            var FamilyId = parseInt(queryString("f"));
-            var strOfficerLocation = Android.getOfficerLocation();
-            var $Locations = $.parseJSON(strOfficerLocation);
-            var RegionId =  parseInt($Locations[0]["RegionId"]);
-            var DistrictId = parseInt($Locations[0]["DistrictId"]);
-            var policyId = parseInt(queryString("p"));
-
-            var HasCycle = null;
-            var fStartDate = null;
-            $("#txtEffectiveDate").prop('disabled', true);
-
-             $("#Officer").hide();
-             var OfficerId =  Android.getOfficerId();
-             var OfficerCode =  Android.getOfficerCode();
-             $("#ddlOfficer").val(parseInt(OfficerId));
-
-             //LoadOfficers(LocationId, null);
-             LoadProduct(RegionId,DistrictId,null);
-
-
-           if (policyId != 0){
-
-                var strPolicy = Android.getPolicy(policyId);
-                var $Policy = $.parseJSON(strPolicy);
-                $("#ddlProduct").val($Policy[0]["ProdId"]);
-                $("#ddlOfficer").val($Policy[0]["OfficerId"]);
-                var PolicyStage = $Policy[0]["PolicyStage"];
-                var StartDate = $Policy[0]["StartDate"];
-                var EnrolmentDate =$Policy[0]["EnrollDate"];
-                var ExpiryDate =$Policy[0]["ExpiryDate"];
-                var ProdId = parseInt($Policy[0]["ProdId"]);
-                var CurrentPolicyValue = $Policy[0]["PolicyValue"];
-                var isOffline = parseInt($Policy[0]["isOffline"]);
-                bindDataFromDatafield(strPolicy);
-
-                $('#txtStartDate').val((StartDate));
-                $('#txtExpiryDate').val(ExpiryDate);
-
-                var HSCycle = false;
-                 if($('#hfHasCycle').val()) HSCycle = true;
-
-                var NewPolicyValue = Android.getPolicyValue(EnrolmentDate,ProdId,FamilyId,$('#hffStartDate').val(),HSCycle,parseInt(policyId),PolicyStage,isOffline);
-                var PolicyStatusValue = $("#hfPolicyStatus").val();
-
-             if (NewPolicyValue != CurrentPolicyValue){
-                var Vdate = new Date(EnrolmentDate);  //or your date here
-                var NewDate = ((Vdate.getMonth() + 1) + '/' + Vdate.getDate() + '/' +  Vdate.getFullYear());
-                Android.ShowDialog(Android.getString('PolicyValueChange') + NewDate + ' '+ Android.getString('Changed'));
-
-                }
-
-                     $("#txtEnrolmentDate").prop('disabled', false);
-                     $("#ddlProduct").prop('disabled', false);
-                     $("#txtStartDate").prop('disabled', true);
-                     if(PolicyStatusValue == 1){
-                        $("#txtExpiryDate").prop('disabled', false);
-                     }else{
-                        $("#txtExpiryDate").prop('disabled', true);
-                     }
-
-
-            }
-
-            $('#txtEnrolmentDate').change(function(){
-              var EnrolmentDate = $('#txtEnrolmentDate').val();
-              LoadProduct(RegionId,DistrictId,EnrolmentDate);
-              //LoadOfficers(LocationId, EnrolmentDate);
-
-            });
-
-
-           $('#txtEnrolmentDate, #ddlProduct').change(function(){
-                var EnrolmentDate = $('#txtEnrolmentDate').val();
-                var ProdId = $('#ddlProduct').val();
-                getPolicyPeriod(EnrolmentDate,parseInt(ProdId),parseInt(FamilyId),parseInt(policyId));
-
-           });
-
-
-
-            $('#btnSave').click(function(){
-            var passed = isFormValidated();
-            var jsonPolicy = createJSONString();
-                if (passed == true){
-                         var PPolicyId = Android.SavePolicy(jsonPolicy, parseInt(FamilyId),parseInt(policyId));
-                          window.open('FamilyPolicies.html?f=' + FamilyId + '&l='+ LocationId + '&r='+ RegionId  + '&d='+ DistrictId , "_self");
-                    $('#btnSave').attr("disabled", "disabled")
-                }
-                else{
-                    Android.ShowDialog(Android.getString('FieldRequired'));
-                }
-           });
-
-               $('#txtStartDate').change(function(){
-                    var txtStartDate = $('#txtStartDate').val();
-                    var ProdId = $('#ddlProduct').val();
-                    getPolicyPeriod(txtStartDate,parseInt(ProdId),parseInt(FamilyId),parseInt(policyId));
-               });
-        });
-
-        function getPolicyPeriod(EnrolmentDate,ProdId,FamilyId,policyId){
-
-         if (EnrolmentDate.length == 0 || ProdId == 0)
-                    return false;
-
-                var Period = $.parseJSON(Android.getPolicyPeriod(parseInt(ProdId),EnrolmentDate));
-
-                var StartDate = new Date(Period[0]["StartDate"]);
-                var ExpiryDate = new Date(Period[0]["ExpiryDate"]);
-                   HasCycle = Period[0]["HasCycle"];
-
-
-
-
-                $('#txtStartDate').val(getDateForJS(StartDate));
-                $('#txtExpiryDate').val(getDateForJS(ExpiryDate));
-
-
-                $("#txtStartDate").prop('disabled', HasCycle);
-
-                  fStartDate = getDateForJS(StartDate)
-                    //fStartDate = moment(fStartDate).toDate();
-                var isOffline =  $('#hfOffline').val();
-                var PolicyValue = Android.getPolicyValue(EnrolmentDate,parseInt(ProdId),FamilyId,fStartDate,HasCycle,0,"N",isOffline);
-
-                $('#spPolicyValue').text(PolicyValue);
-                $('#hfPolicyValue').val(PolicyValue);
-
-                 $('#hfHasCycle').val(HasCycle);
-                 $('#hffStartDate').val(fStartDate);
-        }
-        function LoadOfficers(LocationId, EnrolmentDate){
-
-                 var OfficerId =  Android.getOfficerId();
-
-            var $Officers = Android.getOfficers(LocationId, EnrolmentDate);
-            bindDropdown('ddlOfficer', $Officers, 'OfficerId', 'Code',0,  Android.getString('SelectOfficer'));
-
-             $("#ddlOfficer").val(parseInt(OfficerId));
-             $("#ddlOfficer").prop('disabled', true);
-             $("#ddlOfficer").css('display', 'none');
-
-        }
-        function LoadProduct(RegionId,DistrictId, EnrolmentDate){
-
-                var $Products = Android.getProducts(parseInt(RegionId),parseInt(DistrictId), EnrolmentDate);
-                bindDropdown('ddlProduct', $Products, 'ProdId', 'ProductCode', 0,  Android.getString('SelectProduct'));
-
-
-        }
-
-        function createJSONString(){
-                var jsonPolicy = getControlsValuesJSON('li');
-                return jsonPolicy;
-            }
-
-
-    </script>
 </head>
 <body>
-
+<div id="dialog-confirm" title="Confirm" style="display:none;">
+    <p><span id="msgAlert" class="ui-icon-alert" style="float:left; margin:2px 2px 2px 0;"></span></p>
+</div>
 <div>
     <ul class="ulEntry">
         <li>
@@ -208,22 +47,25 @@ In case of dispute arising out or in relation to the use of the program, it is s
             <input datafield="PolicyValue" type="hidden" value="0" id="hfPolicyValue"/>
             <input datafield="PolicyStatusValue" type="hidden" value="1" id="hfPolicyStatus"/>
             <input datafield="isOffline" type="hidden" value="1" id="hfOffline"/>
-            <span  strName="EnrolmentDate">Enrolment date</span>
-            <input datafield="EnrollDate"  type="date" id="txtEnrolmentDate" required/>
+            <span strName="EnrolmentDate">Enrolment date</span>
+            <input datafield="EnrollDate" type="date" id="txtEnrolmentDate" required/>
         </li>
         <li id="Product">
             <span strName="Product">Product</span>
             <select datafield="ProdId" id="ddlProduct" required></select>
         </li>
+        <li id="ControlNumber">
+            <span strName="controlNumberLabel">Control Number :</span>
+            <input datafield="AssignedControlNumber" type="text" id="AssignedControlNumber">
+        </li>
         <li>
             <span strName="EffectiveDate">Effective date</span>
-            <input datafield="EffectiveDate" type="date" id="txtEffectiveDate" />
+            <input datafield="EffectiveDate" type="date" id="txtEffectiveDate"/>
         </li>
 
         <li>
             <span strName="StartDate">Start date</span>
             <input datafield="StartDate" type="date" id="txtStartDate" required/>
-
         </li>
         <li>
             <span strName="ExpireDate">Expire date</span>
@@ -231,9 +73,8 @@ In case of dispute arising out or in relation to the use of the program, it is s
         </li>
         <li id="Officer">
             <span strName="Officer">Officer</span>
-            <!--<input  datafield="OfficerId" type="text" id="ddlOfficer" required/>-->
+            <input type='hidden' datafield="OfficerId" type="date" id="ddlOfficer" required/>
         </li>
-
         <li>
             <span strName="PolicyStatus">Policy Status :</span>
             <span datafield="PolicyStatus" type="text" id="txtPolicyStatus"></span>
@@ -241,16 +82,13 @@ In case of dispute arising out or in relation to the use of the program, it is s
         <li>
             <span strName="PolicyValue">Policy Value :</span>
             <span datafield="PolicyValue" type="text" id="spPolicyValue">0</span>
-
         </li>
-
         <li>
             <span strName="Contribution">Contribution :</span>
             <span datafield="Contribution" type="text" id="spContribution">0</span>
             <span strName="Balance">Balance : </span>
             <span datafield="Balance" type="text" id="spBalance">0</span>
         </li>
-
     </ul>
 </div>
 <div class="footer">

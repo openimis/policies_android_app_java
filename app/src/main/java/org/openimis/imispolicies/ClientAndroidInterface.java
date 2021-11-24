@@ -26,7 +26,6 @@
 package org.openimis.imispolicies;
 
 import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -37,13 +36,13 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.icu.text.DecimalFormat;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.RequiresApi;
 import android.support.v7.widget.DividerItemDecoration;
@@ -51,6 +50,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Base64;
+import android.util.Log;
 import android.util.Xml;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -60,66 +60,69 @@ import android.widget.Toast;
 
 import com.exact.CallSoap.CallSoap;
 import com.exact.InsureeImages;
-import com.exact.general.General;
 import com.exact.uploadfile.UploadFile;
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
-import java.io.InputStream;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
+import java.util.Arrays;
 import java.util.Date;
 
-
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
+import java.util.Set;
 import java.util.regex.Pattern;
-import java.util.Formatter;
 
+import org.openimis.imispolicies.Util.AndroidUtil;
 import org.xmlpull.v1.XmlSerializer;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
+import javax.net.ssl.HttpsURLConnection;
 
 import static android.database.sqlite.SQLiteDatabase.openOrCreateDatabase;
-import static java.lang.Math.abs;
+import static org.openimis.imispolicies.Util.JsonUtil.isStringEmpty;
+import static org.openimis.imispolicies.Util.StringUtil.isEmpty;
 
 public class ClientAndroidInterface {
+    private static final String LOG_TAG_RENEWAL = "RENEWAL";
+
     private Context mContext;
 
     private SQLHandler sqlHandler;
     private Global global;
     private int Uploaded;
     private HashMap<String, String> controls = new HashMap<>();
-    private final String Path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/IMIS/";
-
-
+    private String Path;
     private File[] files;
     private File[] JSONfiles;
     private int TotalFiles;
@@ -137,35 +140,45 @@ public class ClientAndroidInterface {
     private int rtInsureeId = 0;
     private int rtEnrolledId = 0;
     private int enrol_result;
-    Bitmap myBitmap;
-    String resu;
-    String fname = null;
-    Bitmap theImage;
+    private Bitmap myBitmap;
+    private String resu;
+    private String fname = null;
+    private Bitmap theImage;
 
-    SQLiteDatabase db;
+    private SQLiteDatabase db;
 
-    RecyclerView.LayoutManager myLayoutManger;
+    static public String filePath = null;
+
     EnrollmentReport enrollmentReport;
 
     StringBuffer buffer = new StringBuffer();
-    Formatter formatter = new Formatter(buffer, Locale.US);
 
-
-    private General general = new General(AppInformation.DomainInfo.getDomain());
-    private ArrayList<String> mylist = new ArrayList<String>();
+    private ArrayList<String> mylist = new ArrayList<>();
 
     private String salt;
 
+    Picasso picassoInstance;
+    Target imageTarget;
+
     ClientAndroidInterface(Context c) {
         mContext = c;
+        global = (Global) mContext.getApplicationContext();
         sqlHandler = new SQLHandler(c);
-        // activity = (Activity) c.getApplicationContext();
         getControls();
+        SQLiteDatabase database = sqlHandler.getReadableDatabase();
+        Path = global.getMainDirectory();
+        filePath = database.getPath();
+        database.close();
+        // activity = (Activity) c.getApplicationContext();
+        picassoInstance = new Picasso.Builder(mContext)
+                .listener((picasso, path, exception) -> Log.e("Images", String.format("Image load failed: %s", path.toString()), exception))
+                .loggingEnabled(BuildConfig.LOG)
+                .build();
     }
+
 
     @JavascriptInterface
     public void SetUrl(String Url) {
-        global = (Global) mContext.getApplicationContext();
         global.setCurrentUrl(Url);
     }
 
@@ -194,6 +207,54 @@ public class ClientAndroidInterface {
 
     }
 
+    public String getSpecificControl(String FieldName) {
+
+        String tableName = "tblControls";
+        String[] columns = {"Adjustibility"};
+        String where = "FieldName = '" + FieldName + "'";
+        String OrderBy = null;
+        String Adjustibility = "O";
+
+        JSONArray ctls = sqlHandler.getResult(tableName, columns, where, null);
+
+        for (int i = 0; i < ctls.length(); i++) {
+            try {
+                JSONObject object = ctls.getJSONObject(i);
+                Adjustibility = object.getString("Adjustibility");
+                controls.put(FieldName, Adjustibility);
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        return Adjustibility;
+    }
+
+    @JavascriptInterface
+    public String getSpecificControlHtml(String FieldName) {
+
+        String tableName = "tblControls";
+        String[] columns = {"Adjustibility"};
+        String where = "FieldName = '" + FieldName + "'";
+        String OrderBy = null;
+        String Adjustibility = "O";
+
+        JSONArray ctls = sqlHandler.getResult(tableName, columns, where, null);
+
+        for (int i = 0; i < ctls.length(); i++) {
+            try {
+                JSONObject object = ctls.getJSONObject(i);
+                Adjustibility = object.getString("Adjustibility");
+                controls.put(FieldName, Adjustibility);
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        return Adjustibility;
+    }
+
+
     @JavascriptInterface
     public String GetSystemImageFolder() {
         return global.getImageFolder();
@@ -209,62 +270,57 @@ public class ClientAndroidInterface {
 
     @JavascriptInterface
     public void ShowToast(String msg) {
-        Toast.makeText(mContext, msg, Toast.LENGTH_SHORT).show();
+        AndroidUtil.showToast(mContext, msg);
     }
 
     @JavascriptInterface
     public AlertDialog ShowDialog(String msg) {
-        return new AlertDialog.Builder(mContext)
-                .setMessage(msg)
-                .setCancelable(false)
-
-                .setPositiveButton(R.string.Ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-
-                    }
-                }).show();
+        return AndroidUtil.showDialog(mContext, msg);
     }
 
-
-    //    public int  getDialogResult(final String msg){
-//        ShowDialogYesNo(msg);
-//        while (inProgress){}
-//        return  DialogResult;
-//    }
     @JavascriptInterface
     public AlertDialog ShowDialogYesNo(final int InsureId, final int FamilyId, Boolean Activate, final int isOffline) {
         return new AlertDialog.Builder(mContext)
                 .setMessage(R.string.ExceedThreshold)
                 .setCancelable(false)
-                .setNegativeButton(R.string.No, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        SaveInsureePolicy(InsureId, FamilyId, false, isOffline);
-                        try {
-                            getFamilyPolicies(FamilyId);
-                        } catch (ParseException e) {
-                            e.printStackTrace();
-                        }
+                .setNegativeButton(R.string.No, (dialog, which) -> {
+                    SaveInsureePolicy(InsureId, FamilyId, false, isOffline);
+                    try {
+                        getFamilyPolicies(FamilyId);
+                    } catch (ParseException e) {
+                        e.printStackTrace();
                     }
                 })
-                .setPositiveButton(R.string.Yes, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        SaveInsureePolicy(InsureId, FamilyId, true, isOffline);
-                        try {
-                            getFamilyPolicies(FamilyId);
-                        } catch (ParseException e) {
-                            e.printStackTrace();
-                        }
+                .setPositiveButton(R.string.Yes, (dialogInterface, i) -> {
+                    SaveInsureePolicy(InsureId, FamilyId, true, isOffline);
+                    try {
+                        getFamilyPolicies(FamilyId);
+                    } catch (ParseException e) {
+                        e.printStackTrace();
                     }
                 }).show();
     }
 
     @JavascriptInterface
     public String getString(String str) {
-        Resources resources = mContext.getResources();
-        return resources.getString(resources.getIdentifier(str, "string", mContext.getPackageName()));
+        try {
+            Resources resources = mContext.getResources();
+            return resources.getString(resources.getIdentifier(str, "string", mContext.getPackageName()));
+        } catch (Resources.NotFoundException e) {
+            Log.e("RESOURCES", String.format("Resource \"%s\" not found", str), e);
+        }
+        return "";
+    }
+
+    @JavascriptInterface
+    public String getStringWithArgument(String str, String arg) {
+        try {
+            Resources resources = mContext.getResources();
+            return resources.getString(resources.getIdentifier(str, "string", mContext.getPackageName()), arg);
+        } catch (Resources.NotFoundException e) {
+            Log.e("RESOURCES", String.format("Resource \"%s\" not found", str), e);
+        }
+        return "";
     }
 
 
@@ -402,7 +458,7 @@ public class ClientAndroidInterface {
 
             object = new JSONObject();
             object.put("key", mContext.getResources().getString(R.string.No));
-            object.put("value", 0);
+            object.put("value", 2);
             YesNo.put(object);
 
 
@@ -436,6 +492,56 @@ public class ClientAndroidInterface {
         JSONArray GroupTypes = sqlHandler.getResult(tableName, columns, null, OrderBy);
 
         return GroupTypes.toString();
+    }
+
+    @JavascriptInterface
+    public String getLanguagesOfSMS() {
+        String tableName = "tblLanguages";
+        String[] columns = {"LanguageCode", "LanguageName"};
+        String where = null;
+        String OrderBy = "SortOrder";
+
+        JSONArray GroupTypes = sqlHandler.getResult(tableName, columns, null, OrderBy);
+
+        return GroupTypes.toString();
+    }
+
+    @JavascriptInterface
+    public String getVulnerability() {
+        JSONArray selectJsonArray = new JSONArray();
+        try {
+            JSONObject object = new JSONObject();
+            object.put("key", mContext.getResources().getString(R.string.Yes));
+            object.put("value", 1);
+            selectJsonArray.put(object);
+
+            object = new JSONObject();
+            object.put("key", mContext.getResources().getString(R.string.No));
+            object.put("value", 0);
+            selectJsonArray.put(object);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return selectJsonArray.toString();
+    }
+
+    @JavascriptInterface
+    public String getApprovalOfSMS() {
+        JSONArray selectJsonArray = new JSONArray();
+        try {
+            JSONObject object = new JSONObject();
+            object.put("key", mContext.getResources().getString(R.string.Yes));
+            object.put("value", 1);
+            selectJsonArray.put(object);
+
+            object = new JSONObject();
+            object.put("key", mContext.getResources().getString(R.string.No));
+            object.put("value", 0);
+            selectJsonArray.put(object);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return selectJsonArray.toString();
     }
 
     @JavascriptInterface
@@ -607,10 +713,18 @@ public class ClientAndroidInterface {
 
     @JavascriptInterface
     public String getHF(int DistrictId, String HFLevel) {
-        String Query = "SELECT HFID,  HFCode ||\" : \"||  HFName HF FROM tblHF WHERE LocationId = ? AND HFLevel = ?";
-        String[] args = {String.valueOf(DistrictId), HFLevel};
+        JSONArray HFs;
+        if (HFLevel != null) {
+            String Query = "SELECT HFID,  HFCode ||\" : \"||  HFName HF FROM tblHF WHERE LocationId = ? AND HFLevel = ?";
+            String[] args = {String.valueOf(DistrictId), HFLevel};
 
-        JSONArray HFs = sqlHandler.getResult(Query, args);
+            HFs = sqlHandler.getResult(Query, args);
+        } else {
+            String Query = "SELECT HFID,  HFCode ||\" : \"||  HFName HF FROM tblHF WHERE LocationId = ?";
+            String[] args = {String.valueOf(DistrictId)};
+
+            HFs = sqlHandler.getResult(Query, args);
+        }
 
         return HFs.toString();
     }
@@ -647,15 +761,7 @@ public class ClientAndroidInterface {
 
         try {
             global = (Global) mContext.getApplicationContext();
-            String MaxFamilyIdQuery = "SELECT  IFNULL(COUNT(FamilyId),0)+1  FamilyId  FROM tblFamilies";
-            JSONArray JsonMaxFamily = sqlHandler.getResult(MaxFamilyIdQuery, null);
-            try {
-                JSONObject JmaxFamilyOb = JsonMaxFamily.getJSONObject(0);
-                MaxFamilyId = JmaxFamilyOb.getInt("FamilyId");
-
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+            MaxFamilyId = getNextAvailableFamilyId();
 
             if (InsureeData.length() > 0) {
                 int validation = isValidInsureeData(jsonToTable(InsureeData));
@@ -675,15 +781,9 @@ public class ClientAndroidInterface {
             int LocationId = Integer.parseInt(data.get("ddlVillage"));
 
             Boolean Poverty = null;
-            if (!TextUtils.isEmpty(data.get("ddlPovertyStatus"))){
-                if(data.get("ddlPovertyStatus").equals("1")){
-                    Poverty = true;
-                }else {
-                    Poverty = false;
-                }
+            if (!TextUtils.isEmpty(data.get("ddlPovertyStatus"))) {
+                Poverty = data.get("ddlPovertyStatus").equals("1");
             }
-//            if (Boolean.parseBoolean(data.get("ddlPovertyStatus")) || !Boolean.parseBoolean(data.get("ddlPovertyStatus")))
-//                Poverty = Boolean.parseBoolean(data.get("ddlPovertyStatus"));
 
             String FamilyType = null;
             if (!TextUtils.isEmpty(data.get("ddlGroupType")) && !data.get("ddlGroupType").equals("0"))
@@ -695,7 +795,8 @@ public class ClientAndroidInterface {
 
             String ConfirmationNo = data.get("txtConfirmationNo");
             String ConfirmationType = data.get("ddlConfirmationType");
-            int isOffline = getFamilyStatus(FamilyId);  // Integer.parseInt(data.get("hfisOffline"));
+            int isOffline = getFamilyStatus(FamilyId);
+
             values.put("LocationId", LocationId);
             values.put("Poverty", Poverty);
             values.put("FamilyType", FamilyType);
@@ -749,9 +850,9 @@ public class ClientAndroidInterface {
                 //==========================================================================================
                 ContentValues cvUpdate = new ContentValues();
                 cvUpdate.put("InsureeId", InsureeId);
-                if(getFamilyStatus(FamilyId) == 1){
+                if (getFamilyStatus(FamilyId) == 1) {
                     cvUpdate.put("isOffline", 1);
-                }else{
+                } else {
                     cvUpdate.put("isOffline", 2);
                 }
 
@@ -759,6 +860,8 @@ public class ClientAndroidInterface {
 
                 sqlHandler.updateData("tblFamilies", cvUpdate, "FamilyId= ?", whereArgs);
             }
+            addOrUpdateFamilySmsFromDll(FamilyId, data);
+
             return FamilyId;
 
         } catch (UserException e) {
@@ -786,152 +889,46 @@ public class ClientAndroidInterface {
         return FamilyId;
     }
 
-//    @JavascriptInterface
-//    public int SaveFamily(String FamilyData, String InsureeData) {
-//        int FamilyId = 0;
-//        int InsureeId = 0;
-//        int MaxFamilyId = 0;
-//
-//        try {
-//            global = (Global) mContext.getApplicationContext();
-//            String MaxFamilyIdQuery = "SELECT  IFNULL(COUNT(FamilyId),0)+1  FamilyId  FROM tblFamilies";
-//            JSONArray JsonMaxFamily = sqlHandler.getResult(MaxFamilyIdQuery, null);
-//            try {
-//                JSONObject JmaxFamilyOb = JsonMaxFamily.getJSONObject(0);
-//                MaxFamilyId = JmaxFamilyOb.getInt("FamilyId");
-//
-//            } catch (JSONException e) {
-//                e.printStackTrace();
-//            }
-//
-//            if (InsureeData.length() > 0) {
-//                int validation = isValidInsureeData(jsonToTable(InsureeData));
-//                if (validation > 0) {
-//                    throw new UserException(mContext.getResources().getString(validation));
-//                }
-//            }
-//
-//            //Insert Family
-//            //===============================================================================
-//            HashMap<String, String> data = jsonToTable(FamilyData);
-//            ContentValues values = new ContentValues();
-//
-//
-//            FamilyId = Integer.parseInt(data.get("hfFamilyId"));
-//
-//            int LocationId = Integer.parseInt(data.get("ddlVillage"));
-//
-//            Boolean Poverty = null;
-//            if (!TextUtils.isEmpty(data.get("ddlPovertyStatus"))) {
-//                if (data.get("ddlPovertyStatus").equals("1")) {
-//                    Poverty = true;
-//                } else {
-//                    Poverty = false;
-//                }
-//            }
-////            if (Boolean.parseBoolean(data.get("ddlPovertyStatus")) || !Boolean.parseBoolean(data.get("ddlPovertyStatus")))
-////                Poverty = Boolean.parseBoolean(data.get("ddlPovertyStatus"));
-//
-//            String FamilyType = null;
-//            if (!TextUtils.isEmpty(data.get("ddlGroupType")) && !data.get("ddlGroupType").equals("0"))
-//                FamilyType = data.get("ddlGroupType");
-//
-//            String PermanentAddress = data.get("txtPermanentAddress");
-//
-//            String Ethnicity = data.get("ddlEthnicity");
-//
-//            String ConfirmationNo = data.get("txtConfirmationNo");
-//            String ConfirmationType = data.get("ddlConfirmationType");
-//            int isOffline = getFamilyStatus(FamilyId);  // Integer.parseInt(data.get("hfisOffline"));
-//            values.put("LocationId", LocationId);
-//            values.put("Poverty", Poverty);
-//            values.put("FamilyType", FamilyType);
-//            values.put("FamilyAddress", PermanentAddress);
-//            values.put("Ethnicity", Ethnicity);
-//            values.put("ConfirmationNo", ConfirmationNo);
-//            values.put("ConfirmationType", ConfirmationType);
-//
-//            if (FamilyId == 0) {
-//                values.put("isOffline", isOffline);
-//                values.put("FamilyId", MaxFamilyId);
-//                sqlHandler.insertData("tblFamilies", values);
-//                FamilyId = MaxFamilyId;
-//            } else {
-//                int Online = 2;
-//                if (isOffline == 0 || isOffline == 2) {
-//                    isOffline = 0;
-//                    Online = 2;
-//                    values.put("isOffline", 2);
-//                }
-//                sqlHandler.updateData("tblFamilies", values, "FamilyId = ? AND (isOffline = ? OR isOffline = ?) ", new String[]{String.valueOf(FamilyId), String.valueOf(isOffline), String.valueOf(Online)});
-//                //Automatic sync
-//                /*
-//                if (isOffline == 0 && global.getUserId() > 0) {
-//                    pd = new ProgressDialog(mContext);
-//                    pd = ProgressDialog.show(mContext, "", mContext.getResources().getString(R.string.Uploading));
-//                    final int FinalFamilyId = FamilyId;
-//                    new Thread() {
-//                        public void run() {
-//                            try {
-//                                Enrol(FinalFamilyId, 0, 0, 0, 0);
-//                            } catch (UserException e) {
-//                                e.printStackTrace();
-//                            } catch (JSONException e) {
-//                                e.printStackTrace();
-//                            } catch (IOException e) {
-//                                e.printStackTrace();
-//                            }
-//                            pd.dismiss();
-//                        }
-//                    }.start();
-//
-//                }*/
-//            }
-//            if (InsureeData.length() > 0) {
-//                //Insert Insuree
-//                //==========================================================================================
-//                InsureeId = SaveInsuree(InsureeData, FamilyId, 1, -1, 0);//herman new
-//
-//                //Update insureeId in tblFamilies
-//                //==========================================================================================
-//                ContentValues cvUpdate = new ContentValues();
-//                cvUpdate.put("InsureeId", InsureeId);
-//                if (getFamilyStatus(FamilyId) == 1) {
-//                    cvUpdate.put("isOffline", 1);
-//                } else {
-//                    cvUpdate.put("isOffline", 2);
-//                }
-//
-//                String[] whereArgs = {String.valueOf(FamilyId)};
-//
-//                sqlHandler.updateData("tblFamilies", cvUpdate, "FamilyId= ?", whereArgs);
-//            }
-//            return FamilyId;
-//
-//        } catch (UserException e) {
-//            e.printStackTrace();
-//            if (InsureeId != 0)
-//                sqlHandler.deleteData("tblInsuree", "InsureeId = ?", new String[]{String.valueOf(InsureeId)});
-//            if (FamilyId > 0 && InsureeData.length() > 0)
-//                sqlHandler.deleteData("tblFamilies", "FamilyId", new String[]{String.valueOf(FamilyId)});
-//            FamilyId = 0;
-//            ShowDialog(mContext.getResources().getString(R.string.ErrorOccurred));
-//
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//
-//            if (InsureeId != 0)
-//                sqlHandler.deleteData("tblInsuree", "InsureeId = ?", new String[]{String.valueOf(InsureeId)});
-//
-//            if (FamilyId > 0 && InsureeData.length() > 0)
-//                sqlHandler.deleteData("tblFamilies", "FamilyId = ?", new String[]{String.valueOf(FamilyId)});
-//
-//            FamilyId = 0;
-//            ShowDialog(e.getMessage());
-//        }
-//
-//        return FamilyId;
-//    }
+    private JSONObject getFamilySMS(String familyId) {
+        // tblFamilySMS and tblFamily are in 1:1 relation, therefore only one record is returned
+        String query = "SELECT * FROM tblFamilySMS where FamilyId = ? LIMIT 1;";
+        String[] queryArgs = {familyId};
+        try {
+            JSONObject result = sqlHandler.getResult(query, queryArgs).getJSONObject(0);
+            return result;
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private JSONObject getFamilySMS(int familyId) throws JSONException {
+        return getFamilySMS(String.valueOf(familyId));
+    }
+
+    private void addOrUpdateFamilySmsFromDll(int familyId, HashMap<String, String> familyFormData)
+            throws UserException {
+        Boolean approveSMS = familyFormData.get("ddlApprovalOfSMS").equals("1");
+        String languageOfSMS =
+                familyFormData.get("ddlLanguageOfSMS") == "" ? null : familyFormData.get("ddlLanguageOfSMS");
+        addOrUpdateFamilySms(familyId, approveSMS, languageOfSMS);
+    }
+
+    public void addOrUpdateFamilySms(int familyId, Boolean approve, String language) throws UserException {
+        ContentValues familySmsValues = new ContentValues();
+        familySmsValues.put("ApprovalOfSMS", approve);
+        familySmsValues.put("LanguageOfSMS", language);
+        familySmsValues.put("FamilyID", familyId);
+
+        String query = "SELECT FamilyId FROM tblFamilySMS WHERE FamilyId = ?";
+        String[] queryArgs = {String.valueOf(familyId)};
+        if (sqlHandler.getResult(query, queryArgs).length() == 0) {
+            sqlHandler.insertData("tblFamilySMS", familySmsValues);
+        } else {
+            sqlHandler.updateData("tblFamilySMS", familySmsValues,
+                    "FamilyId= ?", queryArgs);
+        }
+    }
 
     private int isValidInsureeData(HashMap<String, String> data) {
         int Result;
@@ -970,18 +967,9 @@ public class ClientAndroidInterface {
             if (validation > 0) {
                 ShowDialog(mContext.getResources().getString(validation));
                 return 7;
-                //throw new UserException(mContext.getResources().getString(validation)); //commented by Rogers
             }
 
-
-            String MaxInsureeIdQuery = "SELECT  IFNULL(COUNT(InsureeId),0)+1  InsureeId  FROM tblInsuree";
-            JSONArray JsonMaxInsuree = sqlHandler.getResult(MaxInsureeIdQuery, null);
-            try {
-                JSONObject JmaxInsureeOb = JsonMaxInsuree.getJSONObject(0);
-                MaxInsureeId = JmaxInsureeOb.getInt("InsureeId");
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+            MaxInsureeId = getNextAvailableInsureeId();
             ContentValues values = new ContentValues();
             ContentValues InsureePolicyvalues = new ContentValues();
             ContentValues FamilyValues = new ContentValues();
@@ -1005,9 +993,7 @@ public class ClientAndroidInterface {
                 } else {
                     CardIssued = false;
                 }
-
             }
-
 
             Integer Relation = null;
             if (!TextUtils.isEmpty(data.get("ddlRelationship")) && !data.get("ddlRelationship").equals("0"))
@@ -1023,25 +1009,15 @@ public class ClientAndroidInterface {
 
             String IdentificationType = "null";
             if (!TextUtils.isEmpty(data.get("ddlIdentificationType")) && !data.get("ddlIdentificationType").equals(""))
-                IdentificationType = (data.get("ddlIdentificationType")).toString();
+                IdentificationType = (data.get("ddlIdentificationType"));
 
             String PhotoPath = data.get("hfImagePath");
             String newPhotoPath = data.get("hfNewPhotoPath");
-            if (GetListOfImagesContain(data.get("txtInsuranceNumber")).length() > 0) {
-                File file = new File(newPhotoPath);
-                if (file.exists()) {
-                    copyImageFromGalleryToApplication(newPhotoPath, data.get("txtInsuranceNumber"));
-                    PhotoPath = GetListOfImagesContain(data.get("txtInsuranceNumber"));
-                }
-            } else {
-                if (!String.valueOf(PhotoPath).equals(newPhotoPath))
-                    try {
-                        PhotoPath = copyImageFromGalleryToApplication(newPhotoPath, data.get("txtInsuranceNumber"));
-                    } catch (Exception e) {
-                        //e.printStackTrace();
-                    }
 
+            if (!"".equals(newPhotoPath)) {
+                PhotoPath = copyImageFromGalleryToApplication(newPhotoPath, data.get("txtInsuranceNumber"));
             }
+
             values.put("FamilyId", FamilyId);
             values.put("CHFID", data.get("txtInsuranceNumber"));
             values.put("LastName", data.get("txtLastName"));
@@ -1062,7 +1038,7 @@ public class ClientAndroidInterface {
             values.put("IdentificationNumber", data.get("txtIdentificationNumber"));
             values.put("Phone", data.get("txtPhoneNumber"));
             if (isOffline == 0 || isOffline == 2)
-                PhotoPath = PhotoPath.toString().substring(PhotoPath.toString().lastIndexOf("/") + 1);
+                PhotoPath = PhotoPath.substring(PhotoPath.lastIndexOf("/") + 1);
             values.put("PhotoPath", PhotoPath);
             values.put("CardIssued", CardIssued);
 
@@ -1072,6 +1048,12 @@ public class ClientAndroidInterface {
             values.put("Education", Education);
             values.put("Email", data.get("txtEmail"));
             values.put("TypeOfId", IdentificationType);
+
+            if (data.get("ddlVulnerability") != null && !data.get("ddlVulnerability").equals("")) {
+                values.put("Vulnerability", data.get("ddlVulnerability"));
+            } else {
+                values.put("Vulnerability", data.get("0"));
+            }
 
             if (data.get("ddlFSP") != null)
                 values.put("HFID", Integer.valueOf(data.get("ddlFSP")));
@@ -1086,54 +1068,37 @@ public class ClientAndroidInterface {
                 values.put("isOffline", 1);
                 if (isOffline == 0 || isOffline == 2) {
                     if (isOffline == 2) isOffline = 0;
-                    if (general.isNetworkAvailable(mContext)) {
+                    if (global.isNetworkAvailable()) {
+                        //if (isOffline == 0){
+                        MaxInsureeId = -MaxInsureeId;
+                        newInsureeId = MaxInsureeId;
+                        //}
+                        values.put("InsureeId", MaxInsureeId);
 
-                        //Existing family
-                        CallSoap cs = new CallSoap();
-                        cs.setFunctionName("InsureeNumberExist");
-                        //check if insuree exist online
-                        res = cs.InsureeNumberExist(String.valueOf(data.get("txtInsuranceNumber")));
-
-                        if (res == false) {
-                            //if (isOffline == 0){
-                            MaxInsureeId = -MaxInsureeId;
-                            newInsureeId = MaxInsureeId;
-                            //}
-                            values.put("InsureeId", MaxInsureeId);
-
-                            sqlHandler.insertData("tblInsuree", values);
-                            if (PolicyId > 0 && isHead == 0) {
-                                getFamilyPolicies(FamilyId);
+                        sqlHandler.insertData("tblInsuree", values);
+                        if (PolicyId > 0 && isHead == 0) {
+                            getFamilyPolicies(FamilyId);
+                        }
+                        inProgress = false;
+                        rtInsureeId = MaxInsureeId;
+                        if (ExceedThreshold == 1) {
+                            if (isOffline == 0 || isOffline == 2) {
+                                if (isOffline == 2) isOffline = 0;
+                                int InsId = -rtInsureeId;
+                                ShowDialogYesNo(InsId, FamilyId, Activate, isOffline);
+                            } else {
+                                ShowDialogYesNo(rtInsureeId, FamilyId, Activate, isOffline);
                             }
-                            inProgress = false;
-                            rtInsureeId = MaxInsureeId;
-                            if (ExceedThreshold == 1) {
-                                if (isOffline == 0 || isOffline == 2) {
-                                    if (isOffline == 2) isOffline = 0;
-                                    int InsId = -rtInsureeId;
-                                    ShowDialogYesNo(InsId, FamilyId, Activate, isOffline);
-                                } else {
-                                    ShowDialogYesNo(rtInsureeId, FamilyId, Activate, isOffline);
-                                }
-                            } else if (ExceedThreshold == 0) {
-                                if (isOffline == 0 || isOffline == 2) {
-                                    if (isOffline == 2) isOffline = 0;
-                                    int InsId = -rtInsureeId;
-                                    SaveInsureePolicy(InsId, FamilyId, true, isOffline);
-                                } else {
-                                    SaveInsureePolicy(rtInsureeId, FamilyId, true, isOffline);
-                                }
+                        } else if (ExceedThreshold == 0) {
+                            if (isOffline == 0 || isOffline == 2) {
+                                if (isOffline == 2) isOffline = 0;
+                                int InsId = -rtInsureeId;
+                                SaveInsureePolicy(InsId, FamilyId, true, isOffline);
+                            } else {
+                                SaveInsureePolicy(rtInsureeId, FamilyId, true, isOffline);
                             }
-                        } else {
-                            String ErrMsg = null;
-                            ErrMsg = "[" + String.valueOf(data.get("txtInsuranceNumber")) + "] " + mContext.getString(R.string.DuplicateInsuranceNumber);
-                            ShowDialog(ErrMsg);
-
-                            return 6;
-
                         }
                     } else {
-                        values.put("InsureeId", -MaxInsureeId);
                         sqlHandler.insertData("tblInsuree", values);
                         if (PolicyId > 0 && isHead == 0) {
                             getFamilyPolicies(FamilyId);
@@ -1159,91 +1124,21 @@ public class ClientAndroidInterface {
 
             } else {//Existing Insuree
                 values.put("isOffline", insureeIsOffline);
-                if (insureeIsOffline == 0 || insureeIsOffline == 2) {
-                    if (insureeIsOffline == 2) insureeIsOffline = 0;
-                    //if(InsureeId > 0){
-                    newInsureeId = -InsureeId;
-                    values.put("InsureeId", newInsureeId);
-                    if (isHead == 1) {
-                        FamilyValues.put("InsureeId", newInsureeId);
-                    }
-                    //}
-                }
                 sqlHandler.updateData("tblInsuree", values, "InsureeId = ? AND (isOffline = ?)", new String[]{String.valueOf(InsureeId), String.valueOf(insureeIsOffline)});
-                if (insureeIsOffline == 0 || insureeIsOffline == 2) {
-                    if (insureeIsOffline == 2) insureeIsOffline = 0;
-                    if (isHead == 1) {
-                        sqlHandler.updateData("tblFamilies", FamilyValues, "FamilyId = ? AND (isOffline = ?)", new String[]{String.valueOf(FamilyId), String.valueOf(isOffline)});
-                    }
-                }
-
             }
-            if (general.isNetworkAvailable(mContext)) {
+            if (global.isNetworkAvailable()) {
                 if (isOffline == 0 || isOffline == 2) {
                     if (isOffline == 2) isOffline = 0;
                     if (global.getUserId() > 0) {
-                        final int FinalFamilyId = FamilyId;
-                        final int FinalInsureeId = rtInsureeId;
                         if (rtInsureeId > 0) {
                             newInsureeId = -rtInsureeId;
                         } else {
                             newInsureeId = rtInsureeId;
                         }
-                        if (rtInsureeId == 0 && res == true) {
+                        if (rtInsureeId == 0 && res) {
                             inProgress = false;
-                        } else {//Automatic sync
-  /*                          try {
-                                int ReturnValue = Enrol(FinalFamilyId, newInsureeId, 0, 0, 0);//fetches from sqlite database
-                                //Update insureeId to positive becouse its already online now.
-                                if(ReturnValue == 0){
-                                    if(newInsureeId < 0){
-                                        values.put("InsureeId", -newInsureeId);
-                                        InsureePolicyvalues.put("InsureeId", -newInsureeId);
-                                        if(isHead == 1){
-                                            FamilyValues.put("InsureeId", -newInsureeId);
-                                        }
-                                    }else{
-                                        values.put("InsureeId", newInsureeId);
-                                        if(isHead == 1){
-                                            FamilyValues.put("InsureeId", newInsureeId);
-                                        }
-                                    }
-
-                                    int ins = 0;
-                                    if(newInsureeId < 0){
-                                        ins = newInsureeId;
-                                    }else{
-                                        ins = -newInsureeId;
-                                    }
-
-                                    values.put("isOffline", 0);
-                                    sqlHandler.updateData("tblInsuree", values, "InsureeId = ?", new String[]{String.valueOf(ins)});
-                                    if(doInsureeExisttblInsPolicy(ins) > 0){
-                                        sqlHandler.updateData("tblInsureePolicy", InsureePolicyvalues, "InsureeId = ?", new String[]{String.valueOf(ins)});
-                                    }
-
-                                    if(isHead == 1){
-                                        sqlHandler.updateData("tblFamilies", FamilyValues, "FamilyId = ? AND (isOffline = ?)", new String[]{String.valueOf(FamilyId), String.valueOf(isOffline)});
-                                    }
-                                }
-                                inProgress = false;
-                            } catch (UserException e) {
-                                e.printStackTrace();
-                            }*/
+                        } else {
                         }
-
-    /*                new Thread() {
-                        public void run() {
-                            try {
-                                rtInsureeId = Enrol(FinalFamilyId, FinalInsureeId, 0, 0, 0);
-                                inProgress = false;
-                            } catch (UserException e) {
-                                e.printStackTrace();
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    }.start();*/
                         inProgress = false;
                     }
                     inProgress = false;
@@ -1276,41 +1171,37 @@ public class ClientAndroidInterface {
     }
 
     private String copyImageFromGalleryToApplication(String selectedPath, String InsuranceNumber) {
-        try {
-            //Get current date and format it in yyyyMMdd format
-            global = (Global) mContext.getApplicationContext();
+        String result = "";
 
-            @SuppressLint("SimpleDateFormat") SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss");
+        try {
+            SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss", Locale.US);
             Calendar cal = Calendar.getInstance();
             String d = format.format(cal.getTime());
 
-            String Extension = selectedPath.substring(selectedPath.lastIndexOf("."));
-            //Resize the image before saving
-//            InputStream inputStream = new FileInputStream(selectedPath);
-            String outputFileName = global.getImageFolder() + InsuranceNumber + "_" + global.getOfficerCode() + "_" + d + "_0_0" + Extension;
-//            OutputStream outputStream = new FileOutputStream(outputFileName);
-//
-//            byte[] buffer = new byte[1024];
-//            int length = 0;
-//
-//            while ((length = inputStream.read(buffer)) > 0) {
-//                outputStream.write(buffer, 0, length);
-//            }
-//            outputStream.flush();
-//            outputStream.close();
+            String outputFileName = global.getImageFolder() + InsuranceNumber + "_" + global.getOfficerCode() + "_" + d + "_0_0.jpg";
+            File outputFile = new File(outputFileName);
 
-            OutputStream outputStream = ResizeImage(selectedPath, outputFileName, 400);
-            assert outputStream != null;
-            outputStream.flush();
-            outputStream.close();
-            return outputFileName;
+            if (!outputFile.createNewFile()) {
+                Log.e("IMAGES", "Creating image copy failed");
+            }
 
-
+            FileOutputStream outputStream = new FileOutputStream(outputFile);
+            imageTarget = new OutputStreamImageTarget(outputStream, global.getIntSetting("image_jpeg_quality", 40));
+            try {
+                ((Activity) mContext).runOnUiThread(() -> picassoInstance.load(selectedPath)
+                        .resize(global.getIntSetting("image_width_limit", 400),
+                                global.getIntSetting("image_height_limit", 400))
+                        .centerInside()
+                        .into(imageTarget));
+            } catch (ClassCastException e) {
+                Log.e("IMAGES", "copyImageFromGalleryToApplication can only be run in context of Activity");
+            }
+            result = outputFileName;
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        return "";
+        return result;
     }
 
     @JavascriptInterface
@@ -1379,7 +1270,7 @@ public class ClientAndroidInterface {
 
     @JavascriptInterface
     public String getInsuree(int InsureeId) {
-        String Query = "SELECT InsureeId, FamilyId, CHFID, LastName, OtherNames, DOB, Gender, Marital, isHead, IdentificationNumber, Phone, isOffline , PhotoPath, CardIssued, Relationship, Profession, Education, Email, TypeOfId, I.HFID, CurrentAddress,R.LocationId CurRegion, D.LocationId CurDistrict, W.LocationId CurWard,  I.CurVillage, HFR.LocationId FSPRegion, HFD.LocationId FSPDistrict, HF.HFLevel FSPCategory\n" +
+        String Query = "SELECT InsureeId, FamilyId, CHFID, LastName, OtherNames, DOB, Gender, Marital, isHead, IdentificationNumber, Phone, isOffline , PhotoPath, CardIssued, Relationship, Profession, Education, Email, TypeOfId, I.HFID, CurrentAddress,R.LocationId CurRegion, D.LocationId CurDistrict, W.LocationId CurWard,  I.CurVillage, HFR.LocationId FSPRegion, HFD.LocationId FSPDistrict, HF.HFLevel FSPCategory, I.Vulnerability\n" +
                 "FROM tblInsuree I\n" +
                 "LEFT OUTER JOIN tblLocations V ON V.LocationId = I.CurVillage\n" +
                 "LEFT OUTER JOIN tblLocations W ON W.LocationId = V.ParentLocationId\n" +
@@ -1402,7 +1293,7 @@ public class ClientAndroidInterface {
     public String getInsureesForFamily(int FamilyId) {
         String Query = "SELECT I.InsureeId, I.CHFID, I.Othernames ||\" \"|| I.LastName InsureeName, " +
                 "CASE I.Gender WHEN 'M' THEN '" + mContext.getResources().getString(R.string.Male) + "' WHEN 'F' THEN '" + mContext.getResources().getString(R.string.Female) + "' ELSE '" + mContext.getResources().getString(R.string.Other) + "' END Gender, " +
-                "I.DOB , I.isHead, isOffline FROM tblInsuree I WHERE FamilyId = ? ORDER BY I.isHead DESC, I.InsureeId ASC";
+                "I.DOB , I.isHead, isOffline, I.Vulnerability FROM tblInsuree I WHERE FamilyId = ? ORDER BY I.isHead DESC, I.InsureeId ASC";
         String[] arg = {String.valueOf(FamilyId)};
         JSONArray Insurees = sqlHandler.getResult(Query, arg);
         return Insurees.toString();
@@ -1434,13 +1325,20 @@ public class ClientAndroidInterface {
 
         String[] args = {String.valueOf(FamilyId)};
         JSONArray Family = sqlHandler.getResult(sSQL, args);
+        try {
+            JSONObject sms = getFamilySMS(FamilyId);
+            if (sms != null) {
+                Family.getJSONObject(0).put("ApprovalOfSMS", sms.get("ApprovalOfSMS"));
+                Family.getJSONObject(0).put("LanguageOfSMS", sms.get("LanguageOfSMS"));
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         return Family.toString();
-
-
     }
 
     private String getYear(Date date) {
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat format = new SimpleDateFormat("yyyy");
+        SimpleDateFormat format = new SimpleDateFormat("yyyy", Locale.US);
         return format.format(date);
     }
 
@@ -1468,7 +1366,7 @@ public class ClientAndroidInterface {
     @JavascriptInterface
     public String getPolicyPeriod(int ProdId, String EnrollDate) throws ParseException, JSONException {
 
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat format = AppInformation.DateTimeInfo.getDefaultDateFormatter();
         Date dEnrollDate = format.parse(EnrollDate);
 
         String sSQL = "SELECT IFNULL(AdministrationPeriod, 0) AdministrationPeriod, StartCycle1, StartCycle2, StartCycle3, StartCycle4, InsurancePeriod, IFNULL(GracePeriod, 0)GracePeriod\n" +
@@ -1483,7 +1381,8 @@ public class ClientAndroidInterface {
 
         String EnrollYear = getYear(dEnrollDate);
 
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
+        String startCycleFormat = "dd-MM-yyyy";
+        SimpleDateFormat sdf = new SimpleDateFormat(startCycleFormat, Locale.US);
         Date StartCycle1 = null;
         Date StartCycle2 = null;
         Date StartCycle3 = null;
@@ -1539,8 +1438,7 @@ public class ClientAndroidInterface {
 
         ExpiryDate = addDay(addMonth(StartDate, InsurancePeriod), -1);
 
-        SimpleDateFormat ymd = new SimpleDateFormat("yyyy-MM-dd");
-
+        SimpleDateFormat ymd = AppInformation.DateTimeInfo.getDefaultDateFormatter();
 
         JSONArray period = new JSONArray();
         JSONObject o = new JSONObject();
@@ -1561,22 +1459,9 @@ public class ClientAndroidInterface {
     public static boolean inProgress = true;
 
     @JavascriptInterface
-    public String selectPicture() {
-        try {
-            inProgress = true;
-            Intent galleryIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-            ((Activity) mContext).startActivityForResult(galleryIntent, RESULT_LOAD_IMG);
-
-            ((MainActivity) mContext).ImagePath = "";
-            int count = 0;
-            while (((MainActivity) mContext).ImagePath == "") {
-                count++;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return ((MainActivity) mContext).ImagePath;
+    public void selectPicture() {
+        Intent galleryIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        ((Activity) mContext).startActivityForResult(galleryIntent, RESULT_LOAD_IMG);
     }
 
     @JavascriptInterface
@@ -1683,7 +1568,7 @@ public class ClientAndroidInterface {
         if ((AdultMembers + ChildMembers + OAdultMembers + OChildMembers) >= MemberCount)
             OAdultMembers = MemberCount - (AdultMembers + ChildMembers + OAdultMembers);
 
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat format = AppInformation.DateTimeInfo.getDefaultDateFormatter();
         //Get   Previous Expiry Date
         if (PreviousPolicyId > 0) {
             String PED_Query = "SELECT ExpiryDate FROM tblPolicy WHERE  PolicyId =" + PreviousPolicyId;
@@ -1847,9 +1732,9 @@ public class ClientAndroidInterface {
     @JavascriptInterface
     public String getProducts(int RegionId, int DistrictId, String EnrolmentDate) {
 
-        String ProductQuery = "SELECT  ProdId, ProductCode ||\" - \"|| ProductName ProductCode, ProductName \n" +
+        String ProductQuery = "SELECT  ProdId, ProductCode, ProductName, ProductCode ||\" - \"|| ProductName ProductNameCombined  \n" +
                 "FROM tblProduct P\n" +
-                "INNER JOIN  uvwLocations L ON (P.LocationId = L.LocationId) OR (P.LocationId = 'null' OR P.LocationId = '') \n" +
+                "INNER JOIN  uvwLocations L ON (P.LocationId = L.LocationId) \n" +
                 "WHERE  ((L.RegionId = " + RegionId + " OR L.RegionId ='null') AND (L.DistrictId =  " + DistrictId + " OR L.DistrictId ='null') OR L.LocationId='null') AND " +
                 "( '" + EnrolmentDate + "'  BETWEEN P.DateFrom AND P.DateTo OR IFNULL(" + EnrolmentDate + ",0) = 0 )  \n" +
                 "ORDER BY  L.LocationId DESC";
@@ -1858,58 +1743,75 @@ public class ClientAndroidInterface {
         return Products.toString();
     }
 
-    public String getProductsByDistrict(int DistrictId) {
+    public String getProductsRD() {
+        JSONArray Products = null;
+        String loc = null;
+        int RegionId = 0, DistrictId = 0;
+        try {
+            JSONArray locArray = null;
+            JSONObject obj = null;
+            loc = getOfficerLocation();
+            locArray = new JSONArray(loc);
+            if (locArray.length() == 0) {
 
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-        Calendar cal = Calendar.getInstance();
-        String dt = format.format(cal.getTime());
+            } else {
+                for (int i = 0; i < locArray.length(); i++) {
+                    obj = locArray.getJSONObject(i);
+                    RegionId = Integer.parseInt(obj.getString("RegionId"));
+                    DistrictId = Integer.parseInt(obj.getString("DistrictId"));
+                }
+            }
 
-        String ProductQuery = "SELECT  P.ProductCode, P.ProductCode ||\" - \"|| P.ProductName ProductName\n" +
-                " FROM tblProduct P \n" +
-                " LEFT OUTER JOIN  tblLocations L ON (P.LocationId = L.LocationId) \n" +
-                " WHERE  (P.LocationId =  " + DistrictId + " OR P.LocationId ='null' OR P.LocationId ='' OR P.LocationId = L.ParentLocationId) AND " +
-                "( '" + dt + "'  BETWEEN P.DateFrom AND P.Dateto )  \n" +
-                " ORDER BY  L.LocationId DESC";
+            String ProductQuery = "SELECT ProdId, ProductCode, ProductName \n" +
+                    "FROM tblProduct P\n" +
+                    "INNER JOIN  uvwLocations L ON (P.LocationId = L.LocationId) OR (P.LocationId = 'null' OR P.LocationId = '') \n" +
+                    "WHERE  ((L.RegionId = " + RegionId + " OR L.RegionId ='null') AND (L.DistrictId =  " + DistrictId + " OR L.DistrictId ='null') OR L.LocationId='null') " +
+                    "ORDER BY  L.LocationId DESC";
 
-        JSONArray Products = sqlHandler.getResult(ProductQuery, null);
+            Products = sqlHandler.getResult(ProductQuery, null);
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         return Products.toString();
     }
 
-    public String getProducts() {
+    public String getProductsByDistrict(int districtId, String date) {
+        int regionId = sqlHandler.getRegionId(districtId);
+        return getProducts(regionId, districtId, date);
+    }
 
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-        Calendar cal = Calendar.getInstance();
-        String dt = format.format(cal.getTime());
+    @JavascriptInterface
+    public boolean IsBulkCNUsed() {
+        return BuildConfig.SHOW_BULK_CN_MENU;
+    }
 
-        String ProductQuery = "SELECT P.ProductCode ProductCode, P.ProductName ProductName\n" +
-                " FROM tblProduct P \n" +
-                " LEFT OUTER JOIN  tblLocations L ON (P.LocationId = L.LocationId) \n" +
-                //" WHERE  (P.LocationId ='null' OR P.LocationId ='' OR P.LocationId = L.ParentLocationId) AND " +
-                " WHERE ( '" + dt + "'  BETWEEN P.DateFrom AND P.Dateto )  \n" +
-                " ORDER BY  L.LocationId DESC";
+    @JavascriptInterface
+    public String GetNextBulkCn(String productId) {
+        String productCode = sqlHandler.getProductCode(productId);
+        if (productCode != null) {
+            return sqlHandler.getNextFreeCn(global.getOfficerCode(), productCode);
+        }
+        return null;
+    }
 
-        JSONArray Products = sqlHandler.getResult(ProductQuery, null);
-        return Products.toString();
+    public void deleteBulkCn(String controlNumber) {
+        sqlHandler.deleteData("tblBulkControlNumbers", "ControlNumber = ?", new String[]{controlNumber});
+    }
+
+    @JavascriptInterface
+    public boolean isFetchedControlNumber(String controlNumber) {
+        return sqlHandler.isFetchedControlNumber(controlNumber);
     }
 
     @JavascriptInterface
     public int SavePolicy(String PolicyData, int FamilyId, int PolicyId) throws Exception {
         inProgress = true;
-        int MaxPolicyId = 0;
+        int MaxPolicyId;
         rtPolicyId = PolicyId;
         int isOffline = 1;
-        String nullify = null;
-        global = (Global) mContext.getApplicationContext();
         try {
-
-            String MaxPolicyIdQuery = "SELECT  IFNULL(COUNT(PolicyId),0)+1  PolicyId  FROM tblPolicy";
-            JSONArray JsonMaxPolicy = sqlHandler.getResult(MaxPolicyIdQuery, null);
-            try {
-                JSONObject JmaxPolicyOb = JsonMaxPolicy.getJSONObject(0);
-                MaxPolicyId = JmaxPolicyOb.getInt("PolicyId");
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+            MaxPolicyId = getNextAvailablePolicyId();
 
             HashMap<String, String> data = jsonToTable(PolicyData);
             ContentValues values = new ContentValues();
@@ -1924,17 +1826,21 @@ public class ClientAndroidInterface {
             values.put("PolicyValue", data.get("hfPolicyValue"));
             values.put("ProdId", data.get("ddlProduct"));
             values.put("OfficerId", data.get("ddlOfficer"));
+
+            String controlNumber = data.get("AssignedControlNumber");
             if (isOffline == 2) isOffline = 0;
             values.put("isOffline", isOffline);
 
             values.put("PolicyStage", "N");
             if (rtPolicyId == 0) {
-                if (isOffline == 0) MaxPolicyId = -MaxPolicyId;
                 values.put("PolicyId", MaxPolicyId);
                 sqlHandler.insertData("tblPolicy", values);
                 rtPolicyId = MaxPolicyId;
                 InsertPolicyInsuree(rtPolicyId, 1);
-
+                if (IsBulkCNUsed()) {
+                    sqlHandler.assignCnToPolicy(rtPolicyId, controlNumber);
+                }
+                InsertRecordedPolicies("new", String.valueOf(FamilyId), data.get("ddlProduct"), data.get("hfPolicyValue"), MaxPolicyId);
             } else {
                 int Online = 2;
                 if (isOffline == 0 || isOffline == 2) {
@@ -1942,36 +1848,12 @@ public class ClientAndroidInterface {
                     Online = 2;
                 }
                 sqlHandler.updateData("tblPolicy", values, "PolicyId = ? AND (isOffline = ? OR isOffline = ?) ", new String[]{String.valueOf(PolicyId), String.valueOf(isOffline), String.valueOf(Online)});
-
+                if (IsBulkCNUsed()) {
+                    sqlHandler.clearCnAssignedToPolicy(PolicyId);
+                    sqlHandler.assignCnToPolicy(PolicyId, controlNumber);
+                }
             }
-            if (isOffline == 0 || isOffline == 2) {//Automatic sync
- /*
-                if(global.getUserId() > 0){
-                    pd = new ProgressDialog(mContext);
-                    pd = ProgressDialog.show(mContext, "", mContext.getResources().getString(R.string.Uploading));
-                    final int FinalFamilyId = FamilyId;
-                    final int FinalPolicyId = rtPolicyId;
-                    new Thread() {
-                        public void run() {
-                            try {
-                                rtPolicyId = Enrol(FinalFamilyId, 0, FinalPolicyId, 0, 0);
-                                inProgress = false;
-                            } catch (UserException e) {
-                                e.printStackTrace();
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                            pd.dismiss();
-                        }
-                    }.start();
-                }*/
-
-            } else {
-                inProgress = false;
-            }
-
+            inProgress = false;
         } catch (NumberFormatException e) {
             e.printStackTrace();
         } catch (UserException e) {
@@ -2047,32 +1929,24 @@ public class ClientAndroidInterface {
         }
 
 
-        String Query = "SELECT  P.PolicyId, ProductCode, ProductName, EffectiveDate, PolicyValue, StartDate, EnrollDate, \n" +
+        String Query = "SELECT  P.PolicyId, Prod.ProductCode, ProductName, EffectiveDate, PolicyValue, StartDate, EnrollDate, bcn.ControlNumber, \n" +
                 "   CASE    WHEN PolicyStatus = 1 THEN '" + mContext.getResources().getString(R.string.Idle) + "'   " +
                 "   WHEN PolicyStatus = 2 THEN '" + mContext.getResources().getString(R.string.Active) + "'  " +
                 "   WHEN PolicyStatus = 4 THEN '" + mContext.getResources().getString(R.string.Suspended) + "'  " +
                 "   WHEN PolicyStatus = 8 THEN '" + mContext.getResources().getString(R.string.Expired) + "'  END  PolicyStatus, " +
                 "   PolicyStatus PolicyStatusValue, P.ExpiryDate, isOffline FROM tblPolicy P \n" +
                 "   INNER JOIN tblProduct Prod ON P.ProdId=Prod.ProdId  \n " +
+                "   LEFT JOIN tblBulkControlNumbers bcn on P.PolicyId=bcn.PolicyId " +
                 "   WHERE FamilyId = ?";
 
         String[] arg = {String.valueOf(FamilyId)};
-        JSONArray Policies = sqlHandler.getResult(Query, arg);
+        JSONArray Policies = sqlHandler.getResult(Query, arg, "");
         final boolean finalIsValueChanged = isValueChanged;
         final String finalEnrollDate = enrollDate;
         final Double finalNewPolicyValue = NewPolicyValue;
         final String finalPolicyValue = PolicyValue;
         if (finalIsValueChanged) {
-            ((Activity) mContext).runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-
-                    ShowDialog(mContext.getResources().getString(R.string.PolicyValueChange) + finalEnrollDate + "," + "has been changed from " + finalPolicyValue + " to " + finalNewPolicyValue);
-
-
-                }
-
-            });
+            ((Activity) mContext).runOnUiThread(() -> ShowDialog(mContext.getResources().getString(R.string.PolicyValueChange) + finalEnrollDate + "," + "has been changed from " + finalPolicyValue + " to " + finalNewPolicyValue));
         }
 
         return Policies.toString();
@@ -2080,7 +1954,7 @@ public class ClientAndroidInterface {
 
     @JavascriptInterface
     public String getPolicy(int PolicyId) {
-        String Query = "SELECT  P.PolicyId, P.ProdId, OfficerId , ProductCode, ProductName, PolicyStage, EffectiveDate, IFNULL(PolicyValue,0) PolicyValue, StartDate, EnrollDate, \n" +
+        String Query = "SELECT  P.PolicyId, P.ProdId, OfficerId , Prod.ProductCode, ProductName, PolicyStage, EffectiveDate, IFNULL(PolicyValue,0) PolicyValue, StartDate, EnrollDate, bcn.ControlNumber, \n" +
                 "   CASE    WHEN PolicyStatus = 1 THEN '" + mContext.getResources().getString(R.string.Idle) + "'   " +
                 "   WHEN PolicyStatus = 2 THEN '" + mContext.getResources().getString(R.string.Active) + "'  " +
                 "   WHEN PolicyStatus = 4 THEN '" + mContext.getResources().getString(R.string.Suspended) + "'  " +
@@ -2090,10 +1964,11 @@ public class ClientAndroidInterface {
                 "   LEFT JOIN (SELECT MAX(PolicyId) PolicyId, IFNULL(Sum(Amount),0) Contribution ,PremiumId " +
                 "   FROM  tblPremium WHERE PolicyId = " + PolicyId + " AND isPhotoFee = 'false' ) " +
                 "   Pre ON Pre.PolicyId=P.PolicyId \n " +
+                "   LEFT JOIN tblBulkControlNumbers bcn on P.PolicyId=bcn.PolicyId " +
                 "   WHERE P.PolicyId = ?";
 
         String[] arg = {String.valueOf(PolicyId)};
-        JSONArray Policies = sqlHandler.getResult(Query, arg);
+        JSONArray Policies = sqlHandler.getResult(Query, arg, "");
         return Policies.toString();
     }
 
@@ -2138,21 +2013,7 @@ public class ClientAndroidInterface {
         String ReceiptNo = "";
         try {
             global = (Global) mContext.getApplicationContext();
-
-            //getPremium Max Id
-            String MaxPremiumIdQuery = "SELECT  IFNULL(COUNT(PremiumId),0)+1  PremiumId  FROM tblPremium";
-            // String CHFIDQUERY = "SELECT CHFID FROM tblInsuree WHERE isHead = 'true' OR isHead = '1' AND FamilyId = "+ FamilyId;
-            JSONArray JsonMaxPremium = sqlHandler.getResult(MaxPremiumIdQuery, null);
-            // JSONArray JsonCHFID = sqlHandler.getResult(CHFIDQUERY, null);
-            try {
-                JSONObject JmaxPremiumOb = JsonMaxPremium.getJSONObject(0);
-                //  JSONObject JsonCHFIDJSONObject = JsonCHFID.getJSONObject(0);
-                MaxPremiumId = JmaxPremiumOb.getInt("PremiumId");
-                //  CHFID = JsonCHFIDJSONObject.getString("CHFID");
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-
+            MaxPremiumId = getNextAvailablePremiumId();
 
             //  isOffline = getFamilyStatus(FamilyId);
             if (isOffline == 2) isOffline = 0;
@@ -2255,6 +2116,12 @@ public class ClientAndroidInterface {
         return Premiums.toString();
     }
 
+    public JSONArray getRecordedPolicies() {
+        String Query = "SELECT * FROM tblRecordedPolicies WHERE ControlNumberId is null";
+        JSONArray RecordedPolicies = sqlHandler.getResult(Query, null);
+        return RecordedPolicies;
+    }
+
     //This Query
     public JSONArray getRecordedPolicies(String insuranceNumber, String otherNames, String lastName, String insuranceProduct, String uploadedFrom, String uploadedTo, String radioRenewal, String radioRequested) {
         String renewal = "";
@@ -2264,28 +2131,27 @@ public class ClientAndroidInterface {
             renewal = " AND isDone == '" + radioRenewal + "'";
         }
         if (radioRequested.equals("N")) {
-            requested = " AND Code == 'N'";
+            requested = " AND ControlNumberId is null";
         }
         if (radioRequested.equals("Y")) {
-            requested = " AND typeof(Code) = 'integer'";
+            requested = " AND typeof(ControlNumberId) = 'integer'";
         }
-        if (!uploadedFrom.equals("") && !uploadedTo.equals("")) {
-            upload = " AND UploadedDate BETWEEN '" + uploadedFrom + "' AND '" + uploadedTo + "'";
-        } else if (!uploadedFrom.equals("") && uploadedTo.equals("")) {
-            upload = " AND UploadedDate = '" + uploadedFrom + "'";
-        } else if (uploadedFrom.equals("") && !uploadedTo.equals("")) {
-            upload = " AND UploadedDate = '" + uploadedTo + "'";
-        } else {
-            upload = "";
-        }
-        String Query = "SELECT * FROM tblRecordedPolicies WHERE InsuranceNumber LIKE '%" + insuranceNumber + "%' AND LastName LIKE '%" + lastName + "%' AND OtherNames LIKE '%" + otherNames + "%' AND ProductName LIKE '%" + insuranceProduct + "%'" + renewal + "" + requested + "" + upload + "";
+
+        String today = AppInformation.DateTimeInfo.getDefaultDateFormatter().format(Calendar.getInstance().getTime());
+
+        String dateFrom = getOrDefault(uploadedFrom, "0001-01-01");
+        String dateTo = getOrDefault(uploadedTo, today);
+
+        upload = " AND UploadedDate BETWEEN '" + dateFrom + "' AND '" + dateTo + "'";
+
+        String Query = "SELECT * FROM tblRecordedPolicies WHERE InsuranceNumber LIKE '%" + insuranceNumber + "%' AND LastName LIKE '%" + lastName + "%' AND OtherNames LIKE '%" + otherNames + "%' AND ProductCode LIKE '%" + insuranceProduct + "%'" + renewal + "" + requested + "" + upload + "";
         JSONArray RecordedPolicies = sqlHandler.getResult(Query, null);
         return RecordedPolicies;
     }
 
     public JSONArray getRecordedPolicies(String insuranceNumber, String otherNames, String lastName, String insuranceProduct, String uploadedFrom, String uploadedTo, String radioRenewal, String requestedFrom, String requestedTo, String PaymentType) {
         String renewal = "";
-        String request = "";
+        String request;
         String upload = "";
         String payment_type = "";
 
@@ -2295,34 +2161,40 @@ public class ClientAndroidInterface {
         if (!PaymentType.equals("")) {
             payment_type = " AND CN.PaymentType == '" + PaymentType + "'";
         }
-        //Uploaded date filter
-        if (!uploadedFrom.equals("") && !uploadedTo.equals("")) {
-            upload = " AND RP.UploadedDate BETWEEN '" + uploadedFrom + "' AND '" + uploadedTo + "'";
+
+        String today = AppInformation.DateTimeInfo.getDefaultDateFormatter().format(Calendar.getInstance().getTime());
+        String earlyDate = "0001-01-01";
+
+        String dateUploadedFrom = getOrDefault(uploadedFrom, earlyDate);
+        String dateUploadedTo = getOrDefault(uploadedTo, today);
+
+        String dateRequestedFrom = getOrDefault(requestedFrom, earlyDate);
+        String dateRequestedTo = getOrDefault(requestedTo, today);
+
+        if ("".equals(uploadedFrom) && "".equals(uploadedTo)) {
+            upload = "";
+        } else {
+            upload = " AND RP.UploadedDate BETWEEN '" + dateUploadedFrom + "' AND '" + dateUploadedTo + "'";
         }
-        if (!uploadedFrom.equals("") && uploadedTo.equals("")) {
-            upload = " AND RP.UploadedDate = '" + uploadedFrom + "'";
-        }
-        if (uploadedFrom.equals("") && !uploadedTo.equals("")) {
-            upload = " AND RP.UploadedDate = '" + uploadedTo + "'";
-        }
-        //Requested date filter
-        if (!requestedFrom.equals("") && !requestedTo.equals("")) {
-            request = " AND RP.UploadedDate BETWEEN '" + requestedFrom + "' AND '" + requestedTo + "'";
-        }
-        if (!requestedFrom.equals("") && requestedTo.equals("")) {
-            request = " AND RP.UploadedDate = '" + requestedFrom + "'";
-        }
-        if (requestedFrom.equals("") && !requestedTo.equals("")) {
-            request = " AND RP.UploadedDate = '" + requestedTo + "'";
-        }
-        String Query = "SELECT * FROM tblRecordedPolicies RP INNER JOIN tblControlNumber CN ON RP.Code = CN.Id WHERE RP.InsuranceNumber LIKE '%" + insuranceNumber + "%' AND RP.LastName LIKE '%" + lastName + "%' AND RP.OtherNames LIKE '%" + otherNames + "%' AND RP.ProductName LIKE '%" + insuranceProduct + "%'" + renewal + " " + request + " " + upload + " " + payment_type + "";
+
+        request = " AND RP.ControlRequestDate BETWEEN '" + dateRequestedFrom + "' AND '" + dateRequestedTo + "'";
+
+        String Query = "SELECT * FROM tblRecordedPolicies RP INNER JOIN tblControlNumber CN ON RP.ControlNumberId = CN.Id WHERE RP.InsuranceNumber LIKE '%" + insuranceNumber + "%' AND RP.LastName LIKE '%" + lastName + "%' AND RP.OtherNames LIKE '%" + otherNames + "%' AND RP.ProductCode LIKE '%" + insuranceProduct + "%'" + renewal + " " + request + " " + upload + " " + payment_type + "";
         JSONArray RecordedPolicies = sqlHandler.getResult(Query, null);
         return RecordedPolicies;
     }
 
+    public String getOrDefault(String value, String defaultValue) {
+        if (value == null || "".equals(value)) {
+            return defaultValue;
+        } else {
+            return value;
+        }
+    }
+
     public JSONArray getRecordedPoliciesWithIdentifier(String InternalIdentifier) {
         String code = getCode(InternalIdentifier);
-        String Query = "SELECT * FROM tblRecordedPolicies WHERE Code = '" + code + "'";
+        String Query = "SELECT * FROM tblRecordedPolicies WHERE ControlNumberId = '" + code + "'";
         JSONArray RecordedPolicies = sqlHandler.getResult(Query, null);
         return RecordedPolicies;
     }
@@ -2340,19 +2212,55 @@ public class ClientAndroidInterface {
         return code;
     }
 
-    public int insertRecordedPolicy(String amountCalculated, String amountConfirmed, String control_number, String InternalIdentifier, String PaymentType) {
+    public JSONArray getRecordedPolicies(String search_string) {
+        String Query = "SELECT * FROM tblRecordedPolicies (WHERE InsuranceNumber LIKE '%" + search_string + "%' OR LastName LIKE '%" + search_string + "%' OR OtherNames LIKE '%" + search_string + "%' OR ProductName LIKE '%" + search_string + "%' OR isDone LIKE '%" + search_string + "%') AND ControlNumberId = 'N'";
+        JSONArray RecordedPolicies = sqlHandler.getResult(Query, null);
+        return RecordedPolicies;
+    }
+
+    public JSONArray getRecordedPolicies(String From, String To) {
+        String Query = "SELECT * FROM tblRecordedPolicies WHERE (UploadedDate BETWEEN '" + From + "' AND '" + To + "') AND ControlNumberId is null";
+        JSONArray RecordedPolicies = sqlHandler.getResult(Query, null);
+        return RecordedPolicies;
+    }
+
+    public JSONArray getPolicyRequestedControlNumber(String search_string) {
+        String Query = "SELECT * FROM tblRecordedPolicies RP LEFT OUTER JOIN tblControlNumber CN on RP.ControlNumberId = CN.Id WHERE RP.InsuranceNumber LIKE '%" + search_string + "%' OR RP.LastName LIKE '%" + search_string + "%' OR RP.OtherNames LIKE '%" + search_string + "%' OR RP.ProductName LIKE '%" + search_string + "%' OR RP.isDone LIKE '%" + search_string + "%'";
+        JSONArray RecordedPolicies = sqlHandler.getResult(Query, null);
+        return RecordedPolicies;
+    }
+
+    public JSONArray getPolicyRequestedControlNumber(String From, String To) {
+        String Query = "SELECT * FROM tblRecordedPolicies RP LEFT OUTER JOIN tblControlNumber CN on RP.ControlNumberId = CN.Id WHERE RP.UploadedDate BETWEEN '" + From + "' AND '" + To + "'";
+        JSONArray RecordedPolicies = sqlHandler.getResult(Query, null);
+        return RecordedPolicies;
+    }
+
+    public JSONArray getPolicyRequestedControlNumber(String From, String To, String i) {
+        String Query = "SELECT * FROM tblRecordedPolicies RP LEFT OUTER JOIN tblControlNumber CN on RP.ControlNumberId = CN.Id WHERE RP.ControlRequestDate BETWEEN '" + From + "' AND '" + To + "'";
+        JSONArray RecordedPolicies = sqlHandler.getResult(Query, null);
+        return RecordedPolicies;
+    }
+
+    public String getRecordedPoliciesById(int RenewalId) {
+        String Query = "SELECT RenewalId, PolicyId, OfficerId, OfficerCode , InsuranceNumber, LastName,OtherNames,ProductCode,ProductName \n" +
+                "RenewalPromptDate, isDone, LocationId, PolicyValue, UploadedDate, ControlRequestDate FROM tblRecordedPolicies WHERE RenewalId=?";
+        String arg[] = {String.valueOf(RenewalId)};
+        JSONArray RecordedPolicies = sqlHandler.getResult(Query, arg);
+        return RecordedPolicies.toString();
+    }
+
+    public int insertControlNumber(String amountCalculated, String amountConfirmed, String control_number, String InternalIdentifier, String PaymentType, String SmsRequired) {
         ContentValues values = new ContentValues();
         values.put("AmountCalculated", String.valueOf(amountCalculated));
         values.put("AmountConfirmed", String.valueOf(amountConfirmed));
         values.put("ControlNumber", String.valueOf(control_number));
         values.put("InternalIdentifier", String.valueOf(InternalIdentifier));
         values.put("PaymentType", String.valueOf(PaymentType));
-        try {//Update to new policy value
-            sqlHandler.insertData("tblControlNumber", values);
+        values.put("SmsRequired", String.valueOf(SmsRequired));
 
-        } catch (UserException e) {
-            e.printStackTrace();
-        }
+        sqlHandler.insertData("tblControlNumber", values);
+
         return getMaxId();
     }
 
@@ -2380,12 +2288,13 @@ public class ClientAndroidInterface {
         return true;//Update Success
     }
 
-    public void updateRecordedPolicy(int Id, int Code) {
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+    public void updateRecordedPolicy(int Id, int ControlNumberId) {
+        SimpleDateFormat format = AppInformation.DateTimeInfo.getDefaultDateFormatter();
+        ;
         Calendar cal = Calendar.getInstance();
         String d = format.format(cal.getTime());
         ContentValues values = new ContentValues();
-        values.put("Code", Code);
+        values.put("ControlNumberId", ControlNumberId);
         values.put("ControlRequestDate", d);
         try {
             sqlHandler.updateData("tblRecordedPolicies", values, "Id = ?", new String[]{String.valueOf(Id)});
@@ -2395,7 +2304,7 @@ public class ClientAndroidInterface {
     }
 
     public void assignControlNumber(String InternalIdentifier, String ControlNumber) {
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat format = AppInformation.DateTimeInfo.getDefaultDateFormatter();
         Calendar cal = Calendar.getInstance();
         String d = format.format(cal.getTime());
         ContentValues values = new ContentValues();
@@ -2424,8 +2333,7 @@ public class ClientAndroidInterface {
             e.printStackTrace();
         }
 
-        //General general = new General();
-        if (general.isNetworkAvailable(mContext) && isOffline == 0) {
+        if (global.isNetworkAvailable() && isOffline == 0) {
             CallSoap cs = new CallSoap();
             cs.setFunctionName("isUniqueReceiptNo");
             if (!cs.isUniqueReceiptNo(ReceiptNo.trim(), CHFID)) {
@@ -2450,7 +2358,7 @@ public class ClientAndroidInterface {
 
     @JavascriptInterface
     public String checkNet() {
-        if (general.isNetworkAvailable(mContext)) {
+        if (global.isNetworkAvailable()) {
             return "true";
         } else {
             return "false";
@@ -2463,7 +2371,7 @@ public class ClientAndroidInterface {
         ((Activity) mContext).runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                ((MainActivity) mContext).openDialogFromPage();
+                ((MainActivity) mContext).PickMasterDataFileDialogFromPage();
                 ((MainActivity) mContext).calledFrom = "htmlpage";
             }
         });
@@ -2536,18 +2444,14 @@ public class ClientAndroidInterface {
 
     @JavascriptInterface
     public int DeletePolicy(int PolicyId) {
-        String PremiumQuery = "DELETE FROM tblPremium WHERE PolicyId=?";
-        String arg[] = {String.valueOf(PolicyId)};
-        JSONArray Premiums = sqlHandler.getResult(PremiumQuery, arg);
-        //Premiums.toString();
-        String PolicyQuery = "DELETE FROM tblPolicy WHERE PolicyId=?";
-        String PolicyArg[] = {String.valueOf(PolicyId)};
-        JSONArray Policy = sqlHandler.getResult(PolicyQuery, PolicyArg);
-        //Policy.toString();
-        //Added by salum 12.12.2017
-        DeleteInsureePolicy(PolicyId, 0);
+        String[] arg = {String.valueOf(PolicyId)};
+        String selector = "PolicyId=?";
+        sqlHandler.deleteData(SQLHandler.tblPremium, selector, arg);
+        sqlHandler.deleteData(SQLHandler.tblRecordedPolicies, selector, arg);
+        sqlHandler.deleteData(SQLHandler.tblInsureePolicy, selector, arg);
+        sqlHandler.deleteData(SQLHandler.tblPolicy, selector, arg);
+        sqlHandler.clearCnAssignedToPolicy(PolicyId);
         return 1;
-
     }
 
     @JavascriptInterface
@@ -2583,32 +2487,38 @@ public class ClientAndroidInterface {
 
     @JavascriptInterface
     public int DeleteFamily(int FamilyId) {
+        String[] familyIdArgument = new String[]{String.valueOf(FamilyId)};
+        String policyIdSubquery = "(SELECT PolicyId FROM tblPolicy WHERE FamilyId = ?)";
 
-        String PremiumQuery = "DELETE FROM tblPremium   \n" +
+        String updateFetchedCNQuery = "UPDATE " + SQLHandler.tblBulkControlNumbers + " " +
+                "SET PolicyId = NULL WHERE Id IS NOT NULL AND PolicyId IN " +
+                policyIdSubquery;
+        sqlHandler.getResult(updateFetchedCNQuery, familyIdArgument);
+
+        String deleteInsertedCNQuery = "DELETE FROM " + SQLHandler.tblBulkControlNumbers + " " +
+                "WHERE Id IS NULL AND PolicyId IN " +
+                policyIdSubquery;
+        sqlHandler.getResult(deleteInsertedCNQuery, familyIdArgument);
+
+        String PremiumQuery = "DELETE FROM tblPremium \n" +
                 "WHERE PolicyId IN \n" +
-                "(SELECT PolicyId FROM tblPolicy WHERE FamilyId = " + FamilyId + " )";
-        sqlHandler.getResult(PremiumQuery, null);
+                policyIdSubquery;
+        sqlHandler.getResult(PremiumQuery, familyIdArgument);
         //Premium.toString();
 
-        String InsureePolicyQuery = "DELETE FROM tblInsureePolicy   \n" +
+        String InsureePolicyQuery = "DELETE FROM tblInsureePolicy \n" +
                 "WHERE PolicyId IN \n" +
-                "(SELECT PolicyId FROM tblPolicy WHERE FamilyId = " + FamilyId + " )";
-        sqlHandler.getResult(InsureePolicyQuery, null);
+                policyIdSubquery;
+        sqlHandler.getResult(InsureePolicyQuery, familyIdArgument);
 
-        String PolicyQuery = "DELETE FROM tblPolicy WHERE FamilyId=?";
-        String PolicyArg[] = {String.valueOf(FamilyId)};
-        sqlHandler.getResult(PolicyQuery, PolicyArg);
-        //Policy.toString();
+        String PolicyQuery = "DELETE FROM tblPolicy WHERE FamilyId = ?";
+        sqlHandler.getResult(PolicyQuery, familyIdArgument);
 
+        String InsureeQuery = "DELETE FROM  tblInsuree WHERE FamilyId = ?";
+        sqlHandler.getResult(InsureeQuery, familyIdArgument);
 
-        String InsureeQuery = "DELETE FROM  tblInsuree WHERE FamilyId=?";
-        String arg[] = {String.valueOf(FamilyId)};
-        sqlHandler.getResult(InsureeQuery, arg);
-        //Insuree.toString();
-
-        String FamilyQuery = "DELETE FROM  tblfamilies WHERE FamilyId=?";
-        String Familyarg[] = {String.valueOf(FamilyId)};
-        sqlHandler.getResult(FamilyQuery, arg);
+        String FamilyQuery = "DELETE FROM  tblFamilies WHERE FamilyId = ?";
+        sqlHandler.getResult(FamilyQuery, familyIdArgument);
         //Families.toString();
         return 1;
     }
@@ -2707,15 +2617,10 @@ public class ClientAndroidInterface {
         return String.valueOf(1);
     }
 
-    public Boolean deleteRecodedPolicy(String Result) {
-        String TableName = "tblRecordedPolicies";
+    public Boolean deleteRecodedPolicy(String policyId) {
         String Where = "PolicyId = ?";
-        String[] WhereArg = {Result};
-        try {
-            sqlHandler.deleteData(TableName, Where, WhereArg);
-        } catch (Exception e) {
-            return false;
-        }
+        String[] WhereArg = {policyId};
+        sqlHandler.deleteData(SQLHandler.tblRecordedPolicies, Where, WhereArg);
 
         return true;
     }
@@ -2760,11 +2665,7 @@ public class ClientAndroidInterface {
         values.put("UploadedDate", "");
         values.put("ControlRequestDate", "");
 
-        try {
-            sqlHandler.insertData("tblRecordedPolicies", values);
-        } catch (UserException e) {
-            e.printStackTrace();
-        }
+        sqlHandler.insertData("tblRecordedPolicies", values);
     }
 
     private JSONArray getProductName(String prodId) {
@@ -2814,7 +2715,7 @@ public class ClientAndroidInterface {
     }
 
     public void updateUploadedDate(int PolicyId) {
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat format = AppInformation.DateTimeInfo.getDefaultDateFormatter();
         Calendar cal = Calendar.getInstance();
         String d = format.format(cal.getTime());
         ContentValues values = new ContentValues();
@@ -2846,9 +2747,9 @@ public class ClientAndroidInterface {
     }
 
     public String getOfflineFeedBack(String OfficerCode) {
-        String Query = "SELECT ClaimId,OfficerId,OfficerCode,CHFID,LastName,OtherNames,HFCode,HFName,ClaimCode,DateFrom,DateTo,IMEI, Phone,FeedbackPromptDate " +
+        String Query = "SELECT ClaimId,ClaimUUID,OfficerId,OfficerCode,CHFID,LastName,OtherNames,HFCode,HFName,ClaimCode,DateFrom,DateTo,IMEI,Phone,FeedbackPromptDate " +
                 "FROM  tblFeedbacks WHERE LOWER(OfficerCode) = ?  AND  isDone = ?";
-        String arg[] = {OfficerCode.toLowerCase(), "N"};
+        String[] arg = {OfficerCode.toLowerCase(), "N"};
         JSONArray FeedBacks = sqlHandler.getResult(Query, arg);
         return FeedBacks.toString();
     }
@@ -2891,18 +2792,18 @@ public class ClientAndroidInterface {
         return c;
     }
 
-    public String CleanFeedBackTable(String ClaimId) {
-        String Query = "DELETE FROM tblFeedbacks WHERE ClaimId = ?";
-        String arg[] = {ClaimId};
+    public String CleanFeedBackTable(String ClaimUUID) {
+        String Query = "DELETE FROM tblFeedbacks WHERE ClaimUUID = ?";
+        String arg[] = {ClaimUUID};
         JSONArray Feedback = sqlHandler.getResult(Query, arg);
         return Feedback.toString();
     }
 
-    public boolean UpdateFeedBack(int ClaimId) {
+    public boolean UpdateFeedBack(String ClaimUUID) {
         ContentValues values = new ContentValues();
         values.put("isDone", "Y");
         try {
-            sqlHandler.updateData("tblFeedbacks", values, "ClaimId = ?", new String[]{String.valueOf(ClaimId)});
+            sqlHandler.updateData("tblFeedbacks", values, "ClaimUUID = ?", new String[]{ClaimUUID});
         } catch (UserException e) {
             e.printStackTrace();
         }
@@ -2927,7 +2828,7 @@ public class ClientAndroidInterface {
     @JavascriptInterface
     public int UpdatePolicy(int PolicyId, String PayDate, int policystatus) throws ParseException {
         ContentValues values = new ContentValues();
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat format = AppInformation.DateTimeInfo.getDefaultDateFormatter();
         String PolicyQuery = "SELECT StartDate FROM tblPolicy WHERE PolicyId = " + PolicyId;
         JSONArray Policy = sqlHandler.getResult(PolicyQuery, null);
         String StartDate = null;
@@ -2965,69 +2866,60 @@ public class ClientAndroidInterface {
 
     @JavascriptInterface
     public void uploadEnrolment() throws Exception {
-
-        pd = new ProgressDialog(mContext);
-        pd = ProgressDialog.show(mContext, "", mContext.getResources().getString(R.string.Uploading));
-
+        ProgressDialog pd = null;
+        pd = ProgressDialog.show(mContext, mContext.getResources().getString(R.string.Sync), mContext.getResources().getString(R.string.SyncProcessing));
+        final ProgressDialog finalPd = pd;
         try {
             new Thread() {
                 public void run() {
                     try {
-//                         enrol_result = EnrolX(0, 0, 0, 0, 1); // Tymczasowe
                         enrol_result = Enrol(0, 0, 0, 0, 1);
                     } catch (UserException e) {
+                        finalPd.dismiss();
                         e.printStackTrace();
                     } catch (JSONException e) {
+                        finalPd.dismiss();
                         e.printStackTrace();
                     } catch (IOException e) {
+                        finalPd.dismiss();
+                        e.printStackTrace();
+                    } catch (NumberFormatException e) {
+                        finalPd.dismiss();
                         e.printStackTrace();
                     }
+                    finalPd.dismiss();
                     if (mylist.size() == 0) {
-                        ((Activity) mContext).runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (enrol_result != 999) {
-                                    //if error is encountered
-                                    if (enrolMessages.size() > 0 && enrolMessages != null) {
-                                        CharSequence[] charSequence = enrolMessages.toArray(new CharSequence[(enrolMessages.size())]);
-                                        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-                                        builder.setTitle(mContext.getResources().getString(R.string.UploadFailureReport));
-                                        builder.setCancelable(false);
-                                        builder.setItems(charSequence, null);
-                                        builder.setPositiveButton(mContext.getResources().getString(R.string.Ok), new DialogInterface.OnClickListener() {
-                                            @Override
-                                            public void onClick(DialogInterface dialogInterface, int i) {
-                                                dialogInterface.dismiss();
-                                            }
-                                        });
-                                        AlertDialog dialog = builder.create();
-                                        dialog.show();
-                                        enrolMessages.clear();
+                        ((Activity) mContext).runOnUiThread(() -> {
+                            if (enrol_result != 999) {
+                                //if error is encountered
+                                if (enrolMessages != null && enrolMessages.size() > 0) {
+                                    CharSequence[] charSequence = enrolMessages.toArray(new CharSequence[0]);
+                                    AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                                    builder.setTitle(mContext.getResources().getString(R.string.UploadFailureReport));
+                                    builder.setCancelable(false);
+                                    builder.setItems(charSequence, null);
+                                    builder.setPositiveButton(mContext.getResources().getString(R.string.Ok), (dialogInterface, i) -> dialogInterface.dismiss());
+                                    AlertDialog dialog = builder.create();
+                                    dialog.show();
+                                    enrolMessages.clear();
 
-                                    } else {
-                                        //deleteImage();
-                                        ShowDialog(mContext.getResources().getString(R.string.FamilyUploaded));
-                                    }
                                 } else {
-                                    ShowDialog(mContext.getResources().getString(R.string.NoDataAvailable));
+                                    ShowDialog(mContext.getResources().getString(R.string.FamilyUploaded));
                                 }
-
-                                //ShowDialog(mContext.getResources().getString(R.string.FamilyUploaded));
+                            } else {
+                                ShowDialog(mContext.getResources().getString(R.string.NoDataAvailable));
                             }
-
                         });
                     }
-
-
-                    pd.dismiss();
                 }
             }.start();
         } catch (Exception e) {
+            if (finalPd.isShowing()) {
+                finalPd.dismiss();
+            }
             e.printStackTrace();
             throw new Exception(e.getMessage());
         }
-
-
     }
 
     @JavascriptInterface
@@ -3053,6 +2945,8 @@ public class ClientAndroidInterface {
                     } catch (JSONException e) {
                         e.printStackTrace();
                     } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (NumberFormatException e) {
                         e.printStackTrace();
                     }
                     if (mylist.size() == 0) {
@@ -3089,6 +2983,14 @@ public class ClientAndroidInterface {
                             }
 
                         });
+                    } else {
+                        ((Activity) mContext).runOnUiThread(
+                                new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        ShowDialog(mylist.toString());
+                                    }
+                                });
                     }
 
 
@@ -3113,6 +3015,10 @@ public class ClientAndroidInterface {
                 }
             }
         }*/
+    public boolean isContributionRequired() {
+        return !getRule("AllowPolicyWithoutPremium")
+                && getRule("ShowPaymentOption", true);
+    }
 
     public ArrayList<String> VerifyFamily() throws JSONException {
         ArrayList<String> FamilyIDs = new ArrayList<String>();
@@ -3125,7 +3031,7 @@ public class ClientAndroidInterface {
                 " ORDER BY FamilyId";
         JSONArray familiesToUpload = sqlHandler.getResult(Query, null);
 
-        if(familiesToUpload.length() > 0){
+        if (familiesToUpload.length() > 0) {
             mylist.clear();
             for (int i = 0; i < familiesToUpload.length(); i++) {
                 result = true;
@@ -3143,7 +3049,7 @@ public class ClientAndroidInterface {
                         "INNER JOIN tblInsuree I ON I.InsureeId = F.InsureeId WHERE F.InsureeId != ''";
                 Query += " AND F.FamilyId = " + FamilyId + "";
                 JSONArray familyArray = sqlHandler.getResult(Query, null);
-                if(familyArray.length() == 0){
+                if (familyArray.length() == 0) {
                     result = false;
                 }
 
@@ -3153,8 +3059,8 @@ public class ClientAndroidInterface {
                         "WHERE I.InsureeId != ''";
                 Query += " AND I.FamilyId  = " + FamilyId + "";
                 JSONArray insureesArray = sqlHandler.getResult(Query, null);
-                if(IsOffline == 1){
-                    if(insureesArray.length() == 0){
+                if (IsOffline == 1) {
+                    if (insureesArray.length() == 0) {
                         result = false;
                     }
                 }
@@ -3164,9 +3070,9 @@ public class ClientAndroidInterface {
                 Query += " WHERE FamilyId = " + FamilyId + "";
                 JSONArray policiesArray = sqlHandler.getResult(Query, null);
 
-                if(IsOffline == 1){
+                if (IsOffline == 1) {
 
-                    if(policiesArray.length() == 0){
+                    if (policiesArray.length() == 0) {
                         result = false;
                     }
                 }
@@ -3177,19 +3083,19 @@ public class ClientAndroidInterface {
                         "INNER JOIN tblPolicy PL ON PL.PolicyId = PR.PolicyId";
                 Query += " WHERE FamilyId = " + FamilyId;
                 JSONArray premiumsArray = sqlHandler.getResult(Query, null);
-                if(IsOffline == 1){
-                    if(!getRule("AllowPolicyWithoutPremium")){
-                        if(premiumsArray.length() == 0){
+                if (IsOffline == 1) {
+                    if (isContributionRequired()) {
+                        if (premiumsArray.length() == 0) {
                             JSONObject family = familyArray.getJSONObject(0);
                             String chfid = family.getString("HOFCHFID");
                             mylist.add("Family " + chfid + " " + mContext.getResources().getString(R.string.WithoutPolicyPremium));
                             result = false;
                         }
                     }
-                }else{
-                    if(policiesArray.length() != 0){
-                        if(!getRule("AllowPolicyWithoutPremium")){
-                            if(premiumsArray.length() == 0){
+                } else {
+                    if (policiesArray.length() != 0) {
+                        if (isContributionRequired()) {
+                            if (premiumsArray.length() == 0) {
                                 JSONObject family = familyArray.getJSONObject(0);
                                 String chfid = family.getString("HOFCHFID");
                                 mylist.add("Family " + chfid + " " + mContext.getResources().getString(R.string.WithoutPolicyPremium));
@@ -3199,128 +3105,23 @@ public class ClientAndroidInterface {
                     }
                 }
 
-                if(!VerifyPhoto(insureesArray)){
+                if (!VerifyPhoto(insureesArray)) {
                     result = false;
                 }
-                if(result == true){
+                if (result) {
                     FamilyIDs.add(FamilyId);
                 }
             }
-        }else{
+        } else {
             result = false;
         }
 
-        if(mylist.size() != 0){
+        if (mylist.size() != 0) {
             addCategoryBox();
             mylist.clear();
         }
         return FamilyIDs;
     }
-
-//    public ArrayList<String> VerifyFamily() throws JSONException {
-//        ArrayList<String> FamilyIDs = new ArrayList<String>();
-//        boolean result = true;
-//        int IsOffline = 1;
-//        String FamilyId = null;
-//
-//        String Query = null;
-//        Query = "SELECT FamilyId,isOffline  FROM tblFamilies WHERE InsureeId != ''" +
-//                " ORDER BY FamilyId";
-//        JSONArray familiesToUpload = sqlHandler.getResult(Query, null);
-//
-//        if (familiesToUpload.length() > 0) {
-//            mylist.clear();
-//            for (int i = 0; i < familiesToUpload.length(); i++) {
-//                result = true;
-//                JSONObject object = null;
-//                try {
-//                    object = familiesToUpload.getJSONObject(i);
-//                } catch (JSONException e) {
-//                    e.printStackTrace();
-//                }
-//
-//                FamilyId = object != null ? object.getString("FamilyId") : null;
-//                String s1 = object.getString("isOffline");
-//                if (s1.equals("true") || s1.equals("1")) IsOffline = 1;
-//                else IsOffline = 0;
-//
-//                Query = "SELECT F.FamilyId, F.InsureeId, F.LocationId, I.CHFID AS HOFCHFID, NULLIF(F.Poverty,'null') Poverty, NULLIF(F.FamilyType,'null') FamilyType, NULLIF(F.FamilyAddress,'null') FamilyAddress, NULLIF(F.Ethnicity,'null') Ethnicity, NULLIF(F.ConfirmationNo,'null') ConfirmationNo, F.ConfirmationType ConfirmationType,F.isOffline FROM tblFamilies F\n" +
-//                        "INNER JOIN tblInsuree I ON I.InsureeId = F.InsureeId WHERE F.InsureeId != ''";
-//                Query += " AND F.FamilyId = " + FamilyId + "";
-//                JSONArray familyArray = sqlHandler.getResult(Query, null);
-//                if (familyArray.length() == 0) {
-//                    result = false;
-//                }
-//
-//                //get Insurees
-//                Query = "SELECT I.InsureeId, I.FamilyId, I.CHFID, I.LastName, I.OtherNames, I.DOB, I.Gender, NULLIF(I.Marital,'null') Marital, I.isHead, NULLIF(I.IdentificationNumber,'null') IdentificationNumber, NULLIF(I.Phone,'null') Phone, REPLACE(I.PhotoPath, RTRIM(PhotoPath, REPLACE(PhotoPath, '/', '')), '') PhotoPath, NULLIF(I.CardIssued,'null') CardIssued, NULLIF(I.Relationship,'null') Relationship, NULLIF(I.Profession,'null') Profession, NULLIF(I.Education,'null') Education, NULLIF(I.Email,'null') Email, CASE WHEN I.TypeOfId='null' THEN null ELSE I.TypeOfId END TypeOfId, NULLIF(I.HFID,'null') HFID, NULLIF(I.CurrentAddress,'null') CurrentAddress, NULLIF(I.GeoLocation,'null') GeoLocation, NULLIF(I.CurVillage,'null') CurVillage,I.isOffline \n" +
-//                        "FROM tblInsuree I \n" +
-//                        "WHERE I.InsureeId != ''";
-//                Query += " AND I.FamilyId  = " + FamilyId + "";
-//                JSONArray insureesArray = sqlHandler.getResult(Query, null);
-//                if (IsOffline == 1) {
-//                    if (insureesArray.length() == 0) {
-//                        result = false;
-//                    }
-//                }
-//                //get Policies
-//                Query = "SELECT PolicyId, FamilyId, EnrollDate, StartDate, NULLIF(EffectiveDate,'null') EffectiveDate, ExpiryDate, Policystatus, PolicyValue, ProdId, OfficerId, PolicyStage, isOffline\n" +
-//                        "FROM tblPolicy ";
-//                Query += " WHERE FamilyId = " + FamilyId + "";
-//                JSONArray policiesArray = sqlHandler.getResult(Query, null);
-//
-//                if (IsOffline == 1) {
-//
-//                    if (policiesArray.length() == 0) {
-//                        result = false;
-//                    }
-//                }
-//
-//                //get Premiums
-//                Query = "SELECT PR.PremiumId, PR.PolicyId, NULLIF(PR.PayerId,'null') PayerId, PR.Amount, PR.Receipt, PR.PayDate, PR.PayType, PR.isPhotoFee,PR.isOffline\n" +
-//                        "FROM tblPremium PR\n" +
-//                        "INNER JOIN tblPolicy PL ON PL.PolicyId = PR.PolicyId";
-//                Query += " WHERE FamilyId = " + FamilyId;
-//                JSONArray premiumsArray = sqlHandler.getResult(Query, null);
-//                if (IsOffline == 1) {
-//                    if (!getRule("AllowPolicyWithoutPremium")) {
-//                        if (premiumsArray.length() == 0) {
-//                            JSONObject family = familyArray.getJSONObject(0);
-//                            String chfid = family.getString("HOFCHFID");
-//                            mylist.add("Family " + chfid + " " + mContext.getResources().getString(R.string.WithoutPolicyPremium));
-//                            result = false;
-//                        }
-//                    }
-//                } else {
-//                    if (policiesArray.length() != 0) {
-//                        if (!getRule("AllowPolicyWithoutPremium")) {
-//                            if (premiumsArray.length() == 0) {
-//                                JSONObject family = familyArray.getJSONObject(0);
-//                                String chfid = family.getString("HOFCHFID");
-//                                mylist.add("Family " + chfid + " " + mContext.getResources().getString(R.string.WithoutPolicyPremium));
-//                                result = false;
-//                            }
-//                        }
-//                    }
-//                }
-//
-//                if (!VerifyPhoto(insureesArray)) {
-//                    result = false;
-//                }
-//                if (result == true) {
-//                    FamilyIDs.add(FamilyId);
-//                }
-//            }
-//        } else {
-//            result = false;
-//        }
-//
-//        if (mylist.size() != 0) {
-//            addCategoryBox();
-//            mylist.clear();
-//        }
-//        return FamilyIDs;
-//    }
 
     public boolean VerifyPhoto(JSONArray insurees) throws JSONException {
         boolean result = true;
@@ -3339,7 +3140,7 @@ public class ClientAndroidInterface {
 
             if (IsOffline == 1) {
                 if (!getRule("AllowInsureeWithoutPhoto")) {
-                    if (PhotoPath.length() == 0 && PhotoPath.equals("null") && PhotoPath == null) {
+                    if (PhotoPath == null || PhotoPath.length() == 0 || PhotoPath.equals("null")) {
                         String chfid = (Insureeobject.getString("CHFID"));
                         String lastname = (Insureeobject.getString("LastName"));
                         String othername = (Insureeobject.getString("OtherNames"));
@@ -3407,16 +3208,8 @@ public class ClientAndroidInterface {
 
 
             if (IsOffline == 2) IsOffline = 0;
-        /*    } catch (JSONException e) {
-                e.printStackTrace();
-            }*/
-/*            if(CallerId == 2){
-                args = new String[]{""};
-            }else{
-                args = new String[]{FamilyId};
-            }*/
 
-            Query = "SELECT F.FamilyId, ABS(F.InsureeId) AS InsureeId, F.LocationId, I.CHFID AS HOFCHFID, NULLIF(F.Poverty,'null') Poverty, NULLIF(F.FamilyType,'null') FamilyType, NULLIF(F.FamilyAddress,'null') FamilyAddress, NULLIF(F.Ethnicity,'null') Ethnicity, NULLIF(F.ConfirmationNo,'null') ConfirmationNo, F.ConfirmationType ConfirmationType,F.isOffline isOffline FROM tblFamilies F\n" +
+            Query = "SELECT F.FamilyId AS FamilyId, F.InsureeId AS InsureeId, F.LocationId, I.CHFID AS HOFCHFID, NULLIF(F.Poverty,'null') Poverty, NULLIF(F.FamilyType,'null') FamilyType, NULLIF(F.FamilyAddress,'null') FamilyAddress, NULLIF(F.Ethnicity,'null') Ethnicity, NULLIF(F.ConfirmationNo,'null') ConfirmationNo, F.ConfirmationType ConfirmationType,F.isOffline isOffline FROM tblFamilies F\n" +
                     "INNER JOIN tblInsuree I ON I.InsureeId = F.InsureeId WHERE";
 
             if (CallerId != 2) {
@@ -3453,26 +3246,33 @@ public class ClientAndroidInterface {
 
                 String s1 = ob1.getString("isOffline");
                 if (s1.equals("true") || s1.equals("1")) Offline = "1";
-                else if(s1.equals("2")) Offline = "2";
+                else if (s1.equals("2")) Offline = "2";
                 else Offline = "0";
 
-                if (Offline.equals("2")) {
-                    String newFamilyId = "-" + FId;
-                    ob1.put("FamilyId", newFamilyId);
+                if (Offline.equals("2") || Offline.equals("0")) {
+                    // FId = "-" + FId;
+                    ob1.put("FamilyId", FId);
                     ob1.put("isOffline", 0);
                 }
-                if(typeofId == "0"){
+                if (typeofId.equals("0")) {
                     ob1.put("FamilyType", "");
                 }
-                if (ConfirmationType == "0") {
+                if (ConfirmationType.equals("0") || ConfirmationType.equals("null")) {
                     ob1.put("ConfirmationType", "");
                 }
+                JSONObject familySMS = getFamilySMS(FId);
+                if (familySMS != null) {
+                    // Ensure ApprovalOfSMS Is sent as Boolean
+                    familySMS.put("ApprovalOfSMS",
+                            familySMS.getString("ApprovalOfSMS").equals("1"));
+                }
+                ob1.put("FamilySMS", familySMS);
             }
             newFamilyArray.put(ob1);
             familyArray = newFamilyArray;
 
             //get Insureesf
-            Query = "SELECT ABS(I.InsureeId) AS InsureeId, I.FamilyId, I.CHFID, I.LastName, I.OtherNames, I.DOB, I.Gender, NULLIF(I.Marital,'null') Marital, I.isHead, NULLIF(I.IdentificationNumber,'null') IdentificationNumber, NULLIF(I.Phone,'null') Phone, REPLACE(I.PhotoPath, RTRIM(PhotoPath, REPLACE(PhotoPath, '/', '')), '') PhotoPath, NULLIF(I.CardIssued,'null') CardIssued, NULLIF(I.Relationship,'null') Relationship, NULLIF(I.Profession,'null') Profession, NULLIF(I.Education,'null') Education, NULLIF(I.Email,'null') Email, CASE WHEN I.TypeOfId='null' THEN null ELSE I.TypeOfId END TypeOfId, NULLIF(I.HFID,'null') HFID, NULLIF(I.CurrentAddress,'null') CurrentAddress, NULLIF(I.GeoLocation,'null') GeoLocation, NULLIF(I.CurVillage,'null') CurVillage,I.isOffline \n" +
+            Query = "SELECT I.InsureeId AS InsureeId, I.FamilyId AS FamilyId, I.CHFID, I.LastName, I.OtherNames, I.DOB, I.Gender, NULLIF(I.Marital,'') Marital, I.isHead, NULLIF(I.IdentificationNumber,'null') IdentificationNumber, NULLIF(I.Phone,'null') Phone, REPLACE(I.PhotoPath, RTRIM(PhotoPath, REPLACE(PhotoPath, '/', '')), '') PhotoPath, NULLIF(I.CardIssued,'null') CardIssued, NULLIF(I.Relationship,'null') Relationship, NULLIF(I.Profession,'null') Profession, NULLIF(I.Education,'null') Education, NULLIF(I.Email,'null') Email, CASE WHEN I.TypeOfId='null' THEN null ELSE I.TypeOfId END TypeOfId, NULLIF(I.HFID,'null') HFID, NULLIF(I.CurrentAddress,'null') CurrentAddress, NULLIF(I.GeoLocation,'null') GeoLocation, NULLIF(I.CurVillage,'null') CurVillage,I.isOffline, I.Vulnerability \n" +
                     "FROM tblInsuree I \n" + " WHERE ";
             if (CallerId != 2) {
                 Query += " I.FamilyId = " + FamilyId + " \n";
@@ -3482,26 +3282,26 @@ public class ClientAndroidInterface {
                     }
                 }
             } else {
+                Query += "I.InsureeId < 0 AND (";
                 for (int j = 0; j < verifiedId.size(); j++) {
                     if (getFamilyStatus(Integer.parseInt(verifiedId.get(j))) == 0) {
-                        Query += "I.InsureeId < 0 AND ( ";
                         if ((verifiedId.size() - j) == 1) {
-                            Query += " I.FamilyId == " + verifiedId.get(j) + " )";
+                            Query += " I.FamilyId == " + verifiedId.get(j) + "";
                         } else {
-                            Query += " I.FamilyId == " + verifiedId.get(j) + " OR";
+                            Query += " I.FamilyId == " + verifiedId.get(j) + " OR ";
                         }
                     } else {
                         if ((verifiedId.size() - j) == 1) {
                             Query += " I.FamilyId == " + verifiedId.get(j) + "";
                         } else {
-                            Query += " I.FamilyId == " + verifiedId.get(j) + " OR";
+                            Query += " I.FamilyId == " + verifiedId.get(j) + " OR ";
                         }
                     }
-
                 }
                 if (verifiedId.size() == 0) {
                     Query += " I.InsureeId != ''";
                 }
+                Query += ")";
             }
 
 
@@ -3522,11 +3322,7 @@ public class ClientAndroidInterface {
                 for (int j = 0; j < insureesArray.length(); j++) {
                     JSONObject ob = insureesArray.getJSONObject(j);
                     String typeofId = ob.getString("TypeOfId");
-                    String FId = ob.getString("FamilyId");
-                    if (Offline.equals("2")) {
-                        String newFamilyId = "-" + FId;
-                        ob.put("FamilyId", newFamilyId);
-                    }
+
                     if (typeofId == "0") {
                         ob.put("TypeOfId", "");
                         newInsureesArray.put(ob);
@@ -3536,14 +3332,11 @@ public class ClientAndroidInterface {
                 }
 
                 insureesArray = newInsureesArray;
-            /*    } catch (JSONException e) {
-                    e.printStackTrace();
-                }*/
             }
 
             //get Policies
-            Query = "SELECT PolicyId, FamilyId, EnrollDate, StartDate, NULLIF(EffectiveDate,'null') EffectiveDate, ExpiryDate, Policystatus, PolicyValue, ProdId, OfficerId, PolicyStage, isOffline\n" +
-                    "FROM tblPolicy WHERE ";
+            Query = "SELECT p.PolicyId AS PolicyId, FamilyId AS FamilyId, EnrollDate, StartDate, NULLIF(EffectiveDate,'null') EffectiveDate, ExpiryDate, Policystatus, PolicyValue, ProdId, OfficerId, PolicyStage, isOffline, bcn.ControlNumber \n" +
+                    "FROM tblPolicy p LEFT JOIN tblBulkControlNumbers bcn on p.PolicyId=bcn.PolicyId WHERE ";
             if (CallerId != 2) {
                 Query += " FamilyId = " + FamilyId;
             } else {
@@ -3598,7 +3391,7 @@ public class ClientAndroidInterface {
                 if (CallerId == 1 || CallerId == 2) {
                     if (IsOffline == 1) {
                         if (premiumsArray.length() == 0) {
-                            if (!getRule("AllowPolicyWithoutPremium")) {
+                            if (isContributionRequired()) {
                                 String chfid = null;
                                 String lastname = null;
                                 String othername = null;
@@ -3620,19 +3413,12 @@ public class ClientAndroidInterface {
                             JSONObject ob = null;
                             for (int j = 0; j < policiesArray.length(); j++) {
                                 ob = policiesArray.getJSONObject(j);
-                                String FId = ob.getString("FamilyId");
-                                if (Offline.equals("2")) {
-                                    String newFamilyId = "-" + FId;
-                                    ob.put("FamilyId", newFamilyId);
-                                    newpoliciesArray.put(ob);
-                                } else {
-                                    newpoliciesArray.put(ob);
-                                }
+                                newpoliciesArray.put(ob);
                             }
                             policiesArray = newpoliciesArray;
 
                             if (premiumsArray.length() == 0) {
-                                if (!getRule("AllowPolicyWithoutPremium")) {
+                                if (isContributionRequired()) {
                                     String chfid = null;
                                     String lastname = null;
                                     String othername = null;
@@ -3653,25 +3439,21 @@ public class ClientAndroidInterface {
                 }
 
                 //get InsureePolicy
-                Query = "SELECT ABS(DISTINCT(IP.InsureeId)) AS InsureeId,IP.PolicyId,IP.EffectiveDate\n" +
+                Query = "SELECT DISTINCT(IP.InsureeId) AS InsureeId,IP.PolicyId,IP.EffectiveDate\n" +
                         "FROM tblInsureePolicy IP\n" +
                         "INNER JOIN tblPolicy PL ON PL.PolicyId = IP.PolicyId";
                 if (CallerId == 0) Query += " AND  IP.InsureeId = " + oInsureeId;
+                if (CallerId == 1) Query += " AND  PL.FamilyId = " + FamilyId;
                 if (CallerId != 2) {
                     Query += " WHERE PL.FamilyId = " + FamilyId;
                 }
-
                 JSONArray InsureePolicyArray = sqlHandler.getResult(Query, null);
 
                 QueryIP = Query;
 
-
                 JSONObject objEnrol = new JSONObject();
-                //try {
+
                 objEnrol.put("Family", familyArray);
-       /*     } catch (JSONException e) {
-                e.printStackTrace();
-            }*/
                 String Family = objEnrol.toString();
 
                 objEnrol = new JSONObject();
@@ -3684,19 +3466,11 @@ public class ClientAndroidInterface {
                 String Insuree = String.valueOf(objEnrol);
 
                 objEnrol = new JSONObject();
-                //try {
                 objEnrol.put("Policy", policiesArray);
-/*            } catch (JSONException e) {
-                e.printStackTrace();
-            }*/
                 String Policy = objEnrol.toString();
 
                 objEnrol = new JSONObject();
-                //try {
                 objEnrol.put("Premium", premiumsArray);
- /*           } catch (JSONException e) {
-                e.printStackTrace();
-            }*/
                 String Premium = objEnrol.toString();
 
                 objEnrol = new JSONObject();
@@ -3720,24 +3494,36 @@ public class ClientAndroidInterface {
                         for (int j = 0; j < insureesArray.length(); j++) {
                             tempInsureesArray = insureesArray;
                             JSONObject imgObj = new JSONObject();
-                            imgObj.put("ImageName", InsureeImages[j].ImageName);
-                            imgObj.put("ImageContent", Base64.encodeToString(InsureeImages[j].ImageContent, Base64.DEFAULT));
-                            tempInsureesArray.getJSONObject(j).put("picture", imgObj);
+
+                            if (InsureeImages[j] != null) {
+                                imgObj.put("ImageName", InsureeImages[j].ImageName);
+                                imgObj.put("ImageContent", Base64.encodeToString(InsureeImages[j].ImageContent, Base64.DEFAULT));
+                                tempInsureesArray.getJSONObject(j).put("picture", imgObj);
+                            }
                         }
 
                         familyObj.put("insurees", tempInsureesArray);
 
                         // Policy + premium
-                        JSONArray tempPoliciesArray = new JSONArray();
 
                         for (int j = 0; j < policiesArray.length(); j++) {
-                            tempPoliciesArray = policiesArray;
-                            JSONObject premiumObj = premiumsArray.getJSONObject(j);
-                            tempPoliciesArray.getJSONObject(j).put("premium", premiumObj);
+                            JSONArray policyPremiums = new JSONArray();
+                            String policyId = policiesArray.getJSONObject(j).getString("PolicyId");
+                            for (int k = 0; k < premiumsArray.length(); k++) {
+                                JSONObject premiumObject = premiumsArray.getJSONObject(k);
+                                if (StringUtils.equals(policyId, premiumObject.getString("PolicyId"))) {
+                                    policyPremiums.put(premiumObject);
+                                }
+                            }
+                            policiesArray.getJSONObject(j).put("premium", policyPremiums);
                         }
 
-                        familyObj.put("policies", tempPoliciesArray);
+                        familyObj.put("policies", policiesArray);
 
+                        if (mylist.size() != 0) {
+                            addCategoryBox();
+                            break;
+                        }
                         // InsureePolicy
                         familyObj.put("insureePolicy", InsureePolicyArray);
 
@@ -3745,7 +3531,10 @@ public class ClientAndroidInterface {
                         familyArr.put(familyObj);
                         resultObj.put("family", familyArr);
 
-//                        System.out.println("*******resultObj******" + resultObj + "*****");
+                        if (mylist.size() != 0) {
+                            addCategoryBox();
+                            break;
+                        }
 
                         ToRestApi rest = new ToRestApi();
                         HttpResponse response = rest.postToRestApiToken(resultObj, "family");
@@ -3753,20 +3542,44 @@ public class ClientAndroidInterface {
                         HttpEntity entity = response.getEntity();
                         String responseString = EntityUtils.toString(entity);
 
-                        EnrolResult = Integer.parseInt(responseString);
+                        boolean parsingErrorOccured = false;
+                        try {
+                            JSONObject responseObject = new JSONObject(responseString);
+                            if (responseObject.has("error_occured") && responseObject.getBoolean("error_occured")) {
+                                EnrolResult = -400;
+                                enrolMessages.add(responseObject.getString("error_message"));
+                            } else if (responseObject.has("response")) {
+                                EnrolResult = responseObject.getInt("response");
+                            } else {
+                                throw new JSONException("Response does not have required information");
+                            }
+                        } catch (JSONException e) {
+                            EnrolResult = -400;
+                            parsingErrorOccured = true;
+                        }
+
+                        if (parsingErrorOccured) {
+                            try {
+                                EnrolResult = Integer.parseInt(responseString);
+                            } catch (NumberFormatException e) {
+                                Log.e("ENROLL", "Sync response is not a valid json or int");
+                            }
+                        }
                     } else {
                         addCategoryBox();
                         break;
                     }
                 } else {
-                    if (QueryF != "") {
+                    if (!"".equals(QueryF)) {
                         fname = sqlHandler.getResultXML2(QueryF, QueryI, QueryPL, QueryPR, QueryIP, global.getOfficerCode(), global.getOfficerId());
+                        FamilyPictures(insureesArray, 2);
                     }
                     EnrolResult = 0;
                 }
                 int g = 0;
 //             EnrolResult=1001;
                 if (EnrolResult >= 0) {
+                    updatePolicyRecords(Policy);
                     if (IsOffline == 0 && EnrolResult > 0) {
                         ContentValues values = new ContentValues();
                         String UpdateQuery = "";
@@ -3807,7 +3620,6 @@ public class ClientAndroidInterface {
                 } else {
                     String ErrMsg = null;
                     switch (EnrolResult) {
-
                         case -1:
                             ErrMsg = "[" + CHFNumber + "] " + mContext.getString(R.string.MissingHOF);
                             break;
@@ -3855,6 +3667,19 @@ public class ClientAndroidInterface {
         return EnrolResult;
     }
 
+    private JSONObject emptyFamilySMS() {
+        JSONObject familySms = new JSONObject();
+        try {
+            familySms.put("ApprovalOfSMS", null);
+            familySms.put("LanguageOfSMS", null);
+            familySms.put("FamilyID", null);
+            return familySms;
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     public void updatePolicyRecords(String policy) throws JSONException {
         JSONObject object = new JSONObject(policy);
         JSONObject ob = null;
@@ -3875,14 +3700,13 @@ public class ClientAndroidInterface {
         Calendar cal = Calendar.getInstance();
         String d = format.format(cal.getTime());*/
 
-        String targetPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/IMIS/Family/";
+        String targetPath = global.getSubdirectory("Family");
         File file = new File(targetPath, fname);
         file.delete();
     }
 
     public void deleteUnzippedPhotos() {
-        global = (Global) mContext.getApplicationContext();
-        String targetPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/IMIS/Photos";
+        String targetPath = global.getSubdirectory("Photos");
         File folder = new File(targetPath);
         for (int i = 0; i < folder.listFiles().length; i++) {
             if (folder.listFiles()[i].isFile()) {
@@ -3894,11 +3718,8 @@ public class ClientAndroidInterface {
 
     public InsureeImages[] FamilyPictures(JSONArray insurees, int CallerId) throws IOException {
 
-        String Path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/IMIS/Photos";
+        String Path = global.getSubdirectory("Photos");
         //Here we are creating a directory
-        File MyDir = new File(Path);
-        MyDir.mkdir();
-
 
         InsureeImages[] images = new InsureeImages[insurees.length()];
 
@@ -3921,8 +3742,6 @@ public class ClientAndroidInterface {
                 if (s1.equals("true") || s1.equals("1")) IsOffline = 1;
                 else if (s1.equals("false") || s1.equals("0")) IsOffline = 0;
                 else IsOffline = Integer.parseInt(s1);
-
-//                IsOffline = Integer.parseInt(Insureeobject.getString("isOffline"));
 
                 if (PhotoPath.length() > 0 && !PhotoPath.equals("null") && PhotoPath != null) {
                     FileName = PhotoPath;
@@ -3966,6 +3785,8 @@ public class ClientAndroidInterface {
                             images[j] = img;
                         } else {
                             mylist.add("Insuree " + chfid + " " + " " + lastname + " " + " " + othername + " " + mContext.getResources().getString(R.string.WithoutPhoto));
+                            addCategoryBox();
+                            break;
                         }
                     } else {
                         byte[] empty = new byte[0];
@@ -3996,15 +3817,12 @@ public class ClientAndroidInterface {
         return ( data.getData() );
     }*/
 
-    @TargetApi(Build.VERSION_CODES.KITKAT)
+    //@TargetApi(Build.VERSION_CODES.KITKAT)
     public static void copy(String name, byte[] data) throws IOException {
         OutputStream out;
-        String root = Environment.getExternalStorageDirectory().getAbsolutePath() + "/IMIS/";
-        File createDir = new File(root + "Photos" + File.separator);
-        if (!createDir.exists()) {
-            createDir.mkdir();
-        }
-        File file = new File(root + "Photos" + File.separator + name);
+        String photosDir = Global.getGlobal().getSubdirectory("Photos");
+
+        File file = new File(photosDir + File.separator + name);
         file.createNewFile();
         out = new FileOutputStream(file);
 
@@ -4013,17 +3831,10 @@ public class ClientAndroidInterface {
     }
 
     public void xmlWriter(String ImgName, byte[] imgcontent) throws IOException {
-        String Path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/IMIS/";
-        //Here we are creating a directory
-        File MyDir = new File(Path);
-        MyDir.mkdir();
-
-        File Dir = new File(Path + "EnrollmentXML");
-        Dir.mkdir();
-
+        File Dir = new File(global.getSubdirectory("EnrolmentXML"));
 
         //Here we are giving name to the XML file
-        String FileName = "EnrollmentXml.xml";
+        String FileName = "EnrolmentXml.xml";
 
         //Here we are creating file in that directory
         File EnrollmentXML = new File(Dir, FileName);
@@ -4060,9 +3871,9 @@ public class ClientAndroidInterface {
         String d = format.format(cal.getTime());
         String dzip = formatZip.format(cal.getTime());
 
-        String targetPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/IMIS/Enrolment/Enrolment_" + global.getOfficerCode() + "_" + d + ".xml";
-        String zipFilePath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/IMIS/Enrolment/Enrolment_" + global.getOfficerCode() + "_" + dzip + ".rar";
-        //String unzippedFolderPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/IMIS/Enrolment/Enrolment_"+global.getOfficerCode()+"_"+d+".xml";
+        String targetPath = global.getSubdirectory("Enrolment") + File.separator + "Enrolment_" + global.getOfficerCode() + "_" + d + ".xml";
+        String zipFilePath = global.getSubdirectory("Enrolment") + File.separator + "Enrolment_" + global.getOfficerCode() + "_" + dzip + ".rar";
+        //String unzippedFolderPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/IMIS/Enrolment/Enrolment_"+global.getOfficerCode()+"_"+d+".xml";
         String password = getRarPwd();
 
         Compressor.zip(targetPath, zipFilePath, password);
@@ -4077,10 +3888,10 @@ public class ClientAndroidInterface {
         String d = format.format(cal.getTime());
         String dzip = formatZip.format(cal.getTime());
 
-        String targetPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/IMIS/Photos/";
-        String targetPathFamily = Environment.getExternalStorageDirectory().getAbsolutePath() + "/IMIS/Family/";
-        String zipFilePath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/IMIS/Enrolment/Enrolment_" + global.getOfficerCode() + "_" + dzip + ".rar";
-        //String unzippedFolderPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/IMIS/Photos_"+global.getOfficerCode()+"_"+d+"";
+        String targetPath = global.getSubdirectory("Photos");
+        String targetPathFamily = global.getSubdirectory("Family");
+        String zipFilePath = global.getSubdirectory("Enrolment") + File.separator + "Enrolment_" + global.getOfficerCode() + "_" + dzip + ".rar";
+        //String unzippedFolderPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/IMIS/Photos_"+global.getOfficerCode()+"_"+d+"";
         String password = getRarPwd();
 
         ArrayList<File> FilesToAdd = new ArrayList<File>();
@@ -4102,9 +3913,9 @@ public class ClientAndroidInterface {
     }
 
     public boolean unZipWithPassword(String fileName, String password) {
-        String targetPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/IMIS/Database/" + fileName;
-        String unzippedFolderPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/IMIS/Database/";
-        //String unzippedFolderPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/IMIS/Enrolment/Enrolment_"+global.getOfficerCode()+"_"+d+".xml";
+        String targetPath = fileName;
+        String unzippedFolderPath = global.getSubdirectory("Database");
+        //String unzippedFolderPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/IMIS/Enrolment/Enrolment_"+global.getOfficerCode()+"_"+d+".xml";
         //here we not don't have password set yet so we pass password from Edit Text rar input
         try {
             Compressor.unzip(targetPath, unzippedFolderPath, password);
@@ -4115,9 +3926,9 @@ public class ClientAndroidInterface {
     }
 
     public boolean unZip(String FileName) {
-        String targetPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/IMIS/Database/" + FileName;
-        String unzippedFolderPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/IMIS/Database/";
-        //String unzippedFolderPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/IMIS/Enrolment/Enrolment_"+global.getOfficerCode()+"_"+d+".xml";
+        String targetPath = global.getSubdirectory("Database") + File.separator + FileName;
+        String unzippedFolderPath = global.getSubdirectory("Database");
+        //String unzippedFolderPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/IMIS/Enrolment/Enrolment_"+global.getOfficerCode()+"_"+d+".xml";
         String password = getRarPwd();
 
         try {
@@ -4129,9 +3940,9 @@ public class ClientAndroidInterface {
     }
 
     public boolean unZipFeedbacksRenewals(String FileName) {
-        String targetPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/IMIS/" + FileName;
-        String unzippedFolderPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/IMIS/";
-        //String unzippedFolderPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/IMIS/Enrolment/Enrolment_"+global.getOfficerCode()+"_"+d+".xml";
+        String targetPath = global.getSubdirectory("Database") + File.separator + FileName;
+        String unzippedFolderPath = global.getSubdirectory("Database");
+        //String unzippedFolderPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/IMIS/Enrolment/Enrolment_"+global.getOfficerCode()+"_"+d+".xml";
 
         String password = getRarPwd();
         try {
@@ -4152,9 +3963,9 @@ public class ClientAndroidInterface {
         String d = format.format(cal.getTime());
 
 
-        String targetPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/IMIS/";
-        String zipFilePath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/IMIS/" + "Master" + FileType + ".rar";
-        //String unzippedFolderPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/IMIS/Photos_"+global.getOfficerCode()+"_"+d+"";
+        String targetPath = global.getMainDirectory();
+        String zipFilePath = global.getMainDirectory() + File.separator + "Master" + FileType + ".rar";
+        //String unzippedFolderPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/IMIS/Photos_"+global.getOfficerCode()+"_"+d+"";
 
         String password = getRarPwd();
 
@@ -4228,7 +4039,7 @@ public class ClientAndroidInterface {
 
     public void createZipImage() {
 /*        OutputStream out;
-        String root = Environment.getExternalStorageDirectory().getAbsolutePath()+"/";
+        String root = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)+"/";
         File createDir = new File(root+"Folder Name"+File.separator);
         if(!createDir.exists()) {
             createDir.mkdir();
@@ -4257,7 +4068,7 @@ public class ClientAndroidInterface {
                 password = decryptRarPwd(trimEncryptedPassword, trimSalt);
             }
         } catch (Exception e) {
-            e.getMessage();
+            e.printStackTrace();
         }
 
         return password;
@@ -4385,13 +4196,26 @@ public class ClientAndroidInterface {
 
     // Login to Api from JavaScript (call method LoginToken)
     @JavascriptInterface
-    public boolean LoginJI(final String Username, final String Password) throws InterruptedException {
-
+    public boolean LoginJI(final String Username, final String Password) {
         return LoginToken(Username, Password);
     }
 
+    @JavascriptInterface
+    public void Logout() {
+        global.getJWTToken().clearToken();
+
+        ((Activity) mContext).runOnUiThread(
+                () -> MainActivity.SetLoggedIn(mContext.getResources().getString(R.string.Login), mContext.getResources().getString(R.string.Logout))
+        );
+    }
+
+    @JavascriptInterface
+    public boolean isLoggedIn() {
+        return global.isLoggedIn();
+    }
+
     // Login to API and get Token JWT
-    public boolean LoginToken(final String Username, final String Password) throws InterruptedException {
+    public boolean LoginToken(final String Username, final String Password) {
         global = (Global) mContext.getApplicationContext();
 
         ToRestApi rest = new ToRestApi();
@@ -4415,36 +4239,35 @@ public class ClientAndroidInterface {
         if (respEntity != null) {
             try {
                 content = EntityUtils.toString(respEntity);
+                if (content != null && content.length() > 0
+                        && response.getStatusLine().getStatusCode() >= 400) {
+                    Log.e("HTTP", "Error response: " + content);
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
 
-        if (response.getStatusLine().getStatusCode() == 200) {
+        if (response.getStatusLine().getStatusCode() == HttpURLConnection.HTTP_OK) {
             JSONObject ob = null;
-            String jwt = null;
+            String jwt = "";
+            String validTo = "";
             try {
                 ob = new JSONObject(content);
                 jwt = ob.getString("access_token");
+                validTo = ob.getString("expires_on");
             } catch (JSONException e) {
                 e.printStackTrace();
             }
 
-            Token token = new Token();
-            token.saveTokenText(jwt);
+            global.getJWTToken().saveTokenText(jwt, validTo);
 
-            global.setJWTToken(token);
+            ((Activity) mContext).runOnUiThread(
+                    () -> MainActivity.SetLoggedIn(mContext.getResources().getString(R.string.Login), mContext.getResources().getString(R.string.Logout))
+            );
 
             return true;
         }
-
-        ((Activity) mContext).runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                MainActivity.SetLogedIn(mContext.getResources().getString(R.string.Login), mContext.getResources().getString(R.string.Logout));
-            }
-        });
-
         return false;
     }
 
@@ -4458,7 +4281,7 @@ public class ClientAndroidInterface {
         ((Activity) mContext).runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                MainActivity.SetLogedIn(mContext.getResources().getString(R.string.Login), mContext.getResources().getString(R.string.Logout));
+                MainActivity.SetLoggedIn(mContext.getResources().getString(R.string.Login), mContext.getResources().getString(R.string.Logout));
             }
         });
         return UserId;
@@ -4470,12 +4293,9 @@ public class ClientAndroidInterface {
         cs.setFunctionName("isValidLogin");
         UserId = cs.isUserLoggedIn(Username, Password);
         global.setUserId(UserId);
-        ((Activity) mContext).runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                MainActivity.SetLogedIn(mContext.getResources().getString(R.string.Login), mContext.getResources().getString(R.string.Logout));
-            }
-        });
+        ((Activity) mContext).runOnUiThread(
+                () -> MainActivity.SetLoggedIn(mContext.getResources().getString(R.string.Login), mContext.getResources().getString(R.string.Logout))
+        );
         return UserId;
     }
 
@@ -4493,142 +4313,84 @@ public class ClientAndroidInterface {
         return snapshot;
     }
 
-    private void DeleteUploadedData(int FamilyId, ArrayList<String> FamilyIDs, int CallerId) {
+    private void DeleteUploadedData(final int FamilyId, ArrayList<String> FamilyIDs, int CallerId) {
         if (FamilyIDs.size() == 0) {
-            String DeletePolicyPayment = "DELETE FROM tblPremium\n" +
-                    "WHERE PolicyId IN (SELECT PolicyId FROM tblPolicy WHERE FamilyId = " + FamilyId + ") ";
-            String DeleteInsureePolicy = "DELETE FROM tblInsureePolicy\n" +
-                    "WHERE PolicyId IN (SELECT PolicyId FROM tblPolicy WHERE FamilyId = " + FamilyId + ") ";
-            String DeleteFamilyPolicy = "DELETE FROM tblPolicy WHERE FamilyId=" + FamilyId + "";
-            String DeleteFamilyInsuree = "DELETE FROM tblInsuree WHERE FamilyId=" + FamilyId + "";
-            String DeleteFamilyQuery = "DELETE FROM tblFamilies WHERE FamilyId = " + FamilyId + "";
+            FamilyIDs = new ArrayList<String>() {{
+                add(String.valueOf(FamilyId));
+            }};
+        }
 
-            sqlHandler.getResult(DeletePolicyPayment, null);
-            sqlHandler.getResult(DeleteInsureePolicy, null);
-            sqlHandler.getResult(DeleteFamilyPolicy, null);
-            sqlHandler.getResult(DeleteFamilyInsuree, null);
-            sqlHandler.getResult(DeleteFamilyQuery, null);
+
+        String wherePolicyIdIn = "PolicyId IN (SELECT PolicyId FROM tblPolicy WHERE "
+                + combineFamilyIdsInWhereStatement(FamilyIDs) + ")";
+        deleteUploadedTableData(SQLHandler.tblPremium, wherePolicyIdIn);
+        deleteUploadedTableData(SQLHandler.tblInsureePolicy, wherePolicyIdIn);
+        deleteUploadedTableData(SQLHandler.tblBulkControlNumbers, wherePolicyIdIn);
+        deleteUploadedTableData(SQLHandler.tblPolicy, FamilyIDs);
+        deleteUploadedTableData(SQLHandler.tblInsuree, FamilyIDs);
+        deleteUploadedTableData(SQLHandler.tblFamilySMS, FamilyIDs);
+        deleteUploadedTableData(SQLHandler.tblFamilies, FamilyIDs);
+    }
+
+    private void deleteUploadedTableData(String tableName, int familyId) {
+        String where = "FamilyId=" + familyId + "";
+        deleteUploadedTableData(tableName, where);
+    }
+
+    private void deleteUploadedTableData(String tableName, ArrayList<String> familyIDs) {
+        String where = "";
+
+        if (familyIDs.size() != 0) {
+            where += combineFamilyIdsInWhereStatement(familyIDs);
         } else {
-            String DeletePolicyPayment = "DELETE FROM tblPremium\n" +
-                    "WHERE PolicyId IN (SELECT PolicyId FROM tblPolicy WHERE ";
-            if (FamilyIDs.size() != 0) {
-                for (int j = 0; j < FamilyIDs.size(); j++) {
-                    if ((FamilyIDs.size() - j) == 1) {
-                        DeletePolicyPayment += " FamilyId == " + FamilyIDs.get(j) + "";
-                    } else {
-                        DeletePolicyPayment += " FamilyId == " + FamilyIDs.get(j) + " OR";
-                    }
-                }
-            } else {
-                DeletePolicyPayment += " FamilyId = " + FamilyId + "";
-            }
-            DeletePolicyPayment += " )";
-
-            String DeleteInsureePolicy = "DELETE FROM tblInsureePolicy\n" +
-                    "WHERE PolicyId IN (SELECT PolicyId FROM tblPolicy WHERE ";
-            if (FamilyIDs.size() != 0) {
-                for (int j = 0; j < FamilyIDs.size(); j++) {
-                    if ((FamilyIDs.size() - j) == 1) {
-                        DeleteInsureePolicy += " FamilyId == " + FamilyIDs.get(j) + "";
-                    } else {
-                        DeleteInsureePolicy += " FamilyId == " + FamilyIDs.get(j) + " OR";
-                    }
-                }
-            } else {
-                DeleteInsureePolicy += " FamilyId = " + FamilyId + "";
-            }
-            DeleteInsureePolicy += " )";
-
-            String DeleteFamilyPolicy = "DELETE FROM tblPolicy WHERE ";
-            if (FamilyIDs.size() != 0) {
-                for (int j = 0; j < FamilyIDs.size(); j++) {
-                    if ((FamilyIDs.size() - j) == 1) {
-                        DeleteFamilyPolicy += " FamilyId == " + FamilyIDs.get(j) + "";
-                    } else {
-                        DeleteFamilyPolicy += " FamilyId == " + FamilyIDs.get(j) + " OR";
-                    }
-                }
-            } else {
-                DeleteFamilyPolicy += " FamilyId = " + FamilyId + "";
-            }
-            //DeleteFamilyPolicy += "  AND isOffline != 0";
-
-            String DeleteFamilyInsuree = "DELETE FROM tblInsuree WHERE";
-            if (FamilyIDs.size() != 0) {
-                for (int j = 0; j < FamilyIDs.size(); j++) {
-                    if ((FamilyIDs.size() - j) == 1) {
-                        DeleteFamilyInsuree += " FamilyId == " + FamilyIDs.get(j) + "";
-                    } else {
-                        DeleteFamilyInsuree += " FamilyId == " + FamilyIDs.get(j) + " OR";
-                    }
-                }
-            } else {
-                DeleteFamilyInsuree += " FamilyId = " + FamilyId + "";
-            }
-            //DeleteFamilyInsuree += "  AND isOffline != 0";
-
-            String DeleteFamilyQuery = "DELETE FROM tblFamilies WHERE ";
-            if (FamilyIDs.size() != 0) {
-                for (int j = 0; j < FamilyIDs.size(); j++) {
-                    if ((FamilyIDs.size() - j) == 1) {
-                        DeleteFamilyQuery += " FamilyId == " + FamilyIDs.get(j) + "";
-                    } else {
-                        DeleteFamilyQuery += " FamilyId == " + FamilyIDs.get(j) + " OR";
-                    }
-                }
-            } else {
-                DeleteFamilyQuery += " FamilyId = " + FamilyId + "";
-            }
-            //DeleteFamilyQuery += "  AND isOffline != 0";
-
-            sqlHandler.getResult(DeletePolicyPayment, null);
-            sqlHandler.getResult(DeleteInsureePolicy, null);
-            sqlHandler.getResult(DeleteFamilyPolicy, null);
-            sqlHandler.getResult(DeleteFamilyInsuree, null);
-            sqlHandler.getResult(DeleteFamilyQuery, null);
+            where += " FamilyId = " + familyIDs + "";
         }
-
+        deleteUploadedTableData(tableName, where);
     }
 
-    public String getFeedRenewalText(String fileName) {
-        String aBuffer = "";
-        try {
-            String dir = Environment.getExternalStorageDirectory() + File.separator + "IMIS/";
-            File myFile = new File("/" + dir + "/" + fileName + "");//"/"+dir+"/MasterData.txt"
-//            BufferedReader myReader = new BufferedReader(
-//                    new InputStreamReader(
-//                            new FileInputStream(myFile), "UTF32"));
-            FileInputStream fIn = new FileInputStream(myFile);
-            BufferedReader myReader = new BufferedReader(new InputStreamReader(fIn));
-            aBuffer = myReader.readLine();
-
-            myReader.close();
-/*            Scanner in = new Scanner(new FileReader("/"+dir+"/MasterData.txt"));
-            StringBuilder sb = new StringBuilder();
-            while(in.hasNext()) {
-                sb.append(in.next());
+    private String combineFamilyIdsInWhereStatement(ArrayList<String> familyIDs) {
+        String combined = "";
+        for (int j = 0; j < familyIDs.size(); j++) {
+            if ((familyIDs.size() - j) == 1) {
+                combined += " FamilyId == " + familyIDs.get(j) + "";
+            } else {
+                combined += " FamilyId == " + familyIDs.get(j) + " OR";
             }
-            in.close();
-            aBuffer = sb.toString();*/
-        } catch (IOException e) {
-            e.printStackTrace();
         }
-        return aBuffer;
+        return combined;
     }
 
+    private void deleteUploadedTableData(String tableName, String where) {
+        String query = "DELETE FROM " + tableName + " WHERE " + where;
+        sqlHandler.getResult(query, null);
+    }
 
     @JavascriptInterface
     public Boolean UploadOfflineFeedbackRenewal(final String ActivityName) {
+        final File[] files, jsonFiles;
+        final String functionName, jsonPropertyName, path;
+        final int totalFiles;
+        final ProgressDialog pd;
+
+        result = ToRestApi.UploadStatus.NO_RESPONSE;
+
+        path = global.getMainDirectory();
+
         if (ActivityName.equals("renewal")) {
-            files = GetListOfFiles(Path, "Renewal", null);
-            JSONfiles = GetListOfJSONFiles(Path, "Renewal", null);
+            files = GetListOfFiles(path, "Renewal", null);
+            jsonFiles = GetListOfJSONFiles(path, "Renewal", null);
+            functionName = "policy/renew";
+            jsonPropertyName = "Policy";
         } else {
             files = GetListOfFiles(Path, "Feedback", null);
-            JSONfiles = GetListOfJSONFiles(Path, "Feedback", null);
+            jsonFiles = GetListOfJSONFiles(Path, "Feedback", null);
+            functionName = "feedback";
+            jsonPropertyName = "feedback";
         }
 
-        TotalFiles = files.length;
-        if (TotalFiles == 0) {
+        totalFiles = files.length;
+
+        if (totalFiles == 0) {
             ShowDialog(mContext.getResources().getString(R.string.NoDataAvailable));
             //Clean tables in database as well
             if (ActivityName.equals("renewal")) {
@@ -4639,127 +4401,204 @@ public class ClientAndroidInterface {
 
             return false;
         }
-        if (!general.isNetworkAvailable(mContext)) {
+
+        if (!global.isNetworkAvailable()) {
             ShowDialog(mContext.getResources().getString(R.string.NoInternet));
             return false;
         }
-        final ProgressDialog pd;
-        pd = ProgressDialog.show(mContext, "", mContext.getResources().getString(R.string.Uploading));
 
-        new Thread() {
-            public void run() {
-                for (int i = 0; i < JSONfiles.length; i++) {
-                    UploadCounter = i + 1;
-                    //runOnUiThread(ChangeMessage);
+        pd = ProgressDialog.show(mContext, mContext.getResources().getString(R.string.Sync), mContext.getResources().getString(R.string.SyncProcessing));
 
-                    String JsonFileName = getFeedRenewalText(JSONfiles[i].getName());
+        new Thread(() -> {
+            ToRestApi rest = new ToRestApi();
+            JSONObject obj;
+            int uploadsAccepted = 0, uploadsRejected = 0, uploadFailed = 0;
+            for (int i = 0; i < jsonFiles.length; i++) {
+                String jsonText = global.getFileText(jsonFiles[i].getPath());
 
-                    JSONObject obj = new JSONObject();
+                HttpResponse response = null;
+                int responseCode = -1;
+                int uploadStatus = -1;
 
-                    ToRestApi rest = new ToRestApi();
-
-                    Boolean serv = null;
-                    int resInt = 2;
-
-                    if (ActivityName.equals("renewal")) {
-                        try {
-                            obj = new JSONObject(JsonFileName).getJSONObject("Policy");
-                        } catch (Exception e) {
+                try {
+                    obj = new JSONObject(jsonText).getJSONObject(jsonPropertyName);
+                    response = rest.postToRestApiToken(obj, functionName);
+                    if (response != null) {
+                        responseCode = response.getStatusLine().getStatusCode();
+                        if (responseCode == HttpURLConnection.HTTP_OK) {
+                            uploadStatus = Integer.parseInt(rest.getContent(response));
                         }
-
-                        resInt = Integer.parseInt(rest.postObjectToRestApiObjectToken(obj, "policy/renew"));
-
-                        if (resInt != 2) serv = true;
-                        else serv = false;
-                    } else {
-                        try {
-                            obj = new JSONObject(JsonFileName).getJSONObject("feedback");
-                        } catch (Exception e) {
-                        }
-
-                        try {
-                            resInt = Integer.parseInt(rest.postObjectToRestApiObjectToken(obj, "feedback"));
-                        } catch (Exception e) {
-                        }
-
-                        if (resInt != 2) serv = true;
-                        else serv = false;
                     }
-
-                    if (serv == true) {
-                        XMLFile = JSONfiles[i];
-
-                        if (XMLFile.getName().contains("RenPolJSON_")) {
-                            if (resInt == 1) {
-                                MoveFile(XMLFile, 1);
-                                MoveFile(files[i], 1);
-                            } else {
-                                MoveFile(XMLFile, 2);
-                                MoveFile(files[i], 2);
-                            }
-                            result = 1;
-                        } else if (XMLFile.getName().contains("feedbackJSON_")) {
-                            if (resInt == 1) {
-                                MoveFile(XMLFile, 1);
-                                MoveFile(files[i], 1);
-                            } else {
-                                MoveFile(XMLFile, 2);
-                                MoveFile(files[i], 2);
-                            }
-                            result = 1;
-                        } else {
-                            result = 2;
-                        }
-
-                        ((Activity) mContext).runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                ShowDialog(mContext.getResources().getString(R.string.RenewalUploaded));
-                            }
-                        });
-                    } else {
-                        result = -2;
-                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
 
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        switch (result) {
-                            case -1:
-                                ShowDialog(mContext.getResources().getString(R.string.FTPConnectionFailed));
-                                break;
-                            case -2:
-                                ShowDialog(mContext.getResources().getString(R.string.SomethingWrongServer));
-                                break;
-                            default:
-                                ShowDialog(mContext.getResources().getString(R.string.BulkUpload));
-                        }
+                if (response == null || responseCode != HttpURLConnection.HTTP_OK || uploadStatus == ToRestApi.UploadStatus.ERROR) {
+                    uploadFailed += 1;
+                } else if (responseCode == HttpURLConnection.HTTP_OK) {
+                    if (uploadStatus == ToRestApi.UploadStatus.ACCEPTED) {
+                        uploadsAccepted += 1;
+                        MoveFile(files[i], 1);
+                        MoveFile(jsonFiles[i], 1);
+                    } else {
+                        uploadsRejected += 1;
+                        MoveFile(files[i], 2);
+                        MoveFile(jsonFiles[i], 2);
                     }
-                };
-
-                pd.dismiss();
+                }
             }
 
-        }.start();
+            if (uploadsAccepted == 0 && uploadsRejected == 0) {
+                result = ToRestApi.UploadStatus.ERROR;
+            } else if (uploadsAccepted > 0 && uploadsRejected == 0) {
+                result = ToRestApi.UploadStatus.ACCEPTED;
+            } else if (uploadsAccepted == 0 && uploadsRejected > 0) {
+                result = ToRestApi.UploadStatus.REJECTED;
+            } else {
+                //There are both accepted and rejected entries in a bulk
+                result = ToRestApi.UploadStatus.ACCEPTED;
+            }
+
+            ((Activity) mContext).runOnUiThread(() -> {
+                switch (result) {
+                    case ToRestApi.UploadStatus.NO_RESPONSE:
+                        ShowDialog(mContext.getResources().getString(R.string.FTPConnectionFailed));
+                        break;
+                    case ToRestApi.UploadStatus.ERROR:
+                        ShowDialog(mContext.getResources().getString(R.string.SomethingWrongServer));
+                        break;
+                    default:
+                        ShowDialog(mContext.getResources().getString(R.string.BulkUpload));
+                }
+            });
+            pd.dismiss();
+        }).start();
         return true;
+    }
+
+    @JavascriptInterface
+    public void uploadRenewals() {
+        final String path;
+        final int totalFiles;
+        final ProgressDialog pd;
+
+        path = global.getMainDirectory();
+        File[] files = GetListOfFiles(path, "Renewal", null);
+        File[] jsonFiles = GetListOfJSONFiles(path, "Renewal", null);
+
+        totalFiles = jsonFiles.length;
+
+        if (totalFiles == 0) {
+            ShowDialog(mContext.getResources().getString(R.string.NoDataAvailable));
+            DeleteRenewals();
+            return;
+        }
+
+        if (!global.isNetworkAvailable()) {
+            ShowDialog(mContext.getResources().getString(R.string.NoInternet));
+            return;
+        }
+
+        pd = AndroidUtil.showProgressDialog(mContext, R.string.Sync, R.string.SyncProcessing);
+
+        new Thread(() -> {
+            StringBuilder messageBuilder = new StringBuilder();
+            String messageFormat = "[%s] %s\n";
+            Map<Integer, String> messages = new HashMap<>();
+            messages.put(ToRestApi.RenewalStatus.ACCEPTED, mContext.getResources().getString(R.string.RenewalAccepted));
+            messages.put(ToRestApi.RenewalStatus.ALREADY_ACCEPTED, mContext.getResources().getString(R.string.RenewalAlreadyAccepted));
+            messages.put(ToRestApi.RenewalStatus.REJECTED, mContext.getResources().getString(R.string.RenewalRejected));
+            messages.put(ToRestApi.RenewalStatus.DUPLICATE_RECEIPT, mContext.getResources().getString(R.string.DuplicateReceiptNumber));
+            messages.put(ToRestApi.RenewalStatus.GRACE_PERIOD_EXPIRED, mContext.getResources().getString(R.string.GracePeriodExpired));
+            messages.put(ToRestApi.RenewalStatus.CONTROL_NUMBER_ERROR, mContext.getResources().getString(R.string.ControlNumberError));
+            messages.put(ToRestApi.RenewalStatus.UNEXPECTED_EXCEPTION, mContext.getResources().getString(R.string.UnexpectedException));
+
+            ToRestApi rest = new ToRestApi();
+            JSONObject obj;
+
+            int acceptedRenewals = 0;
+            for (int i = 0; i < jsonFiles.length; i++) {
+                String jsonText = global.getFileText(jsonFiles[i].getPath());
+                String renewalInsureeNo = "";
+
+                HttpResponse response;
+                int responseCode;
+                int uploadStatus = -1;
+
+                try {
+                    obj = new JSONObject(jsonText).getJSONObject("Policy");
+                    renewalInsureeNo = obj.getString("CHFID");
+
+                    response = rest.postToRestApiToken(obj, "policy/renew");
+                    if (response != null) {
+                        responseCode = response.getStatusLine().getStatusCode();
+                        if (responseCode == HttpURLConnection.HTTP_OK) {
+                            uploadStatus = Integer.parseInt(EntityUtils.toString(response.getEntity()));
+                        } else {
+                            if (responseCode == HttpURLConnection.HTTP_BAD_REQUEST) {
+                                throw new JSONException("Renewal file caused 400 BAD REQUEST");
+                            } else if (responseCode == HttpsURLConnection.HTTP_UNAUTHORIZED) {
+                                messageBuilder.append(String.format(messageFormat, renewalInsureeNo, mContext.getResources().getString(R.string.LoginFail)));
+                                break;
+                            } else if (responseCode == HttpURLConnection.HTTP_INTERNAL_ERROR) {
+                                throw new IOException("500 INTERNAL ERROR");
+                            }
+                        }
+                    } else {
+                        Log.e(LOG_TAG_RENEWAL, "Server not responding");
+                        messageBuilder.append(String.format(messageFormat, renewalInsureeNo, mContext.getResources().getString(R.string.SomethingWrongServer)));
+                        break;
+                    }
+                } catch (JSONException e) {
+                    Log.e(LOG_TAG_RENEWAL, "Invalid renewal json format", e);
+                    messageBuilder.append(String.format(messageFormat, renewalInsureeNo, mContext.getResources().getString(R.string.InvalidRenewalFile)));
+                    continue;
+                } catch (IOException e) {
+                    Log.e(LOG_TAG_RENEWAL, "Error while sending renewal", e);
+                    messageBuilder.append(String.format(messageFormat, renewalInsureeNo, mContext.getResources().getString(R.string.SomethingWrongServer)));
+                    continue;
+                }
+
+
+                if (messages.containsKey(uploadStatus)) {
+                    if (uploadStatus == ToRestApi.RenewalStatus.ACCEPTED || uploadStatus == ToRestApi.RenewalStatus.ALREADY_ACCEPTED) {
+                        MoveFile(files[i], 1);
+                        MoveFile(jsonFiles[i], 1);
+                        acceptedRenewals++;
+                    } else {
+                        MoveFile(files[i], 2);
+                        MoveFile(jsonFiles[i], 2);
+                        messageBuilder.append(String.format(messageFormat, renewalInsureeNo, messages.get(uploadStatus)));
+                    }
+                }
+            }
+
+            String successMessage = mContext.getResources().getString(R.string.BulkUpload);
+
+            String resultMessage;
+            if (acceptedRenewals != jsonFiles.length) {
+                resultMessage = successMessage + "\n" + messageBuilder.toString();
+            } else {
+                resultMessage = successMessage;
+            }
+
+            ((Activity) mContext).runOnUiThread(() -> AndroidUtil.showDialog(mContext, resultMessage));
+
+            pd.dismiss();
+        }).start();
     }
 
     private File[] GetListOfFiles(String DirectoryPath, final String FileType, final String FileName) {
         File Directory = new File(DirectoryPath);
         final Pattern p = Pattern.compile("(RenPol_)");
-        FilenameFilter filter = new FilenameFilter() {
-
-            @Override
-            public boolean accept(File dir, String filename) {
-                if (FileType.equals("Image")) {
-                    //  return filename.equalsIgnoreCase(FileName);
-                    return filename.endsWith(".jpg");
-                } else if (FileType.equals("Feedback")) {
-                    return filename.startsWith("feedback_");
-                } else {
-                    return filename.startsWith("RenPol_");
-                }
+        FilenameFilter filter = (dir, filename) -> {
+            if (FileType.equals("Image")) {
+                //  return filename.equalsIgnoreCase(FileName);
+                return filename.endsWith(".jpg");
+            } else if (FileType.equals("Feedback")) {
+                return filename.startsWith("feedback_");
+            } else {
+                return filename.startsWith("RenPol_");
             }
         };
         return Directory.listFiles(filter);
@@ -4800,19 +4639,13 @@ public class ClientAndroidInterface {
     @JavascriptInterface
     public String GetListOfImagesContain(final String FileName) {
         File[] Photos = null;
-        global = (Global) mContext.getApplicationContext();
+        String newFileName = "";
         File Directory = new File(global.getImageFolder());
 
-        FilenameFilter filter = new FilenameFilter() {
+        Photos = Directory.listFiles((dir, filename) -> filename.startsWith(FileName + "_"));
 
-            @Override
-            public boolean accept(File dir, String filename) {
-                return filename.startsWith(FileName + "_");
-            }
-        };
-        Photos = Directory.listFiles(filter);
-        String newFileName = "";
-        if (Photos.length > 0) {
+        if (Photos != null && Photos.length > 0) {
+            Arrays.sort(Photos, (f1, f2) -> f1.getName().compareTo(f2.getName()));
             newFileName = Photos[Photos.length - 1].toString();
         }
         return newFileName;
@@ -4821,20 +4654,25 @@ public class ClientAndroidInterface {
     private void MoveFile(File file, int res) {
         String Accepted = "", Rejected = "";
         if (file.getName().contains("RenPol_") || file.getName().contains("RenPolJSON_")) {
-            Accepted = "AcceptedRenewal/";
-            Rejected = "RejectedRenewal/";
+            Accepted = "AcceptedRenewal";
+            Rejected = "RejectedRenewal";
         } else if (file.getName().contains("feedback_") || file.getName().contains("feedbackJSON_")) {
-            Accepted = "AcceptedFeedback/";
-            Rejected = "RejectedFeedback/";
+            Accepted = "AcceptedFeedback";
+            Rejected = "RejectedFeedback";
         }
 
+        boolean status = false;
         switch (res) {
             case 1:
-                file.renameTo(new File(Path + Accepted + file.getName()));
+                status = file.renameTo(new File(global.getSubdirectory(Accepted), file.getName()));
                 break;
             case 2:
-                file.renameTo(new File(Path + Rejected + file.getName()));
+                status = file.renameTo(new File(global.getSubdirectory(Rejected), file.getName()));
                 break;
+        }
+
+        if (!status) {
+            Log.w(Global.FILE_IO_LOG_TAG, "Moving file failed: " + file.getAbsolutePath());
         }
     }
 
@@ -4851,194 +4689,6 @@ public class ClientAndroidInterface {
         }
     }
 
-    @JavascriptInterface
-    public void popUpOfficerDialog() {
-        ((MainActivity) mContext).ShowDialogTex();
-    }
-
-    @JavascriptInterface
-    public void downloadMasterData() throws InterruptedException {
-        ProgressDialog pd = null;
-        pd = ProgressDialog.show(mContext, mContext.getResources().getString(R.string.Sync), mContext.getResources().getString(R.string.DownloadingMasterData));
-        final ProgressDialog finalPd = pd;
-        Thread t = new Thread() {
-            public void run() {
-                try {
-                    startDownloading();
-                    finalPd.dismiss();
-
-                    ((Activity) mContext).runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            ShowDialog(mContext.getResources().getString(R.string.DataDownloadedSuccess));
-                            Global global = new Global();
-                            global.setOfficerCode("");
-//                            Intent refresh = new Intent(mContext, MainActivity.class);
-//                            ((MainActivity)mContext).startActivity(refresh);
-//                            ((MainActivity)mContext).finish();
-                            ((MainActivity) mContext).ShowDialogTex();
-                        }
-                    });
-
-                } catch (JSONException e) {
-                    //e.printStackTrace();
-                    finalPd.dismiss();
-                } catch (UserException e) {
-                    //e.printStackTrace();
-                    finalPd.dismiss();
-                }
-            }
-        };
-        t.start();
-
-
-        //return true;
-        //        finally {
-//            pd.dismiss();
-//        }
-
-
-    }
-
-    public void importMasterData(String data) throws JSONException, UserException {
-
-        String MD = data;
-        JSONArray masterData = new JSONArray(MD);
-
-        if (masterData.length() == 0)
-            throw new UserException(mContext.getResources().getString(R.string.DownloadMasterDataFailed));
-
-        //Sequence of table
-        /*
-            1   :   ConfirmationTypes
-            2   :   Controls
-            3   :   Education
-            4   :   FamilyTypes
-            5   :   HF
-            6   :   IdentificationTypes
-            7   :   Languages
-            8   :   Locations
-            9   :   Officers
-            10  :   Payers
-            11  :   Products
-            12  :   Professions
-            13  :   Relations
-            14  :   PhoneDefaults
-            15  :   Genders
-         */
-
-        JSONArray ConfirmationTypes = new JSONArray();
-        JSONArray Controls = new JSONArray();
-        JSONArray Education = new JSONArray();
-        JSONArray FamilyTypes = new JSONArray();
-        JSONArray HF = new JSONArray();
-        JSONArray IdentificationTypes = new JSONArray();
-        JSONArray Languages = new JSONArray();
-        JSONArray Locations = new JSONArray();
-        JSONArray Officers = new JSONArray();
-        JSONArray Payers = new JSONArray();
-        JSONArray Products = new JSONArray();
-        JSONArray Professions = new JSONArray();
-        JSONArray Relations = new JSONArray();
-        JSONArray PhoneDefaults = new JSONArray();
-        JSONArray Genders = new JSONArray();
-
-        for (int i = 0; i < masterData.length(); i++) {
-            String keyName = masterData.getJSONObject(i).keys().next();
-            switch (keyName.toLowerCase()) {
-                case "confirmationtypes":
-                    ConfirmationTypes = (JSONArray) masterData.getJSONObject(i).get(keyName);
-                    break;
-                case "controls":
-                    Controls = (JSONArray) masterData.getJSONObject(i).get(keyName);
-                    break;
-                case "education":
-                    Education = (JSONArray) masterData.getJSONObject(i).get(keyName);
-                    break;
-                case "familytypes":
-                    FamilyTypes = (JSONArray) masterData.getJSONObject(i).get(keyName);
-                    break;
-                case "hf":
-                    HF = (JSONArray) masterData.getJSONObject(i).get(keyName);
-                    break;
-                case "identificationtypes":
-                    IdentificationTypes = (JSONArray) masterData.getJSONObject(i).get(keyName);
-                    break;
-                case "languages":
-                    Languages = (JSONArray) masterData.getJSONObject(i).get(keyName);
-                    break;
-                case "locations":
-                    Locations = (JSONArray) masterData.getJSONObject(i).get(keyName);
-                    break;
-                case "officers":
-                    Officers = (JSONArray) masterData.getJSONObject(i).get(keyName);
-                    break;
-                case "payers":
-                    Payers = (JSONArray) masterData.getJSONObject(i).get(keyName);
-                    break;
-                case "products":
-                    Products = (JSONArray) masterData.getJSONObject(i).get(keyName);
-                    break;
-                case "professions":
-                    Professions = (JSONArray) masterData.getJSONObject(i).get(keyName);
-                    break;
-                case "relations":
-                    Relations = (JSONArray) masterData.getJSONObject(i).get(keyName);
-                    break;
-                case "phonedefaults":
-                    PhoneDefaults = (JSONArray) masterData.getJSONObject(i).get(keyName);
-                    break;
-                case "genders":
-                    Genders = (JSONArray) masterData.getJSONObject(i).get(keyName);
-                    break;
-            }
-        }
-
-        insertConfirmationTypes(ConfirmationTypes);
-        insertControls(Controls);
-        insertEducation(Education);
-        insertFamilyTypes(FamilyTypes);
-        insertHF(HF);
-        insertIdentificationTypes(IdentificationTypes);
-        insertLanguages(Languages);
-        insertLocations(Locations);
-        insertOfficers(Officers);
-        insertPayers(Payers);
-        insertProducts(Products);
-        insertProfessions(Professions);
-        insertRelations(Relations);
-        insertPhoneDefaults(PhoneDefaults);
-        insertGenders(Genders);
-
-    }
-
-    @SuppressWarnings("ConstantConditions")
-    public void startDownloading() throws JSONException, UserException {
-        ToRestApi rest = new ToRestApi();
-        String MD = rest.getObjectFromRestApi("master");
-
-        JSONObject masterData = new JSONObject(MD);
-
-        if (masterData.length() == 0)
-            throw new UserException(mContext.getResources().getString(R.string.DownloadMasterDataFailed));
-
-        insertConfirmationTypes((JSONArray) masterData.get("confirmationTypes"));
-        insertControls((JSONArray) masterData.get("controls"));
-        insertEducation((JSONArray) masterData.get("education"));
-        insertFamilyTypes((JSONArray) masterData.get("familyTypes"));
-        insertHF((JSONArray) masterData.get("hf"));
-        insertIdentificationTypes((JSONArray) masterData.get("identificationTypes"));
-        insertLanguages((JSONArray) masterData.get("languages"));
-        insertLocations((JSONArray) masterData.get("locations"));
-        insertOfficers((JSONArray) masterData.get("officers"));
-        insertPayers((JSONArray) masterData.get("payers"));
-        insertProducts((JSONArray) masterData.get("products"));
-        insertProfessions((JSONArray) masterData.get("professions"));
-        insertRelations((JSONArray) masterData.get("relations"));
-        insertPhoneDefaults((JSONArray) masterData.get("phoneDefaults"));
-        insertGenders((JSONArray) masterData.get("genders"));
-    }
-
     public void getOfficerVillages(final String OfficerCode) {
         final ToRestApi toRestApi = new ToRestApi();
         final JSONObject object = new JSONObject();
@@ -5050,7 +4700,7 @@ public class ClientAndroidInterface {
 
                 try {
                     object.put("enrollment_officer_code", OfficerCode);
-                    str[0] = toRestApi.postObjectToRestApiObject(object, "api/Locations/GetOfficerVillages");
+                    str[0] = toRestApi.postObjectToRestApiObject(object, "/Locations/GetOfficerVillages");
                     JSONObject object1 = null;
                     object1 = new JSONObject(str[0]);
                     String OfficerVillages = object1.getString("data");
@@ -5079,99 +4729,332 @@ public class ClientAndroidInterface {
         thread.start();
     }
 
+    @JavascriptInterface
+    public void popUpOfficerDialog() {
+        ((MainActivity) mContext).ShowEnrolmentOfficerDialog();
+    }
+
+    @JavascriptInterface
+    public void downloadMasterData() throws InterruptedException {
+        ProgressDialog pd = null;
+        pd = ProgressDialog.show(mContext, mContext.getResources().getString(R.string.Sync), mContext.getResources().getString(R.string.DownloadingMasterData));
+        final ProgressDialog finalPd = pd;
+        Thread t = new Thread() {
+            public void run() {
+                try {
+                    startDownloading();
+                    finalPd.dismiss();
+
+                    ((Activity) mContext).runOnUiThread(() -> {
+                        ShowDialog(mContext.getResources().getString(R.string.DataDownloadedSuccess));
+                        Global global = Global.getGlobal();
+                        global.setOfficerCode("");
+//                            Intent refresh = new Intent(mContext, MainActivity.class);
+//                            ((MainActivity)mContext).startActivity(refresh);
+//                            ((MainActivity)mContext).finish();
+                        ((MainActivity) mContext).ShowEnrolmentOfficerDialog();
+                    });
+
+                } catch (JSONException e) {
+                    //e.printStackTrace();
+                    finalPd.dismiss();
+                } catch (UserException e) {
+                    //e.printStackTrace();
+                    finalPd.dismiss();
+                }
+            }
+        };
+        t.start();
+
+
+        //return true;
+        //        finally {
+//            pd.dismiss();
+//        }
+
+
+    }
+
+    public void importMasterData(String data) throws JSONException, UserException {
+        try {
+            JSONArray masterDataArray = new JSONArray(data);
+            processOldFormat(masterDataArray);
+        } catch (JSONException e) {
+            try {
+                JSONObject masterDataObject = new JSONObject(data);
+                processNewFormat(masterDataObject);
+            } catch (JSONException e2) {
+                throw new UserException(mContext.getResources().getString(R.string.DownloadMasterDataFailed));
+            }
+        }
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    public void startDownloading() throws JSONException, UserException {
+        ToRestApi rest = new ToRestApi();
+        String MD = rest.getObjectFromRestApi("master");
+
+        JSONObject masterData = new JSONObject(MD);
+
+        if (masterData.length() == 0)
+            throw new UserException(mContext.getResources().getString(R.string.DownloadMasterDataFailed));
+
+        processNewFormat(masterData);
+    }
+
+    private void processOldFormat(JSONArray masterData) throws UserException {
+        //Sequence of table
+        /*
+            1   :   ConfirmationTypes
+            2   :   Controls
+            3   :   Education
+            4   :   FamilyTypes
+            5   :   HF
+            6   :   IdentificationTypes
+            7   :   Languages
+            8   :   Locations
+            9   :   Officers
+            10  :   Payers
+            11  :   Products
+            12  :   Professions
+            13  :   Relations
+            14  :   PhoneDefaults
+            15  :   Genders
+            16  :   OfficerVillages
+         */
+
+        JSONArray ConfirmationTypes = new JSONArray();
+        JSONArray Controls = new JSONArray();
+        JSONArray Education = new JSONArray();
+        JSONArray FamilyTypes = new JSONArray();
+        JSONArray HF = new JSONArray();
+        JSONArray IdentificationTypes = new JSONArray();
+        JSONArray Languages = new JSONArray();
+        JSONArray Locations = new JSONArray();
+        JSONArray Officers = new JSONArray();
+        JSONArray Payers = new JSONArray();
+        JSONArray Products = new JSONArray();
+        JSONArray Professions = new JSONArray();
+        JSONArray Relations = new JSONArray();
+        JSONArray PhoneDefaults = new JSONArray();
+        JSONArray Genders = new JSONArray();
+        //JSONArray OfficerVillages = new JSONArray();
+
+        try {
+            for (int i = 0; i < masterData.length(); i++) {
+                String keyName = masterData.getJSONObject(i).keys().next();
+                switch (keyName.toLowerCase()) {
+                    case "confirmationtypes":
+                        ConfirmationTypes = (JSONArray) masterData.getJSONObject(i).get(keyName);
+                        break;
+                    case "controls":
+                        Controls = (JSONArray) masterData.getJSONObject(i).get(keyName);
+                        break;
+                    case "education":
+                        Education = (JSONArray) masterData.getJSONObject(i).get(keyName);
+                        break;
+                    case "familytypes":
+                        FamilyTypes = (JSONArray) masterData.getJSONObject(i).get(keyName);
+                        break;
+                    case "hf":
+                        HF = (JSONArray) masterData.getJSONObject(i).get(keyName);
+                        break;
+                    case "identificationtypes":
+                        IdentificationTypes = (JSONArray) masterData.getJSONObject(i).get(keyName);
+                        break;
+                    case "languages":
+                        Languages = (JSONArray) masterData.getJSONObject(i).get(keyName);
+                        break;
+                    case "locations":
+                        Locations = (JSONArray) masterData.getJSONObject(i).get(keyName);
+                        break;
+                    case "officers":
+                        Officers = (JSONArray) masterData.getJSONObject(i).get(keyName);
+                        break;
+                    case "payers":
+                        Payers = (JSONArray) masterData.getJSONObject(i).get(keyName);
+                        break;
+                    case "products":
+                        Products = (JSONArray) masterData.getJSONObject(i).get(keyName);
+                        break;
+                    case "professions":
+                        Professions = (JSONArray) masterData.getJSONObject(i).get(keyName);
+                        break;
+                    case "relations":
+                        Relations = (JSONArray) masterData.getJSONObject(i).get(keyName);
+                        break;
+                    case "phonedefaults":
+                        PhoneDefaults = (JSONArray) masterData.getJSONObject(i).get(keyName);
+                        break;
+                    case "genders":
+                        Genders = (JSONArray) masterData.getJSONObject(i).get(keyName);
+                        break;
+/*                case "officersvillages":
+                    OfficerVillages = (JSONArray) masterData.getJSONObject(i).get(keyName);
+                    break;*/
+                }
+            }
+
+            insertConfirmationTypes(ConfirmationTypes);
+            insertControls(Controls);
+            insertEducation(Education);
+            insertFamilyTypes(FamilyTypes);
+            insertHF(HF);
+            insertIdentificationTypes(IdentificationTypes);
+            insertLanguages(Languages);
+            insertLocations(Locations);
+            insertOfficers(Officers);
+            insertPayers(Payers);
+            insertProducts(Products);
+            insertProfessions(Professions);
+            insertRelations(Relations);
+            insertPhoneDefaults(PhoneDefaults);
+            insertGenders(Genders);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            throw new UserException(mContext.getResources().getString(R.string.DownloadMasterDataFailed));
+        }
+    }
+
+    private void processNewFormat(JSONObject masterData) throws UserException {
+        try {
+            insertConfirmationTypes((JSONArray) masterData.get("confirmationTypes"));
+            insertControls((JSONArray) masterData.get("controls"));
+            insertEducation((JSONArray) masterData.get("education"));
+            insertFamilyTypes((JSONArray) masterData.get("familyTypes"));
+            insertHF((JSONArray) masterData.get("hf"));
+            insertIdentificationTypes((JSONArray) masterData.get("identificationTypes"));
+            insertLanguages((JSONArray) masterData.get("languages"));
+            insertLocations((JSONArray) masterData.get("locations"));
+            insertOfficers((JSONArray) masterData.get("officers"));
+            insertPayers((JSONArray) masterData.get("payers"));
+            insertProducts((JSONArray) masterData.get("products"));
+            insertProfessions((JSONArray) masterData.get("professions"));
+            insertRelations((JSONArray) masterData.get("relations"));
+            insertPhoneDefaults((JSONArray) masterData.get("phoneDefaults"));
+            insertGenders((JSONArray) masterData.get("genders"));
+        } catch (JSONException e) {
+            e.printStackTrace();
+            throw new UserException(mContext.getResources().getString(R.string.DownloadMasterDataFailed));
+        }
+    }
+
+    private String[] getColumnNames(JSONArray jsonArray) {
+        String[] Columns = {};
+        if (jsonArray.length() > 0) {
+            ArrayList<String> columnsList = new ArrayList<>();
+            Iterator<String> keys;
+            try {
+                keys = jsonArray.getJSONObject(0).keys();
+                while (keys.hasNext())
+                    columnsList.add(keys.next());
+                Columns = columnsList.toArray(new String[0]);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        return Columns;
+    }
+
     private boolean insertConfirmationTypes(JSONArray jsonArray) throws JSONException {
-        String Columns[] = {"confirmationTypeCode", "confirmationType", "sortOrder", "altLanguage"};
-        sqlHandler.insertData("tblConfirmationTypes", Columns, jsonArray.toString(), "DELETE FROM tblConfirmationTypes");
+        try {
+            String[] Columns = getColumnNames(jsonArray);
+            sqlHandler.insertData("tblConfirmationTypes", Columns, jsonArray.toString(), "DELETE FROM tblConfirmationTypes");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+
         return true;
     }
 
     private boolean insertControls(JSONArray jsonArray) throws JSONException {
-        String Columns[] = {"fieldName", "adjustibility"};
+        String[] Columns = getColumnNames(jsonArray);
         sqlHandler.insertData("tblControls", Columns, jsonArray.toString(), "DELETE FROM tblControls;");
         return true;
     }
 
     private boolean insertEducation(JSONArray jsonArray) throws JSONException {
-        String Columns[] = {"educationId", "education", "sortOrder", "altLanguage"};
+        String[] Columns = getColumnNames(jsonArray);
         sqlHandler.insertData("tblEducations", Columns, jsonArray.toString(), "DELETE FROM tblEducations;");
         return true;
     }
 
     private boolean insertFamilyTypes(JSONArray jsonArray) throws JSONException {
-        String Columns[] = {"familyTypeCode", "familyType", "sortOrder", "altLanguage"};
+        String[] Columns = getColumnNames(jsonArray);
         sqlHandler.insertData("tblFamilyTypes", Columns, jsonArray.toString(), "DELETE FROM tblFamilyTypes;");
         return true;
     }
 
     private boolean insertHF(JSONArray jsonArray) throws JSONException {
-        String Columns[] = {"hfid", "hfCode", "hfName", "locationId", "hfLevel"};
+        String[] Columns = getColumnNames(jsonArray);
         sqlHandler.insertData("tblHF", Columns, jsonArray.toString(), "DELETE FROM tblHF;");
         return true;
     }
 
     private boolean insertIdentificationTypes(JSONArray jsonArray) throws JSONException {
-        String Columns[] = {"identificationCode", "identificationTypes", "altLanguage", "sortOrder"};
+        String[] Columns = getColumnNames(jsonArray);
         sqlHandler.insertData("tblIdentificationTypes", Columns, jsonArray.toString(), "DELETE FROM tblIdentificationTypes;");
         return true;
     }
 
     private boolean insertLanguages(JSONArray jsonArray) throws JSONException {
-        String Columns[] = {"languageCode", "languageName", "sortOrder"};
+        String[] Columns = getColumnNames(jsonArray);
         sqlHandler.insertData("tblLanguages", Columns, jsonArray.toString(), "DELETE FROM tblLanguages;");
         return true;
     }
 
     private boolean insertLocations(JSONArray jsonArray) throws JSONException {
-        String Columns[] = {"locationId", "locationCode", "locationName", "parentLocationId", "locationType"};
+        String[] Columns = getColumnNames(jsonArray);
         sqlHandler.insertData("tblLocations", Columns, jsonArray.toString(), "DELETE FROM tblLocations;");
 
         return true;
     }
 
     private boolean insertOfficers(JSONArray jsonArray) throws JSONException {
-        String Columns[] = {"officerId", "officerUUID", "code", "lastName", "otherNames", "phone", "locationId", "officerIDSubst", "worksTo"};
+        String[] Columns = getColumnNames(jsonArray);
         sqlHandler.insertData("tblOfficer", Columns, jsonArray.toString(), "DELETE FROM tblOfficer;");
         return true;
     }
 
     private boolean insertPayers(JSONArray jsonArray) throws JSONException {
-        String Columns[] = {"payerId", "payerName", "locationId"};
+        String[] Columns = getColumnNames(jsonArray);
         sqlHandler.insertData("tblPayer", Columns, jsonArray.toString(), "DELETE FROM tblPayer;");
         return true;
     }
 
     private boolean insertProducts(JSONArray jsonArray) throws JSONException {
-        String Columns[] = {"prodId", "productCode", "productName", "locationId", "insurancePeriod", "dateFrom", "dateTo", "conversionProdId", "lumpsum", "memberCount", "premiumAdult", "premiumChild", "registrationLumpsum", "registrationFee", "generalAssemblyLumpSum", "generalAssemblyFee", "startCycle1", "startCycle2", "startCycle3", "startCycle4", "gracePeriodRenewal", "maxInstallments", "waitingPeriod", "threshold", "renewalDiscountPerc", "renewalDiscountPeriod", "administrationPeriod", "enrolmentDiscountPerc", "enrolmentDiscountPeriod", "gracePeriod"};
+        String[] Columns = getColumnNames(jsonArray);
         sqlHandler.insertData("tblProduct", Columns, jsonArray.toString(), "DELETE FROM tblProduct;");
         return true;
     }
 
     private boolean insertProfessions(JSONArray jsonArray) throws JSONException {
-        String Columns[] = {"professionId", "profession", "sortOrder", "altLanguage"};
+        String[] Columns = getColumnNames(jsonArray);
         sqlHandler.insertData("tblProfessions", Columns, jsonArray.toString(), "DELETE FROM tblProfessions;");
         return true;
     }
 
     private boolean insertRelations(JSONArray jsonArray) throws JSONException {
-        String Columns[] = {"relationId", "relation", "sortOrder", "altLanguage"};
+        String[] Columns = getColumnNames(jsonArray);
         sqlHandler.insertData("tblRelations", Columns, jsonArray.toString(), "DELETE FROM tblRelations;");
         return true;
     }
 
     private boolean insertPhoneDefaults(JSONArray jsonArray) throws JSONException {
-        String Columns[] = {"ruleName", "ruleValue"};
+        String[] Columns = getColumnNames(jsonArray);
         sqlHandler.insertData("tblIMISDefaultsPhone", Columns, jsonArray.toString(), "DELETE FROM tblIMISDefaultsPhone;");
         return true;
     }
 
     private boolean insertGenders(JSONArray jsonArray) throws JSONException {
-        String Columns[] = {"code", "gender", "altLanguage", "sortOrder"};
+        String[] Columns = getColumnNames(jsonArray);
         sqlHandler.insertData("tblGender", Columns, jsonArray.toString(), "DELETE FROM tblGender;");
         return true;
     }
 
     private boolean insertOfficerVillages(JSONArray jsonArray) throws JSONException {
-        String Columns[] = {"code", "ward", "village", "locationId", "wardID"};
+        String[] Columns = getColumnNames(jsonArray);
         sqlHandler.insertData("tblOfficerVillages", Columns, jsonArray.toString(), "DELETE FROM tblOfficerVillages;");
         return true;
     }
@@ -5273,158 +5156,51 @@ public class ClientAndroidInterface {
         return TotalPremiums;
     }
 
-//    @JavascriptInterface
-//    public Bitmap ResizeImage(String ImagePath, int newSize) {
-//        try {
-//            File file = new File(ImagePath);
-//            //Decode image size
-//            BitmapFactory.Options options = new BitmapFactory.Options();
-//            options.inJustDecodeBounds = true;
-//
-//            BitmapFactory.decodeStream(new FileInputStream(file), null, options);
-//
-//
-//            //Docode with new size
-//            BitmapFactory.Options options1 = new BitmapFactory.Options();
-//          //  options1.inSampleSize = scale;
-//
-//            Bitmap newImage = BitmapFactory.decodeStream(new FileInputStream(file), null, options1);
-//            String outputFileName = global.getImageFolder() + "TestImageSize" + "_" + "OfficerCode_"  + "_0_0.jpeg";
-//           Bitmap lastBit= Bitmap.createScaledBitmap(newImage,(int)(newImage.getWidth()*0.8), (int)(newImage.getHeight()*0.8), true);
-//            OutputStream outputStream = new FileOutputStream(outputFileName);
-//          //  lastBit.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
-//
-//            outputStream.close();
-//
-//        } catch (FileNotFoundException e) {
-//            e.printStackTrace();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//        return  null;
-//    }
-
-
     public String getPayer(int LocationId) {
-        String Query = "SELECT D.LocationId DistrictId , R.LocationId RegionId  FROM tblLocations V\n" +
-                "\tINNER JOIN tblLocations W ON W.LocationId = V.ParentLocationId \n" +
-                "\tINNER JOIN tblLocations D ON D.LocationId = W.ParentLocationId \n" +
-                "\tINNER JOIN tblLocations R ON R.LocationId = D.ParentLocationId \n" +
-                "\tWHERE V.locationId =" + LocationId;
+        String Query = "SELECT D.LocationId DistrictId , R.LocationId RegionId  FROM tblLocations V " +
+                "INNER JOIN tblLocations W ON W.LocationId = V.ParentLocationId " +
+                "INNER JOIN tblLocations D ON D.LocationId = W.ParentLocationId " +
+                "INNER JOIN tblLocations R ON R.LocationId = D.ParentLocationId " +
+                "WHERE V.LocationId = " + LocationId + " OR W.LocationId = " + LocationId +
+                " OR D.LocationId = " + LocationId + " OR R.LocationId = " + LocationId;
         int RegionId = 0;
         int DistrictId = 0;
 
         JSONArray RD = sqlHandler.getResult(Query, null);
-        JSONObject object = null;
-        try {
-            object = RD.getJSONObject(0);
-            RegionId = Integer.parseInt(object.getString("RegionId"));
-            DistrictId = Integer.parseInt(object.getString("DistrictId"));
-        } catch (JSONException e) {
-            e.printStackTrace();
+        JSONObject object;
+        JSONArray Payers;
+        if (RD.length() > 0) {
+            try {
+                object = RD.getJSONObject(0);
+                RegionId = Integer.parseInt(object.getString("RegionId"));
+                DistrictId = Integer.parseInt(object.getString("DistrictId"));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            String PayerQuery = "SELECT PayerId, PayerName,P.LocationId FROM tblPayer P \n" +
+                    "INNER JOIN uvwLocations L ON P.LocationId = L.LocationId\n" +
+                    "WHERE (L.RegionId = " + RegionId + " OR L.RegionId ='null' OR L.RegionId ='') AND (L.DistrictId = " + DistrictId + " OR L.DistrictId ='null' OR L.DistrictId ='')  " +
+                    "ORDER BY L.LocationId";
+            Payers = sqlHandler.getResult(PayerQuery, null);
+        } else {
+            Payers = new JSONArray();
         }
-/*String PayerQuery = "SELECT PayerId, PayerName,P.LocationId FROM tblPayer P\n" +
-        "INNER JOIN uvwLocations L ON P.LocationId = L.LocationId\n" +
-        "WHERE \n" +
-        "(\n" +
-        "L.RegionId = CASE WHEN "+ RegionId +" IS NULL THEN NULL ELSE "+ RegionId +" END  \n" +
-        "OR L.RegionId is null\n" +
-        "OR L.DistrictId = CASE WHEN "+ DistrictId +" IS NULL THEN "+ RegionId +" ELSE "+ DistrictId +" END  \n" +
-        ") \n" +
-        "ORDER BY L.LocationId";*/
-        String PayerQuery = "SELECT PayerId, PayerName,P.LocationId FROM tblPayer P \n" +
-                "INNER JOIN uvwLocations L ON P.LocationId = L.LocationId\n" +
-                "WHERE (L.RegionId = " + RegionId + " OR L.RegionId ='null' OR L.RegionId ='') AND (L.DistrictId = " + DistrictId + " OR L.DistrictId ='null' OR L.DistrictId ='')  " +
-                "ORDER BY L.LocationId";
-        JSONArray Payers = sqlHandler.getResult(PayerQuery, null);
         return Payers.toString();
     }
 
     public String getPayersByDistrictId(int OfficeLocationId) {
-        String P = "";
         String PayerQuery = "SELECT P.PayerId, P.PayerName, P.LocationId FROM tblPayer P\n" +
                 " LEFT OUTER JOIN tblLocations L ON P.LocationId = L.LocationId\n" +
                 " WHERE (P.LocationId = " + OfficeLocationId + " OR L.ParentLocationId = P.LocationId OR P.LocationId = 'null' OR P.LocationId = '')  " +
                 " ORDER BY L.LocationId";
         JSONArray Payers = sqlHandler.getResult(PayerQuery, null);
-        if (Payers.length() > 0) {
-            P = Payers.toString();
-        }
-        return P;
-    }
-
-    private OutputStream ResizeImage(String ImagePath, String outputFileName, int newSize) {
-        try {
-            File file = new File(ImagePath);
-
-
-            BitmapFactory.Options options = new BitmapFactory.Options();
-            options.inJustDecodeBounds = true;
-            BitmapFactory.decodeStream(new FileInputStream(file), null, options);
-
-            int scale = 1;
-            while (options.outWidth / scale / 2 >= newSize && options.outHeight / scale / 2 >= newSize) {
-                scale *= 2;
-            }
-
-            BitmapFactory.Options options1 = new BitmapFactory.Options();
-            options1.inJustDecodeBounds = false;
-            options1.inSampleSize = scale;
-
-            //String outputFileName = IMAGE_FOLDER + "TestImageSize" + "_" + "OfficerCode_"  + "_0_0.jpeg";
-            OutputStream outputStream = new FileOutputStream(outputFileName);
-
-
-            Bitmap bitmap = BitmapFactory.decodeStream(new FileInputStream(file), null, options1);
-
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 30, outputStream);
-
-            return outputStream;
-
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return null;
+        return Payers.toString();
     }
 
     public static void setInsuranceNo(String insuranceNo) {
         InsuranceNo = insuranceNo;
 
-    }
-
-    ArrayList<String> scanned = new ArrayList<String>();
-    String aBuffer = "";
-
-    @JavascriptInterface
-    public void clearBuffer() {
-// empty the current content
-        try {
-            String dir = Environment.getExternalStorageDirectory() + File.separator + "scanned";
-            FileOutputStream fOut = new FileOutputStream(dir + "/values.txt");
-            OutputStreamWriter myOutWriter = new OutputStreamWriter(fOut);
-            myOutWriter.append("");
-            myOutWriter.close();
-            fOut.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @JavascriptInterface
-    public String getInsuranceNo() {
-        try {
-            String dir = Environment.getExternalStorageDirectory() + File.separator + "scanned";
-            File myFile = new File("/" + dir + "/values.txt");
-            FileInputStream fIn = new FileInputStream(myFile);
-            BufferedReader myReader = new BufferedReader(new InputStreamReader(fIn));
-            aBuffer = myReader.readLine();
-            myReader.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return aBuffer;
     }
 
     @JavascriptInterface
@@ -5443,29 +5219,7 @@ public class ClientAndroidInterface {
             e.printStackTrace();
         }
 
-
         return ((MainActivity) mContext).InsureeNumber;
-    }
-
-    public void clearXml() {
-        String dir = Environment.getExternalStorageDirectory() + File.separator + "scanned";
-        //create folder
-        File folder = new File(dir); //folder name
-        folder.mkdirs();
-
-        //create file
-        File file = new File(dir, "values.txt");
-        try {
-            file.createNewFile();
-            FileOutputStream fOut = new FileOutputStream(file);
-            OutputStreamWriter myOutWriter = new OutputStreamWriter(fOut);
-            myOutWriter.append("");
-            myOutWriter.close();
-            fOut.close();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     @JavascriptInterface
@@ -5697,16 +5451,8 @@ public class ClientAndroidInterface {
                 values.put("ExpiryDate", ExpiryDate);
                 values.put("isOffline", isOffline);
 
+                sqlHandler.insertData("tblInsureePolicy", values);
 
-/*                   String SavePolicyInsuree = "INSERT INTO tblInsureePolicy(InsureePolicyId,InsureeId,PolicyId,EnrollmentDate,StartDate,EffectiveDate,ExpiryDate,isOffline)\n" +
-                           "SELECT " + MaxInsureePolicyId + "," + InsureId + "," + PolicyId + ",EnrollDate,StartDate," + EffectiveDate + ",ExpiryDate," + isOffline + "\n" +
-                           "FROM tblPolicy WHERE PolicyID =" + PolicyId;*/
-
-                try {
-                    sqlHandler.insertData("tblInsureePolicy", values);
-                } catch (UserException e) {
-                    e.printStackTrace();
-                }
             }
         }
     }
@@ -5745,7 +5491,7 @@ public class ClientAndroidInterface {
     @JavascriptInterface
     public void UpdateInsureePolicy(int PolicyId) {//herman new
         ContentValues values = new ContentValues();
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat format = AppInformation.DateTimeInfo.getDefaultDateFormatter();
         String PolicyQuery = "SELECT EffectiveDate FROM tblPolicy WHERE PolicyId = " + PolicyId;
         JSONArray Policy = sqlHandler.getResult(PolicyQuery, null);
         String EffectiveDate = null;
@@ -5918,7 +5664,7 @@ public class ClientAndroidInterface {
     }
 
     @JavascriptInterface
-    public int ModifyFamily(final String InsuranceNumber) {//herman change
+    public int ModifyFamily(final String InsuranceNumber) {
         IsFamilyAvailable = 0;
         inProgress = true;
         String Query = "SELECT * FROM tblInsuree WHERE Trim(CHFID) = '" + InsuranceNumber + "'";
@@ -5928,24 +5674,19 @@ public class ClientAndroidInterface {
             IsFamilyAvailable = 2;
             inProgress = false;
         } else {
-
             try {
-
                 ToRestApi rest = new ToRestApi();
-                String MD = rest.getObjectFromRestApiToken("family/" + InsuranceNumber);
-
-                JSONObject FamilyData = new JSONObject(MD);
-
-                if (FamilyData.length() == 0) {
-                    IsFamilyAvailable = 0;
-                    inProgress = false;
-                } else {
-                    DownloadFamilyData(FamilyData);
-                    IsFamilyAvailable = 1;
-                    inProgress = false;
+                String MD = rest.getObjectFromRestApiToken("family/" + InsuranceNumber.trim());
+                if (!isEmpty(MD)) {
+                    JSONObject FamilyData = new JSONObject(MD);
+                    if (FamilyData.length() == 0) {
+                        IsFamilyAvailable = 0;
+                    } else {
+                        DownloadFamilyData(FamilyData);
+                        IsFamilyAvailable = 1;
+                    }
                 }
                 inProgress = false;
-
             } catch (JSONException e) {
                 inProgress = false;
                 e.printStackTrace();
@@ -5969,9 +5710,11 @@ public class ClientAndroidInterface {
         JSONArray newFamilyArr = new JSONArray();
         JSONArray newInsureeArr = new JSONArray();
 
+        FamilyData.put("familyId", "-" + FamilyData.getString("familyId"));
+        FamilyData.put("insureeId", "-" + FamilyData.getString("insureeId"));
+
         // Copy oryginal object
         JSONObject cloneFamilyData = new JSONObject(FamilyData.toString());
-
         JSONArray Insuree = (JSONArray) cloneFamilyData.get("insurees");
 
         String familyUUID = FamilyData.getString("familyUUID");
@@ -5982,6 +5725,7 @@ public class ClientAndroidInterface {
             JSONObject obj = (JSONObject) Insuree.get(i);
             obj.put("familyId", familyId);
             obj.put("familyUUID", familyUUID);
+            obj.put("insureeId", "-" + obj.getString("insureeId"));
         }
 
         // Remove insurees from FamilyData
@@ -5994,20 +5738,11 @@ public class ClientAndroidInterface {
 
         for (int j = 0; j < familyArray.length(); j++) {
             JSONObject ob = familyArray.getJSONObject(j);
-            String Poverty = ob.getString("poverty");
+            String poverty = ob.getString("poverty");
             String isOffline = ob.getString("isOffline");
 
-            if (isOffline.equals("true") || isOffline.equals("1")) {
-                ob.put("isOffline", 1);
-            } else {
-                ob.put("isOffline", 0);
-            }
-
-            if (Poverty.equals("true") || Poverty.equals("1")) {
-                ob.put("poverty", 1);
-            } else {
-                ob.put("poverty", 0);
-            }
+            ob.put("poverty", "true".equals(poverty) || "1".equals(poverty) ? 1 : 0);
+            ob.put("isOffline", "true".equals(isOffline) || "1".equals(isOffline) ? 1 : 0);
 
             newFamilyArr.put(ob);
         }
@@ -6015,58 +5750,44 @@ public class ClientAndroidInterface {
         for (int j = 0; j < Insuree.length(); j++) {
             JSONObject ob = Insuree.getJSONObject(j);
             String isOffline = ob.getString("isOffline");
+            String isHead = ob.getString("isHead");
 
-            if (isOffline.equals("true") || isOffline.equals("1")) {
-                ob.put("isOffline", 1);
-            } else {
-                ob.put("isOffline", 0);
-            }
+            ob.put("isOffline", "true".equals(isOffline) || "1".equals(isOffline) ? 1 : 0);
+            ob.put("isHead", "true".equals(isHead) || "1".equals(isHead) ? 1 : 0);
+
+
             newInsureeArr.put(ob);
         }
 
-        InsertFamilyDataFromOnline(newFamilyArr);
-        InsertInsureeDataFromOnline(newInsureeArr);
-
         //Iterate insuree array and download image for each Insuree
         for (int i = 0; i < newInsureeArr.length(); i++) {
-            JSONObject ins = newInsureeArr.getJSONObject(i);
-            String PhotoPath = ins.getString("photoPath");
-            if (PhotoPath.length() > 0) {
-                Bitmap insureeImage = GetImageFromUrl(AppInformation.DomainInfo.getDomain() + "/Images/Updated/" + PhotoPath);
-                if (insureeImage != null) {
-                    FileOutputStream stream = null;
+            JSONObject insureeObj = newInsureeArr.getJSONObject(i);
+
+            if (!isStringEmpty(insureeObj, "photoPath", true)) {
+                String photoName = insureeObj.getString("photoPath");
+                String imagePath = global.getImageFolder() + photoName;
+                insureeObj.put("photoPath", imagePath);
+                OutputStream imageOutputStream = new FileOutputStream(imagePath);
+                if (!isStringEmpty(insureeObj, "photoBase64", true)) {
                     try {
-                        stream = new FileOutputStream(global.getImageFolder() + PhotoPath);
-                        insureeImage.compress(Bitmap.CompressFormat.JPEG, 100, stream);
-
-
-                    } catch (FileNotFoundException e) {
-                        e.printStackTrace();
-                    } finally {
-                        if (stream != null)
-                            stream.close();
+                        byte[] imageBytes = Base64.decode(insureeObj.getString("photoBase64").getBytes(), Base64.DEFAULT);
+                        Bitmap image = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+                        image.compress(Bitmap.CompressFormat.JPEG, 100, imageOutputStream);
+                    } catch (Exception e) {
+                        Log.e("MODIFYFAMILY", "Error while processing Base64 image", e);
+                    }
+                } else {
+                    if (photoName.length() > 0) {
+                        String photoUrl = String.format("%sImages/Updated/%s", AppInformation.DomainInfo.getDomain(), photoName);
+                        imageTarget = new OutputStreamImageTarget(imageOutputStream, 100);
+                        ((Activity) mContext).runOnUiThread(() -> picassoInstance.load(photoUrl).into(imageTarget));
                     }
                 }
             }
         }
-    }
 
-    private Bitmap GetImageFromUrl(String ImagePath) {
-        try {
-            java.net.URL url = new java.net.URL(ImagePath);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setDoInput(true);
-            connection.connect();
-            InputStream input = connection.getInputStream();
-            Bitmap bitmap = BitmapFactory.decodeStream(input);
-            return bitmap;
-
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
+        InsertFamilyDataFromOnline(newFamilyArr);
+        InsertInsureeDataFromOnline(newInsureeArr);
     }
 
     private boolean InsertFamilyDataFromOnline(JSONArray jsonArray) throws JSONException {
@@ -6079,9 +5800,21 @@ public class ClientAndroidInterface {
             String Columns[] = {"familyId", "familyUUID", "insureeId", "insureeUUID", "locationId", "poverty", "isOffline", "familyType",
                     "familyAddress", "ethnicity", "confirmationNo", "confirmationType"};
             sqlHandler.insertData("tblFamilies", Columns, jsonArray.toString(), "");
+
+            if (object.has("familySMS")) {
+                JSONObject smsData = object.getJSONObject("familySMS");
+                try {
+                    addOrUpdateFamilySms(object.getInt("familyId"),
+                            smsData.getBoolean("approvalOfSMS"),
+                            smsData.getString("languageOfSMS")
+                    );
+                } catch (UserException e) {
+                    e.printStackTrace();
+                    Log.w("ModifyFamily", "No familySMS data in family payload");
+                }
+            }
         }
         return true;
-
     }
 
 
@@ -6329,7 +6062,7 @@ public class ClientAndroidInterface {
     }
 
     private int getFamilyStatus(int FamilyId) throws JSONException {
-        if (FamilyId < 0) return 1;
+        if (FamilyId < 0) return 0;
         String Query = "SELECT isOffline FROM tblFamilies WHERE FamilyId = " + FamilyId;
         JSONArray jsonArray = sqlHandler.getResult(Query, null);
         if (jsonArray.length() == 0) return 1;
@@ -6376,7 +6109,7 @@ public class ClientAndroidInterface {
 
             if (DataDeleted == 1) {
                 if (DeleteInfo.equalsIgnoreCase("F")) DeleteFamily(Id);//Enrollment page
-//                    if (DeleteInfo.equalsIgnoreCase("I")) DeleteInsuree(UUID);//family and insuree page
+                if (DeleteInfo.equalsIgnoreCase("I")) DeleteInsuree(Id);//family and insuree page
 //                    if (DeleteInfo.equalsIgnoreCase("PO")) DeletePolicy(UUID);//Family and policy page
 //                    if (DeleteInfo.equalsIgnoreCase("PR")) DeletePremium(UUID);//PolicyPremium page
 
@@ -6435,21 +6168,40 @@ public class ClientAndroidInterface {
         }
     }
 
+    @JavascriptInterface
     public boolean getRule(String rulename) {
+        return getRule(rulename, false);
+    }
+
+    @JavascriptInterface
+    public boolean getRule(String rulename, boolean defaultValue) {
         boolean rule = false;
         String Query = "SELECT RuleValue FROM tblIMISDefaultsPhone WHERE RuleName=?";
         String arg[] = {rulename};
         JSONArray rulevalue = sqlHandler.getResult(Query, arg);
 
         try {
-            JSONObject RuleObject = rulevalue.getJSONObject(0);
+            if (rulevalue.length() > 0) {
+                JSONObject RuleObject = rulevalue.getJSONObject(0);
 
-            rule = RuleObject.getBoolean("RuleValue");
-
+                rule = RuleObject.getBoolean("RuleValue");
+            } else {
+                rule = defaultValue;
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         }
         return rule;
+    }
+
+    @JavascriptInterface
+    public boolean CheckInternetAvailable() {
+        // check internet connection
+        if (!global.isNetworkAvailable()) {
+            ShowDialog(mContext.getResources().getString(R.string.NoInternet));
+            return false;
+        }
+        return true;
     }
 
     public void LoginDialogBox(final String page) {
@@ -6457,6 +6209,9 @@ public class ClientAndroidInterface {
         ((Activity) mContext).runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                // check internet connection
+                if (!CheckInternetAvailable())
+                    return;
                 // get prompts.xml view
                 LayoutInflater li = LayoutInflater.from(mContext);
                 View promptsView = li.inflate(R.layout.login_dialog, null);
@@ -6477,11 +6232,8 @@ public class ClientAndroidInterface {
                                     public void onClick(DialogInterface dialog, int id) {
                                         if (!username.getText().toString().equals("") || !password.getText().toString().equals("")) {
                                             boolean isUserLogged = false;
-                                            try {
-                                                isUserLogged = LoginToken(username.getText().toString(), password.getText().toString());
-                                            } catch (InterruptedException e) {
-                                                e.printStackTrace();
-                                            }
+                                            isUserLogged = LoginToken(username.getText().toString(), password.getText().toString());
+
                                             if (isUserLogged) {
                                                 if (page.equals("Enquire")) {
                                                     ((Enquire) mContext).finish();
@@ -6496,6 +6248,11 @@ public class ClientAndroidInterface {
                                                 if (page.equals("Feedbacks")) {
                                                     ((FeedbackList) mContext).finish();
                                                     Intent intent = new Intent(mContext, FeedbackList.class);
+                                                    mContext.startActivity(intent);
+                                                }
+                                                if (page.equals("Reports")) {
+                                                    ((FeedbackList) mContext).finish();
+                                                    Intent intent = new Intent(mContext, Reports.class);
                                                     mContext.startActivity(intent);
                                                 }
 
@@ -6531,9 +6288,29 @@ public class ClientAndroidInterface {
     }
 
     @JavascriptInterface
-    public void launchControlNumbers() {
-        Intent intent = new Intent(mContext, ControlNumbers.class);
+    public void launchPayment() {
+        Intent intent = new Intent(mContext, PaymentOverview.class);
         mContext.startActivity(intent);
+    }
+
+    @JavascriptInterface
+    public void launchActivity(String activity) {
+        if (activity.equals("Enquire")) {
+            Intent intent = new Intent(mContext, Enquire.class);
+            mContext.startActivity(intent);
+        }
+        if (activity.equals("Renewals")) {
+            Intent intent = new Intent(mContext, RenewList.class);
+            mContext.startActivity(intent);
+        }
+        if (activity.equals("Feedbacks")) {
+            Intent intent = new Intent(mContext, FeedbackList.class);
+            mContext.startActivity(intent);
+        }
+        if (activity.equals("Reports")) {
+            Intent intent = new Intent(mContext, Reports.class);
+            mContext.startActivity(intent);
+        }
     }
 
     @JavascriptInterface
@@ -6541,6 +6318,65 @@ public class ClientAndroidInterface {
         return ((MainActivity) mContext).getSelectedLanguage();
     }
 
+    public boolean isProductsListUnique(JSONObject policies) {
+        ArrayList<String> productCodes = new ArrayList();
+        try {
+            JSONArray policiesArray = policies.getJSONArray("policies");
+            for (int i = 0; i < policiesArray.length(); i++) {
+                JSONObject policyObject = policiesArray.getJSONObject(i);
+                String productCode = policyObject.getString("insurance_product_code");
+                productCodes.add(productCode);
+            }
+            Set<String> nonRepeatedCodes = new HashSet(productCodes);
+            if (nonRepeatedCodes.size() != 1) {
+                return false;
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return true;
+    }
+
+    public JSONArray getNotEnrolledPolicies(String insuranceNumber, String insuranceProduct, String renewal) {
+        String aRenewal = "";
+        if (!renewal.equals("")) {
+            aRenewal = " AND isDone == '" + renewal + "'";
+        }
+
+        String query = "SELECT * FROM tblRecordedPolicies WHERE InsuranceNumber LIKE '%" + insuranceNumber +
+                "%' AND ProductCode LIKE '%" + insuranceProduct + "%' " + aRenewal + " AND UploadedDate == ''";
+        JSONArray notEnrolledPolicies = sqlHandler.getResult(query, null);
+        return notEnrolledPolicies;
+    }
+
+    private int getNextAvailablePolicyId() {
+        return getMaxIdFromTable("PolicyId", "tblPolicy");
+    }
+
+    private int getNextAvailableInsureeId() {
+        return getMaxIdFromTable("InsureeId", "tblInsuree");
+    }
+
+    private int getNextAvailableFamilyId() {
+        return getMaxIdFromTable("FamilyId", "tblFamilies");
+    }
+
+    private int getNextAvailablePremiumId() {
+        return getMaxIdFromTable("PremiumId", "tblPremium");
+    }
+
+    private int getMaxIdFromTable(String idFieldName, String tableName) {
+        String query = String.format("SELECT  IFNULL(MAX(ABS(%s)),0)+1  %s  FROM %s",
+                idFieldName, idFieldName, tableName);
+        JSONArray JsonMaxPolicy = sqlHandler.getResult(query, null);
+        try {
+            JSONObject JmaxPolicyOb = JsonMaxPolicy.getJSONObject(0);
+            return JmaxPolicyOb.getInt(idFieldName);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            throw new SQLException(
+                    "Couldn't get max id " + idFieldName +
+                            " for table " + tableName);
+        }
+    }
 }
-
-

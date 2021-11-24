@@ -29,186 +29,179 @@ import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
 
 import android.os.Bundle;
+import android.support.annotation.StringRes;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 
 import android.view.MenuItem;
 import android.view.View;
 
 import android.widget.Button;
-import android.widget.DatePicker;
 
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.exact.CallSoap.CallSoap;
-import com.exact.general.General;
-
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
-import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
 
-import org.openimis.imispolicies.R;
-
 public class SnapshotIndicators extends AppCompatActivity {
-
-    private General _General = new General(AppInformation.DomainInfo.getDomain());
-    private ClientAndroidInterface ca;
+    private Global global;
     private ProgressDialog pd;
 
-    Calendar myCalendar;
+    private Calendar myCalendar;
 
-    Button btnPick;
-    Button btnGet;
+    private Button btnPick;
+    private Button btnGet;
 
-    TextView tvDate;
-    TextView FAPC;
-    TextView FEPC;
-    TextView FIPC;
-    TextView FSPC;
+    private TextView tvDate;
+    private TextView FAPC;
+    private TextView FEPC;
+    private TextView FIPC;
+    private TextView FSPC;
 
-    RelativeLayout snapshotReport;
+    private RelativeLayout snapshotReport;
 
-    String snapshot = null;
-    public static boolean inProgress = false;
+    private String snapshot = null;
 
+    private DatePickerDialog.OnDateSetListener date = (view, year, monthOfYear, dayOfMonth) -> {
+        myCalendar.set(Calendar.YEAR, year);
+        myCalendar.set(Calendar.MONTH, monthOfYear);
+        myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+        updateLabel();
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_snapshot_indicators);
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        global = (Global) getApplicationContext();
 
-        ca = new ClientAndroidInterface(this);
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setTitle(getResources().getString(R.string.SnapshotIndicators));
+        }
 
-        btnPick= (Button) findViewById(R.id.btnPick);
-        btnGet= (Button) findViewById(R.id.btnGet);
+        btnPick = findViewById(R.id.btnPick);
+        btnGet = findViewById(R.id.btnGet);
 
-        tvDate= (TextView) findViewById(R.id.tvDate);
+        tvDate = findViewById(R.id.tvDate);
 
-        FAPC= (TextView) findViewById(R.id.FAPC);
-        FEPC= (TextView) findViewById(R.id.FEPC);
-        FIPC= (TextView) findViewById(R.id.FIPC);
-        FSPC= (TextView) findViewById(R.id.FSPC);
+        FAPC = findViewById(R.id.FAPC);
+        FEPC = findViewById(R.id.FEPC);
+        FIPC = findViewById(R.id.FIPC);
+        FSPC = findViewById(R.id.FSPC);
 
-        snapshotReport = (RelativeLayout) findViewById(R.id.snapshotReport);
+        snapshotReport = findViewById(R.id.snapshotReport);
 
 
         myCalendar = Calendar.getInstance();
 
-        btnPick.setOnClickListener(new View.OnClickListener() {
+        btnPick.setOnClickListener((view) -> new DatePickerDialog(SnapshotIndicators.this, date, myCalendar
+                .get(Calendar.YEAR), myCalendar.get(Calendar.MONTH),
+                myCalendar.get(Calendar.DAY_OF_MONTH)).show());
 
-            @Override
-            public void onClick(View v) {
-                // TODO Auto-generated method stub
-                new DatePickerDialog(SnapshotIndicators.this, date, myCalendar
-                        .get(Calendar.YEAR), myCalendar.get(Calendar.MONTH),
-                        myCalendar.get(Calendar.DAY_OF_MONTH)).show();
+        btnGet.setOnClickListener((view) -> {
+            if (!(tvDate.getText()).equals("")) {
+                GetSnapshotIndicators(String.valueOf(tvDate.getText()));
+            } else {
+                showToast(R.string.pick_date, Toast.LENGTH_LONG);
             }
         });
-        btnGet.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if(!(tvDate.getText()).equals("")){
-                    GetSnapshotIndicators(String.valueOf(tvDate.getText()));
-                }else{
-                    Toast.makeText(getApplicationContext(), "Pick date then Get.", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-
     }
 
-    DatePickerDialog.OnDateSetListener date = new DatePickerDialog.OnDateSetListener() {
-
-        @Override
-        public void onDateSet(DatePicker view, int year, int monthOfYear,
-                              int dayOfMonth) {
-            // TODO Auto-generated method stub
-            myCalendar.set(Calendar.YEAR, year);
-            myCalendar.set(Calendar.MONTH, monthOfYear);
-            myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-            updateLabel();
-        }
-
-    };
     private void updateLabel() {
-        String myFormat = "yyyy-MM-dd"; //In which you need put here
+        String myFormat = "yyyy-MM-dd";
         SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
 
-        tvDate.setText(String.valueOf(sdf.format(myCalendar.getTime())));
+        tvDate.setText(sdf.format(myCalendar.getTime()));
     }
 
 
-    private void GetSnapshotIndicators(final String today){
-        if(_General.isNetworkAvailable(this)){
+    private void GetSnapshotIndicators(final String today) {
+        if (global.isNetworkAvailable()) {
             pd = ProgressDialog.show(SnapshotIndicators.this, "", getResources().getString(R.string.GetingSnapShotReport));
             try {
-                new Thread() {
-                    public void run() {
-                        GetSnapshot(today);
-                        pd.dismiss();
-                    }
-                }.start();
-
-            }catch (Exception e){
+                new Thread(() -> {
+                    GetSnapshot(today);
+                    runOnUiThread(this::showSnapshot);
+                    pd.dismiss();
+                }).start();
+            } catch (Exception e) {
                 e.printStackTrace();
             }
-
         }
-
-
     }
 
     public void GetSnapshot(String today) {
-        Global global = new Global();
-        global = (Global) this.getApplicationContext();
-
+        JSONObject snapshotObj = new JSONObject();
         try {
-
-            JSONObject snapshotObj = new JSONObject();
             snapshotObj.put("SnapshotDate", today);
-
-
-            ToRestApi rest = new ToRestApi();
-            HttpResponse response = rest.postToRestApiToken(snapshotObj,"report/indicators/snapshot");
-
-            HttpEntity entity = response.getEntity();
-            snapshot = EntityUtils.toString(entity);
-
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    if(snapshot.length() != 0 || snapshot != null){
-                        try {
-                            JSONObject ob = new JSONObject(snapshot);
-                            FAPC.setText(ob.getString("active"));
-                            FEPC.setText(ob.getString("expired"));
-                            FIPC.setText(ob.getString("idle"));
-                            FSPC.setText(ob.getString("suspended"));
-
-                            snapshotReport.setVisibility(View.VISIBLE);
-                        }catch (Exception e){
-                            Toast.makeText(getApplicationContext(), "No data found.", Toast.LENGTH_SHORT);
-                        }
-
-                    }else{
-                        Toast.makeText(getApplicationContext(), "No data found.", Toast.LENGTH_SHORT);
-                    }
-                }
-            });
-
-        }catch (Exception e){
+        } catch (JSONException e) {
             e.printStackTrace();
+            return;
         }
 
+        ToRestApi rest = new ToRestApi();
+        HttpResponse response = rest.postToRestApiToken(snapshotObj, "report/indicators/snapshot");
+
+        if (response.getStatusLine().getStatusCode() == HttpURLConnection.HTTP_OK) {
+            try {
+                HttpEntity entity = response.getEntity();
+                snapshot = EntityUtils.toString(entity);
+            } catch (IOException e) {
+                showToast(R.string.ErrorOccurred, Toast.LENGTH_LONG);
+                e.printStackTrace();
+            }
+        } else {
+            switch (response.getStatusLine().getStatusCode()) {
+                case HttpURLConnection.HTTP_UNAUTHORIZED:
+                    showToast(R.string.LoginFail, Toast.LENGTH_LONG);
+                    break;
+                case HttpURLConnection.HTTP_INTERNAL_ERROR:
+                    showToast(R.string.SomethingWrongServer, Toast.LENGTH_LONG);
+                    break;
+                default:
+                    showToast(R.string.ErrorOccurred, Toast.LENGTH_LONG);
+                    break;
+            }
+        }
     }
+
+    public void showSnapshot() {
+        if (snapshot != null && snapshot.length() > 0) {
+            try {
+                JSONObject ob = new JSONObject(snapshot);
+                FAPC.setText(ob.getString("active"));
+                FEPC.setText(ob.getString("expired"));
+                FIPC.setText(ob.getString("idle"));
+                FSPC.setText(ob.getString("suspended"));
+
+                snapshotReport.setVisibility(View.VISIBLE);
+            } catch (JSONException e) {
+                e.printStackTrace();
+                showToast(R.string.ErrorOccurred, Toast.LENGTH_LONG);
+            }
+        } else {
+            showToast(R.string.NoDataAvailable, Toast.LENGTH_LONG);
+        }
+    }
+
+    public void showToast(@StringRes int id, int length) {
+        runOnUiThread(() -> Toast.makeText(getApplicationContext(), id, length).show());
+    }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -216,14 +209,9 @@ public class SnapshotIndicators extends AppCompatActivity {
             case android.R.id.home:
                 finish();
                 return true;
-
             default:
-                super.onOptionsItemSelected(item);
+                return super.onOptionsItemSelected(item);
         }
-        return false;
-
     }
-
-
 }
 

@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/BulkControlNumbers"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="org.openimis.imispolicies.BulkControlNumbersActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_margin="10dp"
+        android:fontFamily="sans-serif-light"
+        android:orientation="horizontal"
+        android:textSize="20sp"
+        android:typeface="monospace">
+
+        <TextView
+            android:id="@+id/AssignedCN"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginStart="20dp"
+            android:fontFamily="sans-serif-light"
+            android:gravity="start|center_vertical"
+            android:text="@string/AssignedCN"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:typeface="monospace" />
+
+        <TextView
+            android:id="@+id/AssignedCNCount"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginEnd="20dp"
+            android:fontFamily="sans-serif-light"
+            android:gravity="center_vertical|end"
+            android:text="0"
+            android:textSize="20sp"
+            android:typeface="monospace" />
+    </LinearLayout>
+
+    <ListView
+        android:id="@+id/AssignedCNDetails"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_margin="10dp"
+        android:fontFamily="sans-serif-light"
+        android:orientation="horizontal"
+        android:textSize="20sp"
+        android:typeface="monospace">
+
+        <TextView
+            android:id="@+id/FreeCN"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginStart="20dp"
+            android:fontFamily="sans-serif-light"
+            android:gravity="start|center_vertical"
+            android:text="@string/FreeCN"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:typeface="monospace" />
+
+        <TextView
+            android:id="@+id/FreeCNCount"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginEnd="20dp"
+            android:fontFamily="sans-serif-light"
+            android:gravity="center_vertical|end"
+            android:text="0"
+            android:textSize="20sp"
+            android:typeface="monospace" />
+    </LinearLayout>
+
+    <ListView
+        android:id="@+id/FreeCNDetails"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginHorizontal="10dp"
+        android:layout_marginTop="30dp"
+        android:background="@color/colorPrimary"
+        android:fontFamily="sans-serif-light"
+        android:orientation="horizontal"
+        android:textColor="@color/white"
+        android:textSize="20sp"
+        android:typeface="monospace">
+
+        <TextView
+            android:id="@+id/FetchBulkCn"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fontFamily="sans-serif-light"
+            android:gravity="center"
+            android:text="@string/FetchBulkCN"
+            android:textColor="@color/white"
+            android:textSize="20sp"
+            android:typeface="monospace" />
+    </LinearLayout>
+
+</LinearLayout>

@@ -1,50 +1,50 @@
 package org.openimis.imispolicies;
 
 import android.content.Intent;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.Button;
-
-import org.openimis.imispolicies.R;
 
 public class Reports extends AppCompatActivity {
     Button SnapshotIndicators;
-    Button CummulativeIndicators;
+    Button CumulativeIndicators;
+
+    private ClientAndroidInterface ca;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reports);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) actionBar.setDisplayHomeAsUpEnabled(true);
 
-        SnapshotIndicators = (Button) findViewById(R.id.SnapshotIndicators);
-        CummulativeIndicators = (Button) findViewById(R.id.CummulativeIndicators);
+        ca = new ClientAndroidInterface(this);
 
+        SnapshotIndicators = findViewById(R.id.SnapshotIndicators);
+        CumulativeIndicators = findViewById(R.id.CumulativeIndicators);
 
-        SnapshotIndicators.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                openSnapshotIndicators();
-            }
-        });
+        SnapshotIndicators.setOnClickListener((view) -> openSnapshotIndicators());
 
-        CummulativeIndicators.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                openCummulativeIndicators();
-            }
-        });
+        CumulativeIndicators.setOnClickListener((view) -> openCumulativeIndicators());
     }
 
-    public void openSnapshotIndicators(){
-        Intent i = new Intent(this, SnapshotIndicators.class);
-        startActivity(i);
+    public void openSnapshotIndicators() {
+        openReport(SnapshotIndicators.class);
     }
-    public void openCummulativeIndicators(){
-        Intent i = new Intent(this, CummulativeIndicators.class);
-        startActivity(i);
+
+    public void openCumulativeIndicators() {
+        openReport(CumulativeIndicators.class);
+    }
+
+    protected void openReport(Class<?> reportClass) {
+        boolean isInternetAvailable = ca.CheckInternetAvailable();
+        if (isInternetAvailable) {
+            Intent i = new Intent(this, reportClass);
+            startActivity(i);
+        }
     }
 
     @Override
@@ -58,6 +58,5 @@ public class Reports extends AppCompatActivity {
                 super.onOptionsItemSelected(item);
         }
         return false;
-
     }
 }

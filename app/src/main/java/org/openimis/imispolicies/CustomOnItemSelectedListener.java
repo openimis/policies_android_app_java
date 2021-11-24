@@ -10,11 +10,11 @@ import android.widget.AdapterView.OnItemSelectedListener;
 
 public class CustomOnItemSelectedListener implements OnItemSelectedListener {
 
-    OverViewPolicies1 overViewPolicies1 = new OverViewPolicies1();
+    OverViewPolicies overViewPolicies = new OverViewPolicies();
     SearchOverViewControlNumber searchOverViewControlNumber = new SearchOverViewControlNumber();
 
     public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
-        overViewPolicies1.PayType = parent.getItemAtPosition(pos).toString();
+        overViewPolicies.PayType = parent.getItemAtPosition(pos).toString();
         searchOverViewControlNumber.PayType = parent.getItemAtPosition(pos).toString();
 /*        Toast.makeText(parent.getContext(),
                 "OnItemSelectedListener : " + parent.getItemAtPosition(pos).toString(),

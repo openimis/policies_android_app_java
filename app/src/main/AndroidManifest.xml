@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="org.openimis.imispolicies"
-    android:versionCode="2"
-    android:versionName="2.0.0">
+    package="org.openimis.imispolicies">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -16,95 +14,121 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
+    <uses-permission
+        android:name="android.permission.READ_CALL_LOG"
+        tools:node="remove" />
+    <uses-permission
+        android:name="android.permission.READ_CONTACTS"
+        tools:node="remove" />
 
     <uses-feature
         android:name="android.hardware.camera"
         android:required="true" />
 
     <application
-        android:name="org.openimis.imispolicies.Global"
+        android:name=".Global"
         android:allowBackup="true"
         android:fullBackupContent="@xml/backup_descriptor"
-        android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher"
+        android:hardwareAccelerated="true"
+        android:icon="@mipmap/ic_launcher_policies"
+        android:label="@string/app_name_policies"
+        android:networkSecurityConfig="@xml/network_security_config"
+        android:requestLegacyExternalStorage="true"
+        android:roundIcon="@mipmap/ic_launcher_policies"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        android:hardwareAccelerated="true"
         tools:ignore="GoogleAppIndexingWarning"
-        tools:replace="android:icon">
+        tools:replace="android:icon,android:label">
+        <service
+            android:name=".ControlNumberService"
+            android:exported="false" />
+
         <uses-library
             android:name="org.apache.http.legacy"
-            android:required="false"/>
+            android:required="false" />
+        <provider
+            android:name="android.support.v4.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/paths" />
+        </provider>
+
         <activity
-            android:name="org.openimis.imispolicies.MainActivity"
+            android:name=".MainActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:label="@string/app_name"
+            android:label="@string/app_name_policies"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
-            android:name="org.openimis.imispolicies.Enquire"
+            android:name=".Enquire"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/Enquire"
             android:screenOrientation="portrait" />
         <activity
-            android:name="org.openimis.imispolicies.RenewList"
+            android:name=".RenewList"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/Renewal"
             android:screenOrientation="portrait" />
         <activity
-            android:name="org.openimis.imispolicies.Renewal"
+            android:name=".Renewal"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/Renewal"
-            android:parentActivityName="org.openimis.imispolicies.RenewList"
+            android:parentActivityName=".RenewList"
             android:screenOrientation="portrait"
             tools:targetApi="jelly_bean" />
         <activity
-            android:name="org.openimis.imispolicies.FeedbackList"
+            android:name=".FeedbackList"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:screenOrientation="portrait" />
         <activity
-            android:name="org.openimis.imispolicies.Feedback"
+            android:name=".Feedback"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:parentActivityName="org.openimis.imispolicies.FeedbackList"
+            android:parentActivityName=".FeedbackList"
             android:screenOrientation="portrait"
             tools:targetApi="jelly_bean" />
         <activity
-            android:name="org.openimis.imispolicies.Statistics"
+            android:name=".Statistics"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:screenOrientation="portrait" />
         <activity
-            android:name="org.openimis.imispolicies.Acquire"
+            android:name=".Acquire"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/Acquire"
             android:screenOrientation="portrait" />
-        <activity android:name="org.openimis.imispolicies.Reports"
+        <activity
+            android:name=".Reports"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/Reports"
             android:screenOrientation="portrait" />
         <activity
-            android:name="org.openimis.imispolicies.SnapshotIndicators"
+            android:name=".SnapshotIndicators"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/SnapshotIndicators"
             android:screenOrientation="portrait" />
-
-        <activity android:name="org.openimis.imispolicies.CummulativeIndicators"
+        <activity
+            android:name=".CumulativeIndicators"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:label="@string/CummulativeIndicators"
+            android:label="@string/CumulativeIndicators"
             android:screenOrientation="portrait" />
-        <activity android:name="org.openimis.imispolicies.ControlNumbers" />
-        <activity android:name="org.openimis.imispolicies.SearchOverViewPolicies" />
-        <activity android:name="org.openimis.imispolicies.OverViewPolicies1" />
-        <activity android:name="org.openimis.imispolicies.OverViewControlNumbers" />
-        <activity android:name="org.openimis.imispolicies.SearchOverViewControlNumber" />
-        <activity android:name="org.openimis.imispolicies.ViewPolicies" />
-        <activity android:name="org.openimis.imispolicies.CheckCommission"></activity>
+        <activity android:name=".PaymentOverview" />
+        <activity android:name=".SearchOverViewPolicies" />
+        <activity android:name=".OverViewPolicies" />
+        <activity android:name=".OverViewControlNumbers" />
+        <activity android:name=".SearchOverViewControlNumber" />
+        <activity android:name=".ViewPolicies" />
+        <activity android:name=".CheckCommission" />
+        <activity android:name=".SearchNotEnrolledPolicies" />
+        <activity android:name=".NotEnrolledPoliciesOverview" />
+        <activity android:name=".BulkControlNumbersActivity" />
     </application>
 
 </manifest>

@@ -31,61 +31,7 @@ In case of dispute arising out or in relation to the use of the program, it is s
     <script src="../JS/exact.js"></script>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no" charset="utf-8"/>
 
-
-    <script type="text/javascript">
-
-       $(document).ready(function(){
-        document.title = Android.getString('Login');
-           var isSearch =parseInt(queryString("s"));
-         if(sessionStorage.getItem("UserData") != null && isSearch == 2 ){
-             sessionStorage.removeItem("UserData");
-             sessionStorage.setItem("user","out");
-             Android.isValidLogin('','');
-                window.open("Enrollment.html", "_self");
-         }
-         var officer_code = Android.getOfficerCode();
-         $("#txtLoginName").val(officer_code);
-        if(sessionStorage.getItem("UserData") != null){
-           window.open("Enrollment.html", "_self");
-         }
-
-
-           $('#spPleaseWait').text(Android.getString('PleaseWait'));
-           $('#btnLogin').click(function() {
-
-            var passed = isFormValidated();
-            if(passed){
-             var Username = $('#txtLoginName').val();
-             var Password = $('#txtPassword').val();
-              sessionStorage.setItem("user","in");
-            $("#divProgress").show();
-            setTimeout(function(){
-                var LoggedIn =  Android.LoginJI(Username, Password);
-                  if(LoggedIn > 0){
-                        SaveUserLoggedIn();
-                        if(isSearch == 0)window.open('Sync.html', '_self');
-                        else if(isSearch == 1) window.open('Search.html', '_self');
-                        else if(isSearch == 2) window.open('Enrollment.html', '_self');
-                    }
-                    else
-                        Android.ShowDialog(Android.getString('LoginFail'));
-              $("#divProgress").hide();
-            }, 500)
-        }
-        else
-           Android.ShowDialog(Android.getString('FieldRequired'));
-  });
-
-   });
-    function SaveUserLoggedIn(){
-          var jsonUser = getControlsValuesJSON('li');
-           sessionStorage.setItem("UserData", jsonUser);
-        }
-
-
-
-    </script>
-
+    <script type="text/javascript" src="Login.js"></script>
 
 </head>
 <body>

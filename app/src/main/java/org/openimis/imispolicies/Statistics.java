@@ -81,6 +81,7 @@ public class Statistics extends AppCompatActivity {
     private String Caller;
     private Global global;
     public static boolean IsEnrolment = false;
+
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.statistics);
@@ -230,7 +231,6 @@ public class Statistics extends AppCompatActivity {
     }
 
     private void GetStatistics() {
-
         FeedbackStats = new ArrayList<>();
 
         CallSoap cs = new CallSoap();
@@ -248,7 +248,7 @@ public class Statistics extends AppCompatActivity {
         }
         String stats = "";
 
-        DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        DateFormat formatter = AppInformation.DateTimeInfo.getDefaultDateFormatter();
         JSONObject objStats = new JSONObject();
         try {
             objStats.put("fromDate", formatter.format(FromDate));
@@ -321,7 +321,7 @@ public class Statistics extends AppCompatActivity {
 
     }
     private void GetEnrolmentStats(){
-        EnrolmentStats = new ArrayList<HashMap<String, String>>();
+        EnrolmentStats = new ArrayList<>();
 
         Date FromDate, ToDate;
 
@@ -335,7 +335,7 @@ public class Statistics extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        DateFormat formatter = AppInformation.DateTimeInfo.getDefaultDateFormatter();
 
         JSONObject objEnrolment = new JSONObject();
         try {

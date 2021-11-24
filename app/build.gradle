@@ -1,15 +1,27 @@
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+
+apply plugin: 'com.android.application'
+apply from: "$project.rootDir/script-git-version.gradle"
 apply plugin: 'com.android.application'
 
 // Load keystore
-def keystorePropertiesFile = file("keystore.properties");
+def keystorePropertiesFile = file("keystore.properties")
 def keystoreProperties = new Properties()
 if ( keystorePropertiesFile.exists() ) {
     keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 }
 
+//generate date
+static def getDate() {
+    LocalDateTime date = LocalDateTime.now()
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern('yyyy-MM-dd HH:mm:ss').withLocale(Locale.US)
+    return date.format(formatter)
+}
+
 android {
-    compileSdkVersion 28
-    buildToolsVersion '28.0.3'
+    compileSdkVersion 30
+    buildToolsVersion '30.0.3'
     if ( keystorePropertiesFile.exists() ) {
         signingConfigs {
             releaseConfig {
@@ -23,82 +35,207 @@ android {
     defaultConfig {
         applicationId "org.openimis.imispolicies"
         minSdkVersion 19
-        targetSdkVersion 27
-        versionCode 3
-        versionName "2.0.1"
+        targetSdkVersion 30
+        versionCode gitVersionCode
+        versionName gitVersionName
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         useLibrary('org.apache.http.legacy')
+        vectorDrawables {
+            useSupportLibrary = true
+        }
     }
     buildTypes {
         release {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            shrinkResources false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             debuggable = false
             if ( keystorePropertiesFile.exists() ) {
                 signingConfig signingConfigs.releaseConfig
             }
+            buildConfigField "boolean", "LOG", "false"
         }
         debug {
             debuggable = true
+            buildConfigField "boolean", "LOG", "true"
         }
         flavorDimensions 'std'
     }
     flavorDimensions 'std'
     productFlavors.all {
-        buildConfigField "String", "API_BASE_URL", '"http://demo.openimis.org/rest/"'
-        buildConfigField "boolean", "SHOW_CONTROL_NUMBER_MENU", 'false'
+        buildConfigField "String", "API_BASE_URL", '"https://demo.openimis.org/rest/"'
+        buildConfigField "boolean", "SHOW_PAYMENT_MENU", 'false'
+        buildConfigField "boolean", "SHOW_BULK_CN_MENU", 'false'
         buildConfigField "String", "RAR_PASSWORD", '")(#$1HsD"'
-        resValue "string", "app_name", "openIMIS Policies"
+        buildConfigField "String", "API_VERSION", '"3"'
+        buildConfigField "String", "APP_DIR", '"IMIS"'
+        resValue "string", "app_name_policies", "Policies"
+        resValue "string", "ReleaseDateValue", getDate()
     }
     productFlavors {
         demoProd {
             applicationId "org.openimis.imispolicies.demoProd"
-            buildConfigField "String", "API_BASE_URL", '"http://demo.openimis.org/rest/"'
-            buildConfigField "String", "RAR_PASSWORD", '")(#$1HsD"'
-            resValue "string", "app_name", "Policies Demo"
+            buildConfigField "String", "API_BASE_URL", '"https://demo.openimis.org/rest/"'
+            buildConfigField "String", "APP_DIR", '"IMIS-DEMOPROD"'
+            resValue "string", "app_name_policies", "Policies Demo"
             dimension = 'std'
         }
+
         demoRelease {
             applicationId "org.openimis.imispolicies.demoRelease"
-            buildConfigField "String", "API_BASE_URL", '"http://release.openimis.org/rest/"'
-            buildConfigField "boolean", "SHOW_CONTROL_NUMBER_MENU", 'true'
-            resValue "string", "app_name", "Policies Release"
+            buildConfigField "String", "API_BASE_URL", '"https://release.openimis.org/rest/"'
+            buildConfigField "String", "APP_DIR", '"IMIS-DEMORELEASE"'
+            resValue "string", "app_name_policies", "Policies Release"
+        }
+
+        chfDev {
+            applicationId "org.openimis.imispolicies.chfdev"
+            buildConfigField "String", "API_BASE_URL", '"http://chf-dev.swisstph-mis.ch/rest/"'
+            buildConfigField "boolean", "SHOW_PAYMENT_MENU", 'true'
+            buildConfigField "boolean", "SHOW_BULK_CN_MENU", 'true'
+            buildConfigField "String", "APP_DIR", '"IMIS-CHFDEV"'
+            resValue "string", "app_name_policies", "Policies CHF DEV"
+            dimension = 'std'
+        }
+
+        chfProd {
+            applicationId "org.openimis.imispolicies.chf"
+            buildConfigField "String", "API_BASE_URL", '"http://chf-imis.or.tz/restapi/"'
+            buildConfigField "boolean", "SHOW_PAYMENT_MENU", 'false'
+            buildConfigField "boolean", "SHOW_BULK_CN_MENU", 'true'
+            buildConfigField "String", "APP_DIR", '"IMIS-CHFPROD"'
+            resValue "string", "app_name_policies", "Policies CHF"
+            dimension = 'std'
+        }
+
+        mvDev {
+            applicationId "org.openimis.imispolicies.mv"
+            buildConfigField "String", "API_BASE_URL", '"http://imis-mv.swisstph-mis.ch/rest/"'
+            buildConfigField "boolean", "SHOW_PAYMENT_MENU", 'true'
+            buildConfigField "String", "APP_DIR", '"IMIS-MVDEV"'
+            buildConfigField "String", "API_VERSION", '"3"'
+            resValue "string", "app_name_policies", "Policies MV DEV"
+            dimension = 'std'
+        }
+        bephaDev {
+            applicationId "org.openimis.imispolicies.bepha"
+            buildConfigField "String", "API_BASE_URL", '"http://149.210.235.40/devupgrade/rest/"'
+            buildConfigField "String", "APP_DIR", '"IMIS-BEPHADEV"'
+            resValue "string", "app_name_policies", "Policies BEPHA DEV"
+            dimension = 'std'
+        }
+        tchadDev {
+            applicationId "org.openimis.imispolicies.tchadDev"
+            buildConfigField "String", "API_BASE_URL", '"http://imis-tchad-dev.swisstph-mis.ch/rest/"'
+            buildConfigField "String", "APP_DIR", '"IMIS-TCHADDEV"'
+            resValue "string", "app_name_policies", "Policies TCHAD DEV"
+            dimension = 'std'
+        }
+        local {
+            applicationId "org.openimis.imispolicies.local"
+            buildConfigField "String", "API_BASE_URL", '"http://10.0.2.2:35787/"'
+            buildConfigField "String", "APP_DIR", '"IMIS-LOCAL"'
+            buildConfigField "boolean", "SHOW_PAYMENT_MENU", 'true'
+            resValue "string", "app_name_policies", "Policies Local"
+            dimension = 'std'
+            versionCode = gitVersionCodeTime
+        }
+        chfsit {
+            applicationId "org.openimis.imispolicies.chfsit"
+            buildConfigField "String", "API_BASE_URL", '"http://196.192.73.26/restapi/"'
+            buildConfigField "String", "APP_DIR", '"IMIS-CHFSIT"'
+            buildConfigField "boolean", "SHOW_PAYMENT_MENU", 'true'
+            buildConfigField "boolean", "SHOW_BULK_CN_MENU", 'true'
+            resValue "string", "app_name_policies", "Policies CHF SIT"
+        }
+        niger {
+            print("Building niger flavour" + "API_BASE_URL" + '"' + (System.getenv("API_BASE_URL") ?: 'http://192.168.0.100/') + '"')
+            print("App name: " + System.getenv("CLI_APP_NAME") ?: "Polices Niger")
+            applicationId "org.openimis.imispolicies.niger"
+            buildConfigField "String", "API_BASE_URL", '"' + (System.getenv("API_BASE_URL") ?: 'http://192.168.0.100/') + '"'
+            buildConfigField "String", "APP_DIR", '"' + (System.getenv("CLI_APP_DIR") ?: 'IMIS-POL') + '"'
+            resValue "string", "app_name_policies", System.getenv("CLI_APP_NAME") ?: "Polices Niger"
+        }
+        cli {
+            applicationIdSuffix System.getenv("APPLICATION_ID") ?: "org.openimis.imispolicies.cli"
+            buildConfigField "String", "API_BASE_URL", '"' + (System.getenv("API_BASE_URL") ?: 'http://10.0.2.2:35787/') + '"'
+            buildConfigField "String", "APP_DIR", '"' + (System.getenv("CLI_APP_DIR") ?: 'IMIS-CLI') + '"'
+            resValue "string", "app_name_policies", System.getenv("CLI_APP_NAME") ?: "Policies CLI"
+            dimension 'std'
+        }
+        mauritaniaTrain {
+            applicationId "org.openimis.policies.mauritaniaTrain"
+            buildConfigField "String", "API_BASE_URL", '"https://formation.cnass-mauritanie.swisstph-mis.ch/rest/"'
+            buildConfigField "boolean", "SHOW_PAYMENT_MENU", 'false'
+            buildConfigField "boolean", "SHOW_BULK_CN_MENU", 'false'
+            buildConfigField "String", "APP_DIR", '"IMIS-MAURITANIA-TRAIN"'
+            resValue "string", "app_name_policies", "Policies CNASS TRAIN"
             dimension = 'std'
         }
     }
     sourceSets {
-        demoProd.java.srcDir 'src/demo/java'
-        demoRelease.java.srcDir 'src/demo/java'
-    }
-}
+        chfDev.java.srcDir 'src/chf/java'
+        chfDev.res.srcDir 'src/chf/res'
 
-allprojects {
-    repositories {
-        google()
-        jcenter()
-        maven { url 'https://maven.google.com/' }
-        flatDir {
-            dirs 'libs'
-        }
+        chfProd.java.srcDir 'src/chf/java'
+        chfProd.res.srcDir 'src/chf/res'
+
+        chfsit.java.srcDir 'src/chf/java'
+        chfsit.res.srcDir 'src/chf/res'
+
+        mvDev.java.srcDir 'src/master/java'
+        mvDev.res.srcDirs 'src/master/res'
+
+        local.java.srcDir 'src/master/java'
+        local.res.srcDir 'src/master/res'
+
+        bephaDev.java.srcDir 'src/bepha/java'
+        bephaDev.res.srcDir 'src/bepha/res'
+
+        niger.java.srcDir 'src/niger/java'
+        niger.res.srcDir 'src/niger/res'
+
+        tchadDev.java.srcDir 'src/tchad/java'
+        tchadDev.res.srcDir 'src/tchad/res'
+
+        demoProd.java.srcDir 'src/master/java'
+        demoProd.res.srcDir 'src/demoProd/res'
+
+        demoRelease.java.srcDir 'src/master/java'
+        demoRelease.res.srcDir 'src/demoRelease/res'
+
+        cli.java.srcDir System.getenv("CLI_JAVA_DIR") ?: 'src/master/java'
+        cli.res.srcDir System.getenv("CLI_RES_DIR") ?: 'src/demoProd/res'
+
+        mauritaniaTrain.java.srcDir 'src/master/java'
+    }
+
+// Apply custom flavours
+    if(file('custom-flavours.gradle').exists()){
+        apply from: 'custom-flavours.gradle'
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 }
 
 dependencies {
-    implementation  fileTree(include: ['*.jar'], dir: 'libs')
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
-        exclude group: 'com.android.support', module: 'support-annotations'
-    })
-    compile(name: 'CaptureActivity', ext: 'aar')
-    compile(name: 'General', ext: 'aar')
+    implementation  fileTree(include: ['*.jar','*.aar'], dir: 'libs')
     implementation 'com.android.support:appcompat-v7:28.0.0'
     implementation 'com.android.support:design:28.0.0'
-    implementation 'com.android.support.constraint:constraint-layout:1.1.3'
+    implementation 'com.android.support.constraint:constraint-layout:2.0.4'
     implementation 'com.squareup.picasso:picasso:2.5.2'
+    implementation 'commons-io:commons-io:2.11.0'
     implementation 'com.android.support:support-v4:28.0.0'
     implementation 'com.android.support:recyclerview-v7:28.0.0'
+    implementation 'org.apache.commons:commons-lang3:3.12.0'
+
+
+    androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
     testImplementation 'junit:junit:4.12'
-    compile files('libs/zip4j-1.2.7.jar')
-    compile files('libs/httpclient-4.2.3.jar')
-    compile files('libs/httpcore-4.2.3.jar')
-//compile 'com.android.support:support-annotations:27.1.1'
+    //compile 'com.android.support:support-annotations:27.1.1'
 }
