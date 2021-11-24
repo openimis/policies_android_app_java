@@ -428,4 +428,12 @@
     <string name="Permissions">Autorisations</string>
     <string name="PermissionsInfo">Pour fonctionner correctement, %1$s nécessite plusieurs autorisations. Veuillez les autoriser dans l\'écran suivant afin d\'utiliser l\'application.</string>
     <string name="EmptyMonth">Veuillez remplir le mois</string>
+    <string name="RenewalAccepted">Renewal accepted</string>
+    <string name="RenewalAlreadyAccepted">Renewal already accepted</string>
+    <string name="RenewalRejected">Renewal rejected</string>
+    <string name="GracePeriodExpired">Grace period expired</string>
+    <string name="ControlNumberError">Control number error</string>
+    <string name="UnexpectedException">Unexpected exception</string>
+    <string name="InvalidRenewalFile">Invalid renewal file</string>
+    <string name="ConfirmControlNumber">Control number \"%1$s\" is not present in phone memory. Please confirm that this control number is correct.</string>
 </resources>

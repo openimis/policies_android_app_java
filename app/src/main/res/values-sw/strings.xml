@@ -367,7 +367,7 @@
     <string name="commissions_report">Ripoti ya Kamisheni</string>
     <string name="amount">Kiasi</string>
     <string name="Commissions">Kamisheni</string>
-    <string name="SearchPolicies">Tafuta Mikataba</string>
+    <string name="SearchPolicies">Tafuta Mikataba iliyosajiliwa</string>
     <string name="SearchControlNumbers">Namba za Ankara</string>
     <string name="Overviews">Mapitio</string>
     <string name="policies">Mikataba</string>
@@ -404,8 +404,8 @@
     <string name="languageOfSMS">Lugha ya SMS</string>
     <string name="approvalOfSMS">Indhinisha SMS</string>
     <string name="PaymentOverview">Muhtasari wa Malipo</string>
-    <string name="GetPaymentCNOnline">Pata malipo ya ankara kwa mkataba  mtandaoni</string>
-    <string name="GetPaymentCNOffline">Pata malipo ya ankara  kwa mkataba  nje ya mtandao</string>
+    <string name="GetPaymentCNOnline">Pata malipo ya ankara kwa mikataba iliyosajiliwa</string>
+    <string name="GetPaymentCNOffline">Pata malipo ya ankara kwa mikataba isiyosajiliwa</string>
     <string name="OverviewPaymentCN">Muhtasari wa malipo ya Ankara</string>
     <string name="LogInToDownloadRenewals">Tafadhali ingia kwanza kupakua uhuishaji</string>
     <string name="SelectAllButton">Chagua wote</string>
@@ -427,5 +427,13 @@
     <string name="ExternalStorageAccessInfo">Ili kufanya kazi kwa usahihi, %1$s inahitaji ufikiaji wa hifadhi ya nje. Tafadhali ruhusu kwa %1$s kwenye skirini  inayofuata ili utumie programu.</string>
     <string name="Permissions">Ruhusa</string>
     <string name="PermissionsInfo">Kufanya kazi kwa usahihi, %1$s inahitaji ruhusa nyingi. Tafadhali waruhusu kwenye skrini inayofuata ili utumie programu.</string>
-    <string name="EmptyMonth">Please fill the month</string>
+    <string name="EmptyMonth">Tafadhali jaza mwezi</string>
+    <string name="RenewalAccepted">Taarifa za kuhuisha zimepokelewa</string>
+    <string name="RenewalAlreadyAccepted">Taarifa za kuhuisha zimeishapokelewa</string>
+    <string name="RenewalRejected">Taarifa za kuhuisha zimekataliwa</string>
+    <string name="GracePeriodExpired">Muda wa matazamio umeisha</string>
+    <string name="ControlNumberError">Kuna makosa kwenye namba ya malipo</string>
+    <string name="UnexpectedException">Hitilafu isiyotarajiwa</string>
+    <string name="InvalidRenewalFile">Faili la kuhuisha ni batili</string>
+    <string name="ConfirmControlNumber">Namba ya malipo \"%1$s\" haipo kwenye simu,tafadhali hakiki namba kabla ya kuendelea.</string>
 </resources>
