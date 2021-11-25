@@ -40,6 +40,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -83,6 +84,7 @@ import static android.provider.Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSIO
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
+    public static final String LOG_TAG = "MAIN_ACTIVITY";
     private static final int REQUEST_ALL_FILES_ACCESS_CODE = 7;
     private static final int REQUEST_PERMISSIONS_CODE = 1;
     private static final int REQUEST_PICK_MD_FILE = 4;
@@ -114,8 +116,18 @@ public class MainActivity extends AppCompatActivity
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == ClientAndroidInterface.RESULT_LOAD_IMG && resultCode == RESULT_OK && data != null) {
-            Uri selectedImage = data.getData();
+        if (requestCode == ClientAndroidInterface.RESULT_LOAD_IMG && resultCode == RESULT_OK) {
+            Uri selectedImage;
+            if (data == null || data.getData() == null ||
+                    (data.getData() != null
+                            && data.getAction() != null
+                            && data.getAction().equals(MediaStore.ACTION_IMAGE_CAPTURE))) {
+                Log.d("Main", "RESULT_LOAD_IMG got a camera result, in the predefined location");
+                selectedImage = ClientAndroidInterface.tempPhotoUri;
+            } else {
+                // File selection
+                selectedImage = data.getData();
+            }
             wv.evaluateJavascript(String.format("selectImageCallback(\"%s\");", selectedImage), null);
         } else if (requestCode == ClientAndroidInterface.RESULT_SCAN && resultCode == RESULT_OK && data != null) {
             this.InsureeNumber = data.getStringExtra("SCAN_RESULT");
