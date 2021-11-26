@@ -97,6 +97,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -686,34 +687,25 @@ public class ClientAndroidInterface {
 
     @JavascriptInterface
     public String getHFLevels() {
-        JSONArray HFLevels = new JSONArray();
-        JSONObject object = new JSONObject();
+        JSONArray jsonHFLevels = new JSONArray();
+        JSONObject jsonObject = new JSONObject();
+        LinkedHashMap<String, String> hfLevels = global.getHFLevels();
 
         try {
-            object.put("Code", "");
-            object.put("HFLevel", mContext.getResources().getString(R.string.SelectHFLevel));
-            HFLevels.put(object);
-
-            object = new JSONObject();
-            object.put("Code", "D");//Uploaded = 1;
-            object.put("HFLevel", mContext.getResources().getString(R.string.Dispensary));
-            HFLevels.put(object);
-
-            object = new JSONObject();
-            object.put("Code", "C");
-            object.put("HFLevel", mContext.getResources().getString(R.string.HealthCentre));
-            HFLevels.put(object);
-
-            object = new JSONObject();
-            object.put("Code", "H");
-            object.put("HFLevel", mContext.getResources().getString(R.string.Hospital));
-            HFLevels.put(object);
-
+            jsonObject.put("Code", "");
+            jsonObject.put("HFLevel", mContext.getResources().getString(R.string.SelectHFLevel));
+            jsonHFLevels.put(jsonObject);
+            for (String key : hfLevels.keySet()) {
+                jsonObject = new JSONObject();
+                jsonObject.put("Code", key);
+                jsonObject.put("HFLevel", hfLevels.get(key));
+                jsonHFLevels.put(jsonObject);
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
-        return HFLevels.toString();
+        return jsonHFLevels.toString();
     }
 
     @JavascriptInterface
