@@ -734,14 +734,13 @@ public class SQLHandler extends SQLiteOpenHelper {
         String dbPath = ClientAndroidInterface.filePath;
         mDatabase = SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READWRITE);
         try {
-            JSONArray array = null;
+            JSONArray array;
             JSONObject object;
 
             array = new JSONArray(data);
 
             if (array.length() == 0)
                 return;
-
 
             if (!mDatabase.isOpen()) {
                 openDatabase();

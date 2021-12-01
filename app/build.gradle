@@ -2,8 +2,8 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 apply plugin: 'com.android.application'
+apply plugin: "org.ajoberstar.grgit"
 apply from: "$project.rootDir/script-git-version.gradle"
-apply plugin: 'com.android.application'
 
 // Load keystore
 def keystorePropertiesFile = file("keystore.properties")
@@ -149,8 +149,6 @@ android {
             resValue "string", "app_name_policies", "Policies CHF SIT"
         }
         niger {
-            print("Building niger flavour" + "API_BASE_URL" + '"' + (System.getenv("API_BASE_URL") ?: 'http://192.168.0.100/') + '"')
-            print("App name: " + System.getenv("CLI_APP_NAME") ?: "Polices Niger")
             applicationId "org.openimis.imispolicies.niger"
             buildConfigField "String", "API_BASE_URL", '"' + (System.getenv("API_BASE_URL") ?: 'http://192.168.0.100/') + '"'
             buildConfigField "String", "APP_DIR", '"' + (System.getenv("CLI_APP_DIR") ?: 'IMIS-POL') + '"'
@@ -216,8 +214,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
 }
 
@@ -236,6 +234,6 @@ dependencies {
     androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    testImplementation 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.13.1'
     //compile 'com.android.support:support-annotations:27.1.1'
 }

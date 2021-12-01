@@ -2602,9 +2602,24 @@ public class ClientAndroidInterface {
     }
 
 
-    public String InsertRenewals(String Result) {
+    public String InsertRenewalsFromApi(String Result) {
         String TableName = "tblRenewals";
         String[] Columns = {"renewalId", "policyId", "officerId", "officerCode", "chfid", "lastName", "otherNames", "productCode", "productName", "villageName", "renewalPromptDate", "phone", "renewalUUID"};
+        String Where = "isDone = ?";
+        String[] WhereArg = {"N"};
+        sqlHandler.deleteData(TableName, Where, WhereArg);
+        try {
+            sqlHandler.insertData(TableName, Columns, Result, "");
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return String.valueOf(0);
+        }
+        return String.valueOf(1);
+    }
+
+    public String InsertRenewalsFromExtract(String Result) {
+        String TableName = "tblRenewals";
+        String[] Columns = {"RenewalId", "PolicyId", "OfficerId", "OfficerCode", "CHFID", "LastName", "OtherNames", "ProductCode", "ProductName", "VillageName", "RenewalPromptDate", "Phone", "RenewalUUID"};
         String Where = "isDone = ?";
         String[] WhereArg = {"N"};
         sqlHandler.deleteData(TableName, Where, WhereArg);
@@ -3942,7 +3957,6 @@ public class ClientAndroidInterface {
     public boolean unZipFeedbacksRenewals(String FileName) {
         String targetPath = global.getSubdirectory("Database") + File.separator + FileName;
         String unzippedFolderPath = global.getSubdirectory("Database");
-        //String unzippedFolderPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/IMIS/Enrolment/Enrolment_"+global.getOfficerCode()+"_"+d+".xml";
 
         String password = getRarPwd();
         try {
