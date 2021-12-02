@@ -194,6 +194,7 @@ android {
 
         niger.java.srcDir 'src/niger/java'
         niger.res.srcDir 'src/niger/res'
+        niger.assets.srcDir 'src/niger/assets'
 
         tchadDev.java.srcDir 'src/tchad/java'
         tchadDev.res.srcDir 'src/tchad/res'
@@ -206,6 +207,9 @@ android {
 
         cli.java.srcDir System.getenv("CLI_JAVA_DIR") ?: 'src/master/java'
         cli.res.srcDir System.getenv("CLI_RES_DIR") ?: 'src/demoProd/res'
+        if (System.getenv("CLI_ASSETS_DIR")) {
+            cli.assets.srcDir System.getenv("CLI_ASSETS_DIR")
+        }
 
         mauritaniaTrain.java.srcDir 'src/master/java'
     }
