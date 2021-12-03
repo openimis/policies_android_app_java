@@ -38,6 +38,7 @@ import android.os.Environment;
 import android.util.DisplayMetrics;
 import android.util.Log;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -50,6 +51,7 @@ import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -313,5 +315,38 @@ public class Global extends Application {
             Log.e(PREF_LOG_TAG, String.format("%s key is not a string", key), e);
         }
         return defaultValue;
+    }
+
+    public LinkedHashMap<String, String> getHFLevels() {
+        LinkedHashMap<String, String> levels = new LinkedHashMap<>();
+        try {
+            String text = getInputStreamText(getAssets().open("JSON/hflevels.json"));
+            JSONArray root = new JSONArray(text);
+
+            for (int i=0; i<root.length(); i++) {
+                JSONObject item = root.getJSONObject(i);
+                String stringName = item.getString("string");
+                int stringId = getResources().getIdentifier(stringName, "string",
+                        getPackageName());
+                String str;
+                if (stringId == 0) {
+                    str = stringName;
+                } else {
+                    try {
+                        str = getResources().getString(stringId);
+                    } catch (Resources.NotFoundException e) {
+                        Log.e(PREF_LOG_TAG, "Resource not found for HFLevels " + stringName
+                                + "(" + stringId + ")");
+                        str = stringName;
+                    }
+                }
+                levels.put(item.getString("code"), str);
+            }
+        } catch (IOException e) {
+            Log.e(FILE_IO_LOG_TAG, "Reading int defaults failed", e);
+        } catch (JSONException e) {
+            Log.e(FILE_IO_LOG_TAG, "Parsing int defaults failed", e);
+        }
+        return levels;
     }
 }

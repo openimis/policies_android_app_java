@@ -27,7 +27,9 @@ package org.openimis.imispolicies;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -38,11 +40,14 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ListAdapter;
 import android.widget.SimpleAdapter;
 import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
 import android.widget.Toast;
+
+import com.google.zxing.client.android.Intents;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
@@ -75,6 +80,7 @@ public class Renewal extends AppCompatActivity {
     private EditText etProductCode;
     private EditText etAmount;
     private Button btnSubmit;
+    private ImageButton btnScan;
     private ProgressDialog pd;
     private CheckBox chkDiscontinue;
     private Spinner spPayer;
@@ -93,6 +99,7 @@ public class Renewal extends AppCompatActivity {
     private final ArrayList<HashMap<String, String>> PayersList = new ArrayList<>();
     private final ArrayList<HashMap<String, String>> ProductList = new ArrayList<>();
 
+    private static final int INTENT_ACTIVITY_SCAN_CODE = 554;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -114,6 +121,7 @@ public class Renewal extends AppCompatActivity {
         spPayer = findViewById(R.id.spPayer);
         spProduct = findViewById(R.id.spProduct);
         etControlNumber = findViewById(R.id.etControlNumber);
+        btnScan = findViewById(R.id.btnScan);
 
         if (!ca.getRule("ShowPaymentOption", true)) {
             etReceiptNo.setVisibility(View.GONE);
@@ -202,6 +210,17 @@ public class Renewal extends AppCompatActivity {
                 }
             }
         });
+
+        btnScan.setOnClickListener(v -> {
+                    Intent intent = new Intent("com.google.zxing.client.android.SCAN");
+                    intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
+                    try {
+                        startActivityForResult(intent, INTENT_ACTIVITY_SCAN_CODE);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+        );
 
         etOfficer.addTextChangedListener(new TextWatcher() {
             @Override
@@ -419,6 +438,14 @@ public class Renewal extends AppCompatActivity {
                 .setPositiveButton(R.string.Yes, (dialog, which) -> onConfirmed.run())
                 .setNegativeButton(R.string.No, (dialog, which) -> {
                 }).show();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == INTENT_ACTIVITY_SCAN_CODE && data != null) {
+            etCHFID.setText(data.getStringExtra(Intents.Scan.RESULT));
+        }
     }
 
     private void UpdateRow(int RenewalId) {

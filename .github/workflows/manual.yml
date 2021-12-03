@@ -24,6 +24,9 @@ on:
       cli_res_dir:
         description: Resources folder for icons. Only works with application_id_suffix .cli
         required: false
+      cli_assets_dir:
+        description: Asserts folder for images, json files.... Only works with .cli
+        required: false
 # Branch is chosen by default in github manual actions
 
 jobs:
@@ -60,6 +63,7 @@ jobs:
           echo app dir ${{ github.event.inputs.app_dir }}
           echo CLI_JAVA_DIR "${{ github.event.inputs.cli_java_dir }}"
           echo CLI_RES_DIR "${{ github.event.inputs.cli_res_dir }}"
+          echo CLI_ASSETS_DIR "${{ github.event.inputs.cli_assets_dir }}"
           echo APPLICATION_ID "${{ github.event.inputs.application_id }}"
 
       - name: build
@@ -71,6 +75,7 @@ jobs:
           CLI_APP_DIR: "${{ github.event.inputs.app_dir }}"
           CLI_JAVA_DIR: "${{ github.event.inputs.cli_java_dir }}"
           CLI_RES_DIR: "${{ github.event.inputs.cli_res_dir }}"
+          CLI_ASSETS_DIR: "${{ github.event.inputs.cli_assets_dir }}"
           APPLICATION_ID: "${{ github.event.inputs.application_id }}"
 
       - name: Environment info
