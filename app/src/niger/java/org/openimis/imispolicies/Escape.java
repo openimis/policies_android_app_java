@@ -25,6 +25,8 @@
 
 package org.openimis.imispolicies;
 
+import android.util.Log;
+
 public class Escape {
     public int CheckInsuranceNumber(String InsuranceNumber){
 
@@ -46,7 +48,8 @@ public class Escape {
 
         expectedControlNumber = Integer.parseInt(InsuranceNumber.substring(9));
         actualControlNumber = Integer.parseInt(InsuranceNumber.substring(0, 9)) % 7;
-
+        Log.d("Escape", "Invalid checksum on insuree, expected " + expectedControlNumber
+                + " got " + actualControlNumber);
         return expectedControlNumber == actualControlNumber;
     }
 

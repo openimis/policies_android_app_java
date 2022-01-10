@@ -133,7 +133,7 @@
   <string name="NoSDCard">openIMIS a besoin d\'une carte mémoire externe pour fonctionner. Veuillez insérer la carte mémoire et redémarrer l\'application.</string>
   <string name="ForceClose">Fermeture forcée</string>
   <string name="MissingInsuranceNumber">Veuillez entrer le numéro d\'assurance</string>
-  <string name="InvalidInsuranceNumber">Invalid Insurance number</string>
+  <string name="InvalidInsuranceNumber">Numéro d\'assurance invalide</string>
   <string name="GetingInsuuree">Obtenir des informations sur l\'assurance...</string>
   <string name="GetingSnapShotReport">Obtention d\'un aperçu général...</string>
   <string name="GetingCummulativeReport">Obtention d\'un rapport cumulatif...</string>

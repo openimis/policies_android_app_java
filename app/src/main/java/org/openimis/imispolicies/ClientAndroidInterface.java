@@ -43,8 +43,10 @@ import android.graphics.BitmapFactory;
 import android.icu.text.DecimalFormat;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.support.annotation.RequiresApi;
+import android.support.v4.content.FileProvider;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -95,6 +97,8 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
@@ -110,6 +114,7 @@ import javax.crypto.spec.SecretKeySpec;
 import javax.net.ssl.HttpsURLConnection;
 
 import static android.database.sqlite.SQLiteDatabase.openOrCreateDatabase;
+import static android.provider.MediaStore.EXTRA_OUTPUT;
 import static org.openimis.imispolicies.Util.JsonUtil.isStringEmpty;
 import static org.openimis.imispolicies.Util.StringUtil.isEmpty;
 
@@ -159,6 +164,7 @@ public class ClientAndroidInterface {
 
     Picasso picassoInstance;
     Target imageTarget;
+    private File tempPhotoFile;
 
     ClientAndroidInterface(Context c) {
         mContext = c;
@@ -681,34 +687,25 @@ public class ClientAndroidInterface {
 
     @JavascriptInterface
     public String getHFLevels() {
-        JSONArray HFLevels = new JSONArray();
-        JSONObject object = new JSONObject();
+        JSONArray jsonHFLevels = new JSONArray();
+        JSONObject jsonObject = new JSONObject();
+        LinkedHashMap<String, String> hfLevels = global.getHFLevels();
 
         try {
-            object.put("Code", "");
-            object.put("HFLevel", mContext.getResources().getString(R.string.SelectHFLevel));
-            HFLevels.put(object);
-
-            object = new JSONObject();
-            object.put("Code", "D");//Uploaded = 1;
-            object.put("HFLevel", mContext.getResources().getString(R.string.Dispensary));
-            HFLevels.put(object);
-
-            object = new JSONObject();
-            object.put("Code", "C");
-            object.put("HFLevel", mContext.getResources().getString(R.string.HealthCentre));
-            HFLevels.put(object);
-
-            object = new JSONObject();
-            object.put("Code", "H");
-            object.put("HFLevel", mContext.getResources().getString(R.string.Hospital));
-            HFLevels.put(object);
-
+            jsonObject.put("Code", "");
+            jsonObject.put("HFLevel", mContext.getResources().getString(R.string.SelectHFLevel));
+            jsonHFLevels.put(jsonObject);
+            for (String key : hfLevels.keySet()) {
+                jsonObject = new JSONObject();
+                jsonObject.put("Code", key);
+                jsonObject.put("HFLevel", hfLevels.get(key));
+                jsonHFLevels.put(jsonObject);
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
-        return HFLevels.toString();
+        return jsonHFLevels.toString();
     }
 
     @JavascriptInterface
@@ -1452,16 +1449,49 @@ public class ClientAndroidInterface {
     }
 
 
+    public static Uri tempPhotoUri = null;
     public static int RESULT_LOAD_IMG = 1;
     public static int RESULT_SCAN = 100;
     public static String ImagePath;
     public static String InsuranceNo;
     public static boolean inProgress = true;
 
+
+    private void generateTempUri(String tempFileName)  {
+        tempPhotoFile = new File(Path, tempFileName);
+        try {
+            if (tempPhotoFile.delete()) {
+                Log.i("selectPicture", "Leftover temp image deleted");
+            }
+            if (!tempPhotoFile.createNewFile()) {
+                Log.w("selectPicture", "Temp photo file already exists");
+            }
+            tempPhotoUri = FileProvider.getUriForFile(mContext,
+                    String.format("%s.fileprovider", BuildConfig.APPLICATION_ID),
+                    tempPhotoFile);
+        } catch (IOException e) {
+            Log.e("selectPicture", "Temp photo file creation failed", e);
+            Toast.makeText(mContext, "Temp photo file creation failed", Toast.LENGTH_LONG).show();
+        }
+    }
+
     @JavascriptInterface
     public void selectPicture() {
+        Path = global.getSubdirectory("Images") + "/";
+
+        generateTempUri("selectPictureTemp.jpg");
+        if (tempPhotoUri == null) return;
+
         Intent galleryIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        ((Activity) mContext).startActivityForResult(galleryIntent, RESULT_LOAD_IMG);
+
+        final List<Intent> cameraIntents = new ArrayList<>();
+        Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+        cameraIntent.putExtra(EXTRA_OUTPUT, tempPhotoUri);
+        cameraIntents.add(cameraIntent);
+
+        final Intent chooserIntent = Intent.createChooser(galleryIntent, "Select Source");
+        chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, cameraIntents.toArray(new Parcelable[cameraIntents.size()]));
+        ((Activity) mContext).startActivityForResult(chooserIntent, RESULT_LOAD_IMG);
     }
 
     @JavascriptInterface
