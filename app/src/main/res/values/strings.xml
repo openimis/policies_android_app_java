@@ -436,4 +436,9 @@
     <string name="UnexpectedException">Unexpected exception</string>
     <string name="InvalidRenewalFile">Invalid renewal file</string>
     <string name="ConfirmControlNumber">Control number \"%1$s\" is not present in phone memory. Please confirm that this control number is correct.</string>
+    <string name="ImportRenewalFile">Do you want to select renewal file to import?</string>
+    <string name="RarPassword">RAR Password</string>
+    <string name="SaveRarPassword">Save RAR Password</string>
+    <string name="BackToDefaultPassword">Set the default RAR password</string>
+    <string name="BackToDefault">Default RAR Password</string>
 </resources>
