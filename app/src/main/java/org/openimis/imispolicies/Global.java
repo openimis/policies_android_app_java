@@ -299,7 +299,7 @@ public class Global extends Application {
         return stringBuilder.toString();
     }
 
-    public int getIntSetting(String key, int defaultValue) {
+    public int getIntKey(String key, int defaultValue) {
         try {
             return getSharedPreferences(PREF_NAME, MODE_PRIVATE).getInt(key, defaultValue);
         } catch (ClassCastException e) {
@@ -308,7 +308,24 @@ public class Global extends Application {
         return defaultValue;
     }
 
-    public String getStringSetting(String key, String defaultValue) {
+    public void setIntKey(String key, int value) {
+        getSharedPreferences(PREF_NAME, MODE_PRIVATE).edit().putInt(key, value).apply();
+    }
+
+    public long getLongKey(String key, long defaultValue) {
+        try {
+            return getSharedPreferences(PREF_NAME, MODE_PRIVATE).getLong(key, defaultValue);
+        } catch (ClassCastException e) {
+            Log.e(PREF_LOG_TAG, String.format("%s key is not a long", key), e);
+        }
+        return defaultValue;
+    }
+
+    public void setLongKey(String key, long value) {
+        getSharedPreferences(PREF_NAME, MODE_PRIVATE).edit().putLong(key, value).apply();
+    }
+
+    public String getStringKey(String key, String defaultValue) {
         try {
             return getSharedPreferences(PREF_NAME, MODE_PRIVATE).getString(key, defaultValue);
         } catch (ClassCastException e) {
@@ -317,13 +334,17 @@ public class Global extends Application {
         return defaultValue;
     }
 
+    public void setStringKey(String key, String value) {
+        getSharedPreferences(PREF_NAME, MODE_PRIVATE).edit().putString(key, value).apply();
+    }
+
     public LinkedHashMap<String, String> getHFLevels() {
         LinkedHashMap<String, String> levels = new LinkedHashMap<>();
         try {
             String text = getInputStreamText(getAssets().open("JSON/hflevels.json"));
             JSONArray root = new JSONArray(text);
 
-            for (int i=0; i<root.length(); i++) {
+            for (int i = 0; i < root.length(); i++) {
                 JSONObject item = root.getJSONObject(i);
                 String stringName = item.getString("string");
                 int stringId = getResources().getIdentifier(stringName, "string",

@@ -1183,11 +1183,11 @@ public class ClientAndroidInterface {
             }
 
             FileOutputStream outputStream = new FileOutputStream(outputFile);
-            imageTarget = new OutputStreamImageTarget(outputStream, global.getIntSetting("image_jpeg_quality", 40));
+            imageTarget = new OutputStreamImageTarget(outputStream, global.getIntKey("image_jpeg_quality", 40));
             try {
                 ((Activity) mContext).runOnUiThread(() -> picassoInstance.load(selectedPath)
-                        .resize(global.getIntSetting("image_width_limit", 400),
-                                global.getIntSetting("image_height_limit", 400))
+                        .resize(global.getIntKey("image_width_limit", 400),
+                                global.getIntKey("image_height_limit", 400))
                         .centerInside()
                         .into(imageTarget));
             } catch (ClassCastException e) {
@@ -1457,7 +1457,7 @@ public class ClientAndroidInterface {
     public static boolean inProgress = true;
 
 
-    private void generateTempUri(String tempFileName)  {
+    private void generateTempUri(String tempFileName) {
         tempPhotoFile = new File(Path, tempFileName);
         try {
             if (tempPhotoFile.delete()) {

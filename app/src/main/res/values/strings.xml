@@ -441,4 +441,6 @@
     <string name="SaveRarPassword">Save RAR Password</string>
     <string name="BackToDefaultPassword">Set the default RAR password</string>
     <string name="BackToDefault">Default RAR Password</string>
+    <string name="WaitXSeconds">Wait %1$s seconds</string>
+    <string name="CnRequestComplete">Control number request finished. If the available CN amount does not increase, please try again in %1$s seconds.</string>
 </resources>

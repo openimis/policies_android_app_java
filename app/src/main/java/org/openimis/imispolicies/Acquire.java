@@ -289,8 +289,8 @@ public class Acquire extends AppCompatActivity {
                 if (resultCode == RESULT_OK) {
                     picasso.invalidate(tempPhotoUri);
                     picasso.load(tempPhotoUri)
-                            .resize(global.getIntSetting("image_width_limit", 400),
-                                    global.getIntSetting("image_height_limit", 400))
+                            .resize(global.getIntKey("image_width_limit", 400),
+                                    global.getIntKey("image_height_limit", 400))
                             .centerInside()
                             .into(imageTarget);
                 }
@@ -338,7 +338,7 @@ public class Acquire extends AppCompatActivity {
         if (file.exists()) file.delete();
         Uploaded = 1;
         FileOutputStream out = new FileOutputStream(file);
-        theImage.compress(Bitmap.CompressFormat.JPEG, global.getIntSetting("image_jpeg_quality", 40), out);
+        theImage.compress(Bitmap.CompressFormat.JPEG, global.getIntKey("image_jpeg_quality", 40), out);
 
         out.flush();
         out.close();
