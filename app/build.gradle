@@ -154,12 +154,6 @@ android {
         chfDev.java.srcDir 'src/chf/java'
         chfDev.res.srcDir 'src/chf/res'
 
-        chfProd.java.srcDir 'src/chf/java'
-        chfProd.res.srcDir 'src/chf/res'
-
-        chfsit.java.srcDir 'src/chf/java'
-        chfsit.res.srcDir 'src/chf/res'
-
         mvDev.java.srcDir 'src/master/java'
         mvDev.res.srcDirs 'src/master/res'
 
