@@ -2,5 +2,6 @@
   "image_width_limit": 400,
   "image_height_limit": 400,
   "image_jpeg_quality": 40,
-  "min_cn_request_interval": 60
+  "min_cn_request_interval": 60,
+  "cn_per_product_threshold": 200
 }

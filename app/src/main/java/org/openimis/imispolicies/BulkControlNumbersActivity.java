@@ -256,7 +256,18 @@ public class BulkControlNumbersActivity extends AppCompatActivity {
         });
     }
 
-    protected void checkLastProductRequest(String productCode, final AlertDialog productDialog) {
+    protected void checkProductRequest(String productCode, final AlertDialog productDialog) {
+        int cnThreshold = (global.getIntKey("cn_per_product_threshold", 200));
+        int cnAmount = sqlHandler.getFreeCNCount(officerCode, productCode);
+        if(cnAmount >= cnThreshold) {
+            this.runOnUiThread(() -> disableFetchButton(getResources().getString(R.string.CnLimitReached), productDialog));
+            shutdownTimer();
+        } else {
+            checkLastProductRequestInterval(productCode, productDialog);
+        }
+    }
+
+    protected void checkLastProductRequestInterval(String productCode, final AlertDialog productDialog) {
         int minInterval = (global.getIntKey("min_cn_request_interval", 60));
         long lastProductRequestMillis = global.getLongKey(String.format("last_%s_request", productCode), 0);
         long currentMillis = System.currentTimeMillis();
@@ -265,14 +276,14 @@ public class BulkControlNumbersActivity extends AppCompatActivity {
             this.runOnUiThread(() -> enableFetchButton(productDialog));
             shutdownTimer();
         } else {
-            this.runOnUiThread(() -> disableFetchButton(minInterval - interval, productDialog));
+            this.runOnUiThread(() -> disableFetchButton(getResources().getString(R.string.WaitXSeconds, String.valueOf(minInterval - interval)), productDialog));
         }
     }
 
     protected void startTimer(String productCode, final AlertDialog productDialog) {
         Log.i("BULKCN", "Async timer starting");
         productDialogTimer = Executors.newSingleThreadScheduledExecutor();
-        productDialogTimer.scheduleAtFixedRate(() -> checkLastProductRequest(productCode, productDialog), 0, 1000, TimeUnit.MILLISECONDS);
+        productDialogTimer.scheduleAtFixedRate(() -> checkProductRequest(productCode, productDialog), 0, 1000, TimeUnit.MILLISECONDS);
     }
 
     protected void shutdownTimer() {
@@ -291,11 +302,11 @@ public class BulkControlNumbersActivity extends AppCompatActivity {
         }
     }
 
-    protected void disableFetchButton(long seconds, final AlertDialog productDialog) {
+    protected void disableFetchButton(String buttonLabel, final AlertDialog productDialog) {
         Button fetchButton = productDialog.getButton(DialogInterface.BUTTON_POSITIVE);
         if (fetchButton != null) {
             fetchButton.setEnabled(false);
-            fetchButton.setText(getResources().getString(R.string.WaitXSeconds, String.valueOf(seconds)));
+            fetchButton.setText(buttonLabel);
             fetchButton.invalidate();
         }
     }

@@ -436,4 +436,12 @@
     <string name="UnexpectedException">Hitilafu isiyotarajiwa</string>
     <string name="InvalidRenewalFile">Faili la kuhuisha ni batili</string>
     <string name="ConfirmControlNumber">Namba ya malipo \"%1$s\" haipo kwenye simu,tafadhali hakiki namba kabla ya kuendelea.</string>
+    <string name="ImportRenewalFile">Je unataka kuchagua faili la kuhuisha?</string>
+    <string name="RarPassword">Nywila ya RAR</string>
+    <string name="SaveRarPassword">Hifadhi Nywila ya RAR</string>
+    <string name="BackToDefaultPassword">Weka Nywila</string>
+    <string name="BackToDefault">Nywila ya RAR</string>
+    <string name="WaitXSeconds">Subiri sekunde %1$s</string>
+    <string name="CnRequestComplete">\"Namba za malipo zimekwisha jaribu tena baada ya sekunde  %1$s</string>
+    <string name="CnLimitReached">Kikomo cha namba za malipo kimefikiwa</string>
 </resources>

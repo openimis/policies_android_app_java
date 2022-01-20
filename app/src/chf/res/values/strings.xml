@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- default en overridden with en-rTZ for chf builds -->
 <resources>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
@@ -436,4 +437,12 @@
     <string name="UnexpectedException">Unexpected exception</string>
     <string name="InvalidRenewalFile">Invalid renewal file</string>
     <string name="ConfirmControlNumber">Control number \"%1$s\" is not present in phone memory. Please confirm that this control number is correct.</string>
+    <string name="ImportRenewalFile">Do you want to select renewal file to import?</string>
+    <string name="RarPassword">RAR Password</string>
+    <string name="SaveRarPassword">Save RAR Password</string>
+    <string name="BackToDefaultPassword">Set the default RAR password</string>
+    <string name="BackToDefault">Default RAR Password</string>
+    <string name="WaitXSeconds">Wait %1$s seconds</string>
+    <string name="CnRequestComplete">Control number request finished. If the available CN amount does not increase, please try again in %1$s seconds.</string>
+    <string name="CnLimitReached">CN limit reached</string>
 </resources>
