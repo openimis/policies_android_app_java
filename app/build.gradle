@@ -80,14 +80,12 @@ android {
             resValue "string", "app_name_policies", "Policies Demo"
             dimension = 'std'
         }
-
         demoRelease {
             applicationId "org.openimis.imispolicies.demoRelease"
             buildConfigField "String", "API_BASE_URL", '"https://release.openimis.org/rest/"'
             buildConfigField "String", "APP_DIR", '"IMIS-DEMORELEASE"'
             resValue "string", "app_name_policies", "Policies Release"
         }
-
         chfDev {
             applicationId "org.openimis.imispolicies.chfdev"
             buildConfigField "String", "API_BASE_URL", '"http://chf-dev.swisstph-mis.ch/rest/"'
@@ -97,17 +95,6 @@ android {
             resValue "string", "app_name_policies", "Policies CHF DEV"
             dimension = 'std'
         }
-
-        chfProd {
-            applicationId "org.openimis.imispolicies.chf"
-            buildConfigField "String", "API_BASE_URL", '"http://chf-imis.or.tz/restapi/"'
-            buildConfigField "boolean", "SHOW_PAYMENT_MENU", 'false'
-            buildConfigField "boolean", "SHOW_BULK_CN_MENU", 'true'
-            buildConfigField "String", "APP_DIR", '"IMIS-CHFPROD"'
-            resValue "string", "app_name_policies", "Policies CHF"
-            dimension = 'std'
-        }
-
         mvDev {
             applicationId "org.openimis.imispolicies.mv"
             buildConfigField "String", "API_BASE_URL", '"http://imis-mv.swisstph-mis.ch/rest/"'
@@ -139,14 +126,6 @@ android {
             resValue "string", "app_name_policies", "Policies Local"
             dimension = 'std'
             versionCode = gitVersionCodeTime
-        }
-        chfsit {
-            applicationId "org.openimis.imispolicies.chfsit"
-            buildConfigField "String", "API_BASE_URL", '"http://196.192.73.26/restapi/"'
-            buildConfigField "String", "APP_DIR", '"IMIS-CHFSIT"'
-            buildConfigField "boolean", "SHOW_PAYMENT_MENU", 'true'
-            buildConfigField "boolean", "SHOW_BULK_CN_MENU", 'true'
-            resValue "string", "app_name_policies", "Policies CHF SIT"
         }
         niger {
             applicationId "org.openimis.imispolicies.niger"
