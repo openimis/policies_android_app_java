@@ -444,4 +444,6 @@
     <string name="WaitXSeconds">Attendez %1$s secondes</string>
     <string name="CnRequestComplete">La demande de numéro de contrôle (CN) est terminée. Si le montant disponible de CN n\'augmente pas, veuillez réessayer dans %1$s secondes.</string>
     <string name="CnLimitReached">Limite CN atteinte</string>
+    <string name="NoCNReceived">Aucun numéro de contrôle reçu du serveur</string>
+    <string name="CNThresholdReached">Vous ne pouvez pas recevoir plus de numéros de contrôle pour ce produit</string>
 </resources>

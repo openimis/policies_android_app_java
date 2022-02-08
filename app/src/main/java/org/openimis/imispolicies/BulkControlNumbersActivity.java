@@ -257,14 +257,7 @@ public class BulkControlNumbersActivity extends AppCompatActivity {
     }
 
     protected void checkProductRequest(String productCode, final AlertDialog productDialog) {
-        int cnThreshold = (global.getIntKey("cn_per_product_threshold", 200));
-        int cnAmount = sqlHandler.getFreeCNCount(officerCode, productCode);
-        if(cnAmount >= cnThreshold) {
-            this.runOnUiThread(() -> disableFetchButton(getResources().getString(R.string.CnLimitReached), productDialog));
-            shutdownTimer();
-        } else {
-            checkLastProductRequestInterval(productCode, productDialog);
-        }
+        checkLastProductRequestInterval(productCode, productDialog);
     }
 
     protected void checkLastProductRequestInterval(String productCode, final AlertDialog productDialog) {

@@ -444,4 +444,6 @@
     <string name="WaitXSeconds">Subiri sekunde %1$s</string>
     <string name="CnRequestComplete">\"Namba za malipo zimekwisha jaribu tena baada ya sekunde  %1$s</string>
     <string name="CnLimitReached">Kikomo cha namba za malipo kimefikiwa</string>
+    <string name="NoCNReceived">Hakuna namba za malipo zilizopokelewa kwenye kompyuta  kuu</string>
+    <string name="CNThresholdReached">Huwezi pata namba ya malipo kwa bidhaa hizi</string>
 </resources>
