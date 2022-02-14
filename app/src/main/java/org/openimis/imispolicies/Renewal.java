@@ -54,7 +54,7 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.openimis.imispolicies.Util.StringUtil;
+import org.openimis.imispolicies.tools.Util.StringUtil;
 import org.xmlpull.v1.XmlSerializer;
 
 import java.io.File;

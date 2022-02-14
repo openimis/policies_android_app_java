@@ -1,18 +1,19 @@
-package org.openimis.imispolicies;
+package org.openimis.imispolicies.tools;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.OpenableColumns;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
-import android.util.Log;
 import android.widget.Toast;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.openimis.imispolicies.R;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -104,6 +105,14 @@ public class Util {
                     .setCancelable(false)
                     .setPositiveButton(R.string.Ok, (dialogInterface, i) -> {
                     }).show();
+        }
+
+        public static AlertDialog showConfirmDialog(Context context, int messageResId, DialogInterface.OnClickListener onPositive) {
+            return new AlertDialog.Builder(context)
+                    .setMessage(messageResId)
+                    .setCancelable(false)
+                    .setPositiveButton(R.string.Ok, onPositive)
+                    .setNegativeButton(R.string.Cancel, (dialogInterface, i) -> {}).show();
         }
     }
 

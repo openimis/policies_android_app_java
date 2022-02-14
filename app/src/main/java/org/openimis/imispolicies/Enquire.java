@@ -34,7 +34,7 @@ import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
+import org.openimis.imispolicies.tools.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -59,7 +59,7 @@ import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import static org.openimis.imispolicies.Util.JsonUtil.isStringEmpty;
+import static org.openimis.imispolicies.tools.Util.JsonUtil.isStringEmpty;
 
 public class Enquire extends AppCompatActivity {
     private static final String LOG_TAG = "ENQUIRE";
