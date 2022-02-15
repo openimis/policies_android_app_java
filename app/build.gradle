@@ -54,10 +54,18 @@ android {
                 signingConfig signingConfigs.releaseConfig
             }
             buildConfigField "boolean", "LOG", "false"
+
+            // Refer to https://developer.android.com/reference/android/util/Log for the log level values
+            buildConfigField "int", "CONSOLE_LOG_LEVEL", '8' //Assert
+            buildConfigField "int", "FILE_LOG_LEVEL", '8' //Assert
         }
         debug {
             debuggable = true
             buildConfigField "boolean", "LOG", "true"
+
+            // Refer to https://developer.android.com/reference/android/util/Log for the log level values
+            buildConfigField "int", "CONSOLE_LOG_LEVEL", '2' //Verbose
+            buildConfigField "int", "FILE_LOG_LEVEL", '2' //Verbose
         }
         flavorDimensions 'std'
     }

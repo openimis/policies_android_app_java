@@ -25,4 +25,12 @@ $(document).ready(function () {
             Android.ShowDialog(e.message);
         }
     });
+
+    $('#btnExportLogs').click(function () {
+        Android.exportLogs()
+    });
+
+    $('#btnClearLogs').click(function () {
+        Android.clearLogs()
+    });
 });

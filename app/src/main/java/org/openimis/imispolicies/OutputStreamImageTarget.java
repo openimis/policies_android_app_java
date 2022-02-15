@@ -2,7 +2,7 @@ package org.openimis.imispolicies;
 
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
-import android.util.Log;
+import org.openimis.imispolicies.tools.Log;
 
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;

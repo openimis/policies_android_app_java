@@ -1,7 +1,5 @@
 package org.openimis.imispolicies;
 
-import android.util.Log;
-
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -12,10 +10,10 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONObject;
+import org.openimis.imispolicies.tools.Log;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.util.HashMap;
 
 public class ToRestApi {
     public static class UploadStatus {
@@ -106,7 +104,7 @@ public class ToRestApi {
 
             int responseCode = response.getStatusLine().getStatusCode();
             Log.i("HTTP_POST", uri + functionName + " - " + responseCode);
-            if (object != null && responseCode >= 400) {
+            if (object != null && responseCode >= 400 && !functionName.equals("login")) {
                 String body = object.toString();
                 if (body.length() > 1000) {
                     body = body.substring(0,1000);

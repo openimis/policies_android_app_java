@@ -46,7 +46,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.text.TextUtils;
-import android.util.Log;
+import org.openimis.imispolicies.tools.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -69,6 +69,7 @@ import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.openimis.imispolicies.tools.Util;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -598,7 +599,7 @@ public class MainActivity extends AppCompatActivity
             outputStream.flush();
             outputStream.close();
 
-            Log.w("MainActivity", "DB Copied");
+            Log.w(LOG_TAG, "DB Copied");
             return true;
 
         } catch (Exception e) {
