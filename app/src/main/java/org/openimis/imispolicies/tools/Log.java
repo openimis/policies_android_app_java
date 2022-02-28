@@ -1,7 +1,5 @@
 package org.openimis.imispolicies.tools;
 
-import android.content.Context;
-
 import org.openimis.imispolicies.AppInformation;
 import org.openimis.imispolicies.BuildConfig;
 import org.openimis.imispolicies.Compressor;
@@ -19,9 +17,11 @@ import java.util.Locale;
 
 /**
  * This class is a wrapper for the default android Log class, adding additional functionality while
- * keeping the save api
+ * keeping the android.util.Log api
  */
 public class Log {
+    public static String logFilePrefix = "log-";
+    public static String logExportFileName = "logs.zip";
     private static File logFile = null;
     private static final String[] levelMapping = {"V", "D", "I", "W", "E", "A"};
 
@@ -86,8 +86,8 @@ public class Log {
 
     public static File zipLogFiles() {
         File cacheDir = Global.getContext().getExternalCacheDir();
-        File[] logFiles = cacheDir.listFiles((dir, filename) -> filename.startsWith("log-"));
-        File targetFile = new File(cacheDir, "logs.zip");
+        File[] logFiles = cacheDir.listFiles((dir, filename) -> filename.startsWith(logFilePrefix));
+        File targetFile = new File(cacheDir, logExportFileName);
 
         if (logFiles != null) {
             ArrayList<File> filesToZip = new ArrayList<>(Arrays.asList(logFiles));
@@ -99,7 +99,7 @@ public class Log {
 
     public static void deleteLogFiles() {
         File cacheDir = Global.getContext().getExternalCacheDir();
-        File[] logFiles = cacheDir.listFiles((dir, filename) -> filename.startsWith("log-"));
+        File[] logFiles = cacheDir.listFiles((dir, filename) -> filename.startsWith(logFilePrefix));
         if (logFiles != null) {
             for (File f : logFiles) {
                 f.delete();
@@ -123,7 +123,7 @@ public class Log {
         if (logFile == null || !logFile.exists()) {
             File cacheDir = Global.getContext().getExternalCacheDir();
 
-            String filename = String.format("log-%s.txt", AppInformation.DateTimeInfo.getDefaultFileDatetimeFormatter().format(date));
+            String filename = String.format("%s%s.txt",logFilePrefix, AppInformation.DateTimeInfo.getDefaultFileDatetimeFormatter().format(date));
             logFile = new File(cacheDir, filename);
 
             try {
