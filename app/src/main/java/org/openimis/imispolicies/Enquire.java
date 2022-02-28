@@ -34,7 +34,9 @@ import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+
 import org.openimis.imispolicies.tools.Log;
+
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -66,6 +68,7 @@ public class Enquire extends AppCompatActivity {
     private static final int REQUEST_SCAN_QR_CODE = 1;
     private Global global;
     private Escape escape;
+    private Picasso picasso;
     private ClientAndroidInterface ca;
     private EditText etCHFID;
     private TextView tvCHFID;
@@ -95,6 +98,7 @@ public class Enquire extends AppCompatActivity {
         global = (Global) getApplicationContext();
         ca = new ClientAndroidInterface(this);
         escape = new Escape();
+        picasso = new Picasso.Builder(this).build();
 
         isSDCardAvailable();
 
@@ -249,10 +253,10 @@ public class Enquire extends AppCompatActivity {
                             } else if (!isStringEmpty(jsonObject, "photoPath", true)) {
                                 photo_url_str = AppInformation.DomainInfo.getDomain() + jsonObject.getString("photoPath");
                                 iv.setImageResource(R.drawable.person);
-                                Picasso.with(this)
-                                        .load(photo_url_str)
+                                picasso.load(photo_url_str)
                                         .placeholder(R.drawable.person)
-                                        .error(R.drawable.person).into(iv);
+                                        .error(R.drawable.person)
+                                        .into(iv);
                             } else {
                                 iv.setImageDrawable(getResources().getDrawable(R.drawable.person));
                             }

@@ -105,8 +105,8 @@ public class Acquire extends AppCompatActivity {
         }
 
         @Override
-        public void onBitmapFailed(Drawable errorDrawable) {
-            Log.e(LOG_TAG, "Loading acquired photo failed");
+        public void onBitmapFailed(Exception exception, Drawable errorDrawable) {
+            Log.e(LOG_TAG, "Loading acquired photo failed", exception);
         }
 
         @Override
@@ -128,10 +128,7 @@ public class Acquire extends AppCompatActivity {
         global = (Global) getApplicationContext();
         ca = new ClientAndroidInterface(this);
 
-        picasso = new Picasso.Builder(this)
-                .listener((picasso, uri, exception) -> Log.e(LOG_TAG, String.format("Image load failed: %s", uri.toString()), exception))
-                .loggingEnabled(BuildConfig.LOG)
-                .build();
+        picasso = new Picasso.Builder(this).build();
 
         Path = global.getSubdirectory("Images") + "/";
         tempPhotoFile = new File(Path, "temp.jpg");
