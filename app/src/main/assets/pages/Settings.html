@@ -1,60 +1,64 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
+
 <head>
     <title>Settings</title>
-    <link href="../CSS/Style.CSS" rel="stylesheet" type="text/css"/>
+    <link href="../CSS/Style.CSS" rel="stylesheet" type="text/css" />
     <script src="../JS/jquery-3.2.1.min.js"></script>
     <script src="../JS/exact.js"></script>
-    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" charset="utf-8"/>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" charset="utf-8" />
 
     <script type="text/javascript" src="Settings.js"></script>
 
 </head>
+
 <body>
-<div>
-    <ul class="ulEntry">
-        <li>
-            <span strName="RarPassword">RAR Password</span>
-            <input type="password" id="rarPassword" required/>
-        </li>
-    </ul>
+    <div>
+        <ul class="ulEntry">
+            <li>
+                <span strName="RarPassword">RAR Password</span>
+                <input type="password" id="rarPassword" required />
+            </li>
+        </ul>
 
-    <div class="footer">
-        <input type="submit" id="btnSaveRarPassword" strName="SaveRarPassword" value="Save">
+        <div class="footer">
+            <input type="submit" id="btnSaveRarPassword" strName="SaveRarPassword" value="Save">
+        </div>
+
+        <br />
+
+        <ul class="ulEntry">
+            <li>
+                <span strName="BackToDefaultPassword">Set the default RAR password</span>
+            </li>
+        </ul>
+        <div class="footer">
+            <input type="submit" id="btnBackToDefault" strName="BackToDefault" value="Save">
+        </div>
+
+        <br />
+        <div id="logSection">
+            <ul class="ulEntry">
+                <li>
+                    <span strName="ExportLogs">Export logs</span>
+                </li>
+            </ul>
+            <div class="footer">
+                <input type="submit" id="btnExportLogs" strName="ExportLogsButton" value="Save">
+            </div>
+
+            <br />
+
+            <ul class="ulEntry">
+                <li>
+                    <span strName="ClearLogs">Clear logs</span>
+                </li>
+            </ul>
+            <div class="footer">
+                <input type="submit" id="btnClearLogs" strName="ClearLogsButton" value="Save">
+            </div>
+        </div>
     </div>
-
-    <br />
-
-    <ul class="ulEntry">
-        <li>
-            <span strName="BackToDefaultPassword">Set the default RAR password</span>
-        </li>
-    </ul>
-    <div class="footer">
-        <input type="submit" id="btnBackToDefault" strName="BackToDefault" value="Save">
-    </div>
-
-    <br />
-
-    <ul class="ulEntry">
-        <li>
-            <span strName="ExportLogs">Export logs</span>
-        </li>
-    </ul>
-    <div class="footer">
-        <input type="submit" id="btnExportLogs" strName="ExportLogsButton" value="Save">
-    </div>
-
-    <br />
-
-    <ul class="ulEntry">
-        <li>
-            <span strName="ClearLogs">Clear logs</span>
-        </li>
-    </ul>
-    <div class="footer">
-        <input type="submit" id="btnClearLogs" strName="ClearLogsButton" value="Save">
-    </div>
-</div>
 </body>
+
 </html>

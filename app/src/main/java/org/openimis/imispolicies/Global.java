@@ -40,6 +40,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.util.DisplayMetrics;
+
 import org.openimis.imispolicies.tools.Log;
 
 import org.json.JSONArray;
@@ -384,13 +385,13 @@ public class Global extends Application {
         }
     }
 
-    public void sendFile(Context context, Uri uri, String mimeType) {
+    public void sendFile(Uri uri, String mimeType) {
         Intent shareExportIntent = new Intent(Intent.ACTION_SEND);
         shareExportIntent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         shareExportIntent.putExtra(Intent.EXTRA_STREAM, uri);
         shareExportIntent.setType(mimeType);
         Intent chooserIntent = Intent.createChooser(shareExportIntent, null);
-        grantUriPermissions(context, uri, chooserIntent, Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        context.startActivity(chooserIntent);
+        grantUriPermissions(this, uri, chooserIntent, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        startActivity(chooserIntent);
     }
 }

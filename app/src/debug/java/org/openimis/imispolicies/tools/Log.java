@@ -1,5 +1,8 @@
 package org.openimis.imispolicies.tools;
 
+import android.net.Uri;
+import android.support.v4.content.FileProvider;
+
 import org.openimis.imispolicies.AppInformation;
 import org.openimis.imispolicies.BuildConfig;
 import org.openimis.imispolicies.Compressor;
@@ -20,10 +23,12 @@ import java.util.Locale;
  * keeping the android.util.Log api
  */
 public class Log {
-    public static String logFilePrefix = "log-";
-    public static String logExportFileName = "logs.zip";
-    private static File logFile = null;
+    public static final boolean isLoggingEnabled = BuildConfig.LOGGING_ENABLED;
+
+    private static final String logFilePrefix = "log-";
+    private static final String logExportFileName = "logs.zip";
     private static final String[] levelMapping = {"V", "D", "I", "W", "E", "A"};
+    private static File logFile = null;
 
     public static void v(String tag, String msg) {
         log(tag, msg, android.util.Log.VERBOSE);
@@ -65,12 +70,12 @@ public class Log {
         log(tag, String.format("%s\n%s", msg, android.util.Log.getStackTraceString(thr)), android.util.Log.ERROR);
     }
 
-    public static void log(String tag, String msg, int level) {
+    private static void log(String tag, String msg, int level) {
         if (level < 2 || level > 7) {
             throw new RuntimeException("Unknown log level: " + level);
         }
 
-        if (BuildConfig.LOG) {
+        if (isLoggingEnabled) {
             new Thread(() -> {
 
                 if (level >= BuildConfig.CONSOLE_LOG_LEVEL) {
@@ -84,7 +89,7 @@ public class Log {
         }
     }
 
-    public static File zipLogFiles() {
+    public static void zipLogFiles() {
         File cacheDir = Global.getContext().getExternalCacheDir();
         File[] logFiles = cacheDir.listFiles((dir, filename) -> filename.startsWith(logFilePrefix));
         File targetFile = new File(cacheDir, logExportFileName);
@@ -94,7 +99,11 @@ public class Log {
             Compressor.zip(filesToZip, targetFile.getAbsolutePath(), "");
         }
 
-        return targetFile;
+        Uri logExportUri = FileProvider.getUriForFile(Global.getContext(),
+                String.format("%s.fileprovider", BuildConfig.APPLICATION_ID),
+                targetFile);
+
+        Global.getGlobal().sendFile(logExportUri, "application/zip");
     }
 
     public static void deleteLogFiles() {

@@ -26,11 +26,15 @@ $(document).ready(function () {
         }
     });
 
-    $('#btnExportLogs').click(function () {
-        Android.exportLogs()
-    });
+    if (Android.isLoggingEnabled()) {
+        $('#btnExportLogs').click(function () {
+            Android.exportLogs()
+        });
 
-    $('#btnClearLogs').click(function () {
-        Android.clearLogs()
-    });
+        $('#btnClearLogs').click(function () {
+            Android.clearLogs()
+        });
+    } else {
+        $('#logSection').hide();
+    }
 });
