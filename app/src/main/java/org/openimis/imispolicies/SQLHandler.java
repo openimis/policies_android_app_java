@@ -559,7 +559,7 @@ public class SQLHandler extends SQLiteOpenHelper {
         return getResult(Query, args, "0");
     }
 
-    public String getResultXML2(String QueryF, String QueryI, String QueryPL, String QueryPR, String QueryIP, String OfficerCode, int OfficerId) throws IOException {
+    public String getExportAsXML(String QueryF, String QueryI, String QueryPL, String QueryPR, String QueryIP, String OfficerCode, int OfficerId) throws IOException {
         String Query = null;
         String label = null;
         String sublabel = null;
@@ -819,14 +819,6 @@ public class SQLHandler extends SQLiteOpenHelper {
         } finally {
             closeDatabase();
         }
-    }
-
-    public String getDatabasePath(Context context) {
-        SQLHandler helper = new SQLHandler(this.mContext);
-        SQLiteDatabase database = helper.getReadableDatabase();
-        String path = database.getPath();
-        database.close();
-        return path;
     }
 
     public int getCount(String table, String selection, String[] selectionArgs) {

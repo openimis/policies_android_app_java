@@ -3624,7 +3624,7 @@ public class ClientAndroidInterface {
                     }
                 } else {
                     if (!"".equals(QueryF)) {
-                        fname = sqlHandler.getResultXML2(QueryF, QueryI, QueryPL, QueryPR, QueryIP, global.getOfficerCode(), global.getOfficerId());
+                        fname = sqlHandler.getExportAsXML(QueryF, QueryI, QueryPL, QueryPR, QueryIP, global.getOfficerCode(), global.getOfficerId());
                         FamilyPictures(insureesArray, 2);
                     }
                     EnrolResult = 0;
