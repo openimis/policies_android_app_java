@@ -444,4 +444,7 @@
     <string name="WaitXSeconds">Wait %1$s seconds</string>
     <string name="CnRequestComplete">Control number request finished. If the available CN amount does not increase, please try again in %1$s seconds.</string>
     <string name="CnLimitReached">CN limit reached</string>
+    <string name="Wait">Wait</string>
+    <string name="Suspend">Suspend</string>
+    <string name="Enforce">Enforce</string>
 </resources>

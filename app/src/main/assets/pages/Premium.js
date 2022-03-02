@@ -79,12 +79,14 @@ $(document).ready(function () {
                 width: 300,
                 modal: true,
                 buttons: {
-                    Yes: function () {
+                    text: Android.getString("Yes"),
+                    click: function () {
                         $('#div-details').show();
                         $('.footer').show();
                         $(this).dialog("close");
                     },
-                    No: function () {
+                    text: Android.getString("No"),
+                    click: function () {
                         window.open('PolicyPremium.html?p=' + policyId + '&l=' + LocationId + '&f=' + FamilyId + '&r=' + RegionId + '&d=' + DistrictId, "_self");
                         $(this).dialog("close");
                     }
@@ -161,7 +163,8 @@ $(document).ready(function () {
                                     width: 300,
                                     modal: true,
                                     buttons: {
-                                        Wait: function () {
+                                        text: Android.getString("Wait"),
+                                        click: function () {
                                             policystatus = IdlePolicy;
                                             var PremiumId = Android.SavePremiums(jsonPremium, parseInt(policyId), parseInt(premiumId), parseInt(FamilyId));
                                             Paydate = $('#txtPayDate').val();
@@ -170,7 +173,8 @@ $(document).ready(function () {
                                             window.open('PolicyPremium.html?p=' + policyId + '&l=' + LocationId + '&f=' + FamilyId + '&r=' + RegionId + '&d=' + DistrictId, "_self");
                                             $(this).dialog("close");
                                         },
-                                        Suspend: function () {
+                                        text: Android.getString("Suspend"),
+                                        click: function () {
                                             policystatus = SuspendedPolicy;
                                             var PremiumId = Android.SavePremiums(jsonPremium, parseInt(policyId), parseInt(premiumId), parseInt(FamilyId));
                                             Paydate = $('#txtPayDate').val();
@@ -179,7 +183,8 @@ $(document).ready(function () {
                                             window.open('PolicyPremium.html?p=' + policyId + '&l=' + LocationId + '&f=' + FamilyId + '&r=' + RegionId + '&d=' + DistrictId, "_self");
                                             $(this).dialog("close");
                                         },
-                                        Enforce: function () {
+                                        text: Android.getString("Enforce"),
+                                        click: function () {
                                             policystatus = ActivePolicy;
                                             var PremiumId = Android.SavePremiums(jsonPremium, parseInt(policyId), parseInt(premiumId), parseInt(FamilyId));
                                             Paydate = $('#txtPayDate').val();
@@ -188,7 +193,8 @@ $(document).ready(function () {
                                             window.open('PolicyPremium.html?p=' + policyId + '&l=' + LocationId + '&f=' + FamilyId + '&r=' + RegionId + '&d=' + DistrictId, "_self");
                                             $(this).dialog("close");
                                         },
-                                        No: function () {
+                                        text: Android.getString("No"),
+                                        click: function () {
                                             $(this).dialog("close");
                                         }
                                     }
@@ -201,7 +207,8 @@ $(document).ready(function () {
                                     width: 300,
                                     modal: true,
                                     buttons: {
-                                        OK: function () {
+                                        text: Android.getString("Ok"),
+                                        click: function () {
                                             policystatus = IdlePolicy;
                                             var PremiumId = Android.SavePremiums(jsonPremium, parseInt(policyId), parseInt(premiumId), parseInt(FamilyId));
                                             Paydate = $('#txtPayDate').val();
@@ -210,7 +217,8 @@ $(document).ready(function () {
                                             window.open('PolicyPremium.html?p=' + policyId + '&l=' + LocationId + '&f=' + FamilyId + '&r=' + RegionId + '&d=' + DistrictId, "_self");
                                             $(this).dialog("close");
                                         },
-                                        Enforce: function () {
+                                        text: Android.getString("Enforce"),                                        
+                                        click: function () {
                                             policystatus = ActivePolicy;
                                             var PremiumId = Android.SavePremiums(jsonPremium, parseInt(policyId), parseInt(premiumId), parseInt(FamilyId));
                                             $('#btnSave').attr("disabled", "disabled");
@@ -220,7 +228,8 @@ $(document).ready(function () {
                                             window.open('PolicyPremium.html?p=' + policyId + '&l=' + LocationId + '&f=' + FamilyId + '&r=' + RegionId + '&d=' + DistrictId, "_self");
                                             $(this).dialog("close");
                                         },
-                                        No: function () {
+                                        text: Android.getString("No"),
+                                        click: function () {
                                             $(this).dialog("close");
                                         }
                                     }
@@ -242,7 +251,8 @@ $(document).ready(function () {
                                     width: 300,
                                     modal: true,
                                     buttons: {
-                                        OK: function () {
+                                        text: Android.getString("Ok"),
+                                        click: function () {
                                             policystatus = IdlePolicy;
                                             var PremiumId = Android.SavePremiums(jsonPremium, parseInt(policyId), parseInt(premiumId), parseInt(FamilyId));
                                             Paydate = $('#txtPayDate').val();
@@ -251,7 +261,8 @@ $(document).ready(function () {
                                             window.open('PolicyPremium.html?p=' + policyId + '&l=' + LocationId + '&f=' + FamilyId + '&r=' + RegionId + '&d=' + DistrictId, "_self");
                                             $(this).dialog("close");
                                         },
-                                        Enforce: function () {
+                                        text: Android.getString("Enforce"),
+                                        click: function () {
                                             policystatus = ActivePolicy;
                                             var PremiumId = Android.SavePremiums(jsonPremium, parseInt(policyId), parseInt(premiumId), parseInt(FamilyId));
                                             $('#btnSave').attr("disabled", "disabled");
@@ -261,7 +272,8 @@ $(document).ready(function () {
                                             window.open('PolicyPremium.html?p=' + policyId + '&l=' + LocationId + '&f=' + FamilyId + '&r=' + RegionId + '&d=' + DistrictId, "_self");
                                             $(this).dialog("close");
                                         },
-                                        No: function () {
+                                        text: Android.getString("No"),                                        
+                                        click: function () {
                                             $(this).dialog("close");
                                         }
                                     }

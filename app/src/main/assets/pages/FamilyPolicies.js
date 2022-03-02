@@ -58,7 +58,8 @@ $(document).ready(function () {
                 width: 350,
                 modal: true,
                 buttons: {
-                    OK: function () {
+                        text: Android.getString("Ok"),
+                        click: function () {
 
                         if (isOffline == 0 || isOffline == 2) {
 
@@ -76,7 +77,8 @@ $(document).ready(function () {
                         }
                         $(this).dialog("close");
                     },
-                    Cancel: function () {
+                    text: Android.getString("Cancel"),
+                    click: function () {
                         $(this).dialog("close");
                     }
                 }

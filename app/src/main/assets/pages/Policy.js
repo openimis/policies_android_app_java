@@ -132,11 +132,13 @@ $(document).ready(function () {
                     width: 300,
                     modal: true,
                     buttons: {
-                        Yes: function () {
+                        text: Android.getString("Yes"),
+                        click: function () {
                             savePolicy();
                             $(this).dialog("close");
                         },
-                        No: function () {
+                        text: Android.getString("No"),
+                        click: function () {
                             $(this).dialog("close");
                         }
                     }
