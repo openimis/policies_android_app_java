@@ -53,15 +53,16 @@ android {
             if ( keystorePropertiesFile.exists() ) {
                 signingConfig signingConfigs.releaseConfig
             }
-            buildConfigField "boolean", "LOG", "false"
+            buildConfigField "boolean", "LOGGING_ENABLED", "false"
 
             // Refer to https://developer.android.com/reference/android/util/Log for the log level values
+            // Irrelevant if LOGGING_ENABLED = false
             buildConfigField "int", "CONSOLE_LOG_LEVEL", '8' //Assert
             buildConfigField "int", "FILE_LOG_LEVEL", '8' //Assert
         }
         debug {
             debuggable = true
-            buildConfigField "boolean", "LOG", "true"
+            buildConfigField "boolean", "LOGGING_ENABLED", "true"
 
             // Refer to https://developer.android.com/reference/android/util/Log for the log level values
             buildConfigField "int", "CONSOLE_LOG_LEVEL", '2' //Verbose

@@ -29,14 +29,11 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.SQLException;
@@ -62,7 +59,6 @@ import android.util.Xml;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.webkit.JavascriptInterface;
-import android.webkit.MimeTypeMap;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -186,7 +182,7 @@ public class ClientAndroidInterface {
         // activity = (Activity) c.getApplicationContext();
         picassoInstance = new Picasso.Builder(mContext)
                 .listener((picasso, path, exception) -> Log.e("Images", String.format("Image load failed: %s", path.toString()), exception))
-                .loggingEnabled(BuildConfig.LOG)
+                .loggingEnabled(BuildConfig.LOGGING_ENABLED)
                 .build();
     }
 
@@ -6426,13 +6422,16 @@ public class ClientAndroidInterface {
     }
 
     @JavascriptInterface
+    public boolean isLoggingEnabled() {
+        return Log.isLoggingEnabled;
+    }
+
+    @JavascriptInterface
     public void clearLogs() {
         Util.AndroidUtil.showConfirmDialog(
                 mContext,
                 R.string.ConfirmClearLogs,
-                (d, i) -> {
-                    Log.deleteLogFiles();
-                }
+                (d, i) -> new Thread(Log::deleteLogFiles).start()
         );
     }
 
@@ -6441,15 +6440,7 @@ public class ClientAndroidInterface {
         Util.AndroidUtil.showConfirmDialog(
                 mContext,
                 R.string.ConfirmExportLogs,
-                (d, i) -> new Thread(() -> {
-                    File targetFile = Log.zipLogFiles();
-
-                    Uri logExportUri = FileProvider.getUriForFile(mContext,
-                            String.format("%s.fileprovider", BuildConfig.APPLICATION_ID),
-                            targetFile);
-
-                    global.sendFile(mContext, logExportUri, "application/zip");
-                }).start()
+                (d, i) -> new Thread(Log::zipLogFiles).start()
         );
     }
 }
