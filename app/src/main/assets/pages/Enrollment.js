@@ -39,7 +39,8 @@ $(document).ready(function () {
                 height: "auto",
                 width: 350,
                 modal: true,
-                buttons: {
+                buttons: [
+                    {
                         text: Android.getString("Ok"),
                         click: function () {
 
@@ -69,12 +70,15 @@ $(document).ready(function () {
                             }
                         }
                         $(this).dialog("close");
+                        }
                     },
-                    text: Android.getString("Cancel"),
-                    click: function () {
-                        $(this).dialog("close");
+                    {
+                        text: Android.getString("Cancel"),
+                        click: function () {
+                            $(this).dialog("close");
+                        }
                     }
-                }
+                ]
             });
         }
     });

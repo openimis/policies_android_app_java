@@ -131,17 +131,21 @@ $(document).ready(function () {
                     height: "auto",
                     width: 300,
                     modal: true,
-                    buttons: {
+                    buttons: [
+                    {
                         text: Android.getString("Yes"),
                         click: function () {
                             savePolicy();
                             $(this).dialog("close");
-                        },
+                        }
+                    },
+                    {
                         text: Android.getString("No"),
                         click: function () {
                             $(this).dialog("close");
                         }
                     }
+                    ]
                 });
             }
             else {
