@@ -4,7 +4,7 @@ import android.app.IntentService;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.content.Context;
-import android.util.Log;
+import org.openimis.imispolicies.tools.Log;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
@@ -13,9 +13,12 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.openimis.imispolicies.tools.Util;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ControlNumberService extends IntentService {
     private static final String LOG_TAG = "CNSERVICE";
@@ -33,6 +36,23 @@ public class ControlNumberService extends IntentService {
 
     public static final String FIELD_ERROR_MESSAGE = "FIELD_ERROR_MESSAGE";
 
+    private static class ControlNumberStatus {
+        public static final int SUCCESS = 4001;
+        public static final int NO_CN_AVAILABLE = 4002;
+        public static final int THRESHOLD_REACHED = 4003;
+        public static final int ERROR = 4999;
+    }
+
+    public static Map<Integer, Integer> ControlNumberStatusMapping;
+
+    static {
+        ControlNumberStatusMapping = new HashMap<>();
+        ControlNumberStatusMapping.put(ControlNumberStatus.NO_CN_AVAILABLE, R.string.NoCNReceived);
+        ControlNumberStatusMapping.put(ControlNumberStatus.THRESHOLD_REACHED, R.string.CNThresholdReached);
+        ControlNumberStatusMapping.put(ControlNumberStatus.ERROR, R.string.SomethingWrongServer);
+    }
+
+    private Global global;
     private ToRestApi toRestApi;
     private ClientAndroidInterface ca;
     private SQLHandler sqlHandler;
@@ -68,6 +88,7 @@ public class ControlNumberService extends IntentService {
         toRestApi = new ToRestApi();
         ca = new ClientAndroidInterface(this);
         sqlHandler = new SQLHandler(this);
+        global = (Global) getApplicationContext();
 
         if (intent != null) {
             final String action = intent.getAction();
@@ -90,17 +111,18 @@ public class ControlNumberService extends IntentService {
         try {
             JSONObject object = new JSONObject();
             object.put("productCode", productCode);
+            object.put("availableControlNumbers", sqlHandler.getFreeCNCount(global.getOfficerCode(), productCode));
 
-            HttpEntity respEntity;
             HttpResponse response = toRestApi.postToRestApiToken(object, "GetControlNumbersForEO");
             int responseCode = response.getStatusLine().getStatusCode();
-            respEntity = response.getEntity();
+            HttpEntity respEntity = response.getEntity();
             String content = EntityUtils.toString(respEntity);
-            JSONArray responseContent = new JSONArray(content);
+            JSONObject responseContent = new JSONObject(content);
 
-            errorMessage = getErrorMessage(responseCode, null);
-            if ("".equals(errorMessage)) {
-                insertBulkControlNumbers(responseContent);
+            errorMessage = getErrorMessage(responseCode, responseContent);
+            if (Util.StringUtil.isEmpty(errorMessage)) {
+                JSONArray controlNumbers = responseContent.getJSONArray("controlNumbers");
+                insertBulkControlNumbers(controlNumbers);
                 broadcastSuccess();
             } else {
                 broadcastError(errorMessage);
@@ -158,7 +180,6 @@ public class ControlNumberService extends IntentService {
             if (StringUtils.isEmpty(errorMessage)) {
                 String assignedControlNumbers = responseContent.getString("assigned_control_numbers");
                 updateAssignedControlNumbers(assignedControlNumbers);
-
                 broadcastSuccess();
             } else {
                 broadcastError(errorMessage);
@@ -185,9 +206,19 @@ public class ControlNumberService extends IntentService {
     private String getErrorMessage(int responseCode, JSONObject responseContent) throws JSONException {
         String errorMessage = "";
 
-        if (responseContent != null && responseContent.has("error_occured")) {
-            if (responseContent.getBoolean("error_occured")) {
-                errorMessage = responseContent.getString("error_message");
+        if (responseContent != null) {
+            if (responseContent.has("header")) {
+                JSONObject responseHeader = responseContent.getJSONObject("header");
+                int status = responseHeader.getInt("error");
+                if (status != ControlNumberStatus.SUCCESS) {
+                    errorMessage = getBulkCnErrorMessage(status);
+                } else if (responseContent.getJSONArray("controlNumbers").length() == 0) {
+                    errorMessage = getResources().getString(R.string.NoCNReceived);
+                }
+            } else if (responseContent.has("error_occured")) {
+                if (responseContent.getBoolean("error_occured")) {
+                    errorMessage = responseContent.getString("error_message");
+                }
             }
         } else if (responseCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
             errorMessage = getResources().getString(R.string.has_no_rights);
@@ -198,6 +229,16 @@ public class ControlNumberService extends IntentService {
         }
 
         return errorMessage;
+    }
+
+    private String getBulkCnErrorMessage(int status) {
+        Integer errorMessageId = ControlNumberStatusMapping.get(status);
+        if (errorMessageId != null) {
+            return getResources().getString(errorMessageId);
+        } else {
+            Log.e(LOG_TAG, String.format("Unknown response code from the server: %d", status));
+            return getResources().getString(R.string.SomethingWrongServer);
+        }
     }
 
     private int insertControlNumber(JSONObject order, String controlNumber, String internalIdentifier) throws JSONException {

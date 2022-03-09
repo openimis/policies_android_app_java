@@ -52,7 +52,9 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Base64;
-import android.util.Log;
+
+import org.openimis.imispolicies.tools.Log;
+
 import android.util.Xml;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -106,7 +108,8 @@ import java.util.UUID;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import org.openimis.imispolicies.Util.AndroidUtil;
+import org.openimis.imispolicies.tools.Util;
+import org.openimis.imispolicies.tools.Util.AndroidUtil;
 import org.xmlpull.v1.XmlSerializer;
 
 import javax.crypto.Cipher;
@@ -115,11 +118,12 @@ import javax.net.ssl.HttpsURLConnection;
 
 import static android.database.sqlite.SQLiteDatabase.openOrCreateDatabase;
 import static android.provider.MediaStore.EXTRA_OUTPUT;
-import static org.openimis.imispolicies.Util.JsonUtil.isStringEmpty;
-import static org.openimis.imispolicies.Util.StringUtil.isEmpty;
+import static org.openimis.imispolicies.tools.Util.JsonUtil.isStringEmpty;
+import static org.openimis.imispolicies.tools.Util.StringUtil.isEmpty;
 
 public class ClientAndroidInterface {
     private static final String LOG_TAG_RENEWAL = "RENEWAL";
+    private static final String LOG_TAG_SETTINGS = "SETTINGS";
 
     private Context mContext;
 
@@ -178,7 +182,7 @@ public class ClientAndroidInterface {
         // activity = (Activity) c.getApplicationContext();
         picassoInstance = new Picasso.Builder(mContext)
                 .listener((picasso, path, exception) -> Log.e("Images", String.format("Image load failed: %s", path.toString()), exception))
-                .loggingEnabled(BuildConfig.LOG)
+                .loggingEnabled(BuildConfig.LOGGING_ENABLED)
                 .build();
     }
 
@@ -814,7 +818,7 @@ public class ClientAndroidInterface {
                     Online = 2;
                     values.put("isOffline", 2);
                 }
-                sqlHandler.updateData("tblFamilies", values, "FamilyId = ? AND (isOffline = ? OR isOffline = ?) ", new String[]{String.valueOf(FamilyId), String.valueOf(isOffline), String.valueOf(Online)});
+                sqlHandler.updateData("tblFamilies", values, "FamilyId = ? AND (isOffline = ? OR isOffline = ?) ", new String[]{String.valueOf(FamilyId), String.valueOf(isOffline), String.valueOf(Online)}, false);
                 //Automatic sync
                 /*
                 if (isOffline == 0 && global.getUserId() > 0) {
@@ -3616,7 +3620,7 @@ public class ClientAndroidInterface {
                     }
                 } else {
                     if (!"".equals(QueryF)) {
-                        fname = sqlHandler.getResultXML2(QueryF, QueryI, QueryPL, QueryPR, QueryIP, global.getOfficerCode(), global.getOfficerId());
+                        fname = sqlHandler.getExportAsXML(QueryF, QueryI, QueryPL, QueryPR, QueryIP, global.getOfficerCode(), global.getOfficerId());
                         FamilyPictures(insureesArray, 2);
                     }
                     EnrolResult = 0;
@@ -4670,14 +4674,7 @@ public class ClientAndroidInterface {
 
     private File[] GetListOfImages(String DirectoryPath, final String FileName) {
         File Directory = new File(DirectoryPath);
-        FilenameFilter filter = new FilenameFilter() {
-
-            @Override
-            public boolean accept(File dir, String filename) {
-                return filename.equalsIgnoreCase(FileName);
-            }
-        };
-        return Directory.listFiles(filter);
+        return Directory.listFiles((dir, filename) -> filename.equalsIgnoreCase(FileName));
     }
 
     @JavascriptInterface
@@ -6422,5 +6419,28 @@ public class ClientAndroidInterface {
                     "Couldn't get max id " + idFieldName +
                             " for table " + tableName);
         }
+    }
+
+    @JavascriptInterface
+    public boolean isLoggingEnabled() {
+        return Log.isLoggingEnabled;
+    }
+
+    @JavascriptInterface
+    public void clearLogs() {
+        Util.AndroidUtil.showConfirmDialog(
+                mContext,
+                R.string.ConfirmClearLogs,
+                (d, i) -> new Thread(Log::deleteLogFiles).start()
+        );
+    }
+
+    @JavascriptInterface
+    public void exportLogs() {
+        Util.AndroidUtil.showConfirmDialog(
+                mContext,
+                R.string.ConfirmExportLogs,
+                (d, i) -> new Thread(Log::zipLogFiles).start()
+        );
     }
 }

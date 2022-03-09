@@ -28,15 +28,20 @@ package org.openimis.imispolicies;
 import android.Manifest;
 import android.app.Application;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.util.DisplayMetrics;
-import android.util.Log;
+
+import org.openimis.imispolicies.tools.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -369,5 +374,24 @@ public class Global extends Application {
             Log.e(FILE_IO_LOG_TAG, "Parsing int defaults failed", e);
         }
         return levels;
+    }
+
+    public void grantUriPermissions(Context context, Uri uri, Intent intent, int permissionFlags) {
+        intent.addFlags(permissionFlags);
+        List<ResolveInfo> resInfoList = context.getPackageManager().queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
+        for (ResolveInfo resolveInfo : resInfoList) {
+            String packageName = resolveInfo.activityInfo.packageName;
+            context.grantUriPermission(packageName, uri, permissionFlags);
+        }
+    }
+
+    public void sendFile(Uri uri, String mimeType) {
+        Intent shareExportIntent = new Intent(Intent.ACTION_SEND);
+        shareExportIntent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        shareExportIntent.putExtra(Intent.EXTRA_STREAM, uri);
+        shareExportIntent.setType(mimeType);
+        Intent chooserIntent = Intent.createChooser(shareExportIntent, null);
+        grantUriPermissions(this, uri, chooserIntent, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        startActivity(chooserIntent);
     }
 }

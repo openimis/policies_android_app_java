@@ -31,10 +31,9 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.text.TextUtils;
-import android.util.Log;
+import org.openimis.imispolicies.tools.Log;
 import android.util.Xml;
 
 import org.json.JSONArray;
@@ -47,7 +46,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Locale;
 
 public class SQLHandler extends SQLiteOpenHelper {
 
@@ -561,7 +559,7 @@ public class SQLHandler extends SQLiteOpenHelper {
         return getResult(Query, args, "0");
     }
 
-    public String getResultXML2(String QueryF, String QueryI, String QueryPL, String QueryPR, String QueryIP, String OfficerCode, int OfficerId) throws IOException {
+    public String getExportAsXML(String QueryF, String QueryI, String QueryPL, String QueryPR, String QueryIP, String OfficerCode, int OfficerId) throws IOException {
         String Query = null;
         String label = null;
         String sublabel = null;
@@ -791,13 +789,13 @@ public class SQLHandler extends SQLiteOpenHelper {
         }
     }
 
-    public int updateData(String tableName, ContentValues contentValues, String whereClause, String[] whereArgs) throws UserException {
+    public int updateData(String tableName, ContentValues contentValues, String whereClause, String[] whereArgs, boolean throwOnNoRowsUpdated) throws UserException {
         openDatabase();
         int rowsUpdated = 0;
         try {
             openDatabase();
             rowsUpdated = mDatabase.update(tableName, contentValues, whereClause, whereArgs);
-            if (rowsUpdated <= 0) {
+            if (throwOnNoRowsUpdated && rowsUpdated <= 0) {
                 throw new UserException(mContext.getResources().getString(R.string.ErrorUpdate));
             }
         } catch (Exception e) {
@@ -808,6 +806,9 @@ public class SQLHandler extends SQLiteOpenHelper {
         return rowsUpdated;
     }
 
+    public int updateData(String tableName, ContentValues contentValues, String whereClause, String[] whereArgs) throws UserException {
+        return updateData(tableName, contentValues, whereClause, whereArgs, true);
+    }
 
     public void deleteData(String tableName, String whereClause, String[] whereArgs) {
         try {
@@ -818,14 +819,6 @@ public class SQLHandler extends SQLiteOpenHelper {
         } finally {
             closeDatabase();
         }
-    }
-
-    public String getDatabasePath(Context context) {
-        SQLHandler helper = new SQLHandler(this.mContext);
-        SQLiteDatabase database = helper.getReadableDatabase();
-        String path = database.getPath();
-        database.close();
-        return path;
     }
 
     public int getCount(String table, String selection, String[] selectionArgs) {

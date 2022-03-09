@@ -22,16 +22,7 @@ public class Compressor {
             }
 
             ZipFile zipFile = new ZipFile(destinationFilePath);
-
-/*            File targetFile = new File(targetPath);
-            if (targetFile.isFile()) {
-                zipFile.addFile(targetFile, parameters);
-            } else if (targetFile.isDirectory()) {
-                zipFile.addFolder(targetFile, parameters);
-            }*/
             zipFile.addFiles(targetPath, parameters);
-
-
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -58,7 +49,6 @@ public class Compressor {
             } else if (targetFile.isDirectory()) {
                 zipFile.addFolder(targetFile, parameters);
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         }

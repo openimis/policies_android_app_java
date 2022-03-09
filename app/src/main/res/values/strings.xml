@@ -447,4 +447,13 @@
     <string name="Wait">Wait</string>
     <string name="Suspend">Suspend</string>
     <string name="Enforce">Enforce</string>
+    <string name="NoCNReceived">No control numbers received from the server</string>
+    <string name="CNThresholdReached">You cannot receive more control numbers for this product</string>
+    <string name="ExportLogs">Export all logs:</string>
+    <string name="ExportLogsButton">Export logs</string>
+    <string name="ConfirmExportLogs">Do you want to export logs?</string>
+    <string name="ExportLogsCanceled">Export canceled. Export file can be found in external cache directory.</string>
+    <string name="ClearLogs">Clear all logs:</string>
+    <string name="ClearLogsButton">Clear logs</string>
+    <string name="ConfirmClearLogs">Do you want to clear logs?</string>
 </resources>

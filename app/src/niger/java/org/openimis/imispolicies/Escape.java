@@ -25,7 +25,7 @@
 
 package org.openimis.imispolicies;
 
-import android.util.Log;
+import org.openimis.imispolicies.tools.Log;
 
 public class Escape {
     public int CheckInsuranceNumber(String InsuranceNumber){

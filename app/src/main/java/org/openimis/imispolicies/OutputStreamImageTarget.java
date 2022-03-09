@@ -2,7 +2,7 @@ package org.openimis.imispolicies;
 
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
-import android.util.Log;
+import org.openimis.imispolicies.tools.Log;
 
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
@@ -25,8 +25,8 @@ public class OutputStreamImageTarget implements Target {
     }
 
     @Override
-    public void onBitmapFailed(Drawable errorDrawable) {
-        Log.e(LOG_TAG, "Loading image failed");
+    public void onBitmapFailed(Exception exception, Drawable errorDrawable) {
+        Log.e(LOG_TAG, "Loading image failed", exception);
     }
 
     @Override
