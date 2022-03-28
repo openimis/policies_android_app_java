@@ -2919,49 +2919,47 @@ public class ClientAndroidInterface {
         pd = ProgressDialog.show(mContext, mContext.getResources().getString(R.string.Sync), mContext.getResources().getString(R.string.SyncProcessing));
         final ProgressDialog finalPd = pd;
         try {
-            new Thread() {
-                public void run() {
-                    try {
-                        enrol_result = Enrol(0, 0, 0, 0, 1);
-                    } catch (UserException e) {
-                        finalPd.dismiss();
-                        e.printStackTrace();
-                    } catch (JSONException e) {
-                        finalPd.dismiss();
-                        e.printStackTrace();
-                    } catch (IOException e) {
-                        finalPd.dismiss();
-                        e.printStackTrace();
-                    } catch (NumberFormatException e) {
-                        finalPd.dismiss();
-                        e.printStackTrace();
-                    }
+            new Thread(() -> {
+                try {
+                    enrol_result = Enrol(0, 0, 0, 0, 1);
+                } catch (UserException e) {
                     finalPd.dismiss();
-                    if (mylist.size() == 0) {
-                        ((Activity) mContext).runOnUiThread(() -> {
-                            if (enrol_result != 999) {
-                                //if error is encountered
-                                if (enrolMessages != null && enrolMessages.size() > 0) {
-                                    CharSequence[] charSequence = enrolMessages.toArray(new CharSequence[0]);
-                                    AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-                                    builder.setTitle(mContext.getResources().getString(R.string.UploadFailureReport));
-                                    builder.setCancelable(false);
-                                    builder.setItems(charSequence, null);
-                                    builder.setPositiveButton(mContext.getResources().getString(R.string.Ok), (dialogInterface, i) -> dialogInterface.dismiss());
-                                    AlertDialog dialog = builder.create();
-                                    dialog.show();
-                                    enrolMessages.clear();
-
-                                } else {
-                                    ShowDialog(mContext.getResources().getString(R.string.FamilyUploaded));
-                                }
-                            } else {
-                                ShowDialog(mContext.getResources().getString(R.string.NoDataAvailable));
-                            }
-                        });
-                    }
+                    e.printStackTrace();
+                } catch (JSONException e) {
+                    finalPd.dismiss();
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    finalPd.dismiss();
+                    e.printStackTrace();
+                } catch (NumberFormatException e) {
+                    finalPd.dismiss();
+                    e.printStackTrace();
                 }
-            }.start();
+                finalPd.dismiss();
+                if (mylist.size() == 0) {
+                    ((Activity) mContext).runOnUiThread(() -> {
+                        if (enrol_result != 999) {
+                            //if error is encountered
+                            if (enrolMessages != null && enrolMessages.size() > 0) {
+                                CharSequence[] charSequence = enrolMessages.toArray(new CharSequence[0]);
+                                AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                                builder.setTitle(mContext.getResources().getString(R.string.UploadFailureReport));
+                                builder.setCancelable(false);
+                                builder.setItems(charSequence, null);
+                                builder.setPositiveButton(mContext.getResources().getString(R.string.Ok), (dialogInterface, i) -> dialogInterface.dismiss());
+                                AlertDialog dialog = builder.create();
+                                dialog.show();
+                                enrolMessages.clear();
+
+                            } else {
+                                ShowDialog(mContext.getResources().getString(R.string.FamilyUploaded));
+                            }
+                        } else {
+                            ShowDialog(mContext.getResources().getString(R.string.NoDataAvailable));
+                        }
+                    });
+                }
+            }).start();
         } catch (Exception e) {
             if (finalPd.isShowing()) {
                 finalPd.dismiss();
@@ -2978,80 +2976,57 @@ public class ClientAndroidInterface {
         pd = ProgressDialog.show(mContext, "", mContext.getResources().getString(R.string.Uploading));
 
         try {
-            new Thread() {
-                public void run() {
-                    try {
-                        enrol_result = Enrol(0, 0, 0, 0, 2);
-                        if (enrol_result == 0) {
-                            //zipFile();
-                            zipFiles();
-                            deleteUnzippedFie();
-                            deleteUnzippedPhotos();
-
-                        }
-                    } catch (UserException e) {
-                        e.printStackTrace();
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    } catch (NumberFormatException e) {
-                        e.printStackTrace();
+            new Thread(() -> {
+                try {
+                    enrol_result = Enrol(0, 0, 0, 0, 2);
+                    if (enrol_result == 0) {
+                        //zipFile();
+                        zipFiles();
+                        deleteUnzippedFie();
+                        deleteUnzippedPhotos();
                     }
-                    if (mylist.size() == 0) {
-                        ((Activity) mContext).runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (enrol_result != 999) {
-                                    //if error is encountered
-                                    if (enrolMessages.size() > 0 && enrolMessages != null) {
-                                        CharSequence[] charSequence = enrolMessages.toArray(new CharSequence[(enrolMessages.size())]);
-                                        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-                                        builder.setTitle(mContext.getResources().getString(R.string.UploadFailureReport));
-                                        builder.setCancelable(false);
-                                        builder.setItems(charSequence, null);
-                                        builder.setPositiveButton(mContext.getResources().getString(R.string.Ok), new DialogInterface.OnClickListener() {
-                                            @Override
-                                            public void onClick(DialogInterface dialogInterface, int i) {
-                                                dialogInterface.dismiss();
-                                            }
-                                        });
-                                        AlertDialog dialog = builder.create();
-                                        dialog.show();
-                                        enrolMessages.clear();
-
-                                    } else {
-                                        //deleteImage();
-                                        ShowDialog(mContext.getResources().getString(R.string.XmlCreated));
-                                    }
-                                } else {
-                                    ShowDialog(mContext.getResources().getString(R.string.NoDataAvailable));
-                                }
-
-                                //ShowDialog(mContext.getResources().getString(R.string.FamilyUploaded));
-                            }
-
-                        });
-                    } else {
-                        ((Activity) mContext).runOnUiThread(
-                                new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        ShowDialog(mylist.toString());
-                                    }
-                                });
-                    }
-
-
-                    pd.dismiss();
+                } catch (UserException e) {
+                    e.printStackTrace();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (NumberFormatException e) {
+                    e.printStackTrace();
                 }
-            }.start();
+                if (mylist.size() == 0) {
+                    ((Activity) mContext).runOnUiThread(() -> {
+                        if (enrol_result != 999) {
+                            //if error is encountered
+                            if (enrolMessages.size() > 0 && enrolMessages != null) {
+                                CharSequence[] charSequence = enrolMessages.toArray(new CharSequence[(enrolMessages.size())]);
+                                AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                                builder.setTitle(mContext.getResources().getString(R.string.UploadFailureReport));
+                                builder.setCancelable(false);
+                                builder.setItems(charSequence, null);
+                                builder.setPositiveButton(mContext.getResources().getString(R.string.Ok), (dialogInterface, i) -> dialogInterface.dismiss());
+                                AlertDialog dialog = builder.create();
+                                dialog.show();
+                                enrolMessages.clear();
+                            } else {
+                                //deleteImage();
+                                ShowDialog(mContext.getResources().getString(R.string.XmlCreated));
+                            }
+                        } else {
+                            ShowDialog(mContext.getResources().getString(R.string.NoDataAvailable));
+                        }
+                        //ShowDialog(mContext.getResources().getString(R.string.FamilyUploaded));
+                    });
+                } else {
+                    ((Activity) mContext).runOnUiThread(
+                            () -> ShowDialog(mylist.toString()));
+                }
+                pd.dismiss();
+            }).start();
         } catch (Exception e) {
             e.printStackTrace();
             throw new Exception(e.getMessage());
         }
-
-
     }
 
     /*    private void deleteImage() {
@@ -3064,9 +3039,28 @@ public class ClientAndroidInterface {
                 }
             }
         }*/
+
+    public boolean isPolicyRequired() {
+        return !getRule("AllowFamilyWithoutPolicy", false);
+    }
+
     public boolean isContributionRequired() {
         return !getRule("AllowPolicyWithoutPremium")
                 && getRule("ShowPaymentOption", true);
+    }
+
+    public String getFamilyValidationError(String chfid, int errorMessageId) {
+        return String.format("Family %s %s",
+                chfid,
+                mContext.getResources().getString(errorMessageId)
+        );
+    }
+
+    public String getInsureeValidationError(String chfid, String lastname, String othername, int errorMessageId) {
+        return String.format("Insuree %s %s %s %s",
+                chfid, lastname, othername,
+                mContext.getResources().getString(errorMessageId)
+        );
     }
 
     public ArrayList<String> VerifyFamily() throws JSONException {
@@ -3119,11 +3113,9 @@ public class ClientAndroidInterface {
                 Query += " WHERE FamilyId = " + FamilyId + "";
                 JSONArray policiesArray = sqlHandler.getResult(Query, null);
 
-                if (IsOffline == 1) {
-
-                    if (policiesArray.length() == 0) {
-                        result = false;
-                    }
+                if (IsOffline == 1 && isPolicyRequired() && policiesArray.length() == 0) { //Family offline without a policy
+                    mylist.add(getFamilyValidationError(familyArray.getJSONObject(0).getString("HOFCHFID"), R.string.WithoutPolicy));
+                    result = false;
                 }
 
                 //get Premiums
@@ -3132,25 +3124,10 @@ public class ClientAndroidInterface {
                         "INNER JOIN tblPolicy PL ON PL.PolicyId = PR.PolicyId";
                 Query += " WHERE FamilyId = " + FamilyId;
                 JSONArray premiumsArray = sqlHandler.getResult(Query, null);
-                if (IsOffline == 1) {
-                    if (isContributionRequired()) {
-                        if (premiumsArray.length() == 0) {
-                            JSONObject family = familyArray.getJSONObject(0);
-                            String chfid = family.getString("HOFCHFID");
-                            mylist.add("Family " + chfid + " " + mContext.getResources().getString(R.string.WithoutPolicyPremium));
-                            result = false;
-                        }
-                    }
-                } else {
-                    if (policiesArray.length() != 0) {
-                        if (isContributionRequired()) {
-                            if (premiumsArray.length() == 0) {
-                                JSONObject family = familyArray.getJSONObject(0);
-                                String chfid = family.getString("HOFCHFID");
-                                mylist.add("Family " + chfid + " " + mContext.getResources().getString(R.string.WithoutPolicyPremium));
-                                result = false;
-                            }
-                        }
+                if (IsOffline == 1 || policiesArray.length() != 0) { //Family offline or policy added to online family
+                    if (isContributionRequired() && premiumsArray.length() == 0) {
+                        mylist.add(getFamilyValidationError(familyArray.getJSONObject(0).getString("HOFCHFID"), R.string.WithoutPremium));
+                        result = false;
                     }
                 }
 
@@ -3166,7 +3143,7 @@ public class ClientAndroidInterface {
         }
 
         if (mylist.size() != 0) {
-            addCategoryBox();
+            ShowErrorMessages();
             mylist.clear();
         }
         return FamilyIDs;
@@ -3190,10 +3167,12 @@ public class ClientAndroidInterface {
             if (IsOffline == 1) {
                 if (!getRule("AllowInsureeWithoutPhoto")) {
                     if (PhotoPath == null || PhotoPath.length() == 0 || PhotoPath.equals("null")) {
-                        String chfid = (Insureeobject.getString("CHFID"));
-                        String lastname = (Insureeobject.getString("LastName"));
-                        String othername = (Insureeobject.getString("OtherNames"));
-                        mylist.add("Insuree " + chfid + " " + " " + lastname + " " + " " + othername + " " + mContext.getResources().getString(R.string.WithoutPhoto));
+                        mylist.add(getInsureeValidationError(
+                                Insureeobject.getString("CHFID"),
+                                Insureeobject.getString("LastName"),
+                                Insureeobject.getString("OtherNames"),
+                                R.string.WithoutPhoto
+                        ));
                         result = false;
                     }
                 }
@@ -3353,7 +3332,6 @@ public class ClientAndroidInterface {
                 Query += ")";
             }
 
-
             if (CallerId == 0) Query += " AND  I.InsureeId = " + oInsureeId;
 
             JSONArray insureesArray = sqlHandler.getResult(Query, null);
@@ -3372,12 +3350,10 @@ public class ClientAndroidInterface {
                     JSONObject ob = insureesArray.getJSONObject(j);
                     String typeofId = ob.getString("TypeOfId");
 
-                    if (typeofId == "0") {
+                    if (typeofId.equals("0")) {
                         ob.put("TypeOfId", "");
-                        newInsureesArray.put(ob);
-                    } else {
-                        newInsureesArray.put(ob);
                     }
+                    newInsureesArray.put(ob);
                 }
 
                 insureesArray = newInsureesArray;
@@ -3404,11 +3380,18 @@ public class ClientAndroidInterface {
             if (CallerId == 0) Query += " AND PolicyId = " + oPolicyId;
 
             JSONArray policiesArray = sqlHandler.getResult(Query, null);
-
             QueryPL = Query;
 
+            if (CallerId == 1 || CallerId == 2) {
+                if (IsOffline == 1 && isPolicyRequired() && policiesArray.length() == 0) {
+                    mylist.add(getFamilyValidationError(
+                            insureesArray.getJSONObject(0).getString("CHFID"),
+                            R.string.WithoutPolicy
+                    ));
+                }
+            }
 
-            if (insureesArray.length() > 0 || policiesArray.length() != 0 || familyArray.length() > 0) {
+            if (insureesArray.length() > 0 || policiesArray.length() > 0 || familyArray.length() > 0) {
 
                 //get Premiums
                 Query = "SELECT PR.PremiumId, PR.PolicyId, NULLIF(PR.PayerId,'null') PayerId, PR.Amount, PR.Receipt, PR.PayDate, PR.PayType, PR.isPhotoFee,PR.isOffline\n" +
@@ -3433,56 +3416,17 @@ public class ClientAndroidInterface {
                 if (CallerId == 0) {
                     Query += " AND PR.PremiumId  = " + oPremiumId;
                 }
-                JSONArray premiumsArray = sqlHandler.getResult(Query, null);
 
+                JSONArray premiumsArray = sqlHandler.getResult(Query, null);
                 QueryPR = Query;
 
                 if (CallerId == 1 || CallerId == 2) {
-                    if (IsOffline == 1) {
-                        if (premiumsArray.length() == 0) {
-                            if (isContributionRequired()) {
-                                String chfid = null;
-                                String lastname = null;
-                                String othername = null;
-                                try {
-                                    JSONObject insuree = insureesArray.getJSONObject(0);
-                                    chfid = insuree.getString("CHFID");
-                                    lastname = insuree.getString("LastName");
-                                    othername = insuree.getString("OtherNames");
-                                } catch (JSONException e) {
-                                    e.printStackTrace();
-                                }
-                                mylist.add("Family " + chfid + " " + " " + lastname + " " + " " + othername + " " + mContext.getResources().getString(R.string.WithoutPolicyPremium));
-                            }
-                        }
-                    } else {
-                        if (policiesArray.length() != 0) {
-
-                            JSONArray newpoliciesArray = new JSONArray();
-                            JSONObject ob = null;
-                            for (int j = 0; j < policiesArray.length(); j++) {
-                                ob = policiesArray.getJSONObject(j);
-                                newpoliciesArray.put(ob);
-                            }
-                            policiesArray = newpoliciesArray;
-
-                            if (premiumsArray.length() == 0) {
-                                if (isContributionRequired()) {
-                                    String chfid = null;
-                                    String lastname = null;
-                                    String othername = null;
-                                    try {
-                                        JSONObject insuree = insureesArray.getJSONObject(0);
-                                        chfid = insuree.getString("CHFID");
-                                        lastname = insuree.getString("LastName");
-                                        othername = insuree.getString("OtherNames");
-                                    } catch (JSONException e) {
-                                        e.printStackTrace();
-                                    }
-                                    mylist.add("Family " + chfid + " " + " " + lastname + " " + " " + othername + " " + mContext.getResources().getString(R.string.WithoutPolicyPremium));
-
-                                }
-                            }
+                    if (IsOffline == 1 || policiesArray.length() != 0) { //Family offline or policy added to online family
+                        if (isContributionRequired() && premiumsArray.length() == 0) {
+                            mylist.add(getFamilyValidationError(
+                                    insureesArray.getJSONObject(0).getString("CHFID"),
+                                    R.string.WithoutPremium
+                            ));
                         }
                     }
                 }
@@ -3496,8 +3440,8 @@ public class ClientAndroidInterface {
                 if (CallerId != 2) {
                     Query += " WHERE PL.FamilyId = " + FamilyId;
                 }
-                JSONArray InsureePolicyArray = sqlHandler.getResult(Query, null);
 
+                JSONArray InsureePolicyArray = sqlHandler.getResult(Query, null);
                 QueryIP = Query;
 
                 JSONObject objEnrol = new JSONObject();
@@ -3525,8 +3469,6 @@ public class ClientAndroidInterface {
                 objEnrol = new JSONObject();
                 objEnrol.put("InsureePolicy", InsureePolicyArray);
                 String InsureePolicy = objEnrol.toString();
-
-                global = (Global) mContext.getApplicationContext();
 
                 if (CallerId != 2) {
                     if (mylist.size() == 0) {
@@ -3568,22 +3510,9 @@ public class ClientAndroidInterface {
                         }
 
                         familyObj.put("policies", policiesArray);
-
-                        if (mylist.size() != 0) {
-                            addCategoryBox();
-                            break;
-                        }
-                        // InsureePolicy
                         familyObj.put("insureePolicy", InsureePolicyArray);
-
-
                         familyArr.put(familyObj);
                         resultObj.put("family", familyArr);
-
-                        if (mylist.size() != 0) {
-                            addCategoryBox();
-                            break;
-                        }
 
                         ToRestApi rest = new ToRestApi();
                         HttpResponse response = rest.postToRestApiToken(resultObj, "family");
@@ -3615,7 +3544,7 @@ public class ClientAndroidInterface {
                             }
                         }
                     } else {
-                        addCategoryBox();
+                        ShowErrorMessages();
                         break;
                     }
                 } else {
@@ -3833,8 +3762,11 @@ public class ClientAndroidInterface {
                             InsureeImages img = new InsureeImages("", empty);
                             images[j] = img;
                         } else {
-                            mylist.add("Insuree " + chfid + " " + " " + lastname + " " + " " + othername + " " + mContext.getResources().getString(R.string.WithoutPhoto));
-                            addCategoryBox();
+                            mylist.add(getInsureeValidationError(
+                                    chfid, lastname, othername,
+                                    R.string.WithoutPhoto
+                            ));
+                            ShowErrorMessages();
                             break;
                         }
                     } else {
@@ -4173,47 +4105,34 @@ public class ClientAndroidInterface {
 
     }
 
-    public void addCategoryBox() {
+    public void ShowErrorMessages() {
 
-        ((Activity) mContext).runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                // get prompts.xml view
-                LayoutInflater li = LayoutInflater.from(mContext);
-                View promptsView = li.inflate(R.layout.error_message, null);
+        ((Activity) mContext).runOnUiThread(() -> {
+            // get prompts.xml view
+            LayoutInflater li = LayoutInflater.from(mContext);
+            View promptsView = li.inflate(R.layout.error_message, null);
 
-                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(mContext);
+            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(mContext);
 
-                // set prompts.xml to alertdialog builder
-                alertDialogBuilder.setView(promptsView);
+            // set prompts.xml to alertdialog builder
+            alertDialogBuilder.setView(promptsView);
 
-                final TextView textView1 = (TextView) promptsView.findViewById(R.id.textView1);
-                final RecyclerView error_message = (RecyclerView) promptsView.findViewById(R.id.error_message);
+            final TextView textView1 = (TextView) promptsView.findViewById(R.id.textView1);
+            final RecyclerView error_message = (RecyclerView) promptsView.findViewById(R.id.error_message);
 
-                enrollmentReport = new EnrollmentReport(mContext, mylist);
+            enrollmentReport = new EnrollmentReport(mContext, mylist);
 
-                error_message.setLayoutManager(new LinearLayoutManager(mContext));
-                error_message.addItemDecoration(new DividerItemDecoration(mContext, DividerItemDecoration.VERTICAL));
-                error_message.setAdapter(enrollmentReport);
+            error_message.setLayoutManager(new LinearLayoutManager(mContext));
+            error_message.addItemDecoration(new DividerItemDecoration(mContext, DividerItemDecoration.VERTICAL));
+            error_message.setAdapter(enrollmentReport);
 
-                String title = mContext.getString(R.string.failedToUpload);
-                textView1.setText(title.toUpperCase());
-                // set dialog message
-                alertDialogBuilder
-                        .setCancelable(false)
-                        .setPositiveButton("Ok",
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id) {
-                                        dialog.cancel();
-                                    }
-                                });
-
-                // create alert dialog
-                AlertDialog alertDialog = alertDialogBuilder.create();
-
-                // show it
-                alertDialog.show();
-            }
+            String title = mContext.getString(R.string.failedToUpload);
+            textView1.setText(title.toUpperCase());
+            // set dialog message
+            alertDialogBuilder
+                    .setCancelable(false)
+                    .setPositiveButton("Ok", (dialog, id) -> dialog.cancel())
+                    .show();
         });
 
     }
