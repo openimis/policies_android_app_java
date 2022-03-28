@@ -456,4 +456,6 @@
     <string name="ClearLogs">Clear all logs:</string>
     <string name="ClearLogsButton">Clear logs</string>
     <string name="ConfirmClearLogs">Do you want to clear logs?</string>
+    <string name="WithoutPolicy">without a policy</string>
+    <string name="WithoutPremium">without a premium</string>
 </resources>
