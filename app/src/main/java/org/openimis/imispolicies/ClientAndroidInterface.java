@@ -110,6 +110,7 @@ import java.util.regex.Pattern;
 
 import org.openimis.imispolicies.tools.Util;
 import org.openimis.imispolicies.tools.Util.AndroidUtil;
+import org.openimis.imispolicies.tools.Util.JsonUtil;
 import org.xmlpull.v1.XmlSerializer;
 
 import javax.crypto.Cipher;
@@ -5761,7 +5762,7 @@ public class ClientAndroidInterface {
                     "familyAddress", "ethnicity", "confirmationNo", "confirmationType"};
             sqlHandler.insertData("tblFamilies", Columns, jsonArray.toString(), "");
 
-            if (object.has("familySMS")) {
+            if (!Util.JsonUtil.isStringEmpty(object, "familySMS", true)) {
                 JSONObject smsData = object.getJSONObject("familySMS");
                 try {
                     addOrUpdateFamilySms(object.getInt("familyId"),
