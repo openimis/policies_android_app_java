@@ -22,12 +22,13 @@ import java.util.Locale;
  */
 
 public class Token {
-    public void saveTokenText(String token, String validTo) {
+    public void saveTokenText(String token, String validTo, String eoCode) {
         Global global = Global.getGlobal();
         String dir = global.getSubdirectory("Authentications");
 
         File tokenFile = new File(dir, "token.txt");
         File validToFile = new File(dir, "validTo.txt");
+        File eoCodeFile = new File(dir, "eoCode.txt");
 
         try {
             if (tokenFile.exists()) {
@@ -51,6 +52,16 @@ public class Token {
                 myOutWriter.close();
                 fOut.close();
             }
+            if (eoCodeFile.exists()) {
+                eoCodeFile.delete();
+            }
+            if (eoCodeFile.createNewFile()) {
+                FileOutputStream fOut = new FileOutputStream(eoCodeFile);
+                OutputStreamWriter myOutWriter = new OutputStreamWriter(fOut);
+                myOutWriter.write(eoCode);
+                myOutWriter.close();
+                fOut.close();
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -59,9 +70,18 @@ public class Token {
     public String getTokenText() {
         String token = null;
         String validTo = null;
+        String eoCode = null;
         try {
             Global global = Global.getGlobal();
             String dir = global.getSubdirectory("Authentications");
+
+            File eoCodeFile = new File(dir, "eoCode.txt");
+            if (eoCodeFile.exists()) {
+                FileInputStream fIn = new FileInputStream(eoCodeFile);
+                BufferedReader myReader = new BufferedReader(new InputStreamReader(fIn));
+                eoCode = myReader.readLine();
+                myReader.close();
+            }
 
             File validToFile = new File(dir, "validTo.txt");
             if (validToFile.exists()) {
@@ -80,6 +100,10 @@ public class Token {
             }
 
             SimpleDateFormat format = AppInformation.DateTimeInfo.getDefaultIsoDatetimeFormatter();
+            if(!Global.getGlobal().getOfficerCode().equals(eoCode)) {
+                clearToken();
+                token = null;
+            }
 
             if (validTo != null)
                 try {
@@ -105,7 +129,7 @@ public class Token {
     }
 
     public void clearToken() {
-        saveTokenText("", "");
+        saveTokenText("", "", "");
     }
 
     //How to validate JWT:

@@ -4227,8 +4227,7 @@ public class ClientAndroidInterface {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-
-            global.getJWTToken().saveTokenText(jwt, validTo);
+            global.getJWTToken().saveTokenText(jwt, validTo, global.getOfficerCode());
 
             ((Activity) mContext).runOnUiThread(
                     () -> MainActivity.SetLoggedIn(mContext.getResources().getString(R.string.Login), mContext.getResources().getString(R.string.Logout))

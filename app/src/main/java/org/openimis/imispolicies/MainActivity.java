@@ -266,7 +266,6 @@ public class MainActivity extends AppCompatActivity
             loadLanguages();
         }
 
-        SetLoggedIn(getResources().getString(R.string.Login), getResources().getString(R.string.Logout));
 
         navigationView.setCheckedItem(R.id.nav_home);
 
@@ -457,6 +456,8 @@ public class MainActivity extends AppCompatActivity
                                     if (ca.isOfficerCodeValid(userInput.getText().toString())) {
                                         global.setOfficerCode(userInput.getText().toString());
                                         OfficerName.setText(global.getOfficerName());
+                                        SetLoggedIn(getResources().getString(R.string.Login), getResources().getString(R.string.Logout));
+                                        // Officer villages are currently turned off
 //                                            if(_General.isNetworkAvailable(MainActivity.this)){
 //                                                ca.getOfficerVillages(userInput.getText().toString());
 //                                            }
