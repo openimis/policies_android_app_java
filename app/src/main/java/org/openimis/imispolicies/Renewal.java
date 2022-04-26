@@ -186,7 +186,6 @@ public class Renewal extends AppCompatActivity {
                 }
 
                 if (!isValidate()) {
-                    pd.dismiss();
                     return;
                 }
 
