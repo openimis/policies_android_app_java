@@ -186,8 +186,6 @@ public class Renewal extends AppCompatActivity {
                 }
 
                 if (!isValidate()) {
-                    pd = ProgressDialog.show(this, "", "");
-                    pd.dismiss();
                     return;
                 }
 
