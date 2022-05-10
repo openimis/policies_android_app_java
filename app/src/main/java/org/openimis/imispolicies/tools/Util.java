@@ -16,9 +16,12 @@ import org.json.JSONObject;
 import org.openimis.imispolicies.R;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 
 public class Util {
@@ -112,14 +115,15 @@ public class Util {
                     .setMessage(messageResId)
                     .setCancelable(false)
                     .setPositiveButton(R.string.Ok, onPositive)
-                    .setNegativeButton(R.string.Cancel, (dialogInterface, i) -> {}).show();
+                    .setNegativeButton(R.string.Cancel, (dialogInterface, i) -> {
+                    }).show();
         }
     }
 
     public static class UriUtil {
         private static final String LOG_TAG = "UriUtil";
 
-        public static String getDisplayName(Context context, Uri uri) {
+        public static String getDisplayName(@NonNull Context context, @NonNull Uri uri) {
             try (Cursor c = context.getContentResolver().query(uri, new String[]{OpenableColumns.DISPLAY_NAME}, null, null, null)) {
                 c.moveToFirst();
                 c.moveToFirst();
@@ -129,10 +133,19 @@ public class Util {
             }
             return null;
         }
+
+        public static void writeToUri(@NonNull Context context, @NonNull Uri uri, @NonNull InputStream is) {
+            try (OutputStream os = context.getContentResolver().openOutputStream(uri, "w")) {
+                StreamUtil.bufferedStreamCopy(is, os);
+            } catch (IOException e) {
+                Log.e(LOG_TAG, "Writing to uri failed: " + uri, e);
+            }
+        }
     }
 
-    public static class FileUtil {
-        private static final String LOG_TAG = "FileUtil";
+    public static class StreamUtil {
+        private static final int buffSize = 8192;
+        private static final String LOG_TAG = "StreamUtil";
 
         /**
          * Only use this method if you can be sure the content of the input stream,
@@ -142,11 +155,9 @@ public class Util {
          * @param is input stream to be read
          * @return content of the input stream or null if IO exception occurs
          */
-        public static String readInputStreamAsUTF8String(InputStream is) {
-            BufferedReader streamReader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
-            StringBuilder stringBuilder = new StringBuilder();
-
-            try {
+        public static String readInputStreamAsUTF8String(@NonNull InputStream is) {
+            try (BufferedReader streamReader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
+                StringBuilder stringBuilder = new StringBuilder();
                 String inputStr;
                 while ((inputStr = streamReader.readLine()) != null)
                     stringBuilder.append(inputStr);
@@ -159,15 +170,35 @@ public class Util {
         }
 
         /**
+         * Copy input stream to output stream using a byte buffer (8kb by default)
+         *
+         * @param is source stream
+         * @param os target stream
+         * @throws IOException thrown on read/write error
+         */
+        public static void bufferedStreamCopy(@NonNull InputStream is, @NonNull OutputStream os) throws IOException {
+            byte[] buffer = new byte[buffSize];
+
+            int read;
+            while ((read = is.read(buffer)) >= 0) {
+                os.write(buffer, 0, read);
+            }
+        }
+    }
+
+    public static class FileUtil {
+        private static final String LOG_TAG = "FileUtil";
+
+        /**
          * Replaces the extension of the file
          *
-         * @param filename filename ending with extension
+         * @param filename        filename ending with extension
          * @param targetExtension target extension, including a dot (to protect from replacing
          *                        a substring inside filename that match current extension)
          * @return filename with replaced extension, or null if the filename does not end with
          * extension
          */
-        public static String replaceFilenameExtension(String filename, String targetExtension) {
+        public static String replaceFilenameExtension(@NonNull String filename, @NonNull String targetExtension) {
             try {
                 String currentExtension = filename.substring(filename.lastIndexOf('.'));
                 return filename.replace(currentExtension, targetExtension);
@@ -175,6 +206,28 @@ public class Util {
                 Log.e(LOG_TAG, "Filename does not have an extension at the end", e);
             }
             return null;
+        }
+
+        public static void createFileWithSubdirectories(@NonNull File file) {
+            try {
+                File parent = file.getParentFile();
+                if (parent != null && !parent.mkdirs()) {
+                    Log.e(LOG_TAG, "Creating parent directories failed for file: " + file.getAbsolutePath());
+                }
+                if (!file.createNewFile()) {
+                    Log.e(LOG_TAG, "Failed to create file: " + file.getAbsolutePath());
+                }
+            } catch (Exception e) {
+                Log.e(LOG_TAG, "Error while creating file: " + file.getAbsolutePath(), e);
+            }
+        }
+
+        public static void writeToFile(@NonNull File file, @NonNull InputStream is) {
+            try (OutputStream os = new FileOutputStream(file)) {
+                StreamUtil.bufferedStreamCopy(is, os);
+            } catch (IOException e) {
+                Log.e(LOG_TAG, "Error while writing to file: " + file.getAbsolutePath(), e);
+            }
         }
     }
 }
