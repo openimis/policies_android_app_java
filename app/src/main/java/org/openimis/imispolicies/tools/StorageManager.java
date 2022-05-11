@@ -138,4 +138,36 @@ public class StorageManager {
     public void copyFileToUri(@NonNull String filePath, @NonNull Uri uri) {
         copyFileToUri(new File(filePath), uri);
     }
+
+
+    /**
+     * Create a temporary file inside app's cache directory under specified path. This file should be
+     * manually deleted, but the cache directory can be emptied by the user or by the Android to save
+     * storage space. If the file exists, it will be deleted and recreated.
+     *
+     * @param targetPath Path to the temporary file inside cache, the cache root will be appended
+     * @return Created temp file
+     */
+    public File createTempFile(@NonNull String targetPath) {
+        File tempFile = new File(context.getCacheDir(), targetPath);
+
+        if (tempFile.exists() && tempFile.delete()) {
+            org.openimis.imispolicies.tools.Log.i(LOG_TAG, "Leftover temp file deleted: " + tempFile.getAbsolutePath());
+        }
+
+        return Util.FileUtil.createFileWithSubdirectories(tempFile) ? tempFile : null;
+    }
+
+    /**
+     * Convenience method for removing a temp file form specified path inside cache directory created
+     * by createTempFile(String). The file can also be safely deleted with returned File object.
+     *
+     * @param targetPath Path to the temporary file inside cache, the cache root will be appended
+     * @return true if file under targetPath does not exist or was successfully deleted, false if file
+     * exists and delete failed
+     */
+    public boolean removeTempFile(@NonNull String targetPath) {
+        File tempFile = new File(context.getCacheDir(), targetPath);
+        return !tempFile.exists() || tempFile.delete();
+    }
 }

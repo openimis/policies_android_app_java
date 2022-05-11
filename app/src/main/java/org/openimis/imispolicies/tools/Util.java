@@ -208,18 +208,23 @@ public class Util {
             return null;
         }
 
-        public static void createFileWithSubdirectories(@NonNull File file) {
+        public static boolean createFileWithSubdirectories(@NonNull File file) {
             try {
                 File parent = file.getParentFile();
+
                 if (parent != null && !parent.mkdirs()) {
                     Log.e(LOG_TAG, "Creating parent directories failed for file: " + file.getAbsolutePath());
                 }
                 if (!file.createNewFile()) {
-                    Log.e(LOG_TAG, "Failed to create file: " + file.getAbsolutePath());
+                    Log.e(LOG_TAG, "File already exists: " + file.getAbsolutePath());
                 }
+
+                return true;
             } catch (Exception e) {
                 Log.e(LOG_TAG, "Error while creating file: " + file.getAbsolutePath(), e);
             }
+
+            return false;
         }
 
         public static void writeToFile(@NonNull File file, @NonNull InputStream is) {
