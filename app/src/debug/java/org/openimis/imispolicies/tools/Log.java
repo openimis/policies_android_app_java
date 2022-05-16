@@ -5,7 +5,6 @@ import android.support.v4.content.FileProvider;
 
 import org.openimis.imispolicies.AppInformation;
 import org.openimis.imispolicies.BuildConfig;
-import org.openimis.imispolicies.Compressor;
 import org.openimis.imispolicies.Global;
 
 import java.io.File;
@@ -96,7 +95,7 @@ public class Log {
 
         if (logFiles != null) {
             ArrayList<File> filesToZip = new ArrayList<>(Arrays.asList(logFiles));
-            Compressor.zip(filesToZip, targetFile.getAbsolutePath(), "");
+            Compressor.zip(filesToZip, targetFile, "");
         }
 
         Uri logExportUri = FileProvider.getUriForFile(Global.getContext(),
