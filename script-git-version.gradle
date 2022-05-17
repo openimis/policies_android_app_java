@@ -17,7 +17,7 @@ import org.ajoberstar.grgit.Grgit
 ext {
     git = Grgit.open(currentDir: projectDir)
     gitVersionName = git.describe(tags:true)
-    gitVersionCode = git.tag.list().size() + 5 // first Google Play release has the code 8
+    gitVersionCode = git.tag.list().size() + 6 // Manual increment for between tagged versions
     gitVersionCodeTime = git.head().time
 }
 

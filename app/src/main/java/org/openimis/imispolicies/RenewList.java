@@ -196,7 +196,7 @@ public class RenewList extends AppCompatActivity {
         try {
             if (file.exists()) {
                 InputStream inputStream = new FileInputStream(file);
-                aBuffer = Util.FileUtil.readInputStreamAsUTF8String(inputStream);
+                aBuffer = Util.StreamUtil.readInputStreamAsUTF8String(inputStream);
             } else {
                 Log.e(LOG_TAG, "Unpacked renewal file does not exists");
             }
