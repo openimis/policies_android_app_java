@@ -20,7 +20,7 @@ static def getDate() {
 }
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion 32
     buildToolsVersion '30.0.3'
     if ( keystorePropertiesFile.exists() ) {
         signingConfigs {
@@ -34,8 +34,8 @@ android {
     }
     defaultConfig {
         applicationId "org.openimis.imispolicies"
-        minSdkVersion 21
-        targetSdkVersion 30
+        minSdkVersion 19
+        targetSdkVersion 32
         versionCode gitVersionCode
         versionName gitVersionName
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
