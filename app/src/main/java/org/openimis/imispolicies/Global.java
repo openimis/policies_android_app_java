@@ -224,18 +224,6 @@ public class Global extends Application {
         }
     }
 
-    public String getMainDirectory() {
-        if (MainDirectory == null || "".equals(MainDirectory)) {
-            String documentsDir = createOrCheckDirectory(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS).toString());
-            MainDirectory = createOrCheckDirectory(documentsDir + File.separator + APP_DIR);
-
-            if ("".equals(documentsDir) || "".equals(MainDirectory)) {
-                Log.w(FILE_IO_LOG_TAG, "Main directory could not be created");
-            }
-        }
-        return MainDirectory;
-    }
-
     public String getAppDirectory() {
         if (AppDirectory == null || "".equals(AppDirectory)) {
             AppDirectory = createOrCheckDirectory(getApplicationInfo().dataDir + File.separator);
