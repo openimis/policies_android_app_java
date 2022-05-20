@@ -36,7 +36,9 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
+
 import org.openimis.imispolicies.tools.Log;
+
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -50,18 +52,14 @@ import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.openimis.imispolicies.tools.Util;
+import org.openimis.imispolicies.util.FileUtils;
+import org.openimis.imispolicies.util.UriUtils;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -70,9 +68,8 @@ import java.util.HashMap;
 
 public class RenewList extends AppCompatActivity {
     private static final String LOG_TAG = "RENEWAL";
-    private static final int REQUEST_OPEN_DOCUMENT_CODE = 1;
+    private static final int REQUEST_IMPORT_RENEWAL_FILE = 1;
     private Global global;
-    private String aBuffer = "";
     private ListView lv;
     private SwipeRefreshLayout swipe;
     private ArrayList<HashMap<String, String>> renewalList = new ArrayList<>();
@@ -80,7 +77,6 @@ public class RenewList extends AppCompatActivity {
     private ClientAndroidInterface ca;
     private ListAdapter adapter;
     public String UnlistedRenPolicy;
-
     boolean isUserLogged = false;
 
     @Override
@@ -178,12 +174,28 @@ public class RenewList extends AppCompatActivity {
                 .setMessage(filename)
                 .setPositiveButton(R.string.Yes,
                         (dialog, which) -> new Thread(() -> {
-                            if (copyRenewalFile(filename, uri)) {
-                                ca.unZipFeedbacksRenewals(filename);
-                                String txtFilename = Util.FileUtil.replaceFilenameExtension(filename, ".txt");
-                                loadRenewalFile(txtFilename);
-                                ca.InsertRenewalsFromExtract(aBuffer);
-                                runOnUiThread(this::fillRenewals);
+                            File renewalFile = copyRenewalFile(uri);
+                            if (renewalFile != null) {
+                                ca.unZipFeedbacksRenewals(renewalFile);
+                                File[] unzippedFiles = null;
+                                File renewalDir = renewalFile.getParentFile();
+                                if (renewalDir != null) {
+                                    unzippedFiles = renewalDir.listFiles((file) -> file.isFile() && !file.equals(renewalFile));
+                                }
+                                if (unzippedFiles != null) {
+                                    if (unzippedFiles.length == 0) {
+                                        Log.w(LOG_TAG, "No renewal files after unpacking");
+                                    }
+                                    for(File f: unzippedFiles) {
+                                        String renewals = loadRenewalFile(f);
+                                        if (renewals != null) {
+                                            ca.InsertRenewalsFromExtract(renewals);
+                                        }
+                                    }
+                                    runOnUiThread(this::fillRenewals);
+                                    FileUtils.deleteFiles(unzippedFiles);
+                                }
+                                FileUtils.deleteFile(renewalFile);
                             }
                         }).start())
                 .setNegativeButton(R.string.No,
@@ -191,44 +203,23 @@ public class RenewList extends AppCompatActivity {
                 .show();
     }
 
-    private void loadRenewalFile(String filename) {
-        File file = new File(global.getSubdirectory("Database"), filename);
-        try {
-            if (file.exists()) {
-                InputStream inputStream = new FileInputStream(file);
-                aBuffer = Util.StreamUtil.readInputStreamAsUTF8String(inputStream);
-            } else {
-                Log.e(LOG_TAG, "Unpacked renewal file does not exists");
-            }
-        } catch (IOException e) {
-            Log.e(LOG_TAG, "Error while creating input stream for renewal file", e);
+    private String loadRenewalFile(File file) {
+        if (file.exists()) {
+            return FileUtils.readFileAsUTF8String(file);
+        } else {
+            Log.e(LOG_TAG, "Unpacked renewal file does not exists");
+            return null;
         }
     }
 
-    private boolean copyRenewalFile(String filename, Uri uri) {
-        try {
-            boolean success;
-            InputStream is = getContentResolver().openInputStream(uri);
-            File outputFile = new File(global.getSubdirectory("Database"), filename);
-
-            if (outputFile.exists()) {
-                success = outputFile.delete();
-                if (!success) {
-                    throw new IOException("Deleting existing renewal file failed");
-                }
-            }
-
-            success = outputFile.createNewFile();
-            if (!success) {
-                throw new IOException("Creating new renewal file failed");
-            }
-
-            IOUtils.copy(is, new FileOutputStream(outputFile));
-            return true;
-        } catch (Exception e) {
-            Log.e(LOG_TAG, "Copying renewal file failed", e);
+    private File copyRenewalFile(Uri uri) {
+        File copiedFile = UriUtils.copyUriContentToCache(this, uri, "imports/renewal/renewal.rar");
+        if (copiedFile != null) {
+            return copiedFile;
+        } else {
+            Log.e(LOG_TAG, "Copying renewal file failed, uri: " + uri);
+            return null;
         }
-        return false;
     }
 
     public void requestImportRenewal() {
@@ -241,7 +232,7 @@ public class RenewList extends AppCompatActivity {
                             intent.addCategory(Intent.CATEGORY_OPENABLE);
                             intent.setType("*/*");
                             try {
-                                startActivityForResult(intent, REQUEST_OPEN_DOCUMENT_CODE);
+                                startActivityForResult(intent, REQUEST_IMPORT_RENEWAL_FILE);
                             } catch (ActivityNotFoundException e) {
                                 Toast.makeText(getApplicationContext(), getResources().getString(R.string.NoFileExporerInstalled), Toast.LENGTH_SHORT).show();
                             }
@@ -254,9 +245,9 @@ public class RenewList extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_OPEN_DOCUMENT_CODE && resultCode == RESULT_OK && data != null) {
+        if (requestCode == REQUEST_IMPORT_RENEWAL_FILE && resultCode == RESULT_OK && data != null) {
             Uri uri = data.getData();
-            String filename = Util.UriUtil.getDisplayName(this, uri);
+            String filename = UriUtils.getDisplayName(this, uri);
             String expectedFilename = String.format("renewal_%s.rar", global.getOfficerCode().toLowerCase());
 
             if (filename != null && filename.toLowerCase().equals(expectedFilename)) {
@@ -279,7 +270,7 @@ public class RenewList extends AppCompatActivity {
         JSONObject object;
 
         try {
-            HashMap<String,String> renewal;
+            HashMap<String, String> renewal;
             JSONArray jsonArray = new JSONArray(result);
 
             renewalList.clear();

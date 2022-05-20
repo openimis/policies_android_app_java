@@ -1,11 +1,13 @@
 package org.openimis.imispolicies.tools;
 
+import android.content.Context;
 import android.net.Uri;
 import android.support.v4.content.FileProvider;
 
 import org.openimis.imispolicies.AppInformation;
 import org.openimis.imispolicies.BuildConfig;
 import org.openimis.imispolicies.Global;
+import org.openimis.imispolicies.util.ZipUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -88,21 +90,21 @@ public class Log {
         }
     }
 
-    public static void zipLogFiles() {
+    public static void zipLogFiles(Context context) {
         File cacheDir = Global.getContext().getExternalCacheDir();
         File[] logFiles = cacheDir.listFiles((dir, filename) -> filename.startsWith(logFilePrefix));
         File targetFile = new File(cacheDir, logExportFileName);
 
         if (logFiles != null) {
             ArrayList<File> filesToZip = new ArrayList<>(Arrays.asList(logFiles));
-            Compressor.zip(filesToZip, targetFile, "");
+            ZipUtils.zipFiles(filesToZip, targetFile, "");
         }
 
         Uri logExportUri = FileProvider.getUriForFile(Global.getContext(),
                 String.format("%s.fileprovider", BuildConfig.APPLICATION_ID),
                 targetFile);
 
-        Global.getGlobal().sendFile(logExportUri, "application/zip");
+        Global.getGlobal().sendFile(context, logExportUri, "application/octet-stream");
     }
 
     public static void deleteLogFiles() {

@@ -34,7 +34,7 @@ android {
     }
     defaultConfig {
         applicationId "org.openimis.imispolicies"
-        minSdkVersion 19
+        minSdkVersion 21
         targetSdkVersion 30
         versionCode gitVersionCode
         versionName gitVersionName
