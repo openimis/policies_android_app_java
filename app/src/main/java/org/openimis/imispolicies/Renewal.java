@@ -54,7 +54,7 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.openimis.imispolicies.tools.Util.StringUtil;
+import org.openimis.imispolicies.util.StringUtils;
 import org.xmlpull.v1.XmlSerializer;
 
 import java.io.File;
@@ -91,7 +91,6 @@ public class Renewal extends AppCompatActivity {
     private int LocationId;
     private int RenewalId;
     private String RenewalUUID;
-    private int result;
     private EditText PolicyValue;
 
     private ListAdapter adapter;
@@ -165,7 +164,11 @@ public class Renewal extends AppCompatActivity {
             BindSpinnerProduct();
         } else {
             spProduct.setVisibility(View.GONE);
-            assignNextFreeCn(etProductCode.getText().toString());
+
+            if (ca.IsBulkCNUsed()) {
+                assignNextFreeCn(etProductCode.getText().toString());
+            }
+
             BindSpinnerPayers();
         }
 
@@ -265,17 +268,15 @@ public class Renewal extends AppCompatActivity {
 
     private void WriteXML() {
         try {
-            //Create All directories
-            File MyDir = new File(global.getMainDirectory());
 
             //Create File name
             Date date = Calendar.getInstance().getTime();
             String d = AppInformation.DateTimeInfo.getDefaultFileDatetimeFormatter().format(date);
-            FileName = "RenPol_" + d + "_" + etCHFID.getText().toString() + "_" + etReceiptNo.getText().toString() + ".xml";
+            FileName = "Renewal_" + d + "_" + etCHFID.getText().toString() + "_" + etReceiptNo.getText().toString() + ".xml";
             d = AppInformation.DateTimeInfo.getDefaultDateFormatter().format(date);
             String PayerId = GetSelectedPayer();
             //Create XML file
-            File policyXML = new File(MyDir, FileName);
+            File policyXML = new File(global.getSubdirectory("Renewal"), FileName);
 
             FileOutputStream fos = new FileOutputStream(policyXML);
 
@@ -341,17 +342,16 @@ public class Renewal extends AppCompatActivity {
     }
 
     public String WriteJSON() {
-        File MyDir = new File(global.getMainDirectory());
 
         Date date = Calendar.getInstance().getTime();
         String d = AppInformation.DateTimeInfo.getDefaultFileDatetimeFormatter().format(date);
-        FileName = "RenPolJSON_" + d + "_" + etCHFID.getText().toString() + "_" + etReceiptNo.getText().toString() + ".txt";
+        FileName = "RenewalJSON_" + d + "_" + etCHFID.getText().toString() + "_" + etReceiptNo.getText().toString() + ".json";
         String PayerId = GetSelectedPayer();
         String ProductCode = GetSelectedProduct();
         d = AppInformation.DateTimeInfo.getDefaultDateFormatter().format(date);
 
         //Create XML file
-        File policyJSON = new File(MyDir, FileName);
+        File policyJSON = new File(global.getSubdirectory("Renewal"), FileName);
 
         JSONObject FullObject = new JSONObject();
 
@@ -663,7 +663,7 @@ public class Renewal extends AppCompatActivity {
     }
 
     private void assignNextFreeCn(String productCode) {
-        if (!StringUtil.equals(productCode, "0")) {
+        if (!StringUtils.equals(productCode, "0")) {
             String controlNumber = sqlHandler.getNextFreeCn(etOfficer.getText().toString(), productCode);
             if (controlNumber != null) {
                 etControlNumber.setText(controlNumber);

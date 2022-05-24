@@ -56,12 +56,11 @@ import com.squareup.picasso.Picasso;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.openimis.imispolicies.util.JsonUtils;
 
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
-
-import static org.openimis.imispolicies.tools.Util.JsonUtil.isStringEmpty;
 
 public class Enquire extends AppCompatActivity {
     private static final String LOG_TAG = "ENQUIRE";
@@ -241,7 +240,7 @@ public class Enquire extends AppCompatActivity {
                     if (global.isNetworkAvailable()) {
                         String photo_url_str = "";
                         try {
-                            if (!isStringEmpty(jsonObject, "photoBase64", true)) {
+                            if (!JsonUtils.isStringEmpty(jsonObject, "photoBase64", true)) {
                                 try {
                                     byte[] imageBytes = Base64.decode(jsonObject.getString("photoBase64").getBytes(), Base64.DEFAULT);
                                     Bitmap image = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
@@ -250,7 +249,7 @@ public class Enquire extends AppCompatActivity {
                                     Log.e(LOG_TAG, "Error while processing Base64 image", e);
                                     iv.setImageDrawable(getResources().getDrawable(R.drawable.person));
                                 }
-                            } else if (!isStringEmpty(jsonObject, "photoPath", true)) {
+                            } else if (!JsonUtils.isStringEmpty(jsonObject, "photoPath", true)) {
                                 photo_url_str = AppInformation.DomainInfo.getDomain() + jsonObject.getString("photoPath");
                                 iv.setImageResource(R.drawable.person);
                                 picasso.load(photo_url_str)

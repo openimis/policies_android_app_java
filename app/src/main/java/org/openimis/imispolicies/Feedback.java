@@ -38,7 +38,9 @@ import android.widget.Toast;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.openimis.imispolicies.tools.Log;
 import org.xmlpull.v1.XmlSerializer;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -47,6 +49,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 public class Feedback extends AppCompatActivity {
+    private static final String LOG_TAG = "FEEDBACK";
     private Global global;
 
     private EditText etOfficer;
@@ -107,52 +110,46 @@ public class Feedback extends AppCompatActivity {
             pd = ProgressDialog.show(Feedback.this, "", getResources().getString(R.string.UploadingFeedback));
             final String[] feed = {null};
 
-            new Thread() {
-                public void run() {
-                    String Answers = Answers();
-                    try {
-                        feed[0] = WriteJSON(String.valueOf(etOfficer.getText()), ClaimUUID, etCHFID.getText().toString(), Answers);
-                        WriteXML(String.valueOf(etOfficer.getText()), ClaimUUID, etCHFID.getText().toString(), Answers);
-                    } catch (IllegalArgumentException | IllegalStateException e) {
-                        e.printStackTrace();
-                        return;
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        return;
-                    }
-
-                    msgType = 3;
-
-                    runOnUiThread(() -> {
-                        switch (msgType) {
-                            case 1:
-                                DeleteRow(ClaimUUID);
-                                //ca.ShowDialog(getResources().getString(R.string.UploadedSuccessfully));
-                                Toast.makeText(getApplicationContext(), getResources().getString(R.string.UploadedSuccessfully), Toast.LENGTH_LONG).show();
-                                break;
-                            case 2:
-                                DeleteRow(ClaimUUID);
-                                //ca. ShowDialog(getResources().getString(R.string.ServerRejected));
-                                Toast.makeText(getApplicationContext(), getResources().getString(R.string.ServerRejected), Toast.LENGTH_LONG).show();
-                                break;
-                            case 3:
-                                UpdateRow(ClaimUUID);
-                                //ca. ShowDialog(getResources().getString(R.string.SavedOnSDCard));
-                                Toast.makeText(getApplicationContext(), getResources().getString(R.string.SavedOnSDCard), Toast.LENGTH_LONG).show();
-                                break;
-                            case -1:
-                                //ca. ShowDialog(getResources().getString(R.string.FeedBackNotUploaded));
-                                Toast.makeText(getApplicationContext(), getResources().getString(R.string.FeedBackNotUploaded), Toast.LENGTH_LONG).show();
-                                break;
-                        }
-                        finish();
-                    });
-                    pd.dismiss();
+            new Thread(() -> {
+                String Answers = Answers();
+                try {
+                    feed[0] = WriteJSON(String.valueOf(etOfficer.getText()), ClaimUUID, etCHFID.getText().toString(), Answers);
+                    WriteXML(String.valueOf(etOfficer.getText()), ClaimUUID, etCHFID.getText().toString(), Answers);
+                } catch (IllegalArgumentException | IllegalStateException | IOException e) {
+                    e.printStackTrace();
+                    return;
                 }
-            }.start();
+
+                msgType = 3;
+
+                runOnUiThread(() -> {
+                    switch (msgType) {
+                        case 1:
+                            DeleteRow(ClaimUUID);
+                            //ca.ShowDialog(getResources().getString(R.string.UploadedSuccessfully));
+                            Toast.makeText(getApplicationContext(), getResources().getString(R.string.UploadedSuccessfully), Toast.LENGTH_LONG).show();
+                            break;
+                        case 2:
+                            DeleteRow(ClaimUUID);
+                            //ca. ShowDialog(getResources().getString(R.string.ServerRejected));
+                            Toast.makeText(getApplicationContext(), getResources().getString(R.string.ServerRejected), Toast.LENGTH_LONG).show();
+                            break;
+                        case 3:
+                            UpdateRow(ClaimUUID);
+                            //ca. ShowDialog(getResources().getString(R.string.SavedOnSDCard));
+                            Toast.makeText(getApplicationContext(), getResources().getString(R.string.SavedOnSDCard), Toast.LENGTH_LONG).show();
+                            break;
+                        case -1:
+                            //ca. ShowDialog(getResources().getString(R.string.FeedBackNotUploaded));
+                            Toast.makeText(getApplicationContext(), getResources().getString(R.string.FeedBackNotUploaded), Toast.LENGTH_LONG).show();
+                            break;
+                    }
+                    finish();
+                });
+                pd.dismiss();
+            }).start();
         });
     }
-
 
     private void DeleteRow(String ClaimUUID) {
         ca.CleanFeedBackTable(ClaimUUID);
@@ -162,10 +159,9 @@ public class Feedback extends AppCompatActivity {
         ca.UpdateFeedBack(ClaimUUID);
     }
 
-
     private void WriteXML(String Officer, String ClaimUUID, String CHFID, String Answers) throws IllegalArgumentException, IllegalStateException, IOException {
-        File MyDir = new File(global.getMainDirectory());
-        FileName = "feedback_" + etClaimCode.getText() + ".xml";
+        File MyDir = new File(global.getSubdirectory("Feedback"));
+        FileName = "Feedback_" + etClaimCode.getText() + ".xml";
         FeedbackXML = new File(MyDir, FileName);
 
         FileOutputStream fos = new FileOutputStream(FeedbackXML);
@@ -203,16 +199,14 @@ public class Feedback extends AppCompatActivity {
         serializer.endDocument();
         serializer.flush();
         fos.close();
-
-
     }
 
     private String WriteJSON(String Officer, String ClaimUUID, String CHFID, String Answers) {
-        File MyDir = new File(global.getMainDirectory());
+        File MyDir = new File(global.getSubdirectory("Feedback"));
         SimpleDateFormat format = AppInformation.DateTimeInfo.getDefaultDateFormatter();
         Calendar cal = Calendar.getInstance();
         String d = format.format(cal.getTime());
-        FileName = "feedbackJSON_" + etClaimCode.getText() + ".txt";
+        FileName = "FeedbackJSON_" + etClaimCode.getText() + ".json";
         FeedbackJSON = new File(MyDir, FileName);
 
         JSONObject FullObject = new JSONObject();
@@ -238,25 +232,11 @@ public class Feedback extends AppCompatActivity {
                 e.printStackTrace();
             }
 
-        } catch (IllegalStateException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (JSONException e) {
-            e.printStackTrace();
+        } catch (IllegalStateException | JSONException e) {
+            Log.e(LOG_TAG, "Error while writing feedback file", e);
         }
 
         return FullObject.toString();
-    }
-
-    private void MoveFile(File file) {
-        switch (msgType) {
-            case 1:
-                file.renameTo(new File(global.getSubdirectory("AcceptedFeedback"), file.getName()));
-                break;
-            case 2:
-                file.renameTo(new File(global.getSubdirectory("RejectedFeedback"), file.getName()));
-                break;
-        }
     }
 
     private String Answers() {

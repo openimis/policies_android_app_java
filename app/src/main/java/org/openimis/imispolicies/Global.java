@@ -37,7 +37,6 @@ import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Environment;
 import android.util.DisplayMetrics;
 
@@ -46,14 +45,10 @@ import org.openimis.imispolicies.tools.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.openimis.imispolicies.util.StreamUtils;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -82,7 +77,6 @@ public class Global extends Application {
     private String MainDirectory;
     private String AppDirectory;
     private Map<String, String> SubDirectories;
-    private List<String> ProtectedDirectories;
 
     public static Global getGlobal() {
         return GlobalContext;
@@ -97,29 +91,26 @@ public class Global extends Application {
         super.onCreate();
         GlobalContext = this;
         SubDirectories = new HashMap<>();
-        ProtectedDirectories = Arrays.asList("Authentications", "Database", "Images");
         initSharedPrefsInts();
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            permissions = new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.VIBRATE, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.INTERNET, Manifest.permission.CAMERA, Manifest.permission.ACCESS_NETWORK_STATE, Manifest.permission.ACCESS_WIFI_STATE, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.CHANGE_WIFI_STATE, Manifest.permission.MANAGE_EXTERNAL_STORAGE};
-        } else {
-            permissions = new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.VIBRATE, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.INTERNET, Manifest.permission.CAMERA, Manifest.permission.ACCESS_NETWORK_STATE, Manifest.permission.ACCESS_WIFI_STATE, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.CHANGE_WIFI_STATE};
-        }
-
+        permissions = new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.VIBRATE, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.INTERNET, Manifest.permission.CAMERA, Manifest.permission.ACCESS_NETWORK_STATE, Manifest.permission.ACCESS_WIFI_STATE, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.CHANGE_WIFI_STATE};
     }
 
     private void initSharedPrefsInts() {
         SharedPreferences sp = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
         SharedPreferences.Editor editor = sp.edit();
         try {
-            String text = getInputStreamText(getAssets().open("JSON/default_ints.json"));
-            JSONObject intDefaults = new JSONObject(text);
+            String text = StreamUtils.readInputStreamAsUTF8String(getAssets().open("JSON/default_ints.json"));
 
-            for (Iterator<String> it = intDefaults.keys(); it.hasNext(); ) {
-                String key = it.next();
+            if (text != null) {
+                JSONObject intDefaults = new JSONObject(text);
 
-                if (!sp.contains(key)) {
-                    editor.putInt(key, intDefaults.getInt(key));
+                for (Iterator<String> it = intDefaults.keys(); it.hasNext(); ) {
+                    String key = it.next();
+
+                    if (!sp.contains(key)) {
+                        editor.putInt(key, intDefaults.getInt(key));
+                    }
                 }
             }
         } catch (IOException e) {
@@ -233,21 +224,9 @@ public class Global extends Application {
         }
     }
 
-    public String getMainDirectory() {
-        if (MainDirectory == null || "".equals(MainDirectory)) {
-            String documentsDir = createOrCheckDirectory(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS).toString());
-            MainDirectory = createOrCheckDirectory(documentsDir + File.separator + APP_DIR);
-
-            if ("".equals(documentsDir) || "".equals(MainDirectory)) {
-                Log.w(FILE_IO_LOG_TAG, "Main directory could not be created");
-            }
-        }
-        return MainDirectory;
-    }
-
     public String getAppDirectory() {
         if (AppDirectory == null || "".equals(AppDirectory)) {
-            AppDirectory = createOrCheckDirectory(getApplicationInfo().dataDir);
+            AppDirectory = createOrCheckDirectory(getApplicationInfo().dataDir + File.separator);
 
             if ("".equals(AppDirectory)) {
                 Log.w(FILE_IO_LOG_TAG, "App directory could not be created");
@@ -258,15 +237,8 @@ public class Global extends Application {
 
     public String getSubdirectory(String subdirectory) {
         if (!SubDirectories.containsKey(subdirectory) || "".equals(SubDirectories.get(subdirectory))) {
-            String directory;
-
-            if (ProtectedDirectories.contains(subdirectory)) {
-                directory = getAppDirectory();
-            } else {
-                directory = getMainDirectory();
-            }
-
-            String subDirPath = createOrCheckDirectory(directory + File.separator + subdirectory);
+            String directory = getAppDirectory();
+            String subDirPath = createOrCheckDirectory(directory + subdirectory + File.separator);
 
             if ("".equals(subDirPath)) {
                 Log.w(FILE_IO_LOG_TAG, String.format("%s directory could not be created", subdirectory));
@@ -276,32 +248,6 @@ public class Global extends Application {
             }
         }
         return SubDirectories.get(subdirectory);
-    }
-
-    public String getFileText(String path) {
-        String result = "";
-        try {
-            InputStream inputStream = new FileInputStream(path);
-            result = getInputStreamText(inputStream);
-        } catch (IOException e) {
-            Log.e(FILE_IO_LOG_TAG, String.format("Creating input stream for path: %s failed", path), e);
-        }
-        return result;
-    }
-
-    public String getInputStreamText(InputStream inputStream) {
-        String line;
-        StringBuilder stringBuilder = new StringBuilder();
-        try {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-            while ((line = reader.readLine()) != null) {
-                stringBuilder.append(line);
-                stringBuilder.append("\n");
-            }
-        } catch (IOException e) {
-            Log.e(FILE_IO_LOG_TAG, "Reading text from input stream failed", e);
-        }
-        return stringBuilder.toString();
     }
 
     public int getIntKey(String key, int defaultValue) {
@@ -346,7 +292,7 @@ public class Global extends Application {
     public LinkedHashMap<String, String> getHFLevels() {
         LinkedHashMap<String, String> levels = new LinkedHashMap<>();
         try {
-            String text = getInputStreamText(getAssets().open("JSON/hflevels.json"));
+            String text = StreamUtils.readInputStreamAsUTF8String(getAssets().open("JSON/hflevels.json"));
             JSONArray root = new JSONArray(text);
 
             for (int i = 0; i < root.length(); i++) {
@@ -385,13 +331,13 @@ public class Global extends Application {
         }
     }
 
-    public void sendFile(Uri uri, String mimeType) {
+    public void sendFile(Context context, Uri uri, String mimeType) {
         Intent shareExportIntent = new Intent(Intent.ACTION_SEND);
         shareExportIntent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         shareExportIntent.putExtra(Intent.EXTRA_STREAM, uri);
         shareExportIntent.setType(mimeType);
         Intent chooserIntent = Intent.createChooser(shareExportIntent, null);
         grantUriPermissions(this, uri, chooserIntent, Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        startActivity(chooserIntent);
+        context.startActivity(chooserIntent);
     }
 }
