@@ -2846,16 +2846,7 @@ public class ClientAndroidInterface {
             new Thread(() -> {
                 try {
                     enrol_result = Enrol(0, 0, 0, 0, 1);
-                } catch (UserException e) {
-                    finalPd.dismiss();
-                    e.printStackTrace();
-                } catch (JSONException e) {
-                    finalPd.dismiss();
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    finalPd.dismiss();
-                    e.printStackTrace();
-                } catch (NumberFormatException e) {
+                } catch (UserException | JSONException | IOException | NumberFormatException e) {
                     finalPd.dismiss();
                     e.printStackTrace();
                 }
@@ -2910,11 +2901,11 @@ public class ClientAndroidInterface {
                     if (enrol_result != 999) {
                         //if error is encountered
                         if (enrolMessages.size() > 0 && enrolMessages != null) {
-                            CharSequence[] charSequence = enrolMessages.toArray(new CharSequence[(enrolMessages.size())]);
+                            CharSequence[] charSequences = enrolMessages.toArray(new CharSequence[(enrolMessages.size())]);
                             AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
                             builder.setTitle(mContext.getResources().getString(R.string.UploadFailureReport));
                             builder.setCancelable(false);
-                            builder.setItems(charSequence, null);
+                            builder.setItems(charSequences, null);
                             builder.setPositiveButton(mContext.getResources().getString(R.string.Ok), (dialogInterface, i) -> dialogInterface.dismiss());
                             AlertDialog dialog = builder.create();
                             dialog.show();
@@ -3387,6 +3378,8 @@ public class ClientAndroidInterface {
                 String InsureePolicy = objEnrol.toString();
 
                 if (CallerId != 2) {
+                    InsureeImages[] InsureeImages = FamilyPictures(insureesArray, CallerId);
+
                     if (mylist.size() == 0) {
                         JSONObject resultObj = new JSONObject();
                         JSONArray familyArr = new JSONArray();
@@ -3395,8 +3388,6 @@ public class ClientAndroidInterface {
 
                         // Insuree + picture
                         JSONArray tempInsureesArray = new JSONArray();
-
-                        InsureeImages[] InsureeImages = FamilyPictures(insureesArray, CallerId);
 
                         for (int j = 0; j < insureesArray.length(); j++) {
                             tempInsureesArray = insureesArray;
@@ -3432,33 +3423,41 @@ public class ClientAndroidInterface {
 
                         ToRestApi rest = new ToRestApi();
                         HttpResponse response = rest.postToRestApiToken(resultObj, "family");
-
-                        HttpEntity entity = response.getEntity();
-                        String responseString = EntityUtils.toString(entity);
-
-                        boolean parsingErrorOccured = false;
-                        try {
-                            JSONObject responseObject = new JSONObject(responseString);
-                            if (responseObject.has("error_occured") && responseObject.getBoolean("error_occured")) {
-                                EnrolResult = -400;
-                                enrolMessages.add(responseObject.getString("error_message"));
-                            } else if (responseObject.has("response")) {
-                                EnrolResult = responseObject.getInt("response");
-                            } else {
-                                throw new JSONException("Response does not have required information");
-                            }
-                        } catch (JSONException e) {
-                            EnrolResult = -400;
-                            parsingErrorOccured = true;
-                        }
-
-                        if (parsingErrorOccured) {
+                        String responseString = rest.getContent(response);
+                        if (response.getStatusLine().getStatusCode() == HttpURLConnection.HTTP_OK
+                                || response.getStatusLine().getStatusCode() == HttpURLConnection.HTTP_CREATED) {
+                            boolean parsingErrorOccured = false;
                             try {
-                                EnrolResult = Integer.parseInt(responseString);
-                            } catch (NumberFormatException e) {
-                                Log.e("ENROLL", "Sync response is not a valid json or int");
+                                JSONObject responseObject = new JSONObject(responseString);
+                                if (responseObject.has("error_occured") && responseObject.getBoolean("error_occured")) {
+                                    EnrolResult = -400;
+                                    enrolMessages.add(responseObject.getString("error_message"));
+                                } else if (responseObject.has("response")) {
+                                    EnrolResult = responseObject.getInt("response");
+                                } else {
+                                    throw new JSONException("Response does not have required information");
+                                }
+                            } catch (JSONException e) {
+                                EnrolResult = -400;
+                                parsingErrorOccured = true;
                             }
+
+                            if (parsingErrorOccured) {
+                                try {
+                                    EnrolResult = Integer.parseInt(responseString);
+                                } catch (NumberFormatException e) {
+                                    Log.e("ENROLL", "Sync response is not a valid json or int");
+                                }
+                            }
+                        } else {
+                            enrolMessages.add(mContext.getResources().getString(R.string.HttpResponse, response.getStatusLine().getStatusCode(), response.getStatusLine().getReasonPhrase()));
+                            EnrolResult = -400;
                         }
+
+                        if (EnrolResult != 0) {
+                            Log.d("ENROL", "API RESPONSE: " + mContext.getResources().getString(R.string.HttpResponse, response.getStatusLine().getStatusCode(), response.getStatusLine().getReasonPhrase()) + "\n" + responseString);
+                        }
+
                     } else {
                         ShowErrorMessages();
                         break;
@@ -3512,7 +3511,7 @@ public class ClientAndroidInterface {
 
 
                 } else {
-                    String ErrMsg = null;
+                    String ErrMsg;
                     switch (EnrolResult) {
                         case -1:
                             ErrMsg = "[" + CHFNumber + "] " + mContext.getString(R.string.MissingHOF);
@@ -4095,8 +4094,8 @@ public class ClientAndroidInterface {
         }
 
         File feedbackDir = new File(global.getSubdirectory("Feedback"));
-        File[] xmlFiles = feedbackDir.listFiles((file)->file.getName().endsWith(".xml"));
-        File[] jsonFiles = feedbackDir.listFiles((file)->file.getName().endsWith(".json"));
+        File[] xmlFiles = feedbackDir.listFiles((file) -> file.getName().endsWith(".xml"));
+        File[] jsonFiles = feedbackDir.listFiles((file) -> file.getName().endsWith(".json"));
 
         if (xmlFiles == null || jsonFiles == null) {
             ShowDialog(mContext.getResources().getString(R.string.NoFiles));
@@ -4191,8 +4190,8 @@ public class ClientAndroidInterface {
         }
 
         File renewalDir = new File(global.getSubdirectory("Renewal"));
-        File[] xmlFiles = renewalDir.listFiles((file)->file.getName().endsWith(".xml"));
-        File[] jsonFiles = renewalDir.listFiles((file)->file.getName().endsWith(".json"));
+        File[] xmlFiles = renewalDir.listFiles((file) -> file.getName().endsWith(".xml"));
+        File[] jsonFiles = renewalDir.listFiles((file) -> file.getName().endsWith(".json"));
 
         if (xmlFiles == null || jsonFiles == null) {
             ShowDialog(mContext.getResources().getString(R.string.NoFiles));
@@ -6097,7 +6096,7 @@ public class ClientAndroidInterface {
         AndroidUtils.showConfirmDialog(
                 mContext,
                 R.string.ConfirmExportLogs,
-                (d, i) -> new Thread(()-> Log.zipLogFiles(mContext)).start()
+                (d, i) -> new Thread(() -> Log.zipLogFiles(mContext)).start()
         );
     }
 }

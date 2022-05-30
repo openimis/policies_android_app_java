@@ -125,14 +125,6 @@ public class FileUtils {
         return null;
     }
 
-    public static File createOrCheckDirectory(File directory) {
-        if (directory.exists() || directory.mkdirs()) {
-            return directory;
-        } else {
-            return null;
-        }
-    }
-
     public static int getFileCount(File directory) {
         if (!directory.exists() || !directory.isDirectory()) {
             Log.e(LOG_TAG, "Not a directory: " + directory.getAbsolutePath());

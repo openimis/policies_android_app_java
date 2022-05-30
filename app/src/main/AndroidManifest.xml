@@ -177,7 +177,6 @@
             tools:node="merge"
             tools:overrideLibrary="com.google.zxing.client" />
 
-
     </application>
 
 </manifest>
