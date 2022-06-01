@@ -1,12 +1,14 @@
 package org.openimis.imispolicies.tools;
 
+import android.content.Context;
 import android.net.Uri;
 import android.support.v4.content.FileProvider;
 
 import org.openimis.imispolicies.AppInformation;
 import org.openimis.imispolicies.BuildConfig;
-import org.openimis.imispolicies.Compressor;
 import org.openimis.imispolicies.Global;
+import org.openimis.imispolicies.util.FileUtils;
+import org.openimis.imispolicies.util.ZipUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -89,26 +91,30 @@ public class Log {
         }
     }
 
-    public static void zipLogFiles() {
-        File cacheDir = Global.getContext().getExternalCacheDir();
-        File[] logFiles = cacheDir.listFiles((dir, filename) -> filename.startsWith(logFilePrefix));
-        File targetFile = new File(cacheDir, logExportFileName);
+    public static void zipLogFiles(Context context) {
+        File cacheDir = Global.getContext().getCacheDir();
+        File logsDir = new File(cacheDir, "logs");
+        FileUtils.createDirectoryWithSubdirectories(logsDir);
+        File[] logFiles = logsDir.listFiles((dir, filename) -> filename.startsWith(logFilePrefix));
+        File targetFile = new File(logsDir, logExportFileName);
 
         if (logFiles != null) {
             ArrayList<File> filesToZip = new ArrayList<>(Arrays.asList(logFiles));
-            Compressor.zip(filesToZip, targetFile.getAbsolutePath(), "");
+            ZipUtils.zipFiles(filesToZip, targetFile, "");
         }
 
         Uri logExportUri = FileProvider.getUriForFile(Global.getContext(),
                 String.format("%s.fileprovider", BuildConfig.APPLICATION_ID),
                 targetFile);
 
-        Global.getGlobal().sendFile(logExportUri, "application/zip");
+        Global.getGlobal().sendFile(context, logExportUri, "application/octet-stream");
     }
 
     public static void deleteLogFiles() {
-        File cacheDir = Global.getContext().getExternalCacheDir();
-        File[] logFiles = cacheDir.listFiles((dir, filename) -> filename.startsWith(logFilePrefix));
+        File cacheDir = Global.getContext().getCacheDir();
+        File logsDir = new File(cacheDir, "logs");
+        FileUtils.createDirectoryWithSubdirectories(logsDir);
+        File[] logFiles = logsDir.listFiles((dir, filename) -> filename.startsWith(logFilePrefix));
         if (logFiles != null) {
             for (File f : logFiles) {
                 f.delete();
@@ -130,10 +136,12 @@ public class Log {
 
     private static void initializeLogFile(Date date) {
         if (logFile == null || !logFile.exists()) {
-            File cacheDir = Global.getContext().getExternalCacheDir();
+            File cacheDir = Global.getContext().getCacheDir();
+            File logsDir = new File(cacheDir, "logs");
+            FileUtils.createDirectoryWithSubdirectories(logsDir);
 
             String filename = String.format("%s%s.txt",logFilePrefix, AppInformation.DateTimeInfo.getDefaultFileDatetimeFormatter().format(date));
-            logFile = new File(cacheDir, filename);
+            logFile = new File(logsDir, filename);
 
             try {
                 if (!logFile.createNewFile())

@@ -14,7 +14,6 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
 
     <!-- These statements are required as these permissions will be included otherwise -->
     <uses-permission
@@ -22,6 +21,9 @@
         tools:node="remove" />
     <uses-permission
         android:name="android.permission.READ_CONTACTS"
+        tools:node="remove" />
+    <uses-permission
+        android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
         tools:node="remove" />
 
     <uses-feature
@@ -62,6 +64,7 @@
         <activity
             android:name=".MainActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
+            android:exported="true"
             android:label="@string/app_name_policies"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
@@ -131,6 +134,49 @@
         <activity android:name=".SearchNotEnrolledPolicies" />
         <activity android:name=".NotEnrolledPoliciesOverview" />
         <activity android:name=".BulkControlNumbersActivity" />
+
+        <!-- Override missing configuration for library -->
+        <activity
+            android:name="com.google.zxing.client.android.CaptureActivity"
+            android:exported="false"
+            tools:node="merge"
+            tools:overrideLibrary="com.google.zxing.client" />
+        <activity
+            android:name="com.google.zxing.client.android.encode.EncodeActivity"
+            android:exported="false"
+            tools:node="merge"
+            tools:overrideLibrary="com.google.zxing.client" />
+        <activity
+            android:name="com.google.zxing.client.android.book.SearchBookContentsActivity"
+            android:exported="false"
+            tools:node="merge"
+            tools:overrideLibrary="com.google.zxing.client" />
+        <activity
+            android:name="com.google.zxing.client.android.share.ShareActivity"
+            android:exported="false"
+            tools:node="merge"
+            tools:overrideLibrary="com.google.zxing.client" />
+        <activity
+            android:name="com.google.zxing.client.android.history.HistoryActivity"
+            android:exported="false"
+            tools:node="merge"
+            tools:overrideLibrary="com.google.zxing.client" />
+        <activity
+            android:name="com.google.zxing.client.android.share.BookmarkPickerActivity"
+            android:exported="false"
+            tools:node="merge"
+            tools:overrideLibrary="com.google.zxing.client" />
+        <activity
+            android:name="com.google.zxing.client.android.share.AppPickerActivity"
+            android:exported="false"
+            tools:node="merge"
+            tools:overrideLibrary="com.google.zxing.client" />
+        <activity
+            android:name="com.google.zxing.client.android.HelpActivity"
+            android:exported="false"
+            tools:node="merge"
+            tools:overrideLibrary="com.google.zxing.client" />
+
     </application>
 
 </manifest>
