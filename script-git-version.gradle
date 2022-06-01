@@ -17,7 +17,7 @@ import org.ajoberstar.grgit.Grgit
 ext {
     git = Grgit.open(currentDir: projectDir)
     gitVersionName = git.describe(tags:true)
-    gitVersionCode = git.tag.list().size() + 6 // Manual increment for between tagged versions
+    gitVersionCode = git.tag.list().size() + 7 // Manual increment for between tagged versions
     gitVersionCodeTime = git.head().time
 }
 
