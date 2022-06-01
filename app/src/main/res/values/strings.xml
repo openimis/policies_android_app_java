@@ -458,4 +458,5 @@
     <string name="ConfirmClearLogs">Do you want to clear logs?</string>
     <string name="WithoutPolicy">without a policy</string>
     <string name="WithoutPremium">without a premium</string>
+    <string name="HttpResponse">HTTP response: %1$d — %2$s</string>
 </resources>
