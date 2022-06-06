@@ -28,79 +28,101 @@ package cm.ynote.educash;
 import android.Manifest;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.ActivityNotFoundException;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
-
-import com.exact.CallSoap.CallSoap;
-import com.exact.general.General;
-import com.exact.uploadfile.UploadFile;
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Locale;
 
+<<<<<<< HEAD:app/src/main/java/cm/ynote/educash/Acquire.java
 import cm.ynote.educash.R;
+=======
+import static android.provider.MediaStore.EXTRA_OUTPUT;
+>>>>>>> repo/main:app/src/main/java/org/openimis/imispolicies/Acquire.java
 
 public class Acquire extends AppCompatActivity {
-    /**
-     * Called when the activity is first created.
-     */
+    private static final String LOG_TAG = "ACQUIRE";
+    private static final int SCAN_QR_REQUEST_CODE = 0;
+    private static final int TAKE_PHOTO_REQUEST_CODE = 1;
 
+    private Global global;
 
-    General _General = new General(AppInformation.DomainInfo.getDomain());
+    private ImageButton btnScan, btnTakePhoto;
+    private Button btnSubmit;
+    private EditText etCHFID;
+    private ImageView iv;
+    private ProgressDialog pd;
+    private Bitmap theImage;
+    private String Path = null;
+    private int result = 0;
 
-    ImageButton btnScan, btnTakePhoto;
-    Button btnSubmit;
-    EditText etCHFID;
-    ImageView iv;
-    ProgressDialog pd;
-    Global global;
-    Bitmap theImage;
-    String Path = null;
-    int result = 0;
-    String aBuffer = "";
+    private String msg = "";
+    private double Longitude, Latitude;
+    private LocationManager lm;
+    private String towers;
+    private ClientAndroidInterface ca;
+    private SQLHandler sqlHandler;
 
+    private File tempPhotoFile;
+    private Uri tempPhotoUri;
 
-    String msg = "";
-    File[] Images;
-    int TotalImages;
-    int UploadCounter;
-    double Longitude, Latitude;
-    LocationManager lm;
-    String towers;
-    ClientAndroidInterface ca;
+    private Picasso picasso;
+
+    private Target imageTarget = new Target() {
+        @Override
+        public void onBitmapLoaded(final Bitmap bitmap, Picasso.LoadedFrom from) {
+            theImage = bitmap;
+            iv.setImageBitmap(bitmap);
+        }
+
+        @Override
+        public void onBitmapFailed(Drawable errorDrawable) {
+            Log.e(LOG_TAG, "Loading acquired photo failed");
+        }
+
+        @Override
+        public void onPrepareLoad(Drawable placeHolderDrawable) {
+        }
+    };
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.acquire_main);
+
         final ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setTitle(getResources().getString(R.string.Acquire));
@@ -109,49 +131,58 @@ public class Acquire extends AppCompatActivity {
         global = (Global) getApplicationContext();
         ca = new ClientAndroidInterface(this);
 
-        Path = getApplicationContext().getApplicationInfo().dataDir + "/Images/";
-        etCHFID = (EditText) findViewById(R.id.etCHFID);
-        iv = (ImageView) findViewById(R.id.imageView);
-        btnTakePhoto = (ImageButton) findViewById(R.id.btnTakePhoto);
-        btnScan = (ImageButton) findViewById(R.id.btnScan);
-        btnSubmit = (Button) findViewById(R.id.btnSubmit);
+        picasso = new Picasso.Builder(this)
+                .listener((picasso, uri, exception) -> Log.e(LOG_TAG, String.format("Image load failed: %s", uri.toString()), exception))
+                .loggingEnabled(BuildConfig.LOG)
+                .build();
+
+        Path = global.getSubdirectory("Images") + "/";
+        tempPhotoFile = new File(Path, "temp.jpg");
+        try {
+            if (tempPhotoFile.delete()) {
+                Log.i(LOG_TAG, "Leftover temp image deleted");
+            }
+            if (!tempPhotoFile.createNewFile()) {
+                Log.w(LOG_TAG, "Temp photo file already exists");
+            }
+            tempPhotoUri = FileProvider.getUriForFile(this,
+                    String.format("%s.fileprovider", BuildConfig.APPLICATION_ID),
+                    tempPhotoFile);
+        } catch (IOException e) {
+            Log.e(LOG_TAG, "Temp photo file creation failed", e);
+        }
+
+        etCHFID = findViewById(R.id.etCHFID);
+        iv = findViewById(R.id.imageView);
+        btnTakePhoto = findViewById(R.id.btnTakePhoto);
+        btnScan = findViewById(R.id.btnScan);
+        btnSubmit = findViewById(R.id.btnSubmit);
+
+        sqlHandler = new SQLHandler(this);
 
         etCHFID.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
             }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-
             }
 
             @Override
             public void afterTextChanged(Editable InsNo) {
+                String path = null;
                 if (!InsNo.toString().isEmpty()) {
-                    String files = ca.GetListOfImagesContain(InsNo.toString());
-                    if (files.trim() != "" && InsNo.length() > 0) {
-                        File imgFile = new File(files);
-                        Bitmap myBitmap;
-                        if (imgFile.exists()) {
-                            myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
-                            iv.setImageBitmap(myBitmap);
-                        }
-                        else {
-
-                            iv.setImageResource(R.drawable.person);
-                        }
-
-                    }
-                    else {
-
-                        iv.setImageResource(R.drawable.person);
-                    }
+                    path = ca.GetListOfImagesContain(InsNo.toString());
                 }
-                else {
-
-                    iv.setImageResource(R.drawable.person);
+                if (path != null && !"".equals(path)) {
+                    File file = new File(path);
+                    picasso.load(file)
+                            .placeholder(R.drawable.person)
+                            .error(R.drawable.person)
+                            .into(iv);
+                } else {
+                    picasso.load(R.drawable.person).into(iv);
                 }
             }
         });
@@ -160,7 +191,7 @@ public class Acquire extends AppCompatActivity {
         lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         Criteria c = new Criteria();
         towers = lm.getBestProvider(c, false);
-        if(towers != null){
+        if (towers != null) {
             Location loc = null;
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 // TODO: Consider calling
@@ -179,211 +210,151 @@ public class Acquire extends AppCompatActivity {
                 Latitude = loc.getLatitude();
             }
 
-        }else{
+        } else {
             Toast.makeText(Acquire.this, "No providers found", Toast.LENGTH_LONG).show();
         }
 
-        iv.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-//                if (!etCHFID.getText().toString().isEmpty()) {
-//                    String files = ca.GetListOfImagesContain(etCHFID.getText().toString());
-//                    if (files.trim() != "" && etCHFID.getText().length() > 0) {
-//                        File imgFile = new File(files);
-//
-//                        Bitmap myBitmap;
-//                        if (imgFile.exists()) {
-//                            myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
-//                            iv.setImageBitmap(myBitmap);
-//                        }
-//
-//                    } else {
-//
-//                        iv.setImageResource(R.drawable.person);
-//                    }
-//
-//                }
+        iv.setOnClickListener(v -> {
+        });
+
+        btnTakePhoto.setOnClickListener(v -> {
+            try {
+                Intent intent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+                intent.putExtra(EXTRA_OUTPUT, tempPhotoUri);
+                startActivityForResult(intent, TAKE_PHOTO_REQUEST_CODE);
+            } catch (ActivityNotFoundException e) {
+                Log.e(LOG_TAG, "Image capture activity not found", e);
             }
         });
 
-        btnTakePhoto.setOnClickListener(new View.OnClickListener() {
+        btnScan.setOnClickListener(v -> {
+            try {
+                Intent intent = new Intent("com.google.zxing.client.android.SCAN");
+                intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
+                startActivityForResult(intent, SCAN_QR_REQUEST_CODE);
+            } catch (ActivityNotFoundException e) {
+                Log.e(LOG_TAG, "QR Scan activity not found", e);
+            }
+        });
 
-            @Override
-            public void onClick(View v) {
-                try{
-                    Intent intent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-                    startActivityForResult(intent, 0);
-                }catch (Exception e){
+        btnSubmit.setOnClickListener(v -> {
+            Escape escape = new Escape();
+            int validInsuranceNumber = escape.CheckInsuranceNumber(etCHFID.getText().toString());
+            if (validInsuranceNumber > 0) {
+                ca.ShowDialog(getResources().getString(validInsuranceNumber));
+                return;
+            }
+
+            if (!isValidate()) return;
+
+            pd = ProgressDialog.show(Acquire.this, "", getResources().getString(R.string.Uploading));
+            new Thread(() -> {
+                try {
+                    result = SubmitData();
+                } catch (IOException | UserException e) {
                     e.printStackTrace();
                 }
 
-            }
-        });
-
-        btnScan.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent("com.google.zxing.client.android.SCAN");
-                intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
-                startActivityForResult(intent, 1);
-            }
-        });
-
-        btnSubmit.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                Escape escape = new Escape();
-                int validInsuranceNumber = escape.CheckInsuranceNumber(etCHFID.getText().toString());
-                if (validInsuranceNumber > 0){
-                    ca.ShowDialog(getResources().getString(validInsuranceNumber));
-                    return;
-                }
-
-                if (!isValidate()) return;
-
-                pd = ProgressDialog.show(Acquire.this, "", getResources().getString(R.string.Uploading));
-                new Thread() {
-                    public void run() {
-                        try {
-                            result = SubmitData();
-                        } catch (IOException e) {
-                            // TODO Auto-generated catch block
-                            e.printStackTrace();
-                        }
-
-                        runOnUiThread(new Runnable() {
-                            public void run() {
-                                switch (result) {
-                                    case 1:
-                                        msg = getResources().getString(R.string.PhotoSaved);
-                                        break;
-                                    default:
-                                        msg = getResources().getString(R.string.CouldNotUpload);
-                                        break;
-                                }
-
-                                Toast.makeText(Acquire.this, msg, Toast.LENGTH_LONG).show();
-
-                                etCHFID.setText("");
-                                iv.setImageResource(R.drawable.person);
-                                theImage = null;
-                                etCHFID.requestFocus();
-
-                            }
-                        });
-
-                        pd.dismiss();
+                runOnUiThread(() -> {
+                    switch (result) {
+                        case 1:
+                            msg = getResources().getString(R.string.PhotoSaved);
+                            break;
+                        default:
+                            msg = getResources().getString(R.string.CouldNotUpload);
+                            break;
                     }
-                }.start();
 
-            }
+                    Toast.makeText(Acquire.this, getResources().getString(R.string.PhotoSaved), Toast.LENGTH_LONG).show();
+
+                    etCHFID.setText("");
+                    iv.setImageResource(R.drawable.person);
+                    theImage = null;
+                    etCHFID.requestFocus();
+                });
+                pd.dismiss();
+            }).start();
         });
+    }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        if (!tempPhotoFile.delete()) {
+            Log.w(LOG_TAG, "Temp photo file deletion failed");
+        }
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        try {
-            switch (requestCode) {
-                case 0:
-                    theImage = (Bitmap) data.getExtras().get("data");
-                    iv.setImageBitmap(theImage);
-
-                    break;
-                case 1:
-                    if (resultCode == RESULT_OK) {
-                        String CHFID = data.getStringExtra("SCAN_RESULT");
-                        etCHFID.setText(CHFID);
-                    }
-
-                    break;
-            }
-        } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        switch (requestCode) {
+            case TAKE_PHOTO_REQUEST_CODE:
+                if (resultCode == RESULT_OK) {
+                    picasso.invalidate(tempPhotoUri);
+                    picasso.load(tempPhotoUri)
+                            .resize(global.getIntSetting("image_width_limit", 400),
+                                    global.getIntSetting("image_height_limit", 400))
+                            .centerInside()
+                            .into(imageTarget);
+                }
+                break;
+            case SCAN_QR_REQUEST_CODE:
+                if (resultCode == RESULT_OK) {
+                    String insureeNumber = data.getStringExtra("SCAN_RESULT");
+                    etCHFID.setText(insureeNumber);
+                }
+                break;
         }
     }
 
-
-
     protected boolean isValidate() {
-
-
         if (etCHFID.getText().length() == 0) {
-            ShowDialog(etCHFID, getResources().getString(R.string.MissingCHFID));
+            ShowDialog(getResources().getString(R.string.MissingCHFID), (dialog, which) -> etCHFID.requestFocus());
             return false;
         }
-        //Toast.makeText(this, theImage.getWidth(), Toast.LENGTH_LONG).show();
-        if (theImage == null) {
-            ShowDialog(iv, getResources().getString(R.string.MissingImage));
-            return false;
 
+        if (theImage == null) {
+            ShowDialog(getResources().getString(R.string.MissingImage), (dialog, which) -> iv.requestFocus());
+            return false;
         }
 
         if (!isValidCHFID()) {
-            ShowDialog(etCHFID, getResources().getString(R.string.InvalidInsuranceNumber));
+            ShowDialog(getResources().getString(R.string.InvalidInsuranceNumber), (dialog, which) -> etCHFID.requestFocus());
             return false;
         }
 
         return true;
     }
 
-    protected AlertDialog ShowDialog(final TextView tv, String msg) {
-        return new AlertDialog.Builder(this)
-                .setMessage(msg)
-                .setCancelable(false)
-                .setPositiveButton("Ok", new android.content.DialogInterface.OnClickListener() {
-
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        tv.requestFocus();
-                    }
-                }).show();
-    }
-
-    protected AlertDialog ShowDialog(final ImageView tv, String msg) {
-        return new AlertDialog.Builder(this)
-                .setMessage(msg)
-                .setCancelable(false)
-                .setPositiveButton("Ok", new android.content.DialogInterface.OnClickListener() {
-
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        tv.requestFocus();
-                    }
-                }).show();
-    }
-
-    private int SubmitData() throws IOException {
+    private int SubmitData() throws IOException, UserException {
         int Uploaded = 0;
-        //Create folder if folder is not exists
         File myDir = new File(Path);
-        myDir.mkdir();
 
         //Get current date and format it in yyyyMMdd format
-        SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
+        SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss", Locale.US);
         Calendar cal = Calendar.getInstance();
         String d = format.format(cal.getTime());
 
-        String fName = etCHFID.getText() + "_" + global.getOfficerCode() + "_" + d + "_" + Double.toString(Latitude) + "_" + Double.toString(Longitude) + ".jpg";
+        String fName = etCHFID.getText() + "_" + global.getOfficerCode() + "_" + d + "_" + Latitude + "_" + Longitude + ".jpg";
         //Create file and delete if exists
         File file = new File(myDir, fName);
         if (file.exists()) file.delete();
         Uploaded = 1;
         FileOutputStream out = new FileOutputStream(file);
-        theImage.compress(Bitmap.CompressFormat.JPEG, 90, out);
+        theImage.compress(Bitmap.CompressFormat.JPEG, global.getIntSetting("image_jpeg_quality", 40), out);
 
         out.flush();
         out.close();
 
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("PhotoPath", file.getAbsolutePath());
+        String[] whereArgs = {etCHFID.getText().toString()};
+
+        sqlHandler.updateData("tblInsuree", contentValues, "CHFID = ?", whereArgs);
+
         return Uploaded;
-//        }
-
     }
-
-    //create acquire_menu
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -395,107 +366,52 @@ public class Acquire extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case android.R.id.home:
+            case R.id.home:
                 finish();
                 return true;
 
             case R.id.mnuStatistics:
                 Statistics acquire = new Statistics();
                 acquire.IsEnrolment = true;
-                if (!_General.isNetworkAvailable(Acquire.this)) {
+                if (!global.isNetworkAvailable()) {
                     ShowDialog(getResources().getString(R.string.InternetRequired));
                     return false;
                 }
-                if (global.getOfficerCode().toString().length() == 0) {
+                if (global.getOfficerCode().length() == 0) {
                     ShowDialog(getResources().getString(R.string.MissingOfficer));
                     return false;
                 }
 
                 Intent Stats = new Intent(Acquire.this, Statistics.class);
-//                Stats.putExtra("Title", getResources().getString(R.string.Statistics));
-//                Stats.putExtra("OfficerCode", global.getOfficerCode().toString());
-                 startActivity(Stats);
+                startActivity(Stats);
 
                 return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
-
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
+    }
 
     protected AlertDialog ShowDialog(String msg) {
+        return ShowDialog(msg, (dialog, which) -> {
+        });
+    }
+
+    protected AlertDialog ShowDialog(String msg, DialogInterface.OnClickListener positiveButtonListener) {
         return new AlertDialog.Builder(this)
                 .setMessage(msg)
                 .setCancelable(false)
-                .setPositiveButton("Ok", new android.content.DialogInterface.OnClickListener() {
-
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        //et.requestFocus();
-                        return;
-                    }
-                }).show();
-
-    }
-
-    private boolean ConnectsFTP() {
-        UploadFile uf = new UploadFile();
-        return uf.isValidFTPCredentials();
-
-    }
-
-    private void UploadAllImages() {
-        for (int i = 0; i < Images.length; i++) {
-            UploadCounter = i + 1;
-            runOnUiThread(ChangeMessage);
-            UploadFile uf = new UploadFile();
-            if (uf.uploadFileToServer(Acquire.this, Images[i], "Acquire")) {
-                RegisterUploadDetails(Images[i].getName());
-                Images[i].delete();
-            }
-        }
-    }
-
-    Runnable ChangeMessage = new Runnable() {
-
-        @Override
-        public void run() {
-            //Change progress dialog message here
-            pd.setMessage(UploadCounter + " " + getResources().getString(R.string.Of) + " " + TotalImages + " " + getResources().getString(R.string.Uploading));
-
-        }
-    };
-
-    private void RegisterUploadDetails(String ImageName) {
-        String[] FileName = ImageName.split("_");
-        String CHFID, OfficerCode;
-
-
-        if (FileName.length > 0) {
-            CHFID = FileName[0];
-            OfficerCode = FileName[1];
-
-            CallSoap cs = new CallSoap();
-            cs.setFunctionName("InsertPhotoEntry");
-            cs.InsertPhotoEntry(CHFID, OfficerCode, ImageName);
-        }
+                .setPositiveButton("Ok", positiveButtonListener).show();
     }
 
     private boolean isValidCHFID() {
-//	if (etCHFID.getText().toString().length() != 9) return false;
-//	String chfid;
-//	int Part1, Part2;
-//	Part1 = Integer.parseInt(etCHFID.getText().toString())/10;
-//	Part2 = Part1 % 7;
-//
-//	chfid = etCHFID.getText().toString().substring(0, 8) + Integer.toString(Part2);
-//	return etCHFID.getText().toString().equals(chfid);\
         Escape escape = new Escape();
         int result = escape.CheckInsuranceNumber(etCHFID.getText().toString());
 
-        return  (result == 0);
-
+        return (result == 0);
     }
-
-
 }

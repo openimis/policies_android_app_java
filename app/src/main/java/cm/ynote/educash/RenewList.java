@@ -25,16 +25,14 @@
 
 package cm.ynote.educash;
 
-import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -44,7 +42,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AbsListView;
-import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListAdapter;
 import android.widget.ListView;
@@ -52,36 +49,42 @@ import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+<<<<<<< HEAD:app/src/main/java/cm/ynote/educash/RenewList.java
 
 import com.exact.general.General;
 
+=======
+import org.apache.http.HttpResponse;
+>>>>>>> repo/main:app/src/main/java/org/openimis/imispolicies/RenewList.java
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+<<<<<<< HEAD:app/src/main/java/cm/ynote/educash/RenewList.java
 
 import cm.ynote.educash.R;
+=======
+>>>>>>> repo/main:app/src/main/java/org/openimis/imispolicies/RenewList.java
 
 public class RenewList extends AppCompatActivity {
-    private General _general = new General(AppInformation.DomainInfo.getDomain());
-    String aBuffer = "";
+    private static final int REQUEST_OPEN_DOCUMENT_CODE = 1;
+    private Global global;
+    private String aBuffer = "";
     private ListView lv;
     private SwipeRefreshLayout swipe;
     private ArrayList<HashMap<String, String>> RenewalList = new ArrayList<>();
     private String OfficerCode;
     private ClientAndroidInterface ca;
-    private Global global;
-    private EditText etRenewalSearch;
     private ListAdapter adapter;
     public String UnlistedRenPolicy;
 
@@ -90,121 +93,103 @@ public class RenewList extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        global = (Global) getApplicationContext();
         ca = new ClientAndroidInterface(this);
         setContentView(R.layout.renewals);
-        //noinspection ConstantConditions
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        global = (Global) getApplicationContext();
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
         OfficerCode = global.getOfficerCode();
         UnlistedRenPolicy = getResources().getString(R.string.UnlistedRenewalPolicies);
 
-        etRenewalSearch = (EditText) findViewById(R.id.etRenewalSearch);
-        lv = (ListView) findViewById(R.id.lvRenewals);
+        EditText etRenewalSearch = findViewById(R.id.etRenewalSearch);
+        lv = findViewById(R.id.lvRenewals);
 
-        fillRenewals("");
-        swipe = (SwipeRefreshLayout) findViewById(R.id.swipe);
+        swipe = findViewById(R.id.swipe);
         swipe.setColorSchemeResources(
                 R.color.DarkBlue,
                 R.color.Maroon,
                 R.color.LightBlue,
                 R.color.Red);
         swipe.setEnabled(false);
-        swipe.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                swipe.setRefreshing(true);
-                (new Handler()).postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            Global global = new Global();
-                            global = (Global) RenewList.this.getApplicationContext();
+        swipe.setOnRefreshListener(() -> {
+            swipe.setRefreshing(true);
+            (new Handler()).postDelayed(() -> {
+                Token token = null;
 
-                            Token token = null;
+                try {
+                    token = global.getJWTToken();
+                } catch (Exception e) {
+                }
 
-                            try{
-                                token = global.getJWTToken();
-                            }catch (Exception e){}
-
-                            if (_general.isNetworkAvailable(RenewList.this.getApplicationContext())) {
-                                if(token != null){
-                                    RefreshRenewals();
-                                }else{
-                                    LoginDialogBox("Renewals");
-                                }
-                            }else {
-                                openDialogForFeedbackRenewal();
-                            }
-
-                            // FetchPayers();
-                        } catch (IOException | XmlPullParserException e) {
-                            e.printStackTrace();
-                        }
-                        swipe.setRefreshing(false);
+                if (global.isNetworkAvailable()) {
+                    if (token != null) {
+                        RefreshRenewals();
+                    } else {
+                        LoginDialogBox("Renewals");
                     }
-                }, 3000);
-            }
+                } else {
+                    openDialogForFeedbackRenewal();
+                }
+
+                // FetchPayers();
+                swipe.setRefreshing(false);
+            }, 3000);
         });
 
         etRenewalSearch.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
             }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-
                 ((SimpleAdapter) adapter).getFilter().filter(s);
-
-
             }
 
             @Override
             public void afterTextChanged(Editable s) {
-
             }
         });
-
 
 
         lv.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(AbsListView view, int scrollState) {
-
             }
 
             @Override
             public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-                if (firstVisibleItem == 0)
-                    swipe.setEnabled(true);
-                else
-                    swipe.setEnabled(false);
+                swipe.setEnabled(firstVisibleItem == 0);
             }
         });
 
-        lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        lv.setOnItemClickListener((parent, view, position, id) -> {
+            Intent intent = new Intent(getApplicationContext(), Renewal.class);
 
-                Intent intent = new Intent(getApplicationContext(), Renewal.class);
+            HashMap<String, String> oItem;
+            //noinspection unchecked
+            oItem = (HashMap<String, String>) parent.getItemAtPosition(position);
+            intent.putExtra("CHFID", oItem.get("CHFID"));
+            intent.putExtra("ProductCode", oItem.get("ProductCode"));
+            intent.putExtra("RenewalId", oItem.get("RenewalId"));
+            intent.putExtra("OfficerCode", OfficerCode);
+            intent.putExtra("LocationId", oItem.get("LocationId"));
+            intent.putExtra("PolicyValue", oItem.get("PolicyValue"));
+            intent.putExtra("RenewalUUID", oItem.get("RenewalUUID"));
+            startActivity(intent);
 
-                HashMap<String, String> oItem;
-                //noinspection unchecked
-                oItem = (HashMap<String, String>) parent.getItemAtPosition(position);
-                intent.putExtra("CHFID", oItem.get("CHFID"));
-                intent.putExtra("ProductCode", oItem.get("ProductCode"));
-                intent.putExtra("RenewalId", oItem.get("RenewalId"));
-                intent.putExtra("OfficerCode", OfficerCode);
-                intent.putExtra("LocationId", oItem.get("LocationId"));
-                intent.putExtra("PolicyValue", oItem.get("PolicyValue"));
-                intent.putExtra("RenewalUUID", oItem.get("RenewalUUID"));
-                startActivityForResult(intent, 0);
-
-            }
         });
 
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        fillRenewals();
+    }
+
     public void ConfirmDialogFeedbackRenewal(String filename) {
         AlertDialog.Builder alertDialog2 = new AlertDialog.Builder(
                 RenewList.this);
@@ -218,29 +203,26 @@ public class RenewList extends AppCompatActivity {
 
 // Setting Positive "Yes" Btn
         alertDialog2.setPositiveButton("OK",
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        if(ca.InsertRenewals(aBuffer).equals("1")){
-                            fillRenewals("");
-                        }
+                (dialog, which) -> {
+                    if (ca.InsertRenewals(aBuffer).equals("1")) {
+                        fillRenewals();
                     }
                 }).setNegativeButton("Quit",
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        dialog.cancel();
-                        finish();
-                    }
+                (dialog, id) -> {
+                    dialog.cancel();
+                    finish();
                 });
 
 // Showing Alert Dialog
         alertDialog2.show();
     }
-    public String getMasterDataText(String filename){
+
+    public String getMasterDataText(String filename) {
         ca.unZipFeedbacksRenewals(filename);
         String fname = filename.substring(0, filename.indexOf("."));
         try {
-            String dir = Environment.getExternalStorageDirectory() + File.separator + "IMIS/";
-            File myFile = new File("/" + dir + "/" + fname + ".txt");//"/"+dir+"/MasterData.txt"
+            String dir = global.getSubdirectory("Database");
+            File myFile = new File(dir, fname);//"/"+dir+"/MasterData.txt"
 //            BufferedReader myReader = new BufferedReader(
 //                    new InputStreamReader(
 //                            new FileInputStream(myFile), "UTF32"));
@@ -261,6 +243,7 @@ public class RenewList extends AppCompatActivity {
         }
         return aBuffer;
     }
+
     public void openDialogForFeedbackRenewal() {
         AlertDialog.Builder alertDialog2 = new AlertDialog.Builder(
                 RenewList.this);
@@ -274,25 +257,21 @@ public class RenewList extends AppCompatActivity {
 
 // Setting Positive "Yes" Btn
         alertDialog2.setPositiveButton("Yes",
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
+                (dialog, which) -> {
 
-                        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-                        intent.addCategory(Intent.CATEGORY_OPENABLE);
-                        intent.setType("*/*");
-                        try{
-                            startActivityForResult(intent, 5);
-                        } catch (ActivityNotFoundException e){
-                            Toast.makeText(getApplicationContext(), "There are no file explorer clients installed.", Toast.LENGTH_SHORT).show();
-                        }
-                        // Write your code here to execute after dialog
+                    Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                    intent.addCategory(Intent.CATEGORY_OPENABLE);
+                    intent.setType("*/*");
+                    try {
+                        startActivityForResult(intent, REQUEST_OPEN_DOCUMENT_CODE);
+                    } catch (ActivityNotFoundException e) {
+                        Toast.makeText(getApplicationContext(), "There are no file explorer clients installed.", Toast.LENGTH_SHORT).show();
                     }
+                    // Write your code here to execute after dialog
                 }).setNegativeButton("No",
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        dialog.cancel();
-                        finish();
-                    }
+                (dialog, id) -> {
+                    dialog.cancel();
+                    finish();
                 });
 
 // Showing Alert Dialog
@@ -302,33 +281,30 @@ public class RenewList extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == 0) {
-            fillRenewals("");
-        }
-        if(requestCode == 5 && resultCode == RESULT_OK){
+        if (requestCode == REQUEST_OPEN_DOCUMENT_CODE && resultCode == RESULT_OK) {
             Uri uri = data.getData();
-            String path = "";
-            path = uri.getPath();
+            String path = uri.getPath();
             File f = new File(path);
 
-            if(f.getName().toString().toLowerCase().equals("renewal_"+global.getOfficerCode().toLowerCase()+".rar")){
-                getMasterDataText((f.getName()).toString());
-                ConfirmDialogFeedbackRenewal((f.getName()).toString());
-            }else{
+            if (f.getName().toLowerCase().equals("renewal_" + global.getOfficerCode().toLowerCase() + ".rar")) {
+                getMasterDataText((f.getName()));
+                ConfirmDialogFeedbackRenewal((f.getName()));
+            } else {
                 Toast.makeText(this, getResources().getString(R.string.FileDoesntBelongHere), Toast.LENGTH_LONG).show();
             }
 
         }
     }
+
     private void fillRenewals() {
         RenewalList.clear();
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy");
+        SimpleDateFormat format = AppInformation.DateTimeInfo.getDefaultDateFormatter();
         Calendar cal = Calendar.getInstance();
         String d = format.format(cal.getTime());
 
         ClientAndroidInterface ca = new ClientAndroidInterface(this);
         String result = ca.OfflineRenewals(OfficerCode);
-        JSONArray jsonArray = null;
+        JSONArray jsonArray;
         JSONObject object;
 
         try {
@@ -338,94 +314,14 @@ public class RenewList extends AppCompatActivity {
             Renewal = new HashMap<>();
             Renewal.put("RenewalId", "0");
             Renewal.put("CHFID", UnlistedRenPolicy);
-            Renewal.put("FullName",getResources().getString(R.string.RenewYourPolicy));
+            Renewal.put("FullName", getResources().getString(R.string.RenewYourPolicy));
             Renewal.put("Product", getResources().getString(R.string.Product));
             Renewal.put("VillageName", "");
             Renewal.put("PolicyValue", "");
             Renewal.put("PolicyId", "");
             Renewal.put("ProductCode", "");
             Renewal.put("LocationId", String.valueOf(ca.getLocationId(OfficerCode)));
-            Renewal.put("EnrollDate", d);
-            Renewal.put("RenewalUUID", "");
-            RenewalList.add(Renewal);
-            if (jsonArray.length() == 0) {
-                //RenewalList.clear();
-                Toast.makeText(this, getResources().getString(R.string.NoRenewalFound), Toast.LENGTH_LONG).show();
-            } else {
-                RenewalList.clear();
-                Renewal = new HashMap<>();
-                Renewal.put("RenewalId", "0");
-                Renewal.put("CHFID", UnlistedRenPolicy);
-                Renewal.put("FullName",getResources().getString(R.string.RenewYourPolicy));
-                Renewal.put("Product", getResources().getString(R.string.Product));
-                Renewal.put("VillageName", "");
-                Renewal.put("PolicyValue", "");
-                Renewal.put("PolicyId", "");
-                Renewal.put("ProductCode", "");
-                Renewal.put("LocationId", String.valueOf(ca.getLocationId(OfficerCode)));
-                Renewal.put("EnrollDate", d);
-                Renewal.put("RenewalUUID", "");
-                RenewalList.add(Renewal);
-                for (int i = 0; i < jsonArray.length(); i++) {
-
-                    object = jsonArray.getJSONObject(i);
-
-                    Renewal = new HashMap<>();
-                    Renewal.put("RenewalId", object.getString("RenewalId"));
-                    Renewal.put("CHFID", object.getString("CHFID"));
-                    Renewal.put("FullName", object.getString("LastName") + " " + object.getString("OtherNames"));
-                    Renewal.put("Product", object.getString("ProductCode") + " : " + object.getString("ProductName"));
-                    Renewal.put("VillageName", object.getString("VillageName"));
-                    Renewal.put("EnrollDate", object.getString("EnrollDate"));
-                    Renewal.put("PolicyId", object.getString("PolicyId"));
-                    Renewal.put("ProductCode", object.getString("ProductCode"));
-                    Renewal.put("LocationId", object.getString("LocationId"));
-                    Renewal.put("PolicyValue", object.getString("PolicyValue"));
-                    Renewal.put("RenewalUUID", object.getString("RenewalUUID"));
-                    RenewalList.add(Renewal);
-                }
-            }
-
-
-            adapter = new SimpleAdapter(this, RenewalList, R.layout.renewallist,
-                    new String[]{"CHFID", "FullName", "Product", "VillageName", "EnrollDate"},
-                    new int[]{R.id.tvCHFID, R.id.tvFullName, R.id.tvProduct, R.id.tvVillage, R.id.tvTime});
-
-            lv.setAdapter(adapter);
-
-            setTitle("Renewals (" + String.valueOf(lv.getCount()) + ")");
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-    }
-    private void fillRenewals(String label) {
-        RenewalList.clear();
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy");
-        Calendar cal = Calendar.getInstance();
-        String d = format.format(cal.getTime());
-
-        ClientAndroidInterface ca = new ClientAndroidInterface(this);
-        String result = ca.OfflineRenewals(OfficerCode);
-        JSONArray jsonArray = null;
-        JSONObject object;
-
-        try {
-            RenewalList.clear();
-            jsonArray = new JSONArray(result);
-            HashMap<String, String> Renewal;
-            Renewal = new HashMap<>();
-            Renewal.put("RenewalId", "0");
-            Renewal.put("CHFID", UnlistedRenPolicy);
-            Renewal.put("FullName",getResources().getString(R.string.RenewYourPolicy));
-            Renewal.put("Product", getResources().getString(R.string.Product));
-            Renewal.put("VillageName", "");
-            Renewal.put("PolicyValue", "");
-            Renewal.put("PolicyId", "");
-            Renewal.put("ProductCode", "");
-            Renewal.put("LocationId", String.valueOf(ca.getLocationId(OfficerCode)));
-            Renewal.put("EnrollDate", d);
+            Renewal.put("RenewalPromptDate", d);
             Renewal.put("RenewalUUID", "");
             RenewalList.add(Renewal);
             if (jsonArray.length() == 0) {
@@ -436,17 +332,16 @@ public class RenewList extends AppCompatActivity {
                 Renewal = new HashMap<>();
                 Renewal.put("RenewalId", "0");
                 Renewal.put("CHFID", UnlistedRenPolicy);
-                Renewal.put("FullName",getResources().getString(R.string.RenewYourPolicy));
+                Renewal.put("FullName", getResources().getString(R.string.RenewYourPolicy));
                 Renewal.put("Product", getResources().getString(R.string.Product));
                 Renewal.put("VillageName", "");
                 Renewal.put("PolicyValue", "");
                 Renewal.put("PolicyId", "");
                 Renewal.put("ProductCode", "");
                 Renewal.put("LocationId", String.valueOf(ca.getLocationId(OfficerCode)));
-                Renewal.put("EnrollDate", d);
+                Renewal.put("RenewalPromptDate", d);
                 Renewal.put("RenewalUUID", "");
                 RenewalList.add(Renewal);
-
                 for (int i = 0; i < jsonArray.length(); i++) {
 
                     object = jsonArray.getJSONObject(i);
@@ -457,7 +352,7 @@ public class RenewList extends AppCompatActivity {
                     Renewal.put("FullName", object.getString("LastName") + " " + object.getString("OtherNames"));
                     Renewal.put("Product", object.getString("ProductCode") + " : " + object.getString("ProductName"));
                     Renewal.put("VillageName", object.getString("VillageName"));
-                    Renewal.put("EnrollDate", object.getString("EnrollDate"));
+                    Renewal.put("RenewalPromptDate", object.getString("RenewalPromptDate"));
                     Renewal.put("PolicyId", object.getString("PolicyId"));
                     Renewal.put("ProductCode", object.getString("ProductCode"));
                     Renewal.put("LocationId", object.getString("LocationId"));
@@ -467,13 +362,14 @@ public class RenewList extends AppCompatActivity {
                 }
             }
 
+
             adapter = new SimpleAdapter(this, RenewalList, R.layout.renewallist,
-                    new String[]{"CHFID", "FullName", "Product", "VillageName", "EnrollDate"},
+                    new String[]{"CHFID", "FullName", "Product", "VillageName", "RenewalPromptDate"},
                     new int[]{R.id.tvCHFID, R.id.tvFullName, R.id.tvProduct, R.id.tvVillage, R.id.tvTime});
 
             lv.setAdapter(adapter);
 
-            setTitle("Renewals (" + String.valueOf(lv.getCount()) + ")");
+            setTitle("Renewals (" + lv.getCount() + ")");
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -481,33 +377,34 @@ public class RenewList extends AppCompatActivity {
 
     }
 
-
-    private void RefreshRenewals() throws IOException, XmlPullParserException {
-        if (_general.isNetworkAvailable(this)) {
-            new Thread() {
-                public void run() {
+    private void RefreshRenewals() {
+        if (global.isNetworkAvailable()) {
+            if (global.isLoggedIn()) {
+                new Thread(() -> {
                     String result = null;
-
+                    int responseCode = 0;
                     try {
                         ToRestApi rest = new ToRestApi();
-                        result = rest.getObjectFromRestApiToken("policy");
+                        HttpResponse response = rest.getFromRestApiToken("policy");
+                        responseCode = response.getStatusLine().getStatusCode();
+                        result = rest.getContent(response);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
 
-                    if (result != null) {
+                    if (responseCode == HttpURLConnection.HTTP_OK && result != null) {
                         ca.InsertRenewals(result);
+                        runOnUiThread(this::fillRenewals);
+                    } else if (responseCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
+                        Toast.makeText(this, getResources().getString(R.string.LogInToDownloadRenewals), Toast.LENGTH_LONG).show();
+                    } else {
+                        Toast.makeText(this, getResources().getString(R.string.SomethingWrongServer), Toast.LENGTH_LONG).show();
                     }
-
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            fillRenewals();
-                        }
-                    });
                 }
-            }.start();
-
+                ).start();
+            } else {
+                Toast.makeText(this, getResources().getString(R.string.LogInToDownloadRenewals), Toast.LENGTH_LONG).show();
+            }
         } else {
             openDialogForFeedbackRenewal();
             //Toast.makeText(this, getResources().getString(R.string.NoInternet), Toast.LENGTH_LONG).show();
@@ -528,7 +425,7 @@ public class RenewList extends AppCompatActivity {
                 finish();
                 return true;
             case R.id.mnuStatistics:
-                if (!ca.CheckInternetAvailable()){
+                if (!ca.CheckInternetAvailable()) {
                     return false;
                 }
                 Intent stats = new Intent(this, Statistics.class);
@@ -541,7 +438,7 @@ public class RenewList extends AppCompatActivity {
         }
     }
 
-    public void LoginDialogBox(final String page){
+    public void LoginDialogBox(final String page) {
         if (!ca.CheckInternetAvailable())
             return;
 
@@ -555,63 +452,44 @@ public class RenewList extends AppCompatActivity {
         // set prompts.xml to alertdialog builder
         alertDialogBuilder.setView(promptsView);
 
-        final TextView username = (TextView) promptsView.findViewById(R.id.UserName);
-        final TextView password = (TextView) promptsView.findViewById(R.id.Password);
+        final TextView username = promptsView.findViewById(R.id.UserName);
+        final TextView password = promptsView.findViewById(R.id.Password);
 
-        username.setText(global.getOfficerCode().toString());
+        username.setText(global.getOfficerCode());
 
         // set dialog message
         alertDialogBuilder
                 .setCancelable(false)
                 .setPositiveButton(R.string.Ok,
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog,int id) {
-                                if(!username.getText().toString().equals("") && !password.getText().toString().equals("")){
+                        (dialog, id) -> {
+                            if (!username.getText().toString().equals("") && !password.getText().toString().equals("")) {
 
-                                    new Thread() {
-                                        public void run() {
+                                new Thread(() -> {
 
-                                            try {
-                                                isUserLogged = ca.LoginToken(username.getText().toString(),password.getText().toString());
-                                            } catch (InterruptedException e) {
-                                                e.printStackTrace();
+                                    isUserLogged = ca.LoginToken(username.getText().toString(), password.getText().toString());
+
+                                    runOnUiThread(() -> {
+                                        if (isUserLogged) {
+                                            if (page.equals("Renewals")) {
+                                                finish();
+                                                Intent intent = new Intent(RenewList.this, RenewList.class);
+                                                startActivity(intent);
+                                                Toast.makeText(RenewList.this, RenewList.this.getResources().getString(R.string.Login_Successful), Toast.LENGTH_LONG).show();
                                             }
 
-                                            runOnUiThread(new Runnable() {
-                                                @Override
-                                                public void run() {
-                                                    if(isUserLogged){
-                                                        if(page.equals("Renewals")){
-                                                            finish();
-                                                            Intent intent = new Intent(RenewList.this, RenewList.class);
-                                                            startActivity(intent);
-                                                            Toast.makeText(RenewList.this,RenewList.this.getResources().getString(R.string.Login_Successful),Toast.LENGTH_LONG).show();
-                                                        }
-
-                                                    }else{
-                                                        Toast.makeText(RenewList.this,RenewList.this.getResources().getString(R.string.LoginFail),Toast.LENGTH_LONG).show();
-                                                        LoginDialogBox(page);
-                                                        //ca.ShowDialog(RenewList.this.getResources().getString(R.string.LoginFail));
-                                                    }
-                                                }
-                                            });
-
+                                        } else {
+                                            Toast.makeText(RenewList.this, RenewList.this.getResources().getString(R.string.LoginFail), Toast.LENGTH_LONG).show();
+                                            LoginDialogBox(page);
+                                            //ca.ShowDialog(RenewList.this.getResources().getString(R.string.LoginFail));
                                         }
-                                    }.start();
-
-
-                                }else{
-                                    Toast.makeText(RenewList.this,RenewList.this.getResources().getString(R.string.Enter_Credentials), Toast.LENGTH_LONG).show();
-                                    LoginDialogBox(page);
-                                }
+                                    });
+                                }).start();
+                            } else {
+                                Toast.makeText(RenewList.this, RenewList.this.getResources().getString(R.string.Enter_Credentials), Toast.LENGTH_LONG).show();
+                                LoginDialogBox(page);
                             }
                         })
-                .setNegativeButton(R.string.Cancel,
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog,int id) {
-                                dialog.cancel();
-                            }
-                        });
+                .setNegativeButton(R.string.Cancel, (dialog, id) -> dialog.cancel());
 
         // create alert dialog
         AlertDialog alertDialog = alertDialogBuilder.create();

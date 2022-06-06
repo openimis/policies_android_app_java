@@ -31,8 +31,12 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
+<<<<<<< HEAD:app/src/main/java/cm/ynote/educash/SQLHandler.java
 import android.os.Environment;
+=======
+>>>>>>> repo/main:app/src/main/java/org/openimis/imispolicies/SQLHandler.java
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Xml;
@@ -47,8 +51,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+<<<<<<< HEAD:app/src/main/java/cm/ynote/educash/SQLHandler.java
 
 import cm.ynote.educash.R;
+=======
+import java.util.Locale;
+>>>>>>> repo/main:app/src/main/java/org/openimis/imispolicies/SQLHandler.java
 
 public class SQLHandler extends SQLiteOpenHelper {
 
@@ -56,6 +64,7 @@ public class SQLHandler extends SQLiteOpenHelper {
     private static final String OFFLINEDBNAME = "ImisData.db3";
     public Boolean isPrivate = true;
     private Context mContext;
+    private Global global;
     private SQLiteDatabase mDatabase;
     private static final int DATABASE_VERSION = 2;
     int count = 1;
@@ -64,37 +73,38 @@ public class SQLHandler extends SQLiteOpenHelper {
     //table names
     private static final String android_metadata = "android_metadata";
     private static final String sqlite_sequence = "sqlite_sequence";
-    private static final String tblConfirmationTypes = "tblConfirmationTypes";
-    private static final String tblControlNumber = "tblControlNumber";
-    private static final String tblControls = "tblControls";
-    private static final String tblEducations = "tblEducations";
-    private static final String tblFamilies = "tblFamilies";
-    private static final String tblFamilyTypes = "tblFamilyTypes";
-    private static final String tblFeedbacks = "tblFeedbacks";
-    private static final String tblGender = "tblGender";
-    private static final String tblHF = "tblHF";
-    private static final String tblIMISDefaultsPhone = "tblIMISDefaultsPhone";
-    private static final String tblIdentificationTypes = "tblIdentificationTypes";
-    private static final String tblInsuree = "tblInsuree";
-    private static final String tblInsureePolicy = "tblInsureePolicy";
-    private static final String tblLanguages = "tblLanguages";
-    private static final String tblLocations = "tblLocations";
-    private static final String tblOfficer = "tblOfficer";
-    private static final String tblOfficerVillages = "tblOfficerVillages";
-    private static final String tblPayer = "tblPayer";
-    private static final String tblPolicy = "tblPolicy";
-    private static final String tblPremium = "tblPremium";
-    private static final String tblProduct = "tblProduct";
-    private static final String tblProfessions = "tblProfessions";
-    private static final String tblRecordedPolicies = "tblRecordedPolicies";
-    private static final String tblRelations = "tblRelations";
-    private static final String tblRenewals = "tblRenewals";
-
-
+    public static final String tblConfirmationTypes = "tblConfirmationTypes";
+    public static final String tblControlNumber = "tblControlNumber";
+    public static final String tblControls = "tblControls";
+    public static final String tblEducations = "tblEducations";
+    public static final String tblFamilies = "tblFamilies";
+    public static final String tblFamilyTypes = "tblFamilyTypes";
+    public static final String tblFeedbacks = "tblFeedbacks";
+    public static final String tblGender = "tblGender";
+    public static final String tblHF = "tblHF";
+    public static final String tblIMISDefaultsPhone = "tblIMISDefaultsPhone";
+    public static final String tblIdentificationTypes = "tblIdentificationTypes";
+    public static final String tblInsuree = "tblInsuree";
+    public static final String tblInsureePolicy = "tblInsureePolicy";
+    public static final String tblLanguages = "tblLanguages";
+    public static final String tblLocations = "tblLocations";
+    public static final String tblOfficer = "tblOfficer";
+    public static final String tblOfficerVillages = "tblOfficerVillages";
+    public static final String tblPayer = "tblPayer";
+    public static final String tblPolicy = "tblPolicy";
+    public static final String tblPremium = "tblPremium";
+    public static final String tblProduct = "tblProduct";
+    public static final String tblProfessions = "tblProfessions";
+    public static final String tblRecordedPolicies = "tblRecordedPolicies";
+    public static final String tblRelations = "tblRelations";
+    public static final String tblRenewals = "tblRenewals";
+    public static final String tblBulkControlNumbers = "tblBulkControlNumbers";
+    public static final String tblFamilySMS = "tblFamilySMS";
 
     public SQLHandler(Context context) {
         super(context, DBNAME, null, DATABASE_VERSION);
         this.mContext = context;
+        global = (Global) mContext.getApplicationContext();
     }
 
 
@@ -121,7 +131,7 @@ public class SQLHandler extends SQLiteOpenHelper {
             sqLiteDatabase.execSQL(
                     "CREATE TABLE " + tblControls + "("
                             + "FieldName TEXT,"
-                            + "Adjustibility TEXT"+ ")"
+                            + "Adjustibility TEXT" + ")"
             );
             sqLiteDatabase.execSQL(
                     "CREATE TABLE " + tblEducations + "("
@@ -131,7 +141,7 @@ public class SQLHandler extends SQLiteOpenHelper {
                             + "AltLanguage TEXT" + ")"
             );
             sqLiteDatabase.execSQL(
-                    "CREATE TABLE 'tblFamilies' (" +
+                    "CREATE TABLE " + tblFamilies + "(" +
                             "FamilyId INTEGER," +
                             "InsureeId NUMERIC," +
                             "LocationId NUMERIC," +
@@ -144,15 +154,16 @@ public class SQLHandler extends SQLiteOpenHelper {
                             "ConfirmationType TEXT" + ")"
             );
             sqLiteDatabase.execSQL(
-                    "CREATE TABLE 'tblFamilyTypes' (" +
+                    "CREATE TABLE " + tblFamilyTypes + "(" +
                             "FamilyTypeCode TEXT," +
                             "FamilyType TEXT," +
                             "SortOrder NUMERIC," +
                             "AltLanguage TEXT" + ")"
             );
             sqLiteDatabase.execSQL(
-                    "CREATE TABLE 'tblFeedbacks' (" +
+                    "CREATE TABLE " + tblFeedbacks + "(" +
                             "ClaimId INTEGER," +
+                            "ClaimUUID TEXT," +
                             "OfficerId INTEGER," +
                             "OfficerCode TEXT," +
                             "CHFID TEXT," +
@@ -219,7 +230,8 @@ public class SQLHandler extends SQLiteOpenHelper {
                             "HFID NUMERIC," +
                             "CurrentAddress TEXT," +
                             "GeoLocation TEXT," +
-                            "CurVillage NUMERIC" + ")"
+                            "CurVillage NUMERIC," +
+                            "Vulnerability BOOLEAN" + ")"
             );
             sqLiteDatabase.execSQL(
                     "CREATE TABLE 'tblInsureePolicy' (" +
@@ -239,7 +251,7 @@ public class SQLHandler extends SQLiteOpenHelper {
                             "SortOrder NUMERIC" + ")"
             );
             sqLiteDatabase.execSQL(
-                    "CREATE TABLE 'tblLocations' (" +
+                    "CREATE TABLE " + tblLocations + " (" +
                             "LocationId NUMERIC," +
                             "LocationCode TEXT," +
                             "LocationName TEXT," +
@@ -408,7 +420,17 @@ public class SQLHandler extends SQLiteOpenHelper {
                             "LocationTyPe" +
                             " FROM tbllocations " +
                             "where LocationTyPe ='D'");
-        }catch (Exception e){
+            sqLiteDatabase.execSQL(
+                    "CREATE TABLE " + tblBulkControlNumbers + "(" +
+                            "Id INTEGER," +
+                            "BillId INTEGER," +
+                            "ProductCode TEXT," +
+                            "OfficerCode TEXT," +
+                            "ControlNumber TEXT," +
+                            "Amount REAL," +
+                            "PolicyId INTEGER" + ")"
+            );
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -448,7 +470,7 @@ public class SQLHandler extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + tblRecordedPolicies);
         db.execSQL("DROP TABLE IF EXISTS " + tblRelations);
         db.execSQL("DROP TABLE IF EXISTS " + tblRenewals);
-        if (oldVersion < 2){
+        if (oldVersion < 2) {
             String sql = "ALTER TABLE tblRenewals ADD COLUMN LocationId INTEGER;";
             db.execSQL(sql);
             Log.d("Upgrade", "DB Version upgraded from 1 to 2");
@@ -463,7 +485,7 @@ public class SQLHandler extends SQLiteOpenHelper {
 
     private void openDatabase() {
         String dbPath = mContext.getDatabasePath(DBNAME).getPath();
-        String dbOfflinePath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/IMIS/" + OFFLINEDBNAME;
+        String dbOfflinePath = global.getMainDirectory() + File.separator + OFFLINEDBNAME;
         if (mDatabase != null && mDatabase.isOpen()) {
             return;
         }
@@ -480,13 +502,9 @@ public class SQLHandler extends SQLiteOpenHelper {
         }
     }
 
-
-    //get result in JSON format
-    public JSONArray getResult(String tableName, String[] columns, String Where, String OrderBy) {
+    public JSONArray getResult(String tableName, String[] columns, String Where, String OrderBy, String nullOverride) {
         openDatabase();
-
         JSONArray resultSet = new JSONArray();
-
         Cursor cursor = mDatabase.query(tableName, columns, Where, null, null, null, OrderBy);
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
@@ -497,7 +515,7 @@ public class SQLHandler extends SQLiteOpenHelper {
                     if (cursor.getString(i) != null)
                         rowObject.put(cursor.getColumnName(i), cursor.getString(i));
                     else
-                        rowObject.put(cursor.getColumnName(i), "");
+                        rowObject.put(cursor.getColumnName(i), nullOverride);
                 } catch (Exception e) {
                     Log.d("Tag Name ", e.getMessage());
                 }
@@ -511,7 +529,12 @@ public class SQLHandler extends SQLiteOpenHelper {
         return resultSet;
     }
 
-    public JSONArray getResult(String Query, String[] args) {
+    //get result in JSON format
+    public JSONArray getResult(String tableName, String[] columns, String where, String orderBy) {
+        return getResult(tableName, columns, where, orderBy, "0");
+    }
+
+    public JSONArray getResult(String Query, String[] args, String nullOverride) {
         openDatabase();
         JSONArray resultSet = new JSONArray();
         try {
@@ -521,13 +544,11 @@ public class SQLHandler extends SQLiteOpenHelper {
                 int totalColumns = cursor.getColumnCount();
                 JSONObject rowObject = new JSONObject();
                 for (int i = 0; i < totalColumns; i++) {
-
                     try {
-
                         if (cursor.getString(i) != null)
                             rowObject.put(cursor.getColumnName(i), cursor.getString(i));
                         else
-                            rowObject.put(cursor.getColumnName(i), "0");
+                            rowObject.put(cursor.getColumnName(i), nullOverride);
                     } catch (JSONException e) {
                         e.printStackTrace();
                         Log.d("Tag Name", e.getMessage());
@@ -537,17 +558,19 @@ public class SQLHandler extends SQLiteOpenHelper {
                 cursor.moveToNext();
             }
             cursor.close();
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
-
         closeDatabase();
         return resultSet;
-
     }
 
-    public String getResultXML2(String QueryF,String QueryI,String QueryPL,String QueryPR,String QueryIP,String OfficerCode, int OfficerId) throws IOException {
+    public JSONArray getResult(String Query, String[] args) {
+        return getResult(Query, args, "0");
+    }
+
+    public String getResultXML2(String QueryF, String QueryI, String QueryPL, String QueryPR, String QueryIP, String OfficerCode, int OfficerId) throws IOException {
         String Query = null;
         String label = null;
         String sublabel = null;
@@ -556,22 +579,17 @@ public class SQLHandler extends SQLiteOpenHelper {
         Calendar cal = Calendar.getInstance();
         String d = format.format(cal.getTime());
 
-        String Path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/IMIS/";
-        //Here we are creating a directory
-        File MyDir = new File(Path);
-        MyDir.mkdir();
-
-        File Dir = new File(Path + "Family");
+        File Dir = new File(global.getSubdirectory("Family"));
         Dir.mkdir();
 
 
         //Here we are giving name to the XML file
-        String FileName = "Enrolment_"+OfficerCode+"_"+d+".xml";
+        String FileName = "Enrolment_" + OfficerCode + "_" + d + ".xml";
 
         //Here we are creating file in that directory
-        File EnrollmentXML = new File(Dir,FileName);
+        File EnrollmentXML = new File(Dir, FileName);
         //Here we are creating outputstream
-        FileOutputStream fos = new FileOutputStream(EnrollmentXML,true);
+        FileOutputStream fos = new FileOutputStream(EnrollmentXML, true);
         XmlSerializer serializer = Xml.newSerializer();
 
         serializer.setOutput(fos, "UTF-8");
@@ -592,25 +610,25 @@ public class SQLHandler extends SQLiteOpenHelper {
         serializer.endTag(null, "FileInfo");
 
 
-        try{
-            for(int i = 1; i <= 5; i++){
-                if(i == 1){
+        try {
+            for (int i = 1; i <= 5; i++) {
+                if (i == 1) {
                     Query = QueryF;
                     label = "Families";
                     sublabel = "Family";
-                }else if(i == 2){
+                } else if (i == 2) {
                     Query = QueryI;
                     label = "Insurees";
                     sublabel = "Insuree";
-                }else if(i == 3){
+                } else if (i == 3) {
                     Query = QueryPL;
                     label = "Policies";
                     sublabel = "Policy";
-                }else if(i == 4){
+                } else if (i == 4) {
                     Query = QueryIP;
                     label = "InsureePolicies";
                     sublabel = "InsureePolicy";
-                }else if(i == 5){
+                } else if (i == 5) {
                     Query = QueryPR;
                     label = "Premiums";
                     sublabel = "Premium";
@@ -626,40 +644,50 @@ public class SQLHandler extends SQLiteOpenHelper {
                     serializer.startTag(null, sublabel);
                     for (int j = 0; j < totalColumns; j++) {
 
-                        if (cursor.getString(j) != null){
+                        if (cursor.getString(j) != null) {
 
-                            if(label.equals("Families")){
-                                if(cursor.getColumnName(j) == "FamilyType"){
-                                    if(cursor.getString(j).equals("0")){
+                            if (label.equals("Families")) {
+                                if (cursor.getColumnName(j) == "FamilyType") {
+                                    if (cursor.getString(j).equals("0")) {
                                         serializer.startTag(null, cursor.getColumnName(j));
                                         serializer.text("");
                                         serializer.endTag(null, cursor.getColumnName(j));
                                     }
 
-                                }else if(cursor.getColumnName(j) == "ConfirmationType"){
-                                    if(cursor.getString(j).equals("0")){
+                                } else if (cursor.getColumnName(j) == "ConfirmationType") {
+                                    if (cursor.getString(j).equals("0")) {
                                         serializer.startTag(null, cursor.getColumnName(j));
                                         serializer.text("");
                                         serializer.endTag(null, cursor.getColumnName(j));
                                     }
-                                }else{
+                                } else if (cursor.getColumnName(j).equals("isOffline")) {
+                                    String isOffline = cursor.getString(j);
+                                    if (isOffline.equals("2"))
+                                        isOffline = "0";
+                                    serializer.startTag(null, cursor.getColumnName(j));
+                                    serializer.text(isOffline);
+                                    serializer.endTag(null, cursor.getColumnName(j));
+                                } else {
                                     serializer.startTag(null, cursor.getColumnName(j));
                                     serializer.text(cursor.getString(j));
                                     serializer.endTag(null, cursor.getColumnName(j));
                                 }
-                            }else {
+                            } else {
                                 serializer.startTag(null, cursor.getColumnName(j));
                                 serializer.text(cursor.getString(j));
                                 serializer.endTag(null, cursor.getColumnName(j));
                             }
 
 
-                        } else{
+                        } else {
                             serializer.startTag(null, cursor.getColumnName(j));
                             serializer.text("");
                             serializer.endTag(null, cursor.getColumnName(j));
                         }
+                    }
+                    if (sublabel.equals("Family")) {
 
+                        serializer = addFamilySmsTag(serializer, cursor.getString(0));
                     }
                     serializer.endTag(null, sublabel);
                     cursor.moveToNext();
@@ -668,7 +696,7 @@ public class SQLHandler extends SQLiteOpenHelper {
                 cursor.close();
                 closeDatabase();
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -681,6 +709,35 @@ public class SQLHandler extends SQLiteOpenHelper {
 
     }
 
+    private XmlSerializer addFamilySmsTag(XmlSerializer serializer, String familyId) throws IOException {
+        String[] args = {familyId};
+        serializer.startTag(null, "FamilySMS");
+        try {
+            JSONObject familySMS =
+                    getResult("SELECT * FROM tblFamilySMS where FamilyId = ? LIMIT 1;",
+                            args).getJSONObject(0);
+            serializer.startTag(null, "FamilyId");
+            serializer.text(args[0]);
+            serializer.endTag(null, "FamilyId");
+
+            serializer.startTag(null, "ApprovalOfSMS");
+            serializer.text(
+                    String.valueOf(familySMS.getString("ApprovalOfSMS").equals("1"))
+            );
+            serializer.endTag(null, "ApprovalOfSMS");
+
+            serializer.startTag(null, "LanguageOfSMS");
+            serializer.text(familySMS.getString("LanguageOfSMS"));
+
+            serializer.endTag(null, "LanguageOfSMS");
+        } catch (Exception e) {
+            Log.d("CreateEnrolmentXML", "Failed to create FamilySMS tag in enrolment");
+            e.printStackTrace();
+        }
+        serializer.endTag(null, "FamilySMS");
+        return serializer;
+    }
+
 
     public void insertData(String TableName, String[] Columns, String data, String PreExecute) throws JSONException {
         String dbPath = ClientAndroidInterface.filePath;
@@ -691,49 +748,47 @@ public class SQLHandler extends SQLiteOpenHelper {
 
             array = new JSONArray(data);
 
-            if(array.length()==0)
+            if (array.length() == 0)
                 return;
 
 
-            if(!mDatabase.isOpen()){
+            if (!mDatabase.isOpen()) {
                 openDatabase();
             }
 
-            if (!TextUtils.isEmpty(PreExecute)){
+            if (!TextUtils.isEmpty(PreExecute)) {
                 mDatabase.execSQL(PreExecute);
             }
 
 
             mDatabase.beginTransaction();
-            for(int i= 0;i < array.length();i++){
+            for (int i = 0; i < array.length(); i++) {
                 try {
                     object = array.getJSONObject(i);
                     ContentValues cv = new ContentValues();
-                    for(String c: Columns){
-
-                        cv.put(c,  object.getString(c));
+                    for (String c : Columns) {
+                        cv.put(c, object.getString(c));
                     }
-                    mDatabase.insert(TableName,null,cv);
+                    mDatabase.insert(TableName, null, cv);
 
                 } catch (JSONException e) {
                     e.printStackTrace();
-                    throw e;
                 }
 
             }
             mDatabase.setTransactionSuccessful();
             mDatabase.endTransaction();
             mDatabase.close();
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
-        if(mDatabase.isOpen()){
+        if (mDatabase.isOpen()) {
             closeDatabase();
         }
 
     }
 
-    public int insertData(String tableName, ContentValues contentValues) throws UserException {
+    public int insertData(String tableName, ContentValues contentValues) {
         try {
             openDatabase();
             Long lastInsertedId = mDatabase.insertOrThrow(tableName, null, contentValues);
@@ -747,20 +802,20 @@ public class SQLHandler extends SQLiteOpenHelper {
     }
 
     public int updateData(String tableName, ContentValues contentValues, String whereClause, String[] whereArgs) throws UserException {
-        int rowsUpdated;
+        openDatabase();
+        int rowsUpdated = 0;
         try {
             openDatabase();
             rowsUpdated = mDatabase.update(tableName, contentValues, whereClause, whereArgs);
             if (rowsUpdated <= 0) {
                 throw new UserException(mContext.getResources().getString(R.string.ErrorUpdate));
             }
-            return rowsUpdated;
         } catch (Exception e) {
             e.printStackTrace();
-            throw e;
         } finally {
             closeDatabase();
         }
+        return rowsUpdated;
     }
 
 
@@ -770,13 +825,12 @@ public class SQLHandler extends SQLiteOpenHelper {
             mDatabase.delete(tableName, whereClause, whereArgs);
         } catch (Exception e) {
             e.printStackTrace();
-            throw e;
         } finally {
             closeDatabase();
         }
     }
 
-    public String getDatabasePath(Context context){
+    public String getDatabasePath(Context context) {
         SQLHandler helper = new SQLHandler(this.mContext);
         SQLiteDatabase database = helper.getReadableDatabase();
         String path = database.getPath();
@@ -784,4 +838,232 @@ public class SQLHandler extends SQLiteOpenHelper {
         return path;
     }
 
+    public int getCount(String table, String selection, String[] selectionArgs) {
+        openDatabase();
+        int result = 0;
+        try (Cursor c = mDatabase.query(table,
+                new String[]{"COUNT(*)"},
+                selection,
+                selectionArgs,
+                null,
+                null,
+                null)) {
+            c.moveToFirst();
+            result = c.getInt(0);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        } finally {
+            closeDatabase();
+        }
+        return result;
+    }
+
+    public int getAssignedCNCount(String officerCode, String productCode) {
+        return getCount(tblBulkControlNumbers,
+                "PolicyId IS NOT NULL AND UPPER(ProductCode) = UPPER(?) AND UPPER(OfficerCode) = UPPER(?)",
+                new String[]{productCode, officerCode});
+    }
+
+    public int getFreeCNCount(String officerCode, String productCode) {
+        return getCount(tblBulkControlNumbers,
+                "PolicyId IS NULL AND UPPER(ProductCode) = UPPER(?) AND UPPER(OfficerCode) = UPPER(?)",
+                new String[]{productCode, officerCode});
+    }
+
+    public int getAssignedCNCount(String officerCode) {
+        return getCount(tblBulkControlNumbers,
+                "PolicyId IS NOT NULL AND UPPER(OfficerCode) = UPPER(?)",
+                new String[]{officerCode});
+    }
+
+    public int getFreeCNCount(String officerCode) {
+        return getCount(tblBulkControlNumbers,
+                "PolicyId IS NULL AND UPPER(OfficerCode) = UPPER(?)",
+                new String[]{officerCode});
+    }
+
+    public String getProductCode(String productId) {
+        openDatabase();
+        String productCode = null;
+        try (Cursor cursor = mDatabase.query(tblProduct,
+                new String[]{"UPPER(ProductCode)"},
+                "ProdId = ?",
+                new String[]{productId},
+                null,
+                null,
+                null,
+                "1")) {
+            cursor.moveToFirst();
+            if (!cursor.isAfterLast()) {
+                productCode = cursor.getString(0);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            closeDatabase();
+        }
+        return productCode;
+    }
+
+    public JSONArray getAvailableProducts(String officerCode) {
+        SimpleDateFormat format = AppInformation.DateTimeInfo.getDefaultDateFormatter();
+        String date = format.format(Calendar.getInstance().getTime());
+
+        openDatabase();
+        JSONArray result;
+        try {
+            String query = "SELECT DISTINCT p.ProdId, p.ProductCode, p.ProductName " +
+                    "FROM tblOfficer o INNER JOIN tblLocations ld ON o.LocationId=ld.LocationId " +
+                    "INNER JOIN tblLocations lr ON ld.ParentLocationId=lr.LocationId " +
+                    "INNER JOIN tblProduct p ON (ld.LocationId=p.LocationId OR lr.LocationId=p.LocationId OR p.LocationId='null') " +
+                    "WHERE UPPER(o.Code)=UPPER(?) and ? <= p.DateTo";
+
+            Cursor c = mDatabase.rawQuery(query, new String[]{officerCode, date});
+            result = cursorToJsonArray(c);
+            c.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+            result = new JSONArray();
+        } finally {
+            closeDatabase();
+        }
+        return result;
+    }
+
+    public String getNextFreeCn(String officerCode, String productCode) {
+        openDatabase();
+        String result = null;
+        try (Cursor c = mDatabase.query(tblBulkControlNumbers,
+                new String[]{"ControlNumber"},
+                "PolicyId IS NULL AND UPPER(ProductCode) = UPPER(?) AND UPPER(OfficerCode) = UPPER(?)",
+                new String[]{productCode, officerCode},
+                null,
+                null,
+                null,
+                "1")) {
+            c.moveToFirst();
+            if (!c.isAfterLast()) {
+                result = c.getString(0);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            closeDatabase();
+        }
+        return result;
+    }
+
+    public boolean assignCnToPolicy(int policyId, String controlNumber) {
+        try {
+            if (isFetchedControlNumber(controlNumber)) {
+                openDatabase();
+                ContentValues values = new ContentValues();
+                values.put("PolicyId", policyId);
+                mDatabase.update(tblBulkControlNumbers,
+                        values,
+                        "ControlNumber = ?",
+                        new String[]{controlNumber});
+            } else {
+                openDatabase();
+                JSONArray policyData = cursorToJsonArray(mDatabase.rawQuery(
+                        "SELECT po.PolicyValue, UPPER(pr.ProductCode) as ProductCode FROM tblPolicy po INNER JOIN tblProduct pr on pr.ProdId=po.ProdId WHERE PolicyId = ?",
+                        new String[]{String.valueOf(policyId)}));
+
+                if (policyData.length() == 0) {
+                    return false;
+                }
+
+                ContentValues values = new ContentValues();
+                values.put("OfficerCode", global.getOfficerCode());
+                values.put("PolicyId", policyId);
+                values.put("Amount", policyData.getJSONObject(0).getString("PolicyValue"));
+                values.put("ProductCode", policyData.getJSONObject(0).getString("ProductCode"));
+                values.put("ControlNumber", controlNumber);
+
+                return mDatabase.insert(tblBulkControlNumbers, null, values) > 0;
+            }
+
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            closeDatabase();
+        }
+        return false;
+    }
+
+    public boolean clearCnAssignedToPolicy(int policyId) {
+        openDatabase();
+        ContentValues values = new ContentValues();
+        values.put("PolicyId", (String) null);
+
+        try {
+            int updatedRecords = mDatabase.update(tblBulkControlNumbers,
+                    values,
+                    "PolicyId = ? and Id IS NOT NULL",
+                    new String[]{String.valueOf(policyId)});
+
+            int deletedRecords = mDatabase.delete(tblBulkControlNumbers,
+                    "PolicyId = ? and Id IS NULL",
+                    new String[]{String.valueOf(policyId)});
+
+            return updatedRecords + deletedRecords > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            closeDatabase();
+        }
+        return false;
+    }
+
+    public boolean isFetchedControlNumber(String controlNumber) {
+        return getCount(tblBulkControlNumbers,
+                "ControlNumber = ? AND Id IS NOT NULL",
+                new String[]{controlNumber}) > 0;
+    }
+
+    private JSONArray cursorToJsonArray(Cursor cursor) {
+        JSONArray resultSet = new JSONArray();
+        cursor.moveToFirst();
+        try {
+            while (!cursor.isAfterLast()) {
+                int totalColumn = cursor.getColumnCount();
+                JSONObject rowObject = new JSONObject();
+                for (int i = 0; i < totalColumn; i++) {
+                    if (cursor.getColumnName(i) != null) {
+                        rowObject.put(cursor.getColumnName(i), cursor.getString(i));
+                    }
+                }
+                resultSet.put(rowObject);
+                cursor.moveToNext();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return resultSet;
+    }
+
+    public int getRegionId(int districtId) {
+        openDatabase();
+        int result = 0;
+        try (Cursor c = mDatabase.query(tblLocations,
+                new String[]{"ParentLocationId"},
+                "LocationId = ?",
+                new String[]{Integer.toString(districtId)},
+                null,
+                null,
+                null,
+                "1")) {
+            c.moveToFirst();
+            if (!c.isAfterLast()) {
+                result = c.getInt(0);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            closeDatabase();
+        }
+        return result;
+    }
 }

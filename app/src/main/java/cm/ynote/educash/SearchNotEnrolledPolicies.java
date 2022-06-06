@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -42,28 +41,27 @@ public class SearchNotEnrolledPolicies extends AppCompatActivity {
         setContentView(R.layout.request_for_not_enrolled_policies);
 
         final ActionBar actionBar = getSupportActionBar();
-        actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setTitle(getResources().getString(R.string.request_enrolled_policies));
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setTitle(getResources().getString(R.string.request_enrolled_policies));
+        }
 
-        insuranceNumber = (EditText) findViewById(R.id.ins_num);
-        insuranceProduct = (Spinner) findViewById(R.id.ins_product);
-        renewalYesButton = (RadioButton) findViewById(R.id.renewal_yes_button);
-        renewalNoButton = (RadioButton) findViewById(R.id.renewal_no_button);
-        renewalRadio = (RadioGroup) findViewById(R.id.renewal_radio);
-        productsListView = (ListView) findViewById(R.id.ins_prod_list);
-        notEnrolledPoliciesSearchBtn = (Button) findViewById(R.id.notEnrolledPoliciesSearchBtn);
+        insuranceNumber = findViewById(R.id.ins_num);
+        insuranceProduct = findViewById(R.id.ins_product);
+        renewalYesButton = findViewById(R.id.renewal_yes_button);
+        renewalNoButton = findViewById(R.id.renewal_no_button);
+        renewalRadio = findViewById(R.id.renewal_radio);
+        productsListView = findViewById(R.id.ins_prod_list);
+        notEnrolledPoliciesSearchBtn = findViewById(R.id.notEnrolledPoliciesSearchBtn);
 
         bindSpinnerProduct();
 
-        notEnrolledPoliciesSearchBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(SearchNotEnrolledPolicies.this, NotEnrolledPoliciesOverview.class);
-                intent.putExtra("INSURANCE_NUMBER", insuranceNumber.getText().toString());
-                intent.putExtra("INSURANCE_PRODUCT", getSelectedProduct());
-                intent.putExtra("RENEWAL", checkRenewalChoice());
-                startActivity(intent);
-            }
+        notEnrolledPoliciesSearchBtn.setOnClickListener(view -> {
+            Intent intent = new Intent(SearchNotEnrolledPolicies.this, NotEnrolledPoliciesOverview.class);
+            intent.putExtra("INSURANCE_NUMBER", insuranceNumber.getText().toString());
+            intent.putExtra("INSURANCE_PRODUCT", getSelectedProduct());
+            intent.putExtra("RENEWAL", checkRenewalChoice());
+            startActivity(intent);
         });
     }
 
@@ -134,16 +132,15 @@ public class SearchNotEnrolledPolicies extends AppCompatActivity {
     private String getSelectedProduct() {
         String Product = "";
         try {
-            HashMap<String, String> P = new HashMap<>();
+            HashMap<String, String> P;
             //noinspection unchecked
             P = (HashMap<String, String>) insuranceProduct.getSelectedItem();
-            if (P.get("ProductCode").toString().equals("0") || P.get("ProductCode") == null || P.get("ProductCode").toString().equals("")) {
+            Product = P.get("ProductCode");
+            if (Product == null || ("0").equals(Product)) {
                 Product = "";
-            } else {
-                Product = P.get("ProductCode");
             }
         } catch (Exception e) {
-            // e.printStackTrace();
+            e.printStackTrace();
         }
 
         return Product;
@@ -152,7 +149,7 @@ public class SearchNotEnrolledPolicies extends AppCompatActivity {
     private String checkRenewalChoice() {
         if (renewalYesButton.isChecked() || renewalNoButton.isChecked()) {
             int selectedId = renewalRadio.getCheckedRadioButtonId();
-            checkedRadioButton = (RadioButton) findViewById(selectedId);
+            checkedRadioButton = findViewById(selectedId);
             radioRenewal = checkedRadioButton.getText().toString();
         } else {
             radioRenewal = "";

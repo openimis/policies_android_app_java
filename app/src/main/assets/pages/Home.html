@@ -32,43 +32,9 @@ In case of dispute arising out or in relation to the use of the program, it is s
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no" charset="utf-8"/>
 
 
-    <script type="text/javascript">
+    <script type="text/javascript" src="Home.js"></script>
 
-
-        $(document).ready(function(){
-            document.title = Android.getString('Home');
-
-            var Families = Android.getTotalFamily();
-            var Insuree =  Android.getTotalInsuree();
-            var Policy =   Android.getTotalPolicy();
-            var Premium =  Android.getTotalPremium();
-            var SumPremium = Android.getSumPremium();
-
-            var FamiliesOnline = Android.getTotalFamilyOnline();
-            var InsureeOnline = Android.getTotalInsureeOnline();
-            var PolicyOnline = Android.getTotalPolicyOnline();
-            var PremiumOnline = Android.getTotalPremiumOnline();
-
-
-              $('#TotalFamilies').text(Families);
-              $('#TotalInsuree').text(Insuree);
-              $('#TotalPolicies').text(Policy);
-              $('#TotalPremium').text(Premium);
-              $('#PremiumAmount').text(SumPremium);
-
-              $('#TotalFamiliesOnline').text(FamiliesOnline);
-              $('#TotalInsureeOnline').text(InsureeOnline);
-              <!--$('#TotalPoliciesOnline').text(PolicyOnline);-->
-              <!--$('#TotalPremiumOnline').text(PremiumOnline);-->
-
-
-        });
-
-    </script>
-
-    <style>
-
-    </style>
+    <style></style>
 
 </head>
 <body>

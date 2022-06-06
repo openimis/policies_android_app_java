@@ -1,29 +1,81 @@
+<<<<<<< HEAD:app/src/main/java/cm/ynote/educash/AppInformation.java
 package cm.ynote.educash;
 import static cm.ynote.educash.BuildConfig.API_BASE_URL;
 import static cm.ynote.educash.BuildConfig.RAR_PASSWORD;
 import static cm.ynote.educash.BuildConfig.SHOW_CONTROL_NUMBER_MENU;
+=======
+package org.openimis.imispolicies;
 
- public class AppInformation {
-     public static class DomainInfo {
+import java.text.SimpleDateFormat;
+import java.util.Locale;
 
-//         URL address of openIMIS demo server => please update with your own Web Services base URL/IP
-         private static String _Domain = API_BASE_URL;
+import static org.openimis.imispolicies.BuildConfig.API_BASE_URL;
+import static org.openimis.imispolicies.BuildConfig.RAR_PASSWORD;
+import static org.openimis.imispolicies.BuildConfig.API_VERSION;
+import static org.openimis.imispolicies.BuildConfig.SHOW_PAYMENT_MENU;
+import static org.openimis.imispolicies.BuildConfig.SHOW_BULK_CN_MENU;
+>>>>>>> repo/main:app/src/main/java/org/openimis/imispolicies/AppInformation.java
 
-         private static final String DEFAULT_RAR_PASSWORD = RAR_PASSWORD;
+public final class AppInformation {
+    public final static class DomainInfo {
+        public static String getDomain() {
+            return API_BASE_URL;
+        }
 
-         public static String getDomain(){
-             return _Domain;
-         }
+        public static String getDefaultRarPassword() {
+            return RAR_PASSWORD;
+        }
 
-         public static String getDefaultRarPassword() {
-             return DEFAULT_RAR_PASSWORD;
-         }
-     }
-	 public static class MenuInfo {
-         private static boolean _showControlNumberMenu = SHOW_CONTROL_NUMBER_MENU;
+        public static String getApiVersion() {
+            return API_VERSION;
+        }
 
-         public static boolean getShowControlNumberMenu() {
-              return _showControlNumberMenu;
-         }
-     }
+        private DomainInfo() {
+        }
+    }
+
+    public final static class MenuInfo {
+        public static boolean getShowPaymentNumberMenu() {
+            return SHOW_PAYMENT_MENU;
+        }
+
+        public static boolean getShowBulkCNMenu() {
+            return SHOW_BULK_CN_MENU;
+        }
+
+        private MenuInfo() {
+        }
+    }
+
+    public final static class DateTimeInfo {
+        public static String getDateFormat() {
+            return "yyyy-MM-dd";
+        }
+
+        public static String getISODatetimeFormat() {
+            return "yyyy-MM-dd'T'HH:mm:ss.SSSSSSSXXX";
+        }
+
+        public static String getFileDatetimeFormat() {
+            return "yyyy-MM-dd'T'HH-mm-ss";
+        }
+
+        public static SimpleDateFormat getDefaultDateFormatter() {
+            return new SimpleDateFormat(getDateFormat(), Locale.US);
+        }
+
+        public static SimpleDateFormat getDefaultIsoDatetimeFormatter() {
+            return new SimpleDateFormat(getISODatetimeFormat(), Locale.US);
+        }
+
+        public static SimpleDateFormat getDefaultFileDatetimeFormatter() {
+            return new SimpleDateFormat(getFileDatetimeFormat(), Locale.US);
+        }
+
+        private DateTimeInfo() {
+        }
+    }
+
+    private AppInformation() {
+    }
 }
