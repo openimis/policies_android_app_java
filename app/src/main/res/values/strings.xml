@@ -459,4 +459,5 @@
     <string name="WithoutPolicy">without a policy</string>
     <string name="WithoutPremium">without a premium</string>
     <string name="HttpResponse">HTTP response: %1$d — %2$s</string>
+    <string name="EnquireNoPolicies">No policies registered.</string>
 </resources>
