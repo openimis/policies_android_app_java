@@ -325,12 +325,16 @@ public class Enquire extends AppCompatActivity {
 
                         }
 
-
-                        Policy.put("Heading", jsonObject.getString("productCode"));
-                        Policy.put("Heading1", jsonObject.getString("expiryDate") + "  " + jsonObject.getString("status"));
-                        Policy.put("SubItem1", jsonObject.getString("productName"));
-                        Policy.put("SubItem2", Ded);
-                        Policy.put("SubItem3", Ceiling);
+                        if (jsonObject.getString("expiryDate").equals("null")){
+                            Policy.put("Heading", getResources().getString(R.string.EnquireNoPolicies));
+                        }
+                        else{
+                            Policy.put("Heading", jsonObject.getString("productCode"));
+                            Policy.put("Heading1", jsonObject.getString("expiryDate") + "  " + jsonObject.getString("status"));
+                            Policy.put("SubItem1", jsonObject.getString("productName"));
+                            Policy.put("SubItem2", Ded);
+                            Policy.put("SubItem3", Ceiling);
+                        }
 
                         String TotalAdmissionsLeft = buildEnquireValue(jsonObject, "totalAdmissionsLeft", R.string.totalAdmissionsLeft);
                         String TotalVisitsLeft = buildEnquireValue(jsonObject, "totalVisitsLeft", R.string.totalVisitsLeft);
