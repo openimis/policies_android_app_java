@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:id="@+id/MyListItem"
+    android:layout_width="fill_parent" android:layout_height="fill_parent"
+    android:paddingTop="5dp" android:paddingBottom="5dp"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical">
+
+    <TextView android:id="@+id/text1" style="?android:attr/dropDownItemStyle"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:layout_height="40sp"
+        android:layout_width="fill_parent"
+        android:textColor="@color/Gray"
+        android:maxLines="1" />
+
+</LinearLayout>

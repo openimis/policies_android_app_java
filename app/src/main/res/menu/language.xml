@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/firsLanguage1"
+        android:title="@string/Language">
+    </item>
+    <item android:id="@+id/firsLanguage2"
+        android:title="@string/Language"
+       android:icon="@android:drawable/alert_dark_frame">
+    </item>
+</menu>
