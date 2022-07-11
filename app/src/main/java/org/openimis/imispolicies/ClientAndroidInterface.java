@@ -5369,7 +5369,6 @@ public class ClientAndroidInterface {
 
         if (JsonInsNo.length() > 0) {
             IsFamilyAvailable = 2;
-            inProgress = false;
         } else {
             try {
                 ToRestApi rest = new ToRestApi();
@@ -5379,43 +5378,32 @@ public class ClientAndroidInterface {
                     if (FamilyData.length() == 0) {
                         IsFamilyAvailable = 0;
                     } else {
-                        DownloadFamilyData(FamilyData);
+                        parseFamilyData(FamilyData);
                         IsFamilyAvailable = 1;
                     }
                 }
-                inProgress = false;
-            } catch (JSONException e) {
-                inProgress = false;
-                e.printStackTrace();
-            } catch (UserException e) {
-                inProgress = false;
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            while (inProgress) {
+            } catch (JSONException | UserException | IOException e) {
+                Log.e("MODIFYFAMILY", "Error while downloading a family", e);
             }
         }
 
-        inProgress = false;
         return IsFamilyAvailable;
     }
 
 
-    private void DownloadFamilyData(JSONObject FamilyData) throws JSONException, UserException, IOException {
+    private void parseFamilyData(JSONObject familyData) throws JSONException, UserException, IOException {
         JSONArray newFamilyArr = new JSONArray();
         JSONArray newInsureeArr = new JSONArray();
 
-        FamilyData.put("familyId", "-" + FamilyData.getString("familyId"));
-        FamilyData.put("insureeId", "-" + FamilyData.getString("insureeId"));
+        familyData.put("familyId", "-" + familyData.getString("familyId"));
+        familyData.put("insureeId", "-" + familyData.getString("insureeId"));
 
         // Copy oryginal object
-        JSONObject cloneFamilyData = new JSONObject(FamilyData.toString());
+        JSONObject cloneFamilyData = new JSONObject(familyData.toString());
         JSONArray Insuree = (JSONArray) cloneFamilyData.get("insurees");
 
-        String familyUUID = FamilyData.getString("familyUUID");
-        String familyId = FamilyData.getString("familyId");
+        String familyUUID = familyData.getString("familyUUID");
+        String familyId = familyData.getString("familyId");
 
         // Add familyUUID to Insuree
         for (int i = 0; i < Insuree.length(); i++) {
@@ -5461,23 +5449,26 @@ public class ClientAndroidInterface {
             JSONObject insureeObj = newInsureeArr.getJSONObject(i);
 
             if (!JsonUtils.isStringEmpty(insureeObj, "photoPath", true)) {
-                String photoName = insureeObj.getString("photoPath");
-                String imagePath = global.getImageFolder() + photoName;
-                insureeObj.put("photoPath", imagePath);
-                OutputStream imageOutputStream = new FileOutputStream(imagePath);
-                if (!JsonUtils.isStringEmpty(insureeObj, "photoBase64", true)) {
-                    try {
-                        byte[] imageBytes = Base64.decode(insureeObj.getString("photoBase64").getBytes(), Base64.DEFAULT);
-                        Bitmap image = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
-                        image.compress(Bitmap.CompressFormat.JPEG, 100, imageOutputStream);
-                    } catch (Exception e) {
-                        Log.e("MODIFYFAMILY", "Error while processing Base64 image", e);
-                    }
-                } else {
-                    if (photoName.length() > 0) {
-                        String photoUrl = String.format("%sImages/Updated/%s", AppInformation.DomainInfo.getDomain(), photoName);
-                        imageTarget = new OutputStreamImageTarget(imageOutputStream, 100);
-                        ((Activity) mContext).runOnUiThread(() -> picassoInstance.load(photoUrl).into(imageTarget));
+                String[] photoPathSegments = insureeObj.getString("photoPath").split("[\\\\/]");
+                String photoName = photoPathSegments[photoPathSegments.length-1];
+                if(!StringUtils.isEmpty(photoName)) {
+                    String imagePath = global.getImageFolder() + photoName;
+                    insureeObj.put("photoPath", imagePath);
+                    OutputStream imageOutputStream = new FileOutputStream(imagePath);
+                    if (!JsonUtils.isStringEmpty(insureeObj, "photoBase64", true)) {
+                        try {
+                            byte[] imageBytes = Base64.decode(insureeObj.getString("photoBase64").getBytes(), Base64.DEFAULT);
+                            Bitmap image = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+                            image.compress(Bitmap.CompressFormat.JPEG, 100, imageOutputStream);
+                        } catch (Exception e) {
+                            Log.e("MODIFYFAMILY", "Error while processing Base64 image", e);
+                        }
+                    } else {
+                        if (photoName.length() > 0) {
+                            String photoUrl = String.format("%sImages/Updated/%s", AppInformation.DomainInfo.getDomain(), photoName);
+                            imageTarget = new OutputStreamImageTarget(imageOutputStream, 100);
+                            ((Activity) mContext).runOnUiThread(() -> picassoInstance.load(photoUrl).into(imageTarget));
+                        }
                     }
                 }
             }
