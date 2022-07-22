@@ -3212,18 +3212,19 @@ public class ClientAndroidInterface {
             if (CallerId != 2) {
                 Query += " I.FamilyId = " + FamilyId + " \n";
                 if (Integer.parseInt(Offline) == 0) {
-                    if (CallerId == 1 || CallerId == 2) {
+                    if (CallerId == 1) {
                         Query += " AND  I.InsureeId < 0" + "";
                     }
                 }
             } else {
-                Query += "I.InsureeId < 0 AND (";
+                Query += "(";
                 for (int j = 0; j < verifiedId.size(); j++) {
+
                     if (getFamilyStatus(Integer.parseInt(verifiedId.get(j))) == 0) {
                         if ((verifiedId.size() - j) == 1) {
-                            Query += " I.FamilyId == " + verifiedId.get(j) + "";
+                            Query += "I.InsureeId < 0 AND  I.FamilyId == " + verifiedId.get(j) + "";
                         } else {
-                            Query += " I.FamilyId == " + verifiedId.get(j) + " OR ";
+                            Query += "I.InsureeId < 0 AND  I.FamilyId == " + verifiedId.get(j) + " OR ";
                         }
                     } else {
                         if ((verifiedId.size() - j) == 1) {
@@ -3502,11 +3503,12 @@ public class ClientAndroidInterface {
                     }
 
                     if (mylist.size() == 0) {
-                        if (CallerId == 1 || CallerId == 2) {
+                        if (CallerId == 1) {
                             DeleteImages(insureesArray, verifiedId, CallerId);
-                            DeleteUploadedData(Integer.parseInt(FamilyId), verifiedId, CallerId);
-                            DeleteFamily(Integer.parseInt(FamilyId));
                         }
+
+                        DeleteUploadedData(Integer.parseInt(FamilyId), verifiedId, CallerId);
+                        DeleteFamily(Integer.parseInt(FamilyId));
                     }
 
 
@@ -3543,15 +3545,12 @@ public class ClientAndroidInterface {
             } else {
                 EnrolResult = 0;
 
-                if (CallerId == 1 || CallerId == 2) {
+                if (CallerId == 1) {
                     DeleteImages(insureesArray, verifiedId, CallerId);
-                    DeleteUploadedData(Integer.parseInt(FamilyId), verifiedId, CallerId);
                 }
-                if (CallerId == 1 || CallerId != 0) {
-                    DeleteImages(insureesArray, verifiedId, CallerId);
-                    if (IsOffline == 0 || IsOffline == 0) {
-                        DeleteFamily(Integer.parseInt(FamilyId));
-                    }
+                DeleteUploadedData(Integer.parseInt(FamilyId), verifiedId, CallerId);
+                if (IsOffline == 0) {
+                    DeleteFamily(Integer.parseInt(FamilyId));
                 }
             }
 
@@ -3587,7 +3586,7 @@ public class ClientAndroidInterface {
         }
     }
 
-    public void clearDirectory(String directory) {
+    public void giclearDirectory(String directory) {
         File[] files = new File(global.getSubdirectory(directory)).listFiles();
         if (files != null) {
             FileUtils.deleteFiles(files);
@@ -5272,16 +5271,12 @@ public class ClientAndroidInterface {
             } else {
                 Uploaded = 0;
             }
-            ((Activity) mContext).runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    if (Uploaded == 1) {
-                        ShowDialog(mContext.getResources().getString(R.string.PhotosUploaded));
-                    } else {
-                        ShowDialog(mContext.getResources().getString(R.string.NoPhoto));
-                    }
+            ((Activity) mContext).runOnUiThread(() -> {
+                if (Uploaded == 1) {
+                    ShowDialog(mContext.getResources().getString(R.string.PhotosUploaded));
+                } else {
+                    ShowDialog(mContext.getResources().getString(R.string.NoPhoto));
                 }
-
             });
             pd.dismiss();
         }).start();
@@ -5450,8 +5445,8 @@ public class ClientAndroidInterface {
 
             if (!JsonUtils.isStringEmpty(insureeObj, "photoPath", true)) {
                 String[] photoPathSegments = insureeObj.getString("photoPath").split("[\\\\/]");
-                String photoName = photoPathSegments[photoPathSegments.length-1];
-                if(!StringUtils.isEmpty(photoName)) {
+                String photoName = photoPathSegments[photoPathSegments.length - 1];
+                if (!StringUtils.isEmpty(photoName)) {
                     String imagePath = global.getImageFolder() + photoName;
                     insureeObj.put("photoPath", imagePath);
                     OutputStream imageOutputStream = new FileOutputStream(imagePath);

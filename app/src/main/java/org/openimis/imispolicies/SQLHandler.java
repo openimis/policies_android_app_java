@@ -569,8 +569,6 @@ public class SQLHandler extends SQLiteOpenHelper {
         String d = format.format(cal.getTime());
 
         File Dir = new File(global.getSubdirectory("Family"));
-        Dir.mkdir();
-
 
         //Here we are giving name to the XML file
         String FileName = "Enrolment_" + OfficerCode + "_" + d + ".xml";
@@ -675,7 +673,6 @@ public class SQLHandler extends SQLiteOpenHelper {
                         }
                     }
                     if (sublabel.equals("Family")) {
-
                         serializer = addFamilySmsTag(serializer, cursor.getString(0));
                     }
                     serializer.endTag(null, sublabel);
@@ -689,7 +686,7 @@ public class SQLHandler extends SQLiteOpenHelper {
             e.printStackTrace();
         }
 
-
+        serializer.endTag(null, "Enrolment");
         serializer.endDocument();
         serializer.flush();
         fos.close();
