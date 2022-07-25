@@ -3586,7 +3586,7 @@ public class ClientAndroidInterface {
         }
     }
 
-    public void giclearDirectory(String directory) {
+    public void clearDirectory(String directory) {
         File[] files = new File(global.getSubdirectory(directory)).listFiles();
         if (files != null) {
             FileUtils.deleteFiles(files);
