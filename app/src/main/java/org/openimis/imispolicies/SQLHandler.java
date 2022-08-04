@@ -32,6 +32,7 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import org.openimis.imispolicies.tools.Log;
 import android.util.Xml;
@@ -1038,6 +1039,33 @@ public class SQLHandler extends SQLiteOpenHelper {
             c.moveToFirst();
             if (!c.isAfterLast()) {
                 result = c.getInt(0);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            closeDatabase();
+        }
+        return result;
+    }
+
+    /**
+     * @return Default Language as specified by SortOrder in tblLanguages, return DEFAULT_LANGUAGE_CODE before initialization
+     */
+    @NonNull
+    public String getDefaultLanguage() {
+        openDatabase();
+        String result = BuildConfig.DEFAULT_LANGUAGE_CODE;
+        try (Cursor c = mDatabase.query(tblLanguages,
+                new String[]{"LanguageCode"},
+                null,
+                null,
+                null,
+                null,
+                "SortOrder ASC",
+                "1")) {
+            c.moveToFirst();
+            if (!c.isAfterLast()) {
+                result = c.getString(0);
             }
         } catch (Exception e) {
             e.printStackTrace();

@@ -242,7 +242,7 @@
     <string name="TitleDelete">Suppression échouée</string>
     <string name="DeleteFamilyWithPolicy">Cette famille a été supprimée seulement hors ligne parce qu\'elle a un contrat en ligne.</string>
     <string name="PolicyValueChange">Contrat avec date d\'adhésion :</string>
-    <string name="Changed">\" Modifié \"</string>
+    <string name="Changed">" Modifié "</string>
     <string name="ExceedThreshold"><![CDATA[Les contrats suivants avec date d\'adhésion dépasseront le nombre maximum d\'assurés <br/> Voulez-vous activer cet assuré ?]]></string>
     <string name="ExceedMemberCount">Les contrats avec les dates d\'adhésion suivantes ont atteint leur nombre maximum de membres et, par conséquent, cette assurance ne sera pas couverte par ces polices, mais l\'assuré est ajouté à la famille :</string>
     <string name="Acquire">Acquérir</string>
@@ -256,7 +256,7 @@
     <string name="PhotosUploaded">Photos téléversées avec succès</string>
     <string name="NoPhoto">Aucune photo trouvée</string>
     <string name="UploadPhoto">Téléverser les photos</string>
-    <string name="Search">\"Recherche \"</string>
+    <string name="Search">"Recherche "</string>
     <string name="ModifyFamily">Modifier la famille</string>
     <string name="DownloadFamily">Télécharger la famille</string>
     <string name="TotalFamilyOnline">Familles éditées</string>
@@ -446,4 +446,18 @@
     <string name="CnLimitReached">Limite CN atteinte</string>
     <string name="NoCNReceived">Aucun numéro de contrôle reçu du serveur</string>
     <string name="CNThresholdReached">Vous ne pouvez pas recevoir plus de numéros de contrôle pour ce produit</string>
+    <string name="ExportLogs">Export all logs:</string>
+    <string name="ExportLogsButton">Export logs</string>
+    <string name="ConfirmExportLogs">Do you want to export logs?</string>
+    <string name="ExportLogsCanceled">Export canceled. Export file can be found in external cache directory.</string>
+    <string name="ClearLogs">Clear all logs:</string>
+    <string name="ClearLogsButton">Clear logs</string>
+    <string name="ConfirmClearLogs">Do you want to clear logs?</string>
+    <string name="Wait">Wait</string>
+    <string name="Suspend">Suspend</string>
+    <string name="Enforce">Enforce</string>
+    <string name="WithoutPolicy">without a policy</string>
+    <string name="WithoutPremium">without a premium</string>
+    <string name="HttpResponse">HTTP response: %1$d — %2$s</string>
+    <string name="EnquireNoPolicies">No policies registered.</string>
 </resources>
