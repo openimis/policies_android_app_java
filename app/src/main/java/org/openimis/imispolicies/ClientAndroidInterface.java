@@ -30,7 +30,6 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
@@ -157,6 +156,7 @@ public class ClientAndroidInterface {
     Picasso picassoInstance;
     Target imageTarget;
     StorageManager storageManager;
+
 
     ClientAndroidInterface(Context c) {
         mContext = c;
@@ -5217,12 +5217,7 @@ public class ClientAndroidInterface {
     public File[] getPhotos() {
         String path = mContext.getApplicationInfo().dataDir + "/Images/";
         File Directory = new File(path);
-        FilenameFilter filter = new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String filename) {
-                return filename.contains("0");
-            }
-        };
+        FilenameFilter filter = (dir, filename) -> filename.contains("0");
         File[] newFiles = Directory.listFiles(filter);
         return Directory.listFiles(filter);
     }
@@ -5889,71 +5884,66 @@ public class ClientAndroidInterface {
 
     public void LoginDialogBox(final String page) {
 
-        ((Activity) mContext).runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                // check internet connection
-                if (!CheckInternetAvailable())
-                    return;
-                // get prompts.xml view
-                LayoutInflater li = LayoutInflater.from(mContext);
-                View promptsView = li.inflate(R.layout.login_dialog, null);
+        ((Activity) mContext).runOnUiThread(() -> {
+            // check internet connection
+            if (!CheckInternetAvailable())
+                return;
+            // get prompts.xml view
+            LayoutInflater li = LayoutInflater.from(mContext);
+            View promptsView = li.inflate(R.layout.login_dialog, null);
 
-                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(mContext);
+            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(mContext);
 
-                // set prompts.xml to alertdialog builder
-                alertDialogBuilder.setView(promptsView);
+            // set prompts.xml to alertdialog builder
+            alertDialogBuilder.setView(promptsView);
 
-                final TextView username = (TextView) promptsView.findViewById(R.id.UserName);
-                final TextView password = (TextView) promptsView.findViewById(R.id.Password);
+            final TextView username = promptsView.findViewById(R.id.UserName);
+            final TextView password = promptsView.findViewById(R.id.Password);
 
-                // set dialog message
-                alertDialogBuilder
-                        .setCancelable(false)
-                        .setPositiveButton("OK",
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id) {
-                                        if (!username.getText().toString().equals("") || !password.getText().toString().equals("")) {
-                                            boolean isUserLogged = false;
-                                            isUserLogged = LoginToken(username.getText().toString(), password.getText().toString());
+            // set dialog message
+            alertDialogBuilder
+                    .setCancelable(false)
+                    .setPositiveButton("OK",
+                            (dialog, id) -> {
+                                if (!username.getText().toString().equals("") || !password.getText().toString().equals("")) {
+                                    boolean isUserLogged = false;
+                                    isUserLogged = LoginToken(username.getText().toString(), password.getText().toString());
 
-                                            if (isUserLogged) {
-                                                if (page.equals("Enquire")) {
-                                                    ((Enquire) mContext).finish();
-                                                    Intent intent = new Intent(mContext, Enquire.class);
-                                                    mContext.startActivity(intent);
-                                                }
-                                                if (page.equals("Renewals")) {
-                                                    ((RenewList) mContext).finish();
-                                                    Intent intent = new Intent(mContext, RenewList.class);
-                                                    mContext.startActivity(intent);
-                                                }
-                                                if (page.equals("Feedbacks")) {
-                                                    ((FeedbackList) mContext).finish();
-                                                    Intent intent = new Intent(mContext, FeedbackList.class);
-                                                    mContext.startActivity(intent);
-                                                }
-                                                if (page.equals("Reports")) {
-                                                    ((FeedbackList) mContext).finish();
-                                                    Intent intent = new Intent(mContext, Reports.class);
-                                                    mContext.startActivity(intent);
-                                                }
-
-                                            } else {
-                                                ShowDialog(mContext.getResources().getString(R.string.LoginFail));
-                                            }
-                                        } else {
-                                            Toast.makeText(mContext, "Please enter user name and password", Toast.LENGTH_LONG).show();
+                                    if (isUserLogged) {
+                                        if (page.equals("Enquire")) {
+                                            ((Enquire) mContext).finish();
+                                            Intent intent = new Intent(mContext, Enquire.class);
+                                            mContext.startActivity(intent);
                                         }
+                                        if (page.equals("Renewals")) {
+                                            ((RenewList) mContext).finish();
+                                            Intent intent = new Intent(mContext, RenewList.class);
+                                            mContext.startActivity(intent);
+                                        }
+                                        if (page.equals("Feedbacks")) {
+                                            ((FeedbackList) mContext).finish();
+                                            Intent intent = new Intent(mContext, FeedbackList.class);
+                                            mContext.startActivity(intent);
+                                        }
+                                        if (page.equals("Reports")) {
+                                            ((FeedbackList) mContext).finish();
+                                            Intent intent = new Intent(mContext, Reports.class);
+                                            mContext.startActivity(intent);
+                                        }
+
+                                    } else {
+                                        ShowDialog(mContext.getResources().getString(R.string.LoginFail));
                                     }
-                                });
+                                } else {
+                                    Toast.makeText(mContext, "Please enter user name and password", Toast.LENGTH_LONG).show();
+                                }
+                            });
 
-                // create alert dialog
-                AlertDialog alertDialog = alertDialogBuilder.create();
+            // create alert dialog
+            AlertDialog alertDialog = alertDialogBuilder.create();
 
-                // show it
-                alertDialog.show();
-            }
+            // show it
+            alertDialog.show();
         });
 
     }
