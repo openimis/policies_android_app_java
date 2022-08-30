@@ -947,8 +947,6 @@ public class ClientAndroidInterface {
         int isOffline = 1;
         int insureeIsOffline = 1;
         int MaxInsureeId = 0;
-        Boolean res = false;
-        int newInsureeId = 0;
         try {
             global = (Global) mContext.getApplicationContext();
             HashMap<String, String> data = jsonToTable(InsureeData);
@@ -1061,7 +1059,6 @@ public class ClientAndroidInterface {
                     if (global.isNetworkAvailable()) {
                         //if (isOffline == 0){
                         MaxInsureeId = -MaxInsureeId;
-                        newInsureeId = MaxInsureeId;
                         //}
                         values.put("InsureeId", MaxInsureeId);
 
@@ -1116,41 +1113,11 @@ public class ClientAndroidInterface {
                 values.put("isOffline", insureeIsOffline);
                 sqlHandler.updateData("tblInsuree", values, "InsureeId = ? AND (isOffline = ?)", new String[]{String.valueOf(InsureeId), String.valueOf(insureeIsOffline)});
             }
-            if (global.isNetworkAvailable()) {
-                if (isOffline == 0 || isOffline == 2) {
-                    if (isOffline == 2) isOffline = 0;
-                    if (global.getUserId() > 0) {
-                        if (rtInsureeId > 0) {
-                            newInsureeId = -rtInsureeId;
-                        } else {
-                            newInsureeId = rtInsureeId;
-                        }
-                        if (rtInsureeId == 0 && res) {
-                            inProgress = false;
-                        } else {
-                        }
-                        inProgress = false;
-                    }
-                    inProgress = false;
-                } else {
-                    inProgress = false;
-                }
-                inProgress = false;
-            } else {
-                inProgress = false;
-            }
-
-
-        } catch (NumberFormatException e) {
-            e.printStackTrace();
-            throw new Exception(e.getMessage());
-        } catch (UserException e) {
+        } catch (NumberFormatException | UserException e) {
             e.printStackTrace();
             throw new Exception(e.getMessage());
         }
-        while (inProgress) {
-        }
-        inProgress = false;
+
         return rtInsureeId;
     }
 

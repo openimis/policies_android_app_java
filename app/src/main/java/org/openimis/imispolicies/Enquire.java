@@ -276,30 +276,19 @@ public class Enquire extends AppCompatActivity {
                     jsonArray = jsonObject.getJSONArray("details");
 
                     for (i = 0; i < jsonArray.length(); i++) {
-                        jsonObject = jsonArray.getJSONObject(i);
-
-
                         HashMap<String, String> Policy = new HashMap<>();
                         jsonObject = jsonArray.getJSONObject(i);
-                        double iDedType = 0;
-                        if (!jsonObject.getString("dedType").equalsIgnoreCase("null"))
-                            iDedType = Double.parseDouble(jsonObject.getString("dedType"));
+                        double iDedType = Double.parseDouble(JsonUtils.getStringOrDefault(jsonObject, "dedType", "0", true));
 
                         String Ded = "", Ded1 = "", Ded2 = "";
                         String Ceiling = "", Ceiling1 = "", Ceiling2 = "";
 
-                        String jDed1 = "", jDed2 = "", jCeiling1 = "", jCeiling2 = "";
+                        String jDed1, jDed2, jCeiling1, jCeiling2;
 
-                        if (jsonObject.getString("ded1").equalsIgnoreCase("null")) jDed1 = "";
-                        else jDed1 = jsonObject.getString("ded1");
-                        if (jsonObject.getString("ded2").equalsIgnoreCase("null")) jDed2 = "";
-                        else jDed2 = jsonObject.getString("ded2");
-                        if (jsonObject.getString("ceiling1").equalsIgnoreCase("null"))
-                            jCeiling1 = "";
-                        else jCeiling1 = jsonObject.getString("ceiling1");
-                        if (jsonObject.getString("ceiling2").equalsIgnoreCase("null"))
-                            jCeiling2 = "";
-                        else jCeiling2 = jsonObject.getString("ceiling2");
+                        jDed1 = JsonUtils.getStringOrDefault(jsonObject, "ded1", "", true);
+                        jDed2 = JsonUtils.getStringOrDefault(jsonObject, "ded2", "", true);
+                        jCeiling1 = JsonUtils.getStringOrDefault(jsonObject, "ceiling1", "", true);
+                        jCeiling2 = JsonUtils.getStringOrDefault(jsonObject, "ceiling2", "", true);
 
                         //Get the type
 
@@ -325,12 +314,11 @@ public class Enquire extends AppCompatActivity {
 
                         }
 
-                        if (jsonObject.getString("expiryDate").equals("null")){
+                        if (JsonUtils.isStringEmpty(jsonObject, "expiryDate", true)) {
                             Policy.put("Heading", getResources().getString(R.string.EnquireNoPolicies));
-                        }
-                        else{
+                        } else {
                             Policy.put("Heading", jsonObject.getString("productCode"));
-                            Policy.put("Heading1", jsonObject.getString("expiryDate") + "  " + jsonObject.getString("status"));
+                            Policy.put("Heading1", JsonUtils.getStringOrDefault(jsonObject, "expiryDate", "", true) + "  " + jsonObject.getString("status"));
                             Policy.put("SubItem1", jsonObject.getString("productName"));
                             Policy.put("SubItem2", Ded);
                             Policy.put("SubItem3", Ceiling);
@@ -404,7 +392,6 @@ public class Enquire extends AppCompatActivity {
                 result = "";
             }
         });
-
     }
 
     protected String buildEnquireValue(JSONObject jsonObject, String jsonKey, int labelId) throws JSONException {
