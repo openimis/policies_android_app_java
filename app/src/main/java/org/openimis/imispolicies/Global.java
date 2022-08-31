@@ -26,6 +26,7 @@
 package org.openimis.imispolicies;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
@@ -38,6 +39,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Environment;
+import android.support.annotation.NonNull;
 import android.util.DisplayMetrics;
 
 import org.openimis.imispolicies.tools.Log;
@@ -45,6 +47,7 @@ import org.openimis.imispolicies.tools.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.openimis.imispolicies.util.LocaleUtil;
 import org.openimis.imispolicies.util.StreamUtils;
 
 import java.io.File;
@@ -61,6 +64,7 @@ import static org.openimis.imispolicies.BuildConfig.APP_DIR;
 public class Global extends Application {
     private static Global GlobalContext;
     public static final String PREF_NAME = "CMPref";
+    public static final String PREF_LANGUAGE_KEY = "Language";
     public static final String PREF_LOG_TAG = "PREFS";
     public static final String FILE_IO_LOG_TAG = "FILEIO";
 
@@ -206,12 +210,40 @@ public class Global extends Application {
         }
     }
 
-    public void changeLanguage(Context ctx, String Language) {
-        Resources res = ctx.getResources();
-        DisplayMetrics dm = res.getDisplayMetrics();
-        Configuration config = res.getConfiguration();
-        config.locale = new Locale(Language.toLowerCase());
-        res.updateConfiguration(config, dm);
+    public boolean isCurrentLanguage(@NonNull String language) {
+        String currentLanguage = LocaleUtil.getLanguageTag(Locale.getDefault()).toLowerCase(Locale.ROOT);
+        return language.toLowerCase(Locale.ROOT).equals(currentLanguage);
+    }
+
+    public void setLanguage(@NonNull Context context, @NonNull String language) {
+        String newLanguage = language.toLowerCase(Locale.ROOT);
+        if(!isCurrentLanguage(language)) {
+            changeLanguage(context, newLanguage);
+            if (context instanceof Activity) {
+                ((Activity) context).recreate();
+            }
+        }
+    }
+
+    private void changeLanguage(@NonNull Context context, @NonNull String newLanguage) {
+        Resources resources = context.getResources();
+        DisplayMetrics displayMetrics = resources.getDisplayMetrics();
+        Configuration config = resources.getConfiguration();
+        config.locale = LocaleUtil.getLocaleFromTag(newLanguage);
+        resources.updateConfiguration(config, displayMetrics);
+        Locale.setDefault(config.locale);
+        onConfigurationChanged(config);
+        setStoredLanguage(newLanguage);
+    }
+
+
+    public void setStoredLanguage(String locale) {
+        setStringKey(PREF_LANGUAGE_KEY, locale);
+    }
+
+    public String getStoredLanguage() {
+        String defaultLanguage = new SQLHandler(this).getDefaultLanguage();
+        return getStringKey(PREF_LANGUAGE_KEY, defaultLanguage);
     }
 
     private String createOrCheckDirectory(String path) {

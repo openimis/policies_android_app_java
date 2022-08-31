@@ -33,7 +33,6 @@ import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -90,7 +89,6 @@ public class MainActivity extends AppCompatActivity
     public static final int REQUEST_CREATE_ENROL_EXPORT = 3;
     public static final int REQUEST_CREATE_FEEDBACK_EXPORT = 4;
     public static final int REQUEST_CREATE_RENEWAL_EXPORT = 5;
-    private static final String PREFS_NAME = "CMPref";
     private NavigationView navigationView;
 
     private SQLHandler sqlHandler;
@@ -113,6 +111,9 @@ public class MainActivity extends AppCompatActivity
     String calledFrom = "java";
     public File f;
     public String etRarPassword = "";
+    private AlertDialog enrolmentOfficerDialog;
+    private AlertDialog masterDataDialog;
+    private AlertDialog permissionDialog;
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -211,10 +212,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         global = (Global) getApplicationContext();
-        //Check if user has language set
-        SharedPreferences spHF = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-        selectedLanguage = spHF.getString("Language", "en");
-        changeLanguage(selectedLanguage, false);
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         sqlHandler = new SQLHandler(this);
@@ -323,6 +321,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
+        global.setLanguage(this, global.getStoredLanguage());
         OfficerName.setText(global.getOfficerName());
     }
 
@@ -437,13 +436,10 @@ public class MainActivity extends AppCompatActivity
         final ClientAndroidInterface ca = new ClientAndroidInterface(context);
         final int MasterData = ca.isMasterDataAvailable();
 
-//      OfficerCode= ca.ShowDialogText() ;
         LayoutInflater li = LayoutInflater.from(context);
         @SuppressLint("InflateParams") View promptsView = li.inflate(R.layout.dialog, null);
 
-        android.support.v7.app.AlertDialog alertDialog = null;
-
-        final android.support.v7.app.AlertDialog.Builder alertDialogBuilder = new android.support.v7.app.AlertDialog.Builder(
+        final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
                 context);
 
         alertDialogBuilder.setView(promptsView);
@@ -466,7 +462,7 @@ public class MainActivity extends AppCompatActivity
             negativeButton = R.string.No;
         }
 
-        alertDialogBuilder
+        enrolmentOfficerDialog = alertDialogBuilder
                 .setCancelable(false)
                 .setPositiveButton(getResources().getString(positiveButton),
                         (dialog, id) -> {
@@ -507,7 +503,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void ShowMasterDataDialog() {
-        new AlertDialog.Builder(context)
+        masterDataDialog = new AlertDialog.Builder(context)
                 .setTitle(R.string.MasterData)
                 .setMessage(R.string.MasterDataNotFound)
                 .setCancelable(false)
@@ -543,7 +539,7 @@ public class MainActivity extends AppCompatActivity
 
         alertDialogBuilder.setView(promptsView);
 
-        final EditText userInput = (EditText) promptsView.findViewById(R.id.etRarPass);
+        final EditText userInput = promptsView.findViewById(R.id.etRarPass);
 
         alertDialogBuilder
                 .setCancelable(false)
@@ -660,19 +656,6 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-    private void changeLanguage(String LanguageCode, boolean withRefresh) {
-        global.changeLanguage(this, LanguageCode);
-
-        if (withRefresh) {
-            //Restart the activity for change to be affected
-            Intent refresh = new Intent(MainActivity.this, MainActivity.class);
-            startActivity(refresh);
-            finish();
-        }
-        setPreferences();
-        //OfficerName.setText(global.getOfficerName());
-    }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -682,15 +665,14 @@ public class MainActivity extends AppCompatActivity
         switch (item.getItemId()) {
             case MENU_LANGUAGE_1:
                 selectedLanguage = LanguageCode1;
-                changeLanguage(selectedLanguage, true);
+                global.setLanguage(this, selectedLanguage);
 
                 return true;
             case MENU_LANGUAGE_2:
                 selectedLanguage = LanguageCode2;
-                changeLanguage(selectedLanguage, true);
+                global.setLanguage(this, selectedLanguage);
                 return true;
         }
-
 
         return super.onOptionsItemSelected(item);
     }
@@ -814,7 +796,6 @@ public class MainActivity extends AppCompatActivity
             Intent refresh = new Intent(MainActivity.this, MainActivity.class);
             startActivity(refresh);
             finish();
-            setPreferences();
         }
     }
 
@@ -845,22 +826,12 @@ public class MainActivity extends AppCompatActivity
             Intent refresh = new Intent(MainActivity.this, MainActivity.class);
             startActivity(refresh);
             finish();
-            setPreferences();
         }
-    }
-
-
-    private void setPreferences() {
-        SharedPreferences Lang = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-        SharedPreferences.Editor editor = Lang.edit();
-        editor.putString("Language", selectedLanguage);
-        editor.apply();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        setPreferences();
     }
 
 //    private void CheckForUpdates() {
@@ -920,7 +891,7 @@ public class MainActivity extends AppCompatActivity
                             finish();
                         });
 
-        alertDialogBuilder.show();
+        permissionDialog = alertDialogBuilder.show();
     }
 
     public boolean checkRequirements() {
@@ -946,5 +917,16 @@ public class MainActivity extends AppCompatActivity
 
     public String getSelectedLanguage() {
         return selectedLanguage;
+    }
+
+    @Override
+    public void recreate() {
+        for (AlertDialog dialog : new AlertDialog[]{masterDataDialog, enrolmentOfficerDialog, permissionDialog}) {
+            if(dialog != null && dialog.isShowing()) {
+                dialog.dismiss();
+            }
+        }
+
+        super.recreate();
     }
 }

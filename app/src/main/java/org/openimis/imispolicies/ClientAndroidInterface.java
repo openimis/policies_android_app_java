@@ -30,7 +30,6 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
@@ -157,6 +156,7 @@ public class ClientAndroidInterface {
     Picasso picassoInstance;
     Target imageTarget;
     StorageManager storageManager;
+
 
     ClientAndroidInterface(Context c) {
         mContext = c;
@@ -947,8 +947,6 @@ public class ClientAndroidInterface {
         int isOffline = 1;
         int insureeIsOffline = 1;
         int MaxInsureeId = 0;
-        Boolean res = false;
-        int newInsureeId = 0;
         try {
             global = (Global) mContext.getApplicationContext();
             HashMap<String, String> data = jsonToTable(InsureeData);
@@ -1061,7 +1059,6 @@ public class ClientAndroidInterface {
                     if (global.isNetworkAvailable()) {
                         //if (isOffline == 0){
                         MaxInsureeId = -MaxInsureeId;
-                        newInsureeId = MaxInsureeId;
                         //}
                         values.put("InsureeId", MaxInsureeId);
 
@@ -1116,41 +1113,11 @@ public class ClientAndroidInterface {
                 values.put("isOffline", insureeIsOffline);
                 sqlHandler.updateData("tblInsuree", values, "InsureeId = ? AND (isOffline = ?)", new String[]{String.valueOf(InsureeId), String.valueOf(insureeIsOffline)});
             }
-            if (global.isNetworkAvailable()) {
-                if (isOffline == 0 || isOffline == 2) {
-                    if (isOffline == 2) isOffline = 0;
-                    if (global.getUserId() > 0) {
-                        if (rtInsureeId > 0) {
-                            newInsureeId = -rtInsureeId;
-                        } else {
-                            newInsureeId = rtInsureeId;
-                        }
-                        if (rtInsureeId == 0 && res) {
-                            inProgress = false;
-                        } else {
-                        }
-                        inProgress = false;
-                    }
-                    inProgress = false;
-                } else {
-                    inProgress = false;
-                }
-                inProgress = false;
-            } else {
-                inProgress = false;
-            }
-
-
-        } catch (NumberFormatException e) {
-            e.printStackTrace();
-            throw new Exception(e.getMessage());
-        } catch (UserException e) {
+        } catch (NumberFormatException | UserException e) {
             e.printStackTrace();
             throw new Exception(e.getMessage());
         }
-        while (inProgress) {
-        }
-        inProgress = false;
+
         return rtInsureeId;
     }
 
@@ -3212,18 +3179,19 @@ public class ClientAndroidInterface {
             if (CallerId != 2) {
                 Query += " I.FamilyId = " + FamilyId + " \n";
                 if (Integer.parseInt(Offline) == 0) {
-                    if (CallerId == 1 || CallerId == 2) {
+                    if (CallerId == 1) {
                         Query += " AND  I.InsureeId < 0" + "";
                     }
                 }
             } else {
-                Query += "I.InsureeId < 0 AND (";
+                Query += "(";
                 for (int j = 0; j < verifiedId.size(); j++) {
+
                     if (getFamilyStatus(Integer.parseInt(verifiedId.get(j))) == 0) {
                         if ((verifiedId.size() - j) == 1) {
-                            Query += " I.FamilyId == " + verifiedId.get(j) + "";
+                            Query += "I.InsureeId < 0 AND  I.FamilyId == " + verifiedId.get(j) + "";
                         } else {
-                            Query += " I.FamilyId == " + verifiedId.get(j) + " OR ";
+                            Query += "I.InsureeId < 0 AND  I.FamilyId == " + verifiedId.get(j) + " OR ";
                         }
                     } else {
                         if ((verifiedId.size() - j) == 1) {
@@ -3502,11 +3470,12 @@ public class ClientAndroidInterface {
                     }
 
                     if (mylist.size() == 0) {
-                        if (CallerId == 1 || CallerId == 2) {
+                        if (CallerId == 1) {
                             DeleteImages(insureesArray, verifiedId, CallerId);
-                            DeleteUploadedData(Integer.parseInt(FamilyId), verifiedId, CallerId);
-                            DeleteFamily(Integer.parseInt(FamilyId));
                         }
+
+                        DeleteUploadedData(Integer.parseInt(FamilyId), verifiedId, CallerId);
+                        DeleteFamily(Integer.parseInt(FamilyId));
                     }
 
 
@@ -3543,15 +3512,12 @@ public class ClientAndroidInterface {
             } else {
                 EnrolResult = 0;
 
-                if (CallerId == 1 || CallerId == 2) {
+                if (CallerId == 1) {
                     DeleteImages(insureesArray, verifiedId, CallerId);
-                    DeleteUploadedData(Integer.parseInt(FamilyId), verifiedId, CallerId);
                 }
-                if (CallerId == 1 || CallerId != 0) {
-                    DeleteImages(insureesArray, verifiedId, CallerId);
-                    if (IsOffline == 0 || IsOffline == 0) {
-                        DeleteFamily(Integer.parseInt(FamilyId));
-                    }
+                DeleteUploadedData(Integer.parseInt(FamilyId), verifiedId, CallerId);
+                if (IsOffline == 0) {
+                    DeleteFamily(Integer.parseInt(FamilyId));
                 }
             }
 
@@ -5218,12 +5184,7 @@ public class ClientAndroidInterface {
     public File[] getPhotos() {
         String path = mContext.getApplicationInfo().dataDir + "/Images/";
         File Directory = new File(path);
-        FilenameFilter filter = new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String filename) {
-                return filename.contains("0");
-            }
-        };
+        FilenameFilter filter = (dir, filename) -> filename.contains("0");
         File[] newFiles = Directory.listFiles(filter);
         return Directory.listFiles(filter);
     }
@@ -5272,16 +5233,12 @@ public class ClientAndroidInterface {
             } else {
                 Uploaded = 0;
             }
-            ((Activity) mContext).runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    if (Uploaded == 1) {
-                        ShowDialog(mContext.getResources().getString(R.string.PhotosUploaded));
-                    } else {
-                        ShowDialog(mContext.getResources().getString(R.string.NoPhoto));
-                    }
+            ((Activity) mContext).runOnUiThread(() -> {
+                if (Uploaded == 1) {
+                    ShowDialog(mContext.getResources().getString(R.string.PhotosUploaded));
+                } else {
+                    ShowDialog(mContext.getResources().getString(R.string.NoPhoto));
                 }
-
             });
             pd.dismiss();
         }).start();
@@ -5450,8 +5407,8 @@ public class ClientAndroidInterface {
 
             if (!JsonUtils.isStringEmpty(insureeObj, "photoPath", true)) {
                 String[] photoPathSegments = insureeObj.getString("photoPath").split("[\\\\/]");
-                String photoName = photoPathSegments[photoPathSegments.length-1];
-                if(!StringUtils.isEmpty(photoName)) {
+                String photoName = photoPathSegments[photoPathSegments.length - 1];
+                if (!StringUtils.isEmpty(photoName)) {
                     String imagePath = global.getImageFolder() + photoName;
                     insureeObj.put("photoPath", imagePath);
                     OutputStream imageOutputStream = new FileOutputStream(imagePath);
@@ -5894,71 +5851,66 @@ public class ClientAndroidInterface {
 
     public void LoginDialogBox(final String page) {
 
-        ((Activity) mContext).runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                // check internet connection
-                if (!CheckInternetAvailable())
-                    return;
-                // get prompts.xml view
-                LayoutInflater li = LayoutInflater.from(mContext);
-                View promptsView = li.inflate(R.layout.login_dialog, null);
+        ((Activity) mContext).runOnUiThread(() -> {
+            // check internet connection
+            if (!CheckInternetAvailable())
+                return;
+            // get prompts.xml view
+            LayoutInflater li = LayoutInflater.from(mContext);
+            View promptsView = li.inflate(R.layout.login_dialog, null);
 
-                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(mContext);
+            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(mContext);
 
-                // set prompts.xml to alertdialog builder
-                alertDialogBuilder.setView(promptsView);
+            // set prompts.xml to alertdialog builder
+            alertDialogBuilder.setView(promptsView);
 
-                final TextView username = (TextView) promptsView.findViewById(R.id.UserName);
-                final TextView password = (TextView) promptsView.findViewById(R.id.Password);
+            final TextView username = promptsView.findViewById(R.id.UserName);
+            final TextView password = promptsView.findViewById(R.id.Password);
 
-                // set dialog message
-                alertDialogBuilder
-                        .setCancelable(false)
-                        .setPositiveButton("OK",
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id) {
-                                        if (!username.getText().toString().equals("") || !password.getText().toString().equals("")) {
-                                            boolean isUserLogged = false;
-                                            isUserLogged = LoginToken(username.getText().toString(), password.getText().toString());
+            // set dialog message
+            alertDialogBuilder
+                    .setCancelable(false)
+                    .setPositiveButton("OK",
+                            (dialog, id) -> {
+                                if (!username.getText().toString().equals("") || !password.getText().toString().equals("")) {
+                                    boolean isUserLogged = false;
+                                    isUserLogged = LoginToken(username.getText().toString(), password.getText().toString());
 
-                                            if (isUserLogged) {
-                                                if (page.equals("Enquire")) {
-                                                    ((Enquire) mContext).finish();
-                                                    Intent intent = new Intent(mContext, Enquire.class);
-                                                    mContext.startActivity(intent);
-                                                }
-                                                if (page.equals("Renewals")) {
-                                                    ((RenewList) mContext).finish();
-                                                    Intent intent = new Intent(mContext, RenewList.class);
-                                                    mContext.startActivity(intent);
-                                                }
-                                                if (page.equals("Feedbacks")) {
-                                                    ((FeedbackList) mContext).finish();
-                                                    Intent intent = new Intent(mContext, FeedbackList.class);
-                                                    mContext.startActivity(intent);
-                                                }
-                                                if (page.equals("Reports")) {
-                                                    ((FeedbackList) mContext).finish();
-                                                    Intent intent = new Intent(mContext, Reports.class);
-                                                    mContext.startActivity(intent);
-                                                }
-
-                                            } else {
-                                                ShowDialog(mContext.getResources().getString(R.string.LoginFail));
-                                            }
-                                        } else {
-                                            Toast.makeText(mContext, "Please enter user name and password", Toast.LENGTH_LONG).show();
+                                    if (isUserLogged) {
+                                        if (page.equals("Enquire")) {
+                                            ((Enquire) mContext).finish();
+                                            Intent intent = new Intent(mContext, Enquire.class);
+                                            mContext.startActivity(intent);
                                         }
+                                        if (page.equals("Renewals")) {
+                                            ((RenewList) mContext).finish();
+                                            Intent intent = new Intent(mContext, RenewList.class);
+                                            mContext.startActivity(intent);
+                                        }
+                                        if (page.equals("Feedbacks")) {
+                                            ((FeedbackList) mContext).finish();
+                                            Intent intent = new Intent(mContext, FeedbackList.class);
+                                            mContext.startActivity(intent);
+                                        }
+                                        if (page.equals("Reports")) {
+                                            ((FeedbackList) mContext).finish();
+                                            Intent intent = new Intent(mContext, Reports.class);
+                                            mContext.startActivity(intent);
+                                        }
+
+                                    } else {
+                                        ShowDialog(mContext.getResources().getString(R.string.LoginFail));
                                     }
-                                });
+                                } else {
+                                    Toast.makeText(mContext, "Please enter user name and password", Toast.LENGTH_LONG).show();
+                                }
+                            });
 
-                // create alert dialog
-                AlertDialog alertDialog = alertDialogBuilder.create();
+            // create alert dialog
+            AlertDialog alertDialog = alertDialogBuilder.create();
 
-                // show it
-                alertDialog.show();
-            }
+            // show it
+            alertDialog.show();
         });
 
     }
