@@ -109,7 +109,7 @@ $(document).ready(function () {
 
                 }
                 var InsureeId = Android.SaveInsuree(jsonInsuree, FamilyId, 0, parseInt(ExceedThreshold), PolicyId);
-                if (TotalIns >= MemberCount) {
+                if (PolicyId > 0 && TotalIns >= MemberCount) {
                     $("#divProgress").hide();
                 } else {
                     $("#divProgress").hide();
