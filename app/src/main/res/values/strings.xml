@@ -460,4 +460,7 @@
     <string name="WithoutPremium">without a premium</string>
     <string name="HttpResponse">HTTP response: %1$d — %2$s</string>
     <string name="EnquireNoPolicies">No policies registered.</string>
+    <string name="EnquirePolicyCovered">Policy Status: Covered</string>
+    <string name="EnquirePolicyNotCovered">Policy Status: Not Covered</string>
+    <string name="EnquirePolicyLabel">Policy Status</string>
 </resources>
