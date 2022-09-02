@@ -5321,22 +5321,30 @@ public class ClientAndroidInterface {
     public int ModifyFamily(final String InsuranceNumber) {
         IsFamilyAvailable = 0;
         inProgress = true;
-        String Query = "SELECT * FROM tblInsuree WHERE Trim(CHFID) = '" + InsuranceNumber + "'";
-        JSONArray JsonInsNo = sqlHandler.getResult(Query, null);
 
-        if (JsonInsNo.length() > 0) {
-            IsFamilyAvailable = 2;
+        int insureeCount = sqlHandler.getCount("tblInsuree", "Trim(CHFID) = ?", new String[]{InsuranceNumber});
+        if (insureeCount > 0) {
+            ShowDialog(mContext.getResources().getString(R.string.FamilyExists));
         } else {
             try {
                 ToRestApi rest = new ToRestApi();
-                String MD = rest.getObjectFromRestApiToken("family/" + InsuranceNumber.trim());
-                if (!StringUtils.isEmpty(MD)) {
-                    JSONObject FamilyData = new JSONObject(MD);
-                    if (FamilyData.length() == 0) {
-                        IsFamilyAvailable = 0;
-                    } else {
+                HttpResponse response = rest.getFromRestApiToken("family/" + InsuranceNumber.trim());
+                String error = rest.getHttpError(mContext, response.getStatusLine().getStatusCode(), response.getStatusLine().getReasonPhrase());
+                String content = rest.getContent(response);
+
+                if (response.getStatusLine().getStatusCode() == HttpURLConnection.HTTP_NOT_FOUND) {
+                    ShowDialog(mContext.getResources().getString(R.string.InsuranceNumberNotFound));
+                } else if (!StringUtils.isEmpty(error)) {
+                    ShowDialog(error);
+                } else if (StringUtils.isEmpty(content)) {
+                    ShowDialog(mContext.getResources().getString(R.string.SomethingWrongServer));
+                } else {
+                    JSONObject FamilyData = new JSONObject(content);
+                    if (FamilyData.length() != 0) {
                         parseFamilyData(FamilyData);
                         IsFamilyAvailable = 1;
+                    } else {
+                        ShowDialog(mContext.getResources().getString(R.string.InsuranceNumberNotFound));
                     }
                 }
             } catch (JSONException | UserException | IOException e) {
