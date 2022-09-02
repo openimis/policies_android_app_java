@@ -62,9 +62,9 @@
             tools:ignore="RtlHardcoded" />
 
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical" >
+            android:orientation="vertical">
 
 
             <TextView
@@ -91,6 +91,13 @@
             <TextView
                 android:id="@+id/tvDOB"
                 android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/BirthDate"
+                android:textAppearance="?android:attr/textAppearanceSmall" />
+
+            <TextView
+                android:id="@+id/tvPolicyStatus"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/BirthDate"
                 android:textAppearance="?android:attr/textAppearanceSmall" />
