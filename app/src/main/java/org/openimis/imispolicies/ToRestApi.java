@@ -1,5 +1,7 @@
 package org.openimis.imispolicies;
 
+import android.content.Context;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -175,7 +177,7 @@ public class ToRestApi {
                 content = EntityUtils.toString(respEntity);
                 if (content != null && content.length() > 0
                         && response.getStatusLine().getStatusCode() >= 400) {
-                    Log.e("HTTP", "Error response: " + content);
+                    Log.e("HTTP", "Error " + response.getStatusLine().getStatusCode() + ", response: " + content);
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -197,5 +199,19 @@ public class ToRestApi {
             return String.format("bearer %s", tokenText.trim());
         }
         return "";
+    }
+
+    public String getHttpError(Context context, int httpResponseCode, String httpReason) {
+        if (httpResponseCode == HttpURLConnection.HTTP_OK || httpResponseCode == HttpURLConnection.HTTP_CREATED) {
+            return null;
+        } else if (httpResponseCode == HttpURLConnection.HTTP_NOT_FOUND) {
+            return context.getResources().getString(R.string.NotFound);
+        } else if (httpResponseCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
+            return context.getResources().getString(R.string.Unauthorized);
+        } else if (httpResponseCode == HttpURLConnection.HTTP_FORBIDDEN) {
+            return context.getResources().getString(R.string.Forbidden);
+        } else {
+            return context.getResources().getString(R.string.HttpResponse, httpResponseCode, httpReason);
+        }
     }
 }

@@ -99,7 +99,7 @@
                 android:id="@+id/tvPolicyStatus"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/BirthDate"
+                android:text="@string/EnquirePolicyLabel"
                 android:textAppearance="?android:attr/textAppearanceSmall" />
 
         </LinearLayout>

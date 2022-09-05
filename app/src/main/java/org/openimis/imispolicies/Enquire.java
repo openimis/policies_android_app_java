@@ -279,10 +279,9 @@ public class Enquire extends AppCompatActivity {
 
                     jsonArray = jsonObject.getJSONArray("details");
 
-                    if (jsonArray.length()==1 && jsonArray.getJSONObject(0).getString("expiryDate").equals("null")){
+                    if (jsonArray.length() == 1 && jsonArray.getJSONObject(0).getString("expiryDate").equals("null")) {
                         tvPolicyStatus.setText(getResources().getString(R.string.EnquirePolicyNotCovered));
-                    }
-                    else{
+                    } else {
                         tvPolicyStatus.setText(getResources().getString(R.string.EnquirePolicyCovered));
                     }
 
