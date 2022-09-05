@@ -464,4 +464,7 @@
     <string name="Forbidden">You are not allowed to take this action.</string>
     <string name="UnknownError">Unknown Error.</string>
     <string name="NotFound">Entry does not exist.</string>
+    <string name="EnquirePolicyCovered">Policy Status: Covered</string>
+    <string name="EnquirePolicyNotCovered">Policy Status: Not Covered</string>
+    <string name="EnquirePolicyLabel">Policy Status</string>
 </resources>

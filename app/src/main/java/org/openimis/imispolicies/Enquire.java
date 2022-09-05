@@ -74,6 +74,7 @@ public class Enquire extends AppCompatActivity {
     private TextView tvName;
     private TextView tvGender;
     private TextView tvDOB;
+    private TextView tvPolicyStatus;
     private ListView lv;
     private ImageView iv;
     private LinearLayout ll;
@@ -105,6 +106,7 @@ public class Enquire extends AppCompatActivity {
         tvCHFID = findViewById(R.id.tvCHFID);
         tvName = findViewById(R.id.tvName);
         tvDOB = findViewById(R.id.tvDOB);
+        tvPolicyStatus = findViewById(R.id.tvPolicyStatus);
         tvGender = findViewById(R.id.tvGender);
         iv = findViewById(R.id.imageView);
         ImageButton btnGo = findViewById(R.id.btnGo);
@@ -185,6 +187,7 @@ public class Enquire extends AppCompatActivity {
         tvCHFID.setText(getResources().getString(R.string.InsuranceNumber));
         tvName.setText(getResources().getString(R.string.InsureeName));
         tvDOB.setText(getResources().getString(R.string.BirthDate));
+        tvPolicyStatus.setText(getResources().getString(R.string.EnquirePolicyLabel));
         tvGender.setText(getResources().getString(R.string.Gender));
         iv.setImageResource(R.drawable.person);
         ll.setVisibility(View.INVISIBLE);
@@ -235,6 +238,7 @@ public class Enquire extends AppCompatActivity {
                     tvCHFID.setText(jsonObject.getString("chfid"));
                     tvName.setText(jsonObject.getString("insureeName"));
                     tvDOB.setText(jsonObject.getString("dob"));
+                    tvPolicyStatus.setText(getResources().getString(R.string.EnquirePolicyLabel));
                     tvGender.setText(jsonObject.getString("gender"));
 
                     if (global.isNetworkAvailable()) {
@@ -274,6 +278,12 @@ public class Enquire extends AppCompatActivity {
                     }
 
                     jsonArray = jsonObject.getJSONArray("details");
+
+                    if (jsonArray.length() == 1 && jsonArray.getJSONObject(0).getString("expiryDate").equals("null")) {
+                        tvPolicyStatus.setText(getResources().getString(R.string.EnquirePolicyNotCovered));
+                    } else {
+                        tvPolicyStatus.setText(getResources().getString(R.string.EnquirePolicyCovered));
+                    }
 
                     for (i = 0; i < jsonArray.length(); i++) {
                         HashMap<String, String> Policy = new HashMap<>();
