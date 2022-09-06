@@ -8,7 +8,7 @@ apply from: "$project.rootDir/script-git-version.gradle"
 // Load keystore
 def keystorePropertiesFile = file("keystore.properties")
 def keystoreProperties = new Properties()
-if ( keystorePropertiesFile.exists() ) {
+if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 }
 
@@ -20,9 +20,9 @@ static def getDate() {
 }
 
 android {
-    compileSdkVersion 32
-    buildToolsVersion '30.0.3'
-    if ( keystorePropertiesFile.exists() ) {
+    compileSdkVersion 33
+    buildToolsVersion '33.0.0'
+    if (keystorePropertiesFile.exists()) {
         signingConfigs {
             releaseConfig {
                 storeFile file(keystoreProperties['storeFile'])
@@ -35,7 +35,7 @@ android {
     defaultConfig {
         applicationId "org.openimis.imispolicies"
         minSdkVersion 19
-        targetSdkVersion 32
+        targetSdkVersion 33
         versionCode gitVersionCode
         versionName gitVersionName
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -49,7 +49,7 @@ android {
             shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             debuggable = false
-            if ( keystorePropertiesFile.exists() ) {
+            if (keystorePropertiesFile.exists()) {
                 signingConfig signingConfigs.releaseConfig
             }
             buildConfigField "boolean", "LOGGING_ENABLED", "false"
@@ -65,7 +65,7 @@ android {
 
             // Refer to https://developer.android.com/reference/android/util/Log for the log level values
             buildConfigField "int", "CONSOLE_LOG_LEVEL", '2' //Verbose
-            buildConfigField "int", "FILE_LOG_LEVEL", '2' //Verbose
+            buildConfigField "int", "FILE_LOG_LEVEL", '5' //Warn
         }
         flavorDimensions 'std'
     }
@@ -76,7 +76,6 @@ android {
         buildConfigField "boolean", "SHOW_BULK_CN_MENU", 'false'
         buildConfigField "String", "RAR_PASSWORD", '")(#$1HsD"'
         buildConfigField "String", "API_VERSION", '"3"'
-        buildConfigField "String", "APP_DIR", '"IMIS"'
         buildConfigField "String", "DEFAULT_LANGUAGE_CODE", '"en"'
         resValue "string", "app_name_policies", "Policies"
         resValue "string", "ReleaseDateValue", getDate()
@@ -85,14 +84,12 @@ android {
         demoProd {
             applicationId "org.openimis.imispolicies.demoProd"
             buildConfigField "String", "API_BASE_URL", '"https://demo.openimis.org/rest/"'
-            buildConfigField "String", "APP_DIR", '"IMIS-DEMOPROD"'
             resValue "string", "app_name_policies", "Policies Demo"
             dimension = 'std'
         }
         demoRelease {
             applicationId "org.openimis.imispolicies.demoRelease"
             buildConfigField "String", "API_BASE_URL", '"https://legacy-release.s1.openimis.org/rest/"'
-            buildConfigField "String", "APP_DIR", '"IMIS-DEMORELEASE"'
             resValue "string", "app_name_policies", "Policies Release"
         }
         chfDev {
@@ -100,7 +97,6 @@ android {
             buildConfigField "String", "API_BASE_URL", '"http://chf-dev.swisstph-mis.ch/rest/"'
             buildConfigField "boolean", "SHOW_PAYMENT_MENU", 'true'
             buildConfigField "boolean", "SHOW_BULK_CN_MENU", 'true'
-            buildConfigField "String", "APP_DIR", '"IMIS-CHFDEV"'
             buildConfigField "String", "DEFAULT_LANGUAGE_CODE", '"en-tz"'
             resValue "string", "app_name_policies", "Policies CHF DEV"
             dimension = 'std'
@@ -109,7 +105,6 @@ android {
             applicationId "org.openimis.imispolicies.mv"
             buildConfigField "String", "API_BASE_URL", '"http://imis-mv.swisstph-mis.ch/rest/"'
             buildConfigField "boolean", "SHOW_PAYMENT_MENU", 'true'
-            buildConfigField "String", "APP_DIR", '"IMIS-MVDEV"'
             buildConfigField "String", "API_VERSION", '"3"'
             resValue "string", "app_name_policies", "Policies MV DEV"
             dimension = 'std'
@@ -117,7 +112,6 @@ android {
         bephaDev {
             applicationId "org.openimis.imispolicies.bepha"
             buildConfigField "String", "API_BASE_URL", '"http://149.210.235.40/devupgrade/rest/"'
-            buildConfigField "String", "APP_DIR", '"IMIS-BEPHADEV"'
             buildConfigField "String", "DEFAULT_LANGUAGE_CODE", '"en-cm"'
             resValue "string", "app_name_policies", "Policies BEPHA DEV"
             dimension = 'std'
@@ -125,14 +119,12 @@ android {
         tchadDev {
             applicationId "org.openimis.imispolicies.tchadDev"
             buildConfigField "String", "API_BASE_URL", '"http://imis-tchad-dev.swisstph-mis.ch/rest/"'
-            buildConfigField "String", "APP_DIR", '"IMIS-TCHADDEV"'
             resValue "string", "app_name_policies", "Policies TCHAD DEV"
             dimension = 'std'
         }
         local {
             applicationId "org.openimis.imispolicies.local"
             buildConfigField "String", "API_BASE_URL", '"http://10.0.2.2:35787/"'
-            buildConfigField "String", "APP_DIR", '"IMIS-LOCAL"'
             buildConfigField "boolean", "SHOW_PAYMENT_MENU", 'true'
             resValue "string", "app_name_policies", "Policies Local"
             dimension = 'std'
@@ -141,13 +133,11 @@ android {
         niger {
             applicationId "org.openimis.imispolicies.niger"
             buildConfigField "String", "API_BASE_URL", '"' + (System.getenv("API_BASE_URL") ?: 'http://192.168.0.100/') + '"'
-            buildConfigField "String", "APP_DIR", '"' + (System.getenv("CLI_APP_DIR") ?: 'IMIS-POL') + '"'
             resValue "string", "app_name_policies", System.getenv("CLI_APP_NAME") ?: "Polices Niger"
         }
         cli {
             applicationIdSuffix System.getenv("APPLICATION_ID") ?: "org.openimis.imispolicies.cli"
             buildConfigField "String", "API_BASE_URL", '"' + (System.getenv("API_BASE_URL") ?: 'http://10.0.2.2:35787/') + '"'
-            buildConfigField "String", "APP_DIR", '"' + (System.getenv("CLI_APP_DIR") ?: 'IMIS-CLI') + '"'
             resValue "string", "app_name_policies", System.getenv("CLI_APP_NAME") ?: "Policies CLI"
             dimension 'std'
         }
@@ -156,7 +146,6 @@ android {
             buildConfigField "String", "API_BASE_URL", '"https://formation.cnass-mauritanie.swisstph-mis.ch/rest/"'
             buildConfigField "boolean", "SHOW_PAYMENT_MENU", 'false'
             buildConfigField "boolean", "SHOW_BULK_CN_MENU", 'false'
-            buildConfigField "String", "APP_DIR", '"IMIS-MAURITANIA-TRAIN"'
             resValue "string", "app_name_policies", "Policies CNASS TRAIN"
             dimension = 'std'
         }
@@ -196,8 +185,8 @@ android {
         mauritaniaTrain.java.srcDir 'src/master/java'
     }
 
-// Apply custom flavours
-    if(file('custom-flavours.gradle').exists()){
+    // Apply custom flavours
+    if (file('custom-flavours.gradle').exists()) {
         apply from: 'custom-flavours.gradle'
     }
 
@@ -207,12 +196,14 @@ android {
     }
 
     packagingOptions {
-        exclude 'META-INF/DEPENDENCIES'
+        resources {
+            excludes += ['META-INF/DEPENDENCIES']
+        }
     }
 }
 
 dependencies {
-    implementation  fileTree(include: ['*.jar','*.aar'], dir: 'libs')
+    implementation fileTree(include: ['*.jar', '*.aar'], dir: 'libs')
     implementation 'com.android.support:appcompat-v7:28.0.0'
     implementation 'com.android.support:design:28.0.0'
     implementation 'com.android.support.constraint:constraint-layout:2.0.4'
@@ -222,13 +213,10 @@ dependencies {
     implementation 'com.android.support:recyclerview-v7:28.0.0'
     implementation 'org.apache.commons:commons-lang3:3.12.0'
     implementation 'org.jetbrains:annotations:15.0'
-    implementation 'org.apache.httpcomponents:httpclient:4.5.9'
-    implementation 'org.apache.httpcomponents:httpcore:4.4.11'
-
-
+    implementation 'cz.msebera.android:httpclient:4.5.8'
 
     androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    testImplementation 'junit:junit:4.13.1'
+    testImplementation 'junit:junit:4.13.2'
 }

@@ -52,7 +52,8 @@ import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.apache.http.HttpResponse;
+import cz.msebera.android.httpclient.HttpResponse;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -186,7 +187,7 @@ public class RenewList extends AppCompatActivity {
                                     if (unzippedFiles.length == 0) {
                                         Log.w(LOG_TAG, "No renewal files after unpacking");
                                     }
-                                    for(File f: unzippedFiles) {
+                                    for (File f : unzippedFiles) {
                                         String renewals = loadRenewalFile(f);
                                         if (renewals != null) {
                                             ca.InsertRenewalsFromExtract(renewals);

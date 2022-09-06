@@ -59,8 +59,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import static org.openimis.imispolicies.BuildConfig.APP_DIR;
-
 public class Global extends Application {
     private static Global GlobalContext;
     public static final String PREF_NAME = "CMPref";
