@@ -2,15 +2,16 @@ package org.openimis.imispolicies;
 
 import android.content.Context;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.util.EntityUtils;
+import cz.msebera.android.httpclient.HttpEntity;
+import cz.msebera.android.httpclient.HttpResponse;
+import cz.msebera.android.httpclient.client.HttpClient;
+import cz.msebera.android.httpclient.client.methods.HttpDelete;
+import cz.msebera.android.httpclient.client.methods.HttpGet;
+import cz.msebera.android.httpclient.client.methods.HttpPost;
+import cz.msebera.android.httpclient.entity.StringEntity;
+import cz.msebera.android.httpclient.impl.client.DefaultHttpClient;
+import cz.msebera.android.httpclient.util.EntityUtils;
+
 import org.json.JSONObject;
 import org.openimis.imispolicies.tools.Log;
 
@@ -109,7 +110,7 @@ public class ToRestApi {
             if (object != null && responseCode >= 400 && !functionName.equals("login")) {
                 String body = object.toString();
                 if (body.length() > 1000) {
-                    body = body.substring(0,1000);
+                    body = body.substring(0, 1000);
                 }
                 Log.e("HTTP_POST", "Body: " + body);
             }

@@ -460,4 +460,16 @@
     <string name="WithoutPremium">without a premium</string>
     <string name="HttpResponse">HTTP response: %1$d — %2$s</string>
     <string name="EnquireNoPolicies">No policies registered.</string>
+    <string name="UsedChequeNumber">This cheque number already used</string>
+    <string name="AbortedChequeNumber">This cheque number was aborted</string>
+    <string name="DownladChequeDataFail">Could not download cheque numbers data</string>
+    <string name="EnquirePolicyCovered">Policy Status: Covered</string>
+    <string name="EnquirePolicyNotCovered">Policy Status: Not Covered</string>
+    <string name="EnquirePolicyLabel">Policy Status</string>
+    <string name="NotExistChequeNumber">This cheque number not exist</string>
+    <string name="PhotoRequired">Please add a picture</string>
+    <string name="NotFound">Entry does not exist.</string>
+    <string name="Unauthorized">Authorization failed.</string>
+    <string name="UnknownError">Unknown Error.</string>
+    <string name="Forbidden">You are not allowed to take this action.</string>
 </resources>

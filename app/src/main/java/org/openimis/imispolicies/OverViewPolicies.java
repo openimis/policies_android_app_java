@@ -23,9 +23,10 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.util.EntityUtils;
+import cz.msebera.android.httpclient.HttpEntity;
+import cz.msebera.android.httpclient.HttpResponse;
+import cz.msebera.android.httpclient.util.EntityUtils;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -41,8 +42,8 @@ import android.app.ProgressDialog;
 import android.widget.Toast;
 
 public class OverViewPolicies extends AppCompatActivity {
-    private  Global global;
-    private  JSONArray policy;
+    private Global global;
+    private JSONArray policy;
     private ClientAndroidInterface clientAndroidInterface;
     private RecyclerView PolicyRecyclerView;
     private OverViewPoliciesAdapter overViewPoliciesAdapter;

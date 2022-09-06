@@ -76,9 +76,9 @@ import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Date;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.util.EntityUtils;
+import cz.msebera.android.httpclient.HttpEntity;
+import cz.msebera.android.httpclient.HttpResponse;
+import cz.msebera.android.httpclient.util.EntityUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;

@@ -44,13 +44,15 @@ import android.widget.EditText;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
+
 import java.text.DateFormat;
 
 import com.exact.CallSoap.CallSoap;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.util.EntityUtils;
+import cz.msebera.android.httpclient.HttpEntity;
+import cz.msebera.android.httpclient.HttpResponse;
+import cz.msebera.android.httpclient.util.EntityUtils;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -76,7 +78,7 @@ public class Statistics extends AppCompatActivity {
     private static final int ToDate_Dialog_ID = 1;
     private final Calendar cal = Calendar.getInstance();
     private ArrayList<HashMap<String, String>> FeedbackStats = new ArrayList<>();
-    ArrayList<HashMap<String,String>> EnrolmentStats = new ArrayList<HashMap<String, String>>();
+    ArrayList<HashMap<String, String>> EnrolmentStats = new ArrayList<HashMap<String, String>>();
     private String OfficerCode;
     private String Caller;
     private Global global;
@@ -215,8 +217,8 @@ public class Statistics extends AppCompatActivity {
 
                 new Thread() {
                     public void run() {
-                        if(!IsEnrolment)
-                        GetStatistics();
+                        if (!IsEnrolment)
+                            GetStatistics();
                         else
                             GetEnrolmentStats();
                         pd.dismiss();
@@ -260,16 +262,18 @@ public class Statistics extends AppCompatActivity {
         ToRestApi rest = new ToRestApi();
 
         if (Caller.equals("F")) {
-            HttpResponse response = rest.postToRestApiToken(objStats,"report/feedback");
+            HttpResponse response = rest.postToRestApiToken(objStats, "report/feedback");
             try {
                 stats = EntityUtils.toString(response.getEntity());
-            } catch (Exception e) {}
+            } catch (Exception e) {
+            }
 
         } else if (Caller.equals("R")) {
-            HttpResponse response = rest.postToRestApiToken(objStats,"report/renewal");
+            HttpResponse response = rest.postToRestApiToken(objStats, "report/renewal");
             try {
                 stats = EntityUtils.toString(response.getEntity());
-            } catch (Exception e) {}
+            } catch (Exception e) {
+            }
         }
 
         final String finalStats = stats;
@@ -320,7 +324,8 @@ public class Statistics extends AppCompatActivity {
 
 
     }
-    private void GetEnrolmentStats(){
+
+    private void GetEnrolmentStats() {
         EnrolmentStats = new ArrayList<>();
 
         Date FromDate, ToDate;
@@ -346,7 +351,7 @@ public class Statistics extends AppCompatActivity {
         }
 
         ToRestApi rest = new ToRestApi();
-        HttpResponse response = rest.postToRestApiToken(objEnrolment,"report/enrolment");
+        HttpResponse response = rest.postToRestApiToken(objEnrolment, "report/enrolment");
 
         HttpEntity entity = response.getEntity();
         String entityString = "";
@@ -355,7 +360,8 @@ public class Statistics extends AppCompatActivity {
         try {
             entityString = EntityUtils.toString(entity);
             enrolmentStatsObj = new JSONObject(entityString);
-        } catch (Exception e) {}
+        } catch (Exception e) {
+        }
 
         final JSONObject finalEnrolmentStatsObj = enrolmentStatsObj;
 
@@ -363,10 +369,10 @@ public class Statistics extends AppCompatActivity {
             @Override
             public void run() {
                 try {
-                    if(finalEnrolmentStatsObj.length() == 0){
+                    if (finalEnrolmentStatsObj.length() == 0) {
                         ShowDialog(getResources().getString(R.string.NoStatFound));
-                    }else{
-                        HashMap<String,String> data = new HashMap<String, String>();
+                    } else {
+                        HashMap<String, String> data = new HashMap<String, String>();
                         data.put("Label", "Total Submitted");
                         data.put("Value", String.valueOf(finalEnrolmentStatsObj.get("totalSubmitted")));
                         EnrolmentStats.add(data);
@@ -379,19 +385,19 @@ public class Statistics extends AppCompatActivity {
                         ListAdapter adapter = new SimpleAdapter(Statistics.this,
                                 EnrolmentStats,
                                 R.layout.lvstats,
-                                new String[]{"Label","Value"},
-                                new int[]{R.id.tvStatsLabel,R.id.tvStats}
+                                new String[]{"Label", "Value"},
+                                new int[]{R.id.tvStatsLabel, R.id.tvStats}
                         );
 
                         lvStats.setAdapter(adapter);
                     }
-                }
-                catch (JSONException e) {
+                } catch (JSONException e) {
                     e.printStackTrace();
                 }
             }
         });
     }
+
     private AlertDialog ShowDialog(String msg) {
         return new AlertDialog.Builder(this)
                 .setMessage(msg)
