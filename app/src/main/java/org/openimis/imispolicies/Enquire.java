@@ -53,12 +53,14 @@ import android.util.Base64;
 
 import com.squareup.picasso.Picasso;
 
+import cz.msebera.android.httpclient.HttpResponse;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.openimis.imispolicies.util.JsonUtils;
 
 import java.io.ByteArrayInputStream;
+import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -200,20 +202,28 @@ public class Enquire extends AppCompatActivity {
         result = "";
 
         if (global.isNetworkAvailable()) {
-            ToRestApi rest = new ToRestApi();
-            String res = rest.getObjectFromRestApiToken("insuree/" + chfid + "/enquire");
-
-            JSONObject jobj = new JSONObject();
             try {
-                jobj = new JSONObject(res);
-            } catch (JSONException e) {
-                Log.e(LOG_TAG, "Response is not a proper JSON", e);
+                ToRestApi rest = new ToRestApi();
+                HttpResponse response = rest.getFromRestApiToken("insuree/" + chfid + "/enquire");
+                int responseCode = response.getStatusLine().getStatusCode();
+                if (responseCode == HttpURLConnection.HTTP_OK) {
+                    JSONObject obj = new JSONObject(rest.getContent(response));
+                    JSONArray arr = new JSONArray();
+                    arr.put(obj);
+                    result = arr.toString();
+                }
+                else if (responseCode == HttpURLConnection.HTTP_NOT_FOUND) {
+                    // No insuree found
+                    result="[{}]";
+                } else {
+                    result="NETWORK_ERROR";
+                }
+
             }
-
-            JSONArray arr = new JSONArray();
-            arr.put(jobj);
-
-            result = arr.toString();
+            catch(Exception e){
+                Log.e(LOG_TAG, "Fetching online enquire failed", e);
+                result="UNKNOWN_ERROR";
+            }
         } else {
             //TODO: yet to be done
             result = getDataFromDb(etCHFID.getText().toString());
@@ -223,8 +233,16 @@ public class Enquire extends AppCompatActivity {
             try {
                 JSONArray jsonArray = new JSONArray(result);
 
-                if (jsonArray.length() == 0) {
+                if (jsonArray.getJSONObject(0).length()==0) {
                     ca.ShowDialog(getResources().getString(R.string.RecordNotFound));
+                    return;
+                }
+                else if (jsonArray.getJSONObject(0).equals("NETWORK_ERROR")) {
+                    ca.ShowDialog(getResources().getString(R.string.NoInternet));
+                    return;
+                }
+                else if (jsonArray.getJSONObject(0).equals("UNKNOWN_ERROR")) {
+                    ca.ShowDialog(getResources().getString(R.string.UnknownError));
                     return;
                 }
 
