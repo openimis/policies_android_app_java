@@ -213,6 +213,17 @@ public class RenewList extends AppCompatActivity {
         }
     }
 
+    public void NoRenewalsFoundDialog() {
+        AlertDialog.Builder alertDialog2 = new AlertDialog.Builder(
+                RenewList.this);
+
+        alertDialog2.setTitle("Alert")
+                .setMessage(getResources().getString(R.string.NoRenewalFound))
+                .setPositiveButton("OK", null)
+                .create()
+                .show();
+    }
+
     private File copyRenewalFile(Uri uri) {
         File copiedFile = UriUtils.copyUriContentToCache(this, uri, "imports/renewal/renewal.rar");
         if (copiedFile != null) {
@@ -289,6 +300,9 @@ public class RenewList extends AppCompatActivity {
             renewal.put("RenewalUUID", "");
             renewalList.add(renewal);
 
+            if (jsonArray.length()==0) {
+                this.NoRenewalsFoundDialog();
+            }
             for (int i = 0; i < jsonArray.length(); i++) {
 
                 object = jsonArray.getJSONObject(i);
