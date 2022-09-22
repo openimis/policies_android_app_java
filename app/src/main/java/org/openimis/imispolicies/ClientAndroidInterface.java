@@ -64,6 +64,7 @@ import android.widget.Toast;
 import com.exact.CallSoap.CallSoap;
 import com.exact.InsureeImages;
 import com.exact.uploadfile.UploadFile;
+import com.google.zxing.client.android.CaptureActivity;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
@@ -4873,22 +4874,14 @@ public class ClientAndroidInterface {
     }
 
     @JavascriptInterface
-    public String getScannedNumber() {
-        //clearInsuranceNo();
-        //clearXml();
+    public void getScannedNumber() {
         Intent intent = new Intent("com.google.zxing.client.android.SCAN");
         intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
         try {
-            ((Activity) mContext).startActivityForResult(intent, 100);
-            ((MainActivity) mContext).InsureeNumber = "";
-            while (((MainActivity) mContext).InsureeNumber == "") {
-
-            }
+            ((Activity) mContext).startActivityForResult(intent, RESULT_SCAN);
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e("ENROL", "Error while trying to initiate QR scan", e);
         }
-
-        return ((MainActivity) mContext).InsureeNumber;
     }
 
     @JavascriptInterface

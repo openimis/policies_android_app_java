@@ -77,6 +77,7 @@ android {
         buildConfigField "String", "RAR_PASSWORD", '")(#$1HsD"'
         buildConfigField "String", "API_VERSION", '"3"'
         buildConfigField "String", "DEFAULT_LANGUAGE_CODE", '"en"'
+        buildConfigField "String[]", "SUPPORTED_LANGUAGES", '{"en", "fr"}'
         resValue "string", "app_name_policies", "Policies"
         resValue "string", "ReleaseDateValue", getDate()
     }
@@ -91,6 +92,7 @@ android {
             applicationId "org.openimis.imispolicies.demoRelease"
             buildConfigField "String", "API_BASE_URL", '"https://legacy-release.s1.openimis.org/rest/"'
             resValue "string", "app_name_policies", "Policies Release"
+            dimension = 'std'
         }
         chfDev {
             applicationId "org.openimis.imispolicies.chfdev"
@@ -134,6 +136,7 @@ android {
             applicationId "org.openimis.imispolicies.niger"
             buildConfigField "String", "API_BASE_URL", '"' + (System.getenv("API_BASE_URL") ?: 'http://192.168.0.100/') + '"'
             resValue "string", "app_name_policies", System.getenv("CLI_APP_NAME") ?: "Polices Niger"
+            dimension = 'std'
         }
         cli {
             applicationIdSuffix System.getenv("APPLICATION_ID") ?: "org.openimis.imispolicies.cli"

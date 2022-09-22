@@ -472,4 +472,9 @@
     <string name="Unauthorized">Authorization failed.</string>
     <string name="UnknownError">Unknown Error.</string>
     <string name="Forbidden">You are not allowed to take this action.</string>
+    <string name="LanguageCode">en</string>
+    <string name="LanguageSettings">Language settings</string>
+    <string name="CurrentResourceLanguage">Current resource language: %1$s</string>
+    <string name="SystemLanguageNotSupported">Current system language is not supported. The app will use the default language.</string>
+    <string name="SupportedLanguages">Supported languages:\n%1$s</string>
 </resources>
