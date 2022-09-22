@@ -44,6 +44,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.text.TextUtils;
 
+import org.openimis.imispolicies.tools.LanguageManager;
 import org.openimis.imispolicies.tools.Log;
 
 import android.view.KeyEvent;
@@ -64,11 +65,14 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.zxing.client.android.Intents;
+
 import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.openimis.imispolicies.util.AndroidUtils;
+import org.openimis.imispolicies.util.StringUtils;
 import org.openimis.imispolicies.util.UriUtils;
 
 import java.io.BufferedReader;
@@ -97,6 +101,7 @@ public class MainActivity extends AppCompatActivity
     static Global global;
     private static final int MENU_LANGUAGE_1 = Menu.FIRST;
     private static final int MENU_LANGUAGE_2 = Menu.FIRST + 1;
+    private static final int MENU_LANGUAGE_3 = Menu.FIRST + 2;
     private String Language1 = "";
     private String Language2 = "";
     private String LanguageCode1 = "";
@@ -133,7 +138,10 @@ public class MainActivity extends AppCompatActivity
             }
             wv.evaluateJavascript(String.format("selectImageCallback(\"%s\");", selectedImage), null);
         } else if (requestCode == ClientAndroidInterface.RESULT_SCAN && resultCode == RESULT_OK && data != null) {
-            this.InsureeNumber = data.getStringExtra("SCAN_RESULT");
+            String insureeNumber = data.getStringExtra(Intents.Scan.RESULT);
+            if(!StringUtils.isEmpty(insureeNumber)) {
+                wv.evaluateJavascript(String.format("scanQrCallback(\"%s\");", insureeNumber), null);
+            }
         } else if (requestCode == REQUEST_PICK_MD_FILE) {
             if (resultCode == RESULT_OK && data != null) {
                 Uri uri = data.getData();
@@ -212,7 +220,6 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         global = (Global) getApplicationContext();
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         sqlHandler = new SQLHandler(this);
@@ -291,8 +298,7 @@ public class MainActivity extends AppCompatActivity
 
         Login.setOnClickListener(v -> {
             wv.loadUrl("file:///android_asset/pages/Login.html?s=3");
-            DrawerLayout drawer1 = findViewById(R.id.drawer_layout);
-            drawer1.closeDrawer(GravityCompat.START);
+            drawer.closeDrawer(GravityCompat.START);
             SetLoggedIn(getApplication().getResources().getString(R.string.Login), getApplication().getResources().getString(R.string.Logout));
         });
         ca = new ClientAndroidInterface(context);
@@ -320,7 +326,6 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
-        global.setLanguage(this, global.getStoredLanguage());
         OfficerName.setText(global.getOfficerName());
     }
 
@@ -652,24 +657,23 @@ public class MainActivity extends AppCompatActivity
         if (!Language2.equals("")) {
             menu.add(0, MENU_LANGUAGE_2, 0, Language2);
         }
+        menu.add(0, MENU_LANGUAGE_3, 0, getResources().getString(R.string.LanguageSettings));
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-
         switch (item.getItemId()) {
             case MENU_LANGUAGE_1:
                 selectedLanguage = LanguageCode1;
-                global.setLanguage(this, selectedLanguage);
-
+                new LanguageManager(this).setLanguage(selectedLanguage);
                 return true;
             case MENU_LANGUAGE_2:
                 selectedLanguage = LanguageCode2;
-                global.setLanguage(this, selectedLanguage);
+                new LanguageManager(this).setLanguage(selectedLanguage);
+                return true;
+            case MENU_LANGUAGE_3:
+                new LanguageManager(this).openLanguageSettings();
                 return true;
         }
 
@@ -912,6 +916,7 @@ public class MainActivity extends AppCompatActivity
             ShowEnrolmentOfficerDialog();
         }
         global.isSDCardAvailable();
+        new LanguageManager(this).checkSystemLanguage();
     }
 
     public String getSelectedLanguage() {

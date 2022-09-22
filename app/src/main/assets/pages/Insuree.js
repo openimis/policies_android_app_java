@@ -192,15 +192,7 @@ $(document).ready(function () {
     });
 
     $('#btnScan').click(function () {
-        var InsuranceNo = Android.getScannedNumber();
-        var ans = Android.isValidInsuranceNumber(InsuranceNo);
-        if (ans != true) {
-            $('#txtInsuranceNumber').val("");
-            $('#txtInsuranceNumber').focus();
-        } else {
-            $('#txtInsuranceNumber').val(InsuranceNo);
-            getImage();
-        }
+        Android.getScannedNumber();
     });
 
     if ($('#hfIsOffline').val() == "0") {
@@ -231,6 +223,18 @@ function selectImageCallback(imagePath) {
     if (imagePath != "") {
         $("#hfNewPhotoPath").val(imagePath);
         $("#imgInsuree").attr('src', imagePath);
+    }
+}
+
+// called from java after the image was selected by the user
+function scanQrCallback(insureeNumber) {
+    var ans = Android.isValidInsuranceNumber(insureeNumber);
+    if (ans) {
+        $('#txtInsuranceNumber').val(insureeNumber);
+        getImage();
+    } else {
+        $('#txtInsuranceNumber').val("");
+        $('#txtInsuranceNumber').focus();
     }
 }
 

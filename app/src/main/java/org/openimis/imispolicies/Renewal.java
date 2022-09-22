@@ -55,6 +55,8 @@ import cz.msebera.android.httpclient.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.openimis.imispolicies.tools.LanguageManager;
+import org.openimis.imispolicies.tools.Log;
 import org.openimis.imispolicies.util.StringUtils;
 import org.xmlpull.v1.XmlSerializer;
 
@@ -71,6 +73,7 @@ import java.util.HashMap;
 import static android.widget.AdapterView.INVALID_POSITION;
 
 public class Renewal extends AppCompatActivity {
+    private static final String LOG_TAG = "RENEWAL";
     private Global global;
     private SQLHandler sqlHandler;
 
@@ -220,7 +223,7 @@ public class Renewal extends AppCompatActivity {
                     try {
                         startActivityForResult(intent, INTENT_ACTIVITY_SCAN_CODE);
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        Log.e(LOG_TAG, "Error while trying to initiate QR scan", e);
                     }
                 }
         );
@@ -337,9 +340,8 @@ public class Renewal extends AppCompatActivity {
             fos.close();
 
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(LOG_TAG, "Error while saving renewal file", e);
         }
-
     }
 
     public String WriteJSON() {
@@ -382,13 +384,13 @@ public class Renewal extends AppCompatActivity {
                 myOutWriter.close();
                 fOut.close();
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.e(LOG_TAG, "IO error while saving renewal file", e);
             }
 
         } catch (IllegalStateException e) {
-            e.printStackTrace();
+            Log.e(LOG_TAG, "Illegal state error while saving renewal file", e);
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.e(LOG_TAG, "Json error while saving renewal file", e);
         }
 
         return FullObject.toString();
@@ -494,7 +496,7 @@ public class Renewal extends AppCompatActivity {
                 spPayer.setAdapter((SpinnerAdapter) adapter);
             }
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.e(LOG_TAG, "Error while binding payers", e);
         }
     }
 
@@ -540,7 +542,7 @@ public class Renewal extends AppCompatActivity {
                 spProduct.setAdapter(adapter);
             }
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.e(LOG_TAG, "Error while binding products", e);
         }
     }
 
@@ -622,7 +624,7 @@ public class Renewal extends AppCompatActivity {
                     ToRestApi rest = new ToRestApi();
                     response = rest.postToRestApiToken(receiptObj, "premium/receipt");
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Log.e(LOG_TAG, "Error while checking receipt no", e);
                 }
 
                 if (response != null) {

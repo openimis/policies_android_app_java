@@ -25,28 +25,30 @@ public class AndroidUtils {
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
     }
 
+    public static AlertDialog showDialog(Context context, CharSequence title, CharSequence message, boolean isCancelable, CharSequence positiveLabel, DialogInterface.OnClickListener onPositive, CharSequence neutralLabel, DialogInterface.OnClickListener onNeutral, CharSequence negativeLabel, DialogInterface.OnClickListener onNegative) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        if (title != null) builder.setTitle(title);
+        if (message != null) builder.setMessage(message);
+        builder.setCancelable(isCancelable);
+        if (positiveLabel != null) builder.setPositiveButton(positiveLabel, onPositive);
+        if (neutralLabel != null) builder.setPositiveButton(neutralLabel, onNeutral);
+        if (negativeLabel != null) builder.setNegativeButton(negativeLabel, onNegative);
+        return builder.show();
+    }
+
     public static AlertDialog showDialog(Context context, int messageResId) {
-        return new AlertDialog.Builder(context)
-                .setMessage(messageResId)
-                .setCancelable(false)
-                .setPositiveButton(R.string.Ok, (dialogInterface, i) -> {
-                }).show();
+        return showDialog(context, null, context.getResources().getString(messageResId), false, context.getResources().getString(R.string.Ok), null, null, null, null, null);
     }
 
     public static AlertDialog showDialog(Context context, CharSequence message) {
-        return new AlertDialog.Builder(context)
-                .setMessage(message)
-                .setCancelable(false)
-                .setPositiveButton(R.string.Ok, (dialogInterface, i) -> {
-                }).show();
+        return showDialog(context, null, message, false, context.getResources().getString(R.string.Ok), null, null, null, null, null);
     }
 
     public static AlertDialog showConfirmDialog(Context context, int messageResId, DialogInterface.OnClickListener onPositive) {
-        return new AlertDialog.Builder(context)
-                .setMessage(messageResId)
-                .setCancelable(false)
-                .setPositiveButton(R.string.Ok, onPositive)
-                .setNegativeButton(R.string.Cancel, (dialogInterface, i) -> {
-                }).show();
+        return showDialog(context, null, context.getResources().getString(messageResId), false, context.getResources().getString(R.string.Ok), onPositive, null, null, context.getResources().getString(R.string.Cancel), null);
+    }
+
+    public static AlertDialog showDialog(Context context, String message, String positiveLabel, DialogInterface.OnClickListener onPositive) {
+        return showDialog(context, null, message, false, positiveLabel, onPositive, null, null, context.getResources().getString(R.string.Cancel), null);
     }
 }

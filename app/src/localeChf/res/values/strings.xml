@@ -5,7 +5,7 @@
     <string name="action_settings">Settings</string>
     <string name="Pleasewait">Please wait</string>
     <string name="PageLoading">Page is loading</string>
-    <string name="HeaderTitle">openIMIS Policies</string>
+    <string name="HeaderTitle">CHF Policies</string>
     <string name="HeaderEmail">admin@imis.com</string>
     <string name="Home">Home</string>
     <string name="Enrolment">Enrolment</string>
@@ -16,7 +16,7 @@
     <string name="Quit">Quit</string>
     <string name="Region">Region</string>
     <string name="District">District</string>
-    <string name="Ward">Municipality</string>
+    <string name="Ward">Ward</string>
     <string name="Village">Village</string>
     <string name="PovertyStatus">Poverty Status</string>
     <string name="ConfirmationType">Confirmation Type</string>
@@ -27,7 +27,7 @@
     <string name="Next">Next</string>
     <string name="SelectRegion">Select Region</string>
     <string name="SelectDistrict">Select District</string>
-    <string name="SelectWard">Select Municipality</string>
+    <string name="SelectWard">Select Ward</string>
     <string name="SelectVillage">Select Village</string>
     <string name="Yes">Yes</string>
     <string name="No">No</string>
@@ -36,7 +36,7 @@
     <string name="SelectFamilyType">Select Group type</string>
     <string name="Ok">OK</string>
     <string name="FieldRequired">Please verify all the required fields marked in red border</string>
-    <string name="InsuranceNumber">Insuree number</string>
+    <string name="InsuranceNumber">CHF number</string>
     <string name="OtherNames">Other Names</string>
     <string name="LastName">Last Name</string>
     <string name="BirthDate">Birth Date</string>
@@ -44,7 +44,7 @@
     <string name="MaritalStatus">Marital Status</string>
     <string name="BeneficiaryCard">Beneficiary Card</string>
     <string name="CurrentDistrict">Current District</string>
-    <string name="CurrentMunicipality">Current Municipality</string>
+    <string name="CurrentMunicipality">Current Ward</string>
     <string name="CurrentVillage">Current Village</string>
     <string name="CurrentAddress">Current Address Details</string>
     <string name="Profession">Profession</string>
@@ -82,7 +82,7 @@
     <string name="ErrorOccurred">Error occurred while processing data</string>
     <string name="ErrorInsert">Error while inserting data</string>
     <string name="ErrorUpdate">Error while updating data</string>
-    <string name="InsuranceNumberExists">Member with this Insuree number already exists</string>
+    <string name="InsuranceNumberExists">Member with this CHF number already exists</string>
     <string name="Add">Add</string>
     <string name="New">New</string>
     <string name="SelectOfficer">Select Enrolment Officer</string>
@@ -130,14 +130,14 @@
     <string name="Scan">Scan</string>
     <string name="InsureeName">Insuree Name</string>
     <string name="ReadOnly">SD Card is set to readonly mode. Please set the mode to read/write and restart the application.</string>
-    <string name="NoSDCard">openIMIS Policies needs external memory card to run. Please insert memory card and restart the application.</string>
+    <string name="NoSDCard">CHF Policies needs external memory card to run. Please insert memory card and restart the application.</string>
     <string name="ForceClose">Force Close</string>
-    <string name="MissingInsuranceNumber">Please enter the Insuree number</string>
-    <string name="InvalidInsuranceNumber">Invalid Insuree number</string>
+    <string name="MissingInsuranceNumber">Please enter the CHF number</string>
+    <string name="InvalidInsuranceNumber">Invalid CHF number</string>
     <string name="GetingInsuuree">Getting insuree info…</string>
     <string name="GetingSnapShotReport">Getting Snap Shots Report…</string>
     <string name="GetingCummulativeReport">Getting Cumulative Report…</string>
-    <string name="RecordNotFound">Member with this Insuree number does not exist.</string>
+    <string name="RecordNotFound">Member with this CHF number does not exist.</string>
     <string name="NoRenewalFound">No renewal found</string>
     <string name="NoInternet">Please check your internet connection.</string>
     <string name="FileDoesntBelongHere">Process Failed, Wrong File or Enrolment Officer code.</string>
@@ -167,7 +167,7 @@
     <string name="UploadAllFeedback">Upload all feedback</string>
     <string name="MissingOfficer">Please enter Enrolment Officer Code</string>
     <string name="MissingClaimID">Please enter Claim ID</string>
-    <string name="MissingInsureeNumber">Please enter the Insuree number</string>
+    <string name="MissingInsureeNumber">Please enter the CHF number</string>
     <string name="MissingAnswers">All the questions must be answered.</string>
     <string name="EndDate">End Date</string>
     <string name="MissingEndDate">Please enter End Date</string>
@@ -191,8 +191,8 @@
     <string name="UncaughtException">Family could not be inserted.</string>
     <string name="FamilyUploaded">Family uploaded successfully</string>
     <string name="MissingHOF">Given family has no HOF</string>
-    <string name="DuplicateHOF">Family with this Insuree number already exists</string>
-    <string name="DuplicateInsuranceNumber">Duplicate Insuree number found</string>
+    <string name="DuplicateHOF">Family with this CHF number already exists</string>
+    <string name="DuplicateInsuranceNumber">Duplicate CHF number found</string>
     <string name="DuplicateReceiptNumber">Duplicate receipt number found</string>
     <string name="DownloadMasterDataFailed">Could not download master data.</string>
     <string name="DownloadingMasterData">Downloading master data</string>
@@ -224,7 +224,7 @@
     <string name="AddEditPolicy">Add/Edit Policy</string>
     <string name="Premiums">Contributions</string>
     <string name="AddEditPremium">Add/Edit Contribution</string>
-    <string name="QuitAppQuestion">Do you want to quit openIMIS Policies?</string>
+    <string name="QuitAppQuestion">Do you want to quit CHF Policies?</string>
     <string name="UploadFailureReport">Upload report</string>
     <string name="Go">Go</string>
     <string name="Insuree">Insuree</string>
@@ -263,8 +263,8 @@
     <string name="TotalInsureeOnline">Edited Insurees</string>
     <string name="TotalPolicyOnline">Edited Policies</string>
     <string name="TotalPremiumOnline">Edited Contributions</string>
-    <string name="InsuranceNumberNotFound">Insuree number not found</string>
-    <string name="InsuranceNumberRequired">Insuree number required</string>
+    <string name="InsuranceNumberNotFound">CHF number not found</string>
+    <string name="InsuranceNumberRequired">CHF number required</string>
     <string name="Deleting">Deleting…</string>
     <string name="InternetRequiredOnlineData">Internet connection is required to delete online data.</string>
     <string name="LoginToDeleteOnlineData">Please login first, to delete online data</string>
@@ -273,7 +273,7 @@
     <string name="Confirm">Confirm</string>
     <string name="Logout">Logout</string>
     <string name="FamilyExists">Family already exists in phone</string>
-    <string name="ContentTitle">New release of openIMIS Policies is now available.</string>
+    <string name="ContentTitle">New release of CHF Policies is now available.</string>
     <string name="ContentText">Click here to download.</string>
     <string name="saving">Saving…</string>
     <string name="Interuption">Process has been interrupted. Please check your internet connection.</string>
@@ -282,7 +282,7 @@
     <string name="XmlCreated">XML has been created</string>
     <string name="FailXmlCreation">Failed to create XML</string>
     <string name="NoData">No data was created</string>
-    <string name="MissingCHFID">Please Enter the Insuree number</string>
+    <string name="MissingCHFID">Please Enter the CHF number</string>
     <string name="WithoutPolicyPremium">without a policy/a contribution</string>
     <string name="WithoutPhoto">without a photo</string>
     <string name="failedToUpload">Failed to upload</string>
@@ -472,7 +472,7 @@
     <string name="Unauthorized">Authorization failed.</string>
     <string name="UnknownError">Unknown Error.</string>
     <string name="Forbidden">You are not allowed to take this action.</string>
-    <string name="LanguageCode">en</string>
+    <string name="LanguageCode">en_TZ</string>
     <string name="LanguageSettings">Language settings</string>
     <string name="CurrentResourceLanguage">Current resource language: %1$s</string>
     <string name="SystemLanguageNotSupported">Current system language is not supported. The app will use the default language.</string>

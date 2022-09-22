@@ -1074,4 +1074,9 @@ public class SQLHandler extends SQLiteOpenHelper {
         }
         return result;
     }
+
+    @NonNull
+    public JSONArray getSupportedLanguages() {
+        return getResult(tblLanguages, new String[]{"LanguageCode"}, null, null);
+    }
 }
