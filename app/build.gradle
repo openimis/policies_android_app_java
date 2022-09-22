@@ -155,16 +155,16 @@ android {
     }
     sourceSets {
         chfDev.java.srcDir 'src/chf/java'
-        chfDev.res.srcDir 'src/chf/res'
+        chfDev.res.srcDirs = ['src/chf/res', 'src/localeChf/res']
 
         mvDev.java.srcDir 'src/master/java'
-        mvDev.res.srcDirs 'src/master/res'
+        mvDev.res.srcDirs = ['src/master/res', 'src/localeMv/res']
 
         local.java.srcDir 'src/master/java'
-        local.res.srcDir 'src/master/res'
+        local.res.srcDirs = ['src/master/res', 'src/localeMv/res']
 
         bephaDev.java.srcDir 'src/bepha/java'
-        bephaDev.res.srcDir 'src/bepha/res'
+        bephaDev.res.srcDirs = ['src/bepha/res', 'src/localeBepha/res']
 
         niger.java.srcDir 'src/niger/java'
         niger.res.srcDir 'src/niger/res'
@@ -174,10 +174,10 @@ android {
         tchadDev.res.srcDir 'src/tchad/res'
 
         demoProd.java.srcDir 'src/master/java'
-        demoProd.res.srcDir 'src/demoProd/res'
+        demoProd.res.srcDirs = ['src/demoProd/res', 'src/localeMv/res']
 
         demoRelease.java.srcDir 'src/master/java'
-        demoRelease.res.srcDir 'src/demoRelease/res'
+        demoRelease.res.srcDirs = ['src/demoRelease/res', 'src/localeMv/res']
 
         cli.java.srcDir System.getenv("CLI_JAVA_DIR") ?: 'src/master/java'
         cli.res.srcDir System.getenv("CLI_RES_DIR") ?: 'src/demoProd/res'
