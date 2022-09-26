@@ -145,6 +145,10 @@ public class ToRestApi {
         return getFromRestApi(functionName, true);
     }
 
+    public HttpResponse getFromRestApi(final String functionName) {
+        return getFromRestApi(functionName, false);
+    }
+
     public HttpResponse deleteFromRestApiToken(final String functionName) {
         HttpClient httpClient = new DefaultHttpClient();
         HttpDelete httpDelete = new HttpDelete(uri + functionName);

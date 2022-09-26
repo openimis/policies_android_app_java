@@ -4406,43 +4406,30 @@ public class ClientAndroidInterface {
 
     @JavascriptInterface
     public void downloadMasterData() throws InterruptedException {
-        ProgressDialog pd = null;
-        pd = ProgressDialog.show(mContext, mContext.getResources().getString(R.string.Sync), mContext.getResources().getString(R.string.DownloadingMasterData));
-        final ProgressDialog finalPd = pd;
-        Thread t = new Thread() {
-            public void run() {
-                try {
-                    startDownloading();
-                    finalPd.dismiss();
+        ProgressDialog pd = ProgressDialog.show(mContext, mContext.getResources().getString(R.string.Sync), mContext.getResources().getString(R.string.DownloadingMasterData));
+        new Thread(() -> {
+            try {
+                startDownloading();
 
-                    ((Activity) mContext).runOnUiThread(() -> {
-                        ShowDialog(mContext.getResources().getString(R.string.DataDownloadedSuccess));
-                        Global global = Global.getGlobal();
-                        global.setOfficerCode("");
-//                            Intent refresh = new Intent(mContext, MainActivity.class);
-//                            ((MainActivity)mContext).startActivity(refresh);
-//                            ((MainActivity)mContext).finish();
-                        ((MainActivity) mContext).ShowEnrolmentOfficerDialog();
-                    });
-
-                } catch (JSONException e) {
-                    //e.printStackTrace();
-                    finalPd.dismiss();
-                } catch (UserException e) {
-                    //e.printStackTrace();
-                    finalPd.dismiss();
-                }
+                ((Activity) mContext).runOnUiThread(() -> {
+                    ShowDialog(mContext.getResources().getString(R.string.DataDownloadedSuccess));
+                    Global global = Global.getGlobal();
+                    global.setOfficerCode("");
+                    ((MainActivity) mContext).ShowEnrolmentOfficerDialog();
+                });
+            } catch (JSONException e) {
+                Log.e("MASTERDATA", "Error while parsing master data", e);
+            } catch (UserException e) {
+                Log.e("MASTERDATA", "Error while downloading master data", e);
+                ((Activity) mContext).runOnUiThread(() -> {
+                    AndroidUtils.showDialog(mContext,
+                            mContext.getResources().getString(R.string.DataDownloadedFailed),
+                            e.getMessage());
+                });
+            } finally {
+                pd.dismiss();
             }
-        };
-        t.start();
-
-
-        //return true;
-        //        finally {
-//            pd.dismiss();
-//        }
-
-
+        }).start();
     }
 
     public void importMasterData(String data) throws JSONException, UserException {
@@ -4459,17 +4446,19 @@ public class ClientAndroidInterface {
         }
     }
 
-    @SuppressWarnings("ConstantConditions")
+
     public void startDownloading() throws JSONException, UserException {
         ToRestApi rest = new ToRestApi();
-        String MD = rest.getObjectFromRestApi("master");
+        HttpResponse response = rest.getFromRestApi("master");
+        String error = rest.getHttpError(mContext, response.getStatusLine().getStatusCode(), response.getStatusLine().getReasonPhrase());
+        if (error == null) {
+            String MD = rest.getContent(response);
+            JSONObject masterData = new JSONObject(MD);
 
-        JSONObject masterData = new JSONObject(MD);
-
-        if (masterData.length() == 0)
-            throw new UserException(mContext.getResources().getString(R.string.DownloadMasterDataFailed));
-
-        processNewFormat(masterData);
+            processNewFormat(masterData);
+        } else {
+            throw new UserException(error);
+        }
     }
 
     private void processOldFormat(JSONArray masterData) throws UserException {
