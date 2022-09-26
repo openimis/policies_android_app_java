@@ -44,6 +44,10 @@ public class AndroidUtils {
         return showDialog(context, null, message, false, context.getResources().getString(R.string.Ok), null, null, null, null, null);
     }
 
+    public static AlertDialog showDialog(Context context, CharSequence title, CharSequence message) {
+        return showDialog(context, title, message, false, context.getResources().getString(R.string.Ok), null, null, null, null, null);
+    }
+
     public static AlertDialog showConfirmDialog(Context context, int messageResId, DialogInterface.OnClickListener onPositive) {
         return showDialog(context, null, context.getResources().getString(messageResId), false, context.getResources().getString(R.string.Ok), onPositive, null, null, context.getResources().getString(R.string.Cancel), null);
     }
