@@ -2010,14 +2010,14 @@ public class ClientAndroidInterface {
 
     @JavascriptInterface
     public String getPayers(int RegionId, int DistrictId) {
-        String Query = "SELECT PayerId, PayerName,P.LocationId FROM tblPayer P \n" +
-                "LEFT OUTER JOIN tblLocations L ON P.LocationId = L.LocationId\n" +
-                "WHERE (P.LocationId = " + DistrictId + " OR L.ParentLocationId = P.LocationId OR P.LocationId = 'null' OR P.LocationId = '')  " +
+        String Query = "SELECT PayerId, PayerName,P.LocationId FROM tblPayer P " +
+                "LEFT OUTER JOIN tblLocations L ON P.LocationId = L.LocationId " +
+                "WHERE L.LocationId = ? OR L.LocationId = ? OR L.LocationId = 'null' OR L.LocationId = '' OR L.LocationId = 0 " +
                 "ORDER BY L.LocationId";
         /*        "INNER JOIN  uvwLocations L ON P.LocationId = L.LocationId\n" +
                 "WHERE  (L.RegionId = " + RegionId + " OR L.RegionId ='null' OR L.RegionId ='') AND (L.DistrictId = " + DistrictId + " OR L.DistrictId ='null' OR L.DistrictId ='')  " +
                 " ORDER BY L.LocationId";*/
-        JSONArray Payers = sqlHandler.getResult(Query, null);
+        JSONArray Payers = sqlHandler.getResult(Query, new String[]{String.valueOf(RegionId), String.valueOf(DistrictId)});
 
         return Payers.toString();
     }
