@@ -41,13 +41,19 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
+
+import org.openimis.imispolicies.tools.ImageManager;
+import org.openimis.imispolicies.tools.Log;
+import org.openimis.imispolicies.tools.StorageManager;
+import org.openimis.imispolicies.util.FileUtils;
+
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -63,16 +69,13 @@ import com.squareup.picasso.Target;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Locale;
-
-import static android.provider.MediaStore.EXTRA_OUTPUT;
+import java.util.Date;
 
 public class Acquire extends AppCompatActivity {
     private static final String LOG_TAG = "ACQUIRE";
     private static final int SCAN_QR_REQUEST_CODE = 0;
     private static final int TAKE_PHOTO_REQUEST_CODE = 1;
+    private static final String TEMP_PHOTO_PATH = "images/acquireTemp.jpg";
 
     private Global global;
 
@@ -85,19 +88,17 @@ public class Acquire extends AppCompatActivity {
     private String Path = null;
     private int result = 0;
 
-    private String msg = "";
     private double Longitude, Latitude;
     private LocationManager lm;
     private String towers;
     private ClientAndroidInterface ca;
     private SQLHandler sqlHandler;
-
-    private File tempPhotoFile;
     private Uri tempPhotoUri;
 
     private Picasso picasso;
+    private StorageManager storageManager;
 
-    private Target imageTarget = new Target() {
+    private final Target imageTarget = new Target() {
         @Override
         public void onBitmapLoaded(final Bitmap bitmap, Picasso.LoadedFrom from) {
             theImage = bitmap;
@@ -105,8 +106,8 @@ public class Acquire extends AppCompatActivity {
         }
 
         @Override
-        public void onBitmapFailed(Drawable errorDrawable) {
-            Log.e(LOG_TAG, "Loading acquired photo failed");
+        public void onBitmapFailed(Exception exception, Drawable errorDrawable) {
+            Log.e(LOG_TAG, "Loading acquired photo failed", exception);
         }
 
         @Override
@@ -120,33 +121,16 @@ public class Acquire extends AppCompatActivity {
         setContentView(R.layout.acquire_main);
 
         final ActionBar actionBar = getSupportActionBar();
-        actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setTitle(getResources().getString(R.string.Acquire));
-
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setTitle(getResources().getString(R.string.Acquire));
+        }
 
         global = (Global) getApplicationContext();
         ca = new ClientAndroidInterface(this);
-
-        picasso = new Picasso.Builder(this)
-                .listener((picasso, uri, exception) -> Log.e(LOG_TAG, String.format("Image load failed: %s", uri.toString()), exception))
-                .loggingEnabled(BuildConfig.LOG)
-                .build();
-
-        Path = global.getSubdirectory("Images") + "/";
-        tempPhotoFile = new File(Path, "temp.jpg");
-        try {
-            if (tempPhotoFile.delete()) {
-                Log.i(LOG_TAG, "Leftover temp image deleted");
-            }
-            if (!tempPhotoFile.createNewFile()) {
-                Log.w(LOG_TAG, "Temp photo file already exists");
-            }
-            tempPhotoUri = FileProvider.getUriForFile(this,
-                    String.format("%s.fileprovider", BuildConfig.APPLICATION_ID),
-                    tempPhotoFile);
-        } catch (IOException e) {
-            Log.e(LOG_TAG, "Temp photo file creation failed", e);
-        }
+        picasso = new Picasso.Builder(this).build();
+        storageManager = StorageManager.of(this);
+        sqlHandler = new SQLHandler(this);
 
         etCHFID = findViewById(R.id.etCHFID);
         iv = findViewById(R.id.imageView);
@@ -154,7 +138,15 @@ public class Acquire extends AppCompatActivity {
         btnScan = findViewById(R.id.btnScan);
         btnSubmit = findViewById(R.id.btnSubmit);
 
-        sqlHandler = new SQLHandler(this);
+        File tempPhotoFile = FileUtils.createTempFile(this, TEMP_PHOTO_PATH);
+        if (tempPhotoFile != null) {
+            tempPhotoUri = FileProvider.getUriForFile(this,
+                    String.format("%s.fileprovider", BuildConfig.APPLICATION_ID),
+                    tempPhotoFile);
+            if (tempPhotoUri == null) {
+                Log.w(LOG_TAG, "Failed to create temp photo URI");
+            }
+        }
 
         etCHFID.addTextChangedListener(new TextWatcher() {
             @Override
@@ -166,14 +158,14 @@ public class Acquire extends AppCompatActivity {
             }
 
             @Override
-            public void afterTextChanged(Editable InsNo) {
-                String path = null;
-                if (!InsNo.toString().isEmpty()) {
-                    path = ca.GetListOfImagesContain(InsNo.toString());
+            public void afterTextChanged(Editable text) {
+                File photoFile = null;
+                String insureeNumber = text.toString();
+                if (!insureeNumber.isEmpty()) {
+                    photoFile = ImageManager.of(Acquire.this).getNewestInsureeImage(insureeNumber);
                 }
-                if (path != null && !"".equals(path)) {
-                    File file = new File(path);
-                    picasso.load(file)
+                if (photoFile != null) {
+                    picasso.load(photoFile)
                             .placeholder(R.drawable.person)
                             .error(R.drawable.person)
                             .into(iv);
@@ -188,7 +180,7 @@ public class Acquire extends AppCompatActivity {
         Criteria c = new Criteria();
         towers = lm.getBestProvider(c, false);
         if (towers != null) {
-            Location loc = null;
+            Location loc;
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 // TODO: Consider calling
                 //    ActivityCompat#requestPermissions
@@ -207,19 +199,25 @@ public class Acquire extends AppCompatActivity {
             }
 
         } else {
-            Toast.makeText(Acquire.this, "No providers found", Toast.LENGTH_LONG).show();
+            Log.w(LOG_TAG, "No location providers found");
+            Toast.makeText(Acquire.this, "No location providers found", Toast.LENGTH_LONG).show();
         }
 
         iv.setOnClickListener(v -> {
         });
 
         btnTakePhoto.setOnClickListener(v -> {
-            try {
-                Intent intent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-                intent.putExtra(EXTRA_OUTPUT, tempPhotoUri);
-                startActivityForResult(intent, TAKE_PHOTO_REQUEST_CODE);
-            } catch (ActivityNotFoundException e) {
-                Log.e(LOG_TAG, "Image capture activity not found", e);
+            if (!etCHFID.getText().toString().isEmpty()) {
+                try {
+                    Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                    intent.putExtra(MediaStore.EXTRA_OUTPUT, tempPhotoUri);
+                    global.grantUriPermissions(this, tempPhotoUri, intent, Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                    startActivityForResult(intent, TAKE_PHOTO_REQUEST_CODE);
+                } catch (ActivityNotFoundException e) {
+                    Log.e(LOG_TAG, "Image capture activity not found", e);
+                }
+            } else {
+                Toast.makeText(this, R.string.MissingCHFID, Toast.LENGTH_LONG).show();
             }
         });
 
@@ -252,15 +250,6 @@ public class Acquire extends AppCompatActivity {
                 }
 
                 runOnUiThread(() -> {
-                    switch (result) {
-                        case 1:
-                            msg = getResources().getString(R.string.PhotoSaved);
-                            break;
-                        default:
-                            msg = getResources().getString(R.string.CouldNotUpload);
-                            break;
-                    }
-
                     Toast.makeText(Acquire.this, getResources().getString(R.string.PhotoSaved), Toast.LENGTH_LONG).show();
 
                     etCHFID.setText("");
@@ -276,10 +265,7 @@ public class Acquire extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-
-        if (!tempPhotoFile.delete()) {
-            Log.w(LOG_TAG, "Temp photo file deletion failed");
-        }
+        FileUtils.removeTempFile(this, TEMP_PHOTO_PATH);
     }
 
     @Override
@@ -289,8 +275,8 @@ public class Acquire extends AppCompatActivity {
                 if (resultCode == RESULT_OK) {
                     picasso.invalidate(tempPhotoUri);
                     picasso.load(tempPhotoUri)
-                            .resize(global.getIntSetting("image_width_limit", 400),
-                                    global.getIntSetting("image_height_limit", 400))
+                            .resize(global.getIntKey("image_width_limit", 400),
+                                    global.getIntKey("image_height_limit", 400))
                             .centerInside()
                             .into(imageTarget);
                 }
@@ -324,32 +310,39 @@ public class Acquire extends AppCompatActivity {
     }
 
     private int SubmitData() throws IOException, UserException {
-        int Uploaded = 0;
-        File myDir = new File(Path);
+        String date = AppInformation.DateTimeInfo.getDefaultFileDatetimeFormatter().format(new Date());
+        String fName = etCHFID.getText() + "_" + global.getOfficerCode() + "_" + date + "_" + Latitude + "_" + Longitude + ".jpg";
 
-        //Get current date and format it in yyyyMMdd format
-        SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss", Locale.US);
-        Calendar cal = Calendar.getInstance();
-        String d = format.format(cal.getTime());
+        File[] oldInsureeImages = ImageManager.of(this).getInsureeImages(etCHFID.getText().toString());
 
-        String fName = etCHFID.getText() + "_" + global.getOfficerCode() + "_" + d + "_" + Latitude + "_" + Longitude + ".jpg";
-        //Create file and delete if exists
-        File file = new File(myDir, fName);
-        if (file.exists()) file.delete();
-        Uploaded = 1;
+        File file = new File(global.getSubdirectory("Images"), fName);
+        if (file.exists()) {
+            Log.w(LOG_TAG, String.format("File already exists: %s", file.getAbsolutePath()));
+        }
+
         FileOutputStream out = new FileOutputStream(file);
-        theImage.compress(Bitmap.CompressFormat.JPEG, global.getIntSetting("image_jpeg_quality", 40), out);
-
-        out.flush();
+        theImage.compress(Bitmap.CompressFormat.JPEG, global.getIntKey("image_jpeg_quality", 40), out);
         out.close();
+
+        if (file.length() == 0L) {
+            Log.w(LOG_TAG, "Compressing photo failed, the resulting file has no content");
+            if (!file.delete()) {
+                Log.w(LOG_TAG, "Deleting empty output file failed");
+            }
+            return 0;
+        } else {
+            FileUtils.deleteFiles(oldInsureeImages);
+        }
 
         ContentValues contentValues = new ContentValues();
         contentValues.put("PhotoPath", file.getAbsolutePath());
         String[] whereArgs = {etCHFID.getText().toString()};
 
-        sqlHandler.updateData("tblInsuree", contentValues, "CHFID = ?", whereArgs);
+        if (sqlHandler.updateData("tblInsuree", contentValues, "CHFID = ?", whereArgs, false) == 0) {
+            Log.w(LOG_TAG, String.format("Cannot update photo path. No insuree for CHFID: %s", etCHFID.getText().toString()));
+        }
 
-        return Uploaded;
+        return 1;
     }
 
     @Override

@@ -25,13 +25,11 @@
 
 package org.openimis.imispolicies;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
@@ -43,6 +41,7 @@ import android.graphics.BitmapFactory;
 import android.icu.text.DecimalFormat;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.support.annotation.RequiresApi;
 import android.support.v7.widget.DividerItemDecoration;
@@ -50,8 +49,12 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Base64;
-import android.util.Log;
-import android.util.Xml;
+
+import org.openimis.imispolicies.util.UriUtils;
+import org.openimis.imispolicies.util.ZipUtils;
+import org.openimis.imispolicies.tools.ImageManager;
+import org.openimis.imispolicies.tools.Log;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.webkit.JavascriptInterface;
@@ -61,6 +64,7 @@ import android.widget.Toast;
 import com.exact.CallSoap.CallSoap;
 import com.exact.InsureeImages;
 import com.exact.uploadfile.UploadFile;
+import com.google.zxing.client.android.CaptureActivity;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
@@ -73,10 +77,9 @@ import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Date;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.util.EntityUtils;
+import cz.msebera.android.httpclient.HttpEntity;
+import cz.msebera.android.httpclient.HttpResponse;
+import cz.msebera.android.httpclient.util.EntityUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -95,6 +98,8 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
@@ -102,16 +107,18 @@ import java.util.UUID;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import org.openimis.imispolicies.Util.AndroidUtil;
-import org.xmlpull.v1.XmlSerializer;
+import org.openimis.imispolicies.tools.StorageManager;
+import org.openimis.imispolicies.util.AndroidUtils;
+import org.openimis.imispolicies.util.FileUtils;
+import org.openimis.imispolicies.util.JsonUtils;
+import org.openimis.imispolicies.util.StringUtils;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 import javax.net.ssl.HttpsURLConnection;
 
 import static android.database.sqlite.SQLiteDatabase.openOrCreateDatabase;
-import static org.openimis.imispolicies.Util.JsonUtil.isStringEmpty;
-import static org.openimis.imispolicies.Util.StringUtil.isEmpty;
+import static android.provider.MediaStore.EXTRA_OUTPUT;
 
 public class ClientAndroidInterface {
     private static final String LOG_TAG_RENEWAL = "RENEWAL";
@@ -124,23 +131,16 @@ public class ClientAndroidInterface {
     private HashMap<String, String> controls = new HashMap<>();
     private String Path;
     private File[] files;
-    private File[] JSONfiles;
-    private int TotalFiles;
-    private int UploadCounter; //
-    private File XMLFile;
     private int result;
     private int UserId;
-    private Date edate;
     public static boolean Activate = false;
     private int IsFamilyAvailable;
-    private String payerId;
     private int DataDeleted;
     private int rtPolicyId = 0;
     private int rtPremiumId = 0;
     private int rtInsureeId = 0;
     private int rtEnrolledId = 0;
     private int enrol_result;
-    private Bitmap myBitmap;
     private String resu;
     private String fname = null;
     private Bitmap theImage;
@@ -151,14 +151,13 @@ public class ClientAndroidInterface {
 
     EnrollmentReport enrollmentReport;
 
-    StringBuffer buffer = new StringBuffer();
-
     private ArrayList<String> mylist = new ArrayList<>();
-
     private String salt;
 
     Picasso picassoInstance;
     Target imageTarget;
+    StorageManager storageManager;
+
 
     ClientAndroidInterface(Context c) {
         mContext = c;
@@ -166,13 +165,14 @@ public class ClientAndroidInterface {
         sqlHandler = new SQLHandler(c);
         getControls();
         SQLiteDatabase database = sqlHandler.getReadableDatabase();
-        Path = global.getMainDirectory();
+        Path = global.getAppDirectory();
         filePath = database.getPath();
+        storageManager = StorageManager.of(mContext);
         database.close();
         // activity = (Activity) c.getApplicationContext();
         picassoInstance = new Picasso.Builder(mContext)
                 .listener((picasso, path, exception) -> Log.e("Images", String.format("Image load failed: %s", path.toString()), exception))
-                .loggingEnabled(BuildConfig.LOG)
+                .loggingEnabled(BuildConfig.LOGGING_ENABLED)
                 .build();
     }
 
@@ -183,7 +183,6 @@ public class ClientAndroidInterface {
     }
 
     private void getControls() {
-
         String tableName = "tblControls";
         String[] columns = {"FieldName", "Adjustibility"};
         String where = null;
@@ -201,10 +200,7 @@ public class ClientAndroidInterface {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-
-
         }
-
     }
 
     public String getSpecificControl(String FieldName) {
@@ -270,12 +266,12 @@ public class ClientAndroidInterface {
 
     @JavascriptInterface
     public void ShowToast(String msg) {
-        AndroidUtil.showToast(mContext, msg);
+        AndroidUtils.showToast(mContext, msg);
     }
 
     @JavascriptInterface
     public AlertDialog ShowDialog(String msg) {
-        return AndroidUtil.showDialog(mContext, msg);
+        return AndroidUtils.showDialog(mContext, msg);
     }
 
     @JavascriptInterface
@@ -681,34 +677,25 @@ public class ClientAndroidInterface {
 
     @JavascriptInterface
     public String getHFLevels() {
-        JSONArray HFLevels = new JSONArray();
-        JSONObject object = new JSONObject();
+        JSONArray jsonHFLevels = new JSONArray();
+        JSONObject jsonObject = new JSONObject();
+        LinkedHashMap<String, String> hfLevels = global.getHFLevels();
 
         try {
-            object.put("Code", "");
-            object.put("HFLevel", mContext.getResources().getString(R.string.SelectHFLevel));
-            HFLevels.put(object);
-
-            object = new JSONObject();
-            object.put("Code", "D");//Uploaded = 1;
-            object.put("HFLevel", mContext.getResources().getString(R.string.Dispensary));
-            HFLevels.put(object);
-
-            object = new JSONObject();
-            object.put("Code", "C");
-            object.put("HFLevel", mContext.getResources().getString(R.string.HealthCentre));
-            HFLevels.put(object);
-
-            object = new JSONObject();
-            object.put("Code", "H");
-            object.put("HFLevel", mContext.getResources().getString(R.string.Hospital));
-            HFLevels.put(object);
-
+            jsonObject.put("Code", "");
+            jsonObject.put("HFLevel", mContext.getResources().getString(R.string.SelectHFLevel));
+            jsonHFLevels.put(jsonObject);
+            for (String key : hfLevels.keySet()) {
+                jsonObject = new JSONObject();
+                jsonObject.put("Code", key);
+                jsonObject.put("HFLevel", hfLevels.get(key));
+                jsonHFLevels.put(jsonObject);
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
-        return HFLevels.toString();
+        return jsonHFLevels.toString();
     }
 
     @JavascriptInterface
@@ -817,7 +804,7 @@ public class ClientAndroidInterface {
                     Online = 2;
                     values.put("isOffline", 2);
                 }
-                sqlHandler.updateData("tblFamilies", values, "FamilyId = ? AND (isOffline = ? OR isOffline = ?) ", new String[]{String.valueOf(FamilyId), String.valueOf(isOffline), String.valueOf(Online)});
+                sqlHandler.updateData("tblFamilies", values, "FamilyId = ? AND (isOffline = ? OR isOffline = ?) ", new String[]{String.valueOf(FamilyId), String.valueOf(isOffline), String.valueOf(Online)}, false);
                 //Automatic sync
                 /*
                 if (isOffline == 0 && global.getUserId() > 0) {
@@ -894,7 +881,11 @@ public class ClientAndroidInterface {
         String query = "SELECT * FROM tblFamilySMS where FamilyId = ? LIMIT 1;";
         String[] queryArgs = {familyId};
         try {
-            JSONObject result = sqlHandler.getResult(query, queryArgs).getJSONObject(0);
+            JSONObject result = null;
+            JSONArray array = sqlHandler.getResult(query, queryArgs);
+            if (array.length() > 0) {
+                result = array.getJSONObject(0);
+            }
             return result;
         } catch (JSONException e) {
             e.printStackTrace();
@@ -957,8 +948,6 @@ public class ClientAndroidInterface {
         int isOffline = 1;
         int insureeIsOffline = 1;
         int MaxInsureeId = 0;
-        Boolean res = false;
-        int newInsureeId = 0;
         try {
             global = (Global) mContext.getApplicationContext();
             HashMap<String, String> data = jsonToTable(InsureeData);
@@ -1071,7 +1060,6 @@ public class ClientAndroidInterface {
                     if (global.isNetworkAvailable()) {
                         //if (isOffline == 0){
                         MaxInsureeId = -MaxInsureeId;
-                        newInsureeId = MaxInsureeId;
                         //}
                         values.put("InsureeId", MaxInsureeId);
 
@@ -1126,41 +1114,11 @@ public class ClientAndroidInterface {
                 values.put("isOffline", insureeIsOffline);
                 sqlHandler.updateData("tblInsuree", values, "InsureeId = ? AND (isOffline = ?)", new String[]{String.valueOf(InsureeId), String.valueOf(insureeIsOffline)});
             }
-            if (global.isNetworkAvailable()) {
-                if (isOffline == 0 || isOffline == 2) {
-                    if (isOffline == 2) isOffline = 0;
-                    if (global.getUserId() > 0) {
-                        if (rtInsureeId > 0) {
-                            newInsureeId = -rtInsureeId;
-                        } else {
-                            newInsureeId = rtInsureeId;
-                        }
-                        if (rtInsureeId == 0 && res) {
-                            inProgress = false;
-                        } else {
-                        }
-                        inProgress = false;
-                    }
-                    inProgress = false;
-                } else {
-                    inProgress = false;
-                }
-                inProgress = false;
-            } else {
-                inProgress = false;
-            }
-
-
-        } catch (NumberFormatException e) {
-            e.printStackTrace();
-            throw new Exception(e.getMessage());
-        } catch (UserException e) {
+        } catch (NumberFormatException | UserException e) {
             e.printStackTrace();
             throw new Exception(e.getMessage());
         }
-        while (inProgress) {
-        }
-        inProgress = false;
+
         return rtInsureeId;
     }
 
@@ -1178,19 +1136,22 @@ public class ClientAndroidInterface {
             Calendar cal = Calendar.getInstance();
             String d = format.format(cal.getTime());
 
-            String outputFileName = global.getImageFolder() + InsuranceNumber + "_" + global.getOfficerCode() + "_" + d + "_0_0.jpg";
-            File outputFile = new File(outputFileName);
+            File[] oldFiles = ImageManager.of(mContext).getInsureeImages(InsuranceNumber);
+            Runnable deleteOldFiles = () -> FileUtils.deleteFiles(oldFiles);
+
+            String outputFileName = InsuranceNumber + "_" + global.getOfficerCode() + "_" + d + "_0_0.jpg";
+            File outputFile = new File(global.getImageFolder(), outputFileName);
 
             if (!outputFile.createNewFile()) {
                 Log.e("IMAGES", "Creating image copy failed");
             }
 
             FileOutputStream outputStream = new FileOutputStream(outputFile);
-            imageTarget = new OutputStreamImageTarget(outputStream, global.getIntSetting("image_jpeg_quality", 40));
+            imageTarget = new OutputStreamImageTarget(outputStream, global.getIntKey("image_jpeg_quality", 40), deleteOldFiles);
             try {
                 ((Activity) mContext).runOnUiThread(() -> picassoInstance.load(selectedPath)
-                        .resize(global.getIntSetting("image_width_limit", 400),
-                                global.getIntSetting("image_height_limit", 400))
+                        .resize(global.getIntKey("image_width_limit", 400),
+                                global.getIntKey("image_height_limit", 400))
                         .centerInside()
                         .into(imageTarget));
             } catch (ClassCastException e) {
@@ -1211,19 +1172,12 @@ public class ClientAndroidInterface {
                 .setMessage(msg)
                 .setIcon(R.drawable.ic_about)
                 .setCancelable(false)
-                .setPositiveButton(R.string.Yes, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        if (DeleteFamily(FamilyId) == 1) {
-                            ShowDialog(mContext.getResources().getString(R.string.FamilyDeleted));
-                        }
+                .setPositiveButton(R.string.Yes, (dialogInterface, i) -> {
+                    if (DeleteFamily(FamilyId) == 1) {
+                        ShowDialog(mContext.getResources().getString(R.string.FamilyDeleted));
                     }
                 })
-                .setNegativeButton(R.string.No, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        //some code when you click No
-                    }
+                .setNegativeButton(R.string.No, (dialog, which) -> {
                 }).show();
     }
 
@@ -1452,6 +1406,7 @@ public class ClientAndroidInterface {
     }
 
 
+    public static Uri tempPhotoUri = null;
     public static int RESULT_LOAD_IMG = 1;
     public static int RESULT_SCAN = 100;
     public static String ImagePath;
@@ -1460,8 +1415,22 @@ public class ClientAndroidInterface {
 
     @JavascriptInterface
     public void selectPicture() {
+        Path = global.getSubdirectory("Images") + "/";
+
+        File tempPhotoFile = FileUtils.createTempFile(mContext, "images/selectPictureTemp.jpeg");
+        tempPhotoUri = UriUtils.createUriForFile(mContext, tempPhotoFile);
+        if (tempPhotoUri == null) return;
+
         Intent galleryIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        ((Activity) mContext).startActivityForResult(galleryIntent, RESULT_LOAD_IMG);
+
+        final List<Intent> cameraIntents = new ArrayList<>();
+        Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+        cameraIntent.putExtra(EXTRA_OUTPUT, tempPhotoUri);
+        cameraIntents.add(cameraIntent);
+
+        final Intent chooserIntent = Intent.createChooser(galleryIntent, "Select Source");
+        chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, cameraIntents.toArray(new Parcelable[cameraIntents.size()]));
+        ((Activity) mContext).startActivityForResult(chooserIntent, RESULT_LOAD_IMG);
     }
 
     @JavascriptInterface
@@ -1674,49 +1643,6 @@ public class ClientAndroidInterface {
 
         return PolicyValue;
     }
-
-/*    String imagefile ="/sdcard/DCIM/100ANDRO/DSC_0530.jpg";
-    Bitmap bm = ShrinkBitmap(imagefile, 300, 300);
-
-    //this method compresses the image and saves into a location in sdcard
-    Bitmap ShrinkBitmap(String file, int width, int height){
-
-        BitmapFactory.Options bmpFactoryOptions = new BitmapFactory.Options();
-        bmpFactoryOptions.inJustDecodeBounds = true;
-        Bitmap bitmap = BitmapFactory.decodeFile(file, bmpFactoryOptions);
-
-        int heightRatio = (int)Math.ceil(bmpFactoryOptions.outHeight/(float)height);
-        int widthRatio = (int)Math.ceil(bmpFactoryOptions.outWidth/(float)width);
-
-        if (heightRatio > 1 || widthRatio > 1)
-        {
-            if (heightRatio > widthRatio)
-            {
-                bmpFactoryOptions.inSampleSize = heightRatio;
-            } else {
-                bmpFactoryOptions.inSampleSize = widthRatio;
-            }
-        }
-
-        bmpFactoryOptions.inJustDecodeBounds = false;
-        bitmap = BitmapFactory.decodeFile(file, bmpFactoryOptions);
-
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
-        byte[] imageInByte = stream.toByteArray();
-        //this gives the size of the compressed image in kb
-        long lengthbmp = imageInByte.length / 1024;
-
-        try {
-            bitmap.compress(CompressFormat.JPEG, 100, new FileOutputStream("/sdcard/mediaAppPhotos/compressed_new.jpg"));
-        } catch (FileNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
-
-        return bitmap;
-    }*/
 
     @JavascriptInterface
     public String getOfficers(int LocationId, String EnrolmentDate) {
@@ -2084,14 +2010,14 @@ public class ClientAndroidInterface {
 
     @JavascriptInterface
     public String getPayers(int RegionId, int DistrictId) {
-        String Query = "SELECT PayerId, PayerName,P.LocationId FROM tblPayer P \n" +
-                "LEFT OUTER JOIN tblLocations L ON P.LocationId = L.LocationId\n" +
-                "WHERE (P.LocationId = " + DistrictId + " OR L.ParentLocationId = P.LocationId OR P.LocationId = 'null' OR P.LocationId = '')  " +
+        String Query = "SELECT PayerId, PayerName,P.LocationId FROM tblPayer P " +
+                "LEFT OUTER JOIN tblLocations L ON P.LocationId = L.LocationId " +
+                "WHERE L.LocationId = ? OR L.LocationId = ? OR L.LocationId = 'null' OR L.LocationId = '' OR L.LocationId = 0 " +
                 "ORDER BY L.LocationId";
         /*        "INNER JOIN  uvwLocations L ON P.LocationId = L.LocationId\n" +
                 "WHERE  (L.RegionId = " + RegionId + " OR L.RegionId ='null' OR L.RegionId ='') AND (L.DistrictId = " + DistrictId + " OR L.DistrictId ='null' OR L.DistrictId ='')  " +
                 " ORDER BY L.LocationId";*/
-        JSONArray Payers = sqlHandler.getResult(Query, null);
+        JSONArray Payers = sqlHandler.getResult(Query, new String[]{String.valueOf(RegionId), String.valueOf(DistrictId)});
 
         return Payers.toString();
     }
@@ -2602,9 +2528,24 @@ public class ClientAndroidInterface {
     }
 
 
-    public String InsertRenewals(String Result) {
+    public String InsertRenewalsFromApi(String Result) {
         String TableName = "tblRenewals";
         String[] Columns = {"renewalId", "policyId", "officerId", "officerCode", "chfid", "lastName", "otherNames", "productCode", "productName", "villageName", "renewalPromptDate", "phone", "renewalUUID"};
+        String Where = "isDone = ?";
+        String[] WhereArg = {"N"};
+        sqlHandler.deleteData(TableName, Where, WhereArg);
+        try {
+            sqlHandler.insertData(TableName, Columns, Result, "");
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return String.valueOf(0);
+        }
+        return String.valueOf(1);
+    }
+
+    public String InsertRenewalsFromExtract(String Result) {
+        String TableName = "tblRenewals";
+        String[] Columns = {"RenewalId", "PolicyId", "OfficerId", "OfficerCode", "CHFID", "LastName", "OtherNames", "ProductCode", "ProductName", "VillageName", "RenewalPromptDate", "Phone", "RenewalUUID"};
         String Where = "isDone = ?";
         String[] WhereArg = {"N"};
         sqlHandler.deleteData(TableName, Where, WhereArg);
@@ -2870,49 +2811,38 @@ public class ClientAndroidInterface {
         pd = ProgressDialog.show(mContext, mContext.getResources().getString(R.string.Sync), mContext.getResources().getString(R.string.SyncProcessing));
         final ProgressDialog finalPd = pd;
         try {
-            new Thread() {
-                public void run() {
-                    try {
-                        enrol_result = Enrol(0, 0, 0, 0, 1);
-                    } catch (UserException e) {
-                        finalPd.dismiss();
-                        e.printStackTrace();
-                    } catch (JSONException e) {
-                        finalPd.dismiss();
-                        e.printStackTrace();
-                    } catch (IOException e) {
-                        finalPd.dismiss();
-                        e.printStackTrace();
-                    } catch (NumberFormatException e) {
-                        finalPd.dismiss();
-                        e.printStackTrace();
-                    }
+            new Thread(() -> {
+                try {
+                    enrol_result = Enrol(0, 0, 0, 0, 1);
+                } catch (UserException | JSONException | IOException | NumberFormatException e) {
                     finalPd.dismiss();
-                    if (mylist.size() == 0) {
-                        ((Activity) mContext).runOnUiThread(() -> {
-                            if (enrol_result != 999) {
-                                //if error is encountered
-                                if (enrolMessages != null && enrolMessages.size() > 0) {
-                                    CharSequence[] charSequence = enrolMessages.toArray(new CharSequence[0]);
-                                    AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-                                    builder.setTitle(mContext.getResources().getString(R.string.UploadFailureReport));
-                                    builder.setCancelable(false);
-                                    builder.setItems(charSequence, null);
-                                    builder.setPositiveButton(mContext.getResources().getString(R.string.Ok), (dialogInterface, i) -> dialogInterface.dismiss());
-                                    AlertDialog dialog = builder.create();
-                                    dialog.show();
-                                    enrolMessages.clear();
-
-                                } else {
-                                    ShowDialog(mContext.getResources().getString(R.string.FamilyUploaded));
-                                }
-                            } else {
-                                ShowDialog(mContext.getResources().getString(R.string.NoDataAvailable));
-                            }
-                        });
-                    }
+                    e.printStackTrace();
                 }
-            }.start();
+                finalPd.dismiss();
+                if (mylist.size() == 0) {
+                    ((Activity) mContext).runOnUiThread(() -> {
+                        if (enrol_result != 999) {
+                            //if error is encountered
+                            if (enrolMessages != null && enrolMessages.size() > 0) {
+                                CharSequence[] charSequence = enrolMessages.toArray(new CharSequence[0]);
+                                AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                                builder.setTitle(mContext.getResources().getString(R.string.UploadFailureReport));
+                                builder.setCancelable(false);
+                                builder.setItems(charSequence, null);
+                                builder.setPositiveButton(mContext.getResources().getString(R.string.Ok), (dialogInterface, i) -> dialogInterface.dismiss());
+                                AlertDialog dialog = builder.create();
+                                dialog.show();
+                                enrolMessages.clear();
+
+                            } else {
+                                ShowDialog(mContext.getResources().getString(R.string.FamilyUploaded));
+                            }
+                        } else {
+                            ShowDialog(mContext.getResources().getString(R.string.NoDataAvailable));
+                        }
+                    });
+                }
+            }).start();
         } catch (Exception e) {
             if (finalPd.isShowing()) {
                 finalPd.dismiss();
@@ -2923,101 +2853,89 @@ public class ClientAndroidInterface {
     }
 
     @JavascriptInterface
-    public void CreateEnrolmentXML() throws Exception {
-
-        pd = new ProgressDialog(mContext);
-        pd = ProgressDialog.show(mContext, "", mContext.getResources().getString(R.string.Uploading));
-
-        try {
-            new Thread() {
-                public void run() {
-                    try {
-                        enrol_result = Enrol(0, 0, 0, 0, 2);
-                        if (enrol_result == 0) {
-                            //zipFile();
-                            zipFiles();
-                            deleteUnzippedFie();
-                            deleteUnzippedPhotos();
-
-                        }
-                    } catch (UserException e) {
-                        e.printStackTrace();
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    } catch (NumberFormatException e) {
-                        e.printStackTrace();
-                    }
-                    if (mylist.size() == 0) {
-                        ((Activity) mContext).runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (enrol_result != 999) {
-                                    //if error is encountered
-                                    if (enrolMessages.size() > 0 && enrolMessages != null) {
-                                        CharSequence[] charSequence = enrolMessages.toArray(new CharSequence[(enrolMessages.size())]);
-                                        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-                                        builder.setTitle(mContext.getResources().getString(R.string.UploadFailureReport));
-                                        builder.setCancelable(false);
-                                        builder.setItems(charSequence, null);
-                                        builder.setPositiveButton(mContext.getResources().getString(R.string.Ok), new DialogInterface.OnClickListener() {
-                                            @Override
-                                            public void onClick(DialogInterface dialogInterface, int i) {
-                                                dialogInterface.dismiss();
-                                            }
-                                        });
-                                        AlertDialog dialog = builder.create();
-                                        dialog.show();
-                                        enrolMessages.clear();
-
-                                    } else {
-                                        //deleteImage();
-                                        ShowDialog(mContext.getResources().getString(R.string.XmlCreated));
-                                    }
-                                } else {
-                                    ShowDialog(mContext.getResources().getString(R.string.NoDataAvailable));
-                                }
-
-                                //ShowDialog(mContext.getResources().getString(R.string.FamilyUploaded));
-                            }
-
-                        });
-                    } else {
-                        ((Activity) mContext).runOnUiThread(
-                                new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        ShowDialog(mylist.toString());
-                                    }
-                                });
-                    }
-
-
-                    pd.dismiss();
+    public void CreateEnrolmentXML() {
+        new Thread(() -> {
+            try {
+                enrol_result = Enrol(0, 0, 0, 0, 2);
+                if (enrol_result == 0) {
+                    storageManager.requestCreateFile(MainActivity.REQUEST_CREATE_ENROL_EXPORT,
+                            "application/octet-stream", getEnrolmentExportFilename());
                 }
-            }.start();
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new Exception(e.getMessage());
-        }
+            } catch (Exception e) {
+                Log.e("ENROL XML", "Error while creating enrolment xml", e);
+            }
+            if (mylist.size() == 0) {
+                ((Activity) mContext).runOnUiThread(() -> {
+                    if (enrol_result != 999) {
+                        //if error is encountered
+                        if (enrolMessages.size() > 0 && enrolMessages != null) {
+                            CharSequence[] charSequences = enrolMessages.toArray(new CharSequence[(enrolMessages.size())]);
+                            AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                            builder.setTitle(mContext.getResources().getString(R.string.UploadFailureReport));
+                            builder.setCancelable(false);
+                            builder.setItems(charSequences, null);
+                            builder.setPositiveButton(mContext.getResources().getString(R.string.Ok), (dialogInterface, i) -> dialogInterface.dismiss());
+                            AlertDialog dialog = builder.create();
+                            dialog.show();
+                            enrolMessages.clear();
+                        } else {
+                            //deleteImage();
+                            ShowDialog(mContext.getResources().getString(R.string.XmlCreated));
+                        }
+                    } else {
+                        AndroidUtils.showToast(mContext, R.string.NoDataAvailable);
+                    }
+                    //ShowDialog(mContext.getResources().getString(R.string.FamilyUploaded));
+                });
+            } else {
+                ((Activity) mContext).runOnUiThread(
+                        () -> ShowDialog(mylist.toString()));
+            }
+        }).start();
+    }
 
+    @JavascriptInterface
+    public void CreateRenewalExport() {
+        if (FileUtils.getFileCount(new File(global.getSubdirectory("Renewal"))) > 0) {
+            new Thread(() -> storageManager.requestCreateFile(MainActivity.REQUEST_CREATE_RENEWAL_EXPORT,
+                    "application/octet-stream", getRenewalExportFilename())).start();
+        } else {
+            AndroidUtils.showToast(mContext, R.string.NoDataAvailable);
+        }
 
     }
 
-    /*    private void deleteImage() {
-            File fdelete = new File(PhotoPath.trim());
-            if (fdelete.exists()) {
-                if (fdelete.delete()) {
-                    System.out.println("file Deleted :" + file_dj_path);
-                } else {
-                    System.out.println("file not Deleted :" + file_dj_path);
-                }
-            }
-        }*/
+    @JavascriptInterface
+    public void CreateFeedbackExport() {
+        if (FileUtils.getFileCount(new File(global.getSubdirectory("Feedback"))) > 0) {
+            new Thread(() -> storageManager.requestCreateFile(MainActivity.REQUEST_CREATE_FEEDBACK_EXPORT,
+                    "application/octet-stream", getFeedbackExportFilename())).start();
+        } else {
+            AndroidUtils.showToast(mContext, R.string.NoDataAvailable);
+        }
+    }
+
+    public boolean isPolicyRequired() {
+        return !getRule("AllowFamilyWithoutPolicy", false);
+    }
+
     public boolean isContributionRequired() {
         return !getRule("AllowPolicyWithoutPremium")
                 && getRule("ShowPaymentOption", true);
+    }
+
+    public String getFamilyValidationError(String chfid, int errorMessageId) {
+        return String.format("Family %s %s",
+                chfid,
+                mContext.getResources().getString(errorMessageId)
+        );
+    }
+
+    public String getInsureeValidationError(String chfid, String lastname, String othername, int errorMessageId) {
+        return String.format("Insuree %s %s %s %s",
+                chfid, lastname, othername,
+                mContext.getResources().getString(errorMessageId)
+        );
     }
 
     public ArrayList<String> VerifyFamily() throws JSONException {
@@ -3070,11 +2988,9 @@ public class ClientAndroidInterface {
                 Query += " WHERE FamilyId = " + FamilyId + "";
                 JSONArray policiesArray = sqlHandler.getResult(Query, null);
 
-                if (IsOffline == 1) {
-
-                    if (policiesArray.length() == 0) {
-                        result = false;
-                    }
+                if (IsOffline == 1 && isPolicyRequired() && policiesArray.length() == 0) { //Family offline without a policy
+                    mylist.add(getFamilyValidationError(familyArray.getJSONObject(0).getString("HOFCHFID"), R.string.WithoutPolicy));
+                    result = false;
                 }
 
                 //get Premiums
@@ -3083,25 +2999,10 @@ public class ClientAndroidInterface {
                         "INNER JOIN tblPolicy PL ON PL.PolicyId = PR.PolicyId";
                 Query += " WHERE FamilyId = " + FamilyId;
                 JSONArray premiumsArray = sqlHandler.getResult(Query, null);
-                if (IsOffline == 1) {
-                    if (isContributionRequired()) {
-                        if (premiumsArray.length() == 0) {
-                            JSONObject family = familyArray.getJSONObject(0);
-                            String chfid = family.getString("HOFCHFID");
-                            mylist.add("Family " + chfid + " " + mContext.getResources().getString(R.string.WithoutPolicyPremium));
-                            result = false;
-                        }
-                    }
-                } else {
-                    if (policiesArray.length() != 0) {
-                        if (isContributionRequired()) {
-                            if (premiumsArray.length() == 0) {
-                                JSONObject family = familyArray.getJSONObject(0);
-                                String chfid = family.getString("HOFCHFID");
-                                mylist.add("Family " + chfid + " " + mContext.getResources().getString(R.string.WithoutPolicyPremium));
-                                result = false;
-                            }
-                        }
+                if (IsOffline == 1 || policiesArray.length() != 0) { //Family offline or policy added to online family
+                    if (isContributionRequired() && premiumsArray.length() == 0) {
+                        mylist.add(getFamilyValidationError(familyArray.getJSONObject(0).getString("HOFCHFID"), R.string.WithoutPremium));
+                        result = false;
                     }
                 }
 
@@ -3117,7 +3018,7 @@ public class ClientAndroidInterface {
         }
 
         if (mylist.size() != 0) {
-            addCategoryBox();
+            ShowErrorMessages();
             mylist.clear();
         }
         return FamilyIDs;
@@ -3141,10 +3042,12 @@ public class ClientAndroidInterface {
             if (IsOffline == 1) {
                 if (!getRule("AllowInsureeWithoutPhoto")) {
                     if (PhotoPath == null || PhotoPath.length() == 0 || PhotoPath.equals("null")) {
-                        String chfid = (Insureeobject.getString("CHFID"));
-                        String lastname = (Insureeobject.getString("LastName"));
-                        String othername = (Insureeobject.getString("OtherNames"));
-                        mylist.add("Insuree " + chfid + " " + " " + lastname + " " + " " + othername + " " + mContext.getResources().getString(R.string.WithoutPhoto));
+                        mylist.add(getInsureeValidationError(
+                                Insureeobject.getString("CHFID"),
+                                Insureeobject.getString("LastName"),
+                                Insureeobject.getString("OtherNames"),
+                                R.string.WithoutPhoto
+                        ));
                         result = false;
                     }
                 }
@@ -3277,18 +3180,19 @@ public class ClientAndroidInterface {
             if (CallerId != 2) {
                 Query += " I.FamilyId = " + FamilyId + " \n";
                 if (Integer.parseInt(Offline) == 0) {
-                    if (CallerId == 1 || CallerId == 2) {
+                    if (CallerId == 1) {
                         Query += " AND  I.InsureeId < 0" + "";
                     }
                 }
             } else {
-                Query += "I.InsureeId < 0 AND (";
+                Query += "(";
                 for (int j = 0; j < verifiedId.size(); j++) {
+
                     if (getFamilyStatus(Integer.parseInt(verifiedId.get(j))) == 0) {
                         if ((verifiedId.size() - j) == 1) {
-                            Query += " I.FamilyId == " + verifiedId.get(j) + "";
+                            Query += "I.InsureeId < 0 AND  I.FamilyId == " + verifiedId.get(j) + "";
                         } else {
-                            Query += " I.FamilyId == " + verifiedId.get(j) + " OR ";
+                            Query += "I.InsureeId < 0 AND  I.FamilyId == " + verifiedId.get(j) + " OR ";
                         }
                     } else {
                         if ((verifiedId.size() - j) == 1) {
@@ -3303,7 +3207,6 @@ public class ClientAndroidInterface {
                 }
                 Query += ")";
             }
-
 
             if (CallerId == 0) Query += " AND  I.InsureeId = " + oInsureeId;
 
@@ -3323,12 +3226,10 @@ public class ClientAndroidInterface {
                     JSONObject ob = insureesArray.getJSONObject(j);
                     String typeofId = ob.getString("TypeOfId");
 
-                    if (typeofId == "0") {
+                    if (typeofId.equals("0")) {
                         ob.put("TypeOfId", "");
-                        newInsureesArray.put(ob);
-                    } else {
-                        newInsureesArray.put(ob);
                     }
+                    newInsureesArray.put(ob);
                 }
 
                 insureesArray = newInsureesArray;
@@ -3355,11 +3256,18 @@ public class ClientAndroidInterface {
             if (CallerId == 0) Query += " AND PolicyId = " + oPolicyId;
 
             JSONArray policiesArray = sqlHandler.getResult(Query, null);
-
             QueryPL = Query;
 
+            if (CallerId == 1 || CallerId == 2) {
+                if (IsOffline == 1 && isPolicyRequired() && policiesArray.length() == 0) {
+                    mylist.add(getFamilyValidationError(
+                            insureesArray.getJSONObject(0).getString("CHFID"),
+                            R.string.WithoutPolicy
+                    ));
+                }
+            }
 
-            if (insureesArray.length() > 0 || policiesArray.length() != 0 || familyArray.length() > 0) {
+            if (insureesArray.length() > 0 || policiesArray.length() > 0 || familyArray.length() > 0) {
 
                 //get Premiums
                 Query = "SELECT PR.PremiumId, PR.PolicyId, NULLIF(PR.PayerId,'null') PayerId, PR.Amount, PR.Receipt, PR.PayDate, PR.PayType, PR.isPhotoFee,PR.isOffline\n" +
@@ -3384,56 +3292,17 @@ public class ClientAndroidInterface {
                 if (CallerId == 0) {
                     Query += " AND PR.PremiumId  = " + oPremiumId;
                 }
-                JSONArray premiumsArray = sqlHandler.getResult(Query, null);
 
+                JSONArray premiumsArray = sqlHandler.getResult(Query, null);
                 QueryPR = Query;
 
                 if (CallerId == 1 || CallerId == 2) {
-                    if (IsOffline == 1) {
-                        if (premiumsArray.length() == 0) {
-                            if (isContributionRequired()) {
-                                String chfid = null;
-                                String lastname = null;
-                                String othername = null;
-                                try {
-                                    JSONObject insuree = insureesArray.getJSONObject(0);
-                                    chfid = insuree.getString("CHFID");
-                                    lastname = insuree.getString("LastName");
-                                    othername = insuree.getString("OtherNames");
-                                } catch (JSONException e) {
-                                    e.printStackTrace();
-                                }
-                                mylist.add("Family " + chfid + " " + " " + lastname + " " + " " + othername + " " + mContext.getResources().getString(R.string.WithoutPolicyPremium));
-                            }
-                        }
-                    } else {
-                        if (policiesArray.length() != 0) {
-
-                            JSONArray newpoliciesArray = new JSONArray();
-                            JSONObject ob = null;
-                            for (int j = 0; j < policiesArray.length(); j++) {
-                                ob = policiesArray.getJSONObject(j);
-                                newpoliciesArray.put(ob);
-                            }
-                            policiesArray = newpoliciesArray;
-
-                            if (premiumsArray.length() == 0) {
-                                if (isContributionRequired()) {
-                                    String chfid = null;
-                                    String lastname = null;
-                                    String othername = null;
-                                    try {
-                                        JSONObject insuree = insureesArray.getJSONObject(0);
-                                        chfid = insuree.getString("CHFID");
-                                        lastname = insuree.getString("LastName");
-                                        othername = insuree.getString("OtherNames");
-                                    } catch (JSONException e) {
-                                        e.printStackTrace();
-                                    }
-                                    mylist.add("Family " + chfid + " " + " " + lastname + " " + " " + othername + " " + mContext.getResources().getString(R.string.WithoutPolicyPremium));
-
-                                }
-                            }
+                    if (IsOffline == 1 || policiesArray.length() != 0) { //Family offline or policy added to online family
+                        if (isContributionRequired() && premiumsArray.length() == 0) {
+                            mylist.add(getFamilyValidationError(
+                                    insureesArray.getJSONObject(0).getString("CHFID"),
+                                    R.string.WithoutPremium
+                            ));
                         }
                     }
                 }
@@ -3447,8 +3316,8 @@ public class ClientAndroidInterface {
                 if (CallerId != 2) {
                     Query += " WHERE PL.FamilyId = " + FamilyId;
                 }
-                JSONArray InsureePolicyArray = sqlHandler.getResult(Query, null);
 
+                JSONArray InsureePolicyArray = sqlHandler.getResult(Query, null);
                 QueryIP = Query;
 
                 JSONObject objEnrol = new JSONObject();
@@ -3477,9 +3346,9 @@ public class ClientAndroidInterface {
                 objEnrol.put("InsureePolicy", InsureePolicyArray);
                 String InsureePolicy = objEnrol.toString();
 
-                global = (Global) mContext.getApplicationContext();
-
                 if (CallerId != 2) {
+                    InsureeImages[] InsureeImages = FamilyPictures(insureesArray, CallerId);
+
                     if (mylist.size() == 0) {
                         JSONObject resultObj = new JSONObject();
                         JSONArray familyArr = new JSONArray();
@@ -3488,8 +3357,6 @@ public class ClientAndroidInterface {
 
                         // Insuree + picture
                         JSONArray tempInsureesArray = new JSONArray();
-
-                        InsureeImages[] InsureeImages = FamilyPictures(insureesArray, CallerId);
 
                         for (int j = 0; j < insureesArray.length(); j++) {
                             tempInsureesArray = insureesArray;
@@ -3519,59 +3386,54 @@ public class ClientAndroidInterface {
                         }
 
                         familyObj.put("policies", policiesArray);
-
-                        if (mylist.size() != 0) {
-                            addCategoryBox();
-                            break;
-                        }
-                        // InsureePolicy
                         familyObj.put("insureePolicy", InsureePolicyArray);
-
-
                         familyArr.put(familyObj);
                         resultObj.put("family", familyArr);
 
-                        if (mylist.size() != 0) {
-                            addCategoryBox();
-                            break;
-                        }
-
                         ToRestApi rest = new ToRestApi();
                         HttpResponse response = rest.postToRestApiToken(resultObj, "family");
-
-                        HttpEntity entity = response.getEntity();
-                        String responseString = EntityUtils.toString(entity);
-
-                        boolean parsingErrorOccured = false;
-                        try {
-                            JSONObject responseObject = new JSONObject(responseString);
-                            if (responseObject.has("error_occured") && responseObject.getBoolean("error_occured")) {
-                                EnrolResult = -400;
-                                enrolMessages.add(responseObject.getString("error_message"));
-                            } else if (responseObject.has("response")) {
-                                EnrolResult = responseObject.getInt("response");
-                            } else {
-                                throw new JSONException("Response does not have required information");
-                            }
-                        } catch (JSONException e) {
-                            EnrolResult = -400;
-                            parsingErrorOccured = true;
-                        }
-
-                        if (parsingErrorOccured) {
+                        String responseString = rest.getContent(response);
+                        if (response.getStatusLine().getStatusCode() == HttpURLConnection.HTTP_OK
+                                || response.getStatusLine().getStatusCode() == HttpURLConnection.HTTP_CREATED) {
+                            boolean parsingErrorOccured = false;
                             try {
-                                EnrolResult = Integer.parseInt(responseString);
-                            } catch (NumberFormatException e) {
-                                Log.e("ENROLL", "Sync response is not a valid json or int");
+                                JSONObject responseObject = new JSONObject(responseString);
+                                if (responseObject.has("error_occured") && responseObject.getBoolean("error_occured")) {
+                                    EnrolResult = -400;
+                                    enrolMessages.add(responseObject.getString("error_message"));
+                                } else if (responseObject.has("response")) {
+                                    EnrolResult = responseObject.getInt("response");
+                                } else {
+                                    throw new JSONException("Response does not have required information");
+                                }
+                            } catch (JSONException e) {
+                                EnrolResult = -400;
+                                parsingErrorOccured = true;
                             }
+
+                            if (parsingErrorOccured) {
+                                try {
+                                    EnrolResult = Integer.parseInt(responseString);
+                                } catch (NumberFormatException e) {
+                                    Log.e("ENROLL", "Sync response is not a valid json or int");
+                                }
+                            }
+                        } else {
+                            enrolMessages.add(mContext.getResources().getString(R.string.HttpResponse, response.getStatusLine().getStatusCode(), response.getStatusLine().getReasonPhrase()));
+                            EnrolResult = -400;
                         }
+
+                        if (EnrolResult != 0) {
+                            Log.d("ENROL", "API RESPONSE: " + mContext.getResources().getString(R.string.HttpResponse, response.getStatusLine().getStatusCode(), response.getStatusLine().getReasonPhrase()) + "\n" + responseString);
+                        }
+
                     } else {
-                        addCategoryBox();
+                        ShowErrorMessages();
                         break;
                     }
                 } else {
                     if (!"".equals(QueryF)) {
-                        fname = sqlHandler.getResultXML2(QueryF, QueryI, QueryPL, QueryPR, QueryIP, global.getOfficerCode(), global.getOfficerId());
+                        fname = sqlHandler.getExportAsXML(QueryF, QueryI, QueryPL, QueryPR, QueryIP, global.getOfficerCode(), global.getOfficerId());
                         FamilyPictures(insureesArray, 2);
                     }
                     EnrolResult = 0;
@@ -3609,16 +3471,17 @@ public class ClientAndroidInterface {
                     }
 
                     if (mylist.size() == 0) {
-                        if (CallerId == 1 || CallerId == 2) {
+                        if (CallerId == 1) {
                             DeleteImages(insureesArray, verifiedId, CallerId);
-                            DeleteUploadedData(Integer.parseInt(FamilyId), verifiedId, CallerId);
-                            DeleteFamily(Integer.parseInt(FamilyId));
                         }
+
+                        DeleteUploadedData(Integer.parseInt(FamilyId), verifiedId, CallerId);
+                        DeleteFamily(Integer.parseInt(FamilyId));
                     }
 
 
                 } else {
-                    String ErrMsg = null;
+                    String ErrMsg;
                     switch (EnrolResult) {
                         case -1:
                             ErrMsg = "[" + CHFNumber + "] " + mContext.getString(R.string.MissingHOF);
@@ -3650,15 +3513,12 @@ public class ClientAndroidInterface {
             } else {
                 EnrolResult = 0;
 
-                if (CallerId == 1 || CallerId == 2) {
+                if (CallerId == 1) {
                     DeleteImages(insureesArray, verifiedId, CallerId);
-                    DeleteUploadedData(Integer.parseInt(FamilyId), verifiedId, CallerId);
                 }
-                if (CallerId == 1 || CallerId != 0) {
-                    DeleteImages(insureesArray, verifiedId, CallerId);
-                    if (IsOffline == 0 || IsOffline == 0) {
-                        DeleteFamily(Integer.parseInt(FamilyId));
-                    }
+                DeleteUploadedData(Integer.parseInt(FamilyId), verifiedId, CallerId);
+                if (IsOffline == 0) {
+                    DeleteFamily(Integer.parseInt(FamilyId));
                 }
             }
 
@@ -3694,33 +3554,14 @@ public class ClientAndroidInterface {
         }
     }
 
-    private void deleteUnzippedFie() {
- /*       global = (Global) mContext.getApplicationContext();
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy-HH");
-        Calendar cal = Calendar.getInstance();
-        String d = format.format(cal.getTime());*/
-
-        String targetPath = global.getSubdirectory("Family");
-        File file = new File(targetPath, fname);
-        file.delete();
-    }
-
-    public void deleteUnzippedPhotos() {
-        String targetPath = global.getSubdirectory("Photos");
-        File folder = new File(targetPath);
-        for (int i = 0; i < folder.listFiles().length; i++) {
-            if (folder.listFiles()[i].isFile()) {
-                folder.listFiles()[i].delete();
-            }
+    public void clearDirectory(String directory) {
+        File[] files = new File(global.getSubdirectory(directory)).listFiles();
+        if (files != null) {
+            FileUtils.deleteFiles(files);
         }
     }
 
-
     public InsureeImages[] FamilyPictures(JSONArray insurees, int CallerId) throws IOException {
-
-        String Path = global.getSubdirectory("Photos");
-        //Here we are creating a directory
-
         InsureeImages[] images = new InsureeImages[insurees.length()];
 
         String PhotoPath = null;
@@ -3784,8 +3625,11 @@ public class ClientAndroidInterface {
                             InsureeImages img = new InsureeImages("", empty);
                             images[j] = img;
                         } else {
-                            mylist.add("Insuree " + chfid + " " + " " + lastname + " " + " " + othername + " " + mContext.getResources().getString(R.string.WithoutPhoto));
-                            addCategoryBox();
+                            mylist.add(getInsureeValidationError(
+                                    chfid, lastname, othername,
+                                    R.string.WithoutPhoto
+                            ));
+                            ShowErrorMessages();
                             break;
                         }
                     } else {
@@ -3830,86 +3674,49 @@ public class ClientAndroidInterface {
         out.close();
     }
 
-    public void xmlWriter(String ImgName, byte[] imgcontent) throws IOException {
-        File Dir = new File(global.getSubdirectory("EnrolmentXML"));
-
-        //Here we are giving name to the XML file
-        String FileName = "EnrolmentXml.xml";
-
-        //Here we are creating file in that directory
-        File EnrollmentXML = new File(Dir, FileName);
-        //Here we are creating outputstream
-        FileOutputStream fos = new FileOutputStream(EnrollmentXML, true);
-
-
-        XmlSerializer serializer = Xml.newSerializer();
-
-        serializer.setOutput(fos, "UTF-8");
-        serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
-        serializer.startTag(null, "Pictures");
-
-        serializer.startTag(null, "ImageName");
-        serializer.text(ImgName);
-        serializer.endTag(null, "ImageName");
-
-        serializer.startTag(null, "ImageContent");
-        serializer.text(String.valueOf(imgcontent));
-        serializer.endTag(null, "ImageContent");
-
-        serializer.endTag(null, "Pictures");
-        serializer.endDocument();
-        serializer.flush();
-        fos.close();
+    public String getEnrolmentExportFilename() {
+        return getExportFileName("Enrolment");
     }
 
-    public void zipFile() {
-        global = (Global) mContext.getApplicationContext();
-        //@SuppressLint("SimpleDateFormat") SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss");
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy-HH-mm");
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat formatZip = new SimpleDateFormat("dd-MM-yyyy-HH-mm-ss");
-        Calendar cal = Calendar.getInstance();
-        String d = format.format(cal.getTime());
-        String dzip = formatZip.format(cal.getTime());
-
-        String targetPath = global.getSubdirectory("Enrolment") + File.separator + "Enrolment_" + global.getOfficerCode() + "_" + d + ".xml";
-        String zipFilePath = global.getSubdirectory("Enrolment") + File.separator + "Enrolment_" + global.getOfficerCode() + "_" + dzip + ".rar";
-        //String unzippedFolderPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/IMIS/Enrolment/Enrolment_"+global.getOfficerCode()+"_"+d+".xml";
-        String password = getRarPwd();
-
-        Compressor.zip(targetPath, zipFilePath, password);
-        //Compressor.unzip(zipFilePath, unzippedFolderPath, password);
+    public String getRenewalExportFilename() {
+        return getExportFileName("Renewal");
     }
 
-    public void zipFiles() {
-        global = (Global) mContext.getApplicationContext();
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy-HH");
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat formatZip = new SimpleDateFormat("dd-MM-yyyy-HH-mm-ss");
+    public String getFeedbackExportFilename() {
+        return getExportFileName("Feedback");
+    }
+
+    public String getExportFileName(String type) {
+        SimpleDateFormat formatZip = new SimpleDateFormat("dd-MM-yyyy-HH-mm-ss", Locale.US);
         Calendar cal = Calendar.getInstance();
-        String d = format.format(cal.getTime());
         String dzip = formatZip.format(cal.getTime());
+        return type + "_" + global.getOfficerCode() + "_" + dzip + ".rar";
+    }
 
-        String targetPath = global.getSubdirectory("Photos");
-        String targetPathFamily = global.getSubdirectory("Family");
-        String zipFilePath = global.getSubdirectory("Enrolment") + File.separator + "Enrolment_" + global.getOfficerCode() + "_" + dzip + ".rar";
-        //String unzippedFolderPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/IMIS/Photos_"+global.getOfficerCode()+"_"+d+"";
+
+    public File zipEnrolmentFiles() {
+        File zipFile = FileUtils.createTempFile(mContext, "exports/" + getEnrolmentExportFilename(), true);
         String password = getRarPwd();
+        File imageDir = new File(global.getImageFolder());
+        File familyDir = new File(global.getSubdirectory("Family"));
 
-        ArrayList<File> FilesToAdd = new ArrayList<File>();
-        File folder = new File(targetPath);
-        File Family = new File(targetPathFamily);
-        for (int i = 0; i < folder.listFiles().length; i++) {
-            if (folder.listFiles()[i].isFile()) {
-                FilesToAdd.add(new File(folder.listFiles()[i].getPath()));
-            }
-        }
-        for (int i = 0; i < Family.listFiles().length; i++) {
-            if (Family.listFiles()[i].isFile()) {
-                FilesToAdd.add(new File(Family.listFiles()[i].getPath()));
-            }
-        }
+        return ZipUtils.zipDirectories(zipFile, password, familyDir, imageDir);
+    }
 
-        Compressor.zip(FilesToAdd, zipFilePath, password);
-        //Compressor.unzip(zipFilePath, unzippedFolderPath, password);
+    public File zipRenewalFiles() {
+        File zipFile = FileUtils.createTempFile(mContext, "exports/" + getRenewalExportFilename(), true);
+        String password = getRarPwd();
+        File familyDir = new File(global.getSubdirectory("Renewal"));
+
+        return ZipUtils.zipDirectories(zipFile, password, familyDir);
+    }
+
+    public File zipFeedbackFiles() {
+        File zipFile = FileUtils.createTempFile(mContext, "exports/" + getFeedbackExportFilename(), true);
+        String password = getRarPwd();
+        File familyDir = new File(global.getSubdirectory("Feedback"));
+
+        return ZipUtils.zipDirectories(zipFile, password, familyDir);
     }
 
     public boolean unZipWithPassword(String fileName, String password) {
@@ -3918,7 +3725,7 @@ public class ClientAndroidInterface {
         //String unzippedFolderPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/IMIS/Enrolment/Enrolment_"+global.getOfficerCode()+"_"+d+".xml";
         //here we not don't have password set yet so we pass password from Edit Text rar input
         try {
-            Compressor.unzip(targetPath, unzippedFolderPath, password);
+            ZipUtils.unzipPath(targetPath, unzippedFolderPath, password);
         } catch (Exception e) {
             return false;
         }
@@ -3932,124 +3739,21 @@ public class ClientAndroidInterface {
         String password = getRarPwd();
 
         try {
-            Compressor.unzip(targetPath, unzippedFolderPath, password);
+            ZipUtils.unzipPath(targetPath, unzippedFolderPath, password);
         } catch (Exception e) {
             return false;
         }
         return true;
     }
 
-    public boolean unZipFeedbacksRenewals(String FileName) {
-        String targetPath = global.getSubdirectory("Database") + File.separator + FileName;
-        String unzippedFolderPath = global.getSubdirectory("Database");
-        //String unzippedFolderPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/IMIS/Enrolment/Enrolment_"+global.getOfficerCode()+"_"+d+".xml";
-
+    public boolean unZipFeedbacksRenewals(File file) {
         String password = getRarPwd();
         try {
-            Compressor.unzip(targetPath, unzippedFolderPath, password);
+            ZipUtils.unzipFile(file, file.getParentFile(), password);
         } catch (Exception e) {
             return false;
         }
         return true;
-    }
-
-
-    @JavascriptInterface
-    public void zipFeedBackRenewal(final String FileType) {
-        global = (Global) mContext.getApplicationContext();
-        //@SuppressLint("SimpleDateFormat") SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss");
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy-HH-mm-ss");
-        Calendar cal = Calendar.getInstance();
-        String d = format.format(cal.getTime());
-
-
-        String targetPath = global.getMainDirectory();
-        String zipFilePath = global.getMainDirectory() + File.separator + "Master" + FileType + ".rar";
-        //String unzippedFolderPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/IMIS/Photos_"+global.getOfficerCode()+"_"+d+"";
-
-        String password = getRarPwd();
-
-        ArrayList<File> FilesToAdd = new ArrayList<File>();
-        File folder = new File(targetPath);
-        for (int i = 0; i < folder.listFiles().length; i++) {
-            final int[] status = {0};
-            if (folder.listFiles()[i].isFile()) {
-                String fname = folder.listFiles()[i].getName();
-                if (FileType.equals("Feedback")) {
-                    String str = fname.substring(0, 9);
-                    if (str.equals("feedback_")) {
-                        FilesToAdd.add(new File(folder.listFiles()[i].getPath()));
-                    }
-                } else {
-                    String str = fname.substring(0, 7);
-                    if (str.equals("RenPol_")) {
-                        FilesToAdd.add(new File(folder.listFiles()[i].getPath()));
-                    }
-                }
-            }
-
-        }
-
-
-        Compressor.zip(FilesToAdd, zipFilePath, password);
-        if (FilesToAdd.size() > 0) {
-            ShowDialog(mContext.getResources().getString(R.string.XmlCreated) + " with " + FilesToAdd.size() + " Files");
-        } else {
-            ShowDialog(mContext.getResources().getString(R.string.NoDataAvailable));
-        }
-
-        //Compressor.unzip(zipFilePath, unzippedFolderPath, password);
-    }
-
-/*    @JavascriptInterface
-    public void UploadImages(final String Filename) {
-
-        files = GetListOfImages(global.getImageFolder(), Filename);
-        UploadFile uf = new UploadFile();
-        if(files.length > 0){
-            if (uf.isValidFTPCredentials()) {
-                for (int i = 0; i < files.length; i++) {
-                    UploadCounter = i + 1;
-                    if (uf.uploadFileToServer(mContext, files[i], "org.openimis.imispolicies")) {
-                        files[i].delete();
-                    }
-                }
-            }
-        }
-*//*        new Thread() {
-            public void run() {
-                files = GetListOfImages(global.getImageFolder(), Filename);
-                UploadFile uf = new UploadFile();
-                if(files.length > 0){
-                    if (uf.isValidFTPCredentials()) {
-
-                        for (int i = 0; i < files.length; i++) {
-                            UploadCounter = i + 1;
-                            if (uf.uploadFileToServer(mContext, files[i], "org.openimis.imispolicies")) {
-                                files[i].delete();
-                            }
-                        }
-                    }
-                }
-
-            }
-        }.start();*//*
-
-    }*/
-
-    public void createZipImage() {
-/*        OutputStream out;
-        String root = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)+"/";
-        File createDir = new File(root+"Folder Name"+File.separator);
-        if(!createDir.exists()) {
-            createDir.mkdir();
-        }
-        File file = new File(root + "Folder Name" + File.separator +"Name of File");
-        file.createNewFile();
-        out = new FileOutputStream(file);
-
-        out.write(data);
-        out.close();*/
     }
 
     public String getRarPwd() {
@@ -4125,47 +3829,34 @@ public class ClientAndroidInterface {
 
     }
 
-    public void addCategoryBox() {
+    public void ShowErrorMessages() {
 
-        ((Activity) mContext).runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                // get prompts.xml view
-                LayoutInflater li = LayoutInflater.from(mContext);
-                View promptsView = li.inflate(R.layout.error_message, null);
+        ((Activity) mContext).runOnUiThread(() -> {
+            // get prompts.xml view
+            LayoutInflater li = LayoutInflater.from(mContext);
+            View promptsView = li.inflate(R.layout.error_message, null);
 
-                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(mContext);
+            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(mContext);
 
-                // set prompts.xml to alertdialog builder
-                alertDialogBuilder.setView(promptsView);
+            // set prompts.xml to alertdialog builder
+            alertDialogBuilder.setView(promptsView);
 
-                final TextView textView1 = (TextView) promptsView.findViewById(R.id.textView1);
-                final RecyclerView error_message = (RecyclerView) promptsView.findViewById(R.id.error_message);
+            final TextView textView1 = (TextView) promptsView.findViewById(R.id.textView1);
+            final RecyclerView error_message = (RecyclerView) promptsView.findViewById(R.id.error_message);
 
-                enrollmentReport = new EnrollmentReport(mContext, mylist);
+            enrollmentReport = new EnrollmentReport(mContext, mylist);
 
-                error_message.setLayoutManager(new LinearLayoutManager(mContext));
-                error_message.addItemDecoration(new DividerItemDecoration(mContext, DividerItemDecoration.VERTICAL));
-                error_message.setAdapter(enrollmentReport);
+            error_message.setLayoutManager(new LinearLayoutManager(mContext));
+            error_message.addItemDecoration(new DividerItemDecoration(mContext, DividerItemDecoration.VERTICAL));
+            error_message.setAdapter(enrollmentReport);
 
-                String title = mContext.getString(R.string.failedToUpload);
-                textView1.setText(title.toUpperCase());
-                // set dialog message
-                alertDialogBuilder
-                        .setCancelable(false)
-                        .setPositiveButton("Ok",
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id) {
-                                        dialog.cancel();
-                                    }
-                                });
-
-                // create alert dialog
-                AlertDialog alertDialog = alertDialogBuilder.create();
-
-                // show it
-                alertDialog.show();
-            }
+            String title = mContext.getString(R.string.failedToUpload);
+            textView1.setText(title.toUpperCase());
+            // set dialog message
+            alertDialogBuilder
+                    .setCancelable(false)
+                    .setPositiveButton("Ok", (dialog, id) -> dialog.cancel())
+                    .show();
         });
 
     }
@@ -4259,8 +3950,7 @@ public class ClientAndroidInterface {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-
-            global.getJWTToken().saveTokenText(jwt, validTo);
+            global.getJWTToken().saveTokenText(jwt, validTo, global.getOfficerCode());
 
             ((Activity) mContext).runOnUiThread(
                     () -> MainActivity.SetLoggedIn(mContext.getResources().getString(R.string.Login), mContext.getResources().getString(R.string.Logout))
@@ -4278,12 +3968,7 @@ public class ClientAndroidInterface {
         cs.setFunctionName("isValidLogin");
         UserId = cs.isUserLoggedIn(Username, Password);
         global.setUserId(UserId);
-        ((Activity) mContext).runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                MainActivity.SetLoggedIn(mContext.getResources().getString(R.string.Login), mContext.getResources().getString(R.string.Logout));
-            }
-        });
+        ((Activity) mContext).runOnUiThread(() -> MainActivity.SetLoggedIn(mContext.getResources().getString(R.string.Login), mContext.getResources().getString(R.string.Logout)));
         return UserId;
     }
 
@@ -4315,7 +4000,7 @@ public class ClientAndroidInterface {
 
     private void DeleteUploadedData(final int FamilyId, ArrayList<String> FamilyIDs, int CallerId) {
         if (FamilyIDs.size() == 0) {
-            FamilyIDs = new ArrayList<String>() {{
+            FamilyIDs = new ArrayList<>() {{
                 add(String.valueOf(FamilyId));
             }};
         }
@@ -4366,63 +4051,49 @@ public class ClientAndroidInterface {
     }
 
     @JavascriptInterface
-    public Boolean UploadOfflineFeedbackRenewal(final String ActivityName) {
-        final File[] files, jsonFiles;
-        final String functionName, jsonPropertyName, path;
+    public void uploadFeedbacks() {
         final int totalFiles;
         final ProgressDialog pd;
 
-        result = ToRestApi.UploadStatus.NO_RESPONSE;
-
-        path = global.getMainDirectory();
-
-        if (ActivityName.equals("renewal")) {
-            files = GetListOfFiles(path, "Renewal", null);
-            jsonFiles = GetListOfJSONFiles(path, "Renewal", null);
-            functionName = "policy/renew";
-            jsonPropertyName = "Policy";
-        } else {
-            files = GetListOfFiles(Path, "Feedback", null);
-            jsonFiles = GetListOfJSONFiles(Path, "Feedback", null);
-            functionName = "feedback";
-            jsonPropertyName = "feedback";
+        if (!global.isNetworkAvailable()) {
+            ShowDialog(mContext.getResources().getString(R.string.NoInternet));
+            return;
         }
 
-        totalFiles = files.length;
+        File feedbackDir = new File(global.getSubdirectory("Feedback"));
+        File[] xmlFiles = feedbackDir.listFiles((file) -> file.getName().endsWith(".xml"));
+        File[] jsonFiles = feedbackDir.listFiles((file) -> file.getName().endsWith(".json"));
+
+        if (xmlFiles == null || jsonFiles == null) {
+            ShowDialog(mContext.getResources().getString(R.string.NoFiles));
+            DeleteFeedBacks();
+            return;
+        }
+
+        totalFiles = jsonFiles.length;
 
         if (totalFiles == 0) {
             ShowDialog(mContext.getResources().getString(R.string.NoDataAvailable));
-            //Clean tables in database as well
-            if (ActivityName.equals("renewal")) {
-                DeleteRenewals();
-            } else {
-                DeleteFeedBacks();
-            }
-
-            return false;
+            DeleteFeedBacks();
+            return;
         }
 
-        if (!global.isNetworkAvailable()) {
-            ShowDialog(mContext.getResources().getString(R.string.NoInternet));
-            return false;
-        }
-
-        pd = ProgressDialog.show(mContext, mContext.getResources().getString(R.string.Sync), mContext.getResources().getString(R.string.SyncProcessing));
+        pd = AndroidUtils.showProgressDialog(mContext, R.string.Sync, R.string.SyncProcessing);
 
         new Thread(() -> {
             ToRestApi rest = new ToRestApi();
             JSONObject obj;
             int uploadsAccepted = 0, uploadsRejected = 0, uploadFailed = 0;
             for (int i = 0; i < jsonFiles.length; i++) {
-                String jsonText = global.getFileText(jsonFiles[i].getPath());
+                String jsonText = FileUtils.readFileAsUTF8String(jsonFiles[i]);
 
                 HttpResponse response = null;
                 int responseCode = -1;
                 int uploadStatus = -1;
 
                 try {
-                    obj = new JSONObject(jsonText).getJSONObject(jsonPropertyName);
-                    response = rest.postToRestApiToken(obj, functionName);
+                    obj = new JSONObject(jsonText).getJSONObject("feedback");
+                    response = rest.postToRestApiToken(obj, "feedback");
                     if (response != null) {
                         responseCode = response.getStatusLine().getStatusCode();
                         if (responseCode == HttpURLConnection.HTTP_OK) {
@@ -4438,11 +4109,11 @@ public class ClientAndroidInterface {
                 } else if (responseCode == HttpURLConnection.HTTP_OK) {
                     if (uploadStatus == ToRestApi.UploadStatus.ACCEPTED) {
                         uploadsAccepted += 1;
-                        MoveFile(files[i], 1);
+                        MoveFile(xmlFiles[i], 1);
                         MoveFile(jsonFiles[i], 1);
                     } else {
                         uploadsRejected += 1;
-                        MoveFile(files[i], 2);
+                        MoveFile(xmlFiles[i], 2);
                         MoveFile(jsonFiles[i], 2);
                     }
                 }
@@ -4473,18 +4144,27 @@ public class ClientAndroidInterface {
             });
             pd.dismiss();
         }).start();
-        return true;
     }
 
     @JavascriptInterface
     public void uploadRenewals() {
-        final String path;
         final int totalFiles;
         final ProgressDialog pd;
 
-        path = global.getMainDirectory();
-        File[] files = GetListOfFiles(path, "Renewal", null);
-        File[] jsonFiles = GetListOfJSONFiles(path, "Renewal", null);
+        if (!global.isNetworkAvailable()) {
+            ShowDialog(mContext.getResources().getString(R.string.NoInternet));
+            return;
+        }
+
+        File renewalDir = new File(global.getSubdirectory("Renewal"));
+        File[] xmlFiles = renewalDir.listFiles((file) -> file.getName().endsWith(".xml"));
+        File[] jsonFiles = renewalDir.listFiles((file) -> file.getName().endsWith(".json"));
+
+        if (xmlFiles == null || jsonFiles == null) {
+            ShowDialog(mContext.getResources().getString(R.string.NoFiles));
+            DeleteRenewals();
+            return;
+        }
 
         totalFiles = jsonFiles.length;
 
@@ -4494,12 +4174,7 @@ public class ClientAndroidInterface {
             return;
         }
 
-        if (!global.isNetworkAvailable()) {
-            ShowDialog(mContext.getResources().getString(R.string.NoInternet));
-            return;
-        }
-
-        pd = AndroidUtil.showProgressDialog(mContext, R.string.Sync, R.string.SyncProcessing);
+        pd = AndroidUtils.showProgressDialog(mContext, R.string.Sync, R.string.SyncProcessing);
 
         new Thread(() -> {
             StringBuilder messageBuilder = new StringBuilder();
@@ -4518,7 +4193,7 @@ public class ClientAndroidInterface {
 
             int acceptedRenewals = 0;
             for (int i = 0; i < jsonFiles.length; i++) {
-                String jsonText = global.getFileText(jsonFiles[i].getPath());
+                String jsonText = FileUtils.readFileAsUTF8String(jsonFiles[i]);
                 String renewalInsureeNo = "";
 
                 HttpResponse response;
@@ -4562,11 +4237,11 @@ public class ClientAndroidInterface {
 
                 if (messages.containsKey(uploadStatus)) {
                     if (uploadStatus == ToRestApi.RenewalStatus.ACCEPTED || uploadStatus == ToRestApi.RenewalStatus.ALREADY_ACCEPTED) {
-                        MoveFile(files[i], 1);
+                        MoveFile(xmlFiles[i], 1);
                         MoveFile(jsonFiles[i], 1);
                         acceptedRenewals++;
                     } else {
-                        MoveFile(files[i], 2);
+                        MoveFile(xmlFiles[i], 2);
                         MoveFile(jsonFiles[i], 2);
                         messageBuilder.append(String.format(messageFormat, renewalInsureeNo, messages.get(uploadStatus)));
                     }
@@ -4574,15 +4249,17 @@ public class ClientAndroidInterface {
             }
 
             String successMessage = mContext.getResources().getString(R.string.BulkUpload);
-
+            String failMessage = mContext.getResources().getString(R.string.RenewalRejected);
             String resultMessage;
-            if (acceptedRenewals != jsonFiles.length) {
+            if (acceptedRenewals == 0) {
+                resultMessage = failMessage;
+            } else if (acceptedRenewals != jsonFiles.length) {
                 resultMessage = successMessage + "\n" + messageBuilder.toString();
             } else {
                 resultMessage = successMessage;
             }
 
-            ((Activity) mContext).runOnUiThread(() -> AndroidUtil.showDialog(mContext, resultMessage));
+            ((Activity) mContext).runOnUiThread(() -> AndroidUtils.showDialog(mContext, resultMessage));
 
             pd.dismiss();
         }).start();
@@ -4626,14 +4303,7 @@ public class ClientAndroidInterface {
 
     private File[] GetListOfImages(String DirectoryPath, final String FileName) {
         File Directory = new File(DirectoryPath);
-        FilenameFilter filter = new FilenameFilter() {
-
-            @Override
-            public boolean accept(File dir, String filename) {
-                return filename.equalsIgnoreCase(FileName);
-            }
-        };
-        return Directory.listFiles(filter);
+        return Directory.listFiles((dir, filename) -> filename.equalsIgnoreCase(FileName));
     }
 
     @JavascriptInterface
@@ -4645,7 +4315,7 @@ public class ClientAndroidInterface {
         Photos = Directory.listFiles((dir, filename) -> filename.startsWith(FileName + "_"));
 
         if (Photos != null && Photos.length > 0) {
-            Arrays.sort(Photos, (f1, f2) -> f1.getName().compareTo(f2.getName()));
+            Arrays.sort(Photos, (f1, f2) -> Long.compare(f1.lastModified(), f2.lastModified()));
             newFileName = Photos[Photos.length - 1].toString();
         }
         return newFileName;
@@ -4653,7 +4323,7 @@ public class ClientAndroidInterface {
 
     private void MoveFile(File file, int res) {
         String Accepted = "", Rejected = "";
-        if (file.getName().contains("RenPol_") || file.getName().contains("RenPolJSON_")) {
+        if (file.getName().contains("Renewal_") || file.getName().contains("RenewalJSON_")) {
             Accepted = "AcceptedRenewal";
             Rejected = "RejectedRenewal";
         } else if (file.getName().contains("feedback_") || file.getName().contains("feedbackJSON_")) {
@@ -4736,43 +4406,30 @@ public class ClientAndroidInterface {
 
     @JavascriptInterface
     public void downloadMasterData() throws InterruptedException {
-        ProgressDialog pd = null;
-        pd = ProgressDialog.show(mContext, mContext.getResources().getString(R.string.Sync), mContext.getResources().getString(R.string.DownloadingMasterData));
-        final ProgressDialog finalPd = pd;
-        Thread t = new Thread() {
-            public void run() {
-                try {
-                    startDownloading();
-                    finalPd.dismiss();
+        ProgressDialog pd = ProgressDialog.show(mContext, mContext.getResources().getString(R.string.Sync), mContext.getResources().getString(R.string.DownloadingMasterData));
+        new Thread(() -> {
+            try {
+                startDownloading();
 
-                    ((Activity) mContext).runOnUiThread(() -> {
-                        ShowDialog(mContext.getResources().getString(R.string.DataDownloadedSuccess));
-                        Global global = Global.getGlobal();
-                        global.setOfficerCode("");
-//                            Intent refresh = new Intent(mContext, MainActivity.class);
-//                            ((MainActivity)mContext).startActivity(refresh);
-//                            ((MainActivity)mContext).finish();
-                        ((MainActivity) mContext).ShowEnrolmentOfficerDialog();
-                    });
-
-                } catch (JSONException e) {
-                    //e.printStackTrace();
-                    finalPd.dismiss();
-                } catch (UserException e) {
-                    //e.printStackTrace();
-                    finalPd.dismiss();
-                }
+                ((Activity) mContext).runOnUiThread(() -> {
+                    ShowDialog(mContext.getResources().getString(R.string.DataDownloadedSuccess));
+                    Global global = Global.getGlobal();
+                    global.setOfficerCode("");
+                    ((MainActivity) mContext).ShowEnrolmentOfficerDialog();
+                });
+            } catch (JSONException e) {
+                Log.e("MASTERDATA", "Error while parsing master data", e);
+            } catch (UserException e) {
+                Log.e("MASTERDATA", "Error while downloading master data", e);
+                ((Activity) mContext).runOnUiThread(() -> {
+                    AndroidUtils.showDialog(mContext,
+                            mContext.getResources().getString(R.string.DataDownloadedFailed),
+                            e.getMessage());
+                });
+            } finally {
+                pd.dismiss();
             }
-        };
-        t.start();
-
-
-        //return true;
-        //        finally {
-//            pd.dismiss();
-//        }
-
-
+        }).start();
     }
 
     public void importMasterData(String data) throws JSONException, UserException {
@@ -4789,17 +4446,19 @@ public class ClientAndroidInterface {
         }
     }
 
-    @SuppressWarnings("ConstantConditions")
+
     public void startDownloading() throws JSONException, UserException {
         ToRestApi rest = new ToRestApi();
-        String MD = rest.getObjectFromRestApi("master");
+        HttpResponse response = rest.getFromRestApi("master");
+        String error = rest.getHttpError(mContext, response.getStatusLine().getStatusCode(), response.getStatusLine().getReasonPhrase());
+        if (error == null) {
+            String MD = rest.getContent(response);
+            JSONObject masterData = new JSONObject(MD);
 
-        JSONObject masterData = new JSONObject(MD);
-
-        if (masterData.length() == 0)
-            throw new UserException(mContext.getResources().getString(R.string.DownloadMasterDataFailed));
-
-        processNewFormat(masterData);
+            processNewFormat(masterData);
+        } else {
+            throw new UserException(error);
+        }
     }
 
     private void processOldFormat(JSONArray masterData) throws UserException {
@@ -5204,22 +4863,14 @@ public class ClientAndroidInterface {
     }
 
     @JavascriptInterface
-    public String getScannedNumber() {
-        //clearInsuranceNo();
-        //clearXml();
+    public void getScannedNumber() {
         Intent intent = new Intent("com.google.zxing.client.android.SCAN");
         intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
         try {
-            ((Activity) mContext).startActivityForResult(intent, 100);
-            ((MainActivity) mContext).InsureeNumber = "";
-            while (((MainActivity) mContext).InsureeNumber == "") {
-
-            }
+            ((Activity) mContext).startActivityForResult(intent, RESULT_SCAN);
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e("ENROL", "Error while trying to initiate QR scan", e);
         }
-
-        return ((MainActivity) mContext).InsureeNumber;
     }
 
     @JavascriptInterface
@@ -5515,12 +5166,7 @@ public class ClientAndroidInterface {
     public File[] getPhotos() {
         String path = mContext.getApplicationInfo().dataDir + "/Images/";
         File Directory = new File(path);
-        FilenameFilter filter = new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String filename) {
-                return filename.contains("0");
-            }
-        };
+        FilenameFilter filter = (dir, filename) -> filename.contains("0");
         File[] newFiles = Directory.listFiles(filter);
         return Directory.listFiles(filter);
     }
@@ -5531,63 +5177,53 @@ public class ClientAndroidInterface {
         pd = new ProgressDialog(mContext);
         pd = ProgressDialog.show(mContext, "", mContext.getResources().getString(R.string.Uploading));
 
-        new Thread() {
-            public void run() {
+        new Thread(() -> {
 //            try {
 //                Thread.sleep(10000);
 //            } catch (InterruptedException e) {
 //                e.printStackTrace();
 //            }
-                File[] Photo = getPhotos();
+            File[] Photo = getPhotos();
 
-                if (Photo.length > 0) {
-                    UploadFile uf = new UploadFile();
-                    if (uf.isValidFTPCredentials()) {
-                        for (int i = 0; i < Photo.length; i++) {
-                            UploadCounter = i + 1;
-                            String FileName = Photo[i].toString().substring(Photo[i].toString().lastIndexOf("/") + 1);
-                            String PhotoQuery = "SELECT PhotoPath FROM tblInsuree WHERE isOffline = 1 AND REPLACE(PhotoPath, RTRIM(PhotoPath, REPLACE(PhotoPath, '/', '')), '') = '" + FileName + "'";
-                            JSONArray jsonArray = sqlHandler.getResult(PhotoQuery, null);
-                            JSONObject jsonObject = null;
-                            String PhotoPath = "";
-                            if (jsonArray.length() > 0) {
-                                try {
-                                    jsonObject = jsonArray.getJSONObject(0);
-                                    PhotoPath = jsonObject.getString("PhotoPath");
-                                } catch (JSONException e) {
-                                    e.printStackTrace();
-                                }
+            if (Photo.length > 0) {
+                UploadFile uf = new UploadFile();
+                if (uf.isValidFTPCredentials()) {
+                    for (int i = 0; i < Photo.length; i++) {
+                        String FileName = Photo[i].toString().substring(Photo[i].toString().lastIndexOf("/") + 1);
+                        String PhotoQuery = "SELECT PhotoPath FROM tblInsuree WHERE isOffline = 1 AND REPLACE(PhotoPath, RTRIM(PhotoPath, REPLACE(PhotoPath, '/', '')), '') = '" + FileName + "'";
+                        JSONArray jsonArray = sqlHandler.getResult(PhotoQuery, null);
+                        JSONObject jsonObject = null;
+                        String PhotoPath = "";
+                        if (jsonArray.length() > 0) {
+                            try {
+                                jsonObject = jsonArray.getJSONObject(0);
+                                PhotoPath = jsonObject.getString("PhotoPath");
+                            } catch (JSONException e) {
+                                e.printStackTrace();
                             }
-                            if (PhotoPath.trim().length() == 0) {
-                                if (uf.uploadFileToServer(mContext, Photo[i], "com.imispolicies.imis.enrollment")) {
-                                    RegisterUploadDetails(FileName);
-                                    Uploaded = 1;
-                                    Photo[i].delete();
-                                }
+                        }
+                        if (PhotoPath.trim().length() == 0) {
+                            if (uf.uploadFileToServer(mContext, Photo[i], "com.imispolicies.imis.enrollment")) {
+                                RegisterUploadDetails(FileName);
+                                Uploaded = 1;
+                                Photo[i].delete();
                             }
                         }
                     }
-
-                } else {
-                    Uploaded = 0;
                 }
-                ((Activity) mContext).runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (Uploaded == 1) {
-                            ShowDialog(mContext.getResources().getString(R.string.PhotosUploaded));
-                        } else {
-                            ShowDialog(mContext.getResources().getString(R.string.NoPhoto));
-                        }
-                    }
 
-                });
-
-                pd.dismiss();
-
-
+            } else {
+                Uploaded = 0;
             }
-        }.start();
+            ((Activity) mContext).runOnUiThread(() -> {
+                if (Uploaded == 1) {
+                    ShowDialog(mContext.getResources().getString(R.string.PhotosUploaded));
+                } else {
+                    ShowDialog(mContext.getResources().getString(R.string.NoPhoto));
+                }
+            });
+            pd.dismiss();
+        }).start();
     }
 
     private SecretKeySpec generateKey(String encPassword) throws Exception {
@@ -5667,58 +5303,54 @@ public class ClientAndroidInterface {
     public int ModifyFamily(final String InsuranceNumber) {
         IsFamilyAvailable = 0;
         inProgress = true;
-        String Query = "SELECT * FROM tblInsuree WHERE Trim(CHFID) = '" + InsuranceNumber + "'";
-        JSONArray JsonInsNo = sqlHandler.getResult(Query, null);
 
-        if (JsonInsNo.length() > 0) {
-            IsFamilyAvailable = 2;
-            inProgress = false;
+        int insureeCount = sqlHandler.getCount("tblInsuree", "Trim(CHFID) = ?", new String[]{InsuranceNumber});
+        if (insureeCount > 0) {
+            ShowDialog(mContext.getResources().getString(R.string.FamilyExists));
         } else {
             try {
                 ToRestApi rest = new ToRestApi();
-                String MD = rest.getObjectFromRestApiToken("family/" + InsuranceNumber.trim());
-                if (!isEmpty(MD)) {
-                    JSONObject FamilyData = new JSONObject(MD);
-                    if (FamilyData.length() == 0) {
-                        IsFamilyAvailable = 0;
-                    } else {
-                        DownloadFamilyData(FamilyData);
+                HttpResponse response = rest.getFromRestApiToken("family/" + InsuranceNumber.trim());
+                String error = rest.getHttpError(mContext, response.getStatusLine().getStatusCode(), response.getStatusLine().getReasonPhrase());
+                String content = rest.getContent(response);
+
+                if (response.getStatusLine().getStatusCode() == HttpURLConnection.HTTP_NOT_FOUND) {
+                    ShowDialog(mContext.getResources().getString(R.string.InsuranceNumberNotFound));
+                } else if (!StringUtils.isEmpty(error)) {
+                    ShowDialog(error);
+                } else if (StringUtils.isEmpty(content)) {
+                    ShowDialog(mContext.getResources().getString(R.string.SomethingWrongServer));
+                } else {
+                    JSONObject FamilyData = new JSONObject(content);
+                    if (FamilyData.length() != 0) {
+                        parseFamilyData(FamilyData);
                         IsFamilyAvailable = 1;
+                    } else {
+                        ShowDialog(mContext.getResources().getString(R.string.InsuranceNumberNotFound));
                     }
                 }
-                inProgress = false;
-            } catch (JSONException e) {
-                inProgress = false;
-                e.printStackTrace();
-            } catch (UserException e) {
-                inProgress = false;
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            while (inProgress) {
+            } catch (JSONException | UserException | IOException e) {
+                Log.e("MODIFYFAMILY", "Error while downloading a family", e);
             }
         }
 
-        inProgress = false;
         return IsFamilyAvailable;
     }
 
 
-    private void DownloadFamilyData(JSONObject FamilyData) throws JSONException, UserException, IOException {
+    private void parseFamilyData(JSONObject familyData) throws JSONException, UserException, IOException {
         JSONArray newFamilyArr = new JSONArray();
         JSONArray newInsureeArr = new JSONArray();
 
-        FamilyData.put("familyId", "-" + FamilyData.getString("familyId"));
-        FamilyData.put("insureeId", "-" + FamilyData.getString("insureeId"));
+        familyData.put("familyId", "-" + familyData.getString("familyId"));
+        familyData.put("insureeId", "-" + familyData.getString("insureeId"));
 
         // Copy oryginal object
-        JSONObject cloneFamilyData = new JSONObject(FamilyData.toString());
+        JSONObject cloneFamilyData = new JSONObject(familyData.toString());
         JSONArray Insuree = (JSONArray) cloneFamilyData.get("insurees");
 
-        String familyUUID = FamilyData.getString("familyUUID");
-        String familyId = FamilyData.getString("familyId");
+        String familyUUID = familyData.getString("familyUUID");
+        String familyId = familyData.getString("familyId");
 
         // Add familyUUID to Insuree
         for (int i = 0; i < Insuree.length(); i++) {
@@ -5763,24 +5395,27 @@ public class ClientAndroidInterface {
         for (int i = 0; i < newInsureeArr.length(); i++) {
             JSONObject insureeObj = newInsureeArr.getJSONObject(i);
 
-            if (!isStringEmpty(insureeObj, "photoPath", true)) {
-                String photoName = insureeObj.getString("photoPath");
-                String imagePath = global.getImageFolder() + photoName;
-                insureeObj.put("photoPath", imagePath);
-                OutputStream imageOutputStream = new FileOutputStream(imagePath);
-                if (!isStringEmpty(insureeObj, "photoBase64", true)) {
-                    try {
-                        byte[] imageBytes = Base64.decode(insureeObj.getString("photoBase64").getBytes(), Base64.DEFAULT);
-                        Bitmap image = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
-                        image.compress(Bitmap.CompressFormat.JPEG, 100, imageOutputStream);
-                    } catch (Exception e) {
-                        Log.e("MODIFYFAMILY", "Error while processing Base64 image", e);
-                    }
-                } else {
-                    if (photoName.length() > 0) {
-                        String photoUrl = String.format("%sImages/Updated/%s", AppInformation.DomainInfo.getDomain(), photoName);
-                        imageTarget = new OutputStreamImageTarget(imageOutputStream, 100);
-                        ((Activity) mContext).runOnUiThread(() -> picassoInstance.load(photoUrl).into(imageTarget));
+            if (!JsonUtils.isStringEmpty(insureeObj, "photoPath", true)) {
+                String[] photoPathSegments = insureeObj.getString("photoPath").split("[\\\\/]");
+                String photoName = photoPathSegments[photoPathSegments.length - 1];
+                if (!StringUtils.isEmpty(photoName)) {
+                    String imagePath = global.getImageFolder() + photoName;
+                    insureeObj.put("photoPath", imagePath);
+                    OutputStream imageOutputStream = new FileOutputStream(imagePath);
+                    if (!JsonUtils.isStringEmpty(insureeObj, "photoBase64", true)) {
+                        try {
+                            byte[] imageBytes = Base64.decode(insureeObj.getString("photoBase64").getBytes(), Base64.DEFAULT);
+                            Bitmap image = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+                            image.compress(Bitmap.CompressFormat.JPEG, 100, imageOutputStream);
+                        } catch (Exception e) {
+                            Log.e("MODIFYFAMILY", "Error while processing Base64 image", e);
+                        }
+                    } else {
+                        if (photoName.length() > 0) {
+                            String photoUrl = String.format("%sImages/Updated/%s", AppInformation.DomainInfo.getDomain(), photoName);
+                            imageTarget = new OutputStreamImageTarget(imageOutputStream, 100);
+                            ((Activity) mContext).runOnUiThread(() -> picassoInstance.load(photoUrl).into(imageTarget));
+                        }
                     }
                 }
             }
@@ -5801,7 +5436,7 @@ public class ClientAndroidInterface {
                     "familyAddress", "ethnicity", "confirmationNo", "confirmationType"};
             sqlHandler.insertData("tblFamilies", Columns, jsonArray.toString(), "");
 
-            if (object.has("familySMS")) {
+            if (!JsonUtils.isStringEmpty(object, "familySMS", true)) {
                 JSONObject smsData = object.getJSONObject("familySMS");
                 try {
                     addOrUpdateFamilySms(object.getInt("familyId"),
@@ -6206,71 +5841,66 @@ public class ClientAndroidInterface {
 
     public void LoginDialogBox(final String page) {
 
-        ((Activity) mContext).runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                // check internet connection
-                if (!CheckInternetAvailable())
-                    return;
-                // get prompts.xml view
-                LayoutInflater li = LayoutInflater.from(mContext);
-                View promptsView = li.inflate(R.layout.login_dialog, null);
+        ((Activity) mContext).runOnUiThread(() -> {
+            // check internet connection
+            if (!CheckInternetAvailable())
+                return;
+            // get prompts.xml view
+            LayoutInflater li = LayoutInflater.from(mContext);
+            View promptsView = li.inflate(R.layout.login_dialog, null);
 
-                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(mContext);
+            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(mContext);
 
-                // set prompts.xml to alertdialog builder
-                alertDialogBuilder.setView(promptsView);
+            // set prompts.xml to alertdialog builder
+            alertDialogBuilder.setView(promptsView);
 
-                final TextView username = (TextView) promptsView.findViewById(R.id.UserName);
-                final TextView password = (TextView) promptsView.findViewById(R.id.Password);
+            final TextView username = promptsView.findViewById(R.id.UserName);
+            final TextView password = promptsView.findViewById(R.id.Password);
 
-                // set dialog message
-                alertDialogBuilder
-                        .setCancelable(false)
-                        .setPositiveButton("OK",
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id) {
-                                        if (!username.getText().toString().equals("") || !password.getText().toString().equals("")) {
-                                            boolean isUserLogged = false;
-                                            isUserLogged = LoginToken(username.getText().toString(), password.getText().toString());
+            // set dialog message
+            alertDialogBuilder
+                    .setCancelable(false)
+                    .setPositiveButton("OK",
+                            (dialog, id) -> {
+                                if (!username.getText().toString().equals("") || !password.getText().toString().equals("")) {
+                                    boolean isUserLogged = false;
+                                    isUserLogged = LoginToken(username.getText().toString(), password.getText().toString());
 
-                                            if (isUserLogged) {
-                                                if (page.equals("Enquire")) {
-                                                    ((Enquire) mContext).finish();
-                                                    Intent intent = new Intent(mContext, Enquire.class);
-                                                    mContext.startActivity(intent);
-                                                }
-                                                if (page.equals("Renewals")) {
-                                                    ((RenewList) mContext).finish();
-                                                    Intent intent = new Intent(mContext, RenewList.class);
-                                                    mContext.startActivity(intent);
-                                                }
-                                                if (page.equals("Feedbacks")) {
-                                                    ((FeedbackList) mContext).finish();
-                                                    Intent intent = new Intent(mContext, FeedbackList.class);
-                                                    mContext.startActivity(intent);
-                                                }
-                                                if (page.equals("Reports")) {
-                                                    ((FeedbackList) mContext).finish();
-                                                    Intent intent = new Intent(mContext, Reports.class);
-                                                    mContext.startActivity(intent);
-                                                }
-
-                                            } else {
-                                                ShowDialog(mContext.getResources().getString(R.string.LoginFail));
-                                            }
-                                        } else {
-                                            Toast.makeText(mContext, "Please enter user name and password", Toast.LENGTH_LONG).show();
+                                    if (isUserLogged) {
+                                        if (page.equals("Enquire")) {
+                                            ((Enquire) mContext).finish();
+                                            Intent intent = new Intent(mContext, Enquire.class);
+                                            mContext.startActivity(intent);
                                         }
+                                        if (page.equals("Renewals")) {
+                                            ((RenewList) mContext).finish();
+                                            Intent intent = new Intent(mContext, RenewList.class);
+                                            mContext.startActivity(intent);
+                                        }
+                                        if (page.equals("Feedbacks")) {
+                                            ((FeedbackList) mContext).finish();
+                                            Intent intent = new Intent(mContext, FeedbackList.class);
+                                            mContext.startActivity(intent);
+                                        }
+                                        if (page.equals("Reports")) {
+                                            ((FeedbackList) mContext).finish();
+                                            Intent intent = new Intent(mContext, Reports.class);
+                                            mContext.startActivity(intent);
+                                        }
+
+                                    } else {
+                                        ShowDialog(mContext.getResources().getString(R.string.LoginFail));
                                     }
-                                });
+                                } else {
+                                    Toast.makeText(mContext, "Please enter user name and password", Toast.LENGTH_LONG).show();
+                                }
+                            });
 
-                // create alert dialog
-                AlertDialog alertDialog = alertDialogBuilder.create();
+            // create alert dialog
+            AlertDialog alertDialog = alertDialogBuilder.create();
 
-                // show it
-                alertDialog.show();
-            }
+            // show it
+            alertDialog.show();
         });
 
     }
@@ -6378,5 +6008,28 @@ public class ClientAndroidInterface {
                     "Couldn't get max id " + idFieldName +
                             " for table " + tableName);
         }
+    }
+
+    @JavascriptInterface
+    public boolean isLoggingEnabled() {
+        return Log.isLoggingEnabled;
+    }
+
+    @JavascriptInterface
+    public void clearLogs() {
+        AndroidUtils.showConfirmDialog(
+                mContext,
+                R.string.ConfirmClearLogs,
+                (d, i) -> new Thread(Log::deleteLogFiles).start()
+        );
+    }
+
+    @JavascriptInterface
+    public void exportLogs() {
+        AndroidUtils.showConfirmDialog(
+                mContext,
+                R.string.ConfirmExportLogs,
+                (d, i) -> new Thread(() -> Log.zipLogFiles(mContext)).start()
+        );
     }
 }

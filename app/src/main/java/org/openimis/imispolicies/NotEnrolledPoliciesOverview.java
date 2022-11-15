@@ -24,9 +24,10 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.util.EntityUtils;
+import cz.msebera.android.httpclient.HttpEntity;
+import cz.msebera.android.httpclient.HttpResponse;
+import cz.msebera.android.httpclient.util.EntityUtils;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -470,7 +471,7 @@ public class NotEnrolledPoliciesOverview extends AppCompatActivity {
                                                 e.printStackTrace();
                                             }
 
-                                            tokenl.saveTokenText(token, validTo);
+                                            tokenl.saveTokenText(token, validTo, global.getOfficerCode());
 
                                             final String finalToken = token;
                                             runOnUiThread(() -> {
@@ -513,8 +514,7 @@ public class NotEnrolledPoliciesOverview extends AppCompatActivity {
     private void handleRequestResult(Intent intent) {
         if (intent.getAction().equals(ControlNumberService.ACTION_REQUEST_SUCCESS)) {
             policyDeleteDialogReport(getResources().getString(R.string.requestSent));
-        }
-        else if (intent.getAction().equals(ControlNumberService.ACTION_REQUEST_ERROR)) {
+        } else if (intent.getAction().equals(ControlNumberService.ACTION_REQUEST_ERROR)) {
             String errorMessage = intent.getStringExtra(ControlNumberService.FIELD_ERROR_MESSAGE);
             showSnackbar(errorMessage);
         }
@@ -527,8 +527,7 @@ public class NotEnrolledPoliciesOverview extends AppCompatActivity {
                 .setAction("Action", null).show();
     }
 
-    public void refresh()
-    {
+    public void refresh() {
         finish();
         startActivity(getIntent());
     }

@@ -39,8 +39,11 @@ $(document).ready(function () {
                 height: "auto",
                 width: 350,
                 modal: true,
-                buttons: {
-                    OK: function () {
+                buttons: [
+                    {
+                        text: Android.getString("Ok"),
+                        click: function () {
+
                         if (isOffline == 0 || isOffline == 2) {
                             //deletedSuccess = parseInt(Android.DeleteOnlineData(FamilyId, 'F'));
                             var resul = Android.DeleteOnlineDataF(FamilyId);
@@ -67,11 +70,15 @@ $(document).ready(function () {
                             }
                         }
                         $(this).dialog("close");
+                        }
                     },
-                    Cancel: function () {
-                        $(this).dialog("close");
+                    {
+                        text: Android.getString("Cancel"),
+                        click: function () {
+                            $(this).dialog("close");
+                        }
                     }
-                }
+                ]
             });
         }
     });
