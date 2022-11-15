@@ -53,15 +53,16 @@ import android.util.Base64;
 
 import com.squareup.picasso.Picasso;
 
+import cz.msebera.android.httpclient.HttpResponse;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.openimis.imispolicies.util.JsonUtils;
 
 import java.io.ByteArrayInputStream;
+import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
-
-import static org.openimis.imispolicies.tools.Util.JsonUtil.isStringEmpty;
 
 public class Enquire extends AppCompatActivity {
     private static final String LOG_TAG = "ENQUIRE";
@@ -75,6 +76,7 @@ public class Enquire extends AppCompatActivity {
     private TextView tvName;
     private TextView tvGender;
     private TextView tvDOB;
+    private TextView tvPolicyStatus;
     private ListView lv;
     private ImageView iv;
     private LinearLayout ll;
@@ -106,6 +108,7 @@ public class Enquire extends AppCompatActivity {
         tvCHFID = findViewById(R.id.tvCHFID);
         tvName = findViewById(R.id.tvName);
         tvDOB = findViewById(R.id.tvDOB);
+        tvPolicyStatus = findViewById(R.id.tvPolicyStatus);
         tvGender = findViewById(R.id.tvGender);
         iv = findViewById(R.id.imageView);
         ImageButton btnGo = findViewById(R.id.btnGo);
@@ -186,6 +189,7 @@ public class Enquire extends AppCompatActivity {
         tvCHFID.setText(getResources().getString(R.string.InsuranceNumber));
         tvName.setText(getResources().getString(R.string.InsureeName));
         tvDOB.setText(getResources().getString(R.string.BirthDate));
+        tvPolicyStatus.setText(getResources().getString(R.string.EnquirePolicyLabel));
         tvGender.setText(getResources().getString(R.string.Gender));
         iv.setImageResource(R.drawable.person);
         ll.setVisibility(View.INVISIBLE);
@@ -198,20 +202,28 @@ public class Enquire extends AppCompatActivity {
         result = "";
 
         if (global.isNetworkAvailable()) {
-            ToRestApi rest = new ToRestApi();
-            String res = rest.getObjectFromRestApiToken("insuree/" + chfid + "/enquire");
-
-            JSONObject jobj = new JSONObject();
             try {
-                jobj = new JSONObject(res);
-            } catch (JSONException e) {
-                Log.e(LOG_TAG, "Response is not a proper JSON", e);
+                ToRestApi rest = new ToRestApi();
+                HttpResponse response = rest.getFromRestApiToken("insuree/" + chfid + "/enquire");
+                int responseCode = response.getStatusLine().getStatusCode();
+                if (responseCode == HttpURLConnection.HTTP_OK) {
+                    JSONObject obj = new JSONObject(rest.getContent(response));
+                    JSONArray arr = new JSONArray();
+                    arr.put(obj);
+                    result = arr.toString();
+                }
+                else if (responseCode == HttpURLConnection.HTTP_NOT_FOUND) {
+                    // No insuree found
+                    result="[{}]";
+                } else {
+                    result="NETWORK_ERROR";
+                }
+
             }
-
-            JSONArray arr = new JSONArray();
-            arr.put(jobj);
-
-            result = arr.toString();
+            catch(Exception e){
+                Log.e(LOG_TAG, "Fetching online enquire failed", e);
+                result="UNKNOWN_ERROR";
+            }
         } else {
             //TODO: yet to be done
             result = getDataFromDb(etCHFID.getText().toString());
@@ -221,8 +233,16 @@ public class Enquire extends AppCompatActivity {
             try {
                 JSONArray jsonArray = new JSONArray(result);
 
-                if (jsonArray.length() == 0) {
+                if (jsonArray.getJSONObject(0).length()==0) {
                     ca.ShowDialog(getResources().getString(R.string.RecordNotFound));
+                    return;
+                }
+                else if (jsonArray.getJSONObject(0).equals("NETWORK_ERROR")) {
+                    ca.ShowDialog(getResources().getString(R.string.NoInternet));
+                    return;
+                }
+                else if (jsonArray.getJSONObject(0).equals("UNKNOWN_ERROR")) {
+                    ca.ShowDialog(getResources().getString(R.string.UnknownError));
                     return;
                 }
 
@@ -236,12 +256,13 @@ public class Enquire extends AppCompatActivity {
                     tvCHFID.setText(jsonObject.getString("chfid"));
                     tvName.setText(jsonObject.getString("insureeName"));
                     tvDOB.setText(jsonObject.getString("dob"));
+                    tvPolicyStatus.setText(getResources().getString(R.string.EnquirePolicyLabel));
                     tvGender.setText(jsonObject.getString("gender"));
 
                     if (global.isNetworkAvailable()) {
                         String photo_url_str = "";
                         try {
-                            if (!isStringEmpty(jsonObject, "photoBase64", true)) {
+                            if (!JsonUtils.isStringEmpty(jsonObject, "photoBase64", true)) {
                                 try {
                                     byte[] imageBytes = Base64.decode(jsonObject.getString("photoBase64").getBytes(), Base64.DEFAULT);
                                     Bitmap image = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
@@ -250,7 +271,7 @@ public class Enquire extends AppCompatActivity {
                                     Log.e(LOG_TAG, "Error while processing Base64 image", e);
                                     iv.setImageDrawable(getResources().getDrawable(R.drawable.person));
                                 }
-                            } else if (!isStringEmpty(jsonObject, "photoPath", true)) {
+                            } else if (!JsonUtils.isStringEmpty(jsonObject, "photoPath", true)) {
                                 photo_url_str = AppInformation.DomainInfo.getDomain() + jsonObject.getString("photoPath");
                                 iv.setImageResource(R.drawable.person);
                                 picasso.load(photo_url_str)
@@ -276,31 +297,26 @@ public class Enquire extends AppCompatActivity {
 
                     jsonArray = jsonObject.getJSONArray("details");
 
+                    if (jsonArray.length() == 1 && jsonArray.getJSONObject(0).getString("expiryDate").equals("null")) {
+                        tvPolicyStatus.setText(getResources().getString(R.string.EnquirePolicyNotCovered));
+                    } else {
+                        tvPolicyStatus.setText(getResources().getString(R.string.EnquirePolicyCovered));
+                    }
+
                     for (i = 0; i < jsonArray.length(); i++) {
-                        jsonObject = jsonArray.getJSONObject(i);
-
-
                         HashMap<String, String> Policy = new HashMap<>();
                         jsonObject = jsonArray.getJSONObject(i);
-                        double iDedType = 0;
-                        if (!jsonObject.getString("dedType").equalsIgnoreCase("null"))
-                            iDedType = Double.parseDouble(jsonObject.getString("dedType"));
+                        double iDedType = Double.parseDouble(JsonUtils.getStringOrDefault(jsonObject, "dedType", "0", true));
 
                         String Ded = "", Ded1 = "", Ded2 = "";
                         String Ceiling = "", Ceiling1 = "", Ceiling2 = "";
 
-                        String jDed1 = "", jDed2 = "", jCeiling1 = "", jCeiling2 = "";
+                        String jDed1, jDed2, jCeiling1, jCeiling2;
 
-                        if (jsonObject.getString("ded1").equalsIgnoreCase("null")) jDed1 = "";
-                        else jDed1 = jsonObject.getString("ded1");
-                        if (jsonObject.getString("ded2").equalsIgnoreCase("null")) jDed2 = "";
-                        else jDed2 = jsonObject.getString("ded2");
-                        if (jsonObject.getString("ceiling1").equalsIgnoreCase("null"))
-                            jCeiling1 = "";
-                        else jCeiling1 = jsonObject.getString("ceiling1");
-                        if (jsonObject.getString("ceiling2").equalsIgnoreCase("null"))
-                            jCeiling2 = "";
-                        else jCeiling2 = jsonObject.getString("ceiling2");
+                        jDed1 = JsonUtils.getStringOrDefault(jsonObject, "ded1", "", true);
+                        jDed2 = JsonUtils.getStringOrDefault(jsonObject, "ded2", "", true);
+                        jCeiling1 = JsonUtils.getStringOrDefault(jsonObject, "ceiling1", "", true);
+                        jCeiling2 = JsonUtils.getStringOrDefault(jsonObject, "ceiling2", "", true);
 
                         //Get the type
 
@@ -326,12 +342,15 @@ public class Enquire extends AppCompatActivity {
 
                         }
 
-
-                        Policy.put("Heading", jsonObject.getString("productCode"));
-                        Policy.put("Heading1", jsonObject.getString("expiryDate") + "  " + jsonObject.getString("status"));
-                        Policy.put("SubItem1", jsonObject.getString("productName"));
-                        Policy.put("SubItem2", Ded);
-                        Policy.put("SubItem3", Ceiling);
+                        if (JsonUtils.isStringEmpty(jsonObject, "expiryDate", true)) {
+                            Policy.put("Heading", getResources().getString(R.string.EnquireNoPolicies));
+                        } else {
+                            Policy.put("Heading", jsonObject.getString("productCode"));
+                            Policy.put("Heading1", JsonUtils.getStringOrDefault(jsonObject, "expiryDate", "", true) + "  " + jsonObject.getString("status"));
+                            Policy.put("SubItem1", jsonObject.getString("productName"));
+                            Policy.put("SubItem2", Ded);
+                            Policy.put("SubItem3", Ceiling);
+                        }
 
                         String TotalAdmissionsLeft = buildEnquireValue(jsonObject, "totalAdmissionsLeft", R.string.totalAdmissionsLeft);
                         String TotalVisitsLeft = buildEnquireValue(jsonObject, "totalVisitsLeft", R.string.totalVisitsLeft);
@@ -401,7 +420,6 @@ public class Enquire extends AppCompatActivity {
                 result = "";
             }
         });
-
     }
 
     protected String buildEnquireValue(JSONObject jsonObject, String jsonKey, int labelId) throws JSONException {

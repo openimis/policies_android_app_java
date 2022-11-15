@@ -1,5 +1,7 @@
 package org.openimis.imispolicies.tools;
 
+import android.content.Context;
+
 import org.openimis.imispolicies.BuildConfig;
 
 /**
@@ -40,7 +42,7 @@ public class Log {
     public static void e(String tag, String msg, Throwable thr) {
     }
 
-    public static void zipLogFiles() {
+    public static void zipLogFiles(Context context) {
     }
 
     public static void deleteLogFiles() {

@@ -32,6 +32,7 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import org.openimis.imispolicies.tools.Log;
 import android.util.Xml;
@@ -474,7 +475,7 @@ public class SQLHandler extends SQLiteOpenHelper {
 
     private void openDatabase() {
         String dbPath = mContext.getDatabasePath(DBNAME).getPath();
-        String dbOfflinePath = global.getMainDirectory() + File.separator + OFFLINEDBNAME;
+        String dbOfflinePath = global.getAppDirectory() + File.separator + OFFLINEDBNAME;
         if (mDatabase != null && mDatabase.isOpen()) {
             return;
         }
@@ -569,8 +570,6 @@ public class SQLHandler extends SQLiteOpenHelper {
         String d = format.format(cal.getTime());
 
         File Dir = new File(global.getSubdirectory("Family"));
-        Dir.mkdir();
-
 
         //Here we are giving name to the XML file
         String FileName = "Enrolment_" + OfficerCode + "_" + d + ".xml";
@@ -675,7 +674,6 @@ public class SQLHandler extends SQLiteOpenHelper {
                         }
                     }
                     if (sublabel.equals("Family")) {
-
                         serializer = addFamilySmsTag(serializer, cursor.getString(0));
                     }
                     serializer.endTag(null, sublabel);
@@ -689,7 +687,7 @@ public class SQLHandler extends SQLiteOpenHelper {
             e.printStackTrace();
         }
 
-
+        serializer.endTag(null, "Enrolment");
         serializer.endDocument();
         serializer.flush();
         fos.close();
@@ -1048,5 +1046,37 @@ public class SQLHandler extends SQLiteOpenHelper {
             closeDatabase();
         }
         return result;
+    }
+
+    /**
+     * @return Default Language as specified by SortOrder in tblLanguages, return DEFAULT_LANGUAGE_CODE before initialization
+     */
+    @NonNull
+    public String getDefaultLanguage() {
+        openDatabase();
+        String result = BuildConfig.DEFAULT_LANGUAGE_CODE;
+        try (Cursor c = mDatabase.query(tblLanguages,
+                new String[]{"LanguageCode"},
+                null,
+                null,
+                null,
+                null,
+                "SortOrder ASC",
+                "1")) {
+            c.moveToFirst();
+            if (!c.isAfterLast()) {
+                result = c.getString(0);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            closeDatabase();
+        }
+        return result;
+    }
+
+    @NonNull
+    public JSONArray getSupportedLanguages() {
+        return getResult(tblLanguages, new String[]{"LanguageCode"}, null, null);
     }
 }

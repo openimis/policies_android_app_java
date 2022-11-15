@@ -4,16 +4,17 @@ import android.app.IntentService;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.content.Context;
+
 import org.openimis.imispolicies.tools.Log;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.util.EntityUtils;
+import cz.msebera.android.httpclient.HttpEntity;
+import cz.msebera.android.httpclient.HttpResponse;
+import cz.msebera.android.httpclient.util.EntityUtils;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.openimis.imispolicies.tools.Util;
+import org.openimis.imispolicies.util.StringUtils;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -120,7 +121,7 @@ public class ControlNumberService extends IntentService {
             JSONObject responseContent = new JSONObject(content);
 
             errorMessage = getErrorMessage(responseCode, responseContent);
-            if (Util.StringUtil.isEmpty(errorMessage)) {
+            if (StringUtils.isEmpty(errorMessage)) {
                 JSONArray controlNumbers = responseContent.getJSONArray("controlNumbers");
                 insertBulkControlNumbers(controlNumbers);
                 broadcastSuccess();

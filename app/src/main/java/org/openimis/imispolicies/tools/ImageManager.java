@@ -4,6 +4,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 
 import org.openimis.imispolicies.Global;
+import org.openimis.imispolicies.util.FileUtils;
 
 import java.io.File;
 
@@ -23,14 +24,14 @@ public class ImageManager {
     }
 
     public File getNewestInsureeImage(String insureeNumber) {
-        return Util.FileUtil.getNewestFileStartingWith(
+        return FileUtils.getNewestFileStartingWith(
                 new File(Global.getGlobal().getImageFolder()),
                 insureeNumber + "_"
         );
     }
 
     public File[] getInsureeImages(String insureeNumber) {
-        return Util.FileUtil.getFilesStartingWith(
+        return FileUtils.getFilesStartingWith(
                 new File(Global.getGlobal().getImageFolder()),
                 insureeNumber + "_"
         );

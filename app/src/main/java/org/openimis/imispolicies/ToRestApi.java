@@ -1,14 +1,17 @@
 package org.openimis.imispolicies;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.util.EntityUtils;
+import android.content.Context;
+
+import cz.msebera.android.httpclient.HttpEntity;
+import cz.msebera.android.httpclient.HttpResponse;
+import cz.msebera.android.httpclient.client.HttpClient;
+import cz.msebera.android.httpclient.client.methods.HttpDelete;
+import cz.msebera.android.httpclient.client.methods.HttpGet;
+import cz.msebera.android.httpclient.client.methods.HttpPost;
+import cz.msebera.android.httpclient.entity.StringEntity;
+import cz.msebera.android.httpclient.impl.client.DefaultHttpClient;
+import cz.msebera.android.httpclient.util.EntityUtils;
+
 import org.json.JSONObject;
 import org.openimis.imispolicies.tools.Log;
 
@@ -107,7 +110,7 @@ public class ToRestApi {
             if (object != null && responseCode >= 400 && !functionName.equals("login")) {
                 String body = object.toString();
                 if (body.length() > 1000) {
-                    body = body.substring(0,1000);
+                    body = body.substring(0, 1000);
                 }
                 Log.e("HTTP_POST", "Body: " + body);
             }
@@ -140,6 +143,10 @@ public class ToRestApi {
 
     public HttpResponse getFromRestApiToken(final String functionName) {
         return getFromRestApi(functionName, true);
+    }
+
+    public HttpResponse getFromRestApi(final String functionName) {
+        return getFromRestApi(functionName, false);
     }
 
     public HttpResponse deleteFromRestApiToken(final String functionName) {
@@ -175,7 +182,7 @@ public class ToRestApi {
                 content = EntityUtils.toString(respEntity);
                 if (content != null && content.length() > 0
                         && response.getStatusLine().getStatusCode() >= 400) {
-                    Log.e("HTTP", "Error response: " + content);
+                    Log.e("HTTP", "Error " + response.getStatusLine().getStatusCode() + ", response: " + content);
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -197,5 +204,19 @@ public class ToRestApi {
             return String.format("bearer %s", tokenText.trim());
         }
         return "";
+    }
+
+    public String getHttpError(Context context, int httpResponseCode, String httpReason) {
+        if (httpResponseCode == HttpURLConnection.HTTP_OK || httpResponseCode == HttpURLConnection.HTTP_CREATED) {
+            return null;
+        } else if (httpResponseCode == HttpURLConnection.HTTP_NOT_FOUND) {
+            return context.getResources().getString(R.string.NotFound);
+        } else if (httpResponseCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
+            return context.getResources().getString(R.string.Unauthorized);
+        } else if (httpResponseCode == HttpURLConnection.HTTP_FORBIDDEN) {
+            return context.getResources().getString(R.string.Forbidden);
+        } else {
+            return context.getResources().getString(R.string.HttpResponse, httpResponseCode, httpReason);
+        }
     }
 }
