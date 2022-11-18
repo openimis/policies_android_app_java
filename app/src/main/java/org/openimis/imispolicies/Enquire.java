@@ -28,6 +28,7 @@ package org.openimis.imispolicies;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -213,12 +214,10 @@ public class Enquire extends AppCompatActivity {
                     result = arr.toString();
                 }
                 else if (responseCode == HttpURLConnection.HTTP_NOT_FOUND) {
-                    // No insuree found
-                    result="[{}]";
+                    runOnUiThread(() -> showDialog(getResources().getString(R.string.RecordNotFound)));
                 } else {
-                    result="NETWORK_ERROR";
+                    runOnUiThread(() -> showDialog(rest.getHttpError(this, responseCode, response.getStatusLine().getReasonPhrase())));
                 }
-
             }
             catch(Exception e){
                 Log.e(LOG_TAG, "Fetching online enquire failed", e);
@@ -232,20 +231,6 @@ public class Enquire extends AppCompatActivity {
         runOnUiThread(() -> {
             try {
                 JSONArray jsonArray = new JSONArray(result);
-
-                if (jsonArray.getJSONObject(0).length()==0) {
-                    ca.ShowDialog(getResources().getString(R.string.RecordNotFound));
-                    return;
-                }
-                else if (jsonArray.getJSONObject(0).equals("NETWORK_ERROR")) {
-                    ca.ShowDialog(getResources().getString(R.string.NoInternet));
-                    return;
-                }
-                else if (jsonArray.getJSONObject(0).equals("UNKNOWN_ERROR")) {
-                    ca.ShowDialog(getResources().getString(R.string.UnknownError));
-                    return;
-                }
-
                 ll.setVisibility(View.VISIBLE);
 
                 int i = 0;
@@ -460,6 +445,28 @@ public class Enquire extends AppCompatActivity {
             result = e.toString();
         }
         return result;
+    }
+
+    protected AlertDialog showDialog(String msg, DialogInterface.OnClickListener okCallback, DialogInterface.OnClickListener cancelCallback) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this)
+                .setMessage(msg)
+                .setCancelable(false);
+
+        if (okCallback != null) {
+            builder.setPositiveButton(R.string.Ok, okCallback);
+        } else {
+            builder.setPositiveButton(R.string.Ok, ((dialog, which) -> dialog.cancel()));
+        }
+
+        if (cancelCallback != null) {
+            builder.setNegativeButton(R.string.Cancel, cancelCallback);
+        }
+
+        return builder.show();
+    }
+
+    protected AlertDialog showDialog(String msg) {
+        return showDialog(msg, null, null);
     }
 
     @Override
