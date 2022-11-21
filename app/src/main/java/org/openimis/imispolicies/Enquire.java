@@ -28,6 +28,7 @@ package org.openimis.imispolicies;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -58,13 +59,14 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.openimis.imispolicies.util.JsonUtils;
+import org.openimis.imispolicies.ImisActivity;
 
 import java.io.ByteArrayInputStream;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class Enquire extends AppCompatActivity {
+public class Enquire extends ImisActivity {
     private static final String LOG_TAG = "ENQUIRE";
     private static final int REQUEST_SCAN_QR_CODE = 1;
     private Global global;
@@ -213,12 +215,10 @@ public class Enquire extends AppCompatActivity {
                     result = arr.toString();
                 }
                 else if (responseCode == HttpURLConnection.HTTP_NOT_FOUND) {
-                    // No insuree found
-                    result="[{}]";
+                    runOnUiThread(() -> showDialog(getResources().getString(R.string.RecordNotFound)));
                 } else {
-                    result="NETWORK_ERROR";
+                    runOnUiThread(() -> showDialog(rest.getHttpError(this, responseCode, response.getStatusLine().getReasonPhrase())));
                 }
-
             }
             catch(Exception e){
                 Log.e(LOG_TAG, "Fetching online enquire failed", e);
@@ -232,20 +232,6 @@ public class Enquire extends AppCompatActivity {
         runOnUiThread(() -> {
             try {
                 JSONArray jsonArray = new JSONArray(result);
-
-                if (jsonArray.getJSONObject(0).length()==0) {
-                    ca.ShowDialog(getResources().getString(R.string.RecordNotFound));
-                    return;
-                }
-                else if (jsonArray.getJSONObject(0).equals("NETWORK_ERROR")) {
-                    ca.ShowDialog(getResources().getString(R.string.NoInternet));
-                    return;
-                }
-                else if (jsonArray.getJSONObject(0).equals("UNKNOWN_ERROR")) {
-                    ca.ShowDialog(getResources().getString(R.string.UnknownError));
-                    return;
-                }
-
                 ll.setVisibility(View.VISIBLE);
 
                 int i = 0;
