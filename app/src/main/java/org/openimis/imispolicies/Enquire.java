@@ -59,13 +59,14 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.openimis.imispolicies.util.JsonUtils;
+import org.openimis.imispolicies.ImisActivity;
 
 import java.io.ByteArrayInputStream;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class Enquire extends AppCompatActivity {
+public class Enquire extends ImisActivity {
     private static final String LOG_TAG = "ENQUIRE";
     private static final int REQUEST_SCAN_QR_CODE = 1;
     private Global global;
@@ -445,28 +446,6 @@ public class Enquire extends AppCompatActivity {
             result = e.toString();
         }
         return result;
-    }
-
-    protected AlertDialog showDialog(String msg, DialogInterface.OnClickListener okCallback, DialogInterface.OnClickListener cancelCallback) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this)
-                .setMessage(msg)
-                .setCancelable(false);
-
-        if (okCallback != null) {
-            builder.setPositiveButton(R.string.Ok, okCallback);
-        } else {
-            builder.setPositiveButton(R.string.Ok, ((dialog, which) -> dialog.cancel()));
-        }
-
-        if (cancelCallback != null) {
-            builder.setNegativeButton(R.string.Cancel, cancelCallback);
-        }
-
-        return builder.show();
-    }
-
-    protected AlertDialog showDialog(String msg) {
-        return showDialog(msg, null, null);
     }
 
     @Override
