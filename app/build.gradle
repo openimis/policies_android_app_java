@@ -166,7 +166,7 @@ android {
         bephaDev.res.srcDirs = ['src/bepha/res', 'src/localeBepha/res']
 
         niger.java.srcDir 'src/niger/java'
-        niger.res.srcDir 'src/niger/res'
+        niger.res.srcDirs = ['src/niger/res', 'src/localeNiger/res']
         niger.assets.srcDir 'src/niger/assets'
 
         tchadDev.java.srcDir 'src/tchad/java'
@@ -179,7 +179,11 @@ android {
         demoRelease.res.srcDirs = ['src/demoRelease/res', 'src/localeMv/res']
 
         cli.java.srcDir System.getenv("CLI_JAVA_DIR") ?: 'src/master/java'
-        cli.res.srcDir System.getenv("CLI_RES_DIR") ?: 'src/demoProd/res'
+        if (System.getenv("CLI_RES_DIR") && System.getenv("CLI_RES_DIR").contains(",")) {
+            cli.res.srcDirs System.getenv("CLI_RES_DIR").split(",")
+        } else {
+            cli.res.srcDir System.getenv("CLI_RES_DIR") ?: 'src/demoProd/res'
+        }
         if (System.getenv("CLI_ASSETS_DIR")) {
             cli.assets.srcDir System.getenv("CLI_ASSETS_DIR")
         }
