@@ -98,19 +98,18 @@ $(document).ready(function () {
                 var ExceedThreshold = -1;
 
                 if (PolicyId > 0 && IsNewIns == 0) {
-                    var PolicyStatus = Android.getPolicyStatus(PolicyId);
                     if (TotalIns >= MemberCount) {
                         ExceedThreshold = 0;
                         Android.ShowDialog(Android.getString('ExceedMemberCount'));
                     } else if (TotalIns >= Threshold) {
                         ExceedThreshold = 1;
-                    } else if (PolicyStatus == 2) {
+                    } else {
                         ExceedThreshold = 0;
                     }
 
                 }
                 var InsureeId = Android.SaveInsuree(jsonInsuree, FamilyId, 0, parseInt(ExceedThreshold), PolicyId);
-                if (InsureeId == 7 || InsureeId == 6) {
+                if (PolicyId > 0 && TotalIns >= MemberCount) {
                     $("#divProgress").hide();
                 } else {
                     $("#divProgress").hide();
@@ -193,15 +192,7 @@ $(document).ready(function () {
     });
 
     $('#btnScan').click(function () {
-        var InsuranceNo = Android.getScannedNumber();
-        var ans = Android.isValidInsuranceNumber(InsuranceNo);
-        if (ans != true) {
-            $('#txtInsuranceNumber').val("");
-            $('#txtInsuranceNumber').focus();
-        } else {
-            $('#txtInsuranceNumber').val(InsuranceNo);
-            getImage();
-        }
+        Android.getScannedNumber();
     });
 
     if ($('#hfIsOffline').val() == "0") {
@@ -232,6 +223,18 @@ function selectImageCallback(imagePath) {
     if (imagePath != "") {
         $("#hfNewPhotoPath").val(imagePath);
         $("#imgInsuree").attr('src', imagePath);
+    }
+}
+
+// called from java after the image was selected by the user
+function scanQrCallback(insureeNumber) {
+    var ans = Android.isValidInsuranceNumber(insureeNumber);
+    if (ans) {
+        $('#txtInsuranceNumber').val(insureeNumber);
+        getImage();
+    } else {
+        $('#txtInsuranceNumber').val("");
+        $('#txtInsuranceNumber').focus();
     }
 }
 

@@ -131,25 +131,20 @@ public class FeedbackList extends AppCompatActivity {
         etFeedbackSearch.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
             }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-
                 ((SimpleAdapter) adapter).getFilter().filter(s);
-
             }
 
             @Override
             public void afterTextChanged(Editable s) {
-
             }
         });
         lv.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(AbsListView view, int scrollState) {
-
             }
 
             @Override
@@ -218,7 +213,7 @@ public class FeedbackList extends AppCompatActivity {
     }
 
     public String getMasterDataText(String filename) {
-        ca.unZipFeedbacksRenewals(filename);
+        //ca.unZipFeedbacksRenewals(filename);
         String fname = filename.substring(0, filename.indexOf("."));
         try {
             String dir = global.getSubdirectory("Database");
@@ -333,40 +328,33 @@ public class FeedbackList extends AppCompatActivity {
     private void RefreshFeedbacks() throws IOException, XmlPullParserException {
         if (ca.CheckInternetAvailable()) {
             //   pd = ProgressDialog.show(this, "", getResources().getString(R.string.Loading));
-            new Thread() {
-                public void run() {
-                    String result = null;
+            new Thread(() -> {
+                String result = null;
 
-                    try {
-                        ToRestApi rest = new ToRestApi();
-                        result = rest.getObjectFromRestApiToken("feedback");
+                try {
+                    ToRestApi rest = new ToRestApi();
+                    result = rest.getObjectFromRestApiToken("feedback");
 
-                        if (result.equalsIgnoreCase("[]") || result == null) {
-                            FeedbackList.clear();
-                            return;
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                    if (result.equalsIgnoreCase("[]") || result == null) {
+                        FeedbackList.clear();
+                        return;
                     }
-
-                    Boolean IsInserted = ca.InsertFeedbacks(result);
-
-                    if (!IsInserted) {
-                        ca.ShowDialog(getResources().getString(R.string.ErrorOccurred));
-                    }
-
-                    runOnUiThread(() -> fillFeedbacks());
-
-                    //  pd.dismiss();
-                    //   swipe.setRefreshing(false);
-
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-            }.start();
 
-            //fillFeedbacks();
+                Boolean IsInserted = ca.InsertFeedbacks(result);
+
+                if (!IsInserted) {
+                    ca.ShowDialog(getResources().getString(R.string.ErrorOccurred));
+                }
+
+                runOnUiThread(() -> fillFeedbacks());
+
+
+            }).start();
         } else {
             openDialogForFeedbackRenewal();
-            //Toast.makeText(this, getResources().getString(R.string.NoInternet), Toast.LENGTH_LONG).show();
         }
     }
 

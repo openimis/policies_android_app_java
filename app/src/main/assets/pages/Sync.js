@@ -38,17 +38,17 @@ $(document).ready(function () {
 
                     break;
                 case "liCreateRenewalXML":
-                    Android.zipFeedBackRenewal('Renewal');
+                    Android.CreateRenewalExport();
                     break;
                 case "liUploadFeedback":
                     if (!Android.isLoggedIn()) {
                         window.open("Login.html?s=0", "_self");
                     } else {
-                        Android.UploadOfflineFeedbackRenewal('feedback');
+                        Android.uploadFeedbacks();
                     }
                     break;
                 case "liCreateFeedbackXML":
-                    Android.zipFeedBackRenewal('Feedback');
+                    Android.CreateFeedbackExport();
                     break;
 
                 case "liDownloadMasterData":

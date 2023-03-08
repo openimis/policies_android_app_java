@@ -3,17 +3,20 @@ package org.openimis.imispolicies;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
+import org.openimis.imispolicies.tools.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.Spinner;
@@ -29,6 +32,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class BulkControlNumbersActivity extends AppCompatActivity {
     private static final String LOG_TAG = "BULKCN";
@@ -49,6 +55,7 @@ public class BulkControlNumbersActivity extends AppCompatActivity {
     private Spinner dropdownSpinner;
 
     private AlertDialog productDialog;
+    private ScheduledExecutorService productDialogTimer;
     private ProgressDialog progressDialog;
 
     BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -87,17 +94,25 @@ public class BulkControlNumbersActivity extends AppCompatActivity {
         assignedCNCount.setText(CN_COUNT_INITIAL_VALUE);
         freeCNCount.setText(CN_COUNT_INITIAL_VALUE);
 
+        officerCode = global.getOfficerCode();
+        availableProducts = sqlHandler.getAvailableProducts(officerCode);
+        createProductDialog();
+
         fetchBulkCn.setOnClickListener((view) -> {
-            if (global.isNetworkAvailable() && global.isLoggedIn())
+            if (global.isNetworkAvailable() && global.isLoggedIn()) {
                 productDialog.show();
-            else {
+                shutdownTimer();
+                startTimer(productCodes[dropdownSpinner.getSelectedItemPosition()], productDialog);
+            } else {
                 Toast.makeText(this, R.string.LogInToFetchCn, Toast.LENGTH_LONG).show();
             }
         });
+    }
 
-        officerCode = global.getOfficerCode();
-        availableProducts = sqlHandler.getAvailableProducts(officerCode);
-        productDialog = createProductDialog();
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        shutdownTimer();
     }
 
     @Override
@@ -119,10 +134,14 @@ public class BulkControlNumbersActivity extends AppCompatActivity {
     private void handleRequestResult(Intent intent) {
         if (intent.getAction().equals(ControlNumberService.ACTION_REQUEST_ERROR)) {
             String errorMessage = intent.getStringExtra(ControlNumberService.FIELD_ERROR_MESSAGE);
-            Toast.makeText(this,errorMessage,Toast.LENGTH_LONG).show();
+            Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show();
         }
         progressDialog.dismiss();
-        refreshCNCount();
+
+        new AlertDialog.Builder(this)
+                .setMessage(getResources().getString(R.string.CnRequestComplete, String.valueOf(global.getIntKey("min_cn_request_interval", 60))))
+                .setPositiveButton(R.string.Ok, (dialog, id) -> refreshCNCount())
+                .show();
     }
 
     protected void refreshCNCount() {
@@ -175,7 +194,7 @@ public class BulkControlNumbersActivity extends AppCompatActivity {
         );
     }
 
-    protected AlertDialog createProductDialog() {
+    protected void createProductDialog() {
         LayoutInflater li = LayoutInflater.from(this);
         View productDropDown = li.inflate(R.layout.dropdown_dialog, (ViewGroup) null);
 
@@ -199,18 +218,89 @@ public class BulkControlNumbersActivity extends AppCompatActivity {
         }
 
         ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, productNames);
-        dropdownSpinner.setAdapter(arrayAdapter);
+
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
         alertDialogBuilder.setView(productDropDown);
-
-        return alertDialogBuilder
+        productDialog = alertDialogBuilder
                 .setPositiveButton(getResources().getString(R.string.Fetch),
                         (dialog, id) -> {
+                            shutdownTimer();
                             progressDialog = ProgressDialog.show(this, "", getResources().getString(R.string.FetchBulkCN));
-                            ControlNumberService.fetchBulkControlNumbers(this, productCodes[dropdownSpinner.getSelectedItemPosition()]);
+                            String productCode = productCodes[dropdownSpinner.getSelectedItemPosition()];
+                            global.setLongKey(String.format("last_%s_request", productCode), System.currentTimeMillis());
+                            ControlNumberService.fetchBulkControlNumbers(this, productCode);
                         })
                 .setNegativeButton(getResources().getString(R.string.Cancel),
-                        (dialog, id) -> dialog.cancel())
+                        (dialog, id) -> {
+                            shutdownTimer();
+                            dialog.cancel();
+                        })
+                .setOnCancelListener((dialog) -> shutdownTimer())
                 .create();
+
+        //disable button by default, enable after interval check
+        productDialog.setOnShowListener((dialog) -> ((AlertDialog) dialog).getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false));
+
+        dropdownSpinner.setAdapter(arrayAdapter);
+        dropdownSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                shutdownTimer();
+                startTimer(productCodes[position], productDialog);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                shutdownTimer();
+            }
+        });
+    }
+
+    protected void checkProductRequest(String productCode, final AlertDialog productDialog) {
+        checkLastProductRequestInterval(productCode, productDialog);
+    }
+
+    protected void checkLastProductRequestInterval(String productCode, final AlertDialog productDialog) {
+        int minInterval = (global.getIntKey("min_cn_request_interval", 60));
+        long lastProductRequestMillis = global.getLongKey(String.format("last_%s_request", productCode), 0);
+        long currentMillis = System.currentTimeMillis();
+        long interval = (currentMillis - lastProductRequestMillis) / 1000L;
+        if (interval >= minInterval) {
+            this.runOnUiThread(() -> enableFetchButton(productDialog));
+            shutdownTimer();
+        } else {
+            this.runOnUiThread(() -> disableFetchButton(getResources().getString(R.string.WaitXSeconds, String.valueOf(minInterval - interval)), productDialog));
+        }
+    }
+
+    protected void startTimer(String productCode, final AlertDialog productDialog) {
+        Log.i("BULKCN", "Async timer starting");
+        productDialogTimer = Executors.newSingleThreadScheduledExecutor();
+        productDialogTimer.scheduleAtFixedRate(() -> checkProductRequest(productCode, productDialog), 0, 1000, TimeUnit.MILLISECONDS);
+    }
+
+    protected void shutdownTimer() {
+        if (productDialogTimer != null && !productDialogTimer.isShutdown()) {
+            Log.i("BULKCN", "Async timer stopping");
+            productDialogTimer.shutdown();
+        }
+    }
+
+    protected void enableFetchButton(final AlertDialog productDialog) {
+        Button fetchButton = productDialog.getButton(DialogInterface.BUTTON_POSITIVE);
+        if (fetchButton != null) {
+            fetchButton.setEnabled(true);
+            fetchButton.setText(getResources().getString(R.string.Fetch));
+            fetchButton.invalidate();
+        }
+    }
+
+    protected void disableFetchButton(String buttonLabel, final AlertDialog productDialog) {
+        Button fetchButton = productDialog.getButton(DialogInterface.BUTTON_POSITIVE);
+        if (fetchButton != null) {
+            fetchButton.setEnabled(false);
+            fetchButton.setText(buttonLabel);
+            fetchButton.invalidate();
+        }
     }
 }

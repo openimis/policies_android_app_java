@@ -25,4 +25,16 @@ $(document).ready(function () {
             Android.ShowDialog(e.message);
         }
     });
+
+    if (Android.isLoggingEnabled()) {
+        $('#btnExportLogs').click(function () {
+            Android.exportLogs()
+        });
+
+        $('#btnClearLogs').click(function () {
+            Android.clearLogs()
+        });
+    } else {
+        $('#logSection').hide();
+    }
 });

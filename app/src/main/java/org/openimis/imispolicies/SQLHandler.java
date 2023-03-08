@@ -31,10 +31,10 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
-import android.util.Log;
+import org.openimis.imispolicies.tools.Log;
 import android.util.Xml;
 
 import org.json.JSONArray;
@@ -47,7 +47,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Locale;
 
 public class SQLHandler extends SQLiteOpenHelper {
 
@@ -476,7 +475,7 @@ public class SQLHandler extends SQLiteOpenHelper {
 
     private void openDatabase() {
         String dbPath = mContext.getDatabasePath(DBNAME).getPath();
-        String dbOfflinePath = global.getMainDirectory() + File.separator + OFFLINEDBNAME;
+        String dbOfflinePath = global.getAppDirectory() + File.separator + OFFLINEDBNAME;
         if (mDatabase != null && mDatabase.isOpen()) {
             return;
         }
@@ -561,7 +560,7 @@ public class SQLHandler extends SQLiteOpenHelper {
         return getResult(Query, args, "0");
     }
 
-    public String getResultXML2(String QueryF, String QueryI, String QueryPL, String QueryPR, String QueryIP, String OfficerCode, int OfficerId) throws IOException {
+    public String getExportAsXML(String QueryF, String QueryI, String QueryPL, String QueryPR, String QueryIP, String OfficerCode, int OfficerId) throws IOException {
         String Query = null;
         String label = null;
         String sublabel = null;
@@ -571,8 +570,6 @@ public class SQLHandler extends SQLiteOpenHelper {
         String d = format.format(cal.getTime());
 
         File Dir = new File(global.getSubdirectory("Family"));
-        Dir.mkdir();
-
 
         //Here we are giving name to the XML file
         String FileName = "Enrolment_" + OfficerCode + "_" + d + ".xml";
@@ -677,7 +674,6 @@ public class SQLHandler extends SQLiteOpenHelper {
                         }
                     }
                     if (sublabel.equals("Family")) {
-
                         serializer = addFamilySmsTag(serializer, cursor.getString(0));
                     }
                     serializer.endTag(null, sublabel);
@@ -691,7 +687,7 @@ public class SQLHandler extends SQLiteOpenHelper {
             e.printStackTrace();
         }
 
-
+        serializer.endTag(null, "Enrolment");
         serializer.endDocument();
         serializer.flush();
         fos.close();
@@ -734,14 +730,13 @@ public class SQLHandler extends SQLiteOpenHelper {
         String dbPath = ClientAndroidInterface.filePath;
         mDatabase = SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READWRITE);
         try {
-            JSONArray array = null;
+            JSONArray array;
             JSONObject object;
 
             array = new JSONArray(data);
 
             if (array.length() == 0)
                 return;
-
 
             if (!mDatabase.isOpen()) {
                 openDatabase();
@@ -792,13 +787,13 @@ public class SQLHandler extends SQLiteOpenHelper {
         }
     }
 
-    public int updateData(String tableName, ContentValues contentValues, String whereClause, String[] whereArgs) throws UserException {
+    public int updateData(String tableName, ContentValues contentValues, String whereClause, String[] whereArgs, boolean throwOnNoRowsUpdated) throws UserException {
         openDatabase();
         int rowsUpdated = 0;
         try {
             openDatabase();
             rowsUpdated = mDatabase.update(tableName, contentValues, whereClause, whereArgs);
-            if (rowsUpdated <= 0) {
+            if (throwOnNoRowsUpdated && rowsUpdated <= 0) {
                 throw new UserException(mContext.getResources().getString(R.string.ErrorUpdate));
             }
         } catch (Exception e) {
@@ -809,6 +804,9 @@ public class SQLHandler extends SQLiteOpenHelper {
         return rowsUpdated;
     }
 
+    public int updateData(String tableName, ContentValues contentValues, String whereClause, String[] whereArgs) throws UserException {
+        return updateData(tableName, contentValues, whereClause, whereArgs, true);
+    }
 
     public void deleteData(String tableName, String whereClause, String[] whereArgs) {
         try {
@@ -819,14 +817,6 @@ public class SQLHandler extends SQLiteOpenHelper {
         } finally {
             closeDatabase();
         }
-    }
-
-    public String getDatabasePath(Context context) {
-        SQLHandler helper = new SQLHandler(this.mContext);
-        SQLiteDatabase database = helper.getReadableDatabase();
-        String path = database.getPath();
-        database.close();
-        return path;
     }
 
     public int getCount(String table, String selection, String[] selectionArgs) {
@@ -1056,5 +1046,37 @@ public class SQLHandler extends SQLiteOpenHelper {
             closeDatabase();
         }
         return result;
+    }
+
+    /**
+     * @return Default Language as specified by SortOrder in tblLanguages, return DEFAULT_LANGUAGE_CODE before initialization
+     */
+    @NonNull
+    public String getDefaultLanguage() {
+        openDatabase();
+        String result = BuildConfig.DEFAULT_LANGUAGE_CODE;
+        try (Cursor c = mDatabase.query(tblLanguages,
+                new String[]{"LanguageCode"},
+                null,
+                null,
+                null,
+                null,
+                "SortOrder ASC",
+                "1")) {
+            c.moveToFirst();
+            if (!c.isAfterLast()) {
+                result = c.getString(0);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            closeDatabase();
+        }
+        return result;
+    }
+
+    @NonNull
+    public JSONArray getSupportedLanguages() {
+        return getResult(tblLanguages, new String[]{"LanguageCode"}, null, null);
     }
 }

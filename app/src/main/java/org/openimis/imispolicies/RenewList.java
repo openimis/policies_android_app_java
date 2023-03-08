@@ -36,6 +36,10 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
+
+import org.openimis.imispolicies.tools.LanguageManager;
+import org.openimis.imispolicies.tools.Log;
+
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -49,16 +53,15 @@ import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.apache.http.HttpResponse;
+import cz.msebera.android.httpclient.HttpResponse;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.openimis.imispolicies.util.FileUtils;
+import org.openimis.imispolicies.util.UriUtils;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -66,17 +69,16 @@ import java.util.Calendar;
 import java.util.HashMap;
 
 public class RenewList extends AppCompatActivity {
-    private static final int REQUEST_OPEN_DOCUMENT_CODE = 1;
+    private static final String LOG_TAG = "RENEWAL";
+    private static final int REQUEST_IMPORT_RENEWAL_FILE = 1;
     private Global global;
-    private String aBuffer = "";
     private ListView lv;
     private SwipeRefreshLayout swipe;
-    private ArrayList<HashMap<String, String>> RenewalList = new ArrayList<>();
+    private ArrayList<HashMap<String, String>> renewalList = new ArrayList<>();
     private String OfficerCode;
     private ClientAndroidInterface ca;
     private ListAdapter adapter;
     public String UnlistedRenPolicy;
-
     boolean isUserLogged = false;
 
     @Override
@@ -104,27 +106,19 @@ public class RenewList extends AppCompatActivity {
         swipe.setEnabled(false);
         swipe.setOnRefreshListener(() -> {
             swipe.setRefreshing(true);
-            (new Handler()).postDelayed(() -> {
-                Token token = null;
-
-                try {
-                    token = global.getJWTToken();
-                } catch (Exception e) {
-                }
-
+            new Handler().postDelayed(() -> {
                 if (global.isNetworkAvailable()) {
-                    if (token != null) {
-                        RefreshRenewals();
+                    if (global.isLoggedIn()) {
+                        refreshRenewals();
                     } else {
-                        LoginDialogBox("Renewals");
+                        loginDialogBox(this::refreshRenewals);
                     }
                 } else {
-                    openDialogForFeedbackRenewal();
+                    requestImportRenewal();
                 }
 
-                // FetchPayers();
                 swipe.setRefreshing(false);
-            }, 3000);
+            }, 1000);
         });
 
         etRenewalSearch.addTextChangedListener(new TextWatcher() {
@@ -141,7 +135,6 @@ public class RenewList extends AppCompatActivity {
             public void afterTextChanged(Editable s) {
             }
         });
-
 
         lv.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
@@ -168,9 +161,7 @@ public class RenewList extends AppCompatActivity {
             intent.putExtra("PolicyValue", oItem.get("PolicyValue"));
             intent.putExtra("RenewalUUID", oItem.get("RenewalUUID"));
             startActivity(intent);
-
         });
-
     }
 
     @Override
@@ -179,105 +170,101 @@ public class RenewList extends AppCompatActivity {
         fillRenewals();
     }
 
-    public void ConfirmDialogFeedbackRenewal(String filename) {
-        AlertDialog.Builder alertDialog2 = new AlertDialog.Builder(
-                RenewList.this);
-
-// Setting Dialog Title
-        alertDialog2.setTitle("Load file:");
-        alertDialog2.setMessage(filename);
-
-// Setting Icon to Dialog
-        // alertDialog2.setIcon(R.drawable.delete);
-
-// Setting Positive "Yes" Btn
-        alertDialog2.setPositiveButton("OK",
-                (dialog, which) -> {
-                    if (ca.InsertRenewals(aBuffer).equals("1")) {
-                        fillRenewals();
-                    }
-                }).setNegativeButton("Quit",
-                (dialog, id) -> {
-                    dialog.cancel();
-                    finish();
-                });
-
-// Showing Alert Dialog
-        alertDialog2.show();
+    public void confirmImportRenewal(String filename, Uri uri) {
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.LoadFile)
+                .setMessage(filename)
+                .setPositiveButton(R.string.Yes,
+                        (dialog, which) -> new Thread(() -> {
+                            File renewalFile = copyRenewalFile(uri);
+                            if (renewalFile != null) {
+                                ca.unZipFeedbacksRenewals(renewalFile);
+                                File[] unzippedFiles = null;
+                                File renewalDir = renewalFile.getParentFile();
+                                if (renewalDir != null) {
+                                    unzippedFiles = renewalDir.listFiles((file) -> file.isFile() && !file.equals(renewalFile));
+                                }
+                                if (unzippedFiles != null) {
+                                    if (unzippedFiles.length == 0) {
+                                        Log.w(LOG_TAG, "No renewal files after unpacking");
+                                    }
+                                    for (File f : unzippedFiles) {
+                                        String renewals = loadRenewalFile(f);
+                                        if (renewals != null) {
+                                            ca.InsertRenewalsFromExtract(renewals);
+                                        }
+                                    }
+                                    runOnUiThread(this::fillRenewals);
+                                    FileUtils.deleteFiles(unzippedFiles);
+                                }
+                                FileUtils.deleteFile(renewalFile);
+                            }
+                        }).start())
+                .setNegativeButton(R.string.No,
+                        (dialog, id) -> dialog.cancel())
+                .show();
     }
 
-    public String getMasterDataText(String filename) {
-        ca.unZipFeedbacksRenewals(filename);
-        String fname = filename.substring(0, filename.indexOf("."));
-        try {
-            String dir = global.getSubdirectory("Database");
-            File myFile = new File(dir, fname);//"/"+dir+"/MasterData.txt"
-//            BufferedReader myReader = new BufferedReader(
-//                    new InputStreamReader(
-//                            new FileInputStream(myFile), "UTF32"));
-            FileInputStream fIn = new FileInputStream(myFile);
-            BufferedReader myReader = new BufferedReader(new InputStreamReader(fIn));
-            aBuffer = myReader.readLine();
-
-            myReader.close();
-/*            Scanner in = new Scanner(new FileReader("/"+dir+"/MasterData.txt"));
-            StringBuilder sb = new StringBuilder();
-            while(in.hasNext()) {
-                sb.append(in.next());
-            }
-            in.close();
-            aBuffer = sb.toString();*/
-        } catch (IOException e) {
-            e.printStackTrace();
+    private String loadRenewalFile(File file) {
+        if (file.exists()) {
+            return FileUtils.readFileAsUTF8String(file);
+        } else {
+            Log.e(LOG_TAG, "Unpacked renewal file does not exists");
+            return null;
         }
-        return aBuffer;
     }
 
-    public void openDialogForFeedbackRenewal() {
+    public void NoRenewalsFoundDialog() {
         AlertDialog.Builder alertDialog2 = new AlertDialog.Builder(
                 RenewList.this);
 
-// Setting Dialog Title
-        alertDialog2.setTitle("NO INTERNET CONNECTION");
-        alertDialog2.setMessage("Do you want to import .txt file from your IMIS folder?");
+        alertDialog2.setTitle("Alert")
+                .setMessage(getResources().getString(R.string.NoRenewalFound))
+                .setPositiveButton("OK", null)
+                .create()
+                .show();
+    }
 
-// Setting Icon to Dialog
-        // alertDialog2.setIcon(R.drawable.delete);
+    private File copyRenewalFile(Uri uri) {
+        File copiedFile = UriUtils.copyUriContentToCache(this, uri, "imports/renewal/renewal.rar");
+        if (copiedFile != null) {
+            return copiedFile;
+        } else {
+            Log.e(LOG_TAG, "Copying renewal file failed, uri: " + uri);
+            return null;
+        }
+    }
 
-// Setting Positive "Yes" Btn
-        alertDialog2.setPositiveButton("Yes",
-                (dialog, which) -> {
-
-                    Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-                    intent.addCategory(Intent.CATEGORY_OPENABLE);
-                    intent.setType("*/*");
-                    try {
-                        startActivityForResult(intent, REQUEST_OPEN_DOCUMENT_CODE);
-                    } catch (ActivityNotFoundException e) {
-                        Toast.makeText(getApplicationContext(), "There are no file explorer clients installed.", Toast.LENGTH_SHORT).show();
-                    }
-                    // Write your code here to execute after dialog
-                }).setNegativeButton("No",
-                (dialog, id) -> {
-                    dialog.cancel();
-                    finish();
-                });
-
-// Showing Alert Dialog
-        alertDialog2.show();
+    public void requestImportRenewal() {
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.NoInternetTitle)
+                .setMessage(R.string.ImportRenewalFile)
+                .setPositiveButton(R.string.Yes,
+                        (dialog, which) -> {
+                            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                            intent.addCategory(Intent.CATEGORY_OPENABLE);
+                            intent.setType("*/*");
+                            try {
+                                startActivityForResult(intent, REQUEST_IMPORT_RENEWAL_FILE);
+                            } catch (ActivityNotFoundException e) {
+                                Toast.makeText(getApplicationContext(), getResources().getString(R.string.NoFileExporerInstalled), Toast.LENGTH_SHORT).show();
+                            }
+                        })
+                .setNegativeButton(R.string.No,
+                        (dialog, id) -> dialog.cancel())
+                .show();
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_OPEN_DOCUMENT_CODE && resultCode == RESULT_OK) {
+        if (requestCode == REQUEST_IMPORT_RENEWAL_FILE && resultCode == RESULT_OK && data != null) {
             Uri uri = data.getData();
-            String path = uri.getPath();
-            File f = new File(path);
+            String filename = UriUtils.getDisplayName(this, uri);
+            String expectedFilename = String.format("renewal_%s.rar", global.getOfficerCode().toLowerCase());
 
-            if (f.getName().toLowerCase().equals("renewal_" + global.getOfficerCode().toLowerCase() + ".rar")) {
-                getMasterDataText((f.getName()));
-                ConfirmDialogFeedbackRenewal((f.getName()));
+            if (filename != null && filename.toLowerCase().equals(expectedFilename)) {
+                confirmImportRenewal(filename, uri);
             } else {
                 Toast.makeText(this, getResources().getString(R.string.FileDoesntBelongHere), Toast.LENGTH_LONG).show();
             }
@@ -286,73 +273,56 @@ public class RenewList extends AppCompatActivity {
     }
 
     private void fillRenewals() {
-        RenewalList.clear();
+        renewalList.clear();
         SimpleDateFormat format = AppInformation.DateTimeInfo.getDefaultDateFormatter();
         Calendar cal = Calendar.getInstance();
         String d = format.format(cal.getTime());
 
         ClientAndroidInterface ca = new ClientAndroidInterface(this);
         String result = ca.OfflineRenewals(OfficerCode);
-        JSONArray jsonArray;
         JSONObject object;
 
         try {
-            RenewalList.clear();
-            jsonArray = new JSONArray(result);
-            HashMap<String, String> Renewal;
-            Renewal = new HashMap<>();
-            Renewal.put("RenewalId", "0");
-            Renewal.put("CHFID", UnlistedRenPolicy);
-            Renewal.put("FullName", getResources().getString(R.string.RenewYourPolicy));
-            Renewal.put("Product", getResources().getString(R.string.Product));
-            Renewal.put("VillageName", "");
-            Renewal.put("PolicyValue", "");
-            Renewal.put("PolicyId", "");
-            Renewal.put("ProductCode", "");
-            Renewal.put("LocationId", String.valueOf(ca.getLocationId(OfficerCode)));
-            Renewal.put("RenewalPromptDate", d);
-            Renewal.put("RenewalUUID", "");
-            RenewalList.add(Renewal);
-            if (jsonArray.length() == 0) {
-                //RenewalList.clear();
-                //Toast.makeText(this, getResources().getString(R.string.NoRenewalFound), Toast.LENGTH_LONG).show();
-            } else {
-                RenewalList.clear();
-                Renewal = new HashMap<>();
-                Renewal.put("RenewalId", "0");
-                Renewal.put("CHFID", UnlistedRenPolicy);
-                Renewal.put("FullName", getResources().getString(R.string.RenewYourPolicy));
-                Renewal.put("Product", getResources().getString(R.string.Product));
-                Renewal.put("VillageName", "");
-                Renewal.put("PolicyValue", "");
-                Renewal.put("PolicyId", "");
-                Renewal.put("ProductCode", "");
-                Renewal.put("LocationId", String.valueOf(ca.getLocationId(OfficerCode)));
-                Renewal.put("RenewalPromptDate", d);
-                Renewal.put("RenewalUUID", "");
-                RenewalList.add(Renewal);
-                for (int i = 0; i < jsonArray.length(); i++) {
+            HashMap<String, String> renewal;
+            JSONArray jsonArray = new JSONArray(result);
 
-                    object = jsonArray.getJSONObject(i);
+            renewalList.clear();
+            renewal = new HashMap<>();
+            renewal.put("RenewalId", "0");
+            renewal.put("CHFID", UnlistedRenPolicy);
+            renewal.put("FullName", getResources().getString(R.string.RenewYourPolicy));
+            renewal.put("Product", getResources().getString(R.string.Product));
+            renewal.put("VillageName", "");
+            renewal.put("PolicyValue", "");
+            renewal.put("PolicyId", "");
+            renewal.put("ProductCode", "");
+            renewal.put("LocationId", String.valueOf(ca.getLocationId(OfficerCode)));
+            renewal.put("RenewalPromptDate", d);
+            renewal.put("RenewalUUID", "");
+            renewalList.add(renewal);
 
-                    Renewal = new HashMap<>();
-                    Renewal.put("RenewalId", object.getString("RenewalId"));
-                    Renewal.put("CHFID", object.getString("CHFID"));
-                    Renewal.put("FullName", object.getString("LastName") + " " + object.getString("OtherNames"));
-                    Renewal.put("Product", object.getString("ProductCode") + " : " + object.getString("ProductName"));
-                    Renewal.put("VillageName", object.getString("VillageName"));
-                    Renewal.put("RenewalPromptDate", object.getString("RenewalPromptDate"));
-                    Renewal.put("PolicyId", object.getString("PolicyId"));
-                    Renewal.put("ProductCode", object.getString("ProductCode"));
-                    Renewal.put("LocationId", object.getString("LocationId"));
-                    Renewal.put("PolicyValue", object.getString("PolicyValue"));
-                    Renewal.put("RenewalUUID", object.getString("RenewalUUID"));
-                    RenewalList.add(Renewal);
-                }
+            if (jsonArray.length()==0) {
+                this.NoRenewalsFoundDialog();
+            }
+            for (int i = 0; i < jsonArray.length(); i++) {
+
+                object = jsonArray.getJSONObject(i);
+                renewal = new HashMap<>();
+                renewal.put("RenewalId", object.getString("RenewalId"));
+                renewal.put("CHFID", object.getString("CHFID"));
+                renewal.put("FullName", object.getString("LastName") + " " + object.getString("OtherNames"));
+                renewal.put("Product", object.getString("ProductCode") + " : " + object.getString("ProductName"));
+                renewal.put("VillageName", object.getString("VillageName"));
+                renewal.put("RenewalPromptDate", object.getString("RenewalPromptDate"));
+                renewal.put("PolicyId", object.getString("PolicyId"));
+                renewal.put("ProductCode", object.getString("ProductCode"));
+                renewal.put("LocationId", object.getString("LocationId"));
+                renewal.put("PolicyValue", object.getString("PolicyValue"));
+                renewal.put("RenewalUUID", object.getString("RenewalUUID"));
+                renewalList.add(renewal);
             }
 
-
-            adapter = new SimpleAdapter(this, RenewalList, R.layout.renewallist,
+            adapter = new SimpleAdapter(this, renewalList, R.layout.renewallist,
                     new String[]{"CHFID", "FullName", "Product", "VillageName", "RenewalPromptDate"},
                     new int[]{R.id.tvCHFID, R.id.tvFullName, R.id.tvProduct, R.id.tvVillage, R.id.tvTime});
 
@@ -366,7 +336,7 @@ public class RenewList extends AppCompatActivity {
 
     }
 
-    private void RefreshRenewals() {
+    private void refreshRenewals() {
         if (global.isNetworkAvailable()) {
             if (global.isLoggedIn()) {
                 new Thread(() -> {
@@ -382,7 +352,7 @@ public class RenewList extends AppCompatActivity {
                     }
 
                     if (responseCode == HttpURLConnection.HTTP_OK && result != null) {
-                        ca.InsertRenewals(result);
+                        ca.InsertRenewalsFromApi(result);
                         runOnUiThread(this::fillRenewals);
                     } else if (responseCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
                         Toast.makeText(this, getResources().getString(R.string.LogInToDownloadRenewals), Toast.LENGTH_LONG).show();
@@ -395,8 +365,7 @@ public class RenewList extends AppCompatActivity {
                 Toast.makeText(this, getResources().getString(R.string.LogInToDownloadRenewals), Toast.LENGTH_LONG).show();
             }
         } else {
-            openDialogForFeedbackRenewal();
-            //Toast.makeText(this, getResources().getString(R.string.NoInternet), Toast.LENGTH_LONG).show();
+            requestImportRenewal();
         }
     }
 
@@ -409,36 +378,18 @@ public class RenewList extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                finish();
-                return true;
-            case R.id.mnuStatistics:
-                if (!ca.CheckInternetAvailable()) {
-                    return false;
-                }
-                Intent stats = new Intent(this, Statistics.class);
-                stats.putExtra("Title", "Renewal Statistics");
-                stats.putExtra("Caller", "R");
-                startActivity(stats);
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
+        onBackPressed();
+        return true;
     }
 
-    public void LoginDialogBox(final String page) {
-        if (!ca.CheckInternetAvailable())
+    public void loginDialogBox(Runnable onLoggedIn) {
+        if (!global.isNetworkAvailable())
             return;
 
-        Global global = (Global) RenewList.this.getApplicationContext();
-        // get prompts.xml view
         LayoutInflater li = LayoutInflater.from(this);
         View promptsView = li.inflate(R.layout.login_dialog, null);
 
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-
-        // set prompts.xml to alertdialog builder
         alertDialogBuilder.setView(promptsView);
 
         final TextView username = promptsView.findViewById(R.id.UserName);
@@ -446,44 +397,28 @@ public class RenewList extends AppCompatActivity {
 
         username.setText(global.getOfficerCode());
 
-        // set dialog message
         alertDialogBuilder
                 .setCancelable(false)
                 .setPositiveButton(R.string.Ok,
                         (dialog, id) -> {
                             if (!username.getText().toString().equals("") && !password.getText().toString().equals("")) {
-
                                 new Thread(() -> {
-
                                     isUserLogged = ca.LoginToken(username.getText().toString(), password.getText().toString());
-
                                     runOnUiThread(() -> {
                                         if (isUserLogged) {
-                                            if (page.equals("Renewals")) {
-                                                finish();
-                                                Intent intent = new Intent(RenewList.this, RenewList.class);
-                                                startActivity(intent);
-                                                Toast.makeText(RenewList.this, RenewList.this.getResources().getString(R.string.Login_Successful), Toast.LENGTH_LONG).show();
-                                            }
-
+                                            onLoggedIn.run();
                                         } else {
                                             Toast.makeText(RenewList.this, RenewList.this.getResources().getString(R.string.LoginFail), Toast.LENGTH_LONG).show();
-                                            LoginDialogBox(page);
-                                            //ca.ShowDialog(RenewList.this.getResources().getString(R.string.LoginFail));
+                                            loginDialogBox(onLoggedIn);
                                         }
                                     });
                                 }).start();
                             } else {
                                 Toast.makeText(RenewList.this, RenewList.this.getResources().getString(R.string.Enter_Credentials), Toast.LENGTH_LONG).show();
-                                LoginDialogBox(page);
+                                loginDialogBox(onLoggedIn);
                             }
                         })
-                .setNegativeButton(R.string.Cancel, (dialog, id) -> dialog.cancel());
-
-        // create alert dialog
-        AlertDialog alertDialog = alertDialogBuilder.create();
-
-        // show it
-        alertDialog.show();
+                .setNegativeButton(R.string.Cancel, (dialog, id) -> dialog.cancel())
+                .show();
     }
 }

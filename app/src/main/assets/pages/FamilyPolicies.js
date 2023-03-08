@@ -57,29 +57,35 @@ $(document).ready(function () {
                 height: "auto",
                 width: 350,
                 modal: true,
-                buttons: {
-                    OK: function () {
+                buttons: [
+                    {
+                        text: Android.getString("Ok"),
+                        click: function () {
 
-                        if (isOffline == 0 || isOffline == 2) {
+                            if (isOffline == 0 || isOffline == 2) {
 
-                            PolicyDeleted = parseInt(Android.DeleteOnlineData(PolicyId, 'PO'));
+                                PolicyDeleted = parseInt(Android.DeleteOnlineData(PolicyId, 'PO'));
+                            }
+                            else {
+                                PolicyDeleted = Android.DeletePolicy(PolicyId);
+                            }
+                            if (PolicyDeleted == 1) {
+                                Android.ShowDialog(Android.getString('PolicyDeleted'));
+                                window.open('FamilyPolicies.html?f=' + FamilyId + "&l=" + LocationId + '&r=' + RegionId + '&d=' + DistrictId, "_self");
+                            }
+                            else if (PolicyDeleted == -1) {
+                                Android.ShowDialog(Android.getString('LoginToDeleteOnlineData'));
+                            }
+                            $(this).dialog("close");
                         }
-                        else {
-                            PolicyDeleted = Android.DeletePolicy(PolicyId);
-                        }
-                        if (PolicyDeleted == 1) {
-                            Android.ShowDialog(Android.getString('PolicyDeleted'));
-                            window.open('FamilyPolicies.html?f=' + FamilyId + "&l=" + LocationId + '&r=' + RegionId + '&d=' + DistrictId, "_self");
-                        }
-                        else if (PolicyDeleted == -1) {
-                            Android.ShowDialog(Android.getString('LoginToDeleteOnlineData'));
-                        }
-                        $(this).dialog("close");
                     },
-                    Cancel: function () {
-                        $(this).dialog("close");
+                    {
+                        text: Android.getString("Cancel"),
+                        click: function () {
+                            $(this).dialog("close");
+                        }
                     }
-                }
+                ]
             });
         }
     }

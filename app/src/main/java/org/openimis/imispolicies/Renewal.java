@@ -27,7 +27,9 @@ package org.openimis.imispolicies;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -38,18 +40,24 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ListAdapter;
 import android.widget.SimpleAdapter;
 import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
 import android.widget.Toast;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.util.EntityUtils;
+import com.google.zxing.client.android.Intents;
+
+import cz.msebera.android.httpclient.HttpResponse;
+import cz.msebera.android.httpclient.util.EntityUtils;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.openimis.imispolicies.Util.StringUtil;
+import org.openimis.imispolicies.tools.LanguageManager;
+import org.openimis.imispolicies.tools.Log;
+import org.openimis.imispolicies.util.StringUtils;
 import org.xmlpull.v1.XmlSerializer;
 
 import java.io.File;
@@ -65,6 +73,7 @@ import java.util.HashMap;
 import static android.widget.AdapterView.INVALID_POSITION;
 
 public class Renewal extends AppCompatActivity {
+    private static final String LOG_TAG = "RENEWAL";
     private Global global;
     private SQLHandler sqlHandler;
 
@@ -75,6 +84,7 @@ public class Renewal extends AppCompatActivity {
     private EditText etProductCode;
     private EditText etAmount;
     private Button btnSubmit;
+    private ImageButton btnScan;
     private ProgressDialog pd;
     private CheckBox chkDiscontinue;
     private Spinner spPayer;
@@ -85,7 +95,6 @@ public class Renewal extends AppCompatActivity {
     private int LocationId;
     private int RenewalId;
     private String RenewalUUID;
-    private int result;
     private EditText PolicyValue;
 
     private ListAdapter adapter;
@@ -93,6 +102,7 @@ public class Renewal extends AppCompatActivity {
     private final ArrayList<HashMap<String, String>> PayersList = new ArrayList<>();
     private final ArrayList<HashMap<String, String>> ProductList = new ArrayList<>();
 
+    private static final int INTENT_ACTIVITY_SCAN_CODE = 554;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -114,6 +124,7 @@ public class Renewal extends AppCompatActivity {
         spPayer = findViewById(R.id.spPayer);
         spProduct = findViewById(R.id.spProduct);
         etControlNumber = findViewById(R.id.etControlNumber);
+        btnScan = findViewById(R.id.btnScan);
 
         if (!ca.getRule("ShowPaymentOption", true)) {
             etReceiptNo.setVisibility(View.GONE);
@@ -157,7 +168,11 @@ public class Renewal extends AppCompatActivity {
             BindSpinnerProduct();
         } else {
             spProduct.setVisibility(View.GONE);
-            assignNextFreeCn(etProductCode.getText().toString());
+
+            if (ca.IsBulkCNUsed()) {
+                assignNextFreeCn(etProductCode.getText().toString());
+            }
+
             BindSpinnerPayers();
         }
 
@@ -178,7 +193,6 @@ public class Renewal extends AppCompatActivity {
                 }
 
                 if (!isValidate()) {
-                    pd.dismiss();
                     return;
                 }
 
@@ -202,6 +216,17 @@ public class Renewal extends AppCompatActivity {
                 }
             }
         });
+
+        btnScan.setOnClickListener(v -> {
+                    Intent intent = new Intent("com.google.zxing.client.android.SCAN");
+                    intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
+                    try {
+                        startActivityForResult(intent, INTENT_ACTIVITY_SCAN_CODE);
+                    } catch (Exception e) {
+                        Log.e(LOG_TAG, "Error while trying to initiate QR scan", e);
+                    }
+                }
+        );
 
         etOfficer.addTextChangedListener(new TextWatcher() {
             @Override
@@ -247,17 +272,15 @@ public class Renewal extends AppCompatActivity {
 
     private void WriteXML() {
         try {
-            //Create All directories
-            File MyDir = new File(global.getMainDirectory());
 
             //Create File name
             Date date = Calendar.getInstance().getTime();
             String d = AppInformation.DateTimeInfo.getDefaultFileDatetimeFormatter().format(date);
-            FileName = "RenPol_" + d + "_" + etCHFID.getText().toString() + "_" + etReceiptNo.getText().toString() + ".xml";
+            FileName = "Renewal_" + d + "_" + etCHFID.getText().toString() + "_" + etReceiptNo.getText().toString() + ".xml";
             d = AppInformation.DateTimeInfo.getDefaultDateFormatter().format(date);
             String PayerId = GetSelectedPayer();
             //Create XML file
-            File policyXML = new File(MyDir, FileName);
+            File policyXML = new File(global.getSubdirectory("Renewal"), FileName);
 
             FileOutputStream fos = new FileOutputStream(policyXML);
 
@@ -317,23 +340,21 @@ public class Renewal extends AppCompatActivity {
             fos.close();
 
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(LOG_TAG, "Error while saving renewal file", e);
         }
-
     }
 
     public String WriteJSON() {
-        File MyDir = new File(global.getMainDirectory());
 
         Date date = Calendar.getInstance().getTime();
         String d = AppInformation.DateTimeInfo.getDefaultFileDatetimeFormatter().format(date);
-        FileName = "RenPolJSON_" + d + "_" + etCHFID.getText().toString() + "_" + etReceiptNo.getText().toString() + ".txt";
+        FileName = "RenewalJSON_" + d + "_" + etCHFID.getText().toString() + "_" + etReceiptNo.getText().toString() + ".json";
         String PayerId = GetSelectedPayer();
         String ProductCode = GetSelectedProduct();
         d = AppInformation.DateTimeInfo.getDefaultDateFormatter().format(date);
 
         //Create XML file
-        File policyJSON = new File(MyDir, FileName);
+        File policyJSON = new File(global.getSubdirectory("Renewal"), FileName);
 
         JSONObject FullObject = new JSONObject();
 
@@ -363,13 +384,13 @@ public class Renewal extends AppCompatActivity {
                 myOutWriter.close();
                 fOut.close();
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.e(LOG_TAG, "IO error while saving renewal file", e);
             }
 
         } catch (IllegalStateException e) {
-            e.printStackTrace();
+            Log.e(LOG_TAG, "Illegal state error while saving renewal file", e);
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.e(LOG_TAG, "Json error while saving renewal file", e);
         }
 
         return FullObject.toString();
@@ -421,6 +442,14 @@ public class Renewal extends AppCompatActivity {
                 }).show();
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == INTENT_ACTIVITY_SCAN_CODE && data != null) {
+            etCHFID.setText(data.getStringExtra(Intents.Scan.RESULT));
+        }
+    }
+
     private void UpdateRow(int RenewalId) {
         if (RenewalId != 0) {
             ca.UpdateRenewTable(RenewalId);
@@ -467,7 +496,7 @@ public class Renewal extends AppCompatActivity {
                 spPayer.setAdapter((SpinnerAdapter) adapter);
             }
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.e(LOG_TAG, "Error while binding payers", e);
         }
     }
 
@@ -513,7 +542,7 @@ public class Renewal extends AppCompatActivity {
                 spProduct.setAdapter(adapter);
             }
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.e(LOG_TAG, "Error while binding products", e);
         }
     }
 
@@ -595,7 +624,7 @@ public class Renewal extends AppCompatActivity {
                     ToRestApi rest = new ToRestApi();
                     response = rest.postToRestApiToken(receiptObj, "premium/receipt");
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Log.e(LOG_TAG, "Error while checking receipt no", e);
                 }
 
                 if (response != null) {
@@ -637,7 +666,7 @@ public class Renewal extends AppCompatActivity {
     }
 
     private void assignNextFreeCn(String productCode) {
-        if (!StringUtil.equals(productCode, "0")) {
+        if (!StringUtils.equals(productCode, "0")) {
             String controlNumber = sqlHandler.getNextFreeCn(etOfficer.getText().toString(), productCode);
             if (controlNumber != null) {
                 etControlNumber.setText(controlNumber);
