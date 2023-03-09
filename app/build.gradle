@@ -170,7 +170,7 @@ android {
         niger.assets.srcDir 'src/niger/assets'
 
         tchadDev.java.srcDir 'src/tchad/java'
-        tchadDev.res.srcDirs = ['src/tchad/res', 'src/localeBepha/res']
+        tchadDev.res.srcDirs = ['src/tchad/res', 'src/localeTchad/res']
 
         demoProd.java.srcDir 'src/master/java'
         demoProd.res.srcDirs = ['src/demoProd/res', 'src/localeMv/res']
