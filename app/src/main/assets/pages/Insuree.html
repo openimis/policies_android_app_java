@@ -44,13 +44,13 @@ In case of dispute arising out or in relation to the use of the program, it is s
             <span strName="Relation">Relation</span>
             <select id="ddlRelationship" dataField="Relationship"></select>
         </li>
-        <li>
+        <li style="display:none;">
             <input type="hidden" datafield="InsureeId" id="hfInsureeId" value="0"/>
             <input type="hidden" datafld="isOffline" id="hfIsOffline" value="."/>
             <input type="hidden" datafield="isHead" id="hfisHead" value="-1"/>
             <span strName="InsuranceNumber">Insurance Number</span>
             <div style="display:flex">
-            <input type="text" maxlength="12" id="txtInsuranceNumber" dataField="CHFID" onkeyup="getImage()" min="0" required />
+            <input type="text" maxlength="12" id="txtInsuranceNumber" dataField="CHFID" onkeyup="getImage()" min="0" />
             <img src="" alt="Scan" id="btnScan" style="width:50px !important"  />
             </div>
         </li>

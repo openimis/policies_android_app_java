@@ -436,15 +436,21 @@ public class Enquire extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
             case REQUEST_SCAN_QR_CODE:
-                if (resultCode == RESULT_OK) {
-                    String CHFID = data.getStringExtra("SCAN_RESULT");
-                    etCHFID.setText(CHFID);
+                try {
+                    if (resultCode == RESULT_OK) {
+                        String CHFID = data.getStringExtra("SCAN_RESULT");
+                        JSONObject obj = new JSONObject(CHFID);
 
-                    pd = ProgressDialog.show(Enquire.this, "", getResources().getString(R.string.GetingInsuuree));
-                    new Thread(() -> {
-                        getInsureeInfo();
-                        pd.dismiss();
-                    }).start();
+                                etCHFID.setText(obj.getString("chf_id"));
+
+                        pd = ProgressDialog.show(Enquire.this, "", getResources().getString(R.string.GetingInsuuree));
+                        new Thread(() -> {
+                            getInsureeInfo();
+                            pd.dismiss();
+                        }).start();
+                    }
+                }catch (JSONException e){
+
                 }
                 break;
         }
