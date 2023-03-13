@@ -438,13 +438,18 @@ public class Enquire extends AppCompatActivity {
             case REQUEST_SCAN_QR_CODE:
                 try {
                     if (resultCode == RESULT_OK) {
-                        String CHFID = data.getStringExtra("SCAN_RESULT");
-                        JSONObject obj = new JSONObject(CHFID);
+                        String result = data.getStringExtra("SCAN_RESULT");
+                        JSONObject obj = new JSONObject(result);
+                        String chfid = obj.getString("chf_id");
+                        String lastName = obj.getString("last_name");
+                        String otherNames = obj.getString("other_names");
 
-                                etCHFID.setText(obj.getString("chf_id"));
+                                etCHFID.setText(chfid);
 
                         pd = ProgressDialog.show(Enquire.this, "", getResources().getString(R.string.GetingInsuuree));
                         new Thread(() -> {
+                            tvCHFID.setText(chfid);
+                            tvName.setText(lastName+ " " +otherNames);
                             getInsureeInfo();
                             pd.dismiss();
                         }).start();
