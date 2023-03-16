@@ -182,6 +182,13 @@ public class ClientAndroidInterface {
         global.setCurrentUrl(Url);
     }
 
+    @JavascriptInterface
+    public void AddAttachment(){
+        Intent intent = new Intent(Intent.ACTION_VIEW, MediaStore.Downloads.EXTERNAL_CONTENT_URI);
+        intent.setType("*/*");
+        ((Activity) mContext).startActivity(intent);
+    }
+
     private void getControls() {
         String tableName = "tblControls";
         String[] columns = {"FieldName", "Adjustibility"};
@@ -750,12 +757,12 @@ public class ClientAndroidInterface {
             global = (Global) mContext.getApplicationContext();
             MaxFamilyId = getNextAvailableFamilyId();
 
-            if (InsureeData.length() > 0) {
+            /*if (InsureeData.length() > 0) {
                 int validation = isValidInsureeData(jsonToTable(InsureeData));
                 if (validation > 0) {
                     throw new UserException(mContext.getResources().getString(validation));
                 }
-            }
+            }*/
 
             //Insert Family
             //===============================================================================
@@ -952,11 +959,11 @@ public class ClientAndroidInterface {
             global = (Global) mContext.getApplicationContext();
             HashMap<String, String> data = jsonToTable(InsureeData);
 
-            int validation = isValidInsureeData(data);
+            /*int validation = isValidInsureeData(data);
             if (validation > 0) {
                 ShowDialog(mContext.getResources().getString(validation));
                 return 7;
-            }
+            }*/
 
             MaxInsureeId = getNextAvailableInsureeId();
             ContentValues values = new ContentValues();

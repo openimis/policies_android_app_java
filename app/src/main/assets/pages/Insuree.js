@@ -62,6 +62,17 @@ $(document).ready(function () {
 
     $('#spPleaseWait').text(Android.getString('saving'));
 
+    $('#btnNext').click(function () {
+
+            var passed = isFormValidated();
+
+            if (passed == true) {
+                saveInsureeLocally();
+                window.open("Attachment.html", "_self");
+            }else
+                Android.ShowDialog(Android.getString('FieldRequired'));
+    });
+
     $('#btnSave').click(function () {
         $("#divProgress").show();
 
@@ -201,6 +212,11 @@ $(document).ready(function () {
     }
 
 });
+
+function saveInsureeLocally() {
+    var jsonInsuree = createJSONString();
+    sessionStorage.setItem("InsureeData", jsonInsuree);
+}
 
 function fillDropdowns() {
     fillRelationship();

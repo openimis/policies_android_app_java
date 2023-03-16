@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add/Edit Attachments</title>
+    <link href="../CSS/Style.CSS" rel="stylesheet" type="text/css"/>
+    <script src="../JS/jquery-3.2.1.min.js"></script>
+    <script src="../JS/exact.js"></script>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" charset="utf-8"/>
+
+    <script type="text/javascript" src="Attachment.js"></script>
+
+</head>
+<body>
+<div id="divProgress">
+    <span id="spPleaseWait"></span>
+</div>
+<div>
+    <div class="topPanel">
+        <img src="../images/plus.png" alt="New" class="plusButton" id="btnAddNew"/>
+    </div>
+    <ul class="ulList">
+        <li class="dot-side-menu">
+            <div>
+                <input type="hidden" id="hfIsOffline" value="1">
+                <input type="hidden" id="hfFamilyId" value="0" />
+                <h3 id="AttachmentTitle"></h3>
+            </div>
+
+            <div>
+                <h4 id="AttachmentFile"></h4>
+                <span id="Region"></span> &#8594; <span id="District"></span> &#8594; <span
+                    id="Ward"></span> &#8594; <span id="Village"></span>
+            </div>
+        </li>
+
+    </ul>
+
+    <div class="footer">
+        <input type="submit" id="btnSave" strName="Save" value="Save">
+    </div>
+</div>
+</body>
