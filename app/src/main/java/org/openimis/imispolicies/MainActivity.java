@@ -34,6 +34,7 @@ import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -62,6 +63,7 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -90,6 +92,7 @@ public class MainActivity extends AppCompatActivity
     public static final String LOG_TAG = "MAIN_ACTIVITY";
     private static final int REQUEST_PERMISSIONS_CODE = 1;
     private static final int REQUEST_PICK_MD_FILE = 2;
+    private static final int REQUEST_PICK_ATTACH_FILE = 6;
     public static final int REQUEST_CREATE_ENROL_EXPORT = 3;
     public static final int REQUEST_CREATE_FEEDBACK_EXPORT = 4;
     public static final int REQUEST_CREATE_RENEWAL_EXPORT = 5;
@@ -117,8 +120,10 @@ public class MainActivity extends AppCompatActivity
     public File f;
     public String etRarPassword = "";
     private AlertDialog enrolmentOfficerDialog;
+    private AlertDialog addAttachmentDialog;
     private AlertDialog masterDataDialog;
     private AlertDialog permissionDialog;
+    private EditText fileInput;
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -200,6 +205,12 @@ public class MainActivity extends AppCompatActivity
                 }
                 AndroidUtils.showToast(this, R.string.XmlCreated);
             }
+
+        } else if(requestCode == REQUEST_PICK_ATTACH_FILE && resultCode == RESULT_OK && data != null ){
+            Uri fileUri = data.getData();
+
+            Cursor cursor = MainActivity.getContentResolver()
+                    .query(fileUri, null, null, null, null, null);
 
         } else {
             //if user cancels
@@ -376,6 +387,63 @@ public class MainActivity extends AppCompatActivity
                     dialog.cancel();
                     finish();
                 }).show();
+    }
+
+    public AlertDialog PickAttachmentDialogFromPage(){
+        LayoutInflater li = LayoutInflater.from(context);
+        @SuppressLint("InflateParams") View promptsView = li.inflate(R.layout.attachment, null);
+
+        final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+                context);
+
+        alertDialogBuilder.setView(promptsView);
+
+        final EditText titleInput = promptsView.findViewById(R.id.txtAttachmentTitle);
+        fileInput = promptsView.findViewById(R.id.txtFileName);
+        final ImageButton btnAdd = promptsView.findViewById(R.id.addAttachmentBtn);
+
+        JSONObject attachmentObj = new JSONObject();
+        int positiveButton, negativeButton;
+        positiveButton = R.string.Add;
+        negativeButton = R.string.Cancel;
+
+        String filename = "";
+
+
+        btnAdd.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
+                intent.setType("*/*");
+                try {
+                    onActivityResult(REQUEST_PICK_ATTACH_FILE, RESULT_OK, intent);
+
+                    titleInput.setText(filename);
+                } catch (ActivityNotFoundException e) {
+                    Toast.makeText(getApplicationContext(), getResources().getString(R.string.NoFileAdded), Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+        alertDialogBuilder
+                .setCancelable(false)
+                .setPositiveButton(getResources().getString(positiveButton),
+                        (dialog, id) -> {
+                    if(titleInput.getText().toString().equals("") ||
+                            fileInput.getText().toString().equals("")){
+                        //ca.ShowToast(getResources().getString(R.string.FieldRequired));
+
+                    }else{
+
+                    }
+                        })
+                .setNegativeButton(getResources().getString(negativeButton),
+                        (dialog, id) -> {
+                            dialog.cancel();
+                        });
+
+        return alertDialogBuilder.show();
     }
 
     public void PickMasterDataFileDialogFromPage() {

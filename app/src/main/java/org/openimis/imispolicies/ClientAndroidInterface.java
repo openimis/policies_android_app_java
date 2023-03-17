@@ -25,6 +25,7 @@
 
 package org.openimis.imispolicies;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -58,6 +59,8 @@ import org.openimis.imispolicies.tools.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.webkit.JavascriptInterface;
+import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -183,10 +186,9 @@ public class ClientAndroidInterface {
     }
 
     @JavascriptInterface
-    public void AddAttachment(){
-        Intent intent = new Intent(Intent.ACTION_VIEW, MediaStore.Downloads.EXTERNAL_CONTENT_URI);
-        intent.setType("*/*");
-        ((Activity) mContext).startActivity(intent);
+    public AlertDialog showAttachmentDialog(){
+
+        return ((MainActivity) mContext).PickAttachmentDialogFromPage();
     }
 
     private void getControls() {

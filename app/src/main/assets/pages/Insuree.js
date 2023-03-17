@@ -214,7 +214,7 @@ $(document).ready(function () {
 });
 
 function saveInsureeLocally() {
-    var jsonInsuree = createJSONString();
+    var jsonInsuree = getControlsValuesJSON('li');
     sessionStorage.setItem("InsureeData", jsonInsuree);
 }
 

@@ -84,6 +84,7 @@
     <string name="ErrorUpdate">Error while updating data</string>
     <string name="InsuranceNumberExists">Member with this Insuree number already exists</string>
     <string name="Add">Add</string>
+    <string name="NoFileAdded">No file added</string>
     <string name="New">New</string>
     <string name="SelectOfficer">Select Enrolment Officer</string>
     <string name="SelectProduct">Select Product</string>
@@ -184,8 +185,12 @@
     <string name="Password">Password</string>
     <string name="EnterRarPassword">Enter Rar Password</string>
     <string name="OfficerCode">Enrolment Officer Code:</string>
+    <string name="AttachmentTitle">Title</string>
+    <string name="AttachmentFile">File</string>
     <string name="IncorrectOfficerCode">Incorrect Enrolment Officer code</string>
     <string name="Login">Login</string>
+    <string name="Attachment">Attachment</string>
+    <string name="NoneFile">No File</string>
     <string name="FTPConnectionFailed">Unable to connect the server. Operation aborted.</string>
     <string name="SomethingWrongServer">Something went wrong on the server.</string>
     <string name="UncaughtException">Family could not be inserted.</string>
