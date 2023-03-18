@@ -64,13 +64,17 @@ $(document).ready(function () {
 
     $('#btnNext').click(function () {
 
-            var passed = isFormValidated();
+        var passed = isFormValidated();
 
-            if (passed == true) {
+        if (passed == true) {
+            if (FamilyId == 0 || FamilyId == null || FamilyId == undefined) {
                 saveInsureeLocally();
                 window.open("Attachment.html", "_self");
-            }else
-                Android.ShowDialog(Android.getString('FieldRequired'));
+            } else {
+                window.open("Attachment.html?f=" + FamilyId, "_self");
+            }
+        } else
+            Android.ShowDialog(Android.getString('FieldRequired'));
     });
 
     $('#btnSave').click(function () {
@@ -137,10 +141,6 @@ $(document).ready(function () {
     $(window).bind("onbeforeunload", function () {
         Android.showDialog('bye');
     });
-
-    window.onunload = function () {
-        sessionStorage.removeItem("FamilyData");
-    }
 
     //if insureeid is passed load the insuree
     var InsureeId = queryString("i");

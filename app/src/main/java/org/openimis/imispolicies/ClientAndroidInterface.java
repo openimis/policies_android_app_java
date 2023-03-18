@@ -59,6 +59,7 @@ import org.openimis.imispolicies.tools.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.webkit.JavascriptInterface;
+import android.webkit.WebView;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -133,6 +134,7 @@ public class ClientAndroidInterface {
     private int Uploaded;
     private HashMap<String, String> controls = new HashMap<>();
     private String Path;
+    private JSONArray Attachments = new JSONArray();
     private File[] files;
     private int result;
     private int UserId;
@@ -186,9 +188,9 @@ public class ClientAndroidInterface {
     }
 
     @JavascriptInterface
-    public AlertDialog showAttachmentDialog(){
+    public void showAttachmentDialog() {
 
-        return ((MainActivity) mContext).PickAttachmentDialogFromPage();
+        ((MainActivity) mContext).PickAttachmentDialogFromPage();
     }
 
     private void getControls() {
@@ -1222,6 +1224,29 @@ public class ClientAndroidInterface {
         JSONArray Families = sqlHandler.getResult(Query, null);
 
         return Families.toString();
+    }
+
+    @JavascriptInterface
+    public String getAllAttachments() throws JSONException {
+
+        JSONObject obj = new JSONObject();
+        obj.put("fileTitle", "Carte CNI");
+        obj.put("fileName", "cni.pdf");
+
+        if(Attachments.length() == 0){
+            Attachments.put(obj);
+        }
+
+        return Attachments.toString();
+    }
+
+    @JavascriptInterface
+    public void addAttachment(String title, String file) throws JSONException {
+
+        JSONObject obj = new JSONObject();
+        obj.put("fileTitle", title);
+        obj.put("fileName", file);
+        Attachments.put(obj);
     }
 
     @JavascriptInterface

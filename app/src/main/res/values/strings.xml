@@ -36,6 +36,7 @@
     <string name="SelectFamilyType">Select Group type</string>
     <string name="Ok">OK</string>
     <string name="FieldRequired">Please verify all the required fields marked in red border</string>
+    <string name="AttachmentRequired">Please insert one or more attachment(s)</string>
     <string name="InsuranceNumber">Insuree number</string>
     <string name="OtherNames">Other Names</string>
     <string name="LastName">Last Name</string>
@@ -122,6 +123,7 @@
     <string name="ReceiptNotUnique">Receipt number must be unique</string>
     <string name="PleaseDeletePremium">Policy has contribution. Please delete contributions first</string>
     <string name="PolicyDeleted">Policy deleted successfully</string>
+    <string name="AttachmentDeleted">Attachment deleted successfully</string>
     <string name="PremiumDeleted">Contribution deleted successfully</string>
     <string name="InsureeDeleted">Insuree deleted successfully</string>
     <string name="IsHeadDelete">You can not delete the head of the family.</string>
@@ -275,6 +277,7 @@
     <string name="LoginToDeleteOnlineData">Please login first, to delete online data</string>
     <string name="DeletePolicyPremium">Deleting policy will also delete premium on it</string>
     <string name="DeleteFamily">Deleting of family will also Delete all Insurees, Policies and Premiums of this Family</string>
+    <string name="DeleteAttachment">Deleting of Attachment</string>
     <string name="Confirm">Confirm</string>
     <string name="Logout">Logout</string>
     <string name="FamilyExists">Family already exists in phone</string>
