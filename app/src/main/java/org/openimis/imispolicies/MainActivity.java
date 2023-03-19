@@ -122,11 +122,8 @@ public class MainActivity extends AppCompatActivity
     public File f;
     public String etRarPassword = "";
     private AlertDialog enrolmentOfficerDialog;
-    private AlertDialog addAttachmentDialog;
     private AlertDialog masterDataDialog;
     private AlertDialog permissionDialog;
-    private EditText fileInput;
-    private JSONObject attachObj;
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {

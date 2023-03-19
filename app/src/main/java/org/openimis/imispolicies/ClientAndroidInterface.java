@@ -1125,6 +1125,7 @@ public class ClientAndroidInterface {
                 values.put("isOffline", insureeIsOffline);
                 sqlHandler.updateData("tblInsuree", values, "InsureeId = ? AND (isOffline = ?)", new String[]{String.valueOf(InsureeId), String.valueOf(insureeIsOffline)});
             }
+
         } catch (NumberFormatException | UserException e) {
             e.printStackTrace();
             throw new Exception(e.getMessage());
@@ -1227,17 +1228,29 @@ public class ClientAndroidInterface {
     }
 
     @JavascriptInterface
-    public String getAllAttachments() throws JSONException {
+    public String getInsureeAttachments(int FamilyId) throws JSONException {
 
-        JSONObject obj = new JSONObject();
-        obj.put("fileTitle", "Carte CNI");
-        obj.put("fileName", "cni.pdf");
+        if(FamilyId != 0){
+            String Query = "SELECT Title, Filename \n" +
+                    "FROM tblInsureeAttachments \n" +
+                    "WHERE FamilyId = ?";
 
-        if(Attachments.length() == 0){
-            Attachments.put(obj);
+            String[] args = {String.valueOf(FamilyId)};
+
+            JSONArray Attachs = sqlHandler.getResult(Query, args);
+
+            if(Attachments.length() == 0){
+                for(int i=0; i < Attachs.length(); i++){
+                    JSONObject obj = Attachs.getJSONObject(i);
+                    Attachments.put(obj);
+                }
+            }
+
+            return Attachments.toString();
         }
 
         return Attachments.toString();
+
     }
 
     @JavascriptInterface
@@ -2412,6 +2425,19 @@ public class ClientAndroidInterface {
         sqlHandler.deleteData(SQLHandler.tblPolicy, selector, arg);
         sqlHandler.clearCnAssignedToPolicy(PolicyId);
         return 1;
+    }
+
+    @JavascriptInterface
+    public int DeleteAttachment(String AttachmentTitle) throws JSONException {
+
+        for (int i=0; i < Attachments.length();i++){
+            JSONObject obj = Attachments.getJSONObject(i);
+            if(obj.getString("FileTitle").equals(AttachmentTitle)){
+                Attachments.remove(i);
+                return 1;
+            }
+        }
+        return -1;
     }
 
     @JavascriptInterface
@@ -5019,6 +5045,25 @@ public class ClientAndroidInterface {
             }
         }
         return PolicyStatus;
+    }
+
+    @JavascriptInterface
+    public void SaveInsureeAttachments(int FamilyId){
+        try{
+
+            for (int i=0; i < Attachments.length(); i++){
+                ContentValues AttachmentValues = new ContentValues();
+                JSONObject obj = Attachments.getJSONObject(i);
+                AttachmentValues.put("Filename", obj.getString("fileName"));
+                AttachmentValues.put("Title", obj.getString("fileTitle"));
+                AttachmentValues.put("FamilyId", FamilyId);
+                sqlHandler.insertData("tblInsureeAttachments",AttachmentValues);
+            }
+
+        }catch (JSONException e) {
+            e.printStackTrace();
+        }
+
     }
 
     @JavascriptInterface

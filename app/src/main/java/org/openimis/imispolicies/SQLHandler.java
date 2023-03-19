@@ -90,6 +90,7 @@ public class SQLHandler extends SQLiteOpenHelper {
     public static final String tblRenewals = "tblRenewals";
     public static final String tblBulkControlNumbers = "tblBulkControlNumbers";
     public static final String tblFamilySMS = "tblFamilySMS";
+    public static final String tblInsureeAttachments = "tblInsureeAttachments";
 
     public SQLHandler(Context context) {
         super(context, DBNAME, null, DATABASE_VERSION);
@@ -420,6 +421,13 @@ public class SQLHandler extends SQLiteOpenHelper {
                             "Amount REAL," +
                             "PolicyId INTEGER" + ")"
             );
+            sqLiteDatabase.execSQL(
+                    "CREATE TABLE " + tblInsureeAttachments + "(" +
+                            "Id INTEGER," +
+                            "Title TEXT," +
+                            "Filename TEXT," +
+                            "FamilyId INTEGER" + ")"
+            );
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -460,6 +468,7 @@ public class SQLHandler extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + tblRecordedPolicies);
         db.execSQL("DROP TABLE IF EXISTS " + tblRelations);
         db.execSQL("DROP TABLE IF EXISTS " + tblRenewals);
+        db.execSQL("DROP TABLE IF EXISTS " + tblInsureeAttachments);
         if (oldVersion < 2) {
             String sql = "ALTER TABLE tblRenewals ADD COLUMN LocationId INTEGER;";
             db.execSQL(sql);

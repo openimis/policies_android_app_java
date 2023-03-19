@@ -33,9 +33,11 @@ $(document).ready(function () {
             var jsonInsuree = sessionStorage.getItem("InsureeData");
             if (sessionStorage.getItem("FamilyData") !== null) {
                 var FamilyId = Android.SaveFamily(sessionStorage.getItem("FamilyData"), jsonInsuree);
+                Android.SaveInsureeAttachments(FamilyId);
 
                 if (FamilyId > 0) {
                     sessionStorage.removeItem("FamilyData");
+                    sessionStorage.removeItem("InsureeData");
                     $(this).attr("disabled", "disabled");
 
                     window.open("FamilyAndInsurees.html?f=" + FamilyId, "_self");
@@ -66,6 +68,7 @@ $(document).ready(function () {
 
                 }
                 var InsureeId = Android.SaveInsuree(jsonInsuree, FamilyId, 0, parseInt(ExceedThreshold), PolicyId);
+                Android.SaveInsureeAttachments(FamilyId);
                 if (PolicyId > 0 && TotalIns >= MemberCount) {
                     $("#divProgress").hide();
                 } else {
@@ -98,13 +101,10 @@ $(document).ready(function () {
                         text: Android.getString("Ok"),
                         click: function () {
 
-                            AttachmentDeleted = Android.DeleteAttachment(AttachmentId);
+                            AttachmentDeleted = Android.DeleteAttachment(AttachmentTitle);
                             if (AttachmentDeleted == 1) {
                                 Android.ShowDialog(Android.getString('AttachmentDeleted'));
                                 window.open('Attachment.html?f=' + FamilyId, "_self");
-                            }
-                            else if (PolicyDeleted == -1) {
-                                Android.ShowDialog(Android.getString('LoginToDeleteOnlineData'));
                             }
                             $(this).dialog("close");
                         }
@@ -120,9 +120,7 @@ $(document).ready(function () {
         }
     });
 
-    window.onunload = function () {
-        sessionStorage.removeItem("FamilyData");
-    }
+
 });
 
 // called from java after attachment was selected by the user
@@ -139,7 +137,7 @@ function addAttachmentCallback(attachments) {
 }
 
 function LoadAttachments() {
-    var Attachments = Android.getAllAttachments();
+    var Attachments = Android.getInsureeAttachments(parseInt(queryString('f')));
     var ctls = ["AttachmentTitle", "AttachmentFile"];
     var Columns = ["fileTitle", "fileName"];
     LoadList(Attachments, '.ulList', ctls, Columns);

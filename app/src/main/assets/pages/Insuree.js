@@ -71,6 +71,7 @@ $(document).ready(function () {
                 saveInsureeLocally();
                 window.open("Attachment.html", "_self");
             } else {
+                saveInsureeLocally();
                 window.open("Attachment.html?f=" + FamilyId, "_self");
             }
         } else
