@@ -26,7 +26,7 @@ $(document).ready(function () {
     $('#btnSave').click(function () {
         $("#divProgress").show();
 
-        if ($('.ulList').length == 0) {
+        if (Android.getInsureeAttachments(parseInt(queryString('f'))) === "[]") {
             $("#divProgress").hide();
             Android.ShowDialog(Android.getString('AttachmentRequired'));
         } else {
