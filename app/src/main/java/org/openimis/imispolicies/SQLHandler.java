@@ -426,6 +426,7 @@ public class SQLHandler extends SQLiteOpenHelper {
                             "Id INTEGER," +
                             "Title TEXT," +
                             "Filename TEXT," +
+                            "Content TEXT," +
                             "FamilyId INTEGER" + ")"
             );
         } catch (Exception e) {

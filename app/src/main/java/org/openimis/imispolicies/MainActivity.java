@@ -50,6 +50,7 @@ import android.text.TextUtils;
 import org.openimis.imispolicies.tools.LanguageManager;
 import org.openimis.imispolicies.tools.Log;
 
+import android.util.Base64;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -82,6 +83,7 @@ import org.openimis.imispolicies.util.UriUtils;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -217,8 +219,17 @@ public class MainActivity extends AppCompatActivity
                     @SuppressLint("Range") String displayName = cursor.getString(
                             cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
 
-                    wv.evaluateJavascript(String.format("selectAttachmentCallback(\"%s\");", displayName), null);
+                    byte[] bytes = IOUtils.toByteArray(getContentResolver().openInputStream(fileUri));
+
+                    String fileContent = Base64.encodeToString(bytes, Base64.DEFAULT);
+
+                    wv.evaluateJavascript(String.format("selectAttachmentCallback(\"%s\");", displayName),null);
+                    wv.evaluateJavascript(String.format("selectFileCallback(\"%s\");", fileContent),null);
                 }
+            }catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
             } finally {
                 cursor.close();
             }

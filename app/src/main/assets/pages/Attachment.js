@@ -2,18 +2,35 @@ $(document).ready(function () {
 
     var InsureeId = queryString("i");
     var FamilyId = queryString("f");
+    $fileContent = "";
+    var AttachmentTitle = "";
+    var AttachmentName = "";
+    var AttachmentId = 0;
+
+    if (sessionStorage.getItem("FamilyData") !== null) {
+             var Attachments = Android.getInsureeAttachments(parseInt(queryString('f')));
+             var ctls = ["AttachmentTitle", "AttachmentFile", "AttachmentId"];
+             var Columns = ["Title", "Filename", "Id"];
+             LoadList(Attachments, '.ulList', ctls, Columns);
+    }else{
+        LoadAttachments();
+    }
 
 
-    LoadAttachments();
+    $('.ulList li').click(function () {
+          AttachmentTitle = $(this).find('#AttachmentTitle').text();
+          AttachmentName = $(this).find('#AttachmentFile').text();
+          AttachmentId = parseInt($(this).find('#AttachmentId').val());
+    });
+
 
     $('#btnAddNew').click(function () {
         var passed = isFormValidated();
 
-
         if (passed == true) {
             var title = $('#txtTitleAttachment').val();
             var file = $('#txtFileAttachment').val();
-            Android.addAttachment(title, file);
+            Android.addAttachment(parseInt(FamilyId),title, file, $fileContent);
             window.location.reload();
 
         } else
@@ -100,8 +117,8 @@ $(document).ready(function () {
                     {
                         text: Android.getString("Ok"),
                         click: function () {
-
-                            AttachmentDeleted = Android.DeleteAttachment(AttachmentTitle);
+                            AttachmentDeleted = parseInt(Android.DeleteAttachment(parseInt(FamilyId),AttachmentId,AttachmentTitle, AttachmentName));
+                            LoadAttachments();
                             if (AttachmentDeleted == 1) {
                                 Android.ShowDialog(Android.getString('AttachmentDeleted'));
                                 window.open('Attachment.html?f=' + FamilyId, "_self");
@@ -124,9 +141,12 @@ $(document).ready(function () {
 });
 
 // called from java after attachment was selected by the user
-function selectAttachmentCallback(attachment) {
-    var attach = attachment;
-    $('#txtFileAttachment').val(attachment);
+function selectAttachmentCallback(attachName) {
+    $('#txtFileAttachment').val(attachName);
+}
+
+function selectFileCallback(attachContent) {
+    $fileContent = attachContent;
 }
 
 function addAttachmentCallback(attachments) {
@@ -138,8 +158,8 @@ function addAttachmentCallback(attachments) {
 
 function LoadAttachments() {
     var Attachments = Android.getInsureeAttachments(parseInt(queryString('f')));
-    var ctls = ["AttachmentTitle", "AttachmentFile"];
-    var Columns = ["fileTitle", "fileName"];
+    var ctls = ["AttachmentTitle", "AttachmentFile", "AttachmentId"];
+    var Columns = ["Title", "Filename", "Id"];
     LoadList(Attachments, '.ulList', ctls, Columns);
 }
 
