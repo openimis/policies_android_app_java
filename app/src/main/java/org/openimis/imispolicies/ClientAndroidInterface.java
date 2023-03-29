@@ -1233,7 +1233,7 @@ public class ClientAndroidInterface {
     public String getInsureeAttachments(int FamilyId) throws JSONException {
         Attachments = new JSONArray();
 
-        String Query = "SELECT Id,Title, Filename, FamilyId \n" +
+        String Query = "SELECT Id,Title, Filename, Content, FamilyId \n" +
                 "FROM tblInsureeAttachments \n" +
                 "WHERE FamilyId = ?";
         String[] args = {String.valueOf(FamilyId)};
@@ -1254,22 +1254,22 @@ public class ClientAndroidInterface {
     }
 
     @JavascriptInterface
-    public void addAttachment(int familyId, String title, String filename, String fileContent) throws JSONException {
-
+    public void addAttachment(int familyId, String title, String filename) throws JSONException {
+        String contentFile = ((MainActivity) mContext).fileContent;
         if (familyId != 0) {
             int MaxAttachmentId = getNextAvailableAttachmentId();
             ContentValues AttachmentValues = new ContentValues();
             AttachmentValues.put("Filename", filename);
             AttachmentValues.put("Id", MaxAttachmentId);
             AttachmentValues.put("Title", title);
-            AttachmentValues.put("Content", fileContent);
+            AttachmentValues.put("Content", contentFile);
             AttachmentValues.put("FamilyId", familyId);
             sqlHandler.insertData("tblInsureeAttachments", AttachmentValues);
         } else {
             JSONObject obj = new JSONObject();
             obj.put("Title", title);
             obj.put("Filename", filename);
-            obj.put("content", fileContent);
+            obj.put("content", contentFile);
             TempAttachments.put(obj);
         }
 

@@ -2,7 +2,6 @@ $(document).ready(function () {
 
     var InsureeId = queryString("i");
     var FamilyId = queryString("f");
-    $fileContent = "";
     var AttachmentTitle = "";
     var AttachmentName = "";
     var AttachmentId = 0;
@@ -30,7 +29,8 @@ $(document).ready(function () {
         if (passed == true) {
             var title = $('#txtTitleAttachment').val();
             var file = $('#txtFileAttachment').val();
-            Android.addAttachment(parseInt(FamilyId),title, file, $fileContent);
+
+            Android.addAttachment(parseInt(FamilyId),title, file);
             window.location.reload();
 
         } else
@@ -143,17 +143,6 @@ $(document).ready(function () {
 // called from java after attachment was selected by the user
 function selectAttachmentCallback(attachName) {
     $('#txtFileAttachment').val(attachName);
-}
-
-function selectFileCallback(attachContent) {
-    $fileContent = attachContent;
-}
-
-function addAttachmentCallback(attachments) {
-    var attachs = attachments;
-    var ctls = ["AttachmentTitle", "AttachmentFile"];
-    var Columns = ["fileTitle", "fileName"];
-    LoadList(attachs, '.ulList', ctls, Columns);
 }
 
 function LoadAttachments() {

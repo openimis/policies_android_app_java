@@ -114,6 +114,7 @@ public class MainActivity extends AppCompatActivity
     private String LanguageCode1 = "";
     private String LanguageCode2 = "";
     private String selectedLanguage;
+    public String fileContent = "";
     public String ImagePath;
     public String InsureeNumber;
     static TextView Login;
@@ -146,7 +147,7 @@ public class MainActivity extends AppCompatActivity
             wv.evaluateJavascript(String.format("selectImageCallback(\"%s\");", selectedImage), null);
         } else if (requestCode == ClientAndroidInterface.RESULT_SCAN && resultCode == RESULT_OK && data != null) {
             String insureeNumber = data.getStringExtra(Intents.Scan.RESULT);
-            if(!StringUtils.isEmpty(insureeNumber)) {
+            if (!StringUtils.isEmpty(insureeNumber)) {
                 wv.evaluateJavascript(String.format("scanQrCallback(\"%s\");", insureeNumber), null);
             }
         } else if (requestCode == REQUEST_PICK_MD_FILE) {
@@ -208,25 +209,24 @@ public class MainActivity extends AppCompatActivity
                 AndroidUtils.showToast(this, R.string.XmlCreated);
             }
 
-        } else if(requestCode == REQUEST_PICK_ATTACH_FILE && resultCode == RESULT_OK && data != null ){
+        } else if (requestCode == REQUEST_PICK_ATTACH_FILE && resultCode == RESULT_OK && data != null) {
             Uri fileUri = data.getData();
 
             Cursor cursor = getContentResolver()
                     .query(fileUri, null, null, null, null, null);
 
-            try{
-                if (cursor != null && cursor.moveToFirst()){
+            try {
+                if (cursor != null && cursor.moveToFirst()) {
                     @SuppressLint("Range") String displayName = cursor.getString(
                             cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
 
                     byte[] bytes = IOUtils.toByteArray(getContentResolver().openInputStream(fileUri));
 
-                    String fileContent = Base64.encodeToString(bytes, Base64.DEFAULT);
+                    fileContent = Base64.encodeToString(bytes, Base64.DEFAULT);
 
-                    wv.evaluateJavascript(String.format("selectAttachmentCallback(\"%s\");", displayName),null);
-                    wv.evaluateJavascript(String.format("selectFileCallback(\"%s\");", fileContent),null);
+                    wv.evaluateJavascript(String.format("selectAttachmentCallback(\"%s\");", displayName), null);
                 }
-            }catch (FileNotFoundException e) {
+            } catch (FileNotFoundException e) {
                 e.printStackTrace();
             } catch (IOException e) {
                 e.printStackTrace();
@@ -405,18 +405,18 @@ public class MainActivity extends AppCompatActivity
                                 Toast.makeText(getApplicationContext(), getResources().getString(R.string.NoFileExporerInstalled), Toast.LENGTH_SHORT).show();
                             }
                         }).setNegativeButton(getResources().getString(R.string.No),
-                (dialog, id) -> {
-                    dialog.cancel();
-                    finish();
-                }).show();
+                        (dialog, id) -> {
+                            dialog.cancel();
+                            finish();
+                        }).show();
     }
 
-    public void PickAttachmentDialogFromPage(){
+    public void PickAttachmentDialogFromPage() {
 
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
-        intent.setType("*/*");
-        startActivityForResult(intent,REQUEST_PICK_ATTACH_FILE);
+        intent.setType("image/*");
+        startActivityForResult(intent, REQUEST_PICK_ATTACH_FILE);
 
     }
 
@@ -968,7 +968,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void recreate() {
         for (AlertDialog dialog : new AlertDialog[]{masterDataDialog, enrolmentOfficerDialog, permissionDialog}) {
-            if(dialog != null && dialog.isShowing()) {
+            if (dialog != null && dialog.isShowing()) {
                 dialog.dismiss();
             }
         }
