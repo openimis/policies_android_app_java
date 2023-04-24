@@ -145,7 +145,7 @@ android {
         }
         mauritaniaTrain {
             applicationId "org.openimis.policies.mauritaniaTrain"
-            buildConfigField "String", "API_BASE_URL", '"https://release.openimis.org/rest/"'
+            buildConfigField "String", "API_BASE_URL", '"http://ec2-52-1-4-126.compute-1.amazonaws.com/front/tools/reports"'
             buildConfigField "boolean", "SHOW_PAYMENT_MENU", 'false'
             buildConfigField "boolean", "SHOW_BULK_CN_MENU", 'false'
             resValue "string", "app_name_policies", "Policies CNASS TRAIN"
