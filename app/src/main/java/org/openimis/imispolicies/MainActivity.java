@@ -28,16 +28,19 @@ package org.openimis.imispolicies;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.ActionBar;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.provider.OpenableColumns;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -47,6 +50,7 @@ import android.text.TextUtils;
 import org.openimis.imispolicies.tools.LanguageManager;
 import org.openimis.imispolicies.tools.Log;
 
+import android.util.Base64;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -62,6 +66,7 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -78,6 +83,7 @@ import org.openimis.imispolicies.util.UriUtils;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -90,6 +96,7 @@ public class MainActivity extends AppCompatActivity
     public static final String LOG_TAG = "MAIN_ACTIVITY";
     private static final int REQUEST_PERMISSIONS_CODE = 1;
     private static final int REQUEST_PICK_MD_FILE = 2;
+    private static final int REQUEST_PICK_ATTACH_FILE = 6;
     public static final int REQUEST_CREATE_ENROL_EXPORT = 3;
     public static final int REQUEST_CREATE_FEEDBACK_EXPORT = 4;
     public static final int REQUEST_CREATE_RENEWAL_EXPORT = 5;
@@ -107,6 +114,7 @@ public class MainActivity extends AppCompatActivity
     private String LanguageCode1 = "";
     private String LanguageCode2 = "";
     private String selectedLanguage;
+    public String fileContent = "";
     public String ImagePath;
     public String InsureeNumber;
     static TextView Login;
@@ -139,7 +147,7 @@ public class MainActivity extends AppCompatActivity
             wv.evaluateJavascript(String.format("selectImageCallback(\"%s\");", selectedImage), null);
         } else if (requestCode == ClientAndroidInterface.RESULT_SCAN && resultCode == RESULT_OK && data != null) {
             String insureeNumber = data.getStringExtra(Intents.Scan.RESULT);
-            if(!StringUtils.isEmpty(insureeNumber)) {
+            if (!StringUtils.isEmpty(insureeNumber)) {
                 wv.evaluateJavascript(String.format("scanQrCallback(\"%s\");", insureeNumber), null);
             }
         } else if (requestCode == REQUEST_PICK_MD_FILE) {
@@ -199,6 +207,31 @@ public class MainActivity extends AppCompatActivity
                     Log.w("EXPORT", "Deleting feedback export cache failed");
                 }
                 AndroidUtils.showToast(this, R.string.XmlCreated);
+            }
+
+        } else if (requestCode == REQUEST_PICK_ATTACH_FILE && resultCode == RESULT_OK && data != null) {
+            Uri fileUri = data.getData();
+
+            Cursor cursor = getContentResolver()
+                    .query(fileUri, null, null, null, null, null);
+
+            try {
+                if (cursor != null && cursor.moveToFirst()) {
+                    @SuppressLint("Range") String displayName = cursor.getString(
+                            cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+
+                    byte[] bytes = IOUtils.toByteArray(getContentResolver().openInputStream(fileUri));
+
+                    fileContent = Base64.encodeToString(bytes, Base64.DEFAULT);
+
+                    wv.evaluateJavascript(String.format("selectAttachmentCallback(\"%s\");", displayName), null);
+                }
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                cursor.close();
             }
 
         } else {
@@ -372,10 +405,19 @@ public class MainActivity extends AppCompatActivity
                                 Toast.makeText(getApplicationContext(), getResources().getString(R.string.NoFileExporerInstalled), Toast.LENGTH_SHORT).show();
                             }
                         }).setNegativeButton(getResources().getString(R.string.No),
-                (dialog, id) -> {
-                    dialog.cancel();
-                    finish();
-                }).show();
+                        (dialog, id) -> {
+                            dialog.cancel();
+                            finish();
+                        }).show();
+    }
+
+    public void PickAttachmentDialogFromPage() {
+
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("image/*");
+        startActivityForResult(intent, REQUEST_PICK_ATTACH_FILE);
+
     }
 
     public void PickMasterDataFileDialogFromPage() {
@@ -926,7 +968,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void recreate() {
         for (AlertDialog dialog : new AlertDialog[]{masterDataDialog, enrolmentOfficerDialog, permissionDialog}) {
-            if(dialog != null && dialog.isShowing()) {
+            if (dialog != null && dialog.isShowing()) {
                 dialog.dismiss();
             }
         }

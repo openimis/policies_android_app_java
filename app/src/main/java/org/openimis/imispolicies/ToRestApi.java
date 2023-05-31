@@ -109,7 +109,7 @@ public class ToRestApi {
             Log.i("HTTP_POST", uri + functionName + " - " + responseCode);
             if (object != null && responseCode >= 400 && !functionName.equals("login")) {
                 String body = object.toString();
-                if (body.length() > 1000) {
+                if (body.length() > 10000) {
                     body = body.substring(0, 1000);
                 }
                 Log.e("HTTP_POST", "Body: " + body);
