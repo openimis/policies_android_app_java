@@ -64,18 +64,27 @@ $(document).ready(function () {
 
     $('#btnNext').click(function () {
 
+        var idNumber = $('#txtIdentificationNumber').val();
+
         var passed = isFormValidated();
 
         if (passed == true) {
-            if (FamilyId == 0 || FamilyId == null || FamilyId == undefined) {
-                saveInsureeLocally();
-                window.open("Attachment.html", "_self");
-            } else {
-                saveInsureeLocally();
-                window.open("Attachment.html?f=" + FamilyId, "_self");
+
+            if(idNumber.length != 10){
+                Android.ShowDialog(Android.getString('InvalidTypeOfIdNumber'));
+            }else {
+                if (FamilyId == 0 || FamilyId == null || FamilyId == undefined) {
+                 saveInsureeLocally();
+                 window.open("Attachment.html", "_self");
+                } else {
+                  saveInsureeLocally();
+                  window.open("Attachment.html?f=" + FamilyId, "_self");
+                }
             }
+
         } else
             Android.ShowDialog(Android.getString('FieldRequired'));
+
     });
 
     $('#btnSave').click(function () {

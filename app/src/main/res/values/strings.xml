@@ -487,4 +487,5 @@
     <string name="SupportedLanguages">Supported languages:\n%1$s</string>
     <string name="DataDownloadedFailed">Data download failed</string>
     <string name="MembershipGroup">Membership Group</string>
+    <string name="InvalidTypeOfIdNumber">The Identification Type Number must have 10 characters</string>
 </resources>
