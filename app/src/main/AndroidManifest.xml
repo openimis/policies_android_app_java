@@ -141,31 +141,6 @@
             tools:node="merge"
             tools:overrideLibrary="com.google.zxing.client" />
         <activity
-            android:name="com.google.zxing.client.android.book.SearchBookContentsActivity"
-            android:exported="false"
-            tools:node="merge"
-            tools:overrideLibrary="com.google.zxing.client" />
-        <activity
-            android:name="com.google.zxing.client.android.share.ShareActivity"
-            android:exported="false"
-            tools:node="merge"
-            tools:overrideLibrary="com.google.zxing.client" />
-        <activity
-            android:name="com.google.zxing.client.android.history.HistoryActivity"
-            android:exported="false"
-            tools:node="merge"
-            tools:overrideLibrary="com.google.zxing.client" />
-        <activity
-            android:name="com.google.zxing.client.android.share.BookmarkPickerActivity"
-            android:exported="false"
-            tools:node="merge"
-            tools:overrideLibrary="com.google.zxing.client" />
-        <activity
-            android:name="com.google.zxing.client.android.share.AppPickerActivity"
-            android:exported="false"
-            tools:node="merge"
-            tools:overrideLibrary="com.google.zxing.client" />
-        <activity
             android:name="com.google.zxing.client.android.HelpActivity"
             android:exported="false"
             tools:node="merge"
