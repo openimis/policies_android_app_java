@@ -2,7 +2,7 @@ package org.openimis.imispolicies.tools;
 
 import android.content.Context;
 import android.net.Uri;
-import android.support.v4.content.FileProvider;
+import androidx.core.content.FileProvider;
 
 import org.openimis.imispolicies.AppInformation;
 import org.openimis.imispolicies.BuildConfig;

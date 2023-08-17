@@ -1,6 +1,6 @@
 package org.openimis.imispolicies;
 
-import android.support.v7.widget.RecyclerView;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.KeyEvent;
 import android.view.View;
 

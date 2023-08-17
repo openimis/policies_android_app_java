@@ -38,10 +38,10 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityCompat;
+import androidx.annotation.NonNull;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
+import androidx.core.app.ActivityCompat;
 import android.text.TextUtils;
 
 import org.openimis.imispolicies.tools.LanguageManager;
@@ -50,12 +50,12 @@ import org.openimis.imispolicies.tools.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.support.design.widget.NavigationView;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+import com.google.android.material.navigation.NavigationView;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.webkit.WebChromeClient;
@@ -536,9 +536,9 @@ public class MainActivity extends AppCompatActivity
         LayoutInflater li = LayoutInflater.from(context);
         @SuppressLint("InflateParams") View promptsView = li.inflate(R.layout.rar_pass_dialog, null);
 
-        android.support.v7.app.AlertDialog alertDialog = null;
+        androidx.appcompat.app.AlertDialog alertDialog = null;
 
-        final android.support.v7.app.AlertDialog.Builder alertDialogBuilder = new android.support.v7.app.AlertDialog.Builder(
+        final androidx.appcompat.app.AlertDialog.Builder alertDialogBuilder = new androidx.appcompat.app.AlertDialog.Builder(
                 context);
 
         alertDialogBuilder.setView(promptsView);

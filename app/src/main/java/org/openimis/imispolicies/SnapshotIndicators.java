@@ -29,9 +29,9 @@ import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
 
 import android.os.Bundle;
-import android.support.annotation.StringRes;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
+import androidx.annotation.StringRes;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
 
 import android.view.MenuItem;
 import android.view.View;

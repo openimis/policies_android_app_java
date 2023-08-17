@@ -43,10 +43,10 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Parcelable;
 import android.provider.MediaStore;
-import android.support.annotation.RequiresApi;
-import android.support.v7.widget.DividerItemDecoration;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import androidx.annotation.RequiresApi;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Base64;
 
@@ -64,7 +64,6 @@ import android.widget.Toast;
 import com.exact.CallSoap.CallSoap;
 import com.exact.InsureeImages;
 import com.exact.uploadfile.UploadFile;
-import com.google.zxing.client.android.CaptureActivity;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
