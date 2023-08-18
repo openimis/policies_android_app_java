@@ -47,8 +47,6 @@ import android.widget.SimpleAdapter;
 
 import java.text.DateFormat;
 
-import com.exact.CallSoap.CallSoap;
-
 import cz.msebera.android.httpclient.HttpEntity;
 import cz.msebera.android.httpclient.HttpResponse;
 import cz.msebera.android.httpclient.util.EntityUtils;
@@ -231,8 +229,6 @@ public class Statistics extends AppCompatActivity {
 
     private void GetStatistics() {
         FeedbackStats = new ArrayList<>();
-
-        CallSoap cs = new CallSoap();
 
         Date FromDate, ToDate;
 

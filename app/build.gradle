@@ -4,6 +4,7 @@ import java.time.format.DateTimeFormatter
 apply plugin: 'com.android.application'
 apply plugin: "org.ajoberstar.grgit"
 apply from: "$project.rootDir/script-git-version.gradle"
+apply plugin: 'com.apollographql.apollo'
 
 // Load keystore
 def keystorePropertiesFile = file("keystore.properties")
@@ -201,8 +202,25 @@ android {
     }
 }
 
+apollo {
+    service("service") {
+        packageName.set("org.openimis.imispolicies")
+    }
+    customTypeMapping = [
+            "Date" : "java.util.Date",
+            "DateTime" : "java.util.Date",
+            "Decimal": "java.lang.Double",
+    ]
+}
+
 dependencies {
     implementation fileTree(include: ['*.jar', '*.aar'], dir: 'libs')
+    implementation 'com.squareup.okhttp3:okhttp:4.11.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.11.0'
+    implementation('com.apollographql.apollo:apollo-runtime:2.5.14')
+    implementation ('com.apollographql.apollo:apollo-android-support:2.5.14'){
+        because("Apollo 3+ only works with Kotlin coroutines")
+    }
     implementation(platform("org.jetbrains.kotlin:kotlin-bom:1.8.0"))
     implementation 'com.google.zxing:core:3.3.0'
     implementation 'com.embarkmobile:zxing-android-minimal:1.2.1@aar'

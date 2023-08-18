@@ -38,26 +38,12 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import androidx.annotation.NonNull;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
-import androidx.core.app.ActivityCompat;
 import android.text.TextUtils;
-
-import org.openimis.imispolicies.tools.LanguageManager;
-import org.openimis.imispolicies.tools.Log;
-
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.View;
-import com.google.android.material.navigation.NavigationView;
-import androidx.core.view.GravityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.appcompat.app.ActionBarDrawerToggle;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -65,12 +51,26 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.navigation.NavigationView;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.zxing.client.android.Intents;
 
 import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.openimis.imispolicies.tools.LanguageManager;
+import org.openimis.imispolicies.tools.Log;
 import org.openimis.imispolicies.util.AndroidUtils;
 import org.openimis.imispolicies.util.StringUtils;
 import org.openimis.imispolicies.util.UriUtils;
@@ -95,7 +95,12 @@ public class MainActivity extends AppCompatActivity
     public static final int REQUEST_CREATE_RENEWAL_EXPORT = 5;
     private NavigationView navigationView;
 
-    private SQLHandler sqlHandler;
+    // This is super ugly but I'm not fixing the app.
+    // This is less ugly than what was there before.
+    @SuppressLint("StaticFieldLeak")
+    @Nullable
+    private static MainActivity instance;
+
     private WebView wv;
     private final Context context = this;
     static Global global;
@@ -109,8 +114,8 @@ public class MainActivity extends AppCompatActivity
     private String selectedLanguage;
     public String ImagePath;
     public String InsureeNumber;
-    static TextView Login;
-    static TextView OfficerName;
+    TextView Login;
+    TextView OfficerName;
     ClientAndroidInterface ca;
     String aBuffer = "";
     String calledFrom = "java";
@@ -139,7 +144,7 @@ public class MainActivity extends AppCompatActivity
             wv.evaluateJavascript(String.format("selectImageCallback(\"%s\");", selectedImage), null);
         } else if (requestCode == ClientAndroidInterface.RESULT_SCAN && resultCode == RESULT_OK && data != null) {
             String insureeNumber = data.getStringExtra(Intents.Scan.RESULT);
-            if(!StringUtils.isEmpty(insureeNumber)) {
+            if (!StringUtils.isEmpty(insureeNumber)) {
                 wv.evaluateJavascript(String.format("scanQrCallback(\"%s\");", insureeNumber), null);
             }
         } else if (requestCode == REQUEST_PICK_MD_FILE) {
@@ -211,6 +216,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (checkRequirements()) {
             onAllRequirementsMet();
         }
@@ -221,8 +227,9 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         global = (Global) getApplicationContext();
         super.onCreate(savedInstanceState);
+        instance = this;
         setContentView(R.layout.activity_main);
-        sqlHandler = new SQLHandler(this);
+        SQLHandler sqlHandler = new SQLHandler(this);
         sqlHandler.isPrivate = true;
         //Set the Image folder path
         global.setImageFolder(global.getSubdirectory("Images"));
@@ -299,7 +306,7 @@ public class MainActivity extends AppCompatActivity
         Login.setOnClickListener(v -> {
             wv.loadUrl("file:///android_asset/pages/Login.html?s=3");
             drawer.closeDrawer(GravityCompat.START);
-            SetLoggedIn(getApplication().getResources().getString(R.string.Login), getApplication().getResources().getString(R.string.Logout));
+            SetLoggedIn();
         });
         ca = new ClientAndroidInterface(context);
         if (ca.isMasterDataAvailable() > 0) {
@@ -329,12 +336,18 @@ public class MainActivity extends AppCompatActivity
         OfficerName.setText(global.getOfficerName());
     }
 
-    public static void SetLoggedIn(String LogInText, String LogOutText) {
-        if (global.isLoggedIn()) {
-            Login.setText(LogOutText);
-        } else {
-            Login.setText(LogInText);
+    public static void SetLoggedIn() {
+        MainActivity activity = instance;
+        if (activity == null || activity.isFinishing()) {
+            return;
         }
+        activity.runOnUiThread(() -> {
+            if (global.isLoggedIn()) {
+                activity.Login.setText(R.string.Logout);
+            } else {
+                activity.Login.setText(R.string.Login);
+            }
+        });
     }
 
     private void loadLanguages() {
@@ -372,10 +385,10 @@ public class MainActivity extends AppCompatActivity
                                 Toast.makeText(getApplicationContext(), getResources().getString(R.string.NoFileExporerInstalled), Toast.LENGTH_SHORT).show();
                             }
                         }).setNegativeButton(getResources().getString(R.string.No),
-                (dialog, id) -> {
-                    dialog.cancel();
-                    finish();
-                }).show();
+                        (dialog, id) -> {
+                            dialog.cancel();
+                            finish();
+                        }).show();
     }
 
     public void PickMasterDataFileDialogFromPage() {
@@ -475,7 +488,7 @@ public class MainActivity extends AppCompatActivity
                                     if (ca.isOfficerCodeValid(userInput.getText().toString())) {
                                         global.setOfficerCode(userInput.getText().toString());
                                         OfficerName.setText(global.getOfficerName());
-                                        SetLoggedIn(getResources().getString(R.string.Login), getResources().getString(R.string.Logout));
+                                        SetLoggedIn();
                                         // Officer villages are currently turned off
 //                                            if(_General.isNetworkAvailable(MainActivity.this)){
 //                                                ca.getOfficerVillages(userInput.getText().toString());
@@ -926,11 +939,17 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void recreate() {
         for (AlertDialog dialog : new AlertDialog[]{masterDataDialog, enrolmentOfficerDialog, permissionDialog}) {
-            if(dialog != null && dialog.isShowing()) {
+            if (dialog != null && dialog.isShowing()) {
                 dialog.dismiss();
             }
         }
 
         super.recreate();
+    }
+
+    @Override
+    protected void onDestroy() {
+        instance = null;
+        super.onDestroy();
     }
 }

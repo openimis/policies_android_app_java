@@ -22,6 +22,13 @@ import java.util.Locale;
  */
 
 public class Token {
+    private static final SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSXXX", Locale.US);
+
+    // It's inefficient but it's to stay backward compatible without some logic to migrate the old
+    // file to store the value in long.
+    public void saveTokenText(String token, long validTo, String eoCode) {
+        saveTokenText(token, format.format(new Date(validTo)), eoCode);
+    }
     public void saveTokenText(String token, String validTo, String eoCode) {
         Global global = Global.getGlobal();
         String dir = global.getSubdirectory("Authentications");

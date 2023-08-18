@@ -25,18 +25,16 @@
 
 package org.openimis.imispolicies;
 
+
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
-
-import org.openimis.imispolicies.tools.Log;
-
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -49,20 +47,28 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
-import android.util.Base64;
+
+import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.squareup.picasso.Picasso;
 
-import cz.msebera.android.httpclient.HttpResponse;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.openimis.imispolicies.util.JsonUtils;
+import org.openimis.imispolicies.domain.entity.Insuree;
+import org.openimis.imispolicies.domain.entity.Policy;
+import org.openimis.imispolicies.network.exception.HttpException;
+import org.openimis.imispolicies.tools.Log;
+import org.openimis.imispolicies.usecase.FetchInsureeInquire;
+import org.openimis.imispolicies.util.DateUtils;
+import org.openimis.imispolicies.util.TextViewUtils;
 
-import java.io.ByteArrayInputStream;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Objects;
 
 public class Enquire extends AppCompatActivity {
     private static final String LOG_TAG = "ENQUIRE";
@@ -82,8 +88,6 @@ public class Enquire extends AppCompatActivity {
     private LinearLayout ll;
     private ProgressDialog pd;
     private ArrayList<HashMap<String, String>> PolicyList = new ArrayList<>();
-    private Bitmap theImage;
-    private String result;
     private boolean ZoomOut = false;
     private int orgHeight, orgWidth;
 
@@ -199,241 +203,183 @@ public class Enquire extends AppCompatActivity {
 
     private void getInsureeInfo() {
         String chfid = etCHFID.getText().toString();
-        result = "";
+        final Insuree insuree;
 
         if (global.isNetworkAvailable()) {
             try {
-                ToRestApi rest = new ToRestApi();
-                HttpResponse response = rest.getFromRestApiToken("insuree/" + chfid + "/enquire");
-                int responseCode = response.getStatusLine().getStatusCode();
-                if (responseCode == HttpURLConnection.HTTP_OK) {
-                    JSONObject obj = new JSONObject(rest.getContent(response));
-                    JSONArray arr = new JSONArray();
-                    arr.put(obj);
-                    result = arr.toString();
-                }
-                else if (responseCode == HttpURLConnection.HTTP_NOT_FOUND) {
-                    // No insuree found
-                    result="[{}]";
+                insuree = new FetchInsureeInquire().execute(chfid);
+            } catch (Exception e) {
+                if (e instanceof HttpException) {
+                    if (((HttpException) e).getCode() == HttpURLConnection.HTTP_NOT_FOUND) {
+                        ca.ShowDialog(getResources().getString(R.string.RecordNotFound));
+                    } else {
+                        ca.ShowDialog(getResources().getString(R.string.NoInternet));
+                    }
                 } else {
-                    result="NETWORK_ERROR";
+                    ca.ShowDialog(getResources().getString(R.string.UnknownError));
                 }
-
-            }
-            catch(Exception e){
-                Log.e(LOG_TAG, "Fetching online enquire failed", e);
-                result="UNKNOWN_ERROR";
+                return;
             }
         } else {
             //TODO: yet to be done
-            result = getDataFromDb(etCHFID.getText().toString());
+            try {
+                insuree = getDataFromDb(etCHFID.getText().toString());
+            } catch (Exception e) {
+                Log.e(LOG_TAG, "Error when fetching offline enquire data", e);
+                ca.ShowDialog(getResources().getString(R.string.UnknownError));
+                return;
+            }
         }
 
         runOnUiThread(() -> {
-            try {
-                JSONArray jsonArray = new JSONArray(result);
-
-                if (jsonArray.getJSONObject(0).length()==0) {
-                    ca.ShowDialog(getResources().getString(R.string.RecordNotFound));
-                    return;
-                }
-                else if (jsonArray.getJSONObject(0).equals("NETWORK_ERROR")) {
-                    ca.ShowDialog(getResources().getString(R.string.NoInternet));
-                    return;
-                }
-                else if (jsonArray.getJSONObject(0).equals("UNKNOWN_ERROR")) {
-                    ca.ShowDialog(getResources().getString(R.string.UnknownError));
-                    return;
-                }
-
-                ll.setVisibility(View.VISIBLE);
-
-                int i = 0;
-                for (i = 0; i < jsonArray.length(); i++) {
-                    JSONObject jsonObject = jsonArray.getJSONObject(i);
-                    if (!etCHFID.getText().toString().trim().equals(jsonObject.getString("chfid").trim()))
-                        continue;
-                    tvCHFID.setText(jsonObject.getString("chfid"));
-                    tvName.setText(jsonObject.getString("insureeName"));
-                    tvDOB.setText(jsonObject.getString("dob"));
-                    tvPolicyStatus.setText(getResources().getString(R.string.EnquirePolicyLabel));
-                    tvGender.setText(jsonObject.getString("gender"));
-
-                    if (global.isNetworkAvailable()) {
-                        String photo_url_str = "";
+            ll.setVisibility(View.VISIBLE);
+            if (insuree != null) {
+                tvCHFID.setText(insuree.getChfId());
+                tvName.setText(insuree.getName());
+                TextViewUtils.setDate(tvDOB, insuree.getDateOfBirth());
+                tvPolicyStatus.setText(R.string.EnquirePolicyLabel);
+                tvGender.setText(insuree.getGender());
+                try {
+                    if (insuree.getPhoto() != null) {
                         try {
-                            if (!JsonUtils.isStringEmpty(jsonObject, "photoBase64", true)) {
-                                try {
-                                    byte[] imageBytes = Base64.decode(jsonObject.getString("photoBase64").getBytes(), Base64.DEFAULT);
-                                    Bitmap image = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
-                                    iv.setImageBitmap(image);
-                                } catch (Exception e) {
-                                    Log.e(LOG_TAG, "Error while processing Base64 image", e);
-                                    iv.setImageDrawable(getResources().getDrawable(R.drawable.person));
-                                }
-                            } else if (!JsonUtils.isStringEmpty(jsonObject, "photoPath", true)) {
-                                photo_url_str = AppInformation.DomainInfo.getDomain() + jsonObject.getString("photoPath");
-                                iv.setImageResource(R.drawable.person);
-                                picasso.load(photo_url_str)
-                                        .placeholder(R.drawable.person)
-                                        .error(R.drawable.person)
-                                        .into(iv);
-                            } else {
-                                iv.setImageDrawable(getResources().getDrawable(R.drawable.person));
-                            }
+                            iv.setImageBitmap(BitmapFactory.decodeByteArray(insuree.getPhoto(), 0, insuree.getPhoto().length));
                         } catch (Exception e) {
-                            Log.e(LOG_TAG, "Fetching image failed", e);
-                        }
-                    } else {
-                        byte[] photo = jsonObject.getString("photoPath").getBytes();
-                        ByteArrayInputStream is = new ByteArrayInputStream(photo);
-                        theImage = BitmapFactory.decodeStream(is);
-                        if (theImage != null) {
-                            iv.setImageBitmap(theImage);
-                        } else {
+                            Log.e(LOG_TAG, "Error while processing Base64 image", e);
                             iv.setImageResource(R.drawable.person);
                         }
-                    }
-
-                    jsonArray = jsonObject.getJSONArray("details");
-
-                    if (jsonArray.length() == 1 && jsonArray.getJSONObject(0).getString("expiryDate").equals("null")) {
-                        tvPolicyStatus.setText(getResources().getString(R.string.EnquirePolicyNotCovered));
+                    } else if (insuree.getPhotoPath() != null) {
+                        picasso.load(AppInformation.DomainInfo.getDomain() + insuree.getPhotoPath())
+                                .placeholder(R.drawable.person)
+                                .error(R.drawable.person)
+                                .into(iv);
                     } else {
-                        tvPolicyStatus.setText(getResources().getString(R.string.EnquirePolicyCovered));
+                        iv.setImageResource(R.drawable.person);
                     }
-
-                    for (i = 0; i < jsonArray.length(); i++) {
-                        HashMap<String, String> Policy = new HashMap<>();
-                        jsonObject = jsonArray.getJSONObject(i);
-                        double iDedType = Double.parseDouble(JsonUtils.getStringOrDefault(jsonObject, "dedType", "0", true));
-
-                        String Ded = "", Ded1 = "", Ded2 = "";
-                        String Ceiling = "", Ceiling1 = "", Ceiling2 = "";
-
-                        String jDed1, jDed2, jCeiling1, jCeiling2;
-
-                        jDed1 = JsonUtils.getStringOrDefault(jsonObject, "ded1", "", true);
-                        jDed2 = JsonUtils.getStringOrDefault(jsonObject, "ded2", "", true);
-                        jCeiling1 = JsonUtils.getStringOrDefault(jsonObject, "ceiling1", "", true);
-                        jCeiling2 = JsonUtils.getStringOrDefault(jsonObject, "ceiling2", "", true);
-
-                        //Get the type
-
-                        if (iDedType == 1 | iDedType == 2 | iDedType == 3) {
-                            if (!jDed1.equals("")) Ded1 = jsonObject.getString("ded1");
-                            if (!jCeiling1.equals("")) Ceiling1 = jsonObject.getString("ceiling1");
-
-                            if (!Ded1.equals("")) Ded = "Deduction: " + Ded1;
-                            if (!Ceiling1.equals("")) Ceiling = "Ceiling: " + Ceiling1;
-
-                        } else if (iDedType == 1.1 | iDedType == 2.1 | iDedType == 3.1) {
-
-                            if (jDed1.length() > 0) Ded1 = " IP:" + jsonObject.getString("ded1");
-                            if (jDed2.length() > 0) Ded2 = " OP:" + jsonObject.getString("ded2");
-                            if (jCeiling1.length() > 0)
-                                Ceiling1 = " IP:" + jsonObject.getString("ceiling1");
-                            if (jCeiling2.length() > 0)
-                                Ceiling2 = " OP:" + jsonObject.getString("ceiling2");
-
-                            if (!(Ded1 + Ded2).equals("")) Ded = "Deduction: " + Ded1 + Ded2;
-                            if (!(Ceiling1 + Ceiling2).equals(""))
-                                Ceiling = "Ceiling: " + Ceiling1 + Ceiling2;
-
-                        }
-
-                        if (JsonUtils.isStringEmpty(jsonObject, "expiryDate", true)) {
-                            Policy.put("Heading", getResources().getString(R.string.EnquireNoPolicies));
-                        } else {
-                            Policy.put("Heading", jsonObject.getString("productCode"));
-                            Policy.put("Heading1", JsonUtils.getStringOrDefault(jsonObject, "expiryDate", "", true) + "  " + jsonObject.getString("status"));
-                            Policy.put("SubItem1", jsonObject.getString("productName"));
-                            Policy.put("SubItem2", Ded);
-                            Policy.put("SubItem3", Ceiling);
-                        }
-
-                        String TotalAdmissionsLeft = buildEnquireValue(jsonObject, "totalAdmissionsLeft", R.string.totalAdmissionsLeft);
-                        String TotalVisitsLeft = buildEnquireValue(jsonObject, "totalVisitsLeft", R.string.totalVisitsLeft);
-                        String TotalConsultationsLeft = buildEnquireValue(jsonObject, "totalConsultationsLeft", R.string.totalConsultationsLeft);
-                        String TotalSurgeriesLeft = buildEnquireValue(jsonObject, "totalSurgeriesLeft", R.string.totalSurgeriesLeft);
-                        String TotalDeliveriesLeft = buildEnquireValue(jsonObject, "totalDelivieriesLeft", R.string.totalDeliveriesLeft);
-                        String TotalAntenatalLeft = buildEnquireValue(jsonObject, "totalAntenatalLeft", R.string.totalAntenatalLeft);
-                        String ConsultationAmountLeft = buildEnquireValue(jsonObject, "consultationAmountLeft", R.string.consultationAmountLeft);
-                        String SurgeryAmountLeft = buildEnquireValue(jsonObject, "surgeryAmountLeft", R.string.surgeryAmountLeft);
-                        String HospitalizationAmountLeft = buildEnquireValue(jsonObject, "hospitalizationAmountLeft", R.string.hospitalizationAmountLeft);
-                        String AntenatalAmountLeft = buildEnquireValue(jsonObject, "antenatalAmountLeft", R.string.antenatalAmountLeft);
-                        String DeliveryAmountLeft = buildEnquireValue(jsonObject, "deliveryAmountLeft", R.string.deliveryAmountLeft);
-
-                        if (!ca.getSpecificControl("TotalAdmissionsLeft").equals("N")) {
-                            Policy.put("SubItem4", TotalAdmissionsLeft);
-                        }
-                        if (!ca.getSpecificControl("TotalVisitsLeft").equals("N")) {
-                            Policy.put("SubItem5", TotalVisitsLeft);
-                        }
-                        if (!ca.getSpecificControl("TotalConsultationsLeft").equals("N")) {
-                            Policy.put("SubItem6", TotalConsultationsLeft);
-                        }
-                        if (!ca.getSpecificControl("TotalSurgeriesLeft").equals("N")) {
-                            Policy.put("SubItem7", TotalSurgeriesLeft);
-                        }
-                        if (!ca.getSpecificControl("TotalDelivieriesLeft").equals("N")) {
-                            Policy.put("SubItem8", TotalDeliveriesLeft);
-                        }
-                        if (!ca.getSpecificControl("TotalAntenatalLeft").equals("N")) {
-                            Policy.put("SubItem9", TotalAntenatalLeft);
-                        }
-                        if (!ca.getSpecificControl("ConsultationAmountLeft").equals("N")) {
-                            Policy.put("SubItem10", ConsultationAmountLeft);
-                        }
-                        if (!ca.getSpecificControl("SurgeryAmountLeft").equals("N")) {
-                            Policy.put("SubItem11", SurgeryAmountLeft);
-                        }
-                        if (!ca.getSpecificControl("HospitalizationAmountLeft").equals("N")) {
-                            Policy.put("SubItem12", HospitalizationAmountLeft);
-                        }
-                        if (!ca.getSpecificControl("AntenatalAmountLeft").equals("N")) {
-                            Policy.put("SubItem13", AntenatalAmountLeft);
-                        }
-                        if (!ca.getSpecificControl("DeliveryAmountLeft").equals("N")) {
-                            Policy.put("SubItem14", DeliveryAmountLeft);
-                        }
-
-                        PolicyList.add(Policy);
-                        etCHFID.setText("");
-                        //break;
-                    }
+                } catch (Exception e) {
+                    Log.e(LOG_TAG, "Fetching image failed", e);
                 }
-                ListAdapter adapter = new SimpleAdapter(Enquire.this,
-                        PolicyList, R.layout.policylist,
-                        new String[]{"Heading", "Heading1", "SubItem1", "SubItem2", "SubItem3", "SubItem4", "SubItem5", "SubItem6", "SubItem7", "SubItem8", "SubItem9", "SubItem10", "SubItem11", "SubItem12", "SubItem13", "SubItem14"},
-                        new int[]{R.id.tvHeading, R.id.tvHeading1, R.id.tvSubItem1, R.id.tvSubItem2, R.id.tvSubItem3, R.id.tvSubItem4, R.id.tvSubItem5, R.id.tvSubItem6, R.id.tvSubItem7, R.id.tvSubItem8, R.id.tvSubItem9, R.id.tvSubItem10, R.id.tvSubItem11, R.id.tvSubItem12, R.id.tvSubItem13, R.id.tvSubItem14}
-                );
 
-                lv.setAdapter(adapter);
+                if (insuree.getPolicies().size() == 1 && insuree.getPolicies().get(0).getExpiryDate() == null) {
+                    tvPolicyStatus.setText(getResources().getString(R.string.EnquirePolicyNotCovered));
+                } else {
+                    tvPolicyStatus.setText(getResources().getString(R.string.EnquirePolicyCovered));
+                }
 
+                for (Policy policy : insuree.getPolicies()) {
+                    HashMap<String, String> policyMap = new HashMap<>();
 
-            } catch (JSONException e) {
-                Log.e("Error", "JSON related error when parsing enquiry response", e);
-                result = "";
-            } catch (Exception e) {
-                Log.e("Error", "Unknown error when parsing enquiry response", e);
-                result = "";
+                    double iDedType = policy.getDeductibleType() == null ? 0 : policy.getDeductibleType();
+
+                    String Ded = "", Ded1 = "", Ded2 = "";
+                    String Ceiling = "", Ceiling1 = "", Ceiling2 = "";
+
+                    //Get the type
+                    if (iDedType == 1 | iDedType == 2 | iDedType == 3) {
+                        if (policy.getDeductibleIp() != null)
+                            Ded1 = String.valueOf(policy.getDeductibleIp());
+                        if (policy.getCeilingIp() != null)
+                            Ceiling1 = String.valueOf(policy.getCeilingIp());
+
+                        if (!Ded1.equals("")) Ded = "Deduction: " + Ded1;
+                        if (!Ceiling1.equals("")) Ceiling = "Ceiling: " + Ceiling1;
+
+                    } else if (iDedType == 1.1 | iDedType == 2.1 | iDedType == 3.1) {
+
+                        if (policy.getDeductibleIp() != null)
+                            Ded1 = " IP:" + policy.getDeductibleIp();
+                        if (policy.getDeductibleOp() != null)
+                            Ded2 = " OP:" + policy.getDeductibleOp();
+                        if (policy.getCeilingIp() != null)
+                            Ceiling1 = " IP:" + policy.getCeilingIp();
+                        if (policy.getCeilingOp() != null)
+                            Ceiling2 = " OP:" + policy.getCeilingOp();
+
+                        if (!(Ded1 + Ded2).equals("")) Ded = "Deduction: " + Ded1 + Ded2;
+                        if (!(Ceiling1 + Ceiling2).equals(""))
+                            Ceiling = "Ceiling: " + Ceiling1 + Ceiling2;
+
+                    }
+
+                    if (policy.getExpiryDate() == null) {
+                        policyMap.put("Heading", getResources().getString(R.string.EnquireNoPolicies));
+                    } else {
+                        String expiryDate = policy.getExpiryDate() != null ?
+                                DateUtils.toDateString(policy.getExpiryDate()) : null;
+                        String status = policy.getStatus().name();
+                        String heading1;
+                        if (expiryDate != null) {
+                            heading1 = expiryDate + " " + status;
+                        } else {
+                            heading1 = status;
+                        }
+                        policyMap.put("Heading", policy.getCode());
+                        policyMap.put("Heading1", heading1);
+                        policyMap.put("SubItem1", policy.getName());
+                        policyMap.put("SubItem2", Ded);
+                        policyMap.put("SubItem3", Ceiling);
+                    }
+
+                    if (!ca.getSpecificControl("TotalAdmissionsLeft").equals("N")) {
+                        policyMap.put("SubItem4", buildEnquireValue(policy.getTotalAdmissionsLeft(), R.string.totalAdmissionsLeft));
+                    }
+                    if (!ca.getSpecificControl("TotalVisitsLeft").equals("N")) {
+                        policyMap.put("SubItem5", buildEnquireValue(policy.getTotalVisitsLeft(), R.string.totalVisitsLeft));
+                    }
+                    if (!ca.getSpecificControl("TotalConsultationsLeft").equals("N")) {
+                        policyMap.put("SubItem6", buildEnquireValue(policy.getTotalConsultationsLeft(), R.string.totalConsultationsLeft));
+                    }
+                    if (!ca.getSpecificControl("TotalSurgeriesLeft").equals("N")) {
+                        policyMap.put("SubItem7", buildEnquireValue(policy.getTotalSurgeriesLeft(), R.string.totalSurgeriesLeft));
+                    }
+                    if (!ca.getSpecificControl("TotalDelivieriesLeft").equals("N")) {
+                        policyMap.put("SubItem8", buildEnquireValue(policy.getTotalDeliveriesLeft(), R.string.totalDeliveriesLeft));
+                    }
+                    if (!ca.getSpecificControl("TotalAntenatalLeft").equals("N")) {
+                        policyMap.put("SubItem9", buildEnquireValue(policy.getTotalAntenatalLeft(), R.string.totalAntenatalLeft));
+                    }
+                    if (!ca.getSpecificControl("ConsultationAmountLeft").equals("N")) {
+                        policyMap.put("SubItem10", buildEnquireValue(policy.getConsultationAmountLeft(), R.string.consultationAmountLeft));
+                    }
+                    if (!ca.getSpecificControl("SurgeryAmountLeft").equals("N")) {
+                        policyMap.put("SubItem11", buildEnquireValue(policy.getSurgeryAmountLeft(), R.string.surgeryAmountLeft));
+                    }
+                    if (!ca.getSpecificControl("HospitalizationAmountLeft").equals("N")) {
+                        policyMap.put("SubItem12", buildEnquireValue(policy.getHospitalizationAmountLeft(), R.string.hospitalizationAmountLeft));
+                    }
+                    if (!ca.getSpecificControl("AntenatalAmountLeft").equals("N")) {
+                        policyMap.put("SubItem13", buildEnquireValue(policy.getAntenatalAmountLeft(), R.string.antenatalAmountLeft));
+                    }
+                    if (!ca.getSpecificControl("DeliveryAmountLeft").equals("N")) {
+                        policyMap.put("SubItem14", buildEnquireValue(policy.getDeliveryAmountLeft(), R.string.deliveryAmountLeft));
+                    }
+
+                    PolicyList.add(policyMap);
+                    etCHFID.setText("");
+                    //break;
+                }
             }
+            ListAdapter adapter = new SimpleAdapter(Enquire.this,
+                    PolicyList, R.layout.policylist,
+                    new String[]{"Heading", "Heading1", "SubItem1", "SubItem2", "SubItem3", "SubItem4", "SubItem5", "SubItem6", "SubItem7", "SubItem8", "SubItem9", "SubItem10", "SubItem11", "SubItem12", "SubItem13", "SubItem14"},
+                    new int[]{R.id.tvHeading, R.id.tvHeading1, R.id.tvSubItem1, R.id.tvSubItem2, R.id.tvSubItem3, R.id.tvSubItem4, R.id.tvSubItem5, R.id.tvSubItem6, R.id.tvSubItem7, R.id.tvSubItem8, R.id.tvSubItem9, R.id.tvSubItem10, R.id.tvSubItem11, R.id.tvSubItem12, R.id.tvSubItem13, R.id.tvSubItem14}
+            );
+
+            lv.setAdapter(adapter);
         });
     }
 
-    protected String buildEnquireValue(JSONObject jsonObject, String jsonKey, int labelId) throws JSONException {
-        boolean ignore = jsonObject.getString(jsonKey).equalsIgnoreCase("null");
-        if (ignore) {
+    protected String buildEnquireValue(@Nullable Number value, @StringRes int labelId) {
+        if (value == null) {
             return "";
         } else {
             String label = getResources().getString(labelId);
-            return label + ": " + jsonObject.getString(jsonKey);
+            return label + ": " + value;
         }
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
             case REQUEST_SCAN_QR_CODE:
                 if (resultCode == RESULT_OK) {
@@ -450,16 +396,71 @@ public class Enquire extends AppCompatActivity {
         }
     }
 
-    private String getDataFromDb(String chfid) {
-        try {
-            //ca.OfflineEnquire(chfid);
-            result = ca.getDataFromDb2(chfid);
-            return result;
-        } catch (Exception e) {
-            Log.e(LOG_TAG, "Error when fetching offline enquire data", e);
-            result = e.toString();
+    @Nullable
+    @SuppressLint({"WrongConstant", "Range"})
+    private Insuree getDataFromDb(String chfid) throws Exception {
+        try (SQLiteDatabase db = SQLiteDatabase.openOrCreateDatabase(global.getAppDirectory() + "ImisData.db3", null)) {
+            String[] columns = {"CHFID", "Photo", "InsureeName", "DOB", "Gender", "ProductCode", "ProductName", "ExpiryDate", "Status", "DedType", "Ded1", "Ded2", "Ceiling1", "Ceiling2"};
+            String[] selectionArgs = {chfid};
+            Cursor c = db.query("tblPolicyInquiry", columns, "Trim(CHFID)=?", selectionArgs, null, null, null);
+            String name = null;
+            Date dateOfBirth = null;
+            String gender = null;
+            byte[] photo = null;
+            List<Policy> policies = new ArrayList<>();
+            for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
+                if (c.isFirst()) {
+                    name = c.getString(c.getColumnIndex("InsureeName"));
+                    String dateOfBirthString = c.getString(c.getColumnIndex("DOB"));
+                    if (dateOfBirthString != null) {
+                        dateOfBirth = DateUtils.dateFromString(dateOfBirthString);
+                    }
+                    gender = c.getString(c.getColumnIndex("Gender"));
+                    photo = c.getBlob(c.getColumnIndex("Photo"));
+                }
+                String expiryDate = c.getString(c.getColumnIndex("ExpiryDate"));
+                String status = c.getString(c.getColumnIndex("Status"));
+                String deductibleType = c.getString(c.getColumnIndex("DedType"));
+                String deductibleIp = c.getString(c.getColumnIndex("Ded1"));
+                String deductibleOp = c.getString(c.getColumnIndex("Ded2"));
+                String ceilingIp = c.getString(c.getColumnIndex("Ceiling1"));
+                String ceilingOp = c.getString(c.getColumnIndex("Ceiling2"));
+                policies.add(new Policy(
+                        /* code = */ c.getString(c.getColumnIndex("ProductCode")),
+                        /* name = */ c.getString(c.getColumnIndex("ProductName")),
+                        /* value = */ null,
+                        /* expiryDate = */ expiryDate != null ? DateUtils.dateFromString(expiryDate) : null,
+                        /* status = */ status != null ? Policy.Status.valueOf(status) : null,
+                        /* deductibleType = */ deductibleType != null ? Double.parseDouble(deductibleType) : null,
+                        /* deductibleIp = */ deductibleIp != null ? Double.parseDouble(deductibleIp) : null,
+                        /* deductibleOp = */ deductibleOp != null ? Double.parseDouble(deductibleOp) : null,
+                        /* ceilingIp = */ ceilingIp != null ? Double.parseDouble(ceilingIp) : null,
+                        /* ceilingOp = */ ceilingOp != null ? Double.parseDouble(ceilingOp) : null,
+                        /* antenatalAmountLeft = */ null,
+                        /* consultationAmountLeft = */ null,
+                        /* deliveryAmountLeft = */ null,
+                        /* hospitalizationAmountLeft = */ null,
+                        /* surgeryAmountLeft = */ null,
+                        /* totalAdmissionsLeft = */ null,
+                        /* totalAntenatalLeft = */ null,
+                        /* totalConsultationsLeft = */ null,
+                        /* totalDeliveriesLeft = */ null,
+                        /* totalSurgeriesLeft = */ null,
+                        /* totalVisitsLeft = */ null
+                ));
+            }
+            c.close();
+            db.close();
+            return new Insuree(
+                    /* chfId = */ chfid,
+                    /* name = */ Objects.requireNonNull(name),
+                    /* dateOfBirth = */ Objects.requireNonNull(dateOfBirth),
+                    /* gender = */ gender,
+                    /* photoPath = */ null,
+                    /* photo = */ photo,
+                    /* policies = */ policies
+            );
         }
-        return result;
     }
 
     @Override
