@@ -28,6 +28,7 @@ package org.openimis.imispolicies;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.ActionBar;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
@@ -69,6 +70,7 @@ import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.openimis.imispolicies.network.exception.UserNotAuthenticatedException;
 import org.openimis.imispolicies.tools.LanguageManager;
 import org.openimis.imispolicies.tools.Log;
 import org.openimis.imispolicies.util.AndroidUtils;
@@ -83,6 +85,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.lang.ref.WeakReference;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -424,8 +427,7 @@ public class MainActivity extends AppCompatActivity
 
         alertDialog2.setPositiveButton(getResources().getString(R.string.Ok),
                 (dialog, which) -> {
-                    MasterDataLocalAsync masterDataLocalAsync = new MasterDataLocalAsync();
-                    masterDataLocalAsync.execute();
+                    new MasterDataLocalAsync(this).execute(aBuffer);
                 }).setNegativeButton(getResources().getString(R.string.Quit),
                 (dialog, id) -> {
                     dialog.cancel();
@@ -443,8 +445,7 @@ public class MainActivity extends AppCompatActivity
 
         alertDialog2.setPositiveButton(getResources().getString(R.string.Ok),
                 (dialog, which) -> {
-                    MasterDataLocalAsync masterDataLocalAsync = new MasterDataLocalAsync();
-                    masterDataLocalAsync.execute();
+                    new MasterDataLocalAsync(this).execute(aBuffer);
                 }).setNegativeButton(getResources().getString(R.string.Quit),
                 (dialog, id) -> dialog.cancel()).show();
     }
@@ -501,9 +502,7 @@ public class MainActivity extends AppCompatActivity
                                     if (!global.isNetworkAvailable()) {
                                         PickMasterDataFileDialog();
                                     } else {
-                                        MasterDataAsync masterDataAsync = new MasterDataAsync();
-                                        masterDataAsync.execute();
-
+                                        new MasterDataAsync(this).execute();
                                     }
                                     //ca.downloadMasterData();
                                     //ShowDialogTex();
@@ -529,9 +528,7 @@ public class MainActivity extends AppCompatActivity
                             if (!global.isNetworkAvailable()) {
                                 PickMasterDataFileDialog();
                             } else {
-                                MasterDataAsync masterDataAsync = new MasterDataAsync();
-                                masterDataAsync.execute();
-
+                                new MasterDataAsync(this).execute();
                             }
                         })
                 .setNegativeButton(R.string.ForceClose,
@@ -783,22 +780,34 @@ public class MainActivity extends AppCompatActivity
         return super.onKeyDown(keyCode, event);
     }
 
-    public class MasterDataAsync extends AsyncTask<Void, Void, Void> {
-        ProgressDialog pd = null;
+    public static class MasterDataAsync extends AsyncTask<Void, Void, Throwable> {
+        private final WeakReference<MainActivity> activity;
+        private ProgressDialog pd = null;
+
+        public MasterDataAsync(@NonNull MainActivity context) {
+            this.activity = new WeakReference<>(context);
+        }
 
         @Override
         protected void onPreExecute() {
-
+            Context context = activity.get();
+            if (context == null) {
+                return;
+            }
             pd = ProgressDialog.show(context, context.getResources().getString(R.string.Sync), context.getResources().getString(R.string.DownloadingMasterData));
         }
 
         @Override
-        protected Void doInBackground(Void... voids) {
-            ClientAndroidInterface ca = new ClientAndroidInterface(context);
+        protected Throwable doInBackground(Void... voids) {
             try {
-                ca.startDownloading();
-            } catch (JSONException | UserException e) {
+                Context context = activity.get();
+                if (context == null) {
+                    return null;
+                }
+                new ClientAndroidInterface(context).startDownloadingMasterData();
+            } catch (Exception e) {
                 e.printStackTrace();
+                return e;
             }
 
             return null;
@@ -806,28 +815,53 @@ public class MainActivity extends AppCompatActivity
 
 
         @Override
-        protected void onPostExecute(Void aVoid) {
+        protected void onPostExecute(Throwable exception) {
             pd.dismiss();
+            final Activity context = activity.get();
+            if (context == null) {
+                return;
+            }
+            if (exception instanceof UserNotAuthenticatedException) {
+                new ClientAndroidInterface(context).forceLoginDialogBox(() -> restart(context));
+                return;
+            }
+            restart(context);
+        }
 
-            Intent refresh = new Intent(MainActivity.this, MainActivity.class);
-            startActivity(refresh);
-            finish();
+        private void restart(@NonNull Activity activity) {
+            Intent refresh = new Intent(activity, MainActivity.class);
+            activity.startActivity(refresh);
+            activity.finish();
         }
     }
 
-    public class MasterDataLocalAsync extends AsyncTask<Void, Void, Void> {
-        ProgressDialog pd = null;
+    public static class MasterDataLocalAsync extends AsyncTask<String, Void, Void> {
+
+        private final WeakReference<MainActivity> activity;
+        private ProgressDialog pd = null;
+
+        public MasterDataLocalAsync(@NonNull MainActivity context) {
+            this.activity = new WeakReference<>(context);
+        }
 
         @Override
         protected void onPreExecute() {
+            Context context = activity.get();
+            if (context == null) {
+                return;
+            }
             pd = ProgressDialog.show(context, context.getResources().getString(R.string.Sync), context.getResources().getString(R.string.DownloadingMasterData));
         }
 
         @Override
-        protected Void doInBackground(Void... voids) {
+        protected Void doInBackground(String... buffers) {
+            Context context = activity.get();
+            if (context == null) {
+                return null;
+            }
             ClientAndroidInterface ca = new ClientAndroidInterface(context);
             try {
-                ca.importMasterData(aBuffer);
+                ca.importMasterData(buffers[0]);
             } catch (JSONException | UserException e) {
                 e.printStackTrace();
             }
@@ -838,10 +872,13 @@ public class MainActivity extends AppCompatActivity
         @Override
         protected void onPostExecute(Void aVoid) {
             pd.dismiss();
-
-            Intent refresh = new Intent(MainActivity.this, MainActivity.class);
-            startActivity(refresh);
-            finish();
+            Activity context = activity.get();
+            if (context == null) {
+                return;
+            }
+            Intent refresh = new Intent(context, MainActivity.class);
+            context.startActivity(refresh);
+            context.finish();
         }
     }
 

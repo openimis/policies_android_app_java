@@ -87,7 +87,7 @@ public class Enquire extends AppCompatActivity {
     private ImageView iv;
     private LinearLayout ll;
     private ProgressDialog pd;
-    private ArrayList<HashMap<String, String>> PolicyList = new ArrayList<>();
+    private final ArrayList<HashMap<String, String>> PolicyList = new ArrayList<>();
     private boolean ZoomOut = false;
     private int orgHeight, orgWidth;
 
@@ -173,7 +173,6 @@ public class Enquire extends AppCompatActivity {
     }
 
     private void isSDCardAvailable() {
-
         if (global.isSDCardAvailable() == 0) {
             new AlertDialog.Builder(this)
                     .setMessage(getResources().getString(R.string.ReadOnly))

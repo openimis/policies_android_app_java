@@ -107,7 +107,7 @@ public class Token {
             }
 
             SimpleDateFormat format = AppInformation.DateTimeInfo.getDefaultIsoDatetimeFormatter();
-            if(!Global.getGlobal().getOfficerCode().equals(eoCode)) {
+            if(Global.getGlobal().getOfficerCode() == null || !Global.getGlobal().getOfficerCode().equals(eoCode)) {
                 clearToken();
                 token = null;
             }

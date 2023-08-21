@@ -47,7 +47,7 @@ public class ToRestApi {
         public static final String APPLICATION_JSON = "application/json";
     }
 
-    public static final String FUNCTION_PREFIX = "api/";
+    public static final String FUNCTION_PREFIX = "rest/api/";
 
 
     private final Token token;

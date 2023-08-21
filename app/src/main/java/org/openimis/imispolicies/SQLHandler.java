@@ -79,7 +79,6 @@ public class SQLHandler extends SQLiteOpenHelper {
     public static final String tblLanguages = "tblLanguages";
     public static final String tblLocations = "tblLocations";
     public static final String tblOfficer = "tblOfficer";
-    public static final String tblOfficerVillages = "tblOfficerVillages";
     public static final String tblPayer = "tblPayer";
     public static final String tblPolicy = "tblPolicy";
     public static final String tblPremium = "tblPremium";
@@ -258,14 +257,6 @@ public class SQLHandler extends SQLiteOpenHelper {
                             "LocationId NUMERIC," +
                             "OfficerIdSubst NUMERIC," +
                             "WorksTo DATE" + ")"
-            );
-            sqLiteDatabase.execSQL(
-                    "CREATE TABLE 'tblOfficerVillages' (" +
-                            "code TEXT," +
-                            "Ward TEXT," +
-                            "Village TEXT," +
-                            "LocationId INTEGER," +
-                            "WardID INTEGER" + ")"
             );
             sqLiteDatabase.execSQL(
                     "CREATE TABLE 'tblPayer' (" +
@@ -451,7 +442,6 @@ public class SQLHandler extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + tblLanguages);
         db.execSQL("DROP TABLE IF EXISTS " + tblLocations);
         db.execSQL("DROP TABLE IF EXISTS " + tblOfficer);
-        db.execSQL("DROP TABLE IF EXISTS " + tblOfficerVillages);
         db.execSQL("DROP TABLE IF EXISTS " + tblPayer);
         db.execSQL("DROP TABLE IF EXISTS " + tblPolicy);
         db.execSQL("DROP TABLE IF EXISTS " + tblPremium);

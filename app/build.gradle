@@ -81,19 +81,19 @@ android {
     productFlavors {
         demoProd {
             applicationId "org.openimis.imispolicies.demoProd"
-            buildConfigField "String", "API_BASE_URL", '"https://demo.openimis.org/rest/"'
+            buildConfigField "String", "API_BASE_URL", '"https://demo.openimis.org/"'
             resValue "string", "app_name_policies", "Policies Demo"
             dimension = 'std'
         }
         demoRelease {
             applicationId "org.openimis.imispolicies.demoRelease"
-            buildConfigField "String", "API_BASE_URL", '"https://release.openimis.org/rest/"'
+            buildConfigField "String", "API_BASE_URL", '"https://release.openimis.org/"'
             resValue "string", "app_name_policies", "Policies Release"
             dimension = 'std'
         }
         chfDev {
             applicationId "org.openimis.imispolicies.chfdev"
-            buildConfigField "String", "API_BASE_URL", '"http://chf-dev.swisstph-mis.ch/rest/"'
+            buildConfigField "String", "API_BASE_URL", '"http://chf-dev.swisstph-mis.ch/"'
             buildConfigField "boolean", "SHOW_PAYMENT_MENU", 'true'
             buildConfigField "boolean", "SHOW_BULK_CN_MENU", 'true'
             buildConfigField "String", "DEFAULT_LANGUAGE_CODE", '"en-tz"'
@@ -102,7 +102,7 @@ android {
         }
         mvDev {
             applicationId "org.openimis.imispolicies.mv"
-            buildConfigField "String", "API_BASE_URL", '"http://imis-mv.swisstph-mis.ch/rest/"'
+            buildConfigField "String", "API_BASE_URL", '"http://imis-mv.swisstph-mis.ch/"'
             buildConfigField "boolean", "SHOW_PAYMENT_MENU", 'true'
             buildConfigField "String", "API_VERSION", '"3"'
             resValue "string", "app_name_policies", "Policies MV DEV"
@@ -110,14 +110,14 @@ android {
         }
         bephaDev {
             applicationId "org.openimis.imispolicies.bepha"
-            buildConfigField "String", "API_BASE_URL", '"http://149.210.235.40/devupgrade/rest/"'
+            buildConfigField "String", "API_BASE_URL", '"http://149.210.235.40/devupgrade/"'
             buildConfigField "String", "DEFAULT_LANGUAGE_CODE", '"en-cm"'
             resValue "string", "app_name_policies", "Policies BEPHA DEV"
             dimension = 'std'
         }
         tchadDev {
             applicationId "org.openimis.imispolicies.tchadDev"
-            buildConfigField "String", "API_BASE_URL", '"http://imis-tchad-dev.swisstph-mis.ch/rest/"'
+            buildConfigField "String", "API_BASE_URL", '"http://imis-tchad-dev.swisstph-mis.ch/"'
             resValue "string", "app_name_policies", "Policies TCHAD DEV"
             dimension = 'std'
         }
@@ -143,7 +143,7 @@ android {
         }
         mauritaniaTrain {
             applicationId "org.openimis.policies.mauritaniaTrain"
-            buildConfigField "String", "API_BASE_URL", '"https://formation.cnass-mauritanie.swisstph-mis.ch/rest/"'
+            buildConfigField "String", "API_BASE_URL", '"https://formation.cnass-mauritanie.swisstph-mis.ch/"'
             buildConfigField "boolean", "SHOW_PAYMENT_MENU", 'false'
             buildConfigField "boolean", "SHOW_BULK_CN_MENU", 'false'
             resValue "string", "app_name_policies", "Policies CNASS TRAIN"

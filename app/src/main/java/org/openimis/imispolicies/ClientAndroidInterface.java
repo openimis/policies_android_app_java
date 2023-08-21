@@ -25,6 +25,8 @@
 
 package org.openimis.imispolicies;
 
+import static android.provider.MediaStore.EXTRA_OUTPUT;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -43,28 +45,22 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Parcelable;
 import android.provider.MediaStore;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
-import androidx.recyclerview.widget.DividerItemDecoration;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.text.TextUtils;
 import android.util.Base64;
-
-import org.intellij.lang.annotations.Language;
-import org.openimis.imispolicies.usecase.Login;
-import org.openimis.imispolicies.util.UriUtils;
-import org.openimis.imispolicies.util.ZipUtils;
-import org.openimis.imispolicies.tools.ImageManager;
-import org.openimis.imispolicies.tools.Log;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.webkit.JavascriptInterface;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.MainThread;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
+import androidx.annotation.WorkerThread;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.exact.CallSoap.CallSoap;
 import com.exact.InsureeImages;
@@ -72,32 +68,40 @@ import com.exact.uploadfile.UploadFile;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
-import java.io.BufferedInputStream;
-import java.io.FileNotFoundException;
-import java.net.HttpURLConnection;
-import java.security.MessageDigest;
-import java.security.SecureRandom;
-import java.util.Arrays;
-import java.util.Date;
-
-import cz.msebera.android.httpclient.HttpEntity;
-import cz.msebera.android.httpclient.HttpResponse;
-import cz.msebera.android.httpclient.util.EntityUtils;
-
+import org.intellij.lang.annotations.Language;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.openimis.imispolicies.network.exception.UserNotAuthenticatedException;
+import org.openimis.imispolicies.tools.ImageManager;
+import org.openimis.imispolicies.tools.Log;
+import org.openimis.imispolicies.tools.StorageManager;
+import org.openimis.imispolicies.usecase.FetchMasterData;
+import org.openimis.imispolicies.usecase.Login;
+import org.openimis.imispolicies.util.AndroidUtils;
+import org.openimis.imispolicies.util.FileUtils;
+import org.openimis.imispolicies.util.JsonUtils;
+import org.openimis.imispolicies.util.StringUtils;
+import org.openimis.imispolicies.util.UriUtils;
+import org.openimis.imispolicies.util.ZipUtils;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.security.MessageDigest;
+import java.security.SecureRandom;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -106,21 +110,16 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
-import java.util.UUID;
 import java.util.Set;
+import java.util.UUID;
 import java.util.regex.Pattern;
-
-import org.openimis.imispolicies.tools.StorageManager;
-import org.openimis.imispolicies.util.AndroidUtils;
-import org.openimis.imispolicies.util.FileUtils;
-import org.openimis.imispolicies.util.JsonUtils;
-import org.openimis.imispolicies.util.StringUtils;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 import javax.net.ssl.HttpsURLConnection;
 
-import static android.provider.MediaStore.EXTRA_OUTPUT;
+import cz.msebera.android.httpclient.HttpResponse;
+import cz.msebera.android.httpclient.util.EntityUtils;
 
 public class ClientAndroidInterface {
     private static final String LOG_TAG_RENEWAL = "RENEWAL";
@@ -384,44 +383,12 @@ public class ClientAndroidInterface {
     }
 
     @JavascriptInterface
-    public String getWardsOfficer(String OfficerCode) {
-        JSONArray Wards = null;
-        String tableName = "tblOfficerVillages";
-        String[] columns = {"DISTINCT(WardID) WardID", "ward"};
-        String where = " LOWER(code) = '" + OfficerCode.toLowerCase() + "'";
-        try {
-            Wards = sqlHandler.getResult(tableName, columns, where, null);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return Wards.toString();
-    }
-
-    @JavascriptInterface
     public String getVillages(int WardId) {
         String tableName = "tblLocations";
         String[] columns = {"LocationId", "LocationName"};
         String where = "LocationType = 'V' AND ParentLocationId = " + WardId;
 
         JSONArray Villages = sqlHandler.getResult(tableName, columns, where, null);
-
-        return Villages.toString();
-    }
-
-    @JavascriptInterface
-    public String getVillagesOfficer(String WardID) {
-        JSONArray Villages = null;
-        String tableName = "tblOfficerVillages";
-        String[] columns = {"DISTINCT(LocationId)", "village"};
-        String where = " WardID = " + Integer.parseInt(WardID);
-
-        try {
-            Villages = sqlHandler.getResult(tableName, columns, where, null);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
 
         return Villages.toString();
     }
@@ -1088,12 +1055,6 @@ public class ClientAndroidInterface {
         return rtInsureeId;
     }
 
-    public int doInsureeExisttblInsPolicy(int InsureeId) {
-        String InsureeIdQuery = "SELECT * FROM tblInsureePolicy WHERE InsureeId = " + InsureeId;
-        JSONArray JsonInsuree = sqlHandler.getResult(InsureeIdQuery, null);
-        return JsonInsuree.length();
-    }
-
     private String copyImageFromGalleryToApplication(String selectedPath, String InsuranceNumber) {
         String result = "";
 
@@ -1719,7 +1680,6 @@ public class ClientAndroidInterface {
             values.put("OfficerId", data.get("ddlOfficer"));
 
             String controlNumber = data.get("AssignedControlNumber");
-            if (isOffline == 2) isOffline = 0;
             values.put("isOffline", isOffline);
 
             values.put("PolicyStage", "N");
@@ -1734,10 +1694,6 @@ public class ClientAndroidInterface {
                 InsertRecordedPolicies("new", String.valueOf(FamilyId), data.get("ddlProduct"), data.get("hfPolicyValue"), MaxPolicyId);
             } else {
                 int Online = 2;
-                if (isOffline == 0 || isOffline == 2) {
-                    isOffline = 0;
-                    Online = 2;
-                }
                 sqlHandler.updateData("tblPolicy", values, "PolicyId = ? AND (isOffline = ? OR isOffline = ?) ", new String[]{String.valueOf(PolicyId), String.valueOf(isOffline), String.valueOf(Online)});
                 if (IsBulkCNUsed()) {
                     sqlHandler.clearCnAssignedToPolicy(PolicyId);
@@ -3861,7 +3817,7 @@ public class ClientAndroidInterface {
         cs.setFunctionName("isValidLogin");
         UserId = cs.isUserLoggedIn(Username, Password);
         global.setUserId(UserId);
-       MainActivity.SetLoggedIn();
+        MainActivity.SetLoggedIn();
         return UserId;
     }
 
@@ -4241,57 +4197,17 @@ public class ClientAndroidInterface {
         }
     }
 
-    public void getOfficerVillages(final String OfficerCode) {
-        final ToRestApi toRestApi = new ToRestApi();
-        final JSONObject object = new JSONObject();
-        final String[] str = {""};
-
-
-        Thread thread = new Thread() {
-            public void run() {
-
-                try {
-                    object.put("enrollment_officer_code", OfficerCode);
-                    str[0] = toRestApi.postObjectToRestApiObject(object, "/Locations/GetOfficerVillages");
-                    JSONObject object1 = null;
-                    object1 = new JSONObject(str[0]);
-                    String OfficerVillages = object1.getString("data");
-
-                    final JSONArray arr = new JSONArray(OfficerVillages);
-
-                    ((Activity) context).runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                insertOfficerVillages(arr);
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }
-
-                    });
-
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-
-            }
-        };
-        thread.start();
-    }
-
     @JavascriptInterface
     public void popUpOfficerDialog() {
         ((MainActivity) context).ShowEnrolmentOfficerDialog();
     }
 
     @JavascriptInterface
-    public void downloadMasterData() throws InterruptedException {
+    public void downloadMasterData() {
         ProgressDialog pd = ProgressDialog.show(context, context.getResources().getString(R.string.Sync), context.getResources().getString(R.string.DownloadingMasterData));
         new Thread(() -> {
             try {
-                startDownloading();
+                startDownloadingMasterData();
 
                 ((Activity) context).runOnUiThread(() -> {
                     ShowDialog(context.getResources().getString(R.string.DataDownloadedSuccess));
@@ -4302,47 +4218,48 @@ public class ClientAndroidInterface {
                 Log.e("MASTERDATA", "Error while parsing master data", e);
             } catch (UserException e) {
                 Log.e("MASTERDATA", "Error while downloading master data", e);
-                ((Activity) context).runOnUiThread(() -> {
-                    AndroidUtils.showDialog(context,
-                            context.getResources().getString(R.string.DataDownloadedFailed),
-                            e.getMessage());
-                });
+                ((Activity) context).runOnUiThread(() ->
+                        AndroidUtils.showDialog(context,
+                                context.getResources().getString(R.string.DataDownloadedFailed),
+                                e.getMessage()));
+            } catch (UserNotAuthenticatedException e) {
+                ((Activity) context).runOnUiThread(() ->
+                        forceLoginDialogBox(/*onSuccess = */ this::downloadMasterData)
+                );
             } finally {
                 pd.dismiss();
             }
         }).start();
     }
 
+    @WorkerThread
     public void importMasterData(String data) throws JSONException, UserException {
         try {
-            JSONArray masterDataArray = new JSONArray(data);
-            processOldFormat(masterDataArray);
+            processOldFormat(new JSONArray(data));
         } catch (JSONException e) {
             try {
-                JSONObject masterDataObject = new JSONObject(data);
-                processNewFormat(masterDataObject);
+                processNewFormat(new JSONObject(data));
             } catch (JSONException e2) {
-                throw new UserException(context.getResources().getString(R.string.DownloadMasterDataFailed));
+                throw new UserException(context.getResources().getString(R.string.DownloadMasterDataFailed), e2);
             }
         }
     }
 
 
-    public void startDownloading() throws JSONException, UserException {
-        ToRestApi rest = new ToRestApi();
-        HttpResponse response = rest.getFromRestApi("master");
-        String error = rest.getHttpError(context, response.getStatusLine().getStatusCode(), response.getStatusLine().getReasonPhrase());
-        if (error == null) {
-            String MD = rest.getContent(response);
-            JSONObject masterData = new JSONObject(MD);
-
-            processNewFormat(masterData);
-        } else {
-            throw new UserException(error);
+    @WorkerThread
+    public void startDownloadingMasterData() throws JSONException, UserException, UserNotAuthenticatedException {
+        try {
+            importMasterData(new FetchMasterData().execute());
+        } catch (Exception e) {
+            if (e instanceof UserNotAuthenticatedException) {
+                throw (UserNotAuthenticatedException) e;
+            }
+            throw new UserException("Error while downloading the master data", e);
         }
     }
 
-    private void processOldFormat(JSONArray masterData) throws UserException {
+    @WorkerThread
+    private void processOldFormat(@NonNull JSONArray masterData) throws UserException {
         //Sequence of table
         /*
             1   :   ConfirmationTypes
@@ -4452,10 +4369,11 @@ public class ClientAndroidInterface {
             insertGenders(Genders);
         } catch (JSONException e) {
             e.printStackTrace();
-            throw new UserException(context.getResources().getString(R.string.DownloadMasterDataFailed));
+            throw new UserException(context.getResources().getString(R.string.DownloadMasterDataFailed), e);
         }
     }
 
+    @WorkerThread
     private void processNewFormat(JSONObject masterData) throws UserException {
         try {
             insertConfirmationTypes((JSONArray) masterData.get("confirmationTypes"));
@@ -4475,7 +4393,7 @@ public class ClientAndroidInterface {
             insertGenders((JSONArray) masterData.get("genders"));
         } catch (JSONException e) {
             e.printStackTrace();
-            throw new UserException(context.getResources().getString(R.string.DownloadMasterDataFailed));
+            throw new UserException(context.getResources().getString(R.string.DownloadMasterDataFailed), e);
         }
     }
 
@@ -4496,6 +4414,8 @@ public class ClientAndroidInterface {
         return Columns;
     }
 
+    // region Insert MasterData
+    @WorkerThread
     private boolean insertConfirmationTypes(JSONArray jsonArray) throws JSONException {
         try {
             String[] Columns = getColumnNames(jsonArray);
@@ -4508,42 +4428,49 @@ public class ClientAndroidInterface {
         return true;
     }
 
+    @WorkerThread
     private boolean insertControls(JSONArray jsonArray) throws JSONException {
         String[] Columns = getColumnNames(jsonArray);
         sqlHandler.insertData("tblControls", Columns, jsonArray.toString(), "DELETE FROM tblControls;");
         return true;
     }
 
+    @WorkerThread
     private boolean insertEducation(JSONArray jsonArray) throws JSONException {
         String[] Columns = getColumnNames(jsonArray);
         sqlHandler.insertData("tblEducations", Columns, jsonArray.toString(), "DELETE FROM tblEducations;");
         return true;
     }
 
+    @WorkerThread
     private boolean insertFamilyTypes(JSONArray jsonArray) throws JSONException {
         String[] Columns = getColumnNames(jsonArray);
         sqlHandler.insertData("tblFamilyTypes", Columns, jsonArray.toString(), "DELETE FROM tblFamilyTypes;");
         return true;
     }
 
+    @WorkerThread
     private boolean insertHF(JSONArray jsonArray) throws JSONException {
         String[] Columns = getColumnNames(jsonArray);
         sqlHandler.insertData("tblHF", Columns, jsonArray.toString(), "DELETE FROM tblHF;");
         return true;
     }
 
+    @WorkerThread
     private boolean insertIdentificationTypes(JSONArray jsonArray) throws JSONException {
         String[] Columns = getColumnNames(jsonArray);
         sqlHandler.insertData("tblIdentificationTypes", Columns, jsonArray.toString(), "DELETE FROM tblIdentificationTypes;");
         return true;
     }
 
+    @WorkerThread
     private boolean insertLanguages(JSONArray jsonArray) throws JSONException {
         String[] Columns = getColumnNames(jsonArray);
         sqlHandler.insertData("tblLanguages", Columns, jsonArray.toString(), "DELETE FROM tblLanguages;");
         return true;
     }
 
+    @WorkerThread
     private boolean insertLocations(JSONArray jsonArray) throws JSONException {
         String[] Columns = getColumnNames(jsonArray);
         sqlHandler.insertData("tblLocations", Columns, jsonArray.toString(), "DELETE FROM tblLocations;");
@@ -4551,53 +4478,55 @@ public class ClientAndroidInterface {
         return true;
     }
 
+    @WorkerThread
     private boolean insertOfficers(JSONArray jsonArray) throws JSONException {
         String[] Columns = getColumnNames(jsonArray);
         sqlHandler.insertData("tblOfficer", Columns, jsonArray.toString(), "DELETE FROM tblOfficer;");
         return true;
     }
 
+    @WorkerThread
     private boolean insertPayers(JSONArray jsonArray) throws JSONException {
         String[] Columns = getColumnNames(jsonArray);
         sqlHandler.insertData("tblPayer", Columns, jsonArray.toString(), "DELETE FROM tblPayer;");
         return true;
     }
 
+    @WorkerThread
     private boolean insertProducts(JSONArray jsonArray) throws JSONException {
         String[] Columns = getColumnNames(jsonArray);
         sqlHandler.insertData("tblProduct", Columns, jsonArray.toString(), "DELETE FROM tblProduct;");
         return true;
     }
 
+    @WorkerThread
     private boolean insertProfessions(JSONArray jsonArray) throws JSONException {
         String[] Columns = getColumnNames(jsonArray);
         sqlHandler.insertData("tblProfessions", Columns, jsonArray.toString(), "DELETE FROM tblProfessions;");
         return true;
     }
 
+    @WorkerThread
     private boolean insertRelations(JSONArray jsonArray) throws JSONException {
         String[] Columns = getColumnNames(jsonArray);
         sqlHandler.insertData("tblRelations", Columns, jsonArray.toString(), "DELETE FROM tblRelations;");
         return true;
     }
 
+    @WorkerThread
     private boolean insertPhoneDefaults(JSONArray jsonArray) throws JSONException {
         String[] Columns = getColumnNames(jsonArray);
         sqlHandler.insertData("tblIMISDefaultsPhone", Columns, jsonArray.toString(), "DELETE FROM tblIMISDefaultsPhone;");
         return true;
     }
 
+    @WorkerThread
     private boolean insertGenders(JSONArray jsonArray) throws JSONException {
         String[] Columns = getColumnNames(jsonArray);
         sqlHandler.insertData("tblGender", Columns, jsonArray.toString(), "DELETE FROM tblGender;");
         return true;
     }
-
-    private boolean insertOfficerVillages(JSONArray jsonArray) throws JSONException {
-        String[] Columns = getColumnNames(jsonArray);
-        sqlHandler.insertData("tblOfficerVillages", Columns, jsonArray.toString(), "DELETE FROM tblOfficerVillages;");
-        return true;
-    }
+    // endregion Insert Master Data
 
     public int isMasterDataAvailable() {
         @Language("SQL")
@@ -5371,63 +5300,6 @@ public class ClientAndroidInterface {
         return true;
     }
 
-    private boolean InsertPolicyDataFromOnline(JSONArray jsonArray) throws JSONException {
-
-        for (int i = 0; i < jsonArray.length(); i++) {
-            JSONArray TempJsonArray = new JSONArray();
-            JSONObject object = jsonArray.getJSONObject(i);
-            int PolicyId = object.getInt("PolicyId");
-            @Language("SQL")
-            String QueryCheck = "SELECT PolicyId FROM tblPolicy WHERE PolicyId = " + PolicyId + " AND (isOffline = 0 OR isOffline = 2)";
-            JSONArray CheckedArrey = sqlHandler.getResult(QueryCheck, null);
-            if (CheckedArrey.length() == 0) {
-                TempJsonArray.put(jsonArray.getJSONObject(i));
-                String Columns[] = {"PolicyId", "FamilyId", "EnrollDate", "StartDate", "EffectiveDate", "ExpiryDate", "PolicyStatus", "PolicyValue",
-                        "ProdId", "OfficerId", "isOffline", "PolicyStage"};
-                sqlHandler.insertData("tblPolicy", Columns, TempJsonArray.toString(), "");
-
-            }
-        }
-
-        return true;
-    }
-
-    private boolean InsertPolicyInsureeDataFromOnline(JSONArray jsonArray) throws JSONException {
-        for (int i = 0; i < jsonArray.length(); i++) {
-            JSONArray TempJsonArray = new JSONArray();
-            JSONObject object = jsonArray.getJSONObject(i);
-            int InsureePolicyId = object.getInt("InsureePolicyId");
-            @Language("SQL")
-            String QueryCheck = "SELECT PolicyId FROM tblInsureePolicy WHERE InsureePolicyId = " + InsureePolicyId + " AND (isOffline = 0 OR isOffline = 2)";
-            JSONArray CheckedArrey = sqlHandler.getResult(QueryCheck, null);
-            if (CheckedArrey.length() == 0) {
-                TempJsonArray.put(jsonArray.getJSONObject(i));
-                String Columns[] = {"InsureePolicyId", "InsureeId", "PolicyId", "EnrollmentDate", "StartDate", "EffectiveDate", "ExpiryDate", "isOffline"};
-                sqlHandler.insertData("tblInsureePolicy", Columns, TempJsonArray.toString(), "");
-
-            }
-        }
-        return true;
-    }
-
-    private boolean InsertPremiumDataFromOnline(JSONArray jsonArray) throws JSONException {
-        for (int i = 0; i < jsonArray.length(); i++) {
-            JSONArray TempJsonArray = new JSONArray();
-            JSONObject object = jsonArray.getJSONObject(i);
-            int PremiumId = object.getInt("PremiumId");
-            @Language("SQL")
-            String QueryCheck = "SELECT PolicyId FROM tblPremium WHERE PremiumId = " + PremiumId + " AND (isOffline = 0 OR isOffline = 2)";
-            JSONArray CheckedArrey = sqlHandler.getResult(QueryCheck, null);
-            if (CheckedArrey.length() == 0) {
-                TempJsonArray.put(jsonArray.getJSONObject(i));
-                String Columns[] = {"PremiumId", "PolicyId", "PayerId", "Amount", "Receipt", "PayDate", "PayType", "isOffline", "isPhotoFee"};
-                sqlHandler.insertData("tblPremium", Columns, TempJsonArray.toString(), "");
-            }
-        }
-
-        return true;
-    }
-
     //****************************Online Statistics ******************************//
     @JavascriptInterface
     public int getTotalFamilyOnline() {
@@ -5751,70 +5623,56 @@ public class ClientAndroidInterface {
         return true;
     }
 
-    public void LoginDialogBox(final String page) {
+    @MainThread
+    public void forceLoginDialogBox(@NonNull final Runnable onSuccess) {
+        showLoginDialogBox(onSuccess, () -> forceLoginDialogBox(onSuccess));
+    }
 
-        ((Activity) context).runOnUiThread(() -> {
-            // check internet connection
-            if (!CheckInternetAvailable())
-                return;
-            // get prompts.xml view
-            LayoutInflater li = LayoutInflater.from(context);
-            View promptsView = li.inflate(R.layout.login_dialog, null);
+    @MainThread
+    public void showLoginDialogBox(@Nullable final Runnable onSuccess, @Nullable final Runnable onError) {
+        if (!CheckInternetAvailable()) {
+            if (onError != null) {
+                onError.run();
+            }
+            return;
+        }
+        LayoutInflater li = LayoutInflater.from(context);
+        View promptsView = li.inflate(R.layout.login_dialog, null);
+        final TextView username = promptsView.findViewById(R.id.UserName);
+        final TextView password = promptsView.findViewById(R.id.Password);
 
-            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
-
-            // set prompts.xml to alertdialog builder
-            alertDialogBuilder.setView(promptsView);
-
-            final TextView username = promptsView.findViewById(R.id.UserName);
-            final TextView password = promptsView.findViewById(R.id.Password);
-
-            // set dialog message
-            alertDialogBuilder
-                    .setCancelable(false)
-                    .setPositiveButton("OK",
-                            (dialog, id) -> {
-                                if (!username.getText().toString().equals("") || !password.getText().toString().equals("")) {
-                                    boolean isUserLogged = false;
-                                    isUserLogged = LoginToken(username.getText().toString(), password.getText().toString());
-
-                                    if (isUserLogged) {
-                                        if (page.equals("Enquire")) {
-                                            ((Enquire) context).finish();
-                                            Intent intent = new Intent(context, Enquire.class);
-                                            context.startActivity(intent);
-                                        }
-                                        if (page.equals("Renewals")) {
-                                            ((RenewList) context).finish();
-                                            Intent intent = new Intent(context, RenewList.class);
-                                            context.startActivity(intent);
-                                        }
-                                        if (page.equals("Feedbacks")) {
-                                            ((FeedbackList) context).finish();
-                                            Intent intent = new Intent(context, FeedbackList.class);
-                                            context.startActivity(intent);
-                                        }
-                                        if (page.equals("Reports")) {
-                                            ((FeedbackList) context).finish();
-                                            Intent intent = new Intent(context, Reports.class);
-                                            context.startActivity(intent);
-                                        }
-
-                                    } else {
-                                        ShowDialog(context.getResources().getString(R.string.LoginFail));
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
+        alertDialogBuilder.setView(promptsView);
+        alertDialogBuilder
+                .setCancelable(false)
+                .setPositiveButton("OK",
+                        (dialog, id) -> {
+                            if (!username.getText().toString().equals("") || !password.getText().toString().equals("")) {
+                                boolean isUserLogged = LoginToken(username.getText().toString(), password.getText().toString());
+                                if (isUserLogged) {
+                                    if (onSuccess != null) {
+                                        onSuccess.run();
                                     }
                                 } else {
-                                    Toast.makeText(context, "Please enter user name and password", Toast.LENGTH_LONG).show();
+                                    AndroidUtils.showConfirmDialog(
+                                            context, R.string.LoginFail,
+                                            (d, w) -> {
+                                                if (onError != null) {
+                                                    onError.run();
+                                                }
+                                            }
+                                    );
                                 }
-                            });
+                            } else {
+                                Toast.makeText(context, "Please enter user name and password", Toast.LENGTH_LONG).show();
+                            }
+                        });
 
-            // create alert dialog
-            AlertDialog alertDialog = alertDialogBuilder.create();
+        // create alert dialog
+        AlertDialog alertDialog = alertDialogBuilder.create();
 
-            // show it
-            alertDialog.show();
-        });
-
+        // show it
+        alertDialog.show();
     }
 
     @JavascriptInterface
