@@ -10,7 +10,7 @@ import java.util.Date;
 import java.util.Objects;
 
 @SuppressWarnings("unused")
-public class Feedback implements Parcelable {
+public class FeedbackRequest implements Parcelable {
 
     @NonNull
     private final String chfId;
@@ -38,7 +38,7 @@ public class Feedback implements Parcelable {
     @Nullable
     private final String phone;
 
-    public Feedback(
+    public FeedbackRequest(
             @NonNull String chfId,
             int officeId,
             @NonNull String officerCode,
@@ -68,7 +68,7 @@ public class Feedback implements Parcelable {
         this.phone = phone;
     }
 
-    protected Feedback(Parcel in) {
+    protected FeedbackRequest(Parcel in) {
         chfId = Objects.requireNonNull(in.readString());
         officeId = in.readInt();
         officerCode = Objects.requireNonNull(in.readString());
@@ -177,15 +177,15 @@ public class Feedback implements Parcelable {
         return Objects.requireNonNullElse(phone, "");
     }
 
-    public static final Creator<Feedback> CREATOR = new Creator<>() {
+    public static final Creator<FeedbackRequest> CREATOR = new Creator<>() {
         @Override
-        public Feedback createFromParcel(Parcel in) {
-            return new Feedback(in);
+        public FeedbackRequest createFromParcel(Parcel in) {
+            return new FeedbackRequest(in);
         }
 
         @Override
-        public Feedback[] newArray(int size) {
-            return new Feedback[size];
+        public FeedbackRequest[] newArray(int size) {
+            return new FeedbackRequest[size];
         }
     };
 }

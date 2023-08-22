@@ -4,7 +4,7 @@ import androidx.annotation.NonNull;
 
 import org.openimis.imispolicies.GetFeedbacksQuery;
 import org.openimis.imispolicies.Global;
-import org.openimis.imispolicies.domain.entity.Feedback;
+import org.openimis.imispolicies.domain.entity.FeedbackRequest;
 import org.openimis.imispolicies.network.request.GetFeedbackGraphQLRequest;
 import org.openimis.imispolicies.network.util.Mapper;
 
@@ -24,7 +24,7 @@ public class FetchFeedback {
         this.getFeedbackGraphQLRequest = getFeedbackGraphQLRequest;
     }
 
-    public List<Feedback> execute() throws Exception {
+    public List<FeedbackRequest> execute() throws Exception {
         String officerCode = Global.getGlobal().getOfficerCode();
         if (officerCode == null) {
             throw new IllegalStateException("OfficerCode is null");
@@ -32,15 +32,15 @@ public class FetchFeedback {
         return execute(officerCode);
     }
 
-    public List<Feedback> execute(@NonNull String officerCode) throws Exception {
+    public List<FeedbackRequest> execute(@NonNull String officerCode) throws Exception {
         List<GetFeedbacksQuery.Edge> nodes = getFeedbackGraphQLRequest.get(officerCode);
         return Mapper.map(nodes, this::toFeedback);
     }
 
     @NonNull
-    private Feedback toFeedback(@NonNull GetFeedbacksQuery.Edge edge) {
+    private FeedbackRequest toFeedback(@NonNull GetFeedbacksQuery.Edge edge) {
         GetFeedbacksQuery.Node node = Objects.requireNonNull(edge.node());
-        return new Feedback(
+        return new FeedbackRequest(
                 /* chfId = */ Objects.requireNonNull(node.insuree().chfId()),
                 /* officeId = */ -1, // This is not returned by GraphQL
                 /* officerCode = */ Objects.requireNonNull(Objects.requireNonNull(node.admin()).code()),

@@ -136,7 +136,10 @@ public class Enquire extends AppCompatActivity {
 
         btnGo.setOnClickListener(v -> {
             InputMethodManager inputManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-            inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+            View currentFocus = getCurrentFocus();
+            if (currentFocus != null) {
+                inputManager.hideSoftInputFromWindow(currentFocus.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+            }
 
             ClearForm();
             int validInsuranceNumber = escape.CheckInsuranceNumber(etCHFID.getText().toString());

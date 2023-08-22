@@ -49,7 +49,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.openimis.imispolicies.domain.entity.Feedback;
+import org.openimis.imispolicies.domain.entity.FeedbackRequest;
 import org.openimis.imispolicies.usecase.FetchFeedback;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -143,7 +143,7 @@ public class FeedbackList extends AppCompatActivity {
         });
 
         lv.setOnItemClickListener((parent, view, position, id) -> {
-            Intent intent = new Intent(getApplicationContext(), org.openimis.imispolicies.Feedback.class);
+            Intent intent = new Intent(getApplicationContext(), Feedback.class);
             HashMap<String, String> oItem;
             //noinspection unchecked
             oItem = (HashMap<String, String>) parent.getItemAtPosition(position);
@@ -316,7 +316,7 @@ public class FeedbackList extends AppCompatActivity {
             //   pd = ProgressDialog.show(this, "", getResources().getString(R.string.Loading));
             new Thread(() -> {
                 try {
-                    List<Feedback> feedbacks = new FetchFeedback().execute();
+                    List<FeedbackRequest> feedbacks = new FetchFeedback().execute();
                     boolean IsInserted = ca.InsertFeedbacks(feedbacks);
                     if (!IsInserted) {
                         ca.ShowDialog(getResources().getString(R.string.ErrorInsert));

@@ -60,13 +60,6 @@ $(document).ready(function () {
                     }
 
                     break;
-                case "liUploadPhoto":
-                    if (!Android.isLoggedIn()) {
-                        window.open("Login.html?s=0", "_self");
-                    }
-                    Android.UploadPhotos();
-                    break;
-
                 case "liControlNumbers":
                     Android.launchControlNumbers();
                     break;

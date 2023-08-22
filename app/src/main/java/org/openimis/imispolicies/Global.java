@@ -63,7 +63,6 @@ public class Global extends Application {
 
     private String OfficerCode;
     private String OfficerName;
-    private int UserId;
     private int OfficerId;
     private String[] permissions;
 
@@ -135,14 +134,6 @@ public class Global extends Application {
 
     public void setOfficerCode(@Nullable String officerCode) {
         OfficerCode = officerCode;
-    }
-
-    public int getUserId() {
-        return UserId;
-    }
-
-    public void setUserId(int userId) {
-        UserId = userId;
     }
 
     public int getOfficerId() {

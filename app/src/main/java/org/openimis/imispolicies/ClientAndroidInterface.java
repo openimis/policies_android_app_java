@@ -47,6 +47,7 @@ import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Base64;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.webkit.JavascriptInterface;
@@ -62,9 +63,6 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.exact.CallSoap.CallSoap;
-import com.exact.InsureeImages;
-import com.exact.uploadfile.UploadFile;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
@@ -72,12 +70,16 @@ import org.intellij.lang.annotations.Language;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.openimis.imispolicies.domain.entity.FeedbackRequest;
+import org.openimis.imispolicies.domain.entity.PendingFeedback;
+import org.openimis.imispolicies.network.exception.HttpException;
 import org.openimis.imispolicies.network.exception.UserNotAuthenticatedException;
 import org.openimis.imispolicies.tools.ImageManager;
 import org.openimis.imispolicies.tools.Log;
 import org.openimis.imispolicies.tools.StorageManager;
 import org.openimis.imispolicies.usecase.FetchMasterData;
 import org.openimis.imispolicies.usecase.Login;
+import org.openimis.imispolicies.usecase.PostFeedback;
 import org.openimis.imispolicies.util.AndroidUtils;
 import org.openimis.imispolicies.util.DateUtils;
 import org.openimis.imispolicies.util.FileUtils;
@@ -110,6 +112,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
@@ -2191,7 +2194,7 @@ public class ClientAndroidInterface {
         String CHFID = "";
         int isOffline = 0;
         int isHead = 1;
-        Boolean res = true;
+        boolean res = true;
         @Language("SQL")
         String CHFIDQUERY = "SELECT CHFID,isOffline FROM tblInsuree WHERE isHead = " + isHead + " AND FamilyId = " + FamilyId;
 
@@ -2202,14 +2205,6 @@ public class ClientAndroidInterface {
             isOffline = JsonCHFIDJSONObject.getInt("isOffline");
         } catch (JSONException e) {
             e.printStackTrace();
-        }
-
-        if (global.isNetworkAvailable() && isOffline == 0) {
-            CallSoap cs = new CallSoap();
-            cs.setFunctionName("isUniqueReceiptNo");
-            if (!cs.isUniqueReceiptNo(ReceiptNo.trim(), CHFID)) {
-                res = false;
-            }
         }
 
 /*        String Query = "SELECT PremiumId, PayerId, Amount, Receipt , PayDate, PayType,IsOffline,isPhotoFee \n" +
@@ -2599,7 +2594,7 @@ public class ClientAndroidInterface {
         return FeedBacks.toString();
     }
 
-    public boolean InsertFeedbacks(@NonNull List<org.openimis.imispolicies.domain.entity.Feedback> feedbacks) {
+    public boolean InsertFeedbacks(@NonNull List<FeedbackRequest> feedbacks) {
         try {
             return InsertFeedbacks(toJSONArray(feedbacks));
         } catch (JSONException e) {
@@ -2624,9 +2619,9 @@ public class ClientAndroidInterface {
     }
 
     @NonNull
-    private JSONArray toJSONArray(@NonNull List<org.openimis.imispolicies.domain.entity.Feedback> feedbacks) throws JSONException {
+    private JSONArray toJSONArray(@NonNull List<FeedbackRequest> feedbacks) throws JSONException {
         JSONArray array = new JSONArray();
-        for (org.openimis.imispolicies.domain.entity.Feedback feedback : feedbacks) {
+        for (FeedbackRequest feedback : feedbacks) {
             JSONObject json = new JSONObject();
             json.put("claimUUID", feedback.getClaimUUID());
             json.put("officerId", feedback.getOfficeId());
@@ -2967,16 +2962,12 @@ public class ClientAndroidInterface {
 
     public boolean VerifyPhoto(JSONArray insurees) throws JSONException {
         boolean result = true;
-        InsureeImages[] images = new InsureeImages[insurees.length()];
-        String PhotoPath = null;
-        String FileName = "";
-        int IsOffline = 1;
-        JSONObject Insureeobject = null;
         for (int j = 0; j < insurees.length(); j++) {
-            Insureeobject = insurees.getJSONObject(j);
-            PhotoPath = (Insureeobject.getString("PhotoPath"));
+            JSONObject Insureeobject = insurees.getJSONObject(j);
+            String PhotoPath = (Insureeobject.getString("PhotoPath"));
 
             String s1 = Insureeobject.getString("isOffline");
+            int IsOffline;
             if (s1.equals("true") || s1.equals("1")) IsOffline = 1;
             else IsOffline = 0;
 
@@ -3286,7 +3277,7 @@ public class ClientAndroidInterface {
                 String InsureePolicy = objEnrol.toString();
 
                 if (CallerId != 2) {
-                    InsureeImages[] InsureeImages = FamilyPictures(insureesArray, CallerId);
+                    List<Pair<String, byte[]>> InsureeImages = FamilyPictures(insureesArray, CallerId);
 
                     if (myList.size() == 0) {
                         JSONObject resultObj = new JSONObject();
@@ -3300,10 +3291,10 @@ public class ClientAndroidInterface {
                         for (int j = 0; j < insureesArray.length(); j++) {
                             tempInsureesArray = insureesArray;
                             JSONObject imgObj = new JSONObject();
-
-                            if (InsureeImages[j] != null) {
-                                imgObj.put("ImageName", InsureeImages[j].ImageName);
-                                imgObj.put("ImageContent", Base64.encodeToString(InsureeImages[j].ImageContent, Base64.DEFAULT));
+                            Pair<String, byte[]> img = InsureeImages.get(j);
+                            if (img != null) {
+                                imgObj.put("ImageName", img.first);
+                                imgObj.put("ImageContent", Base64.encodeToString(img.second, Base64.DEFAULT));
                                 tempInsureesArray.getJSONObject(j).put("picture", imgObj);
                             }
                         }
@@ -3501,9 +3492,8 @@ public class ClientAndroidInterface {
         }
     }
 
-    public InsureeImages[] FamilyPictures(JSONArray insurees, int CallerId) throws IOException {
-        InsureeImages[] images = new InsureeImages[insurees.length()];
-
+    public List<Pair<String, byte[]>> FamilyPictures(JSONArray insurees, int CallerId) throws IOException {
+        List<Pair<String, byte[]>> images = new ArrayList<>(insurees.length());
         int IsOffline;
         for (int j = 0; j < insurees.length(); j++) {
             try {
@@ -3532,8 +3522,8 @@ public class ClientAndroidInterface {
                             buf.close();
 
                             if (CallerId != 2) {
-                                InsureeImages img = new InsureeImages(files[0].getName(), imgcontent);
-                                images[j] = img;
+                                Pair<String, byte[]> img = new Pair<>(files[0].getName(), imgcontent);
+                                images.set(j, img);
                             }
                         } catch (FileNotFoundException e) {
                             e.printStackTrace();
@@ -3543,8 +3533,8 @@ public class ClientAndroidInterface {
                     } else {
                         byte[] imgcontent = new byte[0];
                         if (CallerId != 2) {
-                            InsureeImages img = new InsureeImages("", imgcontent);
-                            images[j] = img;
+                            Pair<String, byte[]> img = new Pair<>("", imgcontent);
+                            images.set(j, img);
                         }
 
                     }
@@ -3553,8 +3543,8 @@ public class ClientAndroidInterface {
                     if (IsOffline == 1) {
                         if (getRule("AllowInsureeWithoutPhoto")) {
                             byte[] empty = new byte[0];
-                            InsureeImages img = new InsureeImages("", empty);
-                            images[j] = img;
+                            Pair<String, byte[]> img = new Pair<>("", empty);
+                            images.set(j, img);
                         } else {
                             myList.add(getInsureeValidationError(
                                     chfid, lastname, othername,
@@ -3565,18 +3555,15 @@ public class ClientAndroidInterface {
                         }
                     } else {
                         byte[] empty = new byte[0];
-                        InsureeImages img = new InsureeImages("", empty);
-                        images[j] = img;
+                        Pair<String, byte[]> img = new Pair<>("", empty);
+                        images.set(j, img);
                     }
 
                 }
-
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-
         }
-
         return images;
     }
 
@@ -3830,40 +3817,7 @@ public class ClientAndroidInterface {
         } catch (Exception e) {
             Log.d("ClientAndroidInterface", "Login failed", e);
         }
-
         return false;
-    }
-
-    @JavascriptInterface
-    public int isValidLogin(final String Username, final String Password) throws InterruptedException {
-        CallSoap cs = new CallSoap();
-        cs.setFunctionName("isValidLogin");
-        UserId = cs.isUserLoggedIn(Username, Password);
-        global.setUserId(UserId);
-        MainActivity.SetLoggedIn();
-        return UserId;
-    }
-
-    public int Login(final String Username, final String Password) throws InterruptedException {
-        CallSoap cs = new CallSoap();
-        cs.setFunctionName("isValidLogin");
-        UserId = cs.isUserLoggedIn(Username, Password);
-        global.setUserId(UserId);
-        MainActivity.SetLoggedIn();
-        return UserId;
-    }
-
-    public String GetSnapshotIndicators() {
-        String snapshot = null;
-        CallSoap cs = new CallSoap();
-        cs.setFunctionName("GetSnapshotIndicators");
-        try {
-            snapshot = cs.GetSnapshotIndicators("2017-07-01", "1");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return snapshot;
     }
 
     private void DeleteUploadedData(final int FamilyId, ArrayList<String> FamilyIDs, int CallerId) {
@@ -3951,40 +3905,30 @@ public class ClientAndroidInterface {
         pd = AndroidUtils.showProgressDialog(context, R.string.Sync, R.string.SyncProcessing);
 
         new Thread(() -> {
-            ToRestApi rest = new ToRestApi();
-            JSONObject obj;
             int uploadsAccepted = 0, uploadsRejected = 0, uploadFailed = 0;
+            PostFeedback postFeedback = new PostFeedback();
             for (int i = 0; i < jsonFiles.length; i++) {
-                String jsonText = FileUtils.readFileAsUTF8String(jsonFiles[i]);
-
-                HttpResponse response = null;
-                int responseCode = -1;
-                int uploadStatus = -1;
-
                 try {
-                    obj = new JSONObject(jsonText).getJSONObject("feedback");
-                    response = rest.postToRestApiToken(obj, "feedback");
-                    if (response != null) {
-                        responseCode = response.getStatusLine().getStatusCode();
-                        if (responseCode == HttpURLConnection.HTTP_OK) {
-                            uploadStatus = Integer.parseInt(rest.getContent(response));
-                        }
-                    }
+                    String jsonText = Objects.requireNonNull(FileUtils.readFileAsUTF8String(jsonFiles[i]));
+                    PendingFeedback pendingFeedback = pendingFeedbackFromJSON(
+                            new JSONObject(jsonText).getJSONObject("feedback")
+                    );
+                    postFeedback.execute(pendingFeedback);
+                    uploadsAccepted += 1;
+                    MoveFile(xmlFiles[i], 1);
+                    MoveFile(jsonFiles[i], 1);
                 } catch (Exception e) {
                     e.printStackTrace();
-                }
-
-                if (response == null || responseCode != HttpURLConnection.HTTP_OK || uploadStatus == ToRestApi.UploadStatus.ERROR) {
-                    uploadFailed += 1;
-                } else if (responseCode == HttpURLConnection.HTTP_OK) {
-                    if (uploadStatus == ToRestApi.UploadStatus.ACCEPTED) {
-                        uploadsAccepted += 1;
-                        MoveFile(xmlFiles[i], 1);
-                        MoveFile(jsonFiles[i], 1);
-                    } else {
+                    if (
+                            e instanceof HttpException &&
+                                    ((HttpException) e).getCode() >= 400 &&
+                                    ((HttpException) e).getCode() < 500
+                    ) {
                         uploadsRejected += 1;
                         MoveFile(xmlFiles[i], 2);
                         MoveFile(jsonFiles[i], 2);
+                    } else {
+                        uploadFailed += 1;
                     }
                 }
             }
@@ -4014,6 +3958,19 @@ public class ClientAndroidInterface {
             });
             pd.dismiss();
         }).start();
+    }
+
+    private PendingFeedback pendingFeedbackFromJSON(@NonNull JSONObject object) throws JSONException {
+        String answers = object.getString("Answers");
+        return new PendingFeedback(
+                /* claimUUID = */object.getString("ClaimUUID"),
+                /* chfId = */ object.getString("CHFID"),
+                /* careRendered = */ answers.charAt(0) == '1',
+                /* paymentAsked = */ answers.charAt(1) == '1',
+                /* drugPrescribed = */ answers.charAt(2) == '1',
+                /* drugReceived = */ answers.charAt(3) == '1',
+                /* assessment = */ Character.getNumericValue(answers.charAt(4))
+        );
     }
 
     @JavascriptInterface
@@ -4213,19 +4170,6 @@ public class ClientAndroidInterface {
 
         if (!status) {
             Log.w(Global.FILE_IO_LOG_TAG, "Moving file failed: " + file.getAbsolutePath());
-        }
-    }
-
-
-    private void RegisterUploadDetails(String ImageName) {
-        String[] FileName = ImageName.split("_");
-        String CHFID, OfficerCode;
-        if (FileName.length > 0) {
-            CHFID = FileName[0];
-            OfficerCode = FileName[1];
-            CallSoap cs = new CallSoap();
-            cs.setFunctionName("InsertPhotoEntry");
-            cs.InsertPhotoEntry(CHFID, OfficerCode, ImageName);
         }
     }
 
@@ -5030,62 +4974,6 @@ public class ClientAndroidInterface {
         return Directory.listFiles(filter);
     }
 
-
-    @JavascriptInterface
-    public void UploadPhotos() throws JSONException {
-        pd = new ProgressDialog(context);
-        pd = ProgressDialog.show(context, "", context.getResources().getString(R.string.Uploading));
-
-        new Thread(() -> {
-//            try {
-//                Thread.sleep(10000);
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
-            File[] Photo = getPhotos();
-
-            if (Photo.length > 0) {
-                UploadFile uf = new UploadFile();
-                if (uf.isValidFTPCredentials()) {
-                    for (int i = 0; i < Photo.length; i++) {
-                        String FileName = Photo[i].toString().substring(Photo[i].toString().lastIndexOf("/") + 1);
-                        @Language("SQL")
-                        String PhotoQuery = "SELECT PhotoPath FROM tblInsuree WHERE isOffline = 1 AND REPLACE(PhotoPath, RTRIM(PhotoPath, REPLACE(PhotoPath, '/', '')), '') = '" + FileName + "'";
-                        JSONArray jsonArray = sqlHandler.getResult(PhotoQuery, null);
-                        JSONObject jsonObject = null;
-                        String PhotoPath = "";
-                        if (jsonArray.length() > 0) {
-                            try {
-                                jsonObject = jsonArray.getJSONObject(0);
-                                PhotoPath = jsonObject.getString("PhotoPath");
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                        if (PhotoPath.trim().length() == 0) {
-                            if (uf.uploadFileToServer(context, Photo[i], "com.imispolicies.imis.enrollment")) {
-                                RegisterUploadDetails(FileName);
-                                Uploaded = 1;
-                                Photo[i].delete();
-                            }
-                        }
-                    }
-                }
-
-            } else {
-                Uploaded = 0;
-            }
-            ((Activity) context).runOnUiThread(() -> {
-                if (Uploaded == 1) {
-                    ShowDialog(context.getResources().getString(R.string.PhotosUploaded));
-                } else {
-                    ShowDialog(context.getResources().getString(R.string.NoPhoto));
-                }
-            });
-            pd.dismiss();
-        }).start();
-    }
-
     private SecretKeySpec generateKey(String encPassword) throws Exception {
         final MessageDigest digest = MessageDigest.getInstance("SHA-256");
         byte[] bytes = encPassword.getBytes("UTF-8");
@@ -5491,7 +5379,7 @@ public class ClientAndroidInterface {
             try {
                 O = Renews.getJSONObject(0);
                 locationId = Integer.parseInt(O.getString("LocationId"));
-            } catch (JSONException e) {
+            } catch (JSONException|NumberFormatException e) {
                 e.printStackTrace();
             }
         }
@@ -5710,11 +5598,6 @@ public class ClientAndroidInterface {
     @JavascriptInterface
     public String getOfficerCode() {
         return global.getOfficerCode();
-    }
-
-    @JavascriptInterface
-    public int getUserId() {
-        return global.getUserId();
     }
 
     @JavascriptInterface

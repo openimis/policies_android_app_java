@@ -27,6 +27,8 @@ package org.openimis.imispolicies;
 
 import android.app.ProgressDialog;
 import android.os.Bundle;
+
+import androidx.annotation.IdRes;
 import androidx.appcompat.app.AppCompatActivity;
 import android.util.Xml;
 import android.widget.Button;
@@ -55,10 +57,6 @@ public class Feedback extends AppCompatActivity {
     private EditText etOfficer;
     private EditText etClaimCode;
     private EditText etCHFID;
-    private RadioGroup rg1;
-    private RadioGroup rg2;
-    private RadioGroup rg3;
-    private RadioGroup rg4;
     private RadioButton rbYes1;
     private RadioButton rbYes2;
     private RadioButton rbYes3;
@@ -239,29 +237,19 @@ public class Feedback extends AppCompatActivity {
         return FullObject.toString();
     }
 
+    private String getAnswer(@IdRes int groupId, @IdRes int yesId) {
+        if (((RadioGroup) findViewById(groupId)).getCheckedRadioButtonId() == yesId) {
+            return "1";
+        }
+        return "0";
+    }
+
     private String Answers() {
-        String Ans = "";
-        rg1 = findViewById(R.id.radioGroup1);
-        int Ans1 = rg1.getCheckedRadioButtonId();
-        rg2 = findViewById(R.id.radioGroup2);
-        int Ans2 = rg2.getCheckedRadioButtonId();
-        rg3 = findViewById(R.id.radioGroup3);
-        int Ans3 = rg3.getCheckedRadioButtonId();
-        rg4 = findViewById(R.id.radioGroup4);
-        int Ans4 = rg4.getCheckedRadioButtonId();
-
-        if (Ans1 == R.id.rYes1) Ans = "1";
-        else Ans = "0";
-        if (Ans2 == R.id.rYes2) Ans = Ans + "1";
-        else Ans = Ans + "0";
-        if (Ans3 == R.id.rYes3) Ans = Ans + "1";
-        else Ans = Ans + "0";
-        if (Ans4 == R.id.rYes4) Ans = Ans + "1";
-        else Ans = Ans + "0";
-
-        rb1 = findViewById(R.id.ratingBar1);
-        Ans = Ans + (int) rb1.getRating();
-        return Ans;
+        return getAnswer(R.id.radioGroup1, R.id.rYes1) +
+                getAnswer(R.id.radioGroup2, R.id.rYes2) +
+                getAnswer(R.id.radioGroup3, R.id.rYes3) +
+                getAnswer(R.id.radioGroup4, R.id.rYes4) +
+                (int) ((RatingBar) findViewById(R.id.ratingBar1)).getRating();
     }
 
     private boolean isValidate() {

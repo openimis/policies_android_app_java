@@ -196,6 +196,7 @@ public class ToRestApi {
     private void checkToken(HttpResponse response) {
         if (response != null && response.getStatusLine().getStatusCode() == HttpURLConnection.HTTP_UNAUTHORIZED) {
             token.clearToken();
+            MainActivity.SetLoggedIn();
         }
     }
 
