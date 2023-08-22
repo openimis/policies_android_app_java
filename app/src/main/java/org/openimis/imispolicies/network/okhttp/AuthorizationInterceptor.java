@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 
 
 import org.openimis.imispolicies.Global;
+import org.openimis.imispolicies.MainActivity;
 import org.openimis.imispolicies.Token;
 
 import java.io.IOException;
@@ -32,6 +33,7 @@ public class AuthorizationInterceptor implements Interceptor {
             Response response = chain.proceed(builder.build());
             if (response.code() == HttpURLConnection.HTTP_UNAUTHORIZED) {
                 global.getJWTToken().clearToken();
+                MainActivity.SetLoggedIn();
             }
             return response;
         }

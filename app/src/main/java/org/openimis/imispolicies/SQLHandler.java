@@ -715,16 +715,14 @@ public class SQLHandler extends SQLiteOpenHelper {
         return serializer;
     }
 
-
     public void insertData(String TableName, String[] Columns, String data, String PreExecute) throws JSONException {
+        insertData(TableName, Columns, new JSONArray(data), PreExecute);
+    }
+
+    public void insertData(String TableName, String[] Columns, JSONArray array, String PreExecute) throws JSONException {
         String dbPath = ClientAndroidInterface.filePath;
         mDatabase = SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READWRITE);
         try {
-            JSONArray array;
-            JSONObject object;
-
-            array = new JSONArray(data);
-
             if (array.length() == 0)
                 return;
 
@@ -740,7 +738,7 @@ public class SQLHandler extends SQLiteOpenHelper {
             mDatabase.beginTransaction();
             for (int i = 0; i < array.length(); i++) {
                 try {
-                    object = array.getJSONObject(i);
+                    JSONObject object = array.getJSONObject(i);
                     ContentValues cv = new ContentValues();
                     for (String c : Columns) {
                         cv.put(c, object.getString(c));
@@ -761,7 +759,6 @@ public class SQLHandler extends SQLiteOpenHelper {
         if (mDatabase.isOpen()) {
             closeDatabase();
         }
-
     }
 
     public int insertData(String tableName, ContentValues contentValues) {

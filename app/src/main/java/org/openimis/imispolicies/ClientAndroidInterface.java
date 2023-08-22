@@ -79,6 +79,7 @@ import org.openimis.imispolicies.tools.StorageManager;
 import org.openimis.imispolicies.usecase.FetchMasterData;
 import org.openimis.imispolicies.usecase.Login;
 import org.openimis.imispolicies.util.AndroidUtils;
+import org.openimis.imispolicies.util.DateUtils;
 import org.openimis.imispolicies.util.FileUtils;
 import org.openimis.imispolicies.util.JsonUtils;
 import org.openimis.imispolicies.util.StringUtils;
@@ -254,8 +255,8 @@ public class ClientAndroidInterface {
     }
 
     @JavascriptInterface
-    public AlertDialog ShowDialog(String msg) {
-        return AndroidUtils.showDialog(context, msg);
+    public void ShowDialog(String msg) {
+        AndroidUtils.showDialog(context, msg);
     }
 
     @JavascriptInterface
@@ -2598,7 +2599,16 @@ public class ClientAndroidInterface {
         return FeedBacks.toString();
     }
 
-    public Boolean InsertFeedbacks(String Result) {
+    public boolean InsertFeedbacks(@NonNull List<org.openimis.imispolicies.domain.entity.Feedback> feedbacks) {
+        try {
+            return InsertFeedbacks(toJSONArray(feedbacks));
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean InsertFeedbacks(@NonNull JSONArray Result) {
         String TableName = "tblFeedbacks";
         String[] Columns = {"claimUUID", "officerId", "officerCode", "chfid", "lastName", "otherNames", "hfCode", "hfName", "claimCode", "dateFrom", "dateTo", "phone", "feedbackPromptDate"};
         String Where = "isDone = ?";
@@ -2613,6 +2623,28 @@ public class ClientAndroidInterface {
         return true;
     }
 
+    @NonNull
+    private JSONArray toJSONArray(@NonNull List<org.openimis.imispolicies.domain.entity.Feedback> feedbacks) throws JSONException {
+        JSONArray array = new JSONArray();
+        for (org.openimis.imispolicies.domain.entity.Feedback feedback : feedbacks) {
+            JSONObject json = new JSONObject();
+            json.put("claimUUID", feedback.getClaimUUID());
+            json.put("officerId", feedback.getOfficeId());
+            json.put("officerCode", feedback.getOfficerCode());
+            json.put("chfid", feedback.getChfId());
+            json.put("lastName", feedback.getLastName());
+            json.put("otherNames", feedback.getOtherNames());
+            json.put("hfCode", feedback.getHfCode());
+            json.put("hfName", feedback.getHfName());
+            json.put("claimCode", feedback.getClaimCode());
+            json.put("dateFrom", DateUtils.toDateString(feedback.getFromDate()));
+            json.put("dateTo", feedback.getToDate() == null ? null : DateUtils.toDateString(feedback.getToDate()));
+            json.put("phone", feedback.getPhone());
+            json.put("feedbackPromptDate", DateUtils.toDateString(feedback.getPromptDate()));
+            array.put(json);
+        }
+        return array;
+    }
 
     public Cursor SearchPayer(String InputText, String LocationId) {
         @Language("SQL")
@@ -4211,7 +4243,7 @@ public class ClientAndroidInterface {
 
                 ((Activity) context).runOnUiThread(() -> {
                     ShowDialog(context.getResources().getString(R.string.DataDownloadedSuccess));
-                    global.setOfficerCode("");
+                    global.setOfficerCode(null);
                     ((MainActivity) context).ShowEnrolmentOfficerDialog();
                 });
             } catch (JSONException e) {
@@ -4419,7 +4451,7 @@ public class ClientAndroidInterface {
     private boolean insertConfirmationTypes(JSONArray jsonArray) throws JSONException {
         try {
             String[] Columns = getColumnNames(jsonArray);
-            sqlHandler.insertData("tblConfirmationTypes", Columns, jsonArray.toString(), "DELETE FROM tblConfirmationTypes");
+            sqlHandler.insertData("tblConfirmationTypes", Columns, jsonArray, "DELETE FROM tblConfirmationTypes");
         } catch (Exception e) {
             e.printStackTrace();
             return false;
@@ -4431,49 +4463,49 @@ public class ClientAndroidInterface {
     @WorkerThread
     private boolean insertControls(JSONArray jsonArray) throws JSONException {
         String[] Columns = getColumnNames(jsonArray);
-        sqlHandler.insertData("tblControls", Columns, jsonArray.toString(), "DELETE FROM tblControls;");
+        sqlHandler.insertData("tblControls", Columns, jsonArray, "DELETE FROM tblControls;");
         return true;
     }
 
     @WorkerThread
     private boolean insertEducation(JSONArray jsonArray) throws JSONException {
         String[] Columns = getColumnNames(jsonArray);
-        sqlHandler.insertData("tblEducations", Columns, jsonArray.toString(), "DELETE FROM tblEducations;");
+        sqlHandler.insertData("tblEducations", Columns, jsonArray, "DELETE FROM tblEducations;");
         return true;
     }
 
     @WorkerThread
     private boolean insertFamilyTypes(JSONArray jsonArray) throws JSONException {
         String[] Columns = getColumnNames(jsonArray);
-        sqlHandler.insertData("tblFamilyTypes", Columns, jsonArray.toString(), "DELETE FROM tblFamilyTypes;");
+        sqlHandler.insertData("tblFamilyTypes", Columns, jsonArray, "DELETE FROM tblFamilyTypes;");
         return true;
     }
 
     @WorkerThread
     private boolean insertHF(JSONArray jsonArray) throws JSONException {
         String[] Columns = getColumnNames(jsonArray);
-        sqlHandler.insertData("tblHF", Columns, jsonArray.toString(), "DELETE FROM tblHF;");
+        sqlHandler.insertData("tblHF", Columns, jsonArray, "DELETE FROM tblHF;");
         return true;
     }
 
     @WorkerThread
     private boolean insertIdentificationTypes(JSONArray jsonArray) throws JSONException {
         String[] Columns = getColumnNames(jsonArray);
-        sqlHandler.insertData("tblIdentificationTypes", Columns, jsonArray.toString(), "DELETE FROM tblIdentificationTypes;");
+        sqlHandler.insertData("tblIdentificationTypes", Columns, jsonArray, "DELETE FROM tblIdentificationTypes;");
         return true;
     }
 
     @WorkerThread
     private boolean insertLanguages(JSONArray jsonArray) throws JSONException {
         String[] Columns = getColumnNames(jsonArray);
-        sqlHandler.insertData("tblLanguages", Columns, jsonArray.toString(), "DELETE FROM tblLanguages;");
+        sqlHandler.insertData("tblLanguages", Columns, jsonArray, "DELETE FROM tblLanguages;");
         return true;
     }
 
     @WorkerThread
     private boolean insertLocations(JSONArray jsonArray) throws JSONException {
         String[] Columns = getColumnNames(jsonArray);
-        sqlHandler.insertData("tblLocations", Columns, jsonArray.toString(), "DELETE FROM tblLocations;");
+        sqlHandler.insertData("tblLocations", Columns, jsonArray, "DELETE FROM tblLocations;");
 
         return true;
     }
@@ -4481,49 +4513,49 @@ public class ClientAndroidInterface {
     @WorkerThread
     private boolean insertOfficers(JSONArray jsonArray) throws JSONException {
         String[] Columns = getColumnNames(jsonArray);
-        sqlHandler.insertData("tblOfficer", Columns, jsonArray.toString(), "DELETE FROM tblOfficer;");
+        sqlHandler.insertData("tblOfficer", Columns, jsonArray, "DELETE FROM tblOfficer;");
         return true;
     }
 
     @WorkerThread
     private boolean insertPayers(JSONArray jsonArray) throws JSONException {
         String[] Columns = getColumnNames(jsonArray);
-        sqlHandler.insertData("tblPayer", Columns, jsonArray.toString(), "DELETE FROM tblPayer;");
+        sqlHandler.insertData("tblPayer", Columns, jsonArray, "DELETE FROM tblPayer;");
         return true;
     }
 
     @WorkerThread
     private boolean insertProducts(JSONArray jsonArray) throws JSONException {
         String[] Columns = getColumnNames(jsonArray);
-        sqlHandler.insertData("tblProduct", Columns, jsonArray.toString(), "DELETE FROM tblProduct;");
+        sqlHandler.insertData("tblProduct", Columns, jsonArray, "DELETE FROM tblProduct;");
         return true;
     }
 
     @WorkerThread
     private boolean insertProfessions(JSONArray jsonArray) throws JSONException {
         String[] Columns = getColumnNames(jsonArray);
-        sqlHandler.insertData("tblProfessions", Columns, jsonArray.toString(), "DELETE FROM tblProfessions;");
+        sqlHandler.insertData("tblProfessions", Columns, jsonArray, "DELETE FROM tblProfessions;");
         return true;
     }
 
     @WorkerThread
     private boolean insertRelations(JSONArray jsonArray) throws JSONException {
         String[] Columns = getColumnNames(jsonArray);
-        sqlHandler.insertData("tblRelations", Columns, jsonArray.toString(), "DELETE FROM tblRelations;");
+        sqlHandler.insertData("tblRelations", Columns, jsonArray, "DELETE FROM tblRelations;");
         return true;
     }
 
     @WorkerThread
     private boolean insertPhoneDefaults(JSONArray jsonArray) throws JSONException {
         String[] Columns = getColumnNames(jsonArray);
-        sqlHandler.insertData("tblIMISDefaultsPhone", Columns, jsonArray.toString(), "DELETE FROM tblIMISDefaultsPhone;");
+        sqlHandler.insertData("tblIMISDefaultsPhone", Columns, jsonArray, "DELETE FROM tblIMISDefaultsPhone;");
         return true;
     }
 
     @WorkerThread
     private boolean insertGenders(JSONArray jsonArray) throws JSONException {
         String[] Columns = getColumnNames(jsonArray);
-        sqlHandler.insertData("tblGender", Columns, jsonArray.toString(), "DELETE FROM tblGender;");
+        sqlHandler.insertData("tblGender", Columns, jsonArray, "DELETE FROM tblGender;");
         return true;
     }
     // endregion Insert Master Data

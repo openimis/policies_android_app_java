@@ -14,6 +14,7 @@ import cz.msebera.android.httpclient.util.EntityUtils;
 
 import org.json.JSONObject;
 import org.openimis.imispolicies.tools.Log;
+import org.openimis.imispolicies.util.StringUtils;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -200,7 +201,7 @@ public class ToRestApi {
 
     private String buildTokenHeader() {
         String tokenText = token.getTokenText();
-        if (tokenText != null) {
+        if (!StringUtils.isEmpty(tokenText)) {
             return String.format("bearer %s", tokenText.trim());
         }
         return "";

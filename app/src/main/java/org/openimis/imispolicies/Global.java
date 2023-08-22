@@ -32,19 +32,18 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Environment;
 
-import org.openimis.imispolicies.tools.LanguageManager;
-import org.openimis.imispolicies.tools.Log;
+import androidx.annotation.Nullable;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.openimis.imispolicies.tools.Log;
 import org.openimis.imispolicies.util.StreamUtils;
 
 import java.io.File;
@@ -72,7 +71,6 @@ public class Global extends Application {
 
     private Token JWTToken;
 
-    private String MainDirectory;
     private String AppDirectory;
     private Map<String, String> SubDirectories;
 
@@ -126,19 +124,16 @@ public class Global extends Application {
         return JWTToken;
     }
 
-    public void setJWTToken(Token token) {
-        JWTToken = token;
-    }
-
     public boolean isLoggedIn() {
         return getJWTToken().isTokenValidJWT();
     }
 
+    @Nullable
     public String getOfficerCode() {
         return OfficerCode;
     }
 
-    public void setOfficerCode(String officerCode) {
+    public void setOfficerCode(@Nullable String officerCode) {
         OfficerCode = officerCode;
     }
 
@@ -204,15 +199,6 @@ public class Global extends Application {
         }
     }
 
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-//        Locale locale = LocaleUtil.getLocaleFromTag(getStoredLanguage());
-//        newConfig.locale = locale;
-//        Locale.setDefault(locale);
-//        getResources().updateConfiguration(newConfig, getResources().getDisplayMetrics());
-    }
-
     private String createOrCheckDirectory(String path) {
         File dir = new File(path);
 
@@ -256,10 +242,6 @@ public class Global extends Application {
             Log.e(PREF_LOG_TAG, String.format("%s key is not an int", key), e);
         }
         return defaultValue;
-    }
-
-    public void setIntKey(String key, int value) {
-        getSharedPreferences(PREF_NAME, MODE_PRIVATE).edit().putInt(key, value).apply();
     }
 
     public long getLongKey(String key, long defaultValue) {

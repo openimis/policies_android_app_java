@@ -1,0 +1,37 @@
+query GetFeedbacks($officerCode: String) {
+    claims(status: 4, orderBy: ["-dateClaimed"], admin_Code: $officerCode) {
+        edges {
+            node {
+                uuid
+                code
+                dateFrom
+                dateTo
+                visitType
+                admin {
+                    code
+                    phone
+                }
+                healthFacility {
+                    id
+                    uuid
+                    name
+                    code
+                }
+                insuree {
+                    id
+                    uuid
+                    chfId
+                    lastName
+                    otherNames
+                    claimSet(first: 1) {
+                        edges {
+                            node {
+                                dateTo
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

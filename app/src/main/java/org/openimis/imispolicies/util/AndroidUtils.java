@@ -1,9 +1,11 @@
 package org.openimis.imispolicies.util;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.os.Looper;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -32,7 +34,7 @@ public class AndroidUtils {
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
     }
 
-    public static AlertDialog showDialog(
+    public static void showDialog(
             @NonNull Context context,
             @Nullable CharSequence title,
             @Nullable CharSequence message,
@@ -51,26 +53,30 @@ public class AndroidUtils {
         if (positiveLabel != null) builder.setPositiveButton(positiveLabel, onPositive);
         if (neutralLabel != null) builder.setPositiveButton(neutralLabel, onNeutral);
         if (negativeLabel != null) builder.setNegativeButton(negativeLabel, onNegative);
-        return builder.show();
+        if (context instanceof Activity && Thread.currentThread() != Looper.getMainLooper().getThread()) {
+            ((Activity) context).runOnUiThread(builder::show);
+        } else {
+            builder.show();
+        }
     }
 
-    public static AlertDialog showDialog(@NonNull Context context, int messageResId) {
-        return showDialog(context, null, context.getResources().getString(messageResId), false, context.getResources().getString(R.string.Ok), null, null, null, null, null);
+    public static void showDialog(@NonNull Context context, int messageResId) {
+        showDialog(context, null, context.getResources().getString(messageResId), false, context.getResources().getString(R.string.Ok), null, null, null, null, null);
     }
 
-    public static AlertDialog showDialog(@NonNull Context context, @NonNull CharSequence message) {
-        return showDialog(context, null, message, false, context.getResources().getString(R.string.Ok), null, null, null, null, null);
+    public static void showDialog(@NonNull Context context, @NonNull CharSequence message) {
+        showDialog(context, null, message, false, context.getResources().getString(R.string.Ok), null, null, null, null, null);
     }
 
-    public static AlertDialog showDialog(@NonNull Context context, @NonNull CharSequence title, @NonNull CharSequence message) {
-        return showDialog(context, title, message, false, context.getResources().getString(R.string.Ok), null, null, null, null, null);
+    public static void showDialog(@NonNull Context context, @NonNull CharSequence title, @NonNull CharSequence message) {
+        showDialog(context, title, message, false, context.getResources().getString(R.string.Ok), null, null, null, null, null);
     }
 
-    public static AlertDialog showConfirmDialog(@NonNull Context context, int messageResId, @NonNull DialogInterface.OnClickListener onPositive) {
-        return showDialog(context, null, context.getResources().getString(messageResId), false, context.getResources().getString(R.string.Ok), onPositive, null, null, context.getResources().getString(R.string.Cancel), null);
+    public static void showConfirmDialog(@NonNull Context context, int messageResId, @NonNull DialogInterface.OnClickListener onPositive) {
+        showDialog(context, null, context.getResources().getString(messageResId), false, context.getResources().getString(R.string.Ok), onPositive, null, null, context.getResources().getString(R.string.Cancel), null);
     }
 
-    public static AlertDialog showDialog(@NonNull Context context, @NonNull String message, @NonNull String positiveLabel, @NonNull DialogInterface.OnClickListener onPositive) {
-        return showDialog(context, null, message, false, positiveLabel, onPositive, null, null, context.getResources().getString(R.string.Cancel), null);
+    public static void showDialog(@NonNull Context context, @NonNull String message, @NonNull String positiveLabel, @NonNull DialogInterface.OnClickListener onPositive) {
+        showDialog(context, null, message, false, positiveLabel, onPositive, null, null, context.getResources().getString(R.string.Cancel), null);
     }
 }
