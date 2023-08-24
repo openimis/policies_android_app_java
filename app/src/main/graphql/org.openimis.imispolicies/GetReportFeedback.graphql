@@ -1,0 +1,5 @@
+query GetReportFeedback($fromDate: Date, $toDate: Date) {
+    delivered:claims(feedbackStatus:8, dateFrom_Gte:$fromDate, dateTo_Lte:$toDate) {
+        totalCount
+    }
+}

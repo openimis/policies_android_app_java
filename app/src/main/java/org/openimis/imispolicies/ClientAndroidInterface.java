@@ -27,6 +27,7 @@ package org.openimis.imispolicies;
 
 import static android.provider.MediaStore.EXTRA_OUTPUT;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -42,6 +43,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.icu.text.DecimalFormat;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Parcelable;
 import android.provider.MediaStore;
@@ -3809,15 +3811,31 @@ public class ClientAndroidInterface {
     }
 
     // Login to API and get Token JWT
+    @SuppressLint("StaticFieldLeak")
     public boolean LoginToken(@NonNull String username, @NonNull String password) {
         try {
-            new Login().execute(username, password);
-            MainActivity.SetLoggedIn();
-            return true;
+            return new AsyncTask<Void, Void, Boolean>() {
+                @Override
+                protected Boolean doInBackground(Void... voids) {
+                    try {
+                        new Login().execute(username, password);
+                        return true;
+                    } catch (Exception e) {
+                        Log.d("ClientAndroidInterface", "Login failed", e);
+                        return false;
+                    }
+                }
+
+                @Override
+                protected void onPostExecute(Boolean aBoolean) {
+                    super.onPostExecute(aBoolean);
+                    MainActivity.SetLoggedIn();
+                }
+            }.execute().get();
         } catch (Exception e) {
-            Log.d("ClientAndroidInterface", "Login failed", e);
+            e.printStackTrace();
+            return false;
         }
-        return false;
     }
 
     private void DeleteUploadedData(final int FamilyId, ArrayList<String> FamilyIDs, int CallerId) {
@@ -5379,7 +5397,7 @@ public class ClientAndroidInterface {
             try {
                 O = Renews.getJSONObject(0);
                 locationId = Integer.parseInt(O.getString("LocationId"));
-            } catch (JSONException|NumberFormatException e) {
+            } catch (JSONException | NumberFormatException e) {
                 e.printStackTrace();
             }
         }
@@ -5565,7 +5583,8 @@ public class ClientAndroidInterface {
         alertDialogBuilder.setView(promptsView);
         alertDialogBuilder
                 .setCancelable(false)
-                .setPositiveButton("OK",
+                .setPositiveButton(
+                        R.string.Ok,
                         (dialog, id) -> {
                             if (!username.getText().toString().equals("") || !password.getText().toString().equals("")) {
                                 boolean isUserLogged = LoginToken(username.getText().toString(), password.getText().toString());

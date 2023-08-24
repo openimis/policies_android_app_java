@@ -10,23 +10,24 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
 
 import org.openimis.imispolicies.R;
 
 public class AndroidUtils {
     public static ProgressDialog showProgressDialog(
             @NonNull Context context,
-            int titleResId,
-            int messageResId
+            @StringRes int titleResId,
+            @StringRes int messageResId
     ) {
         return ProgressDialog.show(
                 context,
-                context.getResources().getString(titleResId),
+                titleResId != 0 ? context.getResources().getString(titleResId) : null,
                 context.getResources().getString(messageResId)
         );
     }
 
-    public static void showToast(@NonNull Context context, int messageResId) {
+    public static void showToast(@NonNull Context context, @StringRes int messageResId) {
         Toast.makeText(context, messageResId, Toast.LENGTH_SHORT).show();
     }
 
@@ -60,7 +61,7 @@ public class AndroidUtils {
         }
     }
 
-    public static void showDialog(@NonNull Context context, int messageResId) {
+    public static void showDialog(@NonNull Context context, @StringRes int messageResId) {
         showDialog(context, null, context.getResources().getString(messageResId), false, context.getResources().getString(R.string.Ok), null, null, null, null, null);
     }
 
@@ -72,7 +73,7 @@ public class AndroidUtils {
         showDialog(context, title, message, false, context.getResources().getString(R.string.Ok), null, null, null, null, null);
     }
 
-    public static void showConfirmDialog(@NonNull Context context, int messageResId, @NonNull DialogInterface.OnClickListener onPositive) {
+    public static void showConfirmDialog(@NonNull Context context, @StringRes int messageResId, @NonNull DialogInterface.OnClickListener onPositive) {
         showDialog(context, null, context.getResources().getString(messageResId), false, context.getResources().getString(R.string.Ok), onPositive, null, null, context.getResources().getString(R.string.Cancel), null);
     }
 

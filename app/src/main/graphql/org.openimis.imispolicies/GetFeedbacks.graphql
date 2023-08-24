@@ -1,5 +1,5 @@
 query GetFeedbacks($officerCode: String) {
-    claims(status: 4, orderBy: ["-dateClaimed"], admin_Code: $officerCode) {
+    claims(feedbackStatus: 4, orderBy: ["-dateClaimed"], admin_Code: $officerCode) {
         edges {
             node {
                 uuid

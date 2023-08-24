@@ -249,10 +249,7 @@ public class FeedbackList extends AppCompatActivity {
                     ca.ShowDialog(getResources().getString(R.string.InternetRequired));
                     return false;
                 }
-                Intent Stats = new Intent(this, Statistics.class);
-                Stats.putExtra("Title", "Feedback Statistics");
-                Stats.putExtra("Caller", "F");
-                startActivity(Stats);
+                startActivity(Statistics.newIntent(this, "Feedback Statistics", Statistics.Type.FEEDBACK));
                 return true;
             default:
                 super.onOptionsItemSelected(item);

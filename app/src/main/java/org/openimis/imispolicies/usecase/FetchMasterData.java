@@ -1,6 +1,7 @@
 package org.openimis.imispolicies.usecase;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.WorkerThread;
 
 import org.apache.commons.io.IOUtils;
 import org.openimis.imispolicies.network.exception.HttpException;
@@ -28,6 +29,7 @@ public class FetchMasterData {
     }
 
     @NonNull
+    @WorkerThread
     public String execute() throws Exception {
         try (ZipInputStream zipFile = new ZipInputStream(new ByteArrayInputStream(getMasterDataExportRequest.get()))) {
             ZipEntry entry;

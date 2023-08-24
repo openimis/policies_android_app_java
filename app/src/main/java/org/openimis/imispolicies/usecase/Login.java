@@ -30,16 +30,12 @@ public class Login {
     }
 
     @WorkerThread
-    public void execute(@NonNull String username, String password) {
-        try {
-            TokenDto token = request.post(new LoginDto(username.trim(), password));
-            global.getJWTToken().saveTokenText(
-                    token.getToken(),
-                    TimeUnit.SECONDS.toMillis(token.getExpiresOn()),
-                    global.getOfficerCode()
-            );
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    public void execute(@NonNull String username, String password) throws Exception {
+        TokenDto token = request.post(new LoginDto(username.trim(), password));
+        global.getJWTToken().saveTokenText(
+                token.getToken(),
+                TimeUnit.SECONDS.toMillis(token.getExpiresOn()),
+                global.getOfficerCode()
+        );
     }
 }

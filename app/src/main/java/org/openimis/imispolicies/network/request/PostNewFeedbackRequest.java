@@ -57,9 +57,23 @@ public class PostNewFeedbackRequest extends BaseFHIRPostRequest<PendingFeedback,
                                 e
                         );
                     }
-                    if (details.equals("about is required") || details.equals("payload must have 5 elements")) {
+                    if (details.equals("about is required") ||
+                            details.equals("payload is required") ||
+                            details.equals("subject is required") ||
+                            details.equals("status is required field") ||
+                            details.equals("status value must be = completed") ||
+                            details.equals("payload must have 5 elements")
+                    ) {
                         throw new HttpException(
                                 HttpURLConnection.HTTP_BAD_REQUEST,
+                                details,
+                                e.getBody(),
+                                e
+                        );
+                    }
+                    if (details.equals("Claim does not exist")) {
+                        throw new HttpException(
+                                HttpURLConnection.HTTP_NOT_FOUND,
                                 details,
                                 e.getBody(),
                                 e

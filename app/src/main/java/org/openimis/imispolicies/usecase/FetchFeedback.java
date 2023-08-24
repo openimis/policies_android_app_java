@@ -1,6 +1,7 @@
 package org.openimis.imispolicies.usecase;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.WorkerThread;
 
 import org.openimis.imispolicies.GetFeedbacksQuery;
 import org.openimis.imispolicies.Global;
@@ -24,6 +25,7 @@ public class FetchFeedback {
         this.getFeedbackGraphQLRequest = getFeedbackGraphQLRequest;
     }
 
+    @WorkerThread
     public List<FeedbackRequest> execute() throws Exception {
         String officerCode = Global.getGlobal().getOfficerCode();
         if (officerCode == null) {
@@ -32,6 +34,7 @@ public class FetchFeedback {
         return execute(officerCode);
     }
 
+    @WorkerThread
     public List<FeedbackRequest> execute(@NonNull String officerCode) throws Exception {
         List<GetFeedbacksQuery.Edge> nodes = getFeedbackGraphQLRequest.get(officerCode);
         return Mapper.map(nodes, this::toFeedback);
