@@ -29,7 +29,6 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.ActionBar;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -55,6 +54,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
@@ -105,7 +105,6 @@ public class MainActivity extends AppCompatActivity
     private static MainActivity instance;
 
     private WebView wv;
-    private final Context context = this;
     static Global global;
     private static final int MENU_LANGUAGE_1 = Menu.FIRST;
     private static final int MENU_LANGUAGE_2 = Menu.FIRST + 1;
@@ -311,7 +310,7 @@ public class MainActivity extends AppCompatActivity
             drawer.closeDrawer(GravityCompat.START);
             SetLoggedIn();
         });
-        ca = new ClientAndroidInterface(context);
+        ca = new ClientAndroidInterface(this);
         if (ca.isMasterDataAvailable() > 0) {
             loadLanguages();
         }
@@ -354,7 +353,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void loadLanguages() {
-        ClientAndroidInterface ca = new ClientAndroidInterface(context);
+        ClientAndroidInterface ca = new ClientAndroidInterface(this);
         JSONArray Languages = ca.getLanguage();
         JSONObject LanguageObject = null;
 
@@ -451,14 +450,13 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void ShowEnrolmentOfficerDialog() {
-        final ClientAndroidInterface ca = new ClientAndroidInterface(context);
+        final ClientAndroidInterface ca = new ClientAndroidInterface(this);
         final int MasterData = ca.isMasterDataAvailable();
 
-        LayoutInflater li = LayoutInflater.from(context);
+        LayoutInflater li = LayoutInflater.from(this);
         @SuppressLint("InflateParams") View promptsView = li.inflate(R.layout.dialog, null);
 
-        final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
-                context);
+        final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
 
         alertDialogBuilder.setView(promptsView);
 
@@ -519,7 +517,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void ShowMasterDataDialog() {
-        masterDataDialog = new AlertDialog.Builder(context)
+        masterDataDialog = new AlertDialog.Builder(this)
                 .setTitle(R.string.MasterData)
                 .setMessage(R.string.MasterDataNotFound)
                 .setCancelable(false)
@@ -542,14 +540,11 @@ public class MainActivity extends AppCompatActivity
 
     public void ShowDialogTex2() {
 
-        final ClientAndroidInterface ca = new ClientAndroidInterface(context);
-        LayoutInflater li = LayoutInflater.from(context);
+        final ClientAndroidInterface ca = new ClientAndroidInterface(this);
+        LayoutInflater li = LayoutInflater.from(this);
         @SuppressLint("InflateParams") View promptsView = li.inflate(R.layout.rar_pass_dialog, null);
 
-        androidx.appcompat.app.AlertDialog alertDialog = null;
-
-        final androidx.appcompat.app.AlertDialog.Builder alertDialogBuilder = new androidx.appcompat.app.AlertDialog.Builder(
-                context);
+        final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
 
         alertDialogBuilder.setView(promptsView);
 
@@ -578,12 +573,7 @@ public class MainActivity extends AppCompatActivity
                             finish();
                         });
 
-        // create alert dialog
-        alertDialog = alertDialogBuilder.create();
-
-        // show it
-        alertDialog.show();
-
+         alertDialogBuilder.show();
     }
 
     public String getMasterDataText2(String fileName, String password) {
@@ -752,7 +742,7 @@ public class MainActivity extends AppCompatActivity
                 wv.loadUrl("file:///android_asset/pages/Login.html?s=5");
             }
         } else if (id == R.id.nav_payment) {
-            ClientAndroidInterface ca = new ClientAndroidInterface(context);
+            ClientAndroidInterface ca = new ClientAndroidInterface(this);
             ca.launchPayment();
         }
 
@@ -800,7 +790,7 @@ public class MainActivity extends AppCompatActivity
         @Override
         protected Throwable doInBackground(Void... voids) {
             try {
-                Context context = activity.get();
+                Activity context = activity.get();
                 if (context == null) {
                     return null;
                 }
@@ -855,7 +845,7 @@ public class MainActivity extends AppCompatActivity
 
         @Override
         protected Void doInBackground(String... buffers) {
-            Context context = activity.get();
+            Activity context = activity.get();
             if (context == null) {
                 return null;
             }
@@ -887,37 +877,6 @@ public class MainActivity extends AppCompatActivity
         super.onStop();
     }
 
-//    private void CheckForUpdates() {
-//        if (global.isNetworkAvailable()) {
-//            if (_General.isNewVersionAvailable(VersionField, MainActivity.this, getApplicationContext().getPackageName())) {
-//                //Show notification bar
-//                mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-//                //final Notification NotificationDetails = new Notification(R.drawable.ic_launcher_policies, getResources().getString(R.string.NotificationAlertText), System.currentTimeMillis());
-//                //NotificationDetails.flags = Notification.FLAG_SHOW_LIGHTS | Notification.FLAG_AUTO_CANCEL | Notification.DEFAULT_SOUND | Notification.DEFAULT_VIBRATE;
-//                //NotificationDetails.setLatestEventInfo(context, ContentTitle, ContentText, intent);
-//                //mNotificationManager.notify(SIMPLE_NOTFICATION_ID, NotificationDetails);
-//                Context context = getApplicationContext();
-//                CharSequence ContentTitle = getResources().getString(R.string.ContentTitle);
-//                CharSequence ContentText = getResources().getString(R.string.ContentText);
-//
-//                Intent NotifyIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(ApkFileLocation));
-//
-//                PendingIntent intent = PendingIntent.getActivity(MainActivity.this, 0, NotifyIntent, 0);
-//                NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "M_CH_ID");
-//                builder.setAutoCancel(false);
-//                builder.setContentTitle(ContentTitle);
-//                builder.setContentText(ContentText);
-//                builder.setSmallIcon(R.drawable.ic_statistics);
-//                builder.setContentIntent(intent);
-//                builder.setOngoing(false);
-//
-//                mNotificationManager.notify(SIMPLE_NOTFICATION_ID, builder.build());
-//                vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
-//                vibrator.vibrate(500);
-//            }
-//        }
-//    }
-
     public static boolean hasPermissions(Context context, String... permissions) {
         if (context != null && permissions != null) {
             for (String permission : permissions) {
@@ -932,7 +891,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void PermissionsDialog() {
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context)
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this)
                 .setTitle(R.string.Permissions)
                 .setMessage(getResources().getString(R.string.PermissionsInfo, getResources().getString(R.string.app_name_policies)))
                 .setCancelable(false)

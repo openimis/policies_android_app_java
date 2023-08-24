@@ -70,8 +70,6 @@ $(document).ready(function () {
         var passed = isFormValidated();
 
         if (passed == true) {
-
-            Android.clearInsuranceNo();
             var jsonInsuree = createJSONString();
 
             if (sessionStorage.getItem("FamilyData") !== null) {
