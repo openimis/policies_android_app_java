@@ -27,66 +27,50 @@ package org.openimis.imispolicies;
 
 import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
-
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.annotation.MainThread;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.view.MenuItem;
-import android.view.View;
+import org.openimis.imispolicies.domain.entity.SnapshotPolicies;
+import org.openimis.imispolicies.network.exception.HttpException;
+import org.openimis.imispolicies.usecase.FetchSnapshotPolicies;
+import org.openimis.imispolicies.util.AndroidUtils;
+import org.openimis.imispolicies.util.TextViewUtils;
 
-import android.widget.Button;
-
-import android.widget.RelativeLayout;
-import android.widget.TextView;
-import android.widget.Toast;
-
-import cz.msebera.android.httpclient.HttpEntity;
-import cz.msebera.android.httpclient.HttpResponse;
-import cz.msebera.android.httpclient.util.EntityUtils;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Locale;
 
 public class SnapshotIndicators extends AppCompatActivity {
-    private Global global;
-    private ProgressDialog pd;
 
-    private Calendar myCalendar;
+    private static final String DATE = "date";
+    private static final String WAS_PICKED = "was_picked";
 
-    private Button btnPick;
-    private Button btnGet;
+    @NonNull
+    private final Calendar myCalendar = Calendar.getInstance();
 
     private TextView tvDate;
     private TextView FAPC;
     private TextView FEPC;
     private TextView FIPC;
     private TextView FSPC;
-
-    private RelativeLayout snapshotReport;
-
-    private String snapshot = null;
-
-    private DatePickerDialog.OnDateSetListener date = (view, year, monthOfYear, dayOfMonth) -> {
-        myCalendar.set(Calendar.YEAR, year);
-        myCalendar.set(Calendar.MONTH, monthOfYear);
-        myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-        updateLabel();
-    };
+    private View snapshotReport;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_snapshot_indicators);
-
-        global = (Global) getApplicationContext();
 
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
@@ -94,125 +78,145 @@ public class SnapshotIndicators extends AppCompatActivity {
             actionBar.setTitle(getResources().getString(R.string.SnapshotIndicators));
         }
 
-        btnPick = findViewById(R.id.btnPick);
-        btnGet = findViewById(R.id.btnGet);
+        Button btnPick = findViewById(R.id.btnPick);
+        Button btnGet = findViewById(R.id.btnGet);
 
+        snapshotReport = findViewById(R.id.snapshotReport);
         tvDate = findViewById(R.id.tvDate);
-
         FAPC = findViewById(R.id.FAPC);
         FEPC = findViewById(R.id.FEPC);
         FIPC = findViewById(R.id.FIPC);
         FSPC = findViewById(R.id.FSPC);
 
-        snapshotReport = findViewById(R.id.snapshotReport);
+        if (savedInstanceState != null) {
+            myCalendar.setTimeInMillis(savedInstanceState.getLong(DATE));
+            if (savedInstanceState.getBoolean(WAS_PICKED)) {
+                TextViewUtils.setDate(tvDate, myCalendar.getTime());
+            }
+        }
 
-
-        myCalendar = Calendar.getInstance();
-
-        btnPick.setOnClickListener((view) -> new DatePickerDialog(SnapshotIndicators.this, date, myCalendar
-                .get(Calendar.YEAR), myCalendar.get(Calendar.MONTH),
-                myCalendar.get(Calendar.DAY_OF_MONTH)).show());
+        btnPick.setOnClickListener((view) ->
+                new DatePickerDialog(
+                        SnapshotIndicators.this,
+                        (v, year, monthOfYear, dayOfMonth) -> {
+                            myCalendar.set(Calendar.YEAR, year);
+                            myCalendar.set(Calendar.MONTH, monthOfYear);
+                            myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                            TextViewUtils.setDate(tvDate, myCalendar.getTime());
+                        },
+                        myCalendar.get(Calendar.YEAR),
+                        myCalendar.get(Calendar.MONTH),
+                        myCalendar.get(Calendar.DAY_OF_MONTH)
+                ).show());
 
         btnGet.setOnClickListener((view) -> {
             if (!(tvDate.getText()).equals("")) {
-                GetSnapshotIndicators(String.valueOf(tvDate.getText()));
+                GetSnapshotIndicators(myCalendar);
             } else {
                 showToast(R.string.pick_date, Toast.LENGTH_LONG);
             }
         });
     }
 
-    private void updateLabel() {
-        String myFormat = "yyyy-MM-dd";
-        SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
-
-        tvDate.setText(sdf.format(myCalendar.getTime()));
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putLong(DATE, myCalendar.getTime().getTime());
+        outState.putBoolean(WAS_PICKED, tvDate.getText().length() > 0);
     }
 
-
-    private void GetSnapshotIndicators(final String today) {
-        if (global.isNetworkAvailable()) {
-            pd = ProgressDialog.show(SnapshotIndicators.this, "", getResources().getString(R.string.GetingSnapShotReport));
-            try {
-                new Thread(() -> {
-                    GetSnapshot(today);
-                    runOnUiThread(this::showSnapshot);
-                    pd.dismiss();
-                }).start();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+    @SuppressWarnings("deprecation")
+    private void GetSnapshotIndicators(@NonNull final Calendar today) {
+        if (((Global) getApplicationContext()).isNetworkAvailable()) {
+            new GetSnapshotPoliciesAsync(this).execute(today);
         }
     }
 
-    public void GetSnapshot(String today) {
-        JSONObject snapshotObj = new JSONObject();
-        try {
-            snapshotObj.put("SnapshotDate", today);
-        } catch (JSONException e) {
-            e.printStackTrace();
-            return;
-        }
-
-        ToRestApi rest = new ToRestApi();
-        HttpResponse response = rest.postToRestApiToken(snapshotObj, "report/indicators/snapshot");
-
-        if (response.getStatusLine().getStatusCode() == HttpURLConnection.HTTP_OK) {
-            try {
-                HttpEntity entity = response.getEntity();
-                snapshot = EntityUtils.toString(entity);
-            } catch (IOException e) {
-                showToast(R.string.ErrorOccurred, Toast.LENGTH_LONG);
-                e.printStackTrace();
-            }
-        } else {
-            switch (response.getStatusLine().getStatusCode()) {
-                case HttpURLConnection.HTTP_UNAUTHORIZED:
-                    showToast(R.string.LoginFail, Toast.LENGTH_LONG);
-                    break;
-                case HttpURLConnection.HTTP_INTERNAL_ERROR:
-                    showToast(R.string.SomethingWrongServer, Toast.LENGTH_LONG);
-                    break;
-                default:
-                    showToast(R.string.ErrorOccurred, Toast.LENGTH_LONG);
-                    break;
-            }
-        }
-    }
-
-    public void showSnapshot() {
-        if (snapshot != null && snapshot.length() > 0) {
-            try {
-                JSONObject ob = new JSONObject(snapshot);
-                FAPC.setText(ob.getString("active"));
-                FEPC.setText(ob.getString("expired"));
-                FIPC.setText(ob.getString("idle"));
-                FSPC.setText(ob.getString("suspended"));
-
-                snapshotReport.setVisibility(View.VISIBLE);
-            } catch (JSONException e) {
-                e.printStackTrace();
-                showToast(R.string.ErrorOccurred, Toast.LENGTH_LONG);
-            }
-        } else {
-            showToast(R.string.NoDataAvailable, Toast.LENGTH_LONG);
-        }
+    @MainThread
+    public void showSnapshot(@NonNull SnapshotPolicies snapshot) {
+        FAPC.setText(String.valueOf(snapshot.getActive()));
+        FEPC.setText(String.valueOf(snapshot.getExpired()));
+        FIPC.setText(String.valueOf(snapshot.getIdle()));
+        FSPC.setText(String.valueOf(snapshot.getSuspended()));
+        snapshotReport.setVisibility(View.VISIBLE);
     }
 
     public void showToast(@StringRes int id, int length) {
-        runOnUiThread(() -> Toast.makeText(getApplicationContext(), id, length).show());
+        Toast.makeText(getApplicationContext(), id, length).show();
     }
-
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                finish();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+        if (item.getItemId() == android.R.id.home) {
+            finish();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @SuppressWarnings("deprecation")
+    private static class GetSnapshotPoliciesAsync extends AsyncTask<Calendar, Void, SnapshotPolicies> {
+        @NonNull
+        private final WeakReference<SnapshotIndicators> reference;
+        private WeakReference<ProgressDialog> pd;
+
+        GetSnapshotPoliciesAsync(SnapshotIndicators activity) {
+            this.reference = new WeakReference<>(activity);
+        }
+
+        @Override
+        protected void onPreExecute() {
+            SnapshotIndicators activity = reference.get();
+            if (activity == null || activity.isFinishing()) {
+                return;
+            }
+            activity.snapshotReport.setVisibility(View.GONE);
+            pd = new WeakReference<>(
+                    AndroidUtils.showProgressDialog(activity, 0, R.string.GetingSnapShotReport)
+            );
+        }
+
+        @Override
+        protected SnapshotPolicies doInBackground(Calendar... calendars) {
+            try {
+                return new FetchSnapshotPolicies().execute(calendars[0].getTime());
+            } catch (Exception e) {
+                e.printStackTrace();
+                SnapshotIndicators activity = reference.get();
+                if (activity == null || activity.isFinishing()) {
+                    return null;
+                }
+                if (e instanceof HttpException) {
+                    switch (((HttpException) e).getCode()) {
+                        case HttpURLConnection.HTTP_UNAUTHORIZED:
+                            activity.showToast(R.string.LoginFail, Toast.LENGTH_LONG);
+                            break;
+                        case HttpURLConnection.HTTP_INTERNAL_ERROR:
+                            activity.showToast(R.string.SomethingWrongServer, Toast.LENGTH_LONG);
+                            break;
+                        default:
+                            activity.showToast(R.string.ErrorOccurred, Toast.LENGTH_LONG);
+                            break;
+                    }
+                }
+                activity.showToast(R.string.ErrorOccurred, Toast.LENGTH_LONG);
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(@Nullable SnapshotPolicies snapshotPolicies) {
+            ProgressDialog progress = pd.get();
+            if (progress != null) {
+                progress.dismiss();
+            }
+            if (snapshotPolicies != null) {
+                SnapshotIndicators activity = reference.get();
+                if (activity == null || activity.isFinishing()) {
+                    return;
+                }
+                activity.showSnapshot(snapshotPolicies);
+            }
         }
     }
 }
-

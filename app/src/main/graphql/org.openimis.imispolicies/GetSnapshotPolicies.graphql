@@ -1,0 +1,17 @@
+query GetSnapshotPolicies($officerCode: String, $date: Date) {
+    idle:policies(startDate_Lte:$date, expiryDate_Gte:$date, officer_Code: $officerCode, status:1) {
+        totalCount
+    }
+    active:policies(startDate_Lte:$date, expiryDate_Gte:$date, officer_Code: $officerCode, status:2) {
+        totalCount
+    }
+    suspended:policies(startDate_Lte:$date, expiryDate_Gte:$date, officer_Code: $officerCode, status:4) {
+        totalCount
+    }
+    expired:policies(expiryDate:$date, officer_Code: $officerCode, status:8) {
+        totalCount
+    }
+    ready:policies(startDate_Lte:$date, expiryDate_Gte:$date, officer_Code: $officerCode, status:16) {
+        totalCount
+    }
+}

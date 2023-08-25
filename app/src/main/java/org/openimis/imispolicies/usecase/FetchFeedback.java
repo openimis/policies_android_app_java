@@ -15,23 +15,25 @@ import java.util.Objects;
 public class FetchFeedback {
 
     @NonNull
+    private final Global global;
+    @NonNull
     private final GetFeedbackGraphQLRequest getFeedbackGraphQLRequest;
 
     public FetchFeedback() {
-        this(new GetFeedbackGraphQLRequest());
+        this(Global.getGlobal(), new GetFeedbackGraphQLRequest());
     }
 
-    public FetchFeedback(@NonNull GetFeedbackGraphQLRequest getFeedbackGraphQLRequest) {
+    public FetchFeedback(
+            @NonNull Global global,
+            @NonNull GetFeedbackGraphQLRequest getFeedbackGraphQLRequest
+    ) {
         this.getFeedbackGraphQLRequest = getFeedbackGraphQLRequest;
+        this.global = global;
     }
 
     @WorkerThread
     public List<FeedbackRequest> execute() throws Exception {
-        String officerCode = Global.getGlobal().getOfficerCode();
-        if (officerCode == null) {
-            throw new IllegalStateException("OfficerCode is null");
-        }
-        return execute(officerCode);
+        return execute(global.requireOfficerCode());
     }
 
     @WorkerThread

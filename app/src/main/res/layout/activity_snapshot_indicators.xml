@@ -1,129 +1,148 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="org.openimis.imispolicies.tz.co.exact.SnapshotIndicators"
     android:orientation="vertical">
-    <RelativeLayout
+
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="50dp">
+        android:layout_marginVertical="8dp"
+        android:layout_height="50dp"
+        android:orientation="horizontal">
 
         <Button
             android:id="@+id/btnPick"
-            android:clickable="true"
-            android:layout_width="100dp"
-            android:layout_height="50dp"
-            android:text="@string/pick_date"/>
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="@string/pick_date" />
+
         <TextView
             android:id="@+id/tvDate"
-            android:layout_width="160dp"
-            android:layout_height="50dp"
-            android:textAlignment="center"
-            android:textSize="20sp"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_marginVertical="6dp"
+            android:layout_marginHorizontal="8dp"
+            android:background="@color/DarkBlue"
             android:gravity="center"
+            android:textAlignment="center"
             android:textColor="@color/white"
-            android:layout_toRightOf="@+id/btnPick"
-            android:background="@color/DarkBlue"/>
+            android:textSize="20sp" />
+
         <Button
             android:id="@+id/btnGet"
-            android:layout_width="60dp"
-            android:layout_height="50dp"
-            android:layout_toRightOf="@+id/tvDate"
-            android:text="@string/get"/>
-
-    </RelativeLayout>
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="@string/get" />
+    </LinearLayout>
 
 
-    <RelativeLayout
+    <TableLayout
         android:id="@+id/snapshotReport"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="10dp"
-        android:visibility="gone">
+        android:visibility="gone"
+        tools:visibility="visible">
 
-        <TextView
-            android:id="@+id/FAP"
-            android:layout_width="270dp"
-            android:layout_height="50dp"
-            android:textSize="15sp"
-            android:textColor="@color/Black"
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:layout_marginBottom="10dp"
-            android:gravity="left"
-            android:text="@string/NumberOfFAP"/>
-        <TextView
-            android:id="@+id/FAPC"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:textSize="15sp"
-            android:textColor="@color/LightBlue"
-            android:layout_marginBottom="10dp"
-            android:layout_toRightOf="@+id/FAP"
-            android:text="20"
-            android:layout_toEndOf="@+id/FAP" />
-        <TextView
-            android:id="@+id/FEP"
-            android:layout_width="270dp"
-            android:layout_height="50dp"
-            android:textSize="15sp"
-            android:textColor="@color/Black"
-            android:layout_marginBottom="10dp"
-            android:layout_below="@+id/FAP"
-            android:text="@string/NumberOfFEP"/>
-        <TextView
-            android:id="@+id/FEPC"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:textSize="15sp"
-            android:textColor="@color/LightBlue"
-            android:layout_marginBottom="10dp"
-            android:layout_below="@+id/FAPC"
-            android:layout_toRightOf="@+id/FEP"
-            android:text="20"
-            android:layout_toEndOf="@+id/FEP" />
-        <TextView
-            android:id="@+id/FIP"
-            android:layout_width="270dp"
-            android:layout_height="50dp"
-            android:textSize="15sp"
-            android:textColor="@color/Black"
-            android:layout_marginBottom="10dp"
-            android:layout_below="@+id/FEP"
-            android:text="@string/NumberOfFIP"/>
-        <TextView
-            android:id="@+id/FIPC"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:textSize="15sp"
-            android:textColor="@color/LightBlue"
-            android:layout_marginBottom="10dp"
-            android:layout_below="@+id/FEPC"
-            android:layout_toRightOf="@+id/FIP"
-            android:text="20"
-            android:layout_toEndOf="@+id/FIP" />
-        <TextView
-            android:id="@+id/FSP"
-            android:layout_width="270dp"
-            android:layout_height="50dp"
-            android:textSize="15sp"
-            android:textColor="@color/Black"
-            android:layout_marginBottom="10dp"
-            android:layout_below="@+id/FIP"
-            android:text="@string/NumberOfFSP"/>
-        <TextView
-            android:id="@+id/FSPC"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:textSize="15sp"
-            android:textColor="@color/LightBlue"
-            android:layout_marginBottom="10dp"
-            android:layout_below="@+id/FIPC"
-            android:layout_toRightOf="@+id/FSP"
-            android:text="20"
-            android:layout_toEndOf="@+id/FSP" />
+            android:minHeight="50dp"
+            android:orientation="horizontal">
 
-    </RelativeLayout>
+            <TextView
+                android:id="@+id/FAP"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp"
+                android:text="@string/NumberOfFAP"
+                android:textColor="@color/Black"
+                android:textSize="15sp" />
 
+            <TextView
+                android:id="@+id/FAPC"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/LightBlue"
+                android:textSize="15sp"
+                tools:text="20" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="10dp"
+            android:minHeight="50dp">
+
+            <TextView
+                android:id="@+id/FEP"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp"
+                android:text="@string/NumberOfFEP"
+                android:textColor="@color/Black"
+                android:textSize="15sp" />
+
+            <TextView
+                android:id="@+id/FEPC"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:textColor="@color/LightBlue"
+                android:textSize="15sp"
+                tools:text="20" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="10dp"
+            android:minHeight="50dp">
+
+            <TextView
+                android:id="@+id/FIP"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp"
+                android:text="@string/NumberOfFIP"
+                android:textColor="@color/Black"
+                android:textSize="15sp" />
+
+            <TextView
+                android:id="@+id/FIPC"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/LightBlue"
+                android:textSize="15sp"
+                tools:text="20" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="10dp"
+            android:minHeight="50dp">
+
+            <TextView
+                android:id="@+id/FSP"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp"
+                android:text="@string/NumberOfFSP"
+                android:textColor="@color/Black"
+                android:textSize="15sp" />
+
+            <TextView
+                android:id="@+id/FSPC"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/LightBlue"
+                android:textSize="15sp"
+                tools:text="20" />
+        </TableRow>
+    </TableLayout>
 
 </LinearLayout>

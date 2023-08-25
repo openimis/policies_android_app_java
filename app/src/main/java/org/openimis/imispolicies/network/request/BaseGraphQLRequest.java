@@ -10,6 +10,7 @@ import com.apollographql.apollo.api.Query;
 import com.apollographql.apollo.api.Response;
 import com.apollographql.apollo.exception.ApolloException;
 
+import org.openimis.imispolicies.network.exception.HttpException;
 import org.openimis.imispolicies.type.CustomType;
 import org.openimis.imispolicies.BuildConfig;
 import org.openimis.imispolicies.network.apollo.DateCustomTypeAdapter;
@@ -17,6 +18,7 @@ import org.openimis.imispolicies.network.apollo.DateTimeCustomTypeAdapter;
 import org.openimis.imispolicies.network.apollo.DecimalCustomTypeAdapter;
 import org.openimis.imispolicies.network.util.OkHttpUtils;
 
+import java.net.HttpURLConnection;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -60,6 +62,19 @@ public abstract class BaseGraphQLRequest {
         if (exception != null) {
             throw exception;
         }
-        return responses[0];
+        Response<T> response = responses[0];
+        if (response.hasErrors()) {
+            String details = response.getErrors().get(0).getMessage();
+            if (details.equals("User not authorized for this operation")) {
+                throw new HttpException(
+                        HttpURLConnection.HTTP_UNAUTHORIZED,
+                        details,
+                        null,
+                        null
+                );
+            }
+            throw new RuntimeException(response.toString());
+        }
+        return response;
     }
 }

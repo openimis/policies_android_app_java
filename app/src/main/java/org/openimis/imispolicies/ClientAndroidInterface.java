@@ -2932,7 +2932,6 @@ public class ClientAndroidInterface {
 
             QueryI = Query;
 
-            JSONObject O = null;
             //try {
             if (insureesArray.length() > 0) {
                 JSONObject o = insureesArray.getJSONObject(0);
@@ -3060,7 +3059,6 @@ public class ClientAndroidInterface {
 
                 objEnrol = new JSONObject();
                 objEnrol.put("InsureePolicy", InsureePolicyArray);
-                String InsureePolicy = objEnrol.toString();
 
                 if (CallerId != 2) {
                     List<Pair<String, byte[]>> InsureeImages = FamilyPictures(insureesArray, CallerId);
@@ -3149,13 +3147,11 @@ public class ClientAndroidInterface {
                     }
                 } else {
                     if (!"".equals(QueryF)) {
-                        String fname = sqlHandler.getExportAsXML(QueryF, QueryI, QueryPL, QueryPR, QueryIP, global.getOfficerCode(), global.getOfficerId());
+                        sqlHandler.getExportAsXML(QueryF, QueryI, QueryPL, QueryPR, QueryIP, global.getOfficerCode(), global.getOfficerId());
                         FamilyPictures(insureesArray, 2);
                     }
                     EnrolResult = 0;
                 }
-                int g = 0;
-//             EnrolResult=1001;
                 if (EnrolResult >= 0) {
                     updatePolicyRecords(Policy);
                     if (IsOffline == 0 && EnrolResult > 0) {
@@ -3246,12 +3242,11 @@ public class ClientAndroidInterface {
 
     public void updatePolicyRecords(String policy) throws JSONException {
         JSONObject object = new JSONObject(policy);
-        JSONObject ob = null;
         String policies = object.getString("Policy");
         JSONArray jsonArray = new JSONArray(policies);
         if (jsonArray.length() > 0) {
             for (int i = 0; i < jsonArray.length(); i++) {
-                ob = jsonArray.getJSONObject(i);
+                JSONObject ob = jsonArray.getJSONObject(i);
                 int policyId = ob.getInt("PolicyId");
                 updateUploadedDate(policyId);
             }

@@ -772,7 +772,7 @@ public class MainActivity extends AppCompatActivity
 
     public static class MasterDataAsync extends AsyncTask<Void, Void, Throwable> {
         private final WeakReference<MainActivity> activity;
-        private ProgressDialog pd = null;
+        private WeakReference<ProgressDialog> pd = null;
 
         public MasterDataAsync(@NonNull MainActivity context) {
             this.activity = new WeakReference<>(context);
@@ -784,7 +784,7 @@ public class MainActivity extends AppCompatActivity
             if (context == null) {
                 return;
             }
-            pd = ProgressDialog.show(context, context.getResources().getString(R.string.Sync), context.getResources().getString(R.string.DownloadingMasterData));
+            pd = new WeakReference<>(AndroidUtils.showProgressDialog(context, R.string.Sync, R.string.DownloadingMasterData));
         }
 
         @Override
@@ -806,7 +806,10 @@ public class MainActivity extends AppCompatActivity
 
         @Override
         protected void onPostExecute(Throwable exception) {
-            pd.dismiss();
+            ProgressDialog progress = pd.get();
+            if (progress != null) {
+                progress.dismiss();
+            }
             final Activity context = activity.get();
             if (context == null) {
                 return;
@@ -828,7 +831,7 @@ public class MainActivity extends AppCompatActivity
     public static class MasterDataLocalAsync extends AsyncTask<String, Void, Void> {
 
         private final WeakReference<MainActivity> activity;
-        private ProgressDialog pd = null;
+        private WeakReference<ProgressDialog> pd;
 
         public MasterDataLocalAsync(@NonNull MainActivity context) {
             this.activity = new WeakReference<>(context);
@@ -840,7 +843,7 @@ public class MainActivity extends AppCompatActivity
             if (context == null) {
                 return;
             }
-            pd = ProgressDialog.show(context, context.getResources().getString(R.string.Sync), context.getResources().getString(R.string.DownloadingMasterData));
+            pd = new WeakReference<>(AndroidUtils.showProgressDialog(context, R.string.Sync, R.string.DownloadingMasterData));
         }
 
         @Override
@@ -861,7 +864,10 @@ public class MainActivity extends AppCompatActivity
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            pd.dismiss();
+            ProgressDialog progress = pd.get();
+            if (progress != null) {
+                progress.dismiss();
+            }
             Activity context = activity.get();
             if (context == null) {
                 return;

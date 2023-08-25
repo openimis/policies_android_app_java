@@ -19,10 +19,12 @@ public class GetReportFeedbackGraphQLRequest extends BaseGraphQLRequest {
     @WorkerThread
     @NonNull
     public GetReportFeedbackQuery.Data get(
+            @Nullable String officerCode,
             @Nullable Date fromDate,
             @Nullable Date toDate
     ) throws Exception {
         Response<GetReportFeedbackQuery.Data> response = makeSynchronous(new GetReportFeedbackQuery(
+                Input.fromNullable(officerCode),
                 Input.fromNullable(fromDate),
                 Input.fromNullable(toDate)
         ));

@@ -38,6 +38,7 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Environment;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import org.json.JSONArray;
@@ -45,6 +46,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.openimis.imispolicies.tools.Log;
 import org.openimis.imispolicies.util.StreamUtils;
+import org.openimis.imispolicies.util.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -130,6 +132,15 @@ public class Global extends Application {
     @Nullable
     public String getOfficerCode() {
         return OfficerCode;
+    }
+
+    @NonNull
+    public String requireOfficerCode() {
+        String officerCode = getOfficerCode();
+        if (StringUtils.isEmpty(officerCode)) {
+            throw new IllegalStateException("OfficerCode is null or empty");
+        }
+        return officerCode;
     }
 
     public void setOfficerCode(@Nullable String officerCode) {

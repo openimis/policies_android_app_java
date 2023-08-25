@@ -20,12 +20,6 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 
 public class ToRestApi {
-    public static class UploadStatus {
-        public static final int NO_RESPONSE = -1;
-        public static final int REJECTED = 0;
-        public static final int ACCEPTED = 1;
-        public static final int ERROR = 2;
-    }
 
     public static class RenewalStatus {
         public static final int ACCEPTED = 3001;

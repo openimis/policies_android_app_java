@@ -2,66 +2,53 @@ package org.openimis.imispolicies;
 
 import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
-import androidx.annotation.StringRes;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
-import android.widget.RelativeLayout;
+import android.widget.DatePicker;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import cz.msebera.android.httpclient.HttpEntity;
-import cz.msebera.android.httpclient.HttpResponse;
-import cz.msebera.android.httpclient.util.EntityUtils;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import org.openimis.imispolicies.domain.entity.CumulativePolicies;
+import org.openimis.imispolicies.network.exception.HttpException;
+import org.openimis.imispolicies.usecase.FetchCumulativePolicies;
+import org.openimis.imispolicies.util.AndroidUtils;
+import org.openimis.imispolicies.util.TextViewUtils;
 
-import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Locale;
+
+import kotlin.jvm.functions.Function1;
 
 public class CumulativeIndicators extends AppCompatActivity {
-    private Global global;
 
-    private Boolean ClickedFrom = false;
-    private Boolean ClickedTo = false;
-
-    private Calendar myCalendar;
-
-    private Button DateFrom;
-    private Button DateTo;
-    private Button btnGet;
-
+    private static final String FROM = "from";
+    private static final String TO = "to";
+    private View cumulativeReport;
     private TextView NPC;
     private TextView RPC;
     private TextView EPC;
     private TextView SPC;
     private TextView CCC;
 
-    private ProgressDialog pd;
-    private RelativeLayout CumulativeReport;
-
-    private String cumulative = null;
-
-    private DatePickerDialog.OnDateSetListener date = (view, year, monthOfYear, dayOfMonth) -> {
-        myCalendar.set(Calendar.YEAR, year);
-        myCalendar.set(Calendar.MONTH, monthOfYear);
-        myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-        updateLabel();
-    };
+    @Nullable
+    private Calendar from = null;
+    @Nullable
+    private Calendar to = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cumulative_indicators);
 
-        global = (Global) getApplicationContext();
 
         final ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
@@ -69,9 +56,23 @@ public class CumulativeIndicators extends AppCompatActivity {
             actionBar.setTitle(getResources().getString(R.string.CumulativeIndicators));
         }
 
-        DateFrom = findViewById(R.id.DateFrom);
-        DateTo = findViewById(R.id.DateTo);
-        btnGet = findViewById(R.id.btnGet);
+        TextView dateFrom = findViewById(R.id.DateFrom);
+        TextView dateTo = findViewById(R.id.DateTo);
+
+        if (savedInstanceState != null) {
+            long fromLong = savedInstanceState.getLong(FROM);
+            if (fromLong != -1) {
+                from = Calendar.getInstance();
+                from.setTimeInMillis(fromLong);
+                TextViewUtils.setDate(dateFrom, from.getTime());
+            }
+            long toLong = savedInstanceState.getLong(TO);
+            if (toLong != -1) {
+                to = Calendar.getInstance();
+                to.setTimeInMillis(toLong);
+                TextViewUtils.setDate(dateTo, to.getTime());
+            }
+        }
 
         NPC = findViewById(R.id.NPC);
         RPC = findViewById(R.id.RPC);
@@ -79,117 +80,73 @@ public class CumulativeIndicators extends AppCompatActivity {
         SPC = findViewById(R.id.SPC);
         CCC = findViewById(R.id.CCC);
 
-        CumulativeReport = findViewById(R.id.CumulativeReport);
+        cumulativeReport = findViewById(R.id.CumulativeReport);
 
-        myCalendar = Calendar.getInstance();
+        dateFrom.setOnClickListener((view) -> showDatePickerDialog(dateFrom, from, (calendar) -> {
+            from = calendar;
+            return null;
+        }));
 
-        DateFrom.setOnClickListener((view) -> {
-            ClickedTo = false;
-            ClickedFrom = true;
-            new DatePickerDialog(CumulativeIndicators.this, date, myCalendar
-                    .get(Calendar.YEAR), myCalendar.get(Calendar.MONTH),
-                    myCalendar.get(Calendar.DAY_OF_MONTH)).show();
-        });
+        dateTo.setOnClickListener((view) -> showDatePickerDialog(dateTo, to, (calendar) -> {
+            to = calendar;
+            return null;
+        }));
 
-        DateTo.setOnClickListener((view) -> {
-            ClickedFrom = false;
-            ClickedTo = true;
-            new DatePickerDialog(CumulativeIndicators.this, date, myCalendar
-                    .get(Calendar.YEAR), myCalendar.get(Calendar.MONTH),
-                    myCalendar.get(Calendar.DAY_OF_MONTH)).show();
-        });
-
-        btnGet.setOnClickListener((view) -> {
-            if (!DateFrom.getText().equals("Date From") && !DateTo.getText().equals("Date To")) {
-                getCumulativeIndicators(String.valueOf(DateFrom.getText()), String.valueOf(DateTo.getText()));
+        findViewById(R.id.btnGet).setOnClickListener((view) -> {
+            if (!dateFrom.getText().equals("Date From") && !dateTo.getText().equals("Date To")) {
+                new GetCumulativePoliciesAsync(this).execute(from, to);
             } else {
                 showToast(R.string.pick_date, Toast.LENGTH_LONG);
             }
         });
     }
 
-    private void updateLabel() {
-        String myFormat = "yyyy-MM-dd";
-        SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
-
-        if (ClickedFrom) {
-            DateFrom.setText(sdf.format(myCalendar.getTime()));
-        } else {
-            DateTo.setText(sdf.format(myCalendar.getTime()));
-        }
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putLong(FROM, from != null ? from.getTimeInMillis() : -1);
+        outState.putLong(TO, to != null ? to.getTimeInMillis() : -1);
     }
 
-    public void getCumulativeIndicators(final String DateFrom, final String DateTo) {
-        if (global.isNetworkAvailable()) {
-            pd = ProgressDialog.show(CumulativeIndicators.this, "", getResources().getString(R.string.GetingCummulativeReport));
-            try {
-                new Thread(() -> {
-                    getCumulativeIndicatorsData(DateFrom, DateTo);
-                    runOnUiThread(this::showCumulativeIndicators);
-                    pd.dismiss();
-                }).start();
-            } catch (Exception e) {
-                showToast(R.string.ErrorOccurred, Toast.LENGTH_LONG);
-                e.printStackTrace();
-            }
+    private void showDatePickerDialog(
+            @NonNull TextView tv,
+            @Nullable Calendar date,
+            @NonNull Function1<Calendar, Void> onDateSet
+    ) {
+        Calendar c = date;
+        if (c == null) {
+            c = Calendar.getInstance();
         }
+        DatePickerDialog dialog = new DatePickerDialog(this,
+                (view, year, monthOfYear, dayOfMonth) -> {
+                    Calendar calendar = Calendar.getInstance();
+                    calendar.set(Calendar.YEAR, year);
+                    calendar.set(Calendar.MONTH, monthOfYear);
+                    calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                    TextViewUtils.setDate(tv, calendar.getTime());
+                    onDateSet.invoke(calendar);
+                },
+                c.get(Calendar.YEAR),
+                c.get(Calendar.MONTH),
+                c.get(Calendar.DAY_OF_MONTH)
+        );
+        DatePicker picker = dialog.getDatePicker();
+        if (from != null) {
+            picker.setMinDate(from.getTimeInMillis());
+        } if (to != null) {
+            picker.setMaxDate(to.getTimeInMillis());
+        }
+        dialog.show();
     }
 
-    public void getCumulativeIndicatorsData(String DateFrom, String DateTo) {
-        JSONObject cumulativeObj = new JSONObject();
-        try {
-            cumulativeObj.put("FromDate", DateFrom);
-            cumulativeObj.put("ToDate", DateTo);
-        } catch (JSONException e) {
-            e.printStackTrace();
-            return;
-        }
+    public void showCumulativeIndicators(@NonNull CumulativePolicies cumulative) {
+        NPC.setText(String.valueOf(cumulative.getNewPolicies()));
+        RPC.setText(String.valueOf(cumulative.getRenewedPolicies()));
+        EPC.setText(String.valueOf(cumulative.getExpiredPolicies()));
+        SPC.setText(String.valueOf(cumulative.getSuspendedPolicies()));
+        CCC.setText(String.valueOf(cumulative.getCollectedContributions()));
 
-        ToRestApi rest = new ToRestApi();
-        HttpResponse response = rest.postToRestApiToken(cumulativeObj, "report/indicators/cumulative");
-
-        if (response.getStatusLine().getStatusCode() == HttpURLConnection.HTTP_OK) {
-            try {
-                HttpEntity entity = response.getEntity();
-                cumulative = EntityUtils.toString(entity);
-            } catch (IOException e) {
-                showToast(R.string.ErrorOccurred, Toast.LENGTH_LONG);
-                e.printStackTrace();
-            }
-        } else {
-            switch (response.getStatusLine().getStatusCode()) {
-                case HttpURLConnection.HTTP_UNAUTHORIZED:
-                    showToast(R.string.LoginFail, Toast.LENGTH_LONG);
-                    break;
-                case HttpURLConnection.HTTP_INTERNAL_ERROR:
-                    showToast(R.string.SomethingWrongServer, Toast.LENGTH_LONG);
-                    break;
-                default:
-                    showToast(R.string.ErrorOccurred, Toast.LENGTH_LONG);
-                    break;
-            }
-        }
-    }
-
-    public void showCumulativeIndicators() {
-        if (cumulative != null && cumulative.length() > 0) {
-            try {
-                JSONObject ob = new JSONObject(cumulative);
-
-                NPC.setText(ob.getString("newPolicies"));
-                RPC.setText(ob.getString("renewedPolicies"));
-                EPC.setText(ob.getString("expiredPolicies"));
-                SPC.setText(ob.getString("suspendedPolicies"));
-                CCC.setText(ob.getString("collectedContribution"));
-
-                CumulativeReport.setVisibility(View.VISIBLE);
-            } catch (Exception e) {
-                e.printStackTrace();
-                Toast.makeText(getApplicationContext(), R.string.ErrorOccurred, Toast.LENGTH_LONG).show();
-            }
-        } else {
-            Toast.makeText(getApplicationContext(), R.string.NoData, Toast.LENGTH_LONG).show();
-        }
+        cumulativeReport.setVisibility(View.VISIBLE);
     }
 
     public void showToast(@StringRes int id, int length) {
@@ -198,12 +155,76 @@ public class CumulativeIndicators extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                finish();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+        if (item.getItemId() == android.R.id.home) {
+            finish();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @SuppressWarnings("deprecation")
+    private static class GetCumulativePoliciesAsync extends AsyncTask<Calendar, Void, CumulativePolicies> {
+        @NonNull
+        private final WeakReference<CumulativeIndicators> reference;
+        private WeakReference<ProgressDialog> pd;
+
+        GetCumulativePoliciesAsync(CumulativeIndicators activity) {
+            this.reference = new WeakReference<>(activity);
+        }
+
+        @Override
+        protected void onPreExecute() {
+            CumulativeIndicators activity = reference.get();
+            if (activity == null || activity.isFinishing()) {
+                return;
+            }
+            activity.cumulativeReport.setVisibility(View.GONE);
+            pd = new WeakReference<>(
+                    AndroidUtils.showProgressDialog(activity, 0, R.string.GetingSnapShotReport)
+            );
+        }
+
+        @Override
+        protected CumulativePolicies doInBackground(Calendar... calendars) {
+            try {
+                return new FetchCumulativePolicies().execute(calendars[0].getTime(), calendars[1].getTime());
+            } catch (Exception e) {
+                e.printStackTrace();
+                CumulativeIndicators activity = reference.get();
+                if (activity == null || activity.isFinishing()) {
+                    return null;
+                }
+                if (e instanceof HttpException) {
+                    switch (((HttpException) e).getCode()) {
+                        case HttpURLConnection.HTTP_UNAUTHORIZED:
+                            activity.showToast(R.string.LoginFail, Toast.LENGTH_LONG);
+                            break;
+                        case HttpURLConnection.HTTP_INTERNAL_ERROR:
+                            activity.showToast(R.string.SomethingWrongServer, Toast.LENGTH_LONG);
+                            break;
+                        default:
+                            activity.showToast(R.string.ErrorOccurred, Toast.LENGTH_LONG);
+                            break;
+                    }
+                }
+                activity.showToast(R.string.ErrorOccurred, Toast.LENGTH_LONG);
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(@Nullable CumulativePolicies cumulativePolicies) {
+            ProgressDialog progress = pd.get();
+            if (progress != null) {
+                progress.dismiss();
+            }
+            if (cumulativePolicies != null) {
+                CumulativeIndicators activity = reference.get();
+                if (activity == null || activity.isFinishing()) {
+                    return;
+                }
+                activity.showCumulativeIndicators(cumulativePolicies);
+            }
         }
     }
 }
