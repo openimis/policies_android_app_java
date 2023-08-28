@@ -741,7 +741,11 @@ public class SQLHandler extends SQLiteOpenHelper {
                     JSONObject object = array.getJSONObject(i);
                     ContentValues cv = new ContentValues();
                     for (String c : Columns) {
-                        cv.put(c, object.getString(c));
+                        try {
+                            cv.put(c, object.getString(c));
+                        } catch (JSONException ignored) {
+
+                        }
                     }
                     mDatabase.insert(TableName, null, cv);
 

@@ -1,0 +1,84 @@
+query GetFamily($headChfId: String) {
+    families(headInsuree_ChfId: $headChfId, first:1) {
+        edges {
+            node {
+                legacyId
+                id
+                uuid
+                headInsuree {
+                    chfId
+                    uuid
+                    phone
+                }
+                location {
+                    legacyId
+                    id
+                    uuid
+                }
+                poverty
+                familyType {
+                    code
+                }
+                address
+                ethnicity
+                confirmationNo
+                confirmationType {
+                    code
+                }
+                isOffline
+                members(validityTo_Isnull:true) {
+                    edges {
+                        node {
+                            id
+                            chfId
+                            uuid
+                            phone
+                            passport
+                            lastName
+                            otherNames
+                            dob
+                            gender {
+                                code
+                            }
+                            marital
+                            cardIssued
+                            relationship {
+                                id
+                                altLanguage
+                            }
+                            profession {
+                                id
+                                altLanguage
+                            }
+                            education {
+                                id
+                                altLanguage
+                            }
+                            email
+                            typeOfId {
+                                code
+                                altLanguage
+                            }
+                            healthFacility {
+                                id
+                                uuid
+                                legacyId
+                            }
+                            currentAddress
+                            geolocation
+                            currentVillage {
+                                id
+                            }
+                            photo {
+                                photo
+                                filename
+                                folder
+                            }
+                            offline
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

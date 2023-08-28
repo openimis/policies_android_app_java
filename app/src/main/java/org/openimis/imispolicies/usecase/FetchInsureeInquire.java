@@ -1,7 +1,5 @@
 package org.openimis.imispolicies.usecase;
 
-import android.util.Base64;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
@@ -9,6 +7,7 @@ import androidx.annotation.WorkerThread;
 import org.openimis.imispolicies.GetInsureeInquireQuery;
 import org.openimis.imispolicies.domain.entity.Insuree;
 import org.openimis.imispolicies.domain.entity.Policy;
+import org.openimis.imispolicies.domain.utils.PhotoUtils;
 import org.openimis.imispolicies.network.request.GetInsureeInquireGraphQLRequest;
 import org.openimis.imispolicies.network.util.Mapper;
 
@@ -36,7 +35,7 @@ public class FetchInsureeInquire {
                 /* chfId = */ Objects.requireNonNull(node.chfId()),
                 /* name = */ node.lastName() + " " + node.otherNames(),
                 /* dateOfBirth = */ node.dob(),
-                /* gender = */ node.gender() != null ? node.gender().gender() : null,
+                /* gender = */ node.gender() != null ? Objects.requireNonNull(node.gender()).gender() : null,
                 /* photoPath = */ getPhotoPath(node.photos()),
                 /* photo = */ getPhotoBytes(node.photos()),
                 /* policies = */ Mapper.map(node.insureePolicies().edges(), this::toPolicy)
@@ -46,29 +45,20 @@ public class FetchInsureeInquire {
     @Nullable
     private String getPhotoPath(@NonNull List<GetInsureeInquireQuery.Photo> photos) {
         for (GetInsureeInquireQuery.Photo photo : photos) {
-            String filename = photo.filename();
-            if (filename != null) {
-                String folder = photo.folder();
-                if (folder != null) {
-                    folder = folder.replace('\\', '/');
-                    if (!folder.endsWith("/")) {
-                        folder += "/";
-                    }
-                    return folder + filename;
-                }
-                return filename;
+            String path = PhotoUtils.getPhotoPath(photo.folder(), photo.filename());
+            if (path != null) {
+                return path;
             }
         }
-
         return null;
     }
 
     @Nullable
     private byte[] getPhotoBytes(@NonNull List<GetInsureeInquireQuery.Photo> photos) {
         for (GetInsureeInquireQuery.Photo photo : photos) {
-            String photoBase64 = photo.photo();
-            if (photoBase64 != null) {
-                return Base64.decode(photoBase64, Base64.DEFAULT);
+            byte[] bytes = PhotoUtils.getPhotoBytes(photo.photo());
+            if (bytes != null) {
+                return bytes;
             }
         }
 

@@ -37,8 +37,6 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.icu.text.DecimalFormat;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -70,6 +68,7 @@ import org.intellij.lang.annotations.Language;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.openimis.imispolicies.domain.entity.Family;
 import org.openimis.imispolicies.domain.entity.FeedbackRequest;
 import org.openimis.imispolicies.domain.entity.PendingFeedback;
 import org.openimis.imispolicies.network.exception.HttpException;
@@ -77,13 +76,13 @@ import org.openimis.imispolicies.network.exception.UserNotAuthenticatedException
 import org.openimis.imispolicies.tools.ImageManager;
 import org.openimis.imispolicies.tools.Log;
 import org.openimis.imispolicies.tools.StorageManager;
+import org.openimis.imispolicies.usecase.FetchFamily;
 import org.openimis.imispolicies.usecase.FetchMasterData;
 import org.openimis.imispolicies.usecase.Login;
 import org.openimis.imispolicies.usecase.PostFeedback;
 import org.openimis.imispolicies.util.AndroidUtils;
 import org.openimis.imispolicies.util.DateUtils;
 import org.openimis.imispolicies.util.FileUtils;
-import org.openimis.imispolicies.util.JsonUtils;
 import org.openimis.imispolicies.util.StringUtils;
 import org.openimis.imispolicies.util.UriUtils;
 import org.openimis.imispolicies.util.ZipUtils;
@@ -91,7 +90,6 @@ import org.openimis.imispolicies.util.ZipUtils;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -159,7 +157,6 @@ public class ClientAndroidInterface {
         SQLiteDatabase database = sqlHandler.getReadableDatabase();
         filePath = database.getPath();
         storageManager = StorageManager.of(activity);
-        database.close();
         picassoInstance = new Picasso.Builder(activity)
                 .listener((picasso, path, exception) ->
                         Log.e("Images", String.format("Image load failed: %s", path.toString()), exception))
@@ -3061,7 +3058,7 @@ public class ClientAndroidInterface {
                 objEnrol.put("InsureePolicy", InsureePolicyArray);
 
                 if (CallerId != 2) {
-                    List<Pair<String, byte[]>> InsureeImages = FamilyPictures(insureesArray, CallerId);
+                    Pair<String, byte[]>[] InsureeImages = FamilyPictures(insureesArray, CallerId);
 
                     if (myList.size() == 0) {
                         JSONObject resultObj = new JSONObject();
@@ -3075,7 +3072,7 @@ public class ClientAndroidInterface {
                         for (int j = 0; j < insureesArray.length(); j++) {
                             tempInsureesArray = insureesArray;
                             JSONObject imgObj = new JSONObject();
-                            Pair<String, byte[]> img = InsureeImages.get(j);
+                            Pair<String, byte[]> img = InsureeImages[j];
                             if (img != null) {
                                 imgObj.put("ImageName", img.first);
                                 imgObj.put("ImageContent", Base64.encodeToString(img.second, Base64.DEFAULT));
@@ -3260,8 +3257,8 @@ public class ClientAndroidInterface {
         }
     }
 
-    public List<Pair<String, byte[]>> FamilyPictures(JSONArray insurees, int CallerId) throws IOException {
-        List<Pair<String, byte[]>> images = new ArrayList<>(insurees.length());
+    public Pair<String, byte[]>[] FamilyPictures(JSONArray insurees, int CallerId) throws IOException {
+        Pair<String, byte[]>[] images = new Pair[insurees.length()];
         int IsOffline;
         for (int j = 0; j < insurees.length(); j++) {
             try {
@@ -3291,10 +3288,8 @@ public class ClientAndroidInterface {
 
                             if (CallerId != 2) {
                                 Pair<String, byte[]> img = new Pair<>(files[0].getName(), imgcontent);
-                                images.set(j, img);
+                                images[j] = img;
                             }
-                        } catch (FileNotFoundException e) {
-                            e.printStackTrace();
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -3302,7 +3297,7 @@ public class ClientAndroidInterface {
                         byte[] imgcontent = new byte[0];
                         if (CallerId != 2) {
                             Pair<String, byte[]> img = new Pair<>("", imgcontent);
-                            images.set(j, img);
+                            images[j] = img;
                         }
 
                     }
@@ -3312,7 +3307,7 @@ public class ClientAndroidInterface {
                         if (getRule("AllowInsureeWithoutPhoto")) {
                             byte[] empty = new byte[0];
                             Pair<String, byte[]> img = new Pair<>("", empty);
-                            images.set(j, img);
+                            images[j] = img;
                         } else {
                             myList.add(getInsureeValidationError(
                                     chfid, lastname, othername,
@@ -3324,7 +3319,7 @@ public class ClientAndroidInterface {
                     } else {
                         byte[] empty = new byte[0];
                         Pair<String, byte[]> img = new Pair<>("", empty);
-                        images.set(j, img);
+                        images[j] = img;
                     }
 
                 }
@@ -4708,150 +4703,49 @@ public class ClientAndroidInterface {
 
     @JavascriptInterface
     @SuppressWarnings("unused")
-    public int ModifyFamily(final String InsuranceNumber) {
-        int isFamilyAvailable = 0;
+    public int ModifyFamily(final String insuranceNumber) {
         inProgress = true;
 
-        int insureeCount = sqlHandler.getCount("tblInsuree", "Trim(CHFID) = ?", new String[]{InsuranceNumber});
+        int insureeCount = sqlHandler.getCount("tblInsuree", "Trim(CHFID) = ?", new String[]{insuranceNumber});
         if (insureeCount > 0) {
             ShowDialog(activity.getResources().getString(R.string.FamilyExists));
+            return 1;
         } else {
             try {
-                ToRestApi rest = new ToRestApi();
-                HttpResponse response = rest.getFromRestApiToken("family/" + InsuranceNumber.trim());
-                String error = rest.getHttpError(activity, response.getStatusLine().getStatusCode(), response.getStatusLine().getReasonPhrase());
-                String content = rest.getContent(response);
-
-                if (response.getStatusLine().getStatusCode() == HttpURLConnection.HTTP_NOT_FOUND) {
-                    ShowDialog(activity.getResources().getString(R.string.InsuranceNumberNotFound));
-                } else if (!StringUtils.isEmpty(error)) {
-                    ShowDialog(error);
-                } else if (StringUtils.isEmpty(content)) {
-                    ShowDialog(activity.getResources().getString(R.string.SomethingWrongServer));
-                } else {
-                    JSONObject FamilyData = new JSONObject(content);
-                    if (FamilyData.length() != 0) {
-                        parseFamilyData(FamilyData);
-                        isFamilyAvailable = 1;
-                    } else {
-                        ShowDialog(activity.getResources().getString(R.string.InsuranceNumberNotFound));
-                    }
-                }
-            } catch (JSONException | UserException | IOException e) {
+                Family family = new FetchFamily().execute(insuranceNumber);
+                InsertFamilyDataFromOnline(family);
+                InsertInsureeDataFromOnline(family.getMembers());
+                return 1;
+            } catch (Exception e) {
                 Log.e("MODIFYFAMILY", "Error while downloading a family", e);
-            }
-        }
-
-        return isFamilyAvailable;
-    }
-
-    private void parseFamilyData(JSONObject familyData) throws JSONException, UserException, IOException {
-        JSONArray newFamilyArr = new JSONArray();
-        JSONArray newInsureeArr = new JSONArray();
-
-        familyData.put("familyId", "-" + familyData.getString("familyId"));
-        familyData.put("insureeId", "-" + familyData.getString("insureeId"));
-
-        // Copy oryginal object
-        JSONObject cloneFamilyData = new JSONObject(familyData.toString());
-        JSONArray Insuree = (JSONArray) cloneFamilyData.get("insurees");
-
-        String familyUUID = familyData.getString("familyUUID");
-        String familyId = familyData.getString("familyId");
-
-        // Add familyUUID to Insuree
-        for (int i = 0; i < Insuree.length(); i++) {
-            JSONObject obj = (JSONObject) Insuree.get(i);
-            obj.put("familyId", familyId);
-            obj.put("familyUUID", familyUUID);
-            obj.put("insureeId", "-" + obj.getString("insureeId"));
-        }
-
-        // Remove insurees from FamilyData
-        JSONArray RemovedInsurees = (JSONArray) cloneFamilyData.remove("insurees");
-
-        // Family array without insurees
-        JSONArray familyArray = new JSONArray();
-        familyArray.put(cloneFamilyData);
-
-
-        for (int j = 0; j < familyArray.length(); j++) {
-            JSONObject ob = familyArray.getJSONObject(j);
-            String poverty = ob.getString("poverty");
-            String isOffline = ob.getString("isOffline");
-
-            ob.put("poverty", "true".equals(poverty) || "1".equals(poverty) ? 1 : 0);
-            ob.put("isOffline", "true".equals(isOffline) || "1".equals(isOffline) ? 1 : 0);
-
-            newFamilyArr.put(ob);
-        }
-
-        for (int j = 0; j < Insuree.length(); j++) {
-            JSONObject ob = Insuree.getJSONObject(j);
-            String isOffline = ob.getString("isOffline");
-            String isHead = ob.getString("isHead");
-
-            ob.put("isOffline", "true".equals(isOffline) || "1".equals(isOffline) ? 1 : 0);
-            ob.put("isHead", "true".equals(isHead) || "1".equals(isHead) ? 1 : 0);
-
-
-            newInsureeArr.put(ob);
-        }
-
-        //Iterate insuree array and download image for each Insuree
-        for (int i = 0; i < newInsureeArr.length(); i++) {
-            JSONObject insureeObj = newInsureeArr.getJSONObject(i);
-
-            if (!JsonUtils.isStringEmpty(insureeObj, "photoPath", true)) {
-                String[] photoPathSegments = insureeObj.getString("photoPath").split("[\\\\/]");
-                String photoName = photoPathSegments[photoPathSegments.length - 1];
-                if (!StringUtils.isEmpty(photoName)) {
-                    String imagePath = global.getImageFolder() + photoName;
-                    insureeObj.put("photoPath", imagePath);
-                    OutputStream imageOutputStream = new FileOutputStream(imagePath);
-                    if (!JsonUtils.isStringEmpty(insureeObj, "photoBase64", true)) {
-                        try {
-                            byte[] imageBytes = Base64.decode(insureeObj.getString("photoBase64").getBytes(), Base64.DEFAULT);
-                            Bitmap image = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
-                            image.compress(Bitmap.CompressFormat.JPEG, 100, imageOutputStream);
-                        } catch (Exception e) {
-                            Log.e("MODIFYFAMILY", "Error while processing Base64 image", e);
-                        }
-                    } else {
-                        if (photoName.length() > 0) {
-                            String photoUrl = String.format("%sImages/Updated/%s", AppInformation.DomainInfo.getDomain(), photoName);
-                            Target imageTarget = new OutputStreamImageTarget(imageOutputStream, 100);
-                            activity.runOnUiThread(() -> picassoInstance.load(photoUrl).into(imageTarget));
-                        }
-                    }
+                if (e instanceof HttpException && ((HttpException) e).getCode() == HttpURLConnection.HTTP_NOT_FOUND) {
+                    ShowDialog(activity.getResources().getString(R.string.InsuranceNumberNotFound));
+                } else {
+                    ShowDialog(activity.getResources().getString(R.string.SomethingWrongServer) + ": " + e.getMessage());
                 }
             }
         }
 
-        InsertFamilyDataFromOnline(newFamilyArr);
-        InsertInsureeDataFromOnline(newInsureeArr);
+        return 0;
     }
 
-    private void InsertFamilyDataFromOnline(JSONArray jsonArray) throws JSONException {
-        JSONObject object = jsonArray.getJSONObject(0);
-        UUID FamilyUUID = UUID.fromString(object.getString("familyUUID"));
+    private void InsertFamilyDataFromOnline(@NonNull Family family) throws JSONException {
+        UUID FamilyUUID = UUID.fromString(family.getUuid());
 
         @Language("SQL")
         String QueryCheck = "SELECT FamilyUUID FROM tblFamilies WHERE FamilyUUID = '" + FamilyUUID + "' AND (isOffline = 0 OR isOffline = 2)";
-        JSONArray CheckedArrey = sqlHandler.getResult(QueryCheck, null);
-        if (CheckedArrey.length() == 0) {
+        if (sqlHandler.getResult(QueryCheck, null).length() == 0) {
             String[] Columns = {"familyId", "familyUUID", "insureeId", "insureeUUID", "locationId", "poverty", "isOffline", "familyType",
                     "familyAddress", "ethnicity", "confirmationNo", "confirmationType"};
-            sqlHandler.insertData("tblFamilies", Columns, jsonArray.toString(), "");
+            sqlHandler.insertData("tblFamilies", Columns, toJSONArray(family), "");
 
-            if (!JsonUtils.isStringEmpty(object, "familySMS", true)) {
-                JSONObject smsData = object.getJSONObject("familySMS");
+            if (family.getSms() != null) {
                 try {
-                    addOrUpdateFamilySms(object.getInt("familyId"),
-                            smsData.getBoolean("approvalOfSMS"),
-                            smsData.getString("languageOfSMS")
+                    addOrUpdateFamilySms(family.getId(),
+                            family.getSms().isApproval(),
+                            family.getSms().getLanguage()
                     );
-                } catch (UserException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                     Log.w("ModifyFamily", "No familySMS data in family payload");
                 }
@@ -4859,22 +4753,70 @@ public class ClientAndroidInterface {
         }
     }
 
+    @NonNull
+    private JSONArray toJSONArray(@NonNull Family family) throws JSONException {
+        JSONArray array = new JSONArray();
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("familyId", family.getId());
+        jsonObject.put("familyUUID", family.getUuid());
+        jsonObject.put("insureeId", family.getHead().getId());
+        jsonObject.put("insureeUUID", family.getHead().getUuid());
+        jsonObject.put("locationId", family.getLocationId());
+        jsonObject.put("poverty", family.isPoor());
+        jsonObject.put("isOffline", family.isOffline());
+        jsonObject.put("familyType", family.getType());
+        jsonObject.put("familyAddress", family.getAddress());
+        jsonObject.put("ethnicity", family.getEthnicity());
+        jsonObject.put("confirmationNo", family.getConfirmationNumber());
+        jsonObject.put("confirmationType", family.getConfirmationType());
+        array.put(jsonObject);
+        return array;
+    }
 
-    private void InsertInsureeDataFromOnline(JSONArray jsonArray) throws JSONException {
-        for (int i = 0; i < jsonArray.length(); i++) {
-            JSONArray TempJsonArray = new JSONArray();
-            JSONObject object = jsonArray.getJSONObject(i);
-            String CHFID = object.getString("chfid");
+
+    private void InsertInsureeDataFromOnline(@NonNull List<Family.Member> members) throws JSONException {
+        JSONArray array = new JSONArray();
+        for (Family.Member member : members) {
             @Language("SQL")
-            String QueryCheck = "SELECT InsureeUUID FROM tblInsuree WHERE Trim(CHFID) = '" + CHFID + "' AND (isOffline = 0 OR isOffline = 2)";
-            JSONArray CheckedArrey = sqlHandler.getResult(QueryCheck, null);
-            if (CheckedArrey.length() == 0) {
-                TempJsonArray.put(jsonArray.getJSONObject(i));
-                String[] Columns = {"identificationNumber", "familyId", "insureeId", "insureeUUID", "familyUUID", "chfid", "lastName", "otherNames", "dob", "gender", "marital", "isHead", "phone", "photoPath", "cardIssued",
-                        "isOffline", "relationship", "profession", "education", "email", "typeOfId", "hfid", "currentAddress", "geoLocation", "curVillage"};
-                sqlHandler.insertData("tblInsuree", Columns, TempJsonArray.toString(), "");
+            String QueryCheck = "SELECT InsureeUUID FROM tblInsuree WHERE Trim(CHFID) = '" + member.getChfId() + "' AND (isOffline = 0 OR isOffline = 2)";
+            if (sqlHandler.getResult(QueryCheck, null).length() == 0) {
+                array.put(toJSONObject(member));
             }
         }
+        String[] Columns = {"identificationNumber", "familyId", "insureeId", "insureeUUID", "familyUUID", "chfid", "lastName", "otherNames", "dob", "gender", "marital", "isHead", "phone", "photoPath", "cardIssued",
+                "isOffline", "relationship", "profession", "education", "email", "typeOfId", "hfid", "currentAddress", "geoLocation", "curVillage"};
+        sqlHandler.insertData("tblInsuree", Columns, array, "");
+    }
+
+    @NonNull
+    private JSONObject toJSONObject(@NonNull Family.Member member) throws JSONException {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("identificationNumber", member.getIdentificationNumber());
+        jsonObject.put("familyId", member.getFamilyId());
+        jsonObject.put("insureeId", member.getId());
+        jsonObject.put("insureeUUID", member.getUuid());
+        jsonObject.put("familyUUID", member.getFamilyUuid());
+        jsonObject.put("chfid", member.getChfId());
+        jsonObject.put("lastName", member.getLastName());
+        jsonObject.put("otherNames", member.getOtherNames());
+        jsonObject.put("dob", DateUtils.toDateString(member.getDateOfBirth()));
+        jsonObject.put("gender", member.getGender());
+        jsonObject.put("marital", member.getMarital());
+        jsonObject.put("isHead", member.isHead());
+        jsonObject.put("phone", member.getPhone());
+        jsonObject.put("photoPath", member.getPhotoPath());
+        jsonObject.put("cardIssued", member.isCardIssued());
+        jsonObject.put("isOffline", member.isOffline());
+        jsonObject.put("relationship", member.getRelationship());
+        jsonObject.put("profession", member.getProfession());
+        jsonObject.put("education", member.getEducation());
+        jsonObject.put("email", member.getEmail());
+        jsonObject.put("typeOfId", member.getTypeOfId());
+        jsonObject.put("hfid", member.getHealthFacilityId());
+        jsonObject.put("currentAddress", member.getCurrentAddress());
+        jsonObject.put("geoLocation", member.getGeolocation());
+        jsonObject.put("curVillage", member.getCurrentVillage());
+        return jsonObject;
     }
 
     //****************************Online Statistics ******************************//
