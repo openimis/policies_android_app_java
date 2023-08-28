@@ -3540,7 +3540,7 @@ public class ClientAndroidInterface {
     @JavascriptInterface
     @SuppressWarnings("unused")
     public void Logout() {
-        global.getJWTToken().clearToken();
+        global.getLoginRepository().logout();
         MainActivity.SetLoggedIn();
     }
 
@@ -5145,6 +5145,7 @@ public class ClientAndroidInterface {
     @MainThread
     public void showLoginDialogBox(@Nullable final Runnable onSuccess, @Nullable final Runnable onError) {
         if (!CheckInternetAvailable()) {
+            AndroidUtils.showDialog(activity, R.string.NoInternet);
             if (onError != null) {
                 onError.run();
             }

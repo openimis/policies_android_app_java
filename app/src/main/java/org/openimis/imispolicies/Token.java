@@ -2,6 +2,9 @@ package org.openimis.imispolicies;
 
 import android.util.Base64;
 
+import androidx.annotation.Nullable;
+
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -20,15 +23,10 @@ import java.util.Locale;
 /**
  * Created by Hiren on 15/02/2019.
  */
-
+@Deprecated
 public class Token {
     private static final SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSXXX", Locale.US);
 
-    // It's inefficient but it's to stay backward compatible without some logic to migrate the old
-    // file to store the value in long.
-    public void saveTokenText(String token, long validTo, String eoCode) {
-        saveTokenText(token, format.format(new Date(validTo)), eoCode);
-    }
     public void saveTokenText(String token, String validTo, String eoCode) {
         Global global = Global.getGlobal();
         String dir = global.getSubdirectory("Authentications");
@@ -74,65 +72,71 @@ public class Token {
         }
     }
 
-    public String getTokenText() {
-        String token = null;
-        String validTo = null;
-        String eoCode = null;
-        try {
-            Global global = Global.getGlobal();
-            String dir = global.getSubdirectory("Authentications");
+    @Nullable
+    public String getToken() {
+        Global global = Global.getGlobal();
+        String dir = global.getSubdirectory("Authentications");
+        File tokenFile = new File(dir, "token.txt");
+        if (tokenFile.exists()) {
+            try (FileInputStream fIn = new FileInputStream(tokenFile)) {
 
-            File eoCodeFile = new File(dir, "eoCode.txt");
-            if (eoCodeFile.exists()) {
-                FileInputStream fIn = new FileInputStream(eoCodeFile);
                 BufferedReader myReader = new BufferedReader(new InputStreamReader(fIn));
-                eoCode = myReader.readLine();
+                String token = myReader.readLine();
                 myReader.close();
+                return token;
+            } catch (IOException e) {
+                e.printStackTrace();
             }
+        }
+        return null;
+    }
 
-            File validToFile = new File(dir, "validTo.txt");
-            if (validToFile.exists()) {
-                FileInputStream fIn = new FileInputStream(validToFile);
+    @Nullable
+    public Date getValidity() {
+        Global global = Global.getGlobal();
+        String dir = global.getSubdirectory("Authentications");
+        File validToFile = new File(dir, "validTo.txt");
+        if (validToFile.exists()) {
+            try (FileInputStream fIn = new FileInputStream(validToFile)) {
                 BufferedReader myReader = new BufferedReader(new InputStreamReader(fIn));
-                validTo = myReader.readLine();
+                String validTo = myReader.readLine();
                 myReader.close();
-            }
-
-            File tokenFile = new File(dir, "token.txt");
-            if (tokenFile.exists()) {
-                FileInputStream fIn = new FileInputStream(tokenFile);
-                BufferedReader myReader = new BufferedReader(new InputStreamReader(fIn));
-                token = myReader.readLine();
-                myReader.close();
-            }
-
-            SimpleDateFormat format = AppInformation.DateTimeInfo.getDefaultIsoDatetimeFormatter();
-            if(Global.getGlobal().getOfficerCode() == null || !Global.getGlobal().getOfficerCode().equals(eoCode)) {
-                clearToken();
-                token = null;
-            }
-
-            if (validTo != null)
-                try {
-                    Date expiryDate = format.parse(validTo);
-                    Date now = new Date();
-
-                    if (now.after(expiryDate)) {
-                        clearToken();
-                        token = null;
-                    }
-                } catch (ParseException | NullPointerException e) {
-                    e.printStackTrace();
+                if (validTo == null || "".equals(validTo)) {
+                    return null;
                 }
-
-        } catch (IOException e) {
-            e.printStackTrace();
+                return getValidity(validTo);
+            } catch (IOException | ParseException e) {
+                e.printStackTrace();
+            }
         }
+        return null;
+    }
 
-        if (token == null) {
-            return "";
+    @Nullable
+    public static Date getValidity(@Nullable String date) throws ParseException {
+        if (date == null) {
+            return null;
         }
-        return token;
+        return format.parse(date);
+    }
+
+    @Nullable
+    public String getOfficerCode() {
+        Global global = Global.getGlobal();
+        String dir = global.getSubdirectory("Authentications");
+
+        File eoCodeFile = new File(dir, "eoCode.txt");
+        if (eoCodeFile.exists()) {
+            try (FileInputStream fIn = new FileInputStream(eoCodeFile)) {
+                BufferedReader myReader = new BufferedReader(new InputStreamReader(fIn));
+                String eoCode = myReader.readLine();
+                myReader.close();
+                return eoCode;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
     }
 
     public void clearToken() {
@@ -142,9 +146,15 @@ public class Token {
     //How to validate JWT:
     //https://datatracker.ietf.org/doc/html/rfc7519#section-7.2
     public boolean isTokenValidJWT() {
-        String token = getTokenText();
-        if (token == null)
+        String token = getToken();
+        if (StringUtils.isEmpty(token)) {
             return false;
+        }
+
+        String eoCode = getOfficerCode();
+        if (eoCode == null) {
+            return false;
+        }
 
         int indexOfFirstDot = token.indexOf('.');
         if (indexOfFirstDot == -1)
@@ -159,6 +169,8 @@ public class Token {
             return false;
         }
 
-        return true;
+        Date expiryDate = getValidity();
+        Date now = new Date();
+        return !now.after(expiryDate);
     }
 }

@@ -33,7 +33,7 @@ public class OkHttpUtils {
                     HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
                     interceptor.setLevel(BuildConfig.DEBUG ? HttpLoggingInterceptor.Level.BODY : HttpLoggingInterceptor.Level.BASIC);
                     builder.addInterceptor(interceptor);
-                    builder.addInterceptor(new AuthorizationInterceptor(Global.getGlobal()));
+                    builder.addInterceptor(new AuthorizationInterceptor(Global.getGlobal().getLoginRepository()));
                     client = OkHttpUtils.ignoreSslCertificateInDebug(builder).build();
                 }
             }

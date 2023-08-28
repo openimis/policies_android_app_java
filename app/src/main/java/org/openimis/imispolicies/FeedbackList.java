@@ -99,7 +99,7 @@ public class FeedbackList extends AppCompatActivity {
 
             (new Handler()).postDelayed(() -> {
                 try {
-                    if (Global.getGlobal().getJWTToken().isTokenValidJWT()) {
+                    if (Global.getGlobal().isLoggedIn()) {
                         RefreshFeedbacks();
                     } else {
                         ca.forceLoginDialogBox(() -> {

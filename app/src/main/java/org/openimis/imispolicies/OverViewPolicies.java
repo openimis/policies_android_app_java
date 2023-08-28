@@ -48,8 +48,6 @@ public class OverViewPolicies extends AppCompatActivity {
     private RecyclerView PolicyRecyclerView;
     private OverViewPoliciesAdapter overViewPoliciesAdapter;
 
-    private ToRestApi toRestApi;
-    private Token tokenl;
     private ProgressDialog pd;
 
     private TextView ValueNumberOfPolices;
@@ -121,9 +119,6 @@ public class OverViewPolicies extends AppCompatActivity {
             actionBar.setTitle(getResources().getString(R.string.policies));
         }
 
-        tokenl = new Token();
-        toRestApi = new ToRestApi();
-
         ValueNumberOfPolices = findViewById(R.id.ValueNumberOfPolices);
         ValueAmountOfContribution = findViewById(R.id.ValueAmountOfContribution);
         pd = new ProgressDialog(this);
@@ -131,12 +126,11 @@ public class OverViewPolicies extends AppCompatActivity {
 
         NothingFound = findViewById(R.id.NothingFound);
 
-        final String[] n = {""};
         Button requestButton = findViewById(R.id.requestButton);
         requestButton.setOnClickListener(view -> {
             if (global.isNetworkAvailable()) {
-                if (tokenl.getTokenText().length() <= 0) {
-                    LoginDialogBox();
+                if (!global.isLoggedIn()) {
+                    clientAndroidInterface.showLoginDialogBox(null, null);
                 } else {
                     Global global = (Global) getApplicationContext();
 
@@ -146,11 +140,6 @@ public class OverViewPolicies extends AppCompatActivity {
                         getControlNumber.put("enrolment_officer_code", global.getOfficerCode());
                         getControlNumber.put("policies", paymentDetails);
                         getControlNumber.put("amount_to_be_paid", PolicyValueToSend);
-
-                        n[0] = "";
-                        for (int i = 0; i < num.size(); i++) {
-                            n[0] += num.get(i) + "\n";
-                        }
                         AmountCalculated = String.valueOf(PolicyValueToSend);
                         if (num.size() != 0) {
                             trackBox(getControlNumber, String.valueOf(PolicyValueToSend));
@@ -399,105 +388,6 @@ public class OverViewPolicies extends AppCompatActivity {
         AlertDialog alertDialog = alertDialogBuilder.create();
 
         // show it
-        alertDialog.show();
-    }
-
-    public void LoginDialogBox() {
-        if (!clientAndroidInterface.CheckInternetAvailable())
-            return;
-
-        Global global = (Global) OverViewPolicies.this.getApplicationContext();
-
-        // get prompts.xml view
-        LayoutInflater li = LayoutInflater.from(this);
-        View promptsView = li.inflate(R.layout.login_dialog, null);
-
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
-                this);
-
-        // set prompts.xml to alertdialog builder
-        alertDialogBuilder.setView(promptsView);
-
-        final TextView username = promptsView.findViewById(R.id.UserName);
-        final TextView password = promptsView.findViewById(R.id.Password);
-        String officer_code = global.getOfficerCode();
-        username.setText(String.valueOf(officer_code));
-        // set dialog message
-        alertDialogBuilder
-                .setCancelable(false)
-                .setPositiveButton(getResources().getString(R.string.Ok),
-                        (dialog, id) -> {
-                            if (!username.getText().toString().equals("") && !password.getText().toString().equals("")) {
-                                pd = ProgressDialog.show(OverViewPolicies.this, getResources().getString(R.string.Login), getResources().getString(R.string.InProgress));
-
-                                new Thread(() -> {
-                                    JSONObject object = new JSONObject();
-                                    try {
-                                        object.put("userName", username.getText().toString());
-                                        object.put("password", password.getText().toString());
-                                    } catch (JSONException e) {
-                                        e.printStackTrace();
-                                    }
-                                    String functionName = "login";
-                                    HttpResponse response = toRestApi.postToRestApi(object, functionName);
-
-                                    String content = null;
-                                    HttpEntity respEntity = response.getEntity();
-                                    if (respEntity != null) {
-                                        final String[] code = {null};
-                                        // EntityUtils to get the response content
-
-                                        try {
-                                            content = EntityUtils.toString(respEntity);
-                                        } catch (IOException e) {
-                                            e.printStackTrace();
-                                        }
-                                    }
-                                    if (response.getStatusLine().getStatusCode() == HttpURLConnection.HTTP_OK) {
-                                        JSONObject ob = null;
-                                        String token = "";
-                                        String validTo = "";
-                                        try {
-                                            ob = new JSONObject(content);
-                                            token = ob.getString("access_token");
-                                            validTo = ob.getString("expires_on");
-
-                                        } catch (JSONException e) {
-                                            e.printStackTrace();
-                                        }
-
-                                        tokenl.saveTokenText(token, validTo, global.getOfficerCode());
-
-                                        final String finalToken = token;
-                                        runOnUiThread(() -> {
-                                            if (finalToken.length() > 0) {
-                                                pd.dismiss();
-                                                Toast.makeText(OverViewPolicies.this, OverViewPolicies.this.getResources().getString(R.string.Login_Successful), Toast.LENGTH_LONG).show();
-                                            } else {
-                                                pd.dismiss();
-                                                Toast.makeText(OverViewPolicies.this, OverViewPolicies.this.getResources().getString(R.string.LoginFail), Toast.LENGTH_LONG).show();
-                                                LoginDialogBox();
-                                            }
-                                        });
-                                    } else {
-                                        runOnUiThread(() -> {
-                                            pd.dismiss();
-                                            Toast.makeText(OverViewPolicies.this, OverViewPolicies.this.getResources().getString(R.string.LoginFail), Toast.LENGTH_LONG).show();
-                                            LoginDialogBox();
-                                        });
-                                    }
-                                }
-                                ).start();
-                            } else {
-                                LoginDialogBox();
-                                Toast.makeText(OverViewPolicies.this, OverViewPolicies.this.getResources().getString(R.string.Enter_Credentials), Toast.LENGTH_LONG).show();
-                            }
-                        })
-                .setNegativeButton(R.string.Cancel,
-                        (dialog, id) -> dialog.cancel());
-
-        // create alert dialog
-        AlertDialog alertDialog = alertDialogBuilder.create();
         alertDialog.show();
     }
 

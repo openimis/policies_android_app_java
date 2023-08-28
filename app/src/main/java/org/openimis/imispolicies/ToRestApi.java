@@ -13,6 +13,7 @@ import cz.msebera.android.httpclient.impl.client.DefaultHttpClient;
 import cz.msebera.android.httpclient.util.EntityUtils;
 
 import org.json.JSONObject;
+import org.openimis.imispolicies.repository.LoginRepository;
 import org.openimis.imispolicies.tools.Log;
 import org.openimis.imispolicies.util.StringUtils;
 
@@ -45,12 +46,12 @@ public class ToRestApi {
     public static final String FUNCTION_PREFIX = "rest/api/";
 
 
-    private final Token token;
+    private final LoginRepository repository;
     private final String uri;
     private final String apiVersion;
 
     public ToRestApi() {
-        token = Global.getGlobal().getJWTToken();
+        repository = Global.getGlobal().getLoginRepository();
         uri = AppInformation.DomainInfo.getDomain() + FUNCTION_PREFIX;
         apiVersion = AppInformation.DomainInfo.getApiVersion();
     }
@@ -155,9 +156,7 @@ public class ToRestApi {
         HttpResponse response = null;
         try {
             response = httpClient.execute(httpDelete);
-            if (response != null && response.getStatusLine().getStatusCode() == HttpURLConnection.HTTP_UNAUTHORIZED) {
-                token.clearToken();
-            }
+            checkToken(response);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -189,13 +188,13 @@ public class ToRestApi {
 
     private void checkToken(HttpResponse response) {
         if (response != null && response.getStatusLine().getStatusCode() == HttpURLConnection.HTTP_UNAUTHORIZED) {
-            token.clearToken();
+            repository.saveRestToken(null, null, null);
             MainActivity.SetLoggedIn();
         }
     }
 
     private String buildTokenHeader() {
-        String tokenText = token.getTokenText();
+        String tokenText = repository.getRestToken();
         if (!StringUtils.isEmpty(tokenText)) {
             return String.format("bearer %s", tokenText.trim());
         }

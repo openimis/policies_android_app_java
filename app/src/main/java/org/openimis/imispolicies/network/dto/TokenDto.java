@@ -5,11 +5,13 @@ import androidx.annotation.NonNull;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.concurrent.TimeUnit;
+
 public class TokenDto {
 
     @NonNull
     public static TokenDto fromJson(@NonNull JSONObject object) throws JSONException {
-        return new TokenDto(object.getString("token"), object.getLong("exp"));
+        return new TokenDto(object.getString("token"), TimeUnit.SECONDS.toMillis(object.getLong("exp")));
     }
 
     @NonNull
