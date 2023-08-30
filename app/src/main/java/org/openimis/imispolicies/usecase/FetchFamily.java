@@ -52,19 +52,19 @@ public class FetchFamily {
                 /* confirmationNumber = */ node.confirmationNo(),
                 /* confirmationType = */ node.confirmationType() != null ? Objects.requireNonNull(node.confirmationType()).code() : null,
                 /* isOffline = */ node.isOffline() != null ? Objects.requireNonNull(node.isOffline()) : false,
-                /* insurees = */ Mapper.map(node.members().edges(), (edge) -> toMember(edge, headChfId, node))
+                /* insurees = */ Mapper.map(node.members().edges(), (edge) -> toMember(edge, node))
         );
     }
 
     @NonNull
-    private Family.Member toMember(@NonNull GetFamilyQuery.Edge1 edge, @NonNull String headChfId, @NonNull GetFamilyQuery.Node family) {
+    private Family.Member toMember(@NonNull GetFamilyQuery.Edge1 edge, @NonNull GetFamilyQuery.Node family) {
         GetFamilyQuery.Node1 member = Objects.requireNonNull(edge.node());
         return new Family.Member(
                 /* chfId = */ Objects.requireNonNull(member.chfId()),
-                /* isHead = */ headChfId.equals(member.chfId()),
+                /* isHead = */ member.head(),
                 /* id = */ -IdUtils.getIdFromGraphQLString(member.id()), // I have no idea why they add this '-'
                 /* uuid = */ member.uuid(),
-                /* familyId = */ -IdUtils.getIdFromGraphQLString(family.id()),
+                /* familyId = */ -IdUtils.getIdFromGraphQLString(family.id()),// I have no idea why they add this '-'
                 /* familyUuid = */ family.uuid(),
                 /* identificationNumber = */ member.passport(),
                 /* lastName = */ member.lastName(),
@@ -81,9 +81,10 @@ public class FetchFamily {
                 /* typeOfId = */ member.typeOfId() != null ? Objects.requireNonNull(member.typeOfId()).code() : null,
                 /* healthFacilityId = */ member.healthFacility() != null ? IdUtils.getIdFromGraphQLString(Objects.requireNonNull(member.healthFacility()).id()) : null,
                 /* currentAddress = */ member.currentAddress(),
-                /* currentVillage = */ member.currentVillage() != null ? Objects.requireNonNull(member.currentVillage()).id() : null,
+                /* currentVillage = */ member.currentVillage() != null ? IdUtils.getIdFromGraphQLString(Objects.requireNonNull(member.currentVillage()).id()) : null,
                 /* geolocation = */ member.geolocation(),
                 /* photoPath = */ downloadPhoto(member.photo()),
+                /* photoBytes = */ null, // We already saved them on disk, no need to pass them here.
                 /* isOffline = */ member.offline() != null ? Objects.requireNonNull(member.offline()) : false
         );
     }

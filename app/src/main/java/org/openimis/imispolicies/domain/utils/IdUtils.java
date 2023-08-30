@@ -11,7 +11,9 @@ public class IdUtils {
     }
 
     /**
-     * https://github.com/graphql-python/graphene-sqlalchemy/issues/126
+     * <a href="https://github.com/graphql-python/graphene-sqlalchemy/issues/126">
+     *     GraphQL encodes Nodes' int ids for some reasons
+     * </a>
      */
     public static int getIdFromGraphQLString(@NonNull String id) {
         return Integer.parseInt(new String(Base64.decode(id, Base64.NO_WRAP)).split(":", 2)[1]);

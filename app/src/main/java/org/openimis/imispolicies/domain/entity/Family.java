@@ -290,11 +290,13 @@ public class Family implements Parcelable {
         @Nullable
         private final String currentAddress;
         @Nullable
-        private final String currentVillage;
+        private final Integer currentVillage;
         @Nullable
         private final String geolocation;
         @Nullable
         private final String photoPath;
+        @Nullable
+        private final byte[] photoBytes;
         private final boolean isOffline;
 
         public Member(
@@ -302,7 +304,7 @@ public class Family implements Parcelable {
                 boolean isHead,
                 int id,
                 @Nullable String uuid,
-                @NonNull int familyId,
+                int familyId,
                 @NonNull String familyUuid,
                 @Nullable String identificationNumber,
                 @NonNull String lastName,
@@ -319,9 +321,10 @@ public class Family implements Parcelable {
                 @Nullable String typeOfId,
                 @Nullable Integer healthFacilityId,
                 @Nullable String currentAddress,
-                @Nullable String currentVillage,
+                @Nullable Integer currentVillage,
                 @Nullable String geolocation,
                 @Nullable String photoPath,
+                @Nullable byte[] photoBytes,
                 boolean isOffline
         ) {
             this.chfId = chfId;
@@ -348,6 +351,7 @@ public class Family implements Parcelable {
             this.currentVillage = currentVillage;
             this.geolocation = geolocation;
             this.photoPath = photoPath;
+            this.photoBytes = photoBytes;
             this.isOffline = isOffline;
         }
 
@@ -386,9 +390,17 @@ public class Family implements Parcelable {
             int hfId = in.readInt();
             healthFacilityId = hfId != -1 ? hfId : null;
             currentAddress = in.readString();
-            currentVillage = in.readString();
+            int villageId = in.readInt();
+            currentVillage = villageId != -1 ? villageId : null;
             geolocation = in.readString();
             photoPath = in.readString();
+            int size = in.readInt();
+            if (size >= 0) {
+                photoBytes = new byte[size];
+                in.readByteArray(photoBytes);
+            } else {
+                photoBytes = null;
+            }
             isOffline = in.readByte() != 0;
         }
 
@@ -430,9 +442,15 @@ public class Family implements Parcelable {
             dest.writeString(typeOfId);
             dest.writeInt(healthFacilityId != null ? healthFacilityId : -1);
             dest.writeString(currentAddress);
-            dest.writeString(currentVillage);
+            dest.writeInt(currentVillage != null ? currentVillage : -1);
             dest.writeString(geolocation);
             dest.writeString(photoPath);
+            if (photoBytes != null) {
+                dest.writeInt(photoBytes.length);
+                dest.writeByteArray(photoBytes);
+            } else {
+                dest.writeInt(-1);
+            }
             dest.writeByte((byte) (isOffline ? 1 : 0));
         }
 
@@ -543,7 +561,7 @@ public class Family implements Parcelable {
         }
 
         @Nullable
-        public String getCurrentVillage() {
+        public Integer getCurrentVillage() {
             return currentVillage;
         }
 
@@ -555,6 +573,11 @@ public class Family implements Parcelable {
         @Nullable
         public String getPhotoPath() {
             return photoPath;
+        }
+
+        @Nullable
+        public byte[] getPhotoBytes() {
+            return photoBytes;
         }
 
         public boolean isOffline() {

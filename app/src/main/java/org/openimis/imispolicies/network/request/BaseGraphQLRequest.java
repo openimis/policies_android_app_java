@@ -5,18 +5,19 @@ import androidx.annotation.WorkerThread;
 
 import com.apollographql.apollo.ApolloCall;
 import com.apollographql.apollo.ApolloClient;
+import com.apollographql.apollo.api.Mutation;
 import com.apollographql.apollo.api.Operation;
 import com.apollographql.apollo.api.Query;
 import com.apollographql.apollo.api.Response;
 import com.apollographql.apollo.exception.ApolloException;
 
-import org.openimis.imispolicies.network.exception.HttpException;
-import org.openimis.imispolicies.type.CustomType;
 import org.openimis.imispolicies.BuildConfig;
 import org.openimis.imispolicies.network.apollo.DateCustomTypeAdapter;
 import org.openimis.imispolicies.network.apollo.DateTimeCustomTypeAdapter;
 import org.openimis.imispolicies.network.apollo.DecimalCustomTypeAdapter;
+import org.openimis.imispolicies.network.exception.HttpException;
 import org.openimis.imispolicies.network.util.OkHttpUtils;
+import org.openimis.imispolicies.type.CustomType;
 
 import java.net.HttpURLConnection;
 import java.util.concurrent.Semaphore;
@@ -38,11 +39,19 @@ public abstract class BaseGraphQLRequest {
 
     @NonNull
     @WorkerThread
-    protected <T extends Operation.Data> Response<T> makeSynchronous(Query<T, ?, ?> query) throws Exception {
+    protected <T extends Operation.Data> Response<T> makeSynchronous(Operation<T, ?, ?> query) throws Exception {
         Semaphore semaphore = new Semaphore(0);
         final Exception[] exceptions = new Exception[1];
         final Response<T>[] responses = new Response[1];
-        apolloClient.query(query).enqueue(new ApolloCall.Callback() {
+        ApolloCall<?> call;
+        if (query instanceof Query) {
+            call = apolloClient.query((Query<T, ?, ?>) query);
+        } else if(query instanceof Mutation) {
+            call = apolloClient.mutate((Mutation<T, ?, ?>) query);
+        } else {
+            throw new IllegalArgumentException("Query is unsupported");
+        }
+        call.enqueue(new ApolloCall.Callback() {
             @Override
             public void onResponse(@NonNull Response response) {
                 responses[0] = response;

@@ -33,6 +33,7 @@ query GetFamily($headChfId: String) {
                             chfId
                             uuid
                             phone
+                            head
                             passport
                             lastName
                             otherNames
