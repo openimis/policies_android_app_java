@@ -85,7 +85,7 @@ public class JsonUtils {
 
     @Nullable
     public static Integer getIntegerOrDefault(@NonNull JSONObject object, @NonNull String field) {
-        return getIntegerOrDefault(object, field, null, true);
+        return getIntegerOrDefault(object, field, null);
     }
 
     @Nullable
@@ -98,6 +98,30 @@ public class JsonUtils {
         try {
             if (!isStringEmpty(object, field, checkNullString)) {
                 return Integer.parseInt(object.getString(field));
+            } else {
+                return defaultValue;
+            }
+        } catch (JSONException e) {
+            return defaultValue;
+        }
+    }
+
+
+    @Nullable
+    public static Double getDoubleOrDefault(@NonNull JSONObject object, @NonNull String field) {
+        return getDoubleOrDefault(object, field, null);
+    }
+
+    @Nullable
+    public static Double getDoubleOrDefault(@NonNull JSONObject object, @NonNull String field, Double defaultValue) {
+        return getDoubleOrDefault(object, field, defaultValue, true);
+    }
+
+    @Nullable
+    public static Double getDoubleOrDefault(@NonNull JSONObject object, @NonNull String field, Double defaultValue, boolean checkNullString) {
+        try {
+            if (!isStringEmpty(object, field, checkNullString)) {
+                return Double.parseDouble(object.getString(field));
             } else {
                 return defaultValue;
             }

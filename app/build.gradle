@@ -123,7 +123,7 @@ android {
         }
         local {
             applicationId "org.openimis.imispolicies.local"
-            buildConfigField "String", "API_BASE_URL", '"http://10.0.2.2:35787/"'
+            buildConfigField "String", "API_BASE_URL", '"https://gambiatest.bluesquare.org/"'
             buildConfigField "boolean", "SHOW_PAYMENT_MENU", 'true'
             resValue "string", "app_name_policies", "Policies Local"
             dimension = 'std'

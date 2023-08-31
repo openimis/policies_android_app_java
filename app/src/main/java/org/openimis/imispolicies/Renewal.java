@@ -56,6 +56,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.openimis.imispolicies.tools.Log;
+import org.openimis.imispolicies.usecase.DeletePolicyRenewal;
 import org.openimis.imispolicies.util.StringUtils;
 import org.xmlpull.v1.XmlSerializer;
 
@@ -402,32 +403,25 @@ public class Renewal extends AppCompatActivity {
                     dialog.dismiss();
                     pd = ProgressDialog.show(Renewal.this, "", getResources().getString(R.string.Uploading));
                     new Thread(() -> {
-                        ToRestApi rest = new ToRestApi();
                         try {
-                            String result = null;
-                            int responseCode = 0;
                             if (global.isNetworkAvailable()) {
-                                HttpResponse response = rest.deleteFromRestApiToken("policy/renew/" + RenewalUUID);
-                                responseCode = response.getStatusLine().getStatusCode();
-                                result = rest.getContent(response);
+                                new DeletePolicyRenewal().execute(RenewalUUID);
                             } else {
                                 WriteXML();
                             }
-                            if (responseCode == HttpURLConnection.HTTP_OK && TextUtils.equals(result, "1")) {
-                                DeleteRow(RenewalId);
-                                pd.dismiss();
-                                finish();
-                            }
-                        } catch (final Exception e) {
+                        } catch (Exception e) {
                             e.printStackTrace();
                             pd.dismiss();
                             runOnUiThread(() -> {
                                 chkDiscontinue.setChecked(false);
                                 ca.ShowDialog(e.toString());
                             });
+                            return;
                         }
+                        DeleteRow(RenewalId);
+                        pd.dismiss();
+                        finish();
                     }).start();
-
                 })
                 .setNegativeButton(R.string.No, (dialog, which) -> chkDiscontinue.setChecked(false)).show();
     }

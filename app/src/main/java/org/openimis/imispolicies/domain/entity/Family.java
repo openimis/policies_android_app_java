@@ -596,4 +596,351 @@ public class Family implements Parcelable {
             }
         };
     }
+
+    public static class Policy implements Parcelable {
+        private final int id;
+        private final int familyId;
+        @NonNull
+        private final String familyUUID;
+        @NonNull
+        private final Date enrollDate;
+        @NonNull
+        private final Date startDate;
+        @Nullable
+        private final Date effectiveDate;
+        @NonNull
+        private final Date expiryDate;
+        @Nullable
+        private final String status;
+        @Nullable
+        private final Double value;
+        @Nullable
+        private final Integer productId;
+        private final int officerId;
+        @Nullable
+        private final String policyStage;
+        private final boolean isOffline;
+        @Nullable
+        private final String controlNumber;
+        @NonNull
+        private final List<Premium> premiums;
+
+        public Policy(
+                int id,
+                int familyId,
+                @NonNull String familyUUID,
+                @NonNull Date enrollDate,
+                @NonNull Date startDate,
+                @Nullable Date effectiveDate,
+                @NonNull Date expiryDate,
+                @Nullable String status,
+                @Nullable Double value,
+                @Nullable Integer productId,
+                int officerId,
+                @Nullable String policyStage,
+                boolean isOffline,
+                @Nullable String controlNumber,
+                @NonNull List<Premium> premiums
+        ) {
+            this.id = id;
+            this.familyId = familyId;
+            this.familyUUID = familyUUID;
+            this.enrollDate = enrollDate;
+            this.startDate = startDate;
+            this.effectiveDate = effectiveDate;
+            this.expiryDate = expiryDate;
+            this.status = status;
+            this.value = value;
+            this.productId = productId;
+            this.officerId = officerId;
+            this.policyStage = policyStage;
+            this.isOffline = isOffline;
+            this.controlNumber = controlNumber;
+            this.premiums = premiums;
+        }
+
+        protected Policy(Parcel in) {
+            id = in.readInt();
+            familyId = in.readInt();
+            familyUUID = in.readString();
+            enrollDate = new Date(in.readLong());
+            startDate = new Date(in.readLong());
+            long effectiveDateLong = in.readLong();
+            effectiveDate = effectiveDateLong != -1 ? new Date(effectiveDateLong) : null;
+            expiryDate = new Date(in.readLong());
+            status = in.readString();
+            if (in.readByte() == 0) {
+                value = null;
+            } else {
+                value = in.readDouble();
+            }
+            if (in.readByte() == 0) {
+                productId = null;
+            } else {
+                productId = in.readInt();
+            }
+            officerId = in.readInt();
+            policyStage = in.readString();
+            isOffline = in.readByte() != 0;
+            controlNumber = in.readString();
+            premiums = in.createTypedArrayList(Premium.CREATOR);
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(id);
+            dest.writeInt(familyId);
+            dest.writeString(familyUUID);
+            dest.writeLong(enrollDate.getTime());
+            dest.writeLong(startDate.getTime());
+            dest.writeLong(effectiveDate != null ? effectiveDate.getTime() :-1);
+            dest.writeLong(expiryDate.getTime());
+            dest.writeString(status);
+            if (value == null) {
+                dest.writeByte((byte) 0);
+            } else {
+                dest.writeByte((byte) 1);
+                dest.writeDouble(value);
+            }
+            if (productId == null) {
+                dest.writeByte((byte) 0);
+            } else {
+                dest.writeByte((byte) 1);
+                dest.writeInt(productId);
+            }
+            dest.writeInt(officerId);
+            dest.writeString(policyStage);
+            dest.writeByte((byte) (isOffline ? 1 : 0));
+            dest.writeString(controlNumber);
+            dest.writeTypedList(premiums);
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        public int getId() {
+            return id;
+        }
+
+        public int getFamilyId() {
+            return familyId;
+        }
+
+        @NonNull
+        public String getFamilyUUID() {
+            return familyUUID;
+        }
+
+        @NonNull
+        public Date getEnrollDate() {
+            return enrollDate;
+        }
+
+        @NonNull
+        public Date getStartDate() {
+            return startDate;
+        }
+
+        @Nullable
+        public Date getEffectiveDate() {
+            return effectiveDate;
+        }
+
+        @NonNull
+        public Date getExpiryDate() {
+            return expiryDate;
+        }
+
+        @Nullable
+        public String getStatus() {
+            return status;
+        }
+
+        @Nullable
+        public Double getValue() {
+            return value;
+        }
+
+        @Nullable
+        public Integer getProductId() {
+            return productId;
+        }
+
+        public int getOfficerId() {
+            return officerId;
+        }
+
+        @Nullable
+        public String getPolicyStage() {
+            return policyStage;
+        }
+
+        public boolean isOffline() {
+            return isOffline;
+        }
+
+        @Nullable
+        public String getControlNumber() {
+            return controlNumber;
+        }
+
+        @NonNull
+        public List<Premium> getPremiums() {
+            return premiums;
+        }
+
+        public static final Creator<Policy> CREATOR = new Creator<>() {
+            @Override
+            public Policy createFromParcel(Parcel in) {
+                return new Policy(in);
+            }
+
+            @Override
+            public Policy[] newArray(int size) {
+                return new Policy[size];
+            }
+        };
+
+        public static class Premium implements Parcelable {
+            private final int id;
+            private final int policyId;
+            @Nullable
+            private final Integer payerId;
+            @Nullable
+            private final Double amount;
+            @Nullable
+            private final String receipt;
+            @Nullable
+            private final Date payDate;
+            @Nullable
+            private final String payType;
+            private final boolean isPhotoFee;
+            private final boolean isOffline;
+
+            public Premium(
+                    int id,
+                    int policyId,
+                    @Nullable Integer payerId,
+                    @Nullable Double amount,
+                    @Nullable String receipt,
+                    @Nullable Date payDate,
+                    @Nullable String payType,
+                    boolean isPhotoFee,
+                    boolean isOffline
+            ) {
+                this.id = id;
+                this.policyId = policyId;
+                this.payerId = payerId;
+                this.amount = amount;
+                this.receipt = receipt;
+                this.payDate = payDate;
+                this.payType = payType;
+                this.isPhotoFee = isPhotoFee;
+                this.isOffline = isOffline;
+            }
+
+            protected Premium(Parcel in) {
+                id = in.readInt();
+                policyId = in.readInt();
+                if (in.readByte() == 0) {
+                    payerId = null;
+                } else {
+                    payerId = in.readInt();
+                }
+                if (in.readByte() == 0) {
+                    amount = null;
+                } else {
+                    amount = in.readDouble();
+                }
+                receipt = in.readString();
+                long payDateLong = in.readLong();
+                payDate = payDateLong != -1 ? new Date(payDateLong) : null;
+                payType = in.readString();
+                isPhotoFee = in.readByte() != 0;
+                isOffline = in.readByte() != 0;
+            }
+
+            @Override
+            public void writeToParcel(Parcel dest, int flags) {
+                dest.writeInt(id);
+                dest.writeInt(policyId);
+                if (payerId == null) {
+                    dest.writeByte((byte) 0);
+                } else {
+                    dest.writeByte((byte) 1);
+                    dest.writeInt(payerId);
+                }
+                if (amount == null) {
+                    dest.writeByte((byte) 0);
+                } else {
+                    dest.writeByte((byte) 1);
+                    dest.writeDouble(amount);
+                }
+                dest.writeString(receipt);
+                dest.writeLong(payDate != null ? payDate.getTime() : -1);
+                dest.writeString(payType);
+                dest.writeByte((byte) (isPhotoFee ? 1 : 0));
+                dest.writeByte((byte) (isOffline ? 1 : 0));
+            }
+
+            @Override
+            public int describeContents() {
+                return 0;
+            }
+
+            public int getId() {
+                return id;
+            }
+
+            public int getPolicyId() {
+                return policyId;
+            }
+            @Nullable
+            public Integer getPayerId() {
+                return payerId;
+            }
+
+            @Nullable
+            public Double getAmount() {
+                return amount;
+            }
+
+            @Nullable
+            public String getReceipt() {
+                return receipt;
+            }
+
+            @Nullable
+            public Date getPayDate() {
+                return payDate;
+            }
+
+            @Nullable
+            public String getPayType() {
+                return payType;
+            }
+
+            public boolean isPhotoFee() {
+                return isPhotoFee;
+            }
+
+            public boolean isOffline() {
+                return isOffline;
+            }
+
+            public static final Creator<Premium> CREATOR = new Creator<>() {
+                @Override
+                public Premium createFromParcel(Parcel in) {
+                    return new Premium(in);
+                }
+
+                @Override
+                public Premium[] newArray(int size) {
+                    return new Premium[size];
+                }
+            };
+        }
+    }
 }
