@@ -68,15 +68,18 @@ import org.intellij.lang.annotations.Language;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.openimis.imispolicies.domain.PolicyRenewal;
 import org.openimis.imispolicies.domain.entity.Family;
 import org.openimis.imispolicies.domain.entity.FeedbackRequest;
 import org.openimis.imispolicies.domain.entity.PendingFeedback;
+import org.openimis.imispolicies.domain.entity.Policy;
 import org.openimis.imispolicies.network.exception.HttpException;
 import org.openimis.imispolicies.network.exception.UserNotAuthenticatedException;
 import org.openimis.imispolicies.tools.ImageManager;
 import org.openimis.imispolicies.tools.Log;
 import org.openimis.imispolicies.tools.StorageManager;
 import org.openimis.imispolicies.usecase.CreatePolicy;
+import org.openimis.imispolicies.usecase.DeletePolicyRenewal;
 import org.openimis.imispolicies.usecase.FetchFamily;
 import org.openimis.imispolicies.usecase.FetchMasterData;
 import org.openimis.imispolicies.usecase.Login;
@@ -3755,36 +3758,21 @@ public class ClientAndroidInterface {
             int acceptedRenewals = 0;
             for (int i = 0; i < jsonFiles.length; i++) {
                 String jsonText = FileUtils.readFileAsUTF8String(jsonFiles[i]);
+                if (jsonText == null) {
+                    continue;
+                }
                 String renewalInsureeNo = "";
 
                 HttpResponse response;
                 int responseCode;
-                int uploadStatus = -1;
+                int uploadStatus;
 
                 try {
                     JSONObject obj = new JSONObject(jsonText).getJSONObject("Policy");
                     renewalInsureeNo = obj.getString("CHFID");
+                    int renewalId = Integer.parseInt(obj.getString("RenewalId"));
+                    uploadStatus = new DeletePolicyRenewal().execute(renewalId);
 
-                    response = rest.postToRestApiToken(obj, "policy/renew");
-                    if (response != null) {
-                        responseCode = response.getStatusLine().getStatusCode();
-                        if (responseCode == HttpURLConnection.HTTP_OK) {
-                            uploadStatus = Integer.parseInt(EntityUtils.toString(response.getEntity()));
-                        } else {
-                            if (responseCode == HttpURLConnection.HTTP_BAD_REQUEST) {
-                                throw new JSONException("Renewal file caused 400 BAD REQUEST");
-                            } else if (responseCode == HttpsURLConnection.HTTP_UNAUTHORIZED) {
-                                messageBuilder.append(String.format(messageFormat, renewalInsureeNo, activity.getResources().getString(R.string.LoginFail)));
-                                break;
-                            } else if (responseCode == HttpURLConnection.HTTP_INTERNAL_ERROR) {
-                                throw new IOException("500 INTERNAL ERROR");
-                            }
-                        }
-                    } else {
-                        Log.e(LOG_TAG_RENEWAL, "Server not responding");
-                        messageBuilder.append(String.format(messageFormat, renewalInsureeNo, activity.getResources().getString(R.string.SomethingWrongServer)));
-                        break;
-                    }
                 } catch (JSONException e) {
                     Log.e(LOG_TAG_RENEWAL, "Invalid renewal json format", e);
                     messageBuilder.append(String.format(messageFormat, renewalInsureeNo, activity.getResources().getString(R.string.InvalidRenewalFile)));
@@ -3793,8 +3781,22 @@ public class ClientAndroidInterface {
                     Log.e(LOG_TAG_RENEWAL, "Error while sending renewal", e);
                     messageBuilder.append(String.format(messageFormat, renewalInsureeNo, activity.getResources().getString(R.string.SomethingWrongServer)));
                     continue;
+                }  catch (HttpException e) {
+                    Log.e(LOG_TAG_RENEWAL, "Error while sending renewal", e);
+                    if (e.getCode() == HttpsURLConnection.HTTP_NOT_FOUND) {
+                        messageBuilder.append(String.format(messageFormat, renewalInsureeNo, activity.getResources().getString(R.string.NotFound)));
+                        break;
+                    } else if (e.getCode() == HttpsURLConnection.HTTP_UNAUTHORIZED) {
+                        messageBuilder.append(String.format(messageFormat, renewalInsureeNo, activity.getResources().getString(R.string.LoginFail)));
+                        break;
+                    } else {
+                        throw e;
+                    }
+                } catch (Exception e) {
+                    Log.e(LOG_TAG_RENEWAL, "Error while sending renewal", e);
+                    messageBuilder.append(String.format(messageFormat, renewalInsureeNo, activity.getResources().getString(R.string.InvalidRenewalFile)));
+                    continue;
                 }
-
 
                 if (messages.containsKey(uploadStatus)) {
                     if (uploadStatus == ToRestApi.RenewalStatus.ACCEPTED || uploadStatus == ToRestApi.RenewalStatus.ALREADY_ACCEPTED) {

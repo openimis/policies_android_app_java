@@ -2,6 +2,7 @@ package org.openimis.imispolicies.util;
 
 import android.content.Context;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import org.openimis.imispolicies.tools.Log;
 
@@ -115,6 +116,7 @@ public class FileUtils {
         return files[files.length - 1];
     }
 
+    @Nullable
     public static String readFileAsUTF8String(@NonNull File file) {
         try {
             InputStream is = new FileInputStream(file);
