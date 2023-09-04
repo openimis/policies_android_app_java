@@ -68,11 +68,9 @@ import org.intellij.lang.annotations.Language;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.openimis.imispolicies.domain.PolicyRenewal;
 import org.openimis.imispolicies.domain.entity.Family;
 import org.openimis.imispolicies.domain.entity.FeedbackRequest;
 import org.openimis.imispolicies.domain.entity.PendingFeedback;
-import org.openimis.imispolicies.domain.entity.Policy;
 import org.openimis.imispolicies.network.exception.HttpException;
 import org.openimis.imispolicies.network.exception.UserNotAuthenticatedException;
 import org.openimis.imispolicies.tools.ImageManager;
@@ -118,13 +116,13 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
+import java.util.UUID;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 import javax.net.ssl.HttpsURLConnection;
 
 import cz.msebera.android.httpclient.HttpResponse;
-import cz.msebera.android.httpclient.util.EntityUtils;
 
 public class ClientAndroidInterface {
     private static final String LOG_TAG_RENEWAL = "RENEWAL";
@@ -347,35 +345,49 @@ public class ClientAndroidInterface {
         return sqlHandler.getResult(Query, null).toString();
     }
 
+    @Nullable
+    private Integer getOfficerLocationId() {
+        try {
+            String officerCode = global.getOfficerCode();
+            if (officerCode == null) {
+                return null;
+            }
+            @Language("SQL")
+            String query = "SELECT LocationId FROM tblOfficer WHERE Code = ?";
+            JSONObject object = sqlHandler.getResult(query, new String[]{officerCode}).getJSONObject(0);
+            if (!object.has("LocationId")) {
+                return null;
+            }
+            return JsonUtils.getIntegerOrDefault(object,"LocationId");
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     @JavascriptInterface
     @SuppressWarnings("unused")
     public String getRegions() {
-        String officerCode = global.getOfficerCode();
-        if (officerCode == null) {
-            officerCode = "";
-        }
+        Integer officerLocationId = getOfficerLocationId();
         @Language("SQL")
-        String Query = "SELECT LocationId, LocationName FROM tblLocations WHERE LocationId = (SELECT L.ParentLocationId LocationId FROM tblLocations L\n" +
-                "INNER JOIN tblOfficer O ON L.LocationId = O.LocationId\n" +
-                "WHERE LOWER(O.Code) = '" + officerCode.toLowerCase() + "')";
-        JSONArray Regions = sqlHandler.getResult(Query, null);
-
-        return Regions.toString();
+        String Query = "SELECT LocationId, LocationName FROM tblLocations WHERE LocationId = (SELECT L.ParentLocationId LocationId FROM tblLocations L";
+        if (officerLocationId != null) {
+            Query += "WHERE L.LocationId = " + officerLocationId + "')";
+        }
+        Query += ")";
+        return sqlHandler.getResult(Query, null).toString();
     }
 
     @JavascriptInterface
     @SuppressWarnings("unused")
     public String getDistricts(int RegionId) {
-        String officerCode = global.getOfficerCode();
-        if (officerCode == null) {
-            officerCode = "";
-        }
+        Integer officerLocationId = getOfficerLocationId();
         @Language("SQL")
-        String Query = "SELECT * FROM tblLocations L\n" +
-                "INNER JOIN tblOfficer O ON L.LocationId = O.LocationId\n" +
-                "WHERE LOWER(O.Code) = '" + officerCode.toLowerCase() + "' AND LocationType = 'D' AND ParentLocationId = " + RegionId;
-        JSONArray Districts = sqlHandler.getResult(Query, null);
-        return Districts.toString();
+        String Query = "SELECT * FROM tblLocations L WHERE LocationType = 'D' AND ParentLocationId = " + RegionId;
+        if (officerLocationId != null) {
+            Query += " AND LocationId = "+officerLocationId;
+        }
+        return sqlHandler.getResult(Query, null).toString();
     }
 
     @JavascriptInterface
@@ -385,9 +397,7 @@ public class ClientAndroidInterface {
         String[] columns = {"LocationId", "LocationName"};
         String where = "LocationType = 'D'";
 
-        JSONArray Districts = sqlHandler.getResult(tableName, columns, where, null);
-
-        return Districts.toString();
+        return sqlHandler.getResult(tableName, columns, where, null).toString();
     }
 
     @JavascriptInterface
@@ -397,9 +407,7 @@ public class ClientAndroidInterface {
         String[] columns = {"LocationId", "LocationName"};
         String where = "LocationType = 'W' AND ParentLocationId = " + DistrictId;
 
-        JSONArray Wards = sqlHandler.getResult(tableName, columns, where, null);
-
-        return Wards.toString();
+        return sqlHandler.getResult(tableName, columns, where, null).toString();
     }
 
     @JavascriptInterface
@@ -409,9 +417,7 @@ public class ClientAndroidInterface {
         String[] columns = {"LocationId", "LocationName"};
         String where = "LocationType = 'V' AND ParentLocationId = " + WardId;
 
-        JSONArray Villages = sqlHandler.getResult(tableName, columns, where, null);
-
-        return Villages.toString();
+        return sqlHandler.getResult(tableName, columns, where, null).toString();
     }
 
     @JavascriptInterface
@@ -2886,7 +2892,7 @@ public class ClientAndroidInterface {
 
             //get Insureesf
             query = new StringBuilder(
-                    "SELECT I.InsureeUUUID AS InsureeUUID, I.InsureeId AS InsureeId, I.FamilyId AS FamilyId, I.CHFID, I.LastName, I.OtherNames, I.DOB, I.Gender, NULLIF(I.Marital,'') Marital, I.isHead, NULLIF(I.IdentificationNumber,'null') IdentificationNumber, NULLIF(I.Phone,'null') Phone, REPLACE(I.PhotoPath, RTRIM(PhotoPath, REPLACE(PhotoPath, '/', '')), '') PhotoPath, NULLIF(I.CardIssued,'null') CardIssued, NULLIF(I.Relationship,'null') Relationship, NULLIF(I.Profession,'null') Profession, NULLIF(I.Education,'null') Education, NULLIF(I.Email,'null') Email, CASE WHEN I.TypeOfId='null' THEN null ELSE I.TypeOfId END TypeOfId, NULLIF(I.HFID,'null') HFID, NULLIF(I.CurrentAddress,'null') CurrentAddress, NULLIF(I.GeoLocation,'null') GeoLocation, NULLIF(I.CurVillage,'null') CurVillage,I.isOffline, I.Vulnerability FROM tblInsuree I WHERE "
+                    "SELECT I.InsureeUUID AS InsureeUUID, I.InsureeId AS InsureeId, I.FamilyId AS FamilyId, I.CHFID, I.LastName, I.OtherNames, I.DOB, I.Gender, NULLIF(I.Marital,'') Marital, I.isHead, NULLIF(I.IdentificationNumber,'null') IdentificationNumber, NULLIF(I.Phone,'null') Phone, REPLACE(I.PhotoPath, RTRIM(PhotoPath, REPLACE(PhotoPath, '/', '')), '') PhotoPath, NULLIF(I.CardIssued,'null') CardIssued, NULLIF(I.Relationship,'null') Relationship, NULLIF(I.Profession,'null') Profession, NULLIF(I.Education,'null') Education, NULLIF(I.Email,'null') Email, CASE WHEN I.TypeOfId='null' THEN null ELSE I.TypeOfId END TypeOfId, NULLIF(I.HFID,'null') HFID, NULLIF(I.CurrentAddress,'null') CurrentAddress, NULLIF(I.GeoLocation,'null') GeoLocation, NULLIF(I.CurVillage,'null') CurVillage,I.isOffline, I.Vulnerability FROM tblInsuree I WHERE "
             );
             if (CallerId != 2) {
                 query.append(" I.FamilyId = ").append(FamilyId).append(" \n");
@@ -3150,7 +3156,6 @@ public class ClientAndroidInterface {
             return -400;
         }
 
-
         return 0;
     }
 
@@ -3161,7 +3166,7 @@ public class ClientAndroidInterface {
             @NonNull Pair<String, byte[]>[] insureeImages
     ) throws JSONException {
         List<Family.Member> members = new ArrayList<>();
-        String familyUUID = json.getString("FamilyUUUID");
+        String familyUUID = JsonUtils.getStringOrDefault(json, "FamilyUUID", UUID.randomUUID().toString(), true);
         for (int i = 0; i < insurees.length(); i++) {
             members.add(familyMemberFromJSONObject(familyUUID, insurees.getJSONObject(i), insureeImages[i]));
         }
@@ -3192,7 +3197,7 @@ public class ClientAndroidInterface {
                 /* chfId = */ object.getString("CHFID"),
                 /* isHead = */ JsonUtils.getBooleanOrDefault(object, "isHead", false),
                 /* id = */ Integer.parseInt(object.getString("InsureeId")),
-                /* uuid = */ object.getString("InsureeUUID"),
+                /* uuid = */ JsonUtils.getStringOrDefault(object,"InsureeUUID"),
                 /* familyId = */ Integer.parseInt(object.getString("FamilyId")),
                 /* familyUuid = */ familyUUID,
                 /* identificationNumber = */ JsonUtils.getStringOrDefault(object, "IdentificationNumber"),
@@ -3226,8 +3231,10 @@ public class ClientAndroidInterface {
         List<Family.Policy> policies = new ArrayList<>();
         for (int i = 0; i < array.length(); i++) {
             JSONObject object = array.getJSONObject(i);
+            String policyUuid = UUID.randomUUID().toString();
             policies.add(new Family.Policy(
                     /* id = */ Integer.parseInt(object.getString("PolicyId")),
+                    /* uuid = */ policyUuid,
                     /* familyId = */ Integer.parseInt(object.getString("FamilyId")),
                     /* familyUuid = */ familyUUID,
                     /* enrollDate = */ Objects.requireNonNull(JsonUtils.getDateOrDefault(object, "EnrollDate")),
@@ -3241,7 +3248,7 @@ public class ClientAndroidInterface {
                     /* stage = */ JsonUtils.getStringOrDefault(object, "PolicyStage"),
                     /* isOffline = */ JsonUtils.getBooleanOrDefault(object, "isOffline", false),
                     /* controlNumber = */ JsonUtils.getStringOrDefault(object, "ControlNumber"),
-                    /* premiums = */ object.has("premium") ? familyPolicyPremiumsFromJSONObject(object.getJSONArray("premium")) : Collections.emptyList()
+                    /* premiums = */ object.has("premium") ? familyPolicyPremiumsFromJSONObject(policyUuid, object.getJSONArray("premium")) : Collections.emptyList()
             ));
         }
         return policies;
@@ -3249,6 +3256,7 @@ public class ClientAndroidInterface {
 
     @NonNull
     private List<Family.Policy.Premium> familyPolicyPremiumsFromJSONObject(
+            @NonNull String policyUuid,
             @NonNull JSONArray array
     ) throws JSONException {
         List<Family.Policy.Premium> premiums = new ArrayList<>();
@@ -3257,6 +3265,7 @@ public class ClientAndroidInterface {
             premiums.add(new Family.Policy.Premium(
                     /* id = */ Integer.parseInt(object.getString("PremiumId")),
                     /* policyId = */ Integer.parseInt(object.getString("PolicyId")),
+                    /* policyUuid = */ policyUuid,
                     /* payerId = */ JsonUtils.getIntegerOrDefault(object, "PayerId"),
                     /* amount = */ JsonUtils.getDoubleOrDefault(object, "Amount"),
                     /* receipt = */ JsonUtils.getStringOrDefault(object, "Receipt"),
@@ -3781,7 +3790,7 @@ public class ClientAndroidInterface {
                     Log.e(LOG_TAG_RENEWAL, "Error while sending renewal", e);
                     messageBuilder.append(String.format(messageFormat, renewalInsureeNo, activity.getResources().getString(R.string.SomethingWrongServer)));
                     continue;
-                }  catch (HttpException e) {
+                } catch (HttpException e) {
                     Log.e(LOG_TAG_RENEWAL, "Error while sending renewal", e);
                     if (e.getCode() == HttpsURLConnection.HTTP_NOT_FOUND) {
                         messageBuilder.append(String.format(messageFormat, renewalInsureeNo, activity.getResources().getString(R.string.NotFound)));

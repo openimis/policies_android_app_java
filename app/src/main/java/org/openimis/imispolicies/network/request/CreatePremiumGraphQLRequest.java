@@ -21,6 +21,7 @@ public class CreatePremiumGraphQLRequest extends BaseGraphQLRequest {
         Response<CreatePremiumMutation.Data> response = makeSynchronous(new CreatePremiumMutation(
                 CreatePremiumMutationInput.builder()
                         .id(premium.getId())
+                        .policyUuid(premium.getPolicyUuid())
                         .amount(premium.getAmount())
                         .receipt(premium.getReceipt())
                         .payDate(premium.getPayDate())

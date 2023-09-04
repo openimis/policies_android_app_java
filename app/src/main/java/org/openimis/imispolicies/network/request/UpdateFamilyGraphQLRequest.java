@@ -17,6 +17,7 @@ public class UpdateFamilyGraphQLRequest extends BaseGraphQLRequest {
     @WorkerThread
     @NonNull
     public UpdateFamilyMutation.Data update(@NonNull Family family) throws Exception {
+        Family.Member head = family.getHead();
         Response<UpdateFamilyMutation.Data> response = makeSynchronous(new UpdateFamilyMutation(
                 UpdateFamilyMutationInput.builder()
                         .id(family.getId())
@@ -31,8 +32,12 @@ public class UpdateFamilyGraphQLRequest extends BaseGraphQLRequest {
                         .isOffline(family.isOffline())
                         .headInsuree(
                                 FamilyHeadInsureeInputType.builder()
-                                        .id(family.getHead().getId())
-                                        .chfId(family.getHead().getChfId())
+                                        .id(head.getId())
+                                        .chfId(head.getChfId())
+                                        .lastName(head.getLastName())
+                                        .otherNames(head.getOtherNames())
+                                        .genderId(head.getGender())
+                                        .dob(head.getDateOfBirth())
                                         .build()
                         )
                         .build()
