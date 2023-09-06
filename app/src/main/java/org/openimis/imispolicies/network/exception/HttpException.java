@@ -15,7 +15,7 @@ public class HttpException extends RuntimeException {
             @Nullable String body,
             @Nullable Throwable cause
     ) {
-        super("HTTP " + code + " - " + message+": "+body, cause);
+        super("HTTP " + code + " - " + message + ": " + body, cause);
         this.code = code;
         this.body = body;
     }

@@ -25,16 +25,16 @@ public class AuthorizationInterceptor implements Interceptor {
     @Override
     public Response intercept(@NonNull Chain chain) throws IOException {
         String token = repository.getFhirToken();
-        if (token != null) {
-            Request.Builder builder = chain.request().newBuilder();
-            builder.addHeader("Authorization", "bearer " + token.trim());
-            Response response = chain.proceed(builder.build());
-            if (response.code() == HttpURLConnection.HTTP_UNAUTHORIZED) {
-                repository.saveFhirToken(null, null, null);
-                MainActivity.SetLoggedIn();
-            }
-            return response;
+        if (token == null) {
+            return chain.proceed(chain.request());
         }
-        return chain.proceed(chain.request());
+        Request.Builder builder = chain.request().newBuilder();
+        builder.addHeader("Authorization", "bearer " + token.trim());
+        Response response = chain.proceed(builder.build());
+        if (response.code() == HttpURLConnection.HTTP_UNAUTHORIZED) {
+            repository.saveFhirToken(null, null, null);
+            MainActivity.SetLoggedIn();
+        }
+        return response;
     }
 }

@@ -3,10 +3,10 @@ package org.openimis.imispolicies.usecase;
 import androidx.annotation.NonNull;
 import androidx.annotation.WorkerThread;
 
-import org.openimis.imispolicies.GetFeedbacksQuery;
+import org.openimis.imispolicies.GetFeedbackRequestsQuery;
 import org.openimis.imispolicies.Global;
 import org.openimis.imispolicies.domain.entity.FeedbackRequest;
-import org.openimis.imispolicies.network.request.GetFeedbackGraphQLRequest;
+import org.openimis.imispolicies.network.request.GetFeedbackRequestsGraphQLRequest;
 import org.openimis.imispolicies.network.util.Mapper;
 
 import java.util.List;
@@ -17,17 +17,17 @@ public class FetchFeedback {
     @NonNull
     private final Global global;
     @NonNull
-    private final GetFeedbackGraphQLRequest getFeedbackGraphQLRequest;
+    private final GetFeedbackRequestsGraphQLRequest getFeedbackRequestsGraphQLRequest;
 
     public FetchFeedback() {
-        this(Global.getGlobal(), new GetFeedbackGraphQLRequest());
+        this(Global.getGlobal(), new GetFeedbackRequestsGraphQLRequest());
     }
 
     public FetchFeedback(
             @NonNull Global global,
-            @NonNull GetFeedbackGraphQLRequest getFeedbackGraphQLRequest
+            @NonNull GetFeedbackRequestsGraphQLRequest getFeedbackRequestsGraphQLRequest
     ) {
-        this.getFeedbackGraphQLRequest = getFeedbackGraphQLRequest;
+        this.getFeedbackRequestsGraphQLRequest = getFeedbackRequestsGraphQLRequest;
         this.global = global;
     }
 
@@ -38,13 +38,13 @@ public class FetchFeedback {
 
     @WorkerThread
     public List<FeedbackRequest> execute(@NonNull String officerCode) throws Exception {
-        List<GetFeedbacksQuery.Edge> nodes = getFeedbackGraphQLRequest.get(officerCode);
+        List<GetFeedbackRequestsQuery.Edge> nodes = getFeedbackRequestsGraphQLRequest.get(officerCode);
         return Mapper.map(nodes, this::toFeedback);
     }
 
     @NonNull
-    private FeedbackRequest toFeedback(@NonNull GetFeedbacksQuery.Edge edge) {
-        GetFeedbacksQuery.Node node = Objects.requireNonNull(edge.node());
+    private FeedbackRequest toFeedback(@NonNull GetFeedbackRequestsQuery.Edge edge) {
+        GetFeedbackRequestsQuery.Node node = Objects.requireNonNull(edge.node());
         return new FeedbackRequest(
                 /* chfId = */ Objects.requireNonNull(node.insuree().chfId()),
                 /* officeId = */ -1, // This is not returned by GraphQL

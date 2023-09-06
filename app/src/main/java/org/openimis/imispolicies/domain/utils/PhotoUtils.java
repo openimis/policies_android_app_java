@@ -12,17 +12,17 @@ public class PhotoUtils {
 
     @Nullable
     public static String getPhotoPath(@Nullable String folder, @Nullable String fileName) {
-        if (fileName != null) {
-            if (folder != null) {
-                folder = folder.replace('\\', '/');
-                if (!folder.endsWith("/")) {
-                    folder += "/";
-                }
-                return folder + fileName;
-            }
+        if (fileName == null) {
+            return null;
+        }
+        if (folder == null) {
             return fileName;
         }
-        return null;
+        folder = folder.replace('\\', '/');
+        if (!folder.endsWith("/")) {
+            folder += "/";
+        }
+        return folder + fileName;
     }
 
     @Nullable

@@ -41,8 +41,9 @@ public class DeletePolicyRenewal {
                 return execute(renewal.getUuid());
             }
         }
-        throw new HttpException(HttpURLConnection.HTTP_NOT_FOUND, "Renewal with id '"+id+"' doesn't exists", null, null);
+        throw new HttpException(HttpURLConnection.HTTP_NOT_FOUND, "Renewal with id '" + id + "' doesn't exists", null, null);
     }
+
     @WorkerThread
     public int execute(@NonNull String uuid) throws Exception {
         deletePolicyRenewalGraphQLRequest.delete(uuid);

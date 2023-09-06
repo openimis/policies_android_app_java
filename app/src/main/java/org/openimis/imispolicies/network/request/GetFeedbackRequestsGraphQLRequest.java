@@ -5,18 +5,18 @@ import androidx.annotation.WorkerThread;
 
 import com.apollographql.apollo.api.Input;
 
-import org.openimis.imispolicies.GetFeedbacksQuery;
+import org.openimis.imispolicies.GetFeedbackRequestsQuery;
 import org.openimis.imispolicies.network.exception.HttpException;
 
 import java.net.HttpURLConnection;
 import java.util.List;
 
-public class GetFeedbackGraphQLRequest extends BaseGraphQLRequest {
+public class GetFeedbackRequestsGraphQLRequest extends BaseGraphQLRequest {
 
     @WorkerThread
     @NonNull
-    public List<GetFeedbacksQuery.Edge> get(@NonNull String officerCode) throws Exception {
-        List<GetFeedbacksQuery.Edge> edges = makeSynchronous(new GetFeedbacksQuery(
+    public List<GetFeedbackRequestsQuery.Edge> get(@NonNull String officerCode) throws Exception {
+        List<GetFeedbackRequestsQuery.Edge> edges = makeSynchronous(new GetFeedbackRequestsQuery(
                 Input.fromNullable(officerCode)
         )).getData().claims().edges();
         if (edges.isEmpty()) {

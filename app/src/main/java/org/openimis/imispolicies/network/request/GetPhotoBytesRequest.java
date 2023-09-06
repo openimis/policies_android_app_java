@@ -7,6 +7,6 @@ public class GetPhotoBytesRequest extends BaseGetBinaryRequest {
     public GetPhotoBytesRequest(
             @NonNull String photoName
     ) {
-        super("Images/Updated/"+photoName);
+        super("Images/Updated/" + photoName);
     }
 }

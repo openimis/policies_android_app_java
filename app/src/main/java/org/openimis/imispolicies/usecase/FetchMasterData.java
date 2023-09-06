@@ -47,9 +47,8 @@ public class FetchMasterData {
             // Therefore, it's possible the backend would return a 403 (though it should return a
             // 401) when trying to download the zip.
             if (e.getCode() == 401 || e.getCode() == 403) {
-                throw new UserNotAuthenticatedException("Backend return '"+e.getCode()+"' while trying to download master data.", e);
-            }
-            else throw e;
+                throw new UserNotAuthenticatedException("Backend return '" + e.getCode() + "' while trying to download master data.", e);
+            } else throw e;
         }
     }
 }

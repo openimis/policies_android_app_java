@@ -1,4 +1,4 @@
-query GetFeedbacks($officerCode: String) {
+query GetFeedbackRequests($officerCode: String) {
     claims(feedbackStatus: 4, orderBy: ["-dateClaimed"], admin_Code: $officerCode) {
         edges {
             node {
