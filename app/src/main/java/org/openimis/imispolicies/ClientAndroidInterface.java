@@ -1024,6 +1024,8 @@ public class ClientAndroidInterface {
             values.put("CHFID", data.get("txtInsuranceNumber"));
             values.put("LastName", data.get("txtLastName"));
             values.put("OtherNames", data.get("txtOtherNames"));
+            values.put("LastNameArab", data.get("txtLastNameArab"));
+            values.put("GivenNameArab", data.get("txtGivenNameArab"));
             values.put("DOB", data.get("txtBirthDate"));
             values.put("Gender", data.get("ddlGender"));
             values.put("Marital", Marital);
@@ -1308,7 +1310,7 @@ public class ClientAndroidInterface {
 
     @JavascriptInterface
     public String getInsuree(int InsureeId) {
-        String Query = "SELECT InsureeId, FamilyId, CHFID, LastName, OtherNames, DOB, Gender, Marital, isHead, IdentificationNumber, Phone, isOffline , PhotoPath, CardIssued, Relationship, Profession, Education, Email, TypeOfId, I.HFID, CurrentAddress,R.LocationId CurRegion, D.LocationId CurDistrict, W.LocationId CurWard,  I.CurVillage, HFR.LocationId FSPRegion, HFD.LocationId FSPDistrict, HF.HFLevel FSPCategory, I.Vulnerability\n" +
+        String Query = "SELECT InsureeId, FamilyId, CHFID, LastName, OtherNames, LastNameArab, GivenNameArab, DOB, Gender, Marital, isHead, IdentificationNumber, Phone, isOffline , PhotoPath, CardIssued, Relationship, Profession, Education, Email, TypeOfId, I.HFID, CurrentAddress,R.LocationId CurRegion, D.LocationId CurDistrict, W.LocationId CurWard,  I.CurVillage, HFR.LocationId FSPRegion, HFD.LocationId FSPDistrict, HF.HFLevel FSPCategory, I.Vulnerability\n" +
                 "FROM tblInsuree I\n" +
                 "LEFT OUTER JOIN tblLocations V ON V.LocationId = I.CurVillage\n" +
                 "LEFT OUTER JOIN tblLocations W ON W.LocationId = V.ParentLocationId\n" +
@@ -3260,7 +3262,7 @@ public class ClientAndroidInterface {
             familyArray = newFamilyArray;
 
             //get Insureesf
-            Query = "SELECT I.InsureeId AS InsureeId, I.FamilyId AS FamilyId, I.CHFID, I.LastName, I.OtherNames, I.DOB, I.Gender, NULLIF(I.Marital,'') Marital, I.isHead, NULLIF(I.IdentificationNumber,'null') IdentificationNumber, NULLIF(I.Phone,'null') Phone, REPLACE(I.PhotoPath, RTRIM(PhotoPath, REPLACE(PhotoPath, '/', '')), '') PhotoPath, NULLIF(I.CardIssued,'null') CardIssued, NULLIF(I.Relationship,'null') Relationship, NULLIF(I.Profession,'null') Profession, NULLIF(I.Education,'null') Education, NULLIF(I.Email,'null') Email, CASE WHEN I.TypeOfId='null' THEN null ELSE I.TypeOfId END TypeOfId, NULLIF(I.HFID,'null') HFID, NULLIF(I.CurrentAddress,'null') CurrentAddress, NULLIF(I.GeoLocation,'null') GeoLocation, NULLIF(I.CurVillage,'null') CurVillage,I.isOffline, I.Vulnerability \n" +
+            Query = "SELECT I.InsureeId AS InsureeId, I.FamilyId AS FamilyId, I.CHFID, I.LastName, I.OtherNames, I.LastNameArab, I.GivenNameArab, I.DOB, I.Gender, NULLIF(I.Marital,'') Marital, I.isHead, NULLIF(I.IdentificationNumber,'null') IdentificationNumber, NULLIF(I.Phone,'null') Phone, REPLACE(I.PhotoPath, RTRIM(PhotoPath, REPLACE(PhotoPath, '/', '')), '') PhotoPath, NULLIF(I.CardIssued,'null') CardIssued, NULLIF(I.Relationship,'null') Relationship, NULLIF(I.Profession,'null') Profession, NULLIF(I.Education,'null') Education, NULLIF(I.Email,'null') Email, CASE WHEN I.TypeOfId='null' THEN null ELSE I.TypeOfId END TypeOfId, NULLIF(I.HFID,'null') HFID, NULLIF(I.CurrentAddress,'null') CurrentAddress, NULLIF(I.GeoLocation,'null') GeoLocation, NULLIF(I.CurVillage,'null') CurVillage,I.isOffline, I.Vulnerability \n" +
                     "FROM tblInsuree I \n" + " WHERE ";
             if (CallerId != 2) {
                 Query += " I.FamilyId = " + FamilyId + " \n";

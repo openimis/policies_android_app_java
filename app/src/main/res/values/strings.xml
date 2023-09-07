@@ -39,7 +39,9 @@
     <string name="AttachmentRequired">Please insert one or more attachment(s)</string>
     <string name="InsuranceNumber">Insuree number</string>
     <string name="OtherNames">Other Names</string>
+    <string name="GivenNameArab">Given Name Arab</string>
     <string name="LastName">Last Name</string>
+    <string name="LastNameArab">Last Name Arab</string>
     <string name="BirthDate">Birth Date</string>
     <string name="Gender">Gender</string>
     <string name="MaritalStatus">Marital Status</string>
