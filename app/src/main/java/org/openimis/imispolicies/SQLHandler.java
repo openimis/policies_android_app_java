@@ -32,8 +32,10 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import android.text.TextUtils;
+
+import org.intellij.lang.annotations.Language;
 import org.openimis.imispolicies.tools.Log;
 import android.util.Xml;
 
@@ -47,18 +49,17 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Objects;
 
 public class SQLHandler extends SQLiteOpenHelper {
 
     public static final String DBNAME = "IMIS.db3";
     private static final String OFFLINEDBNAME = "ImisData.db3";
     public Boolean isPrivate = true;
-    private Context mContext;
-    private Global global;
+    private final Context context;
+    private final Global global;
     private SQLiteDatabase mDatabase;
     private static final int DATABASE_VERSION = 2;
-    int count = 1;
-
 
     //table names
     private static final String android_metadata = "android_metadata";
@@ -79,7 +80,6 @@ public class SQLHandler extends SQLiteOpenHelper {
     public static final String tblLanguages = "tblLanguages";
     public static final String tblLocations = "tblLocations";
     public static final String tblOfficer = "tblOfficer";
-    public static final String tblOfficerVillages = "tblOfficerVillages";
     public static final String tblPayer = "tblPayer";
     public static final String tblPolicy = "tblPolicy";
     public static final String tblPremium = "tblPremium";
@@ -93,8 +93,8 @@ public class SQLHandler extends SQLiteOpenHelper {
 
     public SQLHandler(Context context) {
         super(context, DBNAME, null, DATABASE_VERSION);
-        this.mContext = context;
-        global = (Global) mContext.getApplicationContext();
+        this.context = context.getApplicationContext();
+        global = (Global) this.context.getApplicationContext();
     }
 
 
@@ -258,14 +258,6 @@ public class SQLHandler extends SQLiteOpenHelper {
                             "LocationId NUMERIC," +
                             "OfficerIdSubst NUMERIC," +
                             "WorksTo DATE" + ")"
-            );
-            sqLiteDatabase.execSQL(
-                    "CREATE TABLE 'tblOfficerVillages' (" +
-                            "code TEXT," +
-                            "Ward TEXT," +
-                            "Village TEXT," +
-                            "LocationId INTEGER," +
-                            "WardID INTEGER" + ")"
             );
             sqLiteDatabase.execSQL(
                     "CREATE TABLE 'tblPayer' (" +
@@ -451,7 +443,6 @@ public class SQLHandler extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + tblLanguages);
         db.execSQL("DROP TABLE IF EXISTS " + tblLocations);
         db.execSQL("DROP TABLE IF EXISTS " + tblOfficer);
-        db.execSQL("DROP TABLE IF EXISTS " + tblOfficerVillages);
         db.execSQL("DROP TABLE IF EXISTS " + tblPayer);
         db.execSQL("DROP TABLE IF EXISTS " + tblPolicy);
         db.execSQL("DROP TABLE IF EXISTS " + tblPremium);
@@ -474,7 +465,7 @@ public class SQLHandler extends SQLiteOpenHelper {
     }
 
     private void openDatabase() {
-        String dbPath = mContext.getDatabasePath(DBNAME).getPath();
+        String dbPath = context.getDatabasePath(DBNAME).getPath();
         String dbOfflinePath = global.getAppDirectory() + File.separator + OFFLINEDBNAME;
         if (mDatabase != null && mDatabase.isOpen()) {
             return;
@@ -492,6 +483,7 @@ public class SQLHandler extends SQLiteOpenHelper {
         }
     }
 
+    @NonNull
     public JSONArray getResult(String tableName, String[] columns, String Where, String OrderBy, String nullOverride) {
         openDatabase();
         JSONArray resultSet = new JSONArray();
@@ -519,11 +511,12 @@ public class SQLHandler extends SQLiteOpenHelper {
         return resultSet;
     }
 
-    //get result in JSON format
+    @NonNull
     public JSONArray getResult(String tableName, String[] columns, String where, String orderBy) {
         return getResult(tableName, columns, where, orderBy, "0");
     }
 
+    @NonNull
     public JSONArray getResult(String Query, String[] args, String nullOverride) {
         openDatabase();
         JSONArray resultSet = new JSONArray();
@@ -555,16 +548,20 @@ public class SQLHandler extends SQLiteOpenHelper {
         closeDatabase();
         return resultSet;
     }
-
-    public JSONArray getResult(String Query, String[] args) {
+    @NonNull
+    public JSONArray getResult(@Language("SQL") String Query, String[] args) {
         return getResult(Query, args, "0");
     }
 
-    public String getExportAsXML(String QueryF, String QueryI, String QueryPL, String QueryPR, String QueryIP, String OfficerCode, int OfficerId) throws IOException {
-        String Query = null;
-        String label = null;
-        String sublabel = null;
-
+    public void getExportAsXML(
+            @Language("SQL") String QueryF,
+            @Language("SQL") String QueryI,
+            @Language("SQL") String QueryPL,
+            @Language("SQL") String QueryPR,
+            @Language("SQL") String QueryIP,
+            String OfficerCode,
+            int OfficerId
+    ) throws IOException {
         @SuppressLint("SimpleDateFormat") SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy-HH-mm-ss");
         Calendar cal = Calendar.getInstance();
         String d = format.format(cal.getTime());
@@ -600,26 +597,29 @@ public class SQLHandler extends SQLiteOpenHelper {
 
         try {
             for (int i = 1; i <= 5; i++) {
+                String subLabel;
+                String label;
+                String Query;
                 if (i == 1) {
                     Query = QueryF;
                     label = "Families";
-                    sublabel = "Family";
+                    subLabel = "Family";
                 } else if (i == 2) {
                     Query = QueryI;
                     label = "Insurees";
-                    sublabel = "Insuree";
+                    subLabel = "Insuree";
                 } else if (i == 3) {
                     Query = QueryPL;
                     label = "Policies";
-                    sublabel = "Policy";
+                    subLabel = "Policy";
                 } else if (i == 4) {
                     Query = QueryIP;
                     label = "InsureePolicies";
-                    sublabel = "InsureePolicy";
-                } else if (i == 5) {
+                    subLabel = "InsureePolicy";
+                } else {
                     Query = QueryPR;
                     label = "Premiums";
-                    sublabel = "Premium";
+                    subLabel = "Premium";
                 }
 
                 serializer.startTag(null, label);
@@ -629,20 +629,20 @@ public class SQLHandler extends SQLiteOpenHelper {
 
                 while (!cursor.isAfterLast()) {
                     int totalColumns = cursor.getColumnCount();
-                    serializer.startTag(null, sublabel);
+                    serializer.startTag(null, subLabel);
                     for (int j = 0; j < totalColumns; j++) {
 
                         if (cursor.getString(j) != null) {
 
                             if (label.equals("Families")) {
-                                if (cursor.getColumnName(j) == "FamilyType") {
+                                if (Objects.equals(cursor.getColumnName(j), "FamilyType")) {
                                     if (cursor.getString(j).equals("0")) {
                                         serializer.startTag(null, cursor.getColumnName(j));
                                         serializer.text("");
                                         serializer.endTag(null, cursor.getColumnName(j));
                                     }
 
-                                } else if (cursor.getColumnName(j) == "ConfirmationType") {
+                                } else if (Objects.equals(cursor.getColumnName(j), "ConfirmationType")) {
                                     if (cursor.getString(j).equals("0")) {
                                         serializer.startTag(null, cursor.getColumnName(j));
                                         serializer.text("");
@@ -673,10 +673,10 @@ public class SQLHandler extends SQLiteOpenHelper {
                             serializer.endTag(null, cursor.getColumnName(j));
                         }
                     }
-                    if (sublabel.equals("Family")) {
-                        serializer = addFamilySmsTag(serializer, cursor.getString(0));
+                    if (subLabel.equals("Family")) {
+                        addFamilySmsTag(serializer, cursor.getString(0));
                     }
-                    serializer.endTag(null, sublabel);
+                    serializer.endTag(null, subLabel);
                     cursor.moveToNext();
                 }
                 serializer.endTag(null, label);
@@ -691,12 +691,9 @@ public class SQLHandler extends SQLiteOpenHelper {
         serializer.endDocument();
         serializer.flush();
         fos.close();
-
-        return FileName;
-
     }
 
-    private XmlSerializer addFamilySmsTag(XmlSerializer serializer, String familyId) throws IOException {
+    private void addFamilySmsTag(@NonNull XmlSerializer serializer, String familyId) throws IOException {
         String[] args = {familyId};
         serializer.startTag(null, "FamilySMS");
         try {
@@ -722,19 +719,16 @@ public class SQLHandler extends SQLiteOpenHelper {
             e.printStackTrace();
         }
         serializer.endTag(null, "FamilySMS");
-        return serializer;
     }
 
-
     public void insertData(String TableName, String[] Columns, String data, String PreExecute) throws JSONException {
+        insertData(TableName, Columns, new JSONArray(data), PreExecute);
+    }
+
+    public void insertData(String TableName, String[] Columns, JSONArray array, String PreExecute) throws JSONException {
         String dbPath = ClientAndroidInterface.filePath;
         mDatabase = SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READWRITE);
         try {
-            JSONArray array;
-            JSONObject object;
-
-            array = new JSONArray(data);
-
             if (array.length() == 0)
                 return;
 
@@ -750,10 +744,14 @@ public class SQLHandler extends SQLiteOpenHelper {
             mDatabase.beginTransaction();
             for (int i = 0; i < array.length(); i++) {
                 try {
-                    object = array.getJSONObject(i);
+                    JSONObject object = array.getJSONObject(i);
                     ContentValues cv = new ContentValues();
                     for (String c : Columns) {
-                        cv.put(c, object.getString(c));
+                        try {
+                            cv.put(c, object.getString(c));
+                        } catch (JSONException ignored) {
+
+                        }
                     }
                     mDatabase.insert(TableName, null, cv);
 
@@ -771,14 +769,12 @@ public class SQLHandler extends SQLiteOpenHelper {
         if (mDatabase.isOpen()) {
             closeDatabase();
         }
-
     }
 
-    public int insertData(String tableName, ContentValues contentValues) {
+    public void insertData(String tableName, ContentValues contentValues) {
         try {
             openDatabase();
-            Long lastInsertedId = mDatabase.insertOrThrow(tableName, null, contentValues);
-            return (int) (long) lastInsertedId;
+            mDatabase.insertOrThrow(tableName, null, contentValues);
         } catch (SQLException e) {
             e.printStackTrace();
             throw e;
@@ -794,7 +790,7 @@ public class SQLHandler extends SQLiteOpenHelper {
             openDatabase();
             rowsUpdated = mDatabase.update(tableName, contentValues, whereClause, whereArgs);
             if (throwOnNoRowsUpdated && rowsUpdated <= 0) {
-                throw new UserException(mContext.getResources().getString(R.string.ErrorUpdate));
+                throw new UserException(context.getResources().getString(R.string.ErrorUpdate));
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -804,8 +800,8 @@ public class SQLHandler extends SQLiteOpenHelper {
         return rowsUpdated;
     }
 
-    public int updateData(String tableName, ContentValues contentValues, String whereClause, String[] whereArgs) throws UserException {
-        return updateData(tableName, contentValues, whereClause, whereArgs, true);
+    public void updateData(String tableName, ContentValues contentValues, String whereClause, String[] whereArgs) throws UserException {
+        updateData(tableName, contentValues, whereClause, whereArgs, true);
     }
 
     public void deleteData(String tableName, String whereClause, String[] whereArgs) {
@@ -821,7 +817,6 @@ public class SQLHandler extends SQLiteOpenHelper {
 
     public int getCount(String table, String selection, String[] selectionArgs) {
         openDatabase();
-        int result = 0;
         try (Cursor c = mDatabase.query(table,
                 new String[]{"COUNT(*)"},
                 selection,
@@ -830,14 +825,13 @@ public class SQLHandler extends SQLiteOpenHelper {
                 null,
                 null)) {
             c.moveToFirst();
-            result = c.getInt(0);
+            return c.getInt(0);
         } catch (Exception e) {
             e.printStackTrace();
             throw e;
         } finally {
             closeDatabase();
         }
-        return result;
     }
 
     public int getAssignedCNCount(String officerCode, String productCode) {
@@ -935,7 +929,7 @@ public class SQLHandler extends SQLiteOpenHelper {
         return result;
     }
 
-    public boolean assignCnToPolicy(int policyId, String controlNumber) {
+    public void assignCnToPolicy(int policyId, String controlNumber) {
         try {
             if (isFetchedControlNumber(controlNumber)) {
                 openDatabase();
@@ -952,7 +946,7 @@ public class SQLHandler extends SQLiteOpenHelper {
                         new String[]{String.valueOf(policyId)}));
 
                 if (policyData.length() == 0) {
-                    return false;
+                    return;
                 }
 
                 ContentValues values = new ContentValues();
@@ -962,40 +956,34 @@ public class SQLHandler extends SQLiteOpenHelper {
                 values.put("ProductCode", policyData.getJSONObject(0).getString("ProductCode"));
                 values.put("ControlNumber", controlNumber);
 
-                return mDatabase.insert(tblBulkControlNumbers, null, values) > 0;
+                mDatabase.insert(tblBulkControlNumbers, null, values);
             }
-
-            return true;
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
             closeDatabase();
         }
-        return false;
     }
 
-    public boolean clearCnAssignedToPolicy(int policyId) {
+    public void clearCnAssignedToPolicy(int policyId) {
         openDatabase();
         ContentValues values = new ContentValues();
         values.put("PolicyId", (String) null);
 
         try {
-            int updatedRecords = mDatabase.update(tblBulkControlNumbers,
+            mDatabase.update(tblBulkControlNumbers,
                     values,
                     "PolicyId = ? and Id IS NOT NULL",
                     new String[]{String.valueOf(policyId)});
 
-            int deletedRecords = mDatabase.delete(tblBulkControlNumbers,
+            mDatabase.delete(tblBulkControlNumbers,
                     "PolicyId = ? and Id IS NULL",
                     new String[]{String.valueOf(policyId)});
-
-            return updatedRecords + deletedRecords > 0;
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
             closeDatabase();
         }
-        return false;
     }
 
     public boolean isFetchedControlNumber(String controlNumber) {

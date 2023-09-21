@@ -1,0 +1,6 @@
+mutation RenewPolicy($input: RenewPolicyMutationInput!) {
+    renewPolicy(input: $input) {
+        clientMutationId
+        internalId
+    }
+}

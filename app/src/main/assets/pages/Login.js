@@ -5,7 +5,6 @@ $(document).ready(function () {
         sessionStorage.removeItem("UserData");
         sessionStorage.setItem("user", "out");
         Android.Logout();
-        Android.isValidLogin('', '');
         window.open("Home.html", "_self");
     }
     var officer_code = Android.getOfficerCode();

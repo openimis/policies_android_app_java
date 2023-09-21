@@ -2,9 +2,9 @@ package org.openimis.imispolicies;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
+import com.google.android.material.snackbar.Snackbar;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 
 import org.openimis.imispolicies.tools.Log;
@@ -49,8 +49,6 @@ public class CheckCommission extends AppCompatActivity {
     private Button btnClear;
     private Button btnCheck;
 
-    private Token tokenl;
-    private ToRestApi toRestApi;
     private ProgressDialog pd;
 
 
@@ -77,9 +75,6 @@ public class CheckCommission extends AppCompatActivity {
         edYear = findViewById(R.id.edYear);
         btnCheck = findViewById(R.id.btnCheck);
         btnClear = findViewById(R.id.btnClear);
-
-        tokenl = new Token();
-        toRestApi = new ToRestApi();
         pd = new ProgressDialog(this);
 
         btnCheck.setOnClickListener(view -> {
@@ -287,7 +282,7 @@ public class CheckCommission extends AppCompatActivity {
         runOnUiThread(() -> pd = ProgressDialog.show(this, "", getResources().getString(R.string.Get_Commission)));
         HttpResponse response;
         try {
-            response = toRestApi.postToRestApiToken(obj, "policy/commissions");
+            response = new ToRestApi().postToRestApiToken(obj, "policy/commissions");
             HttpEntity respEntity = response.getEntity();
 
             int cod = response.getStatusLine().getStatusCode();
@@ -295,8 +290,7 @@ public class CheckCommission extends AppCompatActivity {
                 final int c = cod;
                 runOnUiThread(() -> {
                     pd.dismiss();
-                    LoginDialogBox();
-                    if (tokenl.getTokenText().length() > 1) {
+                    if (Global.getGlobal().isLoggedIn()) {
                         View view = findViewById(R.id.actv);
                         if (c == HttpURLConnection.HTTP_INTERNAL_ERROR) {
                             Snackbar.make(view, c + "-" + getResources().getString(R.string.ServerError), Snackbar.LENGTH_LONG)
@@ -305,7 +299,8 @@ public class CheckCommission extends AppCompatActivity {
                             Snackbar.make(view, c + "-" + getResources().getString(R.string.has_no_rights), Snackbar.LENGTH_LONG)
                                     .setAction("Action", null).show();
                         }
-
+                    } else {
+                        new ClientAndroidInterface(this).showLoginDialogBox(null, null);
                     }
                 });
             } else {
@@ -373,11 +368,12 @@ public class CheckCommission extends AppCompatActivity {
                     } catch (JSONException e) {
                         runOnUiThread(() -> {
                             pd.dismiss();
-                            LoginDialogBox();
-                            if (tokenl.getTokenText().length() > 1) {
+                            if (Global.getGlobal().isLoggedIn()) {
                                 View view = findViewById(R.id.actv);
                                 Snackbar.make(view, getResources().getString(R.string.has_no_rights), Snackbar.LENGTH_LONG)
                                         .setAction("Action", null).show();
+                            } else {
+                                new ClientAndroidInterface(this).showLoginDialogBox(null, null);
                             }
                         });
                     }
@@ -396,97 +392,6 @@ public class CheckCommission extends AppCompatActivity {
             Snackbar.make(view, getResources().getString(R.string.NoInternet), Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show();
         }
-    }
-
-
-    public void LoginDialogBox() {
-        if (!ca.CheckInternetAvailable()) {
-            return;
-        }
-
-        LayoutInflater li = LayoutInflater.from(this);
-        View promptsView = li.inflate(R.layout.login_dialog, null);
-
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this)
-                .setView(promptsView);
-
-        final TextView username = promptsView.findViewById(R.id.UserName);
-        final TextView password = promptsView.findViewById(R.id.Password);
-        String officer_code = global.getOfficerCode();
-        username.setText(String.valueOf(officer_code));
-
-        alertDialogBuilder
-                .setCancelable(false)
-                .setPositiveButton(getResources().getString(R.string.Ok),
-                        (dialog, id) -> {
-                            if (!username.getText().toString().equals("") && !password.getText().toString().equals("")) {
-                                pd = ProgressDialog.show(this, getResources().getString(R.string.Login), getResources().getString(R.string.InProgress));
-
-                                new Thread(() -> {
-                                    JSONObject object = new JSONObject();
-                                    try {
-                                        object.put("userName", username.getText().toString());
-                                        object.put("password", password.getText().toString());
-                                    } catch (JSONException e) {
-                                        e.printStackTrace();
-                                    }
-                                    String functionName = "login";
-                                    HttpResponse response = toRestApi.postToRestApi(object, functionName);
-
-                                    String content = null;
-                                    HttpEntity respEntity = response.getEntity();
-                                    if (respEntity != null) {
-                                        try {
-                                            content = EntityUtils.toString(respEntity);
-                                        } catch (IOException e) {
-                                            e.printStackTrace();
-                                        }
-                                    }
-
-                                    if (response.getStatusLine().getStatusCode() == HttpURLConnection.HTTP_OK && content != null) {
-                                        JSONObject ob;
-                                        String token = "";
-                                        String validTo = "";
-                                        try {
-                                            ob = new JSONObject(content);
-                                            token = ob.getString("access_token");
-                                            validTo = ob.getString("expires_on");
-
-                                        } catch (JSONException e) {
-                                            e.printStackTrace();
-                                        }
-
-                                        tokenl.saveTokenText(token, validTo, global.getOfficerCode());
-
-                                        final String finalToken = token;
-                                        runOnUiThread(() -> {
-                                            if (finalToken.length() > 0) {
-                                                pd.dismiss();
-                                                Toast.makeText(this, getResources().getString(R.string.Login_Successful), Toast.LENGTH_LONG).show();
-                                            } else {
-                                                pd.dismiss();
-                                                Toast.makeText(this, getResources().getString(R.string.LoginFail), Toast.LENGTH_LONG).show();
-                                                LoginDialogBox();
-                                            }
-                                        });
-                                    } else {
-                                        runOnUiThread(() -> {
-                                            pd.dismiss();
-                                            Toast.makeText(this, getResources().getString(R.string.LoginFail), Toast.LENGTH_LONG).show();
-                                            LoginDialogBox();
-                                        });
-                                    }
-
-                                }
-                                ).start();
-                            } else {
-                                LoginDialogBox();
-                                Toast.makeText(this, getResources().getString(R.string.Enter_Credentials), Toast.LENGTH_LONG).show();
-                            }
-                        })
-                .setNegativeButton(R.string.Cancel,
-                        (dialog, id) -> dialog.cancel())
-                .show();
     }
 
     public void CommissionsDialogReport(String Amount, String Commissions) {

@@ -1,0 +1,11 @@
+query GetControls {
+    control{
+        edges{
+            node{
+                name
+                usage
+                adjustability
+            }
+        }
+    }
+}

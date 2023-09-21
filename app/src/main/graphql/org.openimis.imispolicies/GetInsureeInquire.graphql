@@ -1,0 +1,63 @@
+query GetInsureeInquire($chfId: String) {
+    insurees(
+        chfId: $chfId
+    ) {
+        edges {
+            node {
+                chfId
+                lastName
+                otherNames
+                dob
+                gender {
+                    gender
+                }
+                photos {
+                    folder
+                    filename
+                    photo
+                }
+                insureePolicies {
+                    edges {
+                        node {
+                            policy {
+                                product {
+                                    name
+                                    code
+                                    ceiling
+                                    ceilingIp
+                                    ceilingOp
+                                    deductible
+                                    deductibleIp
+                                    deductibleOp
+                                    maxNoAntenatal
+                                    maxAmountAntenatal
+                                    maxNoSurgery
+                                    maxAmountSurgery
+                                    maxNoConsultation
+                                    maxAmountConsultation
+                                    maxNoDelivery
+                                    maxAmountDelivery
+                                    maxNoHospitalization
+                                    maxAmountHospitalization
+                                    maxMembers
+                                    maxNoVisits
+                                    maxInstallments
+                                    maxCeilingPolicy
+                                    maxCeilingPolicyIp
+                                    maxCeilingPolicyOp
+                                    maxPolicyExtraMember
+                                    maxPolicyExtraMemberIp
+                                    maxPolicyExtraMemberOp
+                                }
+                                enrollDate
+                                expiryDate
+                                status
+                                value
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

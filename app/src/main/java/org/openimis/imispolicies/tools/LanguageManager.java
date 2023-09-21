@@ -9,8 +9,8 @@ import android.content.res.Resources;
 import android.icu.text.LocaleDisplayNames;
 import android.os.Build;
 import android.os.LocaleList;
-import android.support.annotation.NonNull;
-import android.support.annotation.RequiresApi;
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import android.util.DisplayMetrics;
 
 import org.json.JSONArray;
@@ -27,7 +27,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.function.Predicate;
 
 public class LanguageManager {
 

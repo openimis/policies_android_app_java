@@ -1,7 +1,7 @@
 package org.openimis.imispolicies;
 
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.view.MenuItem;
 import android.widget.ListAdapter;
 import android.widget.ListView;
@@ -13,8 +13,6 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-
-import org.openimis.imispolicies.R;
 
 public class ViewPolicies extends AppCompatActivity {
 

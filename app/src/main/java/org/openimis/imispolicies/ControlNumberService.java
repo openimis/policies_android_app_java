@@ -5,6 +5,7 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.content.Context;
 
+import org.intellij.lang.annotations.Language;
 import org.openimis.imispolicies.tools.Log;
 
 import cz.msebera.android.httpclient.HttpEntity;
@@ -18,6 +19,8 @@ import org.openimis.imispolicies.util.StringUtils;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -55,7 +58,6 @@ public class ControlNumberService extends IntentService {
 
     private Global global;
     private ToRestApi toRestApi;
-    private ClientAndroidInterface ca;
     private SQLHandler sqlHandler;
 
     public ControlNumberService() {
@@ -87,7 +89,6 @@ public class ControlNumberService extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
         toRestApi = new ToRestApi();
-        ca = new ClientAndroidInterface(this);
         sqlHandler = new SQLHandler(this);
         global = (Global) getApplicationContext();
 
@@ -243,7 +244,7 @@ public class ControlNumberService extends IntentService {
     }
 
     private int insertControlNumber(JSONObject order, String controlNumber, String internalIdentifier) throws JSONException {
-        return ca.insertControlNumber(
+        return insertControlNumber(
                 order.getString("amount_to_be_paid"),
                 order.getString("amount_to_be_paid"), //TODO no separation between calculated and confirmed amount for now
                 controlNumber,
@@ -252,12 +253,54 @@ public class ControlNumberService extends IntentService {
                 order.getString("SmsRequired"));
     }
 
+    private int insertControlNumber(String amountCalculated, String amountConfirmed, String control_number, String InternalIdentifier, String PaymentType, String SmsRequired) {
+        ContentValues values = new ContentValues();
+        values.put("AmountCalculated", String.valueOf(amountCalculated));
+        values.put("AmountConfirmed", String.valueOf(amountConfirmed));
+        values.put("ControlNumber", String.valueOf(control_number));
+        values.put("InternalIdentifier", String.valueOf(InternalIdentifier));
+        values.put("PaymentType", String.valueOf(PaymentType));
+        values.put("SmsRequired", String.valueOf(SmsRequired));
+
+        sqlHandler.insertData("tblControlNumber", values);
+
+        return getMaxId();
+    }
+
+    public int getMaxId() {
+        int id = 0;
+        @Language("SQL")
+        String Query = "SELECT Max(Id) As Id FROM tblControlNumber";
+        JSONArray ID = sqlHandler.getResult(Query, null);
+        try {
+            JSONObject JmaxIdOb = ID.getJSONObject(0);
+            id = JmaxIdOb.getInt("Id");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return id;
+    }
+
     private void updateRecordedPoliciesAfterRequest(JSONArray paymentDetails, int ControlNumberId) throws JSONException {
         JSONObject ob;
         for (int j = 0; j < paymentDetails.length(); j++) {
             ob = paymentDetails.getJSONObject(j);
             int Id = Integer.parseInt(ob.getString("Id"));
-            ca.updateRecordedPolicy(Id, ControlNumberId);
+            updateRecordedPolicy(Id, ControlNumberId);
+        }
+    }
+
+    public void updateRecordedPolicy(int Id, int ControlNumberId) {
+        SimpleDateFormat format = AppInformation.DateTimeInfo.getDefaultDateFormatter();
+        Calendar cal = Calendar.getInstance();
+        String d = format.format(cal.getTime());
+        ContentValues values = new ContentValues();
+        values.put("ControlNumberId", ControlNumberId);
+        values.put("ControlRequestDate", d);
+        try {
+            sqlHandler.updateData("tblRecordedPolicies", values, "Id = ?", new String[]{String.valueOf(Id)});
+        } catch (UserException e) {
+            e.printStackTrace();
         }
     }
 
@@ -268,7 +311,17 @@ public class ControlNumberService extends IntentService {
             ob = arr.getJSONObject(j);
             String internalIdentifier = ob.getString("internal_identifier");
             String controlNumber = ob.getString("control_number");
-            ca.assignControlNumber(internalIdentifier, controlNumber);
+            assignControlNumber(internalIdentifier, controlNumber);
+        }
+    }
+
+    private void assignControlNumber(String InternalIdentifier, String ControlNumber) {
+        ContentValues values = new ContentValues();
+        values.put("ControlNumber", ControlNumber);
+        try {
+            sqlHandler.updateData("tblControlNumber", values, "InternalIdentifier = ?", new String[]{String.valueOf(InternalIdentifier)});
+        } catch (UserException e) {
+            e.printStackTrace();
         }
     }
 

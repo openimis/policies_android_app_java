@@ -1,0 +1,33 @@
+query GetRenewals {
+    policyRenewals {
+        edges {
+            node {
+                id
+                uuid
+                renewalPromptDate
+                policy {
+                    id
+                    product {
+                        id
+                        code
+                        name
+                    }
+                    officer {
+                        id
+                        code
+                    }
+                }
+                insuree {
+                    id
+                    chfId
+                    lastName
+                    otherNames
+                    phone
+                    currentVillage {
+                        name
+                    }
+                }
+            }
+        }
+    }
+}

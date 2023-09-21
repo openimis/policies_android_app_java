@@ -6,40 +6,32 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import cz.msebera.android.httpclient.HttpEntity;
-import cz.msebera.android.httpclient.HttpResponse;
-import cz.msebera.android.httpclient.util.EntityUtils;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.material.snackbar.Snackbar;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
 public class OverViewControlNumbers extends AppCompatActivity {
-    public SQLHandler sqlHandler;
     private Global global;
 
-    private ToRestApi toRestApi;
-    private Token tokenl;
     private ProgressDialog pd;
 
     private JSONArray policy;
@@ -75,7 +67,6 @@ public class OverViewControlNumbers extends AppCompatActivity {
     private String RequestedFrom = "";
     private String RequestedTo = "";
     private String RadioRenewal = "";
-    private String RadioSms = "";
     private String PaymentType = "";
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -115,9 +106,6 @@ public class OverViewControlNumbers extends AppCompatActivity {
             actionBar.setTitle(getResources().getString(R.string.control_numbers));
         }
 
-        toRestApi = new ToRestApi();
-        tokenl = new Token();
-
         ValueNumberOfPolices = findViewById(R.id.ValueNumberOfPolices);
         ValueAmountOfContribution = findViewById(R.id.ValueAmountOfContribution);
         pd = new ProgressDialog(this);
@@ -125,21 +113,16 @@ public class OverViewControlNumbers extends AppCompatActivity {
 
         NothingFound = findViewById(R.id.NothingFound);
 
-        final String[] n = {""};
+
         Button requestButton = findViewById(R.id.requestButton);
         requestButton.setOnClickListener(view -> {
 
             if (global.isNetworkAvailable()) {
-                if (tokenl.getTokenText().length() <= 0) {
-                    LoginDialogBox();
+                if (!Global.getGlobal().isLoggedIn()) {
+                    clientAndroidInterface.showLoginDialogBox(null, null);
                 } else {
                     try {
                         getControlNumber.put("internalIdentifier", PolicyValueToSend);
-
-                        n[0] = "";
-                        for (int i = 0; i < num.size(); i++) {
-                            n[0] += num.get(i) + "\n";
-                        }
                         AmountCalculated = String.valueOf(PolicyValueToSend);
                         if (num.size() != 0) {
                             trackBox(paymentDetails);
@@ -222,7 +205,6 @@ public class OverViewControlNumbers extends AppCompatActivity {
         UploadedTo = getIntent().getStringExtra("REQUESTED_FROM");
         UploadedTo = getIntent().getStringExtra("REQUESTED_TO");
         RadioRenewal = getIntent().getStringExtra("RENEWAL");
-        RadioSms = getIntent().getStringExtra("SMS");
         PaymentType = getIntent().getStringExtra("PAYMENT_TYPE");
 
         fillRecordedPolicies();
@@ -318,10 +300,11 @@ public class OverViewControlNumbers extends AppCompatActivity {
         alertDialogBuilder
                 .setCancelable(false)
                 .setPositiveButton("Get Control Number", (dialog, id) -> {
-                    if (clientAndroidInterface.isLoggedIn())
+                    if (clientAndroidInterface.isLoggedIn()) {
                         getControlNumber(policies);
-                    else
-                        LoginDialogBox();
+                    } else {
+                        clientAndroidInterface.showLoginDialogBox(() -> getControlNumber(policies), null);
+                    }
                 })
                 .setNegativeButton("Cancel",
                         (dialog, id) -> dialog.cancel());
@@ -330,108 +313,6 @@ public class OverViewControlNumbers extends AppCompatActivity {
         AlertDialog alertDialog = alertDialogBuilder.create();
 
         // show it
-        alertDialog.show();
-    }
-
-    public void LoginDialogBox() {
-        if (!global.isNetworkAvailable()) {
-            clientAndroidInterface.ShowDialog(getResources().getString(R.string.NoInternet));
-            return;
-        }
-
-        Global global = (Global) OverViewControlNumbers.this.getApplicationContext();
-
-        // get prompts.xml view
-        LayoutInflater li = LayoutInflater.from(this);
-        View promptsView = li.inflate(R.layout.login_dialog, null);
-
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
-                this);
-
-        // set prompts.xml to alertdialog builder
-        alertDialogBuilder.setView(promptsView);
-
-        final TextView username = promptsView.findViewById(R.id.UserName);
-        final TextView password = promptsView.findViewById(R.id.Password);
-        String officer_code = global.getOfficerCode();
-        username.setText(String.valueOf(officer_code));
-        // set dialog message
-        alertDialogBuilder
-                .setCancelable(false)
-                .setPositiveButton(getResources().getString(R.string.Ok),
-                        (dialog, id) -> {
-                            if (!username.getText().toString().equals("") && !password.getText().toString().equals("")) {
-                                pd = ProgressDialog.show(OverViewControlNumbers.this, getResources().getString(R.string.Login), getResources().getString(R.string.InProgress));
-
-                                new Thread(() -> {
-                                    JSONObject object = new JSONObject();
-                                    try {
-                                        object.put("userName", username.getText().toString());
-                                        object.put("password", password.getText().toString());
-                                    } catch (JSONException e) {
-                                        e.printStackTrace();
-                                    }
-                                    String functionName = "login";
-                                    HttpResponse response = toRestApi.postToRestApi(object, functionName);
-
-                                    String content = null;
-                                    HttpEntity respEntity = response.getEntity();
-                                    if (respEntity != null) {
-                                        final String[] code = {null};
-                                        // EntityUtils to get the response content
-
-                                        try {
-                                            content = EntityUtils.toString(respEntity);
-                                        } catch (IOException e) {
-                                            e.printStackTrace();
-                                        }
-                                    }
-
-                                    if (response.getStatusLine().getStatusCode() == HttpURLConnection.HTTP_OK) {
-                                        JSONObject ob = null;
-                                        String token = "";
-                                        String validTo = "";
-                                        try {
-                                            ob = new JSONObject(content);
-                                            token = ob.getString("access_token");
-                                            validTo = ob.getString("expires_on");
-
-                                        } catch (JSONException e) {
-                                            e.printStackTrace();
-                                        }
-
-                                        tokenl.saveTokenText(token, validTo, global.getOfficerCode());
-
-                                        final String finalToken = token;
-                                        runOnUiThread(() -> {
-                                            if (finalToken.length() > 0) {
-                                                pd.dismiss();
-                                                Toast.makeText(OverViewControlNumbers.this, OverViewControlNumbers.this.getResources().getString(R.string.Login_Successful), Toast.LENGTH_LONG).show();
-                                            } else {
-                                                pd.dismiss();
-                                                Toast.makeText(OverViewControlNumbers.this, OverViewControlNumbers.this.getResources().getString(R.string.LoginFail), Toast.LENGTH_LONG).show();
-                                                LoginDialogBox();
-                                            }
-                                        });
-                                    } else {
-                                        runOnUiThread(() -> {
-                                            pd.dismiss();
-                                            Toast.makeText(OverViewControlNumbers.this, OverViewControlNumbers.this.getResources().getString(R.string.LoginFail), Toast.LENGTH_LONG).show();
-                                            LoginDialogBox();
-                                        });
-                                    }
-                                }
-                                ).start();
-                            } else {
-                                LoginDialogBox();
-                                Toast.makeText(OverViewControlNumbers.this, OverViewControlNumbers.this.getResources().getString(R.string.Enter_Credentials), Toast.LENGTH_LONG).show();
-                            }
-                        })
-                .setNegativeButton(R.string.Cancel,
-                        (dialog, id) -> dialog.cancel());
-
-        // create alert dialog
-        AlertDialog alertDialog = alertDialogBuilder.create();
         alertDialog.show();
     }
 

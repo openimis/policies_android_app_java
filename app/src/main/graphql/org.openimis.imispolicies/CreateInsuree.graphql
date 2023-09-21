@@ -1,0 +1,5 @@
+mutation CreateInsuree($input: CreateInsureeMutationInput!) {
+    createInsuree(input: $input) {
+        clientMutationId
+    }
+}

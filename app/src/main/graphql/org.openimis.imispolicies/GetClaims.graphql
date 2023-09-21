@@ -1,0 +1,80 @@
+query GetClaims($claim_administrator_code: String, $status_claim: Int, $visit_date_from: Date, $visit_date_to: Date, $processed_date_from: Date, $processed_date_to: Date) {
+  claims(
+    admin_Code: $claim_administrator_code
+    status: $status_claim
+    dateClaimed_Gte: $visit_date_from
+    dateClaimed_Lte: $visit_date_to
+    dateProcessed_Lte: $processed_date_to
+    dateProcessed_Gte: $processed_date_from
+  ) {
+    totalCount
+    edges {
+      node {
+        uuid
+        code
+        healthFacility {
+          code
+          name
+        }
+        insuree {
+          chfId
+          lastName
+          otherNames
+        }
+        icd {
+          name
+        }
+        icd1 {
+          name
+        }
+        icd2 {
+          name
+        }
+        icd3 {
+          name
+        }
+        icd4 {
+          name
+        }
+        dateClaimed
+        dateFrom
+        dateTo
+        validityFrom
+        validityTo
+        visitType
+        status
+        claimed
+        approved
+        adjustment
+        explanation
+        guaranteeId
+        services {
+          qtyProvided
+          qtyApproved
+          priceAdjusted
+          priceValuated
+          explanation
+          justification
+          service {
+            code
+            name
+            price
+          }
+        }
+        items {
+          qtyProvided
+          qtyApproved
+          priceAdjusted
+          priceValuated
+          explanation
+          justification
+          item {
+            code
+            name
+            price
+          }
+        }
+      }
+    }
+  }
+}

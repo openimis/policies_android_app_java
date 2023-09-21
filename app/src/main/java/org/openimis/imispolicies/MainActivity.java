@@ -28,7 +28,7 @@ package org.openimis.imispolicies;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.ActionBar;
-import android.app.AlertDialog;
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -38,26 +38,12 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityCompat;
 import android.text.TextUtils;
-
-import org.openimis.imispolicies.tools.LanguageManager;
-import org.openimis.imispolicies.tools.Log;
-
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.View;
-import android.support.design.widget.NavigationView;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -65,12 +51,28 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.navigation.NavigationView;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.zxing.client.android.Intents;
 
 import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.openimis.imispolicies.network.exception.UserNotAuthenticatedException;
+import org.openimis.imispolicies.tools.LanguageManager;
+import org.openimis.imispolicies.tools.Log;
 import org.openimis.imispolicies.util.AndroidUtils;
 import org.openimis.imispolicies.util.StringUtils;
 import org.openimis.imispolicies.util.UriUtils;
@@ -83,6 +85,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.lang.ref.WeakReference;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -95,9 +98,13 @@ public class MainActivity extends AppCompatActivity
     public static final int REQUEST_CREATE_RENEWAL_EXPORT = 5;
     private NavigationView navigationView;
 
-    private SQLHandler sqlHandler;
+    // This is super ugly but I'm not fixing the app.
+    // This is less ugly than what was there before.
+    @SuppressLint("StaticFieldLeak")
+    @Nullable
+    private static MainActivity instance;
+
     private WebView wv;
-    private final Context context = this;
     static Global global;
     private static final int MENU_LANGUAGE_1 = Menu.FIRST;
     private static final int MENU_LANGUAGE_2 = Menu.FIRST + 1;
@@ -109,8 +116,8 @@ public class MainActivity extends AppCompatActivity
     private String selectedLanguage;
     public String ImagePath;
     public String InsureeNumber;
-    static TextView Login;
-    static TextView OfficerName;
+    TextView Login;
+    TextView OfficerName;
     ClientAndroidInterface ca;
     String aBuffer = "";
     String calledFrom = "java";
@@ -139,7 +146,7 @@ public class MainActivity extends AppCompatActivity
             wv.evaluateJavascript(String.format("selectImageCallback(\"%s\");", selectedImage), null);
         } else if (requestCode == ClientAndroidInterface.RESULT_SCAN && resultCode == RESULT_OK && data != null) {
             String insureeNumber = data.getStringExtra(Intents.Scan.RESULT);
-            if(!StringUtils.isEmpty(insureeNumber)) {
+            if (!StringUtils.isEmpty(insureeNumber)) {
                 wv.evaluateJavascript(String.format("scanQrCallback(\"%s\");", insureeNumber), null);
             }
         } else if (requestCode == REQUEST_PICK_MD_FILE) {
@@ -211,6 +218,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (checkRequirements()) {
             onAllRequirementsMet();
         }
@@ -221,8 +229,9 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         global = (Global) getApplicationContext();
         super.onCreate(savedInstanceState);
+        instance = this;
         setContentView(R.layout.activity_main);
-        sqlHandler = new SQLHandler(this);
+        SQLHandler sqlHandler = new SQLHandler(this);
         sqlHandler.isPrivate = true;
         //Set the Image folder path
         global.setImageFolder(global.getSubdirectory("Images"));
@@ -299,9 +308,9 @@ public class MainActivity extends AppCompatActivity
         Login.setOnClickListener(v -> {
             wv.loadUrl("file:///android_asset/pages/Login.html?s=3");
             drawer.closeDrawer(GravityCompat.START);
-            SetLoggedIn(getApplication().getResources().getString(R.string.Login), getApplication().getResources().getString(R.string.Logout));
+            SetLoggedIn();
         });
-        ca = new ClientAndroidInterface(context);
+        ca = new ClientAndroidInterface(this);
         if (ca.isMasterDataAvailable() > 0) {
             loadLanguages();
         }
@@ -329,16 +338,22 @@ public class MainActivity extends AppCompatActivity
         OfficerName.setText(global.getOfficerName());
     }
 
-    public static void SetLoggedIn(String LogInText, String LogOutText) {
-        if (global.isLoggedIn()) {
-            Login.setText(LogOutText);
-        } else {
-            Login.setText(LogInText);
+    public static void SetLoggedIn() {
+        MainActivity activity = instance;
+        if (activity == null || activity.isFinishing()) {
+            return;
         }
+        activity.runOnUiThread(() -> {
+            if (global.isLoggedIn()) {
+                activity.Login.setText(R.string.Logout);
+            } else {
+                activity.Login.setText(R.string.Login);
+            }
+        });
     }
 
     private void loadLanguages() {
-        ClientAndroidInterface ca = new ClientAndroidInterface(context);
+        ClientAndroidInterface ca = new ClientAndroidInterface(this);
         JSONArray Languages = ca.getLanguage();
         JSONObject LanguageObject = null;
 
@@ -372,10 +387,10 @@ public class MainActivity extends AppCompatActivity
                                 Toast.makeText(getApplicationContext(), getResources().getString(R.string.NoFileExporerInstalled), Toast.LENGTH_SHORT).show();
                             }
                         }).setNegativeButton(getResources().getString(R.string.No),
-                (dialog, id) -> {
-                    dialog.cancel();
-                    finish();
-                }).show();
+                        (dialog, id) -> {
+                            dialog.cancel();
+                            finish();
+                        }).show();
     }
 
     public void PickMasterDataFileDialogFromPage() {
@@ -411,8 +426,7 @@ public class MainActivity extends AppCompatActivity
 
         alertDialog2.setPositiveButton(getResources().getString(R.string.Ok),
                 (dialog, which) -> {
-                    MasterDataLocalAsync masterDataLocalAsync = new MasterDataLocalAsync();
-                    masterDataLocalAsync.execute();
+                    new MasterDataLocalAsync(this).execute(aBuffer);
                 }).setNegativeButton(getResources().getString(R.string.Quit),
                 (dialog, id) -> {
                     dialog.cancel();
@@ -430,21 +444,19 @@ public class MainActivity extends AppCompatActivity
 
         alertDialog2.setPositiveButton(getResources().getString(R.string.Ok),
                 (dialog, which) -> {
-                    MasterDataLocalAsync masterDataLocalAsync = new MasterDataLocalAsync();
-                    masterDataLocalAsync.execute();
+                    new MasterDataLocalAsync(this).execute(aBuffer);
                 }).setNegativeButton(getResources().getString(R.string.Quit),
                 (dialog, id) -> dialog.cancel()).show();
     }
 
     public void ShowEnrolmentOfficerDialog() {
-        final ClientAndroidInterface ca = new ClientAndroidInterface(context);
+        final ClientAndroidInterface ca = new ClientAndroidInterface(this);
         final int MasterData = ca.isMasterDataAvailable();
 
-        LayoutInflater li = LayoutInflater.from(context);
+        LayoutInflater li = LayoutInflater.from(this);
         @SuppressLint("InflateParams") View promptsView = li.inflate(R.layout.dialog, null);
 
-        final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
-                context);
+        final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
 
         alertDialogBuilder.setView(promptsView);
 
@@ -475,7 +487,7 @@ public class MainActivity extends AppCompatActivity
                                     if (ca.isOfficerCodeValid(userInput.getText().toString())) {
                                         global.setOfficerCode(userInput.getText().toString());
                                         OfficerName.setText(global.getOfficerName());
-                                        SetLoggedIn(getResources().getString(R.string.Login), getResources().getString(R.string.Logout));
+                                        SetLoggedIn();
                                         // Officer villages are currently turned off
 //                                            if(_General.isNetworkAvailable(MainActivity.this)){
 //                                                ca.getOfficerVillages(userInput.getText().toString());
@@ -488,9 +500,7 @@ public class MainActivity extends AppCompatActivity
                                     if (!global.isNetworkAvailable()) {
                                         PickMasterDataFileDialog();
                                     } else {
-                                        MasterDataAsync masterDataAsync = new MasterDataAsync();
-                                        masterDataAsync.execute();
-
+                                        new MasterDataAsync(this).execute();
                                     }
                                     //ca.downloadMasterData();
                                     //ShowDialogTex();
@@ -507,7 +517,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void ShowMasterDataDialog() {
-        masterDataDialog = new AlertDialog.Builder(context)
+        masterDataDialog = new AlertDialog.Builder(this)
                 .setTitle(R.string.MasterData)
                 .setMessage(R.string.MasterDataNotFound)
                 .setCancelable(false)
@@ -516,9 +526,7 @@ public class MainActivity extends AppCompatActivity
                             if (!global.isNetworkAvailable()) {
                                 PickMasterDataFileDialog();
                             } else {
-                                MasterDataAsync masterDataAsync = new MasterDataAsync();
-                                masterDataAsync.execute();
-
+                                new MasterDataAsync(this).execute();
                             }
                         })
                 .setNegativeButton(R.string.ForceClose,
@@ -532,14 +540,11 @@ public class MainActivity extends AppCompatActivity
 
     public void ShowDialogTex2() {
 
-        final ClientAndroidInterface ca = new ClientAndroidInterface(context);
-        LayoutInflater li = LayoutInflater.from(context);
+        final ClientAndroidInterface ca = new ClientAndroidInterface(this);
+        LayoutInflater li = LayoutInflater.from(this);
         @SuppressLint("InflateParams") View promptsView = li.inflate(R.layout.rar_pass_dialog, null);
 
-        android.support.v7.app.AlertDialog alertDialog = null;
-
-        final android.support.v7.app.AlertDialog.Builder alertDialogBuilder = new android.support.v7.app.AlertDialog.Builder(
-                context);
+        final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
 
         alertDialogBuilder.setView(promptsView);
 
@@ -568,12 +573,7 @@ public class MainActivity extends AppCompatActivity
                             finish();
                         });
 
-        // create alert dialog
-        alertDialog = alertDialogBuilder.create();
-
-        // show it
-        alertDialog.show();
-
+         alertDialogBuilder.show();
     }
 
     public String getMasterDataText2(String fileName, String password) {
@@ -742,7 +742,7 @@ public class MainActivity extends AppCompatActivity
                 wv.loadUrl("file:///android_asset/pages/Login.html?s=5");
             }
         } else if (id == R.id.nav_payment) {
-            ClientAndroidInterface ca = new ClientAndroidInterface(context);
+            ClientAndroidInterface ca = new ClientAndroidInterface(this);
             ca.launchPayment();
         }
 
@@ -770,22 +770,34 @@ public class MainActivity extends AppCompatActivity
         return super.onKeyDown(keyCode, event);
     }
 
-    public class MasterDataAsync extends AsyncTask<Void, Void, Void> {
-        ProgressDialog pd = null;
+    public static class MasterDataAsync extends AsyncTask<Void, Void, Throwable> {
+        private final WeakReference<MainActivity> activity;
+        private WeakReference<ProgressDialog> pd = null;
 
-        @Override
-        protected void onPreExecute() {
-
-            pd = ProgressDialog.show(context, context.getResources().getString(R.string.Sync), context.getResources().getString(R.string.DownloadingMasterData));
+        public MasterDataAsync(@NonNull MainActivity context) {
+            this.activity = new WeakReference<>(context);
         }
 
         @Override
-        protected Void doInBackground(Void... voids) {
-            ClientAndroidInterface ca = new ClientAndroidInterface(context);
+        protected void onPreExecute() {
+            Context context = activity.get();
+            if (context == null) {
+                return;
+            }
+            pd = new WeakReference<>(AndroidUtils.showProgressDialog(context, R.string.Sync, R.string.DownloadingMasterData));
+        }
+
+        @Override
+        protected Throwable doInBackground(Void... voids) {
             try {
-                ca.startDownloading();
-            } catch (JSONException | UserException e) {
+                Activity context = activity.get();
+                if (context == null) {
+                    return null;
+                }
+                new ClientAndroidInterface(context).startDownloadingMasterData();
+            } catch (Exception e) {
                 e.printStackTrace();
+                return e;
             }
 
             return null;
@@ -793,28 +805,56 @@ public class MainActivity extends AppCompatActivity
 
 
         @Override
-        protected void onPostExecute(Void aVoid) {
-            pd.dismiss();
+        protected void onPostExecute(Throwable exception) {
+            ProgressDialog progress = pd.get();
+            if (progress != null) {
+                progress.dismiss();
+            }
+            final Activity context = activity.get();
+            if (context == null) {
+                return;
+            }
+            if (exception instanceof UserNotAuthenticatedException) {
+                new ClientAndroidInterface(context).forceLoginDialogBox(() -> restart(context));
+                return;
+            }
+            restart(context);
+        }
 
-            Intent refresh = new Intent(MainActivity.this, MainActivity.class);
-            startActivity(refresh);
-            finish();
+        private void restart(@NonNull Activity activity) {
+            Intent refresh = new Intent(activity, MainActivity.class);
+            activity.startActivity(refresh);
+            activity.finish();
         }
     }
 
-    public class MasterDataLocalAsync extends AsyncTask<Void, Void, Void> {
-        ProgressDialog pd = null;
+    public static class MasterDataLocalAsync extends AsyncTask<String, Void, Void> {
 
-        @Override
-        protected void onPreExecute() {
-            pd = ProgressDialog.show(context, context.getResources().getString(R.string.Sync), context.getResources().getString(R.string.DownloadingMasterData));
+        private final WeakReference<MainActivity> activity;
+        private WeakReference<ProgressDialog> pd;
+
+        public MasterDataLocalAsync(@NonNull MainActivity context) {
+            this.activity = new WeakReference<>(context);
         }
 
         @Override
-        protected Void doInBackground(Void... voids) {
+        protected void onPreExecute() {
+            Context context = activity.get();
+            if (context == null) {
+                return;
+            }
+            pd = new WeakReference<>(AndroidUtils.showProgressDialog(context, R.string.Sync, R.string.DownloadingMasterData));
+        }
+
+        @Override
+        protected Void doInBackground(String... buffers) {
+            Activity context = activity.get();
+            if (context == null) {
+                return null;
+            }
             ClientAndroidInterface ca = new ClientAndroidInterface(context);
             try {
-                ca.importMasterData(aBuffer);
+                ca.importMasterData(buffers[0]);
             } catch (JSONException | UserException e) {
                 e.printStackTrace();
             }
@@ -824,11 +864,17 @@ public class MainActivity extends AppCompatActivity
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            pd.dismiss();
-
-            Intent refresh = new Intent(MainActivity.this, MainActivity.class);
-            startActivity(refresh);
-            finish();
+            ProgressDialog progress = pd.get();
+            if (progress != null) {
+                progress.dismiss();
+            }
+            Activity context = activity.get();
+            if (context == null) {
+                return;
+            }
+            Intent refresh = new Intent(context, MainActivity.class);
+            context.startActivity(refresh);
+            context.finish();
         }
     }
 
@@ -836,37 +882,6 @@ public class MainActivity extends AppCompatActivity
     protected void onStop() {
         super.onStop();
     }
-
-//    private void CheckForUpdates() {
-//        if (global.isNetworkAvailable()) {
-//            if (_General.isNewVersionAvailable(VersionField, MainActivity.this, getApplicationContext().getPackageName())) {
-//                //Show notification bar
-//                mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-//                //final Notification NotificationDetails = new Notification(R.drawable.ic_launcher_policies, getResources().getString(R.string.NotificationAlertText), System.currentTimeMillis());
-//                //NotificationDetails.flags = Notification.FLAG_SHOW_LIGHTS | Notification.FLAG_AUTO_CANCEL | Notification.DEFAULT_SOUND | Notification.DEFAULT_VIBRATE;
-//                //NotificationDetails.setLatestEventInfo(context, ContentTitle, ContentText, intent);
-//                //mNotificationManager.notify(SIMPLE_NOTFICATION_ID, NotificationDetails);
-//                Context context = getApplicationContext();
-//                CharSequence ContentTitle = getResources().getString(R.string.ContentTitle);
-//                CharSequence ContentText = getResources().getString(R.string.ContentText);
-//
-//                Intent NotifyIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(ApkFileLocation));
-//
-//                PendingIntent intent = PendingIntent.getActivity(MainActivity.this, 0, NotifyIntent, 0);
-//                NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "M_CH_ID");
-//                builder.setAutoCancel(false);
-//                builder.setContentTitle(ContentTitle);
-//                builder.setContentText(ContentText);
-//                builder.setSmallIcon(R.drawable.ic_statistics);
-//                builder.setContentIntent(intent);
-//                builder.setOngoing(false);
-//
-//                mNotificationManager.notify(SIMPLE_NOTFICATION_ID, builder.build());
-//                vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
-//                vibrator.vibrate(500);
-//            }
-//        }
-//    }
 
     public static boolean hasPermissions(Context context, String... permissions) {
         if (context != null && permissions != null) {
@@ -882,7 +897,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void PermissionsDialog() {
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context)
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this)
                 .setTitle(R.string.Permissions)
                 .setMessage(getResources().getString(R.string.PermissionsInfo, getResources().getString(R.string.app_name_policies)))
                 .setCancelable(false)
@@ -926,11 +941,17 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void recreate() {
         for (AlertDialog dialog : new AlertDialog[]{masterDataDialog, enrolmentOfficerDialog, permissionDialog}) {
-            if(dialog != null && dialog.isShowing()) {
+            if (dialog != null && dialog.isShowing()) {
                 dialog.dismiss();
             }
         }
 
         super.recreate();
+    }
+
+    @Override
+    protected void onDestroy() {
+        instance = null;
+        super.onDestroy();
     }
 }
