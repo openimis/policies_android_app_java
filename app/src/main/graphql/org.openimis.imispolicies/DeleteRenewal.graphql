@@ -1,0 +1,6 @@
+mutation DeleteRenewal($input: DeletePolicyRenewalsMutationInput!) {
+    deletePolicyRenewals(input: $input) {
+        clientMutationId
+        internalId
+    }
+}

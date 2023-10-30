@@ -1,0 +1,38 @@
+query GetPaymentList($claim_administrator_code: String) {
+    claimAdmins(code: $claim_administrator_code) {
+        edges {
+            node {
+                code
+                healthFacility {
+                    code
+                    servicesPricelist {
+                        details {
+                            edges {
+                                node {
+                                    service {
+                                        code
+                                        name
+                                        price
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    itemsPricelist {
+                        details {
+                            edges {
+                                node {
+                                    item {
+                                        code
+                                        name
+                                        price
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

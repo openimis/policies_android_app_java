@@ -4,6 +4,9 @@
     package="org.openimis.imispolicies">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
@@ -25,7 +28,8 @@
     <uses-permission
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         tools:node="remove" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" tools:node="remove" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+        tools:node="remove" />
 
     <uses-feature
         android:name="android.hardware.camera"
@@ -50,7 +54,7 @@
             android:exported="false" />
 
         <provider
-            android:name="android.support.v4.content.FileProvider"
+            android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
             android:exported="false"
             android:grantUriPermissions="true">
@@ -138,31 +142,6 @@
             tools:overrideLibrary="com.google.zxing.client" />
         <activity
             android:name="com.google.zxing.client.android.encode.EncodeActivity"
-            android:exported="false"
-            tools:node="merge"
-            tools:overrideLibrary="com.google.zxing.client" />
-        <activity
-            android:name="com.google.zxing.client.android.book.SearchBookContentsActivity"
-            android:exported="false"
-            tools:node="merge"
-            tools:overrideLibrary="com.google.zxing.client" />
-        <activity
-            android:name="com.google.zxing.client.android.share.ShareActivity"
-            android:exported="false"
-            tools:node="merge"
-            tools:overrideLibrary="com.google.zxing.client" />
-        <activity
-            android:name="com.google.zxing.client.android.history.HistoryActivity"
-            android:exported="false"
-            tools:node="merge"
-            tools:overrideLibrary="com.google.zxing.client" />
-        <activity
-            android:name="com.google.zxing.client.android.share.BookmarkPickerActivity"
-            android:exported="false"
-            tools:node="merge"
-            tools:overrideLibrary="com.google.zxing.client" />
-        <activity
-            android:name="com.google.zxing.client.android.share.AppPickerActivity"
             android:exported="false"
             tools:node="merge"
             tools:overrideLibrary="com.google.zxing.client" />

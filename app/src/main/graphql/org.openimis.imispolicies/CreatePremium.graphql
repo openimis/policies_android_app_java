@@ -1,0 +1,6 @@
+mutation CreatePremium ($input: CreatePremiumMutationInput!){
+    createPremium(input: $input) {
+        clientMutationId
+        internalId
+    }
+}

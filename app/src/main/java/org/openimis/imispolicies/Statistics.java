@@ -25,115 +25,98 @@
 
 package org.openimis.imispolicies;
 
-import android.annotation.SuppressLint;
-import android.app.AlertDialog;
 import android.app.DatePickerDialog;
-import android.app.Dialog;
 import android.app.ProgressDialog;
-import android.content.DialogInterface;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
-import android.view.View;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
+import android.widget.TextView;
 
-import java.text.DateFormat;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.WorkerThread;
+import androidx.appcompat.app.AppCompatActivity;
 
-import com.exact.CallSoap.CallSoap;
+import org.openimis.imispolicies.domain.entity.Report;
+import org.openimis.imispolicies.network.exception.HttpException;
+import org.openimis.imispolicies.usecase.FetchReportEnrolment;
+import org.openimis.imispolicies.usecase.FetchReportFeedback;
+import org.openimis.imispolicies.usecase.FetchReportRenewal;
+import org.openimis.imispolicies.util.AndroidUtils;
 
-import cz.msebera.android.httpclient.HttpEntity;
-import cz.msebera.android.httpclient.HttpResponse;
-import cz.msebera.android.httpclient.util.EntityUtils;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
+import java.net.HttpURLConnection;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
-
-import org.openimis.imispolicies.R;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 public class Statistics extends AppCompatActivity {
+
+    private static final String TITLE_EXTRA = "Title";
+    private static final String TYPE_EXTRA = "Type";
+
+    @NonNull
+    public static Intent newIntent(@NonNull Context context, @Nullable String title, @NonNull Type type) {
+        Intent intent = new Intent(context, Statistics.class);
+        intent.putExtra(TITLE_EXTRA, title);
+        intent.putExtra(TYPE_EXTRA, type);
+        return intent;
+    }
+
     private EditText etFromDate;
     private EditText etToDate;
     private ListView lvStats;
     private ProgressDialog pd;
-    private int year;
-    private int month;
-    private int day;
-    private static final int FromDate_Dialog_ID = 0;
-    private static final int ToDate_Dialog_ID = 1;
-    private final Calendar cal = Calendar.getInstance();
-    private ArrayList<HashMap<String, String>> FeedbackStats = new ArrayList<>();
-    ArrayList<HashMap<String, String>> EnrolmentStats = new ArrayList<HashMap<String, String>>();
-    private String OfficerCode;
-    private String Caller;
-    private Global global;
-    public static boolean IsEnrolment = false;
+    private Type caller;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.statistics);
-        global = (Global) getApplicationContext();
-
         //noinspection ConstantConditions
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         Intent intent = getIntent();
-        if (intent.getExtras() != null) {
-            @SuppressWarnings("ConstantConditions") String Title = intent.getExtras().get("Title").toString();
-            //noinspection ConstantConditions
-            Caller = intent.getExtras().get("Caller").toString();
-            setTitle(Title);
+        caller = (Type) intent.getSerializableExtra(TYPE_EXTRA);
+        if (intent.getStringExtra(TITLE_EXTRA) != null) {
+            setTitle(intent.getStringExtra(TITLE_EXTRA));
         }
 
-        OfficerCode = global.getOfficerCode();
+        etFromDate = findViewById(R.id.etFromDate);
+        etToDate = findViewById(R.id.etToDate);
+        lvStats = findViewById(R.id.lvStats);
 
-        etFromDate = (EditText) findViewById(R.id.etFromDate);
-        etToDate = (EditText) findViewById(R.id.etToDate);
-        lvStats = (ListView) findViewById(R.id.lvStats);
-
-        etFromDate.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                //noinspection deprecation
-                showDialog(FromDate_Dialog_ID);
-                return false;
-            }
-        });
-
-        etToDate.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                //noinspection deprecation
-                showDialog(ToDate_Dialog_ID);
-                return false;
-            }
-        });
-
+        etFromDate.setOnClickListener((view) ->
+                getDateDialog(
+                        FromDatePickerListener,
+                        null,
+                        getDateOrNull(etToDate)
+                ).show()
+        );
+        etToDate.setOnClickListener((view) ->
+                getDateDialog(
+                        ToDatePickerListener,
+                        getDateOrNull(etFromDate),
+                        null
+                ).show()
+        );
     }
 
 
-    private DatePickerDialog.OnDateSetListener FromDatePickerListener = new DatePickerDialog.OnDateSetListener() {
-
+    private final DatePickerDialog.OnDateSetListener FromDatePickerListener = new DatePickerDialog.OnDateSetListener() {
         @Override
-        public void onDateSet(DatePicker view, int Selectedyear, int SelectedMonth, int SelectedDay) {
-            year = Selectedyear;
-            month = SelectedMonth;
-            day = SelectedDay;
-
+        public void onDateSet(DatePicker view, int year, int month, int day) {
             etFromDate.setText(new StringBuilder().append(day).append("/").append(month + 1).append("/").append(year));
 
             if (etToDate.getText().length() == 0) {
@@ -142,51 +125,45 @@ public class Statistics extends AppCompatActivity {
         }
     };
 
-
-    private DatePickerDialog.OnDateSetListener ToDatePickerListener = new DatePickerDialog.OnDateSetListener() {
+    private final DatePickerDialog.OnDateSetListener ToDatePickerListener = new DatePickerDialog.OnDateSetListener() {
         @Override
-        public void onDateSet(DatePicker datePicker, int SelectedYear, int SelectedMonth, int SelectedDay) {
-            year = SelectedYear;
-            month = SelectedMonth;
-            day = SelectedDay;
-
+        public void onDateSet(DatePicker datePicker, int year, int month, int day) {
             etToDate.setText(new StringBuilder().append(day).append("/").append(month + 1).append("/").append(year));
-
-
         }
     };
 
-
-    @SuppressWarnings("deprecation")
-    @Override
-    protected Dialog onCreateDialog(int id) {
-        switch (id) {
-            case FromDate_Dialog_ID:
-                year = cal.get(Calendar.YEAR);
-                month = cal.get(Calendar.MONTH);
-                day = cal.get(Calendar.DATE);
-
-                return new DatePickerDialog(this, FromDatePickerListener, year, month, day);
-
-            case ToDate_Dialog_ID:
-                year = cal.get(Calendar.YEAR);
-                month = cal.get(Calendar.MONTH);
-                day = cal.get(Calendar.DATE);
-
-                return new DatePickerDialog(this, ToDatePickerListener, year, month, day);
-
+    @NonNull
+    private DatePickerDialog getDateDialog(
+            @NonNull DatePickerDialog.OnDateSetListener listener,
+            @Nullable Date minDate,
+            @Nullable Date maxDate
+    ) {
+        Calendar cal = Calendar.getInstance();
+        DatePickerDialog dialog = new DatePickerDialog(
+                this,
+                listener,
+                cal.get(Calendar.YEAR),
+                cal.get(Calendar.MONTH),
+                cal.get(Calendar.DAY_OF_MONTH)
+        );
+        DatePicker picker = dialog.getDatePicker();
+        if (minDate != null) {
+            picker.setMinDate(minDate.getTime());
         }
-        return null;
+        if (maxDate != null) {
+            picker.setMaxDate(maxDate.getTime());
+        }
+        return dialog;
     }
 
 
     private boolean isValidData() {
         if (etFromDate.getText().length() == 0) {
-            ShowDialog(getResources().getString(R.string.MissingStartDate));
+            AndroidUtils.showDialog(this, R.string.MissingStartDate);
             return false;
         }
         if (etToDate.getText().length() == 0) {
-            ShowDialog(getResources().getString(R.string.MissingEndDate));
+            AndroidUtils.showDialog(this, R.string.MissingEndDate);
             return false;
 
         }
@@ -202,213 +179,137 @@ public class Statistics extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                finish();
-                return true;
-            case R.id.mnuGetStats:
-
-                if (!isValidData()) return false;
-
-
-                pd = new ProgressDialog(this);
-                pd.setCancelable(true);
-                pd = ProgressDialog.show(this, "", getResources().getString(R.string.InProgress));
-
-                new Thread() {
-                    public void run() {
-                        if (!IsEnrolment)
-                            GetStatistics();
-                        else
-                            GetEnrolmentStats();
-                        pd.dismiss();
+        int itemId = item.getItemId();
+        if (itemId == android.R.id.home) {
+            finish();
+            return true;
+        } else if (itemId == R.id.mnuGetStats) {
+            if (!isValidData()) {
+                return false;
+            }
+            pd = AndroidUtils.showProgressDialog(this, 0, R.string.InProgress);
+            new Thread() {
+                public void run() {
+                    if (caller != Type.ENROLMENT) {
+                        GetStatistics(caller);
+                    } else {
+                        GetEnrolmentStats();
                     }
+                    pd.dismiss();
+                }
+            }.start();
 
-                }.start();
-
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+            return true;
         }
+        return super.onOptionsItemSelected(item);
     }
 
-    private void GetStatistics() {
-        FeedbackStats = new ArrayList<>();
-
-        CallSoap cs = new CallSoap();
-
-        Date FromDate, ToDate;
-
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
-        FromDate = new Date();
-        ToDate = new Date();
+    @WorkerThread
+    private void GetStatistics(@Nullable Type caller) {
+        Date fromDate = getDate(etFromDate);
+        Date toDate = getDate(etToDate);
+        Report report;
         try {
-            FromDate = dateFormat.parse(String.valueOf(etFromDate.getText()));
-            ToDate = dateFormat.parse(String.valueOf(etToDate.getText()));
+            if (Type.FEEDBACK.equals(caller)) {
+                report = new FetchReportFeedback().execute(fromDate, toDate);
+            } else if (Type.RENEWAL.equals(caller)) {
+                report = new FetchReportRenewal().execute(fromDate, toDate);
+            } else {
+                throw new IllegalArgumentException("Caller '" + caller + "' is not valid");
+            }
+        } catch (Exception e) {
+            if (e instanceof HttpException && ((HttpException) e).getCode() == HttpURLConnection.HTTP_UNAUTHORIZED) {
+                runOnUiThread(() -> {
+                    new ClientAndroidInterface(this).showLoginDialogBox(() -> GetStatistics(caller), null);
+                });
+                return;
+            }
+            e.printStackTrace();
+            AndroidUtils.showDialog(this, R.string.NoStatFound);
+            return;
+        }
+        runOnUiThread(() -> {
+            List<Map<String, String>> feedbackStats = new ArrayList<>();
+            Map<String, String> data = new HashMap<>();
+            data.put("Label", "Total Sent");
+            data.put("Value", String.valueOf(report.getSent()));
+            feedbackStats.add(data);
+
+            data = new HashMap<>();
+            data.put("Label", "Accepted");
+            data.put("Value", String.valueOf(report.getAccepted()));
+            feedbackStats.add(data);
+
+            ListAdapter adapter = new SimpleAdapter(Statistics.this,
+                    feedbackStats,
+                    R.layout.lvstats,
+                    new String[]{"Label", "Value"},
+                    new int[]{R.id.tvStatsLabel, R.id.tvStats}
+            );
+
+            lvStats.setAdapter(adapter);
+        });
+    }
+
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH);
+
+    @Nullable
+    private Date getDateOrNull(@NonNull TextView tv) {
+        Date date;
+        try {
+            date = dateFormat.parse(String.valueOf(tv.getText()));
         } catch (ParseException e) {
             e.printStackTrace();
+            date = null;
         }
-        String stats = "";
+        return date;
+    }
 
-        DateFormat formatter = AppInformation.DateTimeInfo.getDefaultDateFormatter();
-        JSONObject objStats = new JSONObject();
-        try {
-            objStats.put("fromDate", formatter.format(FromDate));
-            objStats.put("toDate", formatter.format(ToDate));
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        ToRestApi rest = new ToRestApi();
-
-        if (Caller.equals("F")) {
-            HttpResponse response = rest.postToRestApiToken(objStats, "report/feedback");
-            try {
-                stats = EntityUtils.toString(response.getEntity());
-            } catch (Exception e) {
-            }
-
-        } else if (Caller.equals("R")) {
-            HttpResponse response = rest.postToRestApiToken(objStats, "report/renewal");
-            try {
-                stats = EntityUtils.toString(response.getEntity());
-            } catch (Exception e) {
-            }
-        }
-
-        final String finalStats = stats;
-
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-
-
-                try {
-                    JSONObject statsObj = new JSONObject(finalStats);
-                    if (statsObj.length() == 0) {
-                        ShowDialog(getResources().getString(R.string.NoStatFound));
-                    } else {
-                        HashMap<String, String> data = new HashMap<>();
-                        data.put("Label", "Total Sent");
-                        if (Caller.equals("F"))
-                            data.put("Value", String.valueOf(statsObj.get("feedbackSent")));
-                        else if (Caller.equals("R"))
-                            data.put("Value", String.valueOf(statsObj.get("renewalSent")));
-                        FeedbackStats.add(data);
-
-                        data = new HashMap<>();
-                        data.put("Label", "Accepted");
-                        if (Caller.equals("F"))
-                            data.put("Value", String.valueOf(statsObj.get("feedbackAccepted")));
-                        else if (Caller.equals("R"))
-                            data.put("Value", String.valueOf(statsObj.get("renewalAccepted")));
-                        FeedbackStats.add(data);
-
-                        ListAdapter adapter = new SimpleAdapter(Statistics.this,
-                                FeedbackStats,
-                                R.layout.lvstats,
-                                new String[]{"Label", "Value"},
-                                new int[]{R.id.tvStatsLabel, R.id.tvStats}
-                        );
-
-                        lvStats.setAdapter(adapter);
-                    }
-
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-
-            }
-        });
-
-
+    @NonNull
+    private Date getDate(@NonNull TextView tv) {
+        Date date = getDateOrNull(tv);
+        return date == null ? new Date() : date;
     }
 
     private void GetEnrolmentStats() {
-        EnrolmentStats = new ArrayList<>();
-
-        Date FromDate, ToDate;
-
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
-        FromDate = new Date();
-        ToDate = new Date();
+        Report.Enrolment report;
         try {
-            FromDate = dateFormat.parse(String.valueOf(etFromDate.getText()));
-            ToDate = dateFormat.parse(String.valueOf(etToDate.getText()));
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-
-        DateFormat formatter = AppInformation.DateTimeInfo.getDefaultDateFormatter();
-
-        JSONObject objEnrolment = new JSONObject();
-        try {
-            objEnrolment.put("fromDate", formatter.format(FromDate));
-            objEnrolment.put("toDate", formatter.format(ToDate));
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        ToRestApi rest = new ToRestApi();
-        HttpResponse response = rest.postToRestApiToken(objEnrolment, "report/enrolment");
-
-        HttpEntity entity = response.getEntity();
-        String entityString = "";
-        JSONObject enrolmentStatsObj = new JSONObject();
-
-        try {
-            entityString = EntityUtils.toString(entity);
-            enrolmentStatsObj = new JSONObject(entityString);
+            report = new FetchReportEnrolment().execute(getDate(etFromDate), getDate(etToDate));
         } catch (Exception e) {
+            if (e instanceof HttpException && ((HttpException) e).getCode() == HttpURLConnection.HTTP_UNAUTHORIZED) {
+                runOnUiThread(() -> {
+                    new ClientAndroidInterface(this).showLoginDialogBox(() -> GetStatistics(caller), null);
+                });
+                return;
+            }
+            AndroidUtils.showDialog(this, R.string.NoStatFound);
+            return;
         }
 
-        final JSONObject finalEnrolmentStatsObj = enrolmentStatsObj;
+        runOnUiThread(() -> {
+            List<Map<String, String>> EnrolmentStats = new ArrayList<>();
+            Map<String, String> data = new HashMap<>();
+            data.put("Label", "Total Submitted");
+            data.put("Value", String.valueOf(report.getSubmitted()));
+            EnrolmentStats.add(data);
 
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    if (finalEnrolmentStatsObj.length() == 0) {
-                        ShowDialog(getResources().getString(R.string.NoStatFound));
-                    } else {
-                        HashMap<String, String> data = new HashMap<String, String>();
-                        data.put("Label", "Total Submitted");
-                        data.put("Value", String.valueOf(finalEnrolmentStatsObj.get("totalSubmitted")));
-                        EnrolmentStats.add(data);
+            data = new HashMap<>();
+            data.put("Label", "Assigned");
+            data.put("Value", String.valueOf(report.getAssigned()));
+            EnrolmentStats.add(data);
 
-                        data = new HashMap<String, String>();
-                        data.put("Label", "Assigned");
-                        data.put("Value", String.valueOf(finalEnrolmentStatsObj.get("totalAssigned")));
-                        EnrolmentStats.add(data);
+            ListAdapter adapter = new SimpleAdapter(Statistics.this,
+                    EnrolmentStats,
+                    R.layout.lvstats,
+                    new String[]{"Label", "Value"},
+                    new int[]{R.id.tvStatsLabel, R.id.tvStats}
+            );
 
-                        ListAdapter adapter = new SimpleAdapter(Statistics.this,
-                                EnrolmentStats,
-                                R.layout.lvstats,
-                                new String[]{"Label", "Value"},
-                                new int[]{R.id.tvStatsLabel, R.id.tvStats}
-                        );
-
-                        lvStats.setAdapter(adapter);
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
+            lvStats.setAdapter(adapter);
         });
     }
 
-    private AlertDialog ShowDialog(String msg) {
-        return new AlertDialog.Builder(this)
-                .setMessage(msg)
-                .setCancelable(false)
-                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-
-                    }
-                }).show();
+    public enum Type {
+        FEEDBACK, RENEWAL, ENROLMENT
     }
-
-
 }

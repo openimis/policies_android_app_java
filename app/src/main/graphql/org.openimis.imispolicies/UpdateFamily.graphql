@@ -1,0 +1,5 @@
+mutation UpdateFamily($input: UpdateFamilyMutationInput!) {
+    updateFamily(input: $input) {
+        clientMutationId
+    }
+}

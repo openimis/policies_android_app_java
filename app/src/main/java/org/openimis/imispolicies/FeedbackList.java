@@ -31,26 +31,26 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.AbsListView;
 import android.widget.EditText;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
-import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.MainThread;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.openimis.imispolicies.domain.entity.FeedbackRequest;
+import org.openimis.imispolicies.usecase.FetchFeedback;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.BufferedReader;
@@ -60,20 +60,13 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class FeedbackList extends AppCompatActivity {
-    private ListView lv;
-    private SwipeRefreshLayout swipe;
-    private ArrayList<HashMap<String, String>> FeedbackList = new ArrayList<>();
-    private String OfficerCode;
-    private String aBuffer = "";
 
     private ClientAndroidInterface ca;
-    private Global global;
-    private EditText etFeedbackSearch;
-    private ListAdapter adapter;
-
-    boolean isUserLogged = false;
+    private ListView lv;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,14 +74,13 @@ public class FeedbackList extends AppCompatActivity {
         setContentView(R.layout.feedbacks);
         //noinspection ConstantConditions
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        global = (Global) getApplicationContext();
-        OfficerCode = global.getOfficerCode();
+
         ca = new ClientAndroidInterface(this);
-        etFeedbackSearch = findViewById(R.id.etFeedbackSearch);
+        EditText etFeedbackSearch = findViewById(R.id.etFeedbackSearch);
         lv = findViewById(R.id.lvFeedbacks);
         fillFeedbacks();
 
-        swipe = findViewById(R.id.swipe);
+        SwipeRefreshLayout swipe = findViewById(R.id.swipe);
         swipe.setColorSchemeResources(
                 R.color.DarkBlue,
                 R.color.Maroon,
@@ -107,20 +99,17 @@ public class FeedbackList extends AppCompatActivity {
 
             (new Handler()).postDelayed(() -> {
                 try {
-                    swipe.setRefreshing(false);
-                    Token token = null;
-
-                    try {
-                        token = global.getJWTToken();
-                    } catch (Exception e) {
-                    }
-
-                    if (token != null) {
+                    if (Global.getGlobal().isLoggedIn()) {
                         RefreshFeedbacks();
                     } else {
-                        LoginDialogBox("Feedbacks");
+                        ca.forceLoginDialogBox(() -> {
+                            Toast.makeText(FeedbackList.this, FeedbackList.this.getResources().getString(R.string.Login_Successful), Toast.LENGTH_LONG).show();
+                            Intent intent = new Intent(FeedbackList.this, FeedbackList.class);
+                            startActivity(intent);
+                            finish();
+                        });
                     }
-
+                    swipe.setRefreshing(false);
                 } catch (IOException | XmlPullParserException e) {
                     e.printStackTrace();
                 }
@@ -135,7 +124,7 @@ public class FeedbackList extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                ((SimpleAdapter) adapter).getFilter().filter(s);
+                ((SimpleAdapter) lv.getAdapter()).getFilter().filter(s);
             }
 
             @Override
@@ -154,7 +143,6 @@ public class FeedbackList extends AppCompatActivity {
         });
 
         lv.setOnItemClickListener((parent, view, position, id) -> {
-
             Intent intent = new Intent(getApplicationContext(), Feedback.class);
             HashMap<String, String> oItem;
             //noinspection unchecked
@@ -163,30 +151,25 @@ public class FeedbackList extends AppCompatActivity {
             intent.putExtra("CHFID", oItem.get("CHFID"));
             intent.putExtra("ClaimUUID", oItem.get("ClaimUUID"));
             intent.putExtra("ClaimCode", oItem.get("ClaimCode"));
-            intent.putExtra("OfficerCode", OfficerCode);
+            intent.putExtra("OfficerCode", Global.getGlobal().getOfficerCode());
             startActivityForResult(intent, 0);
         });
     }
 
+    @MainThread
     private void fillFeedbacks() {
         if (!ca.CheckInternetAvailable())
             return;
 
-        String result = ca.getOfflineFeedBack(OfficerCode);
-
-        JSONArray jsonArray;
-        JSONObject object;
-
+        String result = ca.getOfflineFeedBack(Global.getGlobal().getOfficerCode());
+        List<Map<String, String>> list = new ArrayList<>();
         try {
-            jsonArray = new JSONArray(result);
+            JSONArray jsonArray = new JSONArray(result);
             if (jsonArray.length() == 0) {
-                FeedbackList.clear();
                 Toast.makeText(getApplicationContext(), getResources().getString(R.string.NoFeedbackFound), Toast.LENGTH_LONG).show();
             } else {
-                FeedbackList.clear();
-
                 for (int i = 0; i < jsonArray.length(); i++) {
-                    object = jsonArray.getJSONObject(i);
+                    JSONObject object = jsonArray.getJSONObject(i);
 
                     HashMap<String, String> feedback = new HashMap<>();
                     feedback.put("CHFID", object.getString("CHFID"));
@@ -196,16 +179,15 @@ public class FeedbackList extends AppCompatActivity {
                     feedback.put("DateFromTo", object.getString("DateFrom") + " - " + object.getString("DateTo"));
                     feedback.put("FeedbackPromptDate", object.getString("FeedbackPromptDate"));
                     feedback.put("ClaimUUID", object.getString("ClaimUUID"));
-                    FeedbackList.add(feedback);
+                    list.add(feedback);
                 }
             }
-            adapter = new SimpleAdapter(this, FeedbackList, R.layout.feedbacklist,
+
+            lv.setAdapter(new SimpleAdapter(this, list, R.layout.feedbacklist,
                     new String[]{"CHFID", "FullName", "HFName", "ClaimCode", "DateFromTo", "FeedbackPromptDate"},
-                    new int[]{R.id.tvCHFID, R.id.tvFullName, R.id.tvHFName, R.id.tvClaimCode, R.id.tvDates, R.id.tvTime});
+                    new int[]{R.id.tvCHFID, R.id.tvFullName, R.id.tvHFName, R.id.tvClaimCode, R.id.tvDates, R.id.tvTime}));
 
-            lv.setAdapter(adapter);
-
-            setTitle("Feedbacks (" + lv.getCount() + ")");
+            setTitle("Feedbacks (" + list.size() + ")");
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -215,8 +197,9 @@ public class FeedbackList extends AppCompatActivity {
     public String getMasterDataText(String filename) {
         //ca.unZipFeedbacksRenewals(filename);
         String fname = filename.substring(0, filename.indexOf("."));
+        String aBuffer = "";
         try {
-            String dir = global.getSubdirectory("Database");
+            String dir = Global.getGlobal().getSubdirectory("Database");
             File myFile = new File(dir, fname);
             FileInputStream fIn = new FileInputStream(myFile);
             BufferedReader myReader = new BufferedReader(new InputStreamReader(fIn));
@@ -237,12 +220,11 @@ public class FeedbackList extends AppCompatActivity {
         }
         if (requestCode == 5 && resultCode == RESULT_OK) {
             Uri uri = data.getData();
-            String path = "";
-            path = uri.getPath();
+            String path = uri.getPath();
             File f = new File(path);
-            if (f.getName().toLowerCase().equals("feedback_" + global.getOfficerCode().toLowerCase() + ".rar")) {
-                getMasterDataText((f.getName()));
-                ConfirmDialogFeedbackRenewal((f.getName()));
+            if (f.getName().toLowerCase().equals("feedback_" + Global.getGlobal().getOfficerCode().toLowerCase() + ".rar")) {
+                String aBuffer = getMasterDataText((f.getName()));
+                ConfirmDialogFeedbackRenewal(f.getName(), aBuffer);
             } else {
                 Toast.makeText(this, getResources().getString(R.string.FileDoesntBelongHere), Toast.LENGTH_LONG).show();
             }
@@ -263,14 +245,11 @@ public class FeedbackList extends AppCompatActivity {
                 finish();
                 return true;
             case R.id.mnuStatistics:
-                if (!global.isNetworkAvailable()) {
+                if (!Global.getGlobal().isNetworkAvailable()) {
                     ca.ShowDialog(getResources().getString(R.string.InternetRequired));
                     return false;
                 }
-                Intent Stats = new Intent(this, Statistics.class);
-                Stats.putExtra("Title", "Feedback Statistics");
-                Stats.putExtra("Caller", "F");
-                startActivity(Stats);
+                startActivity(Statistics.newIntent(this, "Feedback Statistics", Statistics.Type.FEEDBACK));
                 return true;
             default:
                 super.onOptionsItemSelected(item);
@@ -279,15 +258,19 @@ public class FeedbackList extends AppCompatActivity {
 
     }
 
-    public void ConfirmDialogFeedbackRenewal(String filename) {
+    private void ConfirmDialogFeedbackRenewal(String filename, String aBuffer) {
         AlertDialog.Builder alertDialog2 = new AlertDialog.Builder(
                 FeedbackList.this);
         alertDialog2.setTitle("Load file:");
         alertDialog2.setMessage(filename);
         alertDialog2.setPositiveButton("OK",
                 (dialog, which) -> {
-                    if (ca.InsertFeedbacks(aBuffer)) {
-                        fillFeedbacks();
+                    try {
+                        if (ca.InsertFeedbacks(new JSONArray(aBuffer))) {
+                            fillFeedbacks();
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
                     }
                 }).setNegativeButton("Quit",
                 (dialog, id) -> {
@@ -329,101 +312,21 @@ public class FeedbackList extends AppCompatActivity {
         if (ca.CheckInternetAvailable()) {
             //   pd = ProgressDialog.show(this, "", getResources().getString(R.string.Loading));
             new Thread(() -> {
-                String result = null;
-
                 try {
-                    ToRestApi rest = new ToRestApi();
-                    result = rest.getObjectFromRestApiToken("feedback");
-
-                    if (result.equalsIgnoreCase("[]") || result == null) {
-                        FeedbackList.clear();
-                        return;
+                    List<FeedbackRequest> feedbacks = new FetchFeedback().execute();
+                    boolean IsInserted = ca.InsertFeedbacks(feedbacks);
+                    if (!IsInserted) {
+                        ca.ShowDialog(getResources().getString(R.string.ErrorInsert));
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
+                    ca.ShowDialog(getResources().getString(R.string.ErrorOccurred) + ": " + e.getMessage());
                 }
 
-                Boolean IsInserted = ca.InsertFeedbacks(result);
-
-                if (!IsInserted) {
-                    ca.ShowDialog(getResources().getString(R.string.ErrorOccurred));
-                }
-
-                runOnUiThread(() -> fillFeedbacks());
-
-
+                runOnUiThread(this::fillFeedbacks);
             }).start();
         } else {
             openDialogForFeedbackRenewal();
         }
-    }
-
-    public void LoginDialogBox(final String page) {
-        if (!ca.CheckInternetAvailable())
-            return;
-
-        final int[] userid = {0};
-
-        Global global = (Global) FeedbackList.this.getApplicationContext();
-        // get prompts.xml view
-        LayoutInflater li = LayoutInflater.from(this);
-        View promptsView = li.inflate(R.layout.login_dialog, null);
-
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-
-        // set prompts.xml to alertdialog builder
-        alertDialogBuilder.setView(promptsView);
-
-        final TextView username = promptsView.findViewById(R.id.UserName);
-        final TextView password = promptsView.findViewById(R.id.Password);
-
-        username.setText(global.getOfficerCode());
-
-        ca = new ClientAndroidInterface(this);
-
-        // set dialog message
-        alertDialogBuilder
-                .setCancelable(false)
-                .setPositiveButton(R.string.Ok,
-                        (dialog, id) -> {
-                            if (!username.getText().toString().equals("") && !password.getText().toString().equals("")) {
-
-                                new Thread() {
-                                    public void run() {
-                                        isUserLogged = ca.LoginToken(username.getText().toString(), password.getText().toString());
-
-                                        runOnUiThread(() -> {
-                                            if (isUserLogged) {
-                                                if (page.equals("Feedbacks")) {
-                                                    finish();
-                                                    Intent intent = new Intent(FeedbackList.this, FeedbackList.class);
-                                                    startActivity(intent);
-                                                    Toast.makeText(FeedbackList.this, FeedbackList.this.getResources().getString(R.string.Login_Successful), Toast.LENGTH_LONG).show();
-                                                }
-
-                                            } else {
-                                                Toast.makeText(FeedbackList.this, FeedbackList.this.getResources().getString(R.string.LoginFail), Toast.LENGTH_LONG).show();
-                                                LoginDialogBox(page);
-                                                //ca.ShowDialog(FeedbackList.this.getResources().getString(R.string.LoginFail));
-                                            }
-                                        });
-
-                                    }
-                                }.start();
-
-
-                            } else {
-                                Toast.makeText(FeedbackList.this, FeedbackList.this.getResources().getString(R.string.Enter_Credentials), Toast.LENGTH_LONG).show();
-                                LoginDialogBox(page);
-                            }
-                        })
-                .setNegativeButton(R.string.Cancel,
-                        (dialog, id) -> dialog.cancel());
-
-        // create alert dialog
-        AlertDialog alertDialog = alertDialogBuilder.create();
-
-        // show it
-        alertDialog.show();
     }
 }

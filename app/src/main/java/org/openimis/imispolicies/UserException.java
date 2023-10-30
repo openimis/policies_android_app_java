@@ -25,9 +25,15 @@
 
 package org.openimis.imispolicies;
 
+import androidx.annotation.Nullable;
+
 public class UserException extends Exception {
 
     public UserException(String message) {
-        super(message);
+        this(message, null);
+    }
+
+    public UserException(String message, @Nullable Throwable cause) {
+        super(message, cause);
     }
 }

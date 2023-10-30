@@ -31,15 +31,8 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
-
-import org.openimis.imispolicies.tools.LanguageManager;
-import org.openimis.imispolicies.tools.Log;
-
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -53,11 +46,17 @@ import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import cz.msebera.android.httpclient.HttpResponse;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.openimis.imispolicies.domain.PolicyRenewal;
+import org.openimis.imispolicies.network.exception.HttpException;
+import org.openimis.imispolicies.tools.Log;
+import org.openimis.imispolicies.usecase.FetchPolicyRenewals;
 import org.openimis.imispolicies.util.FileUtils;
 import org.openimis.imispolicies.util.UriUtils;
 
@@ -67,6 +66,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class RenewList extends AppCompatActivity {
     private static final String LOG_TAG = "RENEWAL";
@@ -74,7 +75,6 @@ public class RenewList extends AppCompatActivity {
     private Global global;
     private ListView lv;
     private SwipeRefreshLayout swipe;
-    private ArrayList<HashMap<String, String>> renewalList = new ArrayList<>();
     private String OfficerCode;
     private ClientAndroidInterface ca;
     private ListAdapter adapter;
@@ -273,7 +273,7 @@ public class RenewList extends AppCompatActivity {
     }
 
     private void fillRenewals() {
-        renewalList.clear();
+        List<Map<String, String>> renewalList = new ArrayList<>();
         SimpleDateFormat format = AppInformation.DateTimeInfo.getDefaultDateFormatter();
         Calendar cal = Calendar.getInstance();
         String d = format.format(cal.getTime());
@@ -286,7 +286,6 @@ public class RenewList extends AppCompatActivity {
             HashMap<String, String> renewal;
             JSONArray jsonArray = new JSONArray(result);
 
-            renewalList.clear();
             renewal = new HashMap<>();
             renewal.put("RenewalId", "0");
             renewal.put("CHFID", UnlistedRenPolicy);
@@ -301,7 +300,7 @@ public class RenewList extends AppCompatActivity {
             renewal.put("RenewalUUID", "");
             renewalList.add(renewal);
 
-            if (jsonArray.length()==0) {
+            if (jsonArray.length() == 0) {
                 this.NoRenewalsFoundDialog();
             }
             for (int i = 0; i < jsonArray.length(); i++) {
@@ -340,24 +339,18 @@ public class RenewList extends AppCompatActivity {
         if (global.isNetworkAvailable()) {
             if (global.isLoggedIn()) {
                 new Thread(() -> {
-                    String result = null;
-                    int responseCode = 0;
+
                     try {
-                        ToRestApi rest = new ToRestApi();
-                        HttpResponse response = rest.getFromRestApiToken("policy");
-                        responseCode = response.getStatusLine().getStatusCode();
-                        result = rest.getContent(response);
+                        List<PolicyRenewal> renewals = new FetchPolicyRenewals().execute();
+                        ca.InsertRenewalsFromApi(toJson(renewals));
+                        runOnUiThread(this::fillRenewals);
                     } catch (Exception e) {
                         e.printStackTrace();
-                    }
-
-                    if (responseCode == HttpURLConnection.HTTP_OK && result != null) {
-                        ca.InsertRenewalsFromApi(result);
-                        runOnUiThread(this::fillRenewals);
-                    } else if (responseCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
-                        Toast.makeText(this, getResources().getString(R.string.LogInToDownloadRenewals), Toast.LENGTH_LONG).show();
-                    } else {
-                        Toast.makeText(this, getResources().getString(R.string.SomethingWrongServer), Toast.LENGTH_LONG).show();
+                        if (e instanceof HttpException && ((HttpException) e).getCode() == HttpURLConnection.HTTP_UNAUTHORIZED) {
+                            Toast.makeText(this, getResources().getString(R.string.LogInToDownloadRenewals), Toast.LENGTH_LONG).show();
+                        } else {
+                            Toast.makeText(this, getResources().getString(R.string.SomethingWrongServer), Toast.LENGTH_LONG).show();
+                        }
                     }
                 }
                 ).start();
@@ -367,6 +360,28 @@ public class RenewList extends AppCompatActivity {
         } else {
             requestImportRenewal();
         }
+    }
+
+    private JSONArray toJson(List<PolicyRenewal> renewals) throws JSONException {
+        JSONArray array = new JSONArray();
+        for (PolicyRenewal renewal : renewals) {
+            JSONObject object = new JSONObject();
+            object.put("renewalId", renewal.getId());
+            object.put("renewalUUID", renewal.getUuid());
+            object.put("policyId", renewal.getPolicyId());
+            object.put("officerId", renewal.getOfficerId());
+            object.put("officerCode", renewal.getOfficerCode());
+            object.put("chfid", renewal.getChfId());
+            object.put("lastName", renewal.getLastName());
+            object.put("otherNames", renewal.getOtherNames());
+            object.put("productCode", renewal.getProductCode());
+            object.put("productName", renewal.getProductName());
+            object.put("villageName", renewal.getVillageName());
+            object.put("renewalPromptDate", renewal.getRenewalPromptDate());
+            object.put("phone", renewal.getPhone());
+            array.put(object);
+        }
+        return array;
     }
 
     @Override

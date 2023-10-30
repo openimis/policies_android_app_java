@@ -26,26 +26,30 @@
 package org.openimis.imispolicies;
 
 import android.Manifest;
+import android.annotation.TargetApi;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 
-import org.openimis.imispolicies.tools.LanguageManager;
-import org.openimis.imispolicies.tools.Log;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.openimis.imispolicies.repository.LoginRepository;
+import org.openimis.imispolicies.tools.Log;
 import org.openimis.imispolicies.util.StreamUtils;
+import org.openimis.imispolicies.util.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -56,6 +60,30 @@ import java.util.List;
 import java.util.Map;
 
 public class Global extends Application {
+    private static final String[] PERMISSIONS_PRE_13 = new String[]{
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.VIBRATE,
+            Manifest.permission.INTERNET,
+            Manifest.permission.CAMERA,
+            Manifest.permission.ACCESS_NETWORK_STATE,
+            Manifest.permission.ACCESS_WIFI_STATE,
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.CHANGE_WIFI_STATE
+    };
+    @TargetApi(Build.VERSION_CODES.TIRAMISU)
+    private static final String[] PERMISSIONS_POST_13 = new String[]{
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.VIBRATE,
+            Manifest.permission.READ_MEDIA_AUDIO,
+            Manifest.permission.READ_MEDIA_IMAGES,
+            Manifest.permission.READ_MEDIA_VIDEO,
+            Manifest.permission.INTERNET,
+            Manifest.permission.CAMERA,
+            Manifest.permission.ACCESS_NETWORK_STATE,
+            Manifest.permission.ACCESS_WIFI_STATE,
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.CHANGE_WIFI_STATE
+    };
     private static Global GlobalContext;
     public static final String PREF_NAME = "CMPref";
     public static final String PREF_LANGUAGE_KEY = "Language";
@@ -64,18 +92,14 @@ public class Global extends Application {
 
     private String OfficerCode;
     private String OfficerName;
-    private int UserId;
     private int OfficerId;
-    private String[] permissions;
 
     private String ImageFolder;
 
-    private Token JWTToken;
-
-    private String MainDirectory;
     private String AppDirectory;
-    private Map<String, String> SubDirectories;
-
+    private Map<String,
+            String> SubDirectories;
+    private volatile LoginRepository loginRepository;
     public static Global getGlobal() {
         return GlobalContext;
     }
@@ -90,8 +114,6 @@ public class Global extends Application {
         GlobalContext = this;
         SubDirectories = new HashMap<>();
         initSharedPrefsInts();
-
-        permissions = new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.VIBRATE, Manifest.permission.INTERNET, Manifest.permission.CAMERA, Manifest.permission.ACCESS_NETWORK_STATE, Manifest.permission.ACCESS_WIFI_STATE, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.CHANGE_WIFI_STATE};
     }
 
     private void initSharedPrefsInts() {
@@ -120,34 +142,37 @@ public class Global extends Application {
         }
     }
 
-    public Token getJWTToken() {
-        if (JWTToken == null)
-            JWTToken = new Token();
-        return JWTToken;
-    }
-
-    public void setJWTToken(Token token) {
-        JWTToken = token;
+    public LoginRepository getLoginRepository() {
+        if (loginRepository == null) {
+            synchronized (this) {
+                if (loginRepository == null) {
+                    loginRepository = new LoginRepository(this);
+                }
+            }
+        }
+        return loginRepository;
     }
 
     public boolean isLoggedIn() {
-        return getJWTToken().isTokenValidJWT();
+        return getLoginRepository().isLoggedIn();
     }
 
+    @Nullable
     public String getOfficerCode() {
         return OfficerCode;
     }
 
-    public void setOfficerCode(String officerCode) {
+    @NonNull
+    public String requireOfficerCode() {
+        String officerCode = getOfficerCode();
+        if (StringUtils.isEmpty(officerCode)) {
+            throw new IllegalStateException("OfficerCode is null or empty");
+        }
+        return officerCode;
+    }
+
+    public void setOfficerCode(@Nullable String officerCode) {
         OfficerCode = officerCode;
-    }
-
-    public int getUserId() {
-        return UserId;
-    }
-
-    public void setUserId(int userId) {
-        UserId = userId;
     }
 
     public int getOfficerId() {
@@ -185,7 +210,10 @@ public class Global extends Application {
     }
 
     public String[] getPermissions() {
-        return permissions;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            return PERMISSIONS_POST_13;
+        }
+        return PERMISSIONS_PRE_13;
     }
 
     public boolean isNetworkAvailable() {
@@ -202,15 +230,6 @@ public class Global extends Application {
         } else {
             return !State.equals("mounted") ? -1 : 1;
         }
-    }
-
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-//        Locale locale = LocaleUtil.getLocaleFromTag(getStoredLanguage());
-//        newConfig.locale = locale;
-//        Locale.setDefault(locale);
-//        getResources().updateConfiguration(newConfig, getResources().getDisplayMetrics());
     }
 
     private String createOrCheckDirectory(String path) {
@@ -256,10 +275,6 @@ public class Global extends Application {
             Log.e(PREF_LOG_TAG, String.format("%s key is not an int", key), e);
         }
         return defaultValue;
-    }
-
-    public void setIntKey(String key, int value) {
-        getSharedPreferences(PREF_NAME, MODE_PRIVATE).edit().putInt(key, value).apply();
     }
 
     public long getLongKey(String key, long defaultValue) {

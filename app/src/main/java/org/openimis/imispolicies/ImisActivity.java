@@ -1,20 +1,21 @@
 package org.openimis.imispolicies;
 
-import android.app.AlertDialog;
-import android.app.ProgressDialog;
+
 import android.content.DialogInterface;
 
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+
 
 public abstract class ImisActivity extends AppCompatActivity {
-    private static final String BASE_LOG_TAG = "IMISACTIVITY";
-    protected ProgressDialog progressDialog;
-    protected ActionBar actionBar;
-    protected Global global;
 
-
-    protected AlertDialog showDialog(String msg, DialogInterface.OnClickListener okCallback, DialogInterface.OnClickListener cancelCallback) {
+    protected AlertDialog showDialog(
+            @NonNull String msg,
+            @Nullable DialogInterface.OnClickListener okCallback,
+            @Nullable DialogInterface.OnClickListener cancelCallback
+    ) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this)
                 .setMessage(msg)
                 .setCancelable(false);
@@ -32,12 +33,12 @@ public abstract class ImisActivity extends AppCompatActivity {
         return builder.show();
     }
 
-    protected AlertDialog showDialog(String msg, DialogInterface.OnClickListener okCallback) {
+    protected AlertDialog showDialog(@NonNull String msg, @Nullable DialogInterface.OnClickListener okCallback) {
         return showDialog(msg, okCallback, null);
     }
 
-    protected AlertDialog showDialog(String msg) {
-        return showDialog(msg, null, null);
+    protected AlertDialog showDialog(@NonNull String msg) {
+        return showDialog(msg, null);
     }
 
 }

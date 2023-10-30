@@ -4,6 +4,7 @@ import java.time.format.DateTimeFormatter
 apply plugin: 'com.android.application'
 apply plugin: "org.ajoberstar.grgit"
 apply from: "$project.rootDir/script-git-version.gradle"
+apply plugin: 'com.apollographql.apollo'
 
 // Load keystore
 def keystorePropertiesFile = file("keystore.properties")
@@ -20,8 +21,8 @@ static def getDate() {
 }
 
 android {
-    compileSdkVersion 33
-    buildToolsVersion '33.0.0'
+    compileSdk 34
+    namespace = "org.openimis.imispolicies"
     if (keystorePropertiesFile.exists()) {
         signingConfigs {
             releaseConfig {
@@ -34,14 +35,22 @@ android {
     }
     defaultConfig {
         applicationId "org.openimis.imispolicies"
-        minSdkVersion 19
+        minSdkVersion 21
         targetSdkVersion 33
         versionCode gitVersionCode
         versionName gitVersionName
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         vectorDrawables {
             useSupportLibrary = true
         }
+        buildConfigField "String", "API_BASE_URL", '"https://demo.openimis.org/rest/"'
+        buildConfigField "boolean", "SHOW_PAYMENT_MENU", 'false'
+        buildConfigField "boolean", "SHOW_BULK_CN_MENU", 'false'
+        buildConfigField "String", "RAR_PASSWORD", '")(#$1HsD"'
+        buildConfigField "String", "API_VERSION", '"3"'
+        buildConfigField "String", "DEFAULT_LANGUAGE_CODE", '"en"'
+        resValue "string", "app_name_policies", "Policies"
+        resValue "string", "ReleaseDateValue", getDate()
     }
     buildTypes {
         release {
@@ -67,35 +76,24 @@ android {
             buildConfigField "int", "CONSOLE_LOG_LEVEL", '2' //Verbose
             buildConfigField "int", "FILE_LOG_LEVEL", '5' //Warn
         }
-        flavorDimensions 'std'
     }
-    flavorDimensions 'std'
-    productFlavors.all {
-        buildConfigField "String", "API_BASE_URL", '"https://demo.openimis.org/rest/"'
-        buildConfigField "boolean", "SHOW_PAYMENT_MENU", 'false'
-        buildConfigField "boolean", "SHOW_BULK_CN_MENU", 'false'
-        buildConfigField "String", "RAR_PASSWORD", '")(#$1HsD"'
-        buildConfigField "String", "API_VERSION", '"3"'
-        buildConfigField "String", "DEFAULT_LANGUAGE_CODE", '"en"'
-        resValue "string", "app_name_policies", "Policies"
-        resValue "string", "ReleaseDateValue", getDate()
-    }
+    flavorDimensions = ['std']
     productFlavors {
         demoProd {
             applicationId "org.openimis.imispolicies.demoProd"
-            buildConfigField "String", "API_BASE_URL", '"https://demo.openimis.org/rest/"'
+            buildConfigField "String", "API_BASE_URL", '"https://demo.openimis.org/"'
             resValue "string", "app_name_policies", "Policies Demo"
             dimension = 'std'
         }
         demoRelease {
             applicationId "org.openimis.imispolicies.demoRelease"
-            buildConfigField "String", "API_BASE_URL", '"https://release.openimis.org/rest/"'
+            buildConfigField "String", "API_BASE_URL", '"https://release.openimis.org/"'
             resValue "string", "app_name_policies", "Policies Release"
             dimension = 'std'
         }
         chfDev {
             applicationId "org.openimis.imispolicies.chfdev"
-            buildConfigField "String", "API_BASE_URL", '"http://chf-dev.swisstph-mis.ch/rest/"'
+            buildConfigField "String", "API_BASE_URL", '"http://chf-dev.swisstph-mis.ch/"'
             buildConfigField "boolean", "SHOW_PAYMENT_MENU", 'true'
             buildConfigField "boolean", "SHOW_BULK_CN_MENU", 'true'
             buildConfigField "String", "DEFAULT_LANGUAGE_CODE", '"en-tz"'
@@ -104,7 +102,7 @@ android {
         }
         mvDev {
             applicationId "org.openimis.imispolicies.mv"
-            buildConfigField "String", "API_BASE_URL", '"http://imis-mv.swisstph-mis.ch/rest/"'
+            buildConfigField "String", "API_BASE_URL", '"http://imis-mv.swisstph-mis.ch/"'
             buildConfigField "boolean", "SHOW_PAYMENT_MENU", 'true'
             buildConfigField "String", "API_VERSION", '"3"'
             resValue "string", "app_name_policies", "Policies MV DEV"
@@ -112,20 +110,20 @@ android {
         }
         bephaDev {
             applicationId "org.openimis.imispolicies.bepha"
-            buildConfigField "String", "API_BASE_URL", '"http://149.210.235.40/devupgrade/rest/"'
+            buildConfigField "String", "API_BASE_URL", '"http://149.210.235.40/devupgrade/"'
             buildConfigField "String", "DEFAULT_LANGUAGE_CODE", '"en-cm"'
             resValue "string", "app_name_policies", "Policies BEPHA DEV"
             dimension = 'std'
         }
         tchadDev {
             applicationId "org.openimis.imispolicies.tchadDev"
-            buildConfigField "String", "API_BASE_URL", '"http://imis-tchad-dev.swisstph-mis.ch/rest/"'
+            buildConfigField "String", "API_BASE_URL", '"http://imis-tchad-dev.swisstph-mis.ch/"'
             resValue "string", "app_name_policies", "Policies TCHAD DEV"
             dimension = 'std'
         }
         local {
             applicationId "org.openimis.imispolicies.local"
-            buildConfigField "String", "API_BASE_URL", '"http://10.0.2.2:35787/"'
+            buildConfigField "String", "API_BASE_URL", '"https://gambiatest.bluesquare.org/"'
             buildConfigField "boolean", "SHOW_PAYMENT_MENU", 'true'
             resValue "string", "app_name_policies", "Policies Local"
             dimension = 'std'
@@ -145,7 +143,7 @@ android {
         }
         mauritaniaTrain {
             applicationId "org.openimis.policies.mauritaniaTrain"
-            buildConfigField "String", "API_BASE_URL", '"https://formation.cnass-mauritanie.swisstph-mis.ch/rest/"'
+            buildConfigField "String", "API_BASE_URL", '"https://formation.cnass-mauritanie.swisstph-mis.ch/"'
             buildConfigField "boolean", "SHOW_PAYMENT_MENU", 'false'
             buildConfigField "boolean", "SHOW_BULK_CN_MENU", 'false'
             resValue "string", "app_name_policies", "Policies CNASS TRAIN"
@@ -202,22 +200,47 @@ android {
             excludes += ['META-INF/DEPENDENCIES']
         }
     }
+
+    buildFeatures {
+        buildConfig true
+    }
+}
+
+apollo {
+    service("service") {
+        packageName.set("org.openimis.imispolicies")
+    }
+    customTypeMapping = [
+            "Date" : "java.util.Date",
+            "DateTime" : "java.util.Date",
+            "Decimal": "java.lang.Double",
+    ]
 }
 
 dependencies {
     implementation fileTree(include: ['*.jar', '*.aar'], dir: 'libs')
-    implementation 'com.android.support:appcompat-v7:28.0.0'
-    implementation 'com.android.support:design:28.0.0'
-    implementation 'com.android.support.constraint:constraint-layout:2.0.4'
-    implementation 'com.squareup.picasso:picasso:2.71828'
+    implementation 'com.squareup.okhttp3:okhttp:4.11.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.11.0'
+    implementation('com.apollographql.apollo:apollo-runtime:2.5.14')
+    implementation ('com.apollographql.apollo:apollo-android-support:2.5.14'){
+        because("Apollo 3+ only works with Kotlin coroutines")
+    }
+    implementation(platform("org.jetbrains.kotlin:kotlin-bom:1.8.0"))
+    implementation 'com.google.zxing:core:3.3.0'
+    implementation 'com.embarkmobile:zxing-android-minimal:1.2.1@aar'
+    implementation 'androidx.annotation:annotation:1.7.0'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.10.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    //noinspection GradleDependency
+    implementation 'com.squareup.picasso:picasso:2.8'
     implementation 'commons-io:commons-io:2.11.0'
-    implementation 'com.android.support:support-v4:28.0.0'
-    implementation 'com.android.support:recyclerview-v7:28.0.0'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'androidx.recyclerview:recyclerview:1.3.2'
     implementation 'org.apache.commons:commons-lang3:3.12.0'
-    implementation 'org.jetbrains:annotations:15.0'
     implementation 'cz.msebera.android:httpclient:4.5.8'
 
-    androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
+    androidTestImplementation('androidx.test.espresso:espresso-core:3.1.0', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
     testImplementation 'junit:junit:4.13.2'

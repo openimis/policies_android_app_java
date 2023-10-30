@@ -30,32 +30,32 @@ import android.database.Cursor;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.CursorAdapter;
 import android.widget.TextView;
 
-import org.openimis.imispolicies.R;
+import org.intellij.lang.annotations.Language;
 
-public class PayerAdapter extends CursorAdapter implements AdapterView.OnItemClickListener {
-    private ClientAndroidInterface ca;
-    private String LocationId ="1";
-    public PayerAdapter(Context context){
+public class PayerAdapter extends CursorAdapter {
+
+    private final SQLHandler sqlHandler;
+
+    public PayerAdapter(Context context) {
         //noinspection deprecation
-        super(context,null);
-        ca= new ClientAndroidInterface(context);
+        super(context, null);
+        sqlHandler = new SQLHandler(context);
     }
+
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
         final LayoutInflater inflater = LayoutInflater.from(context);
-        return inflater.inflate(R.layout.payer_list,parent, false);
+        return inflater.inflate(R.layout.payer_list, parent, false);
     }
 
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
         final int descColumnIndex = cursor.getColumnIndexOrThrow("PayerName");
-        final int IdColumnIndex = cursor.getColumnIndexOrThrow("PayerId");
-               String Suggestion = cursor.getString(descColumnIndex);
-        TextView text1 = (TextView) view.findViewById(R.id.text1);
+        String Suggestion = cursor.getString(descColumnIndex);
+        TextView text1 = view.findViewById(R.id.text1);
         text1.setText(Suggestion);
 
     }
@@ -66,25 +66,38 @@ public class PayerAdapter extends CursorAdapter implements AdapterView.OnItemCli
             return getFilterQueryProvider().runQuery(constraint);
         }
 
-        return ca.SearchPayer(
-                (constraint != null ? constraint.toString() : ""),LocationId);
+        String locationId = "1";
+        return SearchPayer(
+                (constraint != null ? constraint.toString() : ""), locationId);
+    }
+
+    private Cursor SearchPayer(String InputText, String LocationId) {
+        @Language("SQL")
+        String Query = "WITH RECURSIVE AllLocations(LocationId, ParentLocationId) AS\n" +
+                "(\n" +
+                " SELECT 0 LocationId, NULL ParentLocationId FROM tbllocations\n" +
+                " UNION \n" +
+                " SELECT   LocationId, ParentLocationId FROM tblLocations WHERE LocationId =" + LocationId + "\n" +
+                " UNION \n" +
+                " SELECT L.LocationId, L.ParentLocationId\n" +
+                " FROM tblLocations L, AllLocations\n" +
+                " WHERE L.LocationId = AllLocations.ParentLocationId\n" +
+                ")\n" +
+                "SELECT PayerId, PayerName,P.LocationId FROM tblPayer P \n" +
+                "INNER JOIN ALLLocations AL ON IFNULL(P.LocationId,0) =IFNULL(AL.LocationId,0) \n" +
+                "WHERE PayerName LIKE '%" + InputText + "%' \n" +
+                "ORDER BY AL.ParentLocationId ,AL.LocationId";
+        Cursor c = (Cursor) sqlHandler.getResult(Query, null);
+        if (c != null) {
+            c.moveToFirst();
+        }
+        return c;
     }
 
     @Override
     public CharSequence convertToString(Cursor cursor) {
         final int columnIndex = cursor.getColumnIndexOrThrow("PayerName");
         return cursor.getString(columnIndex);
-    }
-
-
-    @Override
-    public void onItemClick(AdapterView<?> listView, View view, int position, long id) {
-//        Cursor cursor = (Cursor) listView.getItemAtPosition(position);
-//
-//        // Get the Item Number from this row in the database.
-//        String itemNumber = cursor.getString(cursor.getColumnIndexOrThrow("Code"));
-
-
     }
 }
 

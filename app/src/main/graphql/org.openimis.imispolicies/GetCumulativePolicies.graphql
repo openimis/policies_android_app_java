@@ -1,0 +1,14 @@
+query GetCumulativePolicies($officerCode: String, $from: Date, $to: Date) {
+    new:policies(startDate_Lte:$from, expiryDate_Gte:$to, officer_Code: $officerCode, status:2, stage: "n") {
+        totalCount
+    }
+    renewed:policies(startDate_Lte:$from, expiryDate_Gte:$to, officer_Code: $officerCode, status:2, stage: "r") {
+        totalCount
+    }
+    suspended:policies(startDate_Lte:$from, expiryDate_Gte:$to, officer_Code: $officerCode, status:4) {
+        totalCount
+    }
+    expired:policies(startDate_Lte:$from, expiryDate_Gte:$to, officer_Code: $officerCode, status:8) {
+        totalCount
+    }
+}
