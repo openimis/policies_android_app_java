@@ -70,7 +70,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
-public class Enquire extends AppCompatActivity {
+public class Enquire extends ImisActivity {
     private static final String LOG_TAG = "ENQUIRE";
     private static final int REQUEST_SCAN_QR_CODE = 1;
     private Global global;

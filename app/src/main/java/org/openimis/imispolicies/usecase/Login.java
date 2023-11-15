@@ -52,7 +52,7 @@ public class Login {
         try {
             TokenDto token = request.post(new LoginDto(username.trim(), password));
             repository.saveFhirToken(token.getToken(), new Date(token.getExpiresOn()), officerCode);
-            token = loginToRestApi(username, password);
+            //token = loginToRestApi(username, password);
             repository.saveRestToken(token.getToken(), new Date(token.getExpiresOn()), officerCode);
         } catch (Exception e) {
             repository.logout();

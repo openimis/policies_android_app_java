@@ -63,8 +63,6 @@ public class Global extends Application {
     private static final String[] PERMISSIONS_PRE_13 = new String[]{
             Manifest.permission.ACCESS_COARSE_LOCATION,
             Manifest.permission.VIBRATE,
-            Manifest.permission.READ_EXTERNAL_STORAGE,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.INTERNET,
             Manifest.permission.CAMERA,
             Manifest.permission.ACCESS_NETWORK_STATE,
