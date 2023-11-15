@@ -372,7 +372,7 @@ public class ClientAndroidInterface {
         @Language("SQL")
         String Query = "SELECT LocationId, LocationName FROM tblLocations WHERE LocationId = (SELECT L.ParentLocationId LocationId FROM tblLocations L";
         if (officerLocationId != null) {
-            Query += "WHERE L.LocationId = " + officerLocationId + "')";
+            Query += " WHERE L.LocationId = " + officerLocationId + "')";
         }
         Query += ")";
         return sqlHandler.getResult(Query, null).toString();
