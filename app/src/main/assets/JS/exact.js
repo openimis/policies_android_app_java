@@ -103,7 +103,7 @@ $(document).ready(function(){
         var $mandatory = $('[required]');
         var passed = true;
         $mandatory.each(function(){
-            if($(this).val() == "" || $(this).val() == 0){//|| $(this).val() == 0
+            if($(this).val() == "" || $(this).val() == 0 || $(this).val() == null){//|| $(this).val() == 0
                 // if(sessionStorage.getItem("FamilyData") == null){
                 //     passed = false;
                 // }
