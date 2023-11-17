@@ -204,8 +204,8 @@ public class SQLHandler extends SQLiteOpenHelper {
                             "CHFID TEXT," +
                             "LastName TEXT," +
                             "OtherNames TEXT," +
-                            "LastNameArab TEXT," +
-                            "GivenNameArab TEXT," +
+                            "ArabLastName TEXT," +
+                            "ArabOtherNames TEXT," +
                             "DOB TEXT," +
                             "Gender INTEGER," +
                             "Marital TEXT," +

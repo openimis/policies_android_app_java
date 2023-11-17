@@ -368,9 +368,18 @@ public class ClientAndroidInterface {
     @JavascriptInterface
     public String getRegions() {
         global = (Global) mContext.getApplicationContext();
-        String Query = "SELECT LocationId, LocationName FROM tblLocations WHERE LocationId = (SELECT L.ParentLocationId LocationId FROM tblLocations L\n" +
+        String Query = "SELECT LocationId, LocationName FROM tblLocations WHERE LocationId = (SELECT L.ParentLocationId LocationId FROM tblLocations L \n" +
                 "INNER JOIN tblOfficer O ON L.LocationId = O.LocationId\n" +
                 "WHERE LOWER(O.Code) = '" + global.getOfficerCode().toLowerCase() + "')";
+        JSONArray Regions = sqlHandler.getResult(Query, null);
+
+        return Regions.toString();
+    }
+
+    @JavascriptInterface
+    public String printOfficers() {
+        global = (Global) mContext.getApplicationContext();
+        String Query = "SELECT * FROM tblOfficer";
         JSONArray Regions = sqlHandler.getResult(Query, null);
 
         return Regions.toString();
@@ -1024,8 +1033,8 @@ public class ClientAndroidInterface {
             values.put("CHFID", data.get("txtInsuranceNumber"));
             values.put("LastName", data.get("txtLastName"));
             values.put("OtherNames", data.get("txtOtherNames"));
-            values.put("LastNameArab", data.get("txtLastNameArab"));
-            values.put("GivenNameArab", data.get("txtGivenNameArab"));
+            values.put("ArabLastName", data.get("txtLastNameArab"));
+            values.put("ArabOtherNames", data.get("txtGivenNameArab"));
             values.put("DOB", data.get("txtBirthDate"));
             values.put("Gender", data.get("ddlGender"));
             values.put("Marital", Marital);
@@ -1310,7 +1319,7 @@ public class ClientAndroidInterface {
 
     @JavascriptInterface
     public String getInsuree(int InsureeId) {
-        String Query = "SELECT InsureeId, FamilyId, CHFID, LastName, OtherNames, LastNameArab, GivenNameArab, DOB, Gender, Marital, isHead, IdentificationNumber, Phone, isOffline , PhotoPath, CardIssued, Relationship, Profession, Education, Email, TypeOfId, I.HFID, CurrentAddress,R.LocationId CurRegion, D.LocationId CurDistrict, W.LocationId CurWard,  I.CurVillage, HFR.LocationId FSPRegion, HFD.LocationId FSPDistrict, HF.HFLevel FSPCategory, I.Vulnerability\n" +
+        String Query = "SELECT InsureeId, FamilyId, CHFID, LastName, OtherNames, ArabLastName, ArabOtherNames, DOB, Gender, Marital, isHead, IdentificationNumber, Phone, isOffline , PhotoPath, CardIssued, Relationship, Profession, Education, Email, TypeOfId, I.HFID, CurrentAddress,R.LocationId CurRegion, D.LocationId CurDistrict, W.LocationId CurWard,  I.CurVillage, HFR.LocationId FSPRegion, HFD.LocationId FSPDistrict, HF.HFLevel FSPCategory, I.Vulnerability\n" +
                 "FROM tblInsuree I\n" +
                 "LEFT OUTER JOIN tblLocations V ON V.LocationId = I.CurVillage\n" +
                 "LEFT OUTER JOIN tblLocations W ON W.LocationId = V.ParentLocationId\n" +
@@ -3262,7 +3271,7 @@ public class ClientAndroidInterface {
             familyArray = newFamilyArray;
 
             //get Insureesf
-            Query = "SELECT I.InsureeId AS InsureeId, I.FamilyId AS FamilyId, I.CHFID, I.LastName, I.OtherNames, I.LastNameArab, I.GivenNameArab, I.DOB, I.Gender, NULLIF(I.Marital,'') Marital, I.isHead, NULLIF(I.IdentificationNumber,'null') IdentificationNumber, NULLIF(I.Phone,'null') Phone, REPLACE(I.PhotoPath, RTRIM(PhotoPath, REPLACE(PhotoPath, '/', '')), '') PhotoPath, NULLIF(I.CardIssued,'null') CardIssued, NULLIF(I.Relationship,'null') Relationship, NULLIF(I.Profession,'null') Profession, NULLIF(I.Education,'null') Education, NULLIF(I.Email,'null') Email, CASE WHEN I.TypeOfId='null' THEN null ELSE I.TypeOfId END TypeOfId, NULLIF(I.HFID,'null') HFID, NULLIF(I.CurrentAddress,'null') CurrentAddress, NULLIF(I.GeoLocation,'null') GeoLocation, NULLIF(I.CurVillage,'null') CurVillage,I.isOffline, I.Vulnerability \n" +
+            Query = "SELECT I.InsureeId AS InsureeId, I.FamilyId AS FamilyId, I.CHFID, I.LastName, I.OtherNames, I.ArabLastName, I.ArabOtherNames, I.DOB, I.Gender, NULLIF(I.Marital,'') Marital, I.isHead, NULLIF(I.IdentificationNumber,'null') IdentificationNumber, NULLIF(I.Phone,'null') Phone, REPLACE(I.PhotoPath, RTRIM(PhotoPath, REPLACE(PhotoPath, '/', '')), '') PhotoPath, NULLIF(I.CardIssued,'null') CardIssued, NULLIF(I.Relationship,'null') Relationship, NULLIF(I.Profession,'null') Profession, NULLIF(I.Education,'null') Education, NULLIF(I.Email,'null') Email, CASE WHEN I.TypeOfId='null' THEN null ELSE I.TypeOfId END TypeOfId, NULLIF(I.HFID,'null') HFID, NULLIF(I.CurrentAddress,'null') CurrentAddress, NULLIF(I.GeoLocation,'null') GeoLocation, NULLIF(I.CurVillage,'null') CurVillage,I.isOffline, I.Vulnerability \n" +
                     "FROM tblInsuree I \n" + " WHERE ";
             if (CallerId != 2) {
                 Query += " I.FamilyId = " + FamilyId + " \n";
@@ -4686,6 +4695,8 @@ public class ClientAndroidInterface {
             insertRelations((JSONArray) masterData.get("relations"));
             insertPhoneDefaults((JSONArray) masterData.get("phoneDefaults"));
             insertGenders((JSONArray) masterData.get("genders"));
+
+            Log.e("officers",masterData.get("officers").toString());
         } catch (JSONException e) {
             e.printStackTrace();
             throw new UserException(mContext.getResources().getString(R.string.DownloadMasterDataFailed));
