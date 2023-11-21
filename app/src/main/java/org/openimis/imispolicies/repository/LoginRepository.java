@@ -10,6 +10,7 @@ import androidx.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.openimis.imispolicies.BuildConfig;
 import org.openimis.imispolicies.Global;
 import org.openimis.imispolicies.Token;
 
@@ -26,8 +27,14 @@ public class LoginRepository {
     private static final String FHIR_OFFICER_CODE = "fhir_officer_code";
 
     private final SharedPreferences prefs;
+    private final boolean isPaymentEnabled;
 
     public LoginRepository(@NonNull Context context) {
+        this(context, BuildConfig.IS_PAYMENT_ENABLED);
+    }
+
+    public LoginRepository(@NonNull Context context, boolean isPaymentEnabled) {
+        this.isPaymentEnabled = isPaymentEnabled;
         prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         if (!prefs.getBoolean(HAS_MIGRATED, false)) {
             migrateOldTokens();
@@ -73,7 +80,7 @@ public class LoginRepository {
             @NonNull String officerCodeKey
     ) {
         String eoCode = prefs.getString(officerCodeKey, null);
-        if(Global.getGlobal().getOfficerCode() == null || !Global.getGlobal().getOfficerCode().equals(eoCode)) {
+        if (Global.getGlobal().getOfficerCode() == null || !Global.getGlobal().getOfficerCode().equals(eoCode)) {
             return null;
         }
 
@@ -150,7 +157,10 @@ public class LoginRepository {
     }
 
     public boolean isLoggedIn() {
-        return getFhirToken() != null && getRestToken() != null;
+        if (isPaymentEnabled && getRestToken() == null) {
+            return false;
+        }
+        return getFhirToken() != null;
     }
 
     public void logout() {
