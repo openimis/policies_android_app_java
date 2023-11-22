@@ -49,6 +49,7 @@ android {
         buildConfigField "String", "RAR_PASSWORD", '")(#$1HsD"'
         buildConfigField "String", "API_VERSION", '"3"'
         buildConfigField "String", "DEFAULT_LANGUAGE_CODE", '"en"'
+        buildConfigField "boolean", "IS_PAYMENT_ENABLED", 'false'
         resValue "string", "app_name_policies", "Policies"
         resValue "string", "ReleaseDateValue", getDate()
     }

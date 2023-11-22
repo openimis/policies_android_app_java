@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.WorkerThread;
 
 import org.json.JSONObject;
+import org.openimis.imispolicies.BuildConfig;
 import org.openimis.imispolicies.Global;
 import org.openimis.imispolicies.ToRestApi;
 import org.openimis.imispolicies.Token;
@@ -28,32 +29,37 @@ public class Login {
     private final LoginRepository repository;
     @NonNull
     private final ToRestApi toRestApi;
+    private final boolean isPaymentEnabled;
 
     public Login() {
-        this(Global.getGlobal().getLoginRepository(), new LoginRequest(), new ToRestApi());
+        this(Global.getGlobal().getLoginRepository(), new LoginRequest(), new ToRestApi(), BuildConfig.IS_PAYMENT_ENABLED);
     }
 
     public Login(
             @NonNull LoginRepository loginRepository,
             @NonNull LoginRequest request,
-            @NonNull ToRestApi toRestApi
-            ) {
+            @NonNull ToRestApi toRestApi,
+            boolean isPaymentEnabled
+    ) {
         this.request = request;
         this.repository = loginRepository;
         this.toRestApi = toRestApi;
+        this.isPaymentEnabled = isPaymentEnabled;
     }
 
     @WorkerThread
     public void execute(@NonNull String username, @NonNull String password) throws Exception {
-        String officerCode =  Global.getGlobal().getOfficerCode();
+        String officerCode = Global.getGlobal().getOfficerCode();
         if (officerCode == null) {
             throw new IllegalStateException("OfficerCode should not be null on login");
         }
         try {
             TokenDto token = request.post(new LoginDto(username.trim(), password));
             repository.saveFhirToken(token.getToken(), new Date(token.getExpiresOn()), officerCode);
-            token = loginToRestApi(username, password);
-            repository.saveRestToken(token.getToken(), new Date(token.getExpiresOn()), officerCode);
+            if (isPaymentEnabled) {
+                token = loginToRestApi(username, password);
+                repository.saveRestToken(token.getToken(), new Date(token.getExpiresOn()), officerCode);
+            }
         } catch (Exception e) {
             repository.logout();
             throw e;
