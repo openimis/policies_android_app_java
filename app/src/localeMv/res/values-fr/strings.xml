@@ -477,4 +477,8 @@
     <string name="CurrentResourceLanguage">Current resource language: %1$s</string>
     <string name="SystemLanguageNotSupported">Current system language is not supported. The app will use the default language.</string>
     <string name="SupportedLanguages">Supported languages:\n%1$s</string>
+    <string name="MembershipGroup">Groupe d\'appartenance</string>
+    <string name="InvalidTypeOfIdNumber">Le numéro de la pièce d'identification doit contenir 10 caractères</string>
+    <string name="GivenNameArab">Prénom Arabe</string>
+    <string name="LastNameArab">Nom Arabe</string>
 </resources>

@@ -36,9 +36,12 @@
     <string name="SelectFamilyType">Select Group type</string>
     <string name="Ok">OK</string>
     <string name="FieldRequired">Please verify all the required fields marked in red border</string>
+    <string name="AttachmentRequired">Please insert one or more attachment(s)</string>
     <string name="InsuranceNumber">Insuree number</string>
     <string name="OtherNames">Other Names</string>
+    <string name="GivenNameArab">Given Name Arab</string>
     <string name="LastName">Last Name</string>
+    <string name="LastNameArab">Last Name Arab</string>
     <string name="BirthDate">Birth Date</string>
     <string name="Gender">Gender</string>
     <string name="MaritalStatus">Marital Status</string>
@@ -84,6 +87,7 @@
     <string name="ErrorUpdate">Error while updating data</string>
     <string name="InsuranceNumberExists">Member with this Insuree number already exists</string>
     <string name="Add">Add</string>
+    <string name="NoFileAdded">No file added</string>
     <string name="New">New</string>
     <string name="SelectOfficer">Select Enrolment Officer</string>
     <string name="SelectProduct">Select Product</string>
@@ -121,6 +125,7 @@
     <string name="ReceiptNotUnique">Receipt number must be unique</string>
     <string name="PleaseDeletePremium">Policy has contribution. Please delete contributions first</string>
     <string name="PolicyDeleted">Policy deleted successfully</string>
+    <string name="AttachmentDeleted">Attachment deleted successfully</string>
     <string name="PremiumDeleted">Contribution deleted successfully</string>
     <string name="InsureeDeleted">Insuree deleted successfully</string>
     <string name="IsHeadDelete">You can not delete the head of the family.</string>
@@ -184,8 +189,12 @@
     <string name="Password">Password</string>
     <string name="EnterRarPassword">Enter Rar Password</string>
     <string name="OfficerCode">Enrolment Officer Code:</string>
+    <string name="AttachmentTitle">Title</string>
+    <string name="AttachmentFile">File</string>
     <string name="IncorrectOfficerCode">Incorrect Enrolment Officer code</string>
     <string name="Login">Login</string>
+    <string name="Attachment">Attachment</string>
+    <string name="NoneFile">No File</string>
     <string name="FTPConnectionFailed">Unable to connect the server. Operation aborted.</string>
     <string name="SomethingWrongServer">Something went wrong on the server.</string>
     <string name="UncaughtException">Family could not be inserted.</string>
@@ -270,6 +279,7 @@
     <string name="LoginToDeleteOnlineData">Please login first, to delete online data</string>
     <string name="DeletePolicyPremium">Deleting policy will also delete premium on it</string>
     <string name="DeleteFamily">Deleting of family will also Delete all Insurees, Policies and Premiums of this Family</string>
+    <string name="DeleteAttachment">Deleting of Attachment</string>
     <string name="Confirm">Confirm</string>
     <string name="Logout">Logout</string>
     <string name="FamilyExists">Family already exists in phone</string>
@@ -478,4 +488,6 @@
     <string name="SystemLanguageNotSupported">Current system language is not supported. The app will use the default language.</string>
     <string name="SupportedLanguages">Supported languages:\n%1$s</string>
     <string name="DataDownloadedFailed">Data download failed</string>
+    <string name="MembershipGroup">Membership Group</string>
+    <string name="InvalidTypeOfIdNumber">The Identification Type Number must have 10 characters</string>
 </resources>

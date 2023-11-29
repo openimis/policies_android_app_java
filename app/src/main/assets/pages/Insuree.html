@@ -44,13 +44,13 @@ In case of dispute arising out or in relation to the use of the program, it is s
             <span strName="Relation">Relation</span>
             <select id="ddlRelationship" dataField="Relationship"></select>
         </li>
-        <li>
+        <li style="display:none;">
             <input type="hidden" datafield="InsureeId" id="hfInsureeId" value="0"/>
             <input type="hidden" datafld="isOffline" id="hfIsOffline" value="."/>
             <input type="hidden" datafield="isHead" id="hfisHead" value="-1"/>
             <span strName="InsuranceNumber">Insurance Number</span>
             <div style="display:flex">
-            <input type="text" maxlength="12" id="txtInsuranceNumber" dataField="CHFID" onkeyup="getImage()" min="0" required />
+            <input type="text" maxlength="12" id="txtInsuranceNumber" dataField="CHFID" onkeyup="getImage()" min="0" />
             <img src="" alt="Scan" id="btnScan" style="width:50px !important"  />
             </div>
         </li>
@@ -61,6 +61,14 @@ In case of dispute arising out or in relation to the use of the program, it is s
         <li>
             <span strName="LastName">Last Name</span>
             <input type="text" maxlength="50" id="txtLastName" dataField="LastName" required/>
+        </li>
+        <li>
+            <span strName="LastNameArab">Last Name Arab</span>
+            <input type="text" maxlength="50" id="txtLastNameArab" dataField="ArabLastName" required/>
+        </li>
+        <li>
+            <span strName="GivenNameArab">Given Names Arab</span>
+            <input type="text" maxlength="50" id="txtGivenNameArab" dataField="ArabOtherNames" required/>
         </li>
         <li>
             <input type="hidden" id="hfImagePath" datafield="PhotoPath" />
@@ -109,7 +117,7 @@ In case of dispute arising out or in relation to the use of the program, it is s
             <span strName="Profession">Profession</span>
             <select id="ddlProfession" datafield="Profession"></select>
         </li>
-        <li id="Education">
+        <li style="display:none;">
             <span strName="Education">Education</span>
             <select id="ddlEducation" datafield="Education"></select>
         </li>
@@ -123,36 +131,40 @@ In case of dispute arising out or in relation to the use of the program, it is s
         </li>
         <li id="IdentificationType">
             <span strName="IdentificationType">Identification Type</span>
-            <select id="ddlIdentificationType" datafield="TypeOfId"></select>
+            <select id="ddlIdentificationType" datafield="TypeOfId" required></select>
         </li>
         <li id="IdentificationNumber">
             <span strName="IdentificationNumber">Identification Number</span>
-            <input type="text" id="txtIdentificationNumber" maxlength="50" datafield="IdentificationNumber"/>
+            <input type="text" id="txtIdentificationNumber" maxlength="50" datafield="IdentificationNumber" required/>
         </li>
 		<li id="Vulnerability">
             <span strName="Vulnerability">Vulnerability</span>
             <select id="ddlVulnerability" datafield="Vulnerability"></select>
         </li>
-        <li id="FSPRegion">
+        <li style="display:none;">
             <span strName="FSPRegion"></span>
             <select id="ddlFSPRegion" datafield="FSPRegion"></select>
         </li>
-        <li id="FSPDistrict">
+        <li style="display:none;">
             <span strName="FSPDistrict">District of FSP</span>
             <select id="ddlFSPDistrict" datafield="FSPDistrict"></select>
         </li>
-        <li id="FSPCategory">
+        <li style="display:none;">
             <span strName="FSPCategory">Level of FSP</span>
             <select id="ddlFSPCategory" datafield="FSPCategory"></select>
         </li>
-        <li id="FSP">
+        <li style="display:none;">
             <span strName="FSP">First Service Point</span>
             <select id="ddlFSP" datafield="HFID"></select>
+        </li>
+        <li id="membershipGroup">
+            <span strName="MembershipGroup">Membership Group</span>
+            <select id="ddlMembershipGroup" datafield="MembershipGroup"></select>
         </li>
     </ul>
 </div>
 <div class="footer">
-    <input type="submit" id="btnSave" strName="Save" value="Save">
+    <input type="submit" id="btnNext" strName="Next" value="Next">
 </div>
 </body>
 </html>
