@@ -20,7 +20,6 @@ public class CreatePremiumGraphQLRequest extends BaseGraphQLRequest {
     public CreatePremiumMutation.Data create(@NonNull Family.Policy.Premium premium) throws Exception {
         Response<CreatePremiumMutation.Data> response = makeSynchronous(new CreatePremiumMutation(
                 CreatePremiumMutationInput.builder()
-                        .id(premium.getId())
                         .policyUuid(premium.getPolicyUuid())
                         .amount(premium.getAmount())
                         .receipt(premium.getReceipt())

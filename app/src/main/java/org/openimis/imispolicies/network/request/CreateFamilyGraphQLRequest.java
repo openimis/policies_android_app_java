@@ -20,8 +20,6 @@ public class CreateFamilyGraphQLRequest extends BaseGraphQLRequest {
         Family.Member head = family.getHead();
         Response<CreateFamilyMutation.Data> response = makeSynchronous(new CreateFamilyMutation(
                 CreateFamilyMutationInput.builder()
-                        .id(family.getId())
-                        .uuid(family.getUuid())
                         .locationId(family.getLocationId())
                         .poverty(family.isPoor())
                         .familyTypeId(family.getType())
