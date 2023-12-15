@@ -22,6 +22,7 @@ public class CreateInsureeGraphQLRequest extends BaseGraphQLRequest {
         Response<CreateInsureeMutation.Data> response = makeSynchronous(new CreateInsureeMutation(
                 CreateInsureeMutationInput.builder()
                         .chfId(member.getChfId())
+                        .uuid(member.getUuid())
                         .familyId(member.getFamilyId())
                         .head(member.isHead())
                         .passport(member.getIdentificationNumber())
