@@ -1,0 +1,13 @@
+query CheckMutation($clientMutationId: String) {
+    mutationLogs(clientMutationId:$clientMutationId, orderBy:["-requestDateTime"]) {
+        edges {
+            node {
+                id
+                requestDateTime
+                clientMutationId
+                status
+                error
+            }
+        }
+    }
+}

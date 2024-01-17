@@ -114,6 +114,11 @@ public class Family implements Parcelable {
     }
 
     @NonNull
+    public String getHeadChfId() {
+        return headChfId;
+    }
+
+    @NonNull
     public Member getHead() {
         if (head != null) {
             return head;
@@ -527,16 +532,25 @@ public class Family implements Parcelable {
 
         @Nullable
         public Integer getRelationship() {
+            if (relationship != null && relationship == 0) {
+                return null;
+            }
             return relationship;
         }
 
         @Nullable
         public Integer getProfession() {
+            if (profession != null && profession == 0) {
+                return null;
+            }
             return profession;
         }
 
         @Nullable
         public Integer getEducation() {
+            if (education != null && education == 0) {
+                return null;
+            }
             return education;
         }
 
@@ -547,11 +561,17 @@ public class Family implements Parcelable {
 
         @Nullable
         public String getTypeOfId() {
+            if (typeOfId != null && typeOfId.isBlank()) {
+                return null;
+            }
             return typeOfId;
         }
 
         @Nullable
         public Integer getHealthFacilityId() {
+            if (healthFacilityId != null && healthFacilityId == 0) {
+                return null;
+            }
             return healthFacilityId;
         }
 
@@ -562,6 +582,9 @@ public class Family implements Parcelable {
 
         @Nullable
         public Integer getCurrentVillage() {
+            if (currentVillage != null && currentVillage == 0) {
+                return null;
+            }
             return currentVillage;
         }
 
@@ -582,6 +605,12 @@ public class Family implements Parcelable {
 
         public boolean isOffline() {
             return isOffline;
+        }
+
+        @NonNull
+        @Override
+        public String toString() {
+            return getLastName() + " " + getOtherNames() + " [" + getChfId() + "]";
         }
 
         public static final Creator<Member> CREATOR = new Creator<>() {
@@ -699,7 +728,7 @@ public class Family implements Parcelable {
             dest.writeString(familyUUID);
             dest.writeLong(enrollDate.getTime());
             dest.writeLong(startDate.getTime());
-            dest.writeLong(effectiveDate != null ? effectiveDate.getTime() :-1);
+            dest.writeLong(effectiveDate != null ? effectiveDate.getTime() : -1);
             dest.writeLong(expiryDate.getTime());
             dest.writeString(status);
             if (value == null) {

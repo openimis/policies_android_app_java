@@ -2896,26 +2896,22 @@ public class ClientAndroidInterface {
             );
             if (CallerId != 2) {
                 query.append(" I.FamilyId = ").append(FamilyId).append(" \n");
-                if (Offline == null || Integer.parseInt(Offline) == 0) {
-                    if (CallerId == 1) {
-                        query.append(" AND  I.InsureeId < 0").append("");
-                    }
-                }
             } else {
                 query.append("(");
                 for (int j = 0; j < verifiedId.size(); j++) {
 
                     if (getFamilyStatus(Integer.parseInt(verifiedId.get(j))) == 0) {
+
                         if ((verifiedId.size() - j) == 1) {
-                            query.append("I.InsureeId < 0 AND  I.FamilyId == ").append(verifiedId.get(j));
+                            query.append("I.FamilyId = ").append(verifiedId.get(j));
                         } else {
-                            query.append("I.InsureeId < 0 AND  I.FamilyId == ").append(verifiedId.get(j)).append(" OR ");
+                            query.append("I.FamilyId = ").append(verifiedId.get(j)).append(" OR ");
                         }
                     } else {
                         if ((verifiedId.size() - j) == 1) {
-                            query.append(" I.FamilyId == ").append(verifiedId.get(j));
+                            query.append(" teI.FamilyId = ").append(verifiedId.get(j));
                         } else {
-                            query.append(" I.FamilyId == ").append(verifiedId.get(j)).append(" OR ");
+                            query.append(" I.FamilyId = ").append(verifiedId.get(j)).append(" OR ");
                         }
                     }
                 }
@@ -3132,7 +3128,8 @@ public class ClientAndroidInterface {
         try {
             new UpdateFamily().execute(family);
         } catch (Exception e) {
-            enrolMessages.add(e.getMessage());
+            e.printStackTrace();
+            enrolMessages.add(Objects.requireNonNullElse(e.getMessage(), "Something went wrong updating the family"));
             return -400;
         }
 
@@ -3152,7 +3149,8 @@ public class ClientAndroidInterface {
         try {
             new CreatePolicy().execute(policies);
         } catch (Exception e) {
-            enrolMessages.add(e.getMessage());
+            e.printStackTrace();
+            enrolMessages.add(Objects.requireNonNullElse(e.getMessage(), "Something went wrong creating the policies"));
             return -400;
         }
 
@@ -4642,7 +4640,6 @@ public class ClientAndroidInterface {
         String path = activity.getApplicationInfo().dataDir + "/Images/";
         File Directory = new File(path);
         FilenameFilter filter = (dir, filename) -> filename.contains("0");
-        File[] newFiles = Directory.listFiles(filter);
         return Directory.listFiles(filter);
     }
 

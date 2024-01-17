@@ -15,25 +15,29 @@ public class CreatePolicy {
     private final CreatePolicyGraphQLRequest createPolicyGraphQLRequest;
     @NonNull
     private final CreatePremiumGraphQLRequest createPremiumGraphQLRequest;
+    @NonNull
+    private final CheckMutation checkMutation;
 
     public CreatePolicy() {
-        this(new CreatePolicyGraphQLRequest(), new CreatePremiumGraphQLRequest());
+        this(new CreatePolicyGraphQLRequest(), new CreatePremiumGraphQLRequest(), new CheckMutation());
     }
 
     public CreatePolicy(
             @NonNull CreatePolicyGraphQLRequest createPolicyGraphQLRequest,
-            @NonNull CreatePremiumGraphQLRequest createPremiumGraphQLRequest
+            @NonNull CreatePremiumGraphQLRequest createPremiumGraphQLRequest,
+            @NonNull CheckMutation checkMutation
     ) {
         this.createPolicyGraphQLRequest = createPolicyGraphQLRequest;
         this.createPremiumGraphQLRequest = createPremiumGraphQLRequest;
+        this.checkMutation = checkMutation;
     }
 
     @WorkerThread
     public void execute(List<Family.Policy> policies) throws Exception {
         for (Family.Policy policy : policies) {
-            createPolicyGraphQLRequest.create(policy);
+            checkMutation.execute(createPolicyGraphQLRequest.create(policy), "Error while creating policy '" + policy.getUuid() + "'");
             for (Family.Policy.Premium premium : policy.getPremiums()) {
-                createPremiumGraphQLRequest.create(premium);
+                checkMutation.execute(createPremiumGraphQLRequest.create(premium), "Error while creating premium '" + premium.getId() + "' for policy '" + premium.getPolicyUuid() + "'");
             }
         }
     }

@@ -11,17 +11,16 @@ import org.openimis.imispolicies.type.CreateFamilyMutationInput;
 import org.openimis.imispolicies.type.FamilyHeadInsureeInputType;
 
 import java.util.Objects;
+import java.util.UUID;
 
 public class CreateFamilyGraphQLRequest extends BaseGraphQLRequest {
 
     @WorkerThread
     @NonNull
-    public CreateFamilyMutation.Data create(@NonNull Family family) throws Exception {
+    public String create(@NonNull Family family) throws Exception {
         Family.Member head = family.getHead();
         Response<CreateFamilyMutation.Data> response = makeSynchronous(new CreateFamilyMutation(
                 CreateFamilyMutationInput.builder()
-                        .id(family.getId())
-                        .uuid(family.getUuid())
                         .locationId(family.getLocationId())
                         .poverty(family.isPoor())
                         .familyTypeId(family.getType())
@@ -32,16 +31,22 @@ public class CreateFamilyGraphQLRequest extends BaseGraphQLRequest {
                         .isOffline(family.isOffline())
                         .headInsuree(
                                 FamilyHeadInsureeInputType.builder()
-                                        .id(head.getId())
                                         .chfId(head.getChfId())
                                         .lastName(head.getLastName())
                                         .otherNames(head.getOtherNames())
                                         .genderId(head.getGender())
                                         .dob(head.getDateOfBirth())
+                                        .cardIssued(head.isCardIssued())
                                         .build()
                         )
+                        .clientMutationId(UUID.randomUUID().toString())
+                        .clientMutationLabel("Create family with UUID '" + family.getUuid() + "'")
                         .build()
         ));
-        return Objects.requireNonNull(response.getData());
+        return Objects.requireNonNull(
+                Objects.requireNonNull(
+                                Objects.requireNonNull(response.getData(), "data is null")
+                                        .createFamily(), "createFamily is null")
+                        .clientMutationId(), "clientMutationId is null");
     }
 }

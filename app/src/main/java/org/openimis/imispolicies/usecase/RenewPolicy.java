@@ -9,17 +9,22 @@ public class RenewPolicy {
 
     @NonNull
     private final RenewPolicyGraphQLRequest renewPolicyGraphQLRequest;
+    private final CheckMutation checkMutation;
 
     public RenewPolicy() {
-        this(new RenewPolicyGraphQLRequest());
+        this(new RenewPolicyGraphQLRequest(), new CheckMutation());
     }
 
-    public RenewPolicy(@NonNull RenewPolicyGraphQLRequest renewPolicyGraphQLRequest) {
+    public RenewPolicy(
+            @NonNull RenewPolicyGraphQLRequest renewPolicyGraphQLRequest,
+            @NonNull CheckMutation checkMutation
+    ) {
         this.renewPolicyGraphQLRequest = renewPolicyGraphQLRequest;
+        this.checkMutation = checkMutation;
     }
 
     @WorkerThread
     public void execute(@NonNull String uuid) throws Exception {
-        renewPolicyGraphQLRequest.execute(uuid);
+        checkMutation.execute(renewPolicyGraphQLRequest.execute(uuid), "Error while renewing policy '" + uuid + "'");
     }
 }
