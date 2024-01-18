@@ -16,10 +16,10 @@ public class CreatePremiumGraphQLRequest extends BaseGraphQLRequest {
 
     @WorkerThread
     @NonNull
-    public String create(@NonNull Family.Policy.Premium premium) throws Exception {
+    public String create(@NonNull Family.Policy.Premium premium, @NonNull String policyUuid) throws Exception {
         Response<CreatePremiumMutation.Data> response = makeSynchronous(new CreatePremiumMutation(
                 CreatePremiumMutationInput.builder()
-                        .policyUuid(premium.getPolicyUuid())
+                        .policyUuid(policyUuid)
                         .amount(premium.getAmount())
                         .receipt(premium.getReceipt())
                         .payDate(premium.getPayDate())
@@ -27,7 +27,7 @@ public class CreatePremiumGraphQLRequest extends BaseGraphQLRequest {
                         .isOffline(premium.isOffline())
                         .isPhotoFee(premium.isPhotoFee())
                         .clientMutationId(UUID.randomUUID().toString())
-                        .clientMutationLabel("Create premium with for policy with UUID '" + premium.getPolicyUuid() + "'")
+                        .clientMutationLabel("Create premium with for policy with UUID '" + policyUuid+ "'")
                         .build()
         ));
         return Objects.requireNonNull(

@@ -1591,8 +1591,8 @@ public class ClientAndroidInterface {
             if (locArray.length() != 0) {
                 for (int i = 0; i < locArray.length(); i++) {
                     JSONObject obj = locArray.getJSONObject(i);
-                    RegionId = Integer.parseInt(obj.getString("RegionId"));
-                    DistrictId = Integer.parseInt(obj.getString("DistrictId"));
+                    RegionId = JsonUtils.getIntegerOrDefault(obj,"RegionId", 0);
+                    DistrictId = JsonUtils.getIntegerOrDefault(obj,"DistrictId", 0);
                 }
             }
             @Language("SQL")
