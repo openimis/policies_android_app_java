@@ -1,6 +1,6 @@
 $(document).ready(function () {
     document.title = Android.getString('Login');
-    var page = parseInt(queryString("s"));
+    var page = queryString("s");
     if (Android.isLoggedIn()) {
         sessionStorage.removeItem("UserData");
         sessionStorage.setItem("user", "out");
