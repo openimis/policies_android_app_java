@@ -49,11 +49,23 @@ public class MobileEnrolmentGraphQLRequest extends BaseGraphQLRequest {
                                 .headInsuree(
                                         FamilyHeadInsureeInputType.builder()
                                                 .chfId(head.getChfId())
+                                                .uuidInput(Input.optional(head.getUuid()))
                                                 .lastName(head.getLastName())
                                                 .otherNames(head.getOtherNames())
                                                 .genderId(head.getGender())
                                                 .dob(head.getDateOfBirth())
                                                 .cardIssued(head.isCardIssued())
+                                                .photo(
+                                                        PhotoInputType.builder()
+                                                                .filename(head.getPhotoPath())
+                                                                .officerId(Global.getGlobal().getOfficerId())
+                                                                .date(new Date())
+                                                                .photo(head.getPhotoBytes() != null ?
+                                                                        Base64.encodeToString(head.getPhotoBytes(), Base64.DEFAULT) :
+                                                                        null
+                                                                )
+                                                                .build()
+                                                )
                                                 .build()
                                 )
                                 .build())
@@ -77,6 +89,7 @@ public class MobileEnrolmentGraphQLRequest extends BaseGraphQLRequest {
             }
             insurees.add(InsureeEnrollmentGQLType.builder()
                     .chfId(member.getChfId())
+                    .uuidInput(Input.optional(member.getUuid()))
                     .familyId(member.getFamilyId())
                     .head(member.isHead())
                     .passport(member.getIdentificationNumber())

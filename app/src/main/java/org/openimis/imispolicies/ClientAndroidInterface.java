@@ -64,6 +64,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
+import org.apache.commons.io.IOUtils;
 import org.intellij.lang.annotations.Language;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -91,10 +92,11 @@ import org.openimis.imispolicies.util.UriUtils;
 import org.openimis.imispolicies.util.ZipUtils;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.io.OutputStream;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
@@ -956,7 +958,9 @@ public class ClientAndroidInterface {
             values.put("Phone", data.get("txtPhoneNumber"));
             if (isOffline == 0 || isOffline == 2)
                 PhotoPath = PhotoPath.substring(PhotoPath.lastIndexOf("/") + 1);
-            values.put("PhotoPath", PhotoPath);
+            if (!"".equals(PhotoPath)) {
+                values.put("PhotoPath", PhotoPath);
+            }
             values.put("CardIssued", CardIssued);
 
             //values.put("isOffline", isOffline);
@@ -1030,7 +1034,10 @@ public class ClientAndroidInterface {
 
             } else {//Existing Insuree
                 values.put("isOffline", insureeIsOffline);
-                sqlHandler.updateData("tblInsuree", values, "InsureeId = ? AND (isOffline = ?)", new String[]{String.valueOf(InsureeId), String.valueOf(insureeIsOffline)});
+                sqlHandler.updateData(
+                        "tblInsuree", values, "InsureeId = ? AND (isOffline = ? OR isOffline = ?)",
+                        new String[]{String.valueOf(InsureeId), String.valueOf(insureeIsOffline), insureeIsOffline == 1 ? "true" : "false"}
+                );
             }
         } catch (NumberFormatException | UserException e) {
             e.printStackTrace();
@@ -2908,7 +2915,7 @@ public class ClientAndroidInterface {
                         }
                     } else {
                         if ((verifiedId.size() - j) == 1) {
-                            query.append(" teI.FamilyId = ").append(verifiedId.get(j));
+                            query.append(" I.FamilyId = ").append(verifiedId.get(j));
                         } else {
                             query.append(" I.FamilyId = ").append(verifiedId.get(j)).append(" OR ");
                         }
@@ -3298,9 +3305,8 @@ public class ClientAndroidInterface {
                     File[] files = GetListOfImages(global.getImageFolder(), PhotoPath);
 
                     if (files.length > 0) {
-                        try {
-                            byte[] imgContent = new byte[(int) files[0].length()];
-                            copy(PhotoPath, imgContent);
+                        try (InputStream in = new FileInputStream(files[0])) {
+                            byte[] imgContent = IOUtils.toByteArray(in);
                             if (CallerId != 2) {
                                 images[j] = new Pair<>(files[0].getName(), imgContent);
                             }
@@ -3333,18 +3339,6 @@ public class ClientAndroidInterface {
             }
         }
         return images;
-    }
-
-    public static void copy(String name, byte[] data) throws IOException {
-        String photosDir = Global.getGlobal().getSubdirectory("Photos");
-
-        File file = new File(photosDir + File.separator + name);
-        if (!file.exists() && !file.createNewFile()) {
-            throw new IOException("Cannot create file '" + file.getAbsolutePath() + "'");
-        }
-        try (OutputStream out = new FileOutputStream(file)) {
-            out.write(data);
-        }
     }
 
     public String getEnrolmentExportFilename() {
