@@ -76,7 +76,6 @@ import org.openimis.imispolicies.network.exception.UserNotAuthenticatedException
 import org.openimis.imispolicies.tools.ImageManager;
 import org.openimis.imispolicies.tools.Log;
 import org.openimis.imispolicies.tools.StorageManager;
-import org.openimis.imispolicies.usecase.CreatePolicy;
 import org.openimis.imispolicies.usecase.DeletePolicyRenewal;
 import org.openimis.imispolicies.usecase.FetchFamily;
 import org.openimis.imispolicies.usecase.FetchMasterData;
@@ -358,7 +357,7 @@ public class ClientAndroidInterface {
             if (!object.has("LocationId")) {
                 return null;
             }
-            return JsonUtils.getIntegerOrDefault(object,"LocationId");
+            return JsonUtils.getIntegerOrDefault(object, "LocationId");
         } catch (JSONException e) {
             e.printStackTrace();
             return null;
@@ -385,7 +384,7 @@ public class ClientAndroidInterface {
         @Language("SQL")
         String Query = "SELECT * FROM tblLocations L WHERE LocationType = 'D' AND ParentLocationId = " + RegionId;
         if (officerLocationId != null) {
-            Query += " AND LocationId = "+officerLocationId;
+            Query += " AND LocationId = " + officerLocationId;
         }
         return sqlHandler.getResult(Query, null).toString();
     }
@@ -1591,8 +1590,8 @@ public class ClientAndroidInterface {
             if (locArray.length() != 0) {
                 for (int i = 0; i < locArray.length(); i++) {
                     JSONObject obj = locArray.getJSONObject(i);
-                    RegionId = JsonUtils.getIntegerOrDefault(obj,"RegionId", 0);
-                    DistrictId = JsonUtils.getIntegerOrDefault(obj,"DistrictId", 0);
+                    RegionId = JsonUtils.getIntegerOrDefault(obj, "RegionId", 0);
+                    DistrictId = JsonUtils.getIntegerOrDefault(obj, "DistrictId", 0);
                 }
             }
             @Language("SQL")
@@ -3123,34 +3122,24 @@ public class ClientAndroidInterface {
             @NonNull Pair<String, byte[]>[] insureeImages
     ) throws JSONException {
         JSONObject familyObj = familyArray.getJSONObject(0);
-
-        Family family = familyFromJSONObject(familyObj, insureesArray, insureeImages);
         try {
-            new UpdateFamily().execute(family);
+            Family family = familyFromJSONObject(familyObj, insureesArray, insureeImages);
+            for (int j = 0; j < policiesArray.length(); j++) {
+                JSONArray policyPremiums = new JSONArray();
+                String policyId = policiesArray.getJSONObject(j).getString("PolicyId");
+                for (int k = 0; k < premiumsArray.length(); k++) {
+                    JSONObject premiumObject = premiumsArray.getJSONObject(k);
+                    if (StringUtils.equals(policyId, premiumObject.getString("PolicyId"))) {
+                        policyPremiums.put(premiumObject);
+                    }
+                }
+                policiesArray.getJSONObject(j).put("premium", policyPremiums);
+            }
+            List<Family.Policy> policies = familyPolicyFromJSONObject(family.getUuid(), policiesArray);
+            new UpdateFamily().execute(family, policies);
         } catch (Exception e) {
             e.printStackTrace();
             enrolMessages.add(Objects.requireNonNullElse(e.getMessage(), "Something went wrong updating the family"));
-            return -400;
-        }
-
-        for (int j = 0; j < policiesArray.length(); j++) {
-            JSONArray policyPremiums = new JSONArray();
-            String policyId = policiesArray.getJSONObject(j).getString("PolicyId");
-            for (int k = 0; k < premiumsArray.length(); k++) {
-                JSONObject premiumObject = premiumsArray.getJSONObject(k);
-                if (StringUtils.equals(policyId, premiumObject.getString("PolicyId"))) {
-                    policyPremiums.put(premiumObject);
-                }
-            }
-            policiesArray.getJSONObject(j).put("premium", policyPremiums);
-        }
-
-        List<Family.Policy> policies = familyPolicyFromJSONObject(family.getUuid(), policiesArray);
-        try {
-            new CreatePolicy().execute(policies);
-        } catch (Exception e) {
-            e.printStackTrace();
-            enrolMessages.add(Objects.requireNonNullElse(e.getMessage(), "Something went wrong creating the policies"));
             return -400;
         }
 
@@ -3195,7 +3184,7 @@ public class ClientAndroidInterface {
                 /* chfId = */ object.getString("CHFID"),
                 /* isHead = */ JsonUtils.getBooleanOrDefault(object, "isHead", false),
                 /* id = */ Integer.parseInt(object.getString("InsureeId")),
-                /* uuid = */ JsonUtils.getStringOrDefault(object,"InsureeUUID"),
+                /* uuid = */ JsonUtils.getStringOrDefault(object, "InsureeUUID"),
                 /* familyId = */ Integer.parseInt(object.getString("FamilyId")),
                 /* familyUuid = */ familyUUID,
                 /* identificationNumber = */ JsonUtils.getStringOrDefault(object, "IdentificationNumber"),
@@ -3229,10 +3218,9 @@ public class ClientAndroidInterface {
         List<Family.Policy> policies = new ArrayList<>();
         for (int i = 0; i < array.length(); i++) {
             JSONObject object = array.getJSONObject(i);
-            String policyUuid = UUID.randomUUID().toString();
             policies.add(new Family.Policy(
                     /* id = */ Integer.parseInt(object.getString("PolicyId")),
-                    /* uuid = */ policyUuid,
+                    /* uuid = */ null,
                     /* familyId = */ Integer.parseInt(object.getString("FamilyId")),
                     /* familyUuid = */ familyUUID,
                     /* enrollDate = */ Objects.requireNonNull(JsonUtils.getDateOrDefault(object, "EnrollDate")),
@@ -3246,7 +3234,7 @@ public class ClientAndroidInterface {
                     /* stage = */ JsonUtils.getStringOrDefault(object, "PolicyStage"),
                     /* isOffline = */ JsonUtils.getBooleanOrDefault(object, "isOffline", false),
                     /* controlNumber = */ JsonUtils.getStringOrDefault(object, "ControlNumber"),
-                    /* premiums = */ object.has("premium") ? familyPolicyPremiumsFromJSONObject(policyUuid, object.getJSONArray("premium")) : Collections.emptyList()
+                    /* premiums = */ object.has("premium") ? familyPolicyPremiumsFromJSONObject(object.getJSONArray("premium")) : Collections.emptyList()
             ));
         }
         return policies;
@@ -3254,7 +3242,6 @@ public class ClientAndroidInterface {
 
     @NonNull
     private List<Family.Policy.Premium> familyPolicyPremiumsFromJSONObject(
-            @NonNull String policyUuid,
             @NonNull JSONArray array
     ) throws JSONException {
         List<Family.Policy.Premium> premiums = new ArrayList<>();
@@ -3263,7 +3250,7 @@ public class ClientAndroidInterface {
             premiums.add(new Family.Policy.Premium(
                     /* id = */ Integer.parseInt(object.getString("PremiumId")),
                     /* policyId = */ Integer.parseInt(object.getString("PolicyId")),
-                    /* policyUuid = */ policyUuid,
+                    /* policyUuid = */ null,
                     /* payerId = */ JsonUtils.getIntegerOrDefault(object, "PayerId"),
                     /* amount = */ JsonUtils.getDoubleOrDefault(object, "Amount"),
                     /* receipt = */ JsonUtils.getStringOrDefault(object, "Receipt"),

@@ -1352,6 +1352,7 @@ type ItemGQLType implements Node {
   frequency: Int
   patientCategory: Int!
   auditUserId: Int!
+  nhiaCode: String
   pricelistDetails(offset: Int, before: String, after: String, first: Int, last: Int, itemsPricelist: ID): ItemsPricelistDetailGQLTypeConnection!
   items(offset: Int, before: String, after: String, first: Int, last: Int, id: ID): ProductItemGQLTypeConnection!
   claimitemSet: [ClaimItemGQLType!]!
@@ -4515,6 +4516,7 @@ type Mutation {
   updateCategory(input: UpdateCategoryMutationInput!): UpdateCategoryMutationPayload
   createTicketAttachment(input: CreateTicketAttachmentMutationInput!): CreateTicketAttachmentMutationPayload
   updateTicketAttachment(input: UpdateTicketAttachmentMutationInput!): UpdateTicketAttachmentMutationPayload
+  mobileEnrollment(input: MobileEnrollmentMutationInput!): MobileEnrollmentMutationPayload
   generateInvoicesForTimePeriod(input: GenerateTimeframeInvoicesInput!): GenerateTimeframeInvoicesPayload
   deleteInvoice(input: DeleteInvoiceMutationInput!): DeleteInvoiceMutationPayload
   createInvoicePayment(input: CreateInvoicePaymentMutationInput!): CreateInvoicePaymentMutationPayload
@@ -5026,6 +5028,153 @@ input UpdateTicketAttachmentMutationInput {
   date: Date
   ticketUuid: String
   clientMutationId: String
+}
+
+type MobileEnrollmentMutationPayload {
+  internalId: String
+  clientMutationId: String
+}
+
+input MobileEnrollmentMutationInput {
+  clientMutationLabel: String
+  clientMutationDetails: [String]
+  """
+  Extension data to be used by signals. Will not be pushed to mutation implementation.
+  """
+  mutationExtensions: ParsedJSONString
+  family: FamilyEnrollmentGQLType!
+  insurees: [InsureeEnrollmentGQLType]
+  policies: [PolicyEnrollmentGQLType]!
+  premiums: [PremiumEnrollmentGQLType]!
+  clientMutationId: String
+}
+
+input FamilyEnrollmentGQLType {
+  id: Int
+  uuid: String
+  locationId: Int
+  poverty: Boolean
+  familyTypeId: String
+  address: String
+  isOffline: Boolean
+  ethnicity: String
+  confirmationNo: String
+  confirmationTypeId: String
+  jsonExt: JSONString
+  contribution: JSONString
+  headInsuree: FamilyHeadInsureeInputType
+}
+
+input FamilyHeadInsureeInputType {
+  id: Int
+  uuid: String
+  chfId: String
+  lastName: String!
+  otherNames: String!
+  """
+  Was mandatory in Legacy but not in modular
+  """
+  genderId: String!
+  dob: Date!
+  head: Boolean
+  marital: String
+  passport: String
+  phone: String
+  email: String
+  currentAddress: String
+  geolocation: String
+  currentVillageId: Int
+  photoId: Int
+  photoDate: Date
+  photo: PhotoInputType
+  cardIssued: Boolean
+  familyId: Int
+  relationshipId: Int
+  professionId: Int
+  educationId: Int
+  typeOfIdId: String
+  healthFacilityId: Int
+  offline: Boolean
+  insureeWallet: String
+  jsonExt: JSONString
+}
+
+input PhotoInputType {
+  id: Int
+  uuid: String
+  date: Date
+  officerId: Int
+  photo: String
+  filename: String
+  folder: String
+}
+
+input InsureeEnrollmentGQLType {
+  id: Int
+  uuid: String
+  chfId: String
+  lastName: String!
+  otherNames: String!
+  """
+  Was mandatory in Legacy but not in modular
+  """
+  genderId: String!
+  dob: Date!
+  head: Boolean
+  marital: String
+  passport: String
+  phone: String
+  email: String
+  currentAddress: String
+  geolocation: String
+  currentVillageId: Int
+  photoId: Int
+  photoDate: Date
+  photo: PhotoInputType
+  cardIssued: Boolean
+  familyId: Int
+  relationshipId: Int
+  professionId: Int
+  educationId: Int
+  typeOfIdId: String
+  healthFacilityId: Int
+  offline: Boolean
+  insureeWallet: String
+  jsonExt: JSONString
+}
+
+input PolicyEnrollmentGQLType {
+  clientMutationLabel: String
+  clientMutationDetails: [String]
+  """
+  Extension data to be used by signals. Will not be pushed to mutation implementation.
+  """
+  mutationExtensions: ParsedJSONString
+  id: Int
+  uuid: String
+  enrollDate: Date!
+  startDate: Date!
+  expiryDate: Date!
+  value: Decimal!
+  productId: Int!
+  familyId: Int!
+  officerId: Int!
+  mobileId: Int!
+}
+
+input PremiumEnrollmentGQLType {
+  id: Int
+  uuid: String
+  policyUuid: String!
+  payerUuid: String
+  amount: Decimal
+  receipt: String
+  payDate: Date
+  payType: String
+  isOffline: Boolean
+  isPhotoFee: Boolean
+  action: String
+  policyId: Int!
 }
 
 type GenerateTimeframeInvoicesPayload {
@@ -7296,50 +7445,6 @@ input CreateFamilyMutationInput {
   clientMutationId: String
 }
 
-input FamilyHeadInsureeInputType {
-  id: Int
-  uuid: String
-  chfId: String
-  lastName: String!
-  otherNames: String!
-  """
-  Was mandatory in Legacy but not in modular
-  """
-  genderId: String!
-  dob: Date!
-  head: Boolean
-  marital: String
-  passport: String
-  phone: String
-  email: String
-  currentAddress: String
-  geolocation: String
-  currentVillageId: Int
-  photoId: Int
-  photoDate: Date
-  photo: PhotoInputType
-  cardIssued: Boolean
-  familyId: Int
-  relationshipId: Int
-  professionId: Int
-  educationId: Int
-  typeOfIdId: String
-  healthFacilityId: Int
-  offline: Boolean
-  insureeWallet: String
-  jsonExt: JSONString
-}
-
-input PhotoInputType {
-  id: Int
-  uuid: String
-  date: Date
-  officerId: Int
-  photo: String
-  filename: String
-  folder: String
-}
-
 """
 Update an existing family, with its head insuree
 """
@@ -8091,6 +8196,7 @@ input CreateItemMutationInput {
   price: Decimal!
   package: String
   quantity: Decimal
+  nhiaCode: String
   clientMutationId: String
 }
 
@@ -8118,6 +8224,7 @@ input UpdateItemMutationInput {
   price: Decimal!
   package: String
   quantity: Decimal
+  nhiaCode: String
   clientMutationId: String
 }
 

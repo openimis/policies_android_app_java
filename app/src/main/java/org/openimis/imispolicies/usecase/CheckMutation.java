@@ -36,8 +36,7 @@ public class CheckMutation {
     }
 
     @WorkerThread
-    @NonNull
-    public CheckMutationQuery.Node execute(@NonNull String uuid, @NonNull String message) throws Exception {
+    public void execute(@NonNull String uuid, @NonNull String message) throws Exception {
         long start = System.currentTimeMillis();
         CheckMutationQuery.Node node = null;
         Integer status;
@@ -55,6 +54,5 @@ public class CheckMutation {
         if (status == STATUS_ERROR) {
             throw new IllegalStateException(message + ": " + node.error());
         }
-        return node;
     }
 }

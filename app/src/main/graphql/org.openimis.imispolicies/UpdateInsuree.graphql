@@ -1,5 +1,0 @@
-mutation UpdateInsuree($input: UpdateInsureeMutationInput!) {
-    updateInsuree(input: $input) {
-        clientMutationId
-    }
-}

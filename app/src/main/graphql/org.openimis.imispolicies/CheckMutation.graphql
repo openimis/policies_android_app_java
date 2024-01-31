@@ -4,11 +4,6 @@ query CheckMutation($clientMutationId: String) {
             node {
                 status
                 error
-                policies {
-                    policy {
-                        uuid
-                    }
-                }
             }
         }
     }

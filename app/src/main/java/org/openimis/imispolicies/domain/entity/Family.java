@@ -16,7 +16,7 @@ public class Family implements Parcelable {
     @NonNull
     private final String headChfId;
     private final int id;
-    @NonNull
+    @Nullable
     private final String uuid;
     @Nullable
     private final SMS sms;
@@ -43,7 +43,7 @@ public class Family implements Parcelable {
     public Family(
             @NonNull String headChfId,
             int id,
-            @NonNull String uuid,
+            @Nullable String uuid,
             @Nullable SMS sms,
             @Nullable Integer locationId,
             boolean isPoor,
@@ -136,8 +136,11 @@ public class Family implements Parcelable {
         return id;
     }
 
-    @NonNull
+    @Nullable
     public String getUuid() {
+        if ("0".equals(uuid)) {
+            return null;
+        }
         return uuid;
     }
 
@@ -157,6 +160,9 @@ public class Family implements Parcelable {
 
     @Nullable
     public String getType() {
+        if ("0".equals(type)) {
+            return null;
+        }
         return type;
     }
 
@@ -167,6 +173,9 @@ public class Family implements Parcelable {
 
     @Nullable
     public String getEthnicity() {
+        if ("0".equals(ethnicity)) {
+            return null;
+        }
         return ethnicity;
     }
 
@@ -479,6 +488,9 @@ public class Family implements Parcelable {
 
         @Nullable
         public String getUuid() {
+            if ("0".equals(uuid)) {
+                return null;
+            }
             return uuid;
         }
 
@@ -561,7 +573,7 @@ public class Family implements Parcelable {
 
         @Nullable
         public String getTypeOfId() {
-            if (typeOfId != null && typeOfId.isBlank()) {
+            if (typeOfId == null || typeOfId.isBlank()) {
                 return null;
             }
             return typeOfId;
@@ -628,7 +640,7 @@ public class Family implements Parcelable {
 
     public static class Policy implements Parcelable {
         private final int id;
-        @NonNull
+        @Nullable
         private final String uuid;
         private final int familyId;
         @NonNull
@@ -658,7 +670,7 @@ public class Family implements Parcelable {
 
         public Policy(
                 int id,
-                @NonNull String uuid,
+                @Nullable String uuid,
                 int familyId,
                 @NonNull String familyUUID,
                 @NonNull Date enrollDate,
@@ -759,8 +771,11 @@ public class Family implements Parcelable {
             return id;
         }
 
-        @NonNull
+        @Nullable
         public String getUuid() {
+            if ("0".equals(uuid)) {
+                return null;
+            }
             return uuid;
         }
 
@@ -846,7 +861,7 @@ public class Family implements Parcelable {
         public static class Premium implements Parcelable {
             private final int id;
             private final int policyId;
-            @NonNull
+            @Nullable
             private final String policyUuid;
             @Nullable
             private final Integer payerId;
@@ -864,7 +879,7 @@ public class Family implements Parcelable {
             public Premium(
                     int id,
                     int policyId,
-                    @NonNull String policyUuid,
+                    @Nullable String policyUuid,
                     @Nullable Integer payerId,
                     @Nullable Double amount,
                     @Nullable String receipt,
@@ -944,7 +959,7 @@ public class Family implements Parcelable {
                 return policyId;
             }
 
-            @NonNull
+            @Nullable
             public String getPolicyUuid() {
                 return policyUuid;
             }
