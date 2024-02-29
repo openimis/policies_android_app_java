@@ -3763,26 +3763,30 @@ public class ClientAndroidInterface {
                 } catch (JSONException e) {
                     Log.e(LOG_TAG_RENEWAL, "Invalid renewal json format", e);
                     messageBuilder.append(String.format(messageFormat, renewalInsureeNo, activity.getResources().getString(R.string.InvalidRenewalFile)));
-                    continue;
+                    uploadStatus = ToRestApi.RenewalStatus.UNEXPECTED_EXCEPTION;
                 } catch (IOException e) {
                     Log.e(LOG_TAG_RENEWAL, "Error while sending renewal", e);
                     messageBuilder.append(String.format(messageFormat, renewalInsureeNo, activity.getResources().getString(R.string.SomethingWrongServer)));
-                    continue;
+                    uploadStatus = ToRestApi.RenewalStatus.UNEXPECTED_EXCEPTION;
                 } catch (HttpException e) {
                     Log.e(LOG_TAG_RENEWAL, "Error while sending renewal", e);
                     if (e.getCode() == HttpsURLConnection.HTTP_NOT_FOUND) {
                         messageBuilder.append(String.format(messageFormat, renewalInsureeNo, activity.getResources().getString(R.string.NotFound)));
-                        break;
+                        uploadStatus = ToRestApi.RenewalStatus.UNEXPECTED_EXCEPTION;
                     } else if (e.getCode() == HttpsURLConnection.HTTP_UNAUTHORIZED) {
                         messageBuilder.append(String.format(messageFormat, renewalInsureeNo, activity.getResources().getString(R.string.LoginFail)));
                         break;
                     } else {
                         throw e;
                     }
+                } catch (IllegalArgumentException e) {
+                    Log.e(LOG_TAG_RENEWAL, "Error while sending renewal", e);
+                    messageBuilder.append(String.format(messageFormat, renewalInsureeNo, activity.getResources().getString(R.string.InvalidRenewalFile)+": "+e.getMessage()));
+                    uploadStatus = ToRestApi.RenewalStatus.REJECTED;
                 } catch (Exception e) {
                     Log.e(LOG_TAG_RENEWAL, "Error while sending renewal", e);
                     messageBuilder.append(String.format(messageFormat, renewalInsureeNo, activity.getResources().getString(R.string.InvalidRenewalFile)+": "+e.getMessage()));
-                    continue;
+                    uploadStatus = ToRestApi.RenewalStatus.UNEXPECTED_EXCEPTION;
                 }
 
                 if (messages.containsKey(uploadStatus)) {
