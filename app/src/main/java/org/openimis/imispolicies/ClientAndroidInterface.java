@@ -72,6 +72,7 @@ import org.json.JSONObject;
 import org.openimis.imispolicies.domain.entity.Family;
 import org.openimis.imispolicies.domain.entity.FeedbackRequest;
 import org.openimis.imispolicies.domain.entity.PendingFeedback;
+import org.openimis.imispolicies.domain.entity.PolicyRenewalRequest;
 import org.openimis.imispolicies.network.exception.HttpException;
 import org.openimis.imispolicies.network.exception.UserNotAuthenticatedException;
 import org.openimis.imispolicies.tools.ImageManager;
@@ -82,6 +83,7 @@ import org.openimis.imispolicies.usecase.FetchFamily;
 import org.openimis.imispolicies.usecase.FetchMasterData;
 import org.openimis.imispolicies.usecase.Login;
 import org.openimis.imispolicies.usecase.PostFeedback;
+import org.openimis.imispolicies.usecase.RenewPolicy;
 import org.openimis.imispolicies.usecase.UpdateFamily;
 import org.openimis.imispolicies.util.AndroidUtils;
 import org.openimis.imispolicies.util.DateUtils;
@@ -3751,16 +3753,13 @@ public class ClientAndroidInterface {
                 }
                 String renewalInsureeNo = "";
 
-                HttpResponse response;
-                int responseCode;
                 int uploadStatus;
 
                 try {
                     JSONObject obj = new JSONObject(jsonText).getJSONObject("Policy");
-                    renewalInsureeNo = obj.getString("CHFID");
-                    int renewalId = Integer.parseInt(obj.getString("RenewalId"));
-                    uploadStatus = new DeletePolicyRenewal().execute(renewalId);
-
+                    PolicyRenewalRequest request = policyRenewalRequestFromJson(obj);
+                    renewalInsureeNo = request.getChfId();
+                    uploadStatus = new RenewPolicy().execute(request);
                 } catch (JSONException e) {
                     Log.e(LOG_TAG_RENEWAL, "Invalid renewal json format", e);
                     messageBuilder.append(String.format(messageFormat, renewalInsureeNo, activity.getResources().getString(R.string.InvalidRenewalFile)));
@@ -3782,7 +3781,7 @@ public class ClientAndroidInterface {
                     }
                 } catch (Exception e) {
                     Log.e(LOG_TAG_RENEWAL, "Error while sending renewal", e);
-                    messageBuilder.append(String.format(messageFormat, renewalInsureeNo, activity.getResources().getString(R.string.InvalidRenewalFile)));
+                    messageBuilder.append(String.format(messageFormat, renewalInsureeNo, activity.getResources().getString(R.string.InvalidRenewalFile)+": "+e.getMessage()));
                     continue;
                 }
 
@@ -3803,9 +3802,9 @@ public class ClientAndroidInterface {
             String failMessage = activity.getResources().getString(R.string.RenewalRejected);
             String resultMessage;
             if (acceptedRenewals == 0) {
-                resultMessage = failMessage;
+                resultMessage = failMessage + "\n" + messageBuilder;
             } else if (acceptedRenewals != jsonFiles.length) {
-                resultMessage = successMessage + "\n" + messageBuilder.toString();
+                resultMessage = successMessage + "\n" + messageBuilder;
             } else {
                 resultMessage = successMessage;
             }
@@ -3814,6 +3813,23 @@ public class ClientAndroidInterface {
 
             pd.dismiss();
         }).start();
+    }
+
+    @NonNull
+    private PolicyRenewalRequest policyRenewalRequestFromJson(@NonNull JSONObject obj) throws Exception {
+        return new PolicyRenewalRequest(
+                /* renewalId = */ Integer.parseInt(obj.getString("RenewalId")),
+                /* officerId = */ JsonUtils.getIntegerOrDefault(obj, "OfficerId", getOfficerId()),
+                /* officerCode = */ obj.getString("Officer"),
+                /* chfId = */ obj.getString("CHFID"),
+                /* receiptNumber = */ obj.getString("ReceiptNo"),
+                /* productCode = */ obj.getString("ProductCode"),
+                /* amount = */ Double.parseDouble(obj.getString("Amount")),
+                /* date = */ AppInformation.DateTimeInfo.getDefaultDateFormatter().parse(obj.getString("Date")),
+                /* discontinued = */ Boolean.valueOf(obj.getString("Discontinue")),
+                /* payerId = */ Integer.parseInt(obj.getString("PayerId")),
+                /* payType = */ JsonUtils.getStringOrDefault(obj, "PayType", "C", true)
+        );
     }
 
     private File[] GetListOfImages(String DirectoryPath, final String FileName) {

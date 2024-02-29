@@ -3,6 +3,8 @@ package org.openimis.imispolicies.usecase;
 import androidx.annotation.NonNull;
 import androidx.annotation.WorkerThread;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.openimis.imispolicies.CheckMutationQuery;
 import org.openimis.imispolicies.network.request.CheckMutationGraphQLRequest;
 
@@ -14,7 +16,6 @@ public class CheckMutation {
     private static final long DEFAULT_DELAY = 500L;
     private static final int STATUS_RECEIVED = 0;
     private static final int STATUS_ERROR = 1;
-    private static final int STATUS_SUCCESS = 2;
 
     private final long timeOutMs;
     private final long delayMs;
@@ -52,7 +53,28 @@ public class CheckMutation {
         } while (status == null || status == STATUS_RECEIVED);
 
         if (status == STATUS_ERROR) {
-            throw new IllegalStateException(message + ": " + node.error());
+            throw new IllegalStateException(message + ":\n" + getErrorDetail(node.error()));
         }
+    }
+
+    private String getErrorDetail(String error) {
+        try {
+            JSONArray array = new JSONArray(error);
+            StringBuilder builder = new StringBuilder();
+            for (int i=0; i < array.length();i++) {
+                JSONObject object = array.getJSONObject(i);
+                if (builder.length() != 0) {
+                    builder.append("\n");
+                }
+                builder.append(" - ");
+                builder.append(object.getString("detail"));
+            }
+            if (builder.length() != 0) {
+                return builder.toString();
+            }
+        } catch (Exception ignored) {
+            //
+        }
+        return error;
     }
 }

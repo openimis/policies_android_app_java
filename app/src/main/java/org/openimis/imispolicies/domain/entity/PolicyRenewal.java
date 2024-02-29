@@ -1,4 +1,4 @@
-package org.openimis.imispolicies.domain;
+package org.openimis.imispolicies.domain.entity;
 
 import android.os.Parcel;
 import android.os.Parcelable;

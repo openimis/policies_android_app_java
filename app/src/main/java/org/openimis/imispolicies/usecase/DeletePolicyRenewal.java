@@ -4,7 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.WorkerThread;
 
 import org.openimis.imispolicies.ToRestApi;
-import org.openimis.imispolicies.domain.PolicyRenewal;
+import org.openimis.imispolicies.domain.entity.PolicyRenewal;
 import org.openimis.imispolicies.network.exception.HttpException;
 import org.openimis.imispolicies.network.request.DeletePolicyRenewalGraphQLRequest;
 

@@ -1,5 +1,5 @@
-mutation RenewPolicy($input: RenewPolicyMutationInput!) {
-    renewPolicy(input: $input) {
+mutation RenewPolicy($input: MobilePolicyRenewalAndPremiumInput!) {
+    mobilePolicyRenewalAndPremium(input: $input) {
         clientMutationId
         internalId
     }

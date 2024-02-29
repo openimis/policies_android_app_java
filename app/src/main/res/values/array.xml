@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="pay_types">
+        <item>@string/pay_type_select_one</item>
+        <item>@string/pay_type_cash</item>
+        <item>@string/pay_type_mobile_phone</item>
+        <item>@string/pay_type_bank_transfer</item>
+    </array>
+    <array name="pay_types_enum">
+        <item/>
+        <item>C</item>
+        <item>M</item>
+        <item>B</item>
+    </array>
+</resources>
