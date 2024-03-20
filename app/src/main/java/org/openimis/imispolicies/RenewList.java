@@ -53,7 +53,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.openimis.imispolicies.domain.PolicyRenewal;
+import org.openimis.imispolicies.domain.entity.PolicyRenewal;
 import org.openimis.imispolicies.network.exception.HttpException;
 import org.openimis.imispolicies.tools.Log;
 import org.openimis.imispolicies.usecase.FetchPolicyRenewals;
@@ -283,8 +283,13 @@ public class RenewList extends AppCompatActivity {
         JSONObject object;
 
         try {
-            HashMap<String, String> renewal;
+
             JSONArray jsonArray = new JSONArray(result);
+
+/*
+            There used to be an entry to manually enter the renewal information but this has been
+            removed from the application. I usually remove commented out code but I wanted to make
+            it clear this used to exist.
 
             renewal = new HashMap<>();
             renewal.put("RenewalId", "0");
@@ -299,6 +304,7 @@ public class RenewList extends AppCompatActivity {
             renewal.put("RenewalPromptDate", d);
             renewal.put("RenewalUUID", "");
             renewalList.add(renewal);
+ */
 
             if (jsonArray.length() == 0) {
                 this.NoRenewalsFoundDialog();
@@ -306,7 +312,7 @@ public class RenewList extends AppCompatActivity {
             for (int i = 0; i < jsonArray.length(); i++) {
 
                 object = jsonArray.getJSONObject(i);
-                renewal = new HashMap<>();
+                HashMap<String, String> renewal = new HashMap<>();
                 renewal.put("RenewalId", object.getString("RenewalId"));
                 renewal.put("CHFID", object.getString("CHFID"));
                 renewal.put("FullName", object.getString("LastName") + " " + object.getString("OtherNames"));

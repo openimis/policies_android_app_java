@@ -1,5 +1,0 @@
-mutation CreateFamily($input: CreateFamilyMutationInput!) {
-    createFamily(input: $input) {
-        clientMutationId
-    }
-}

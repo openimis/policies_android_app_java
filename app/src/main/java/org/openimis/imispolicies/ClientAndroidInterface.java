@@ -64,6 +64,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
+import org.apache.commons.io.IOUtils;
 import org.intellij.lang.annotations.Language;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -71,17 +72,17 @@ import org.json.JSONObject;
 import org.openimis.imispolicies.domain.entity.Family;
 import org.openimis.imispolicies.domain.entity.FeedbackRequest;
 import org.openimis.imispolicies.domain.entity.PendingFeedback;
+import org.openimis.imispolicies.domain.entity.PolicyRenewalRequest;
 import org.openimis.imispolicies.network.exception.HttpException;
 import org.openimis.imispolicies.network.exception.UserNotAuthenticatedException;
 import org.openimis.imispolicies.tools.ImageManager;
 import org.openimis.imispolicies.tools.Log;
 import org.openimis.imispolicies.tools.StorageManager;
-import org.openimis.imispolicies.usecase.CreatePolicy;
-import org.openimis.imispolicies.usecase.DeletePolicyRenewal;
 import org.openimis.imispolicies.usecase.FetchFamily;
 import org.openimis.imispolicies.usecase.FetchMasterData;
 import org.openimis.imispolicies.usecase.Login;
 import org.openimis.imispolicies.usecase.PostFeedback;
+import org.openimis.imispolicies.usecase.RenewPolicy;
 import org.openimis.imispolicies.usecase.UpdateFamily;
 import org.openimis.imispolicies.util.AndroidUtils;
 import org.openimis.imispolicies.util.DateUtils;
@@ -92,10 +93,11 @@ import org.openimis.imispolicies.util.UriUtils;
 import org.openimis.imispolicies.util.ZipUtils;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.io.OutputStream;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
@@ -121,8 +123,6 @@ import java.util.UUID;
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 import javax.net.ssl.HttpsURLConnection;
-
-import cz.msebera.android.httpclient.HttpResponse;
 
 public class ClientAndroidInterface {
     private static final String LOG_TAG_RENEWAL = "RENEWAL";
@@ -358,7 +358,7 @@ public class ClientAndroidInterface {
             if (!object.has("LocationId")) {
                 return null;
             }
-            return JsonUtils.getIntegerOrDefault(object,"LocationId");
+            return JsonUtils.getIntegerOrDefault(object, "LocationId");
         } catch (JSONException e) {
             e.printStackTrace();
             return null;
@@ -369,13 +369,10 @@ public class ClientAndroidInterface {
     @SuppressWarnings("unused")
     public String getRegions() {
         Integer officerLocationId = getOfficerLocationId();
-        @Language("SQL")
-        String Query = "SELECT LocationId, LocationName FROM tblLocations WHERE LocationId = (SELECT L.ParentLocationId LocationId FROM tblLocations L";
-        if (officerLocationId != null) {
-            Query += " WHERE L.LocationId = " + officerLocationId;
+        if (officerLocationId == null) {
+            return getRegionsWO();
         }
-        Query += ")";
-        return sqlHandler.getResult(Query, null).toString();
+        return sqlHandler.getResult("SELECT LocationId, LocationName FROM tblLocations WHERE LocationId = (SELECT L.ParentLocationId LocationId FROM tblLocations L WHERE L.LocationId = " + officerLocationId + ")", null).toString();
     }
 
     @JavascriptInterface
@@ -385,7 +382,7 @@ public class ClientAndroidInterface {
         @Language("SQL")
         String Query = "SELECT * FROM tblLocations L WHERE LocationType = 'D' AND ParentLocationId = " + RegionId;
         if (officerLocationId != null) {
-            Query += " AND LocationId = "+officerLocationId;
+            Query += " AND LocationId = " + officerLocationId;
         }
         return sqlHandler.getResult(Query, null).toString();
     }
@@ -957,7 +954,9 @@ public class ClientAndroidInterface {
             values.put("Phone", data.get("txtPhoneNumber"));
             if (isOffline == 0 || isOffline == 2)
                 PhotoPath = PhotoPath.substring(PhotoPath.lastIndexOf("/") + 1);
-            values.put("PhotoPath", PhotoPath);
+            if (!"".equals(PhotoPath)) {
+                values.put("PhotoPath", PhotoPath);
+            }
             values.put("CardIssued", CardIssued);
 
             //values.put("isOffline", isOffline);
@@ -1031,7 +1030,10 @@ public class ClientAndroidInterface {
 
             } else {//Existing Insuree
                 values.put("isOffline", insureeIsOffline);
-                sqlHandler.updateData("tblInsuree", values, "InsureeId = ? AND (isOffline = ?)", new String[]{String.valueOf(InsureeId), String.valueOf(insureeIsOffline)});
+                sqlHandler.updateData(
+                        "tblInsuree", values, "InsureeId = ? AND (isOffline = ? OR isOffline = ?)",
+                        new String[]{String.valueOf(InsureeId), String.valueOf(insureeIsOffline), insureeIsOffline == 1 ? "true" : "false"}
+                );
             }
         } catch (NumberFormatException | UserException e) {
             e.printStackTrace();
@@ -1591,8 +1593,8 @@ public class ClientAndroidInterface {
             if (locArray.length() != 0) {
                 for (int i = 0; i < locArray.length(); i++) {
                     JSONObject obj = locArray.getJSONObject(i);
-                    RegionId = Integer.parseInt(obj.getString("RegionId"));
-                    DistrictId = Integer.parseInt(obj.getString("DistrictId"));
+                    RegionId = JsonUtils.getIntegerOrDefault(obj, "RegionId", 0);
+                    DistrictId = JsonUtils.getIntegerOrDefault(obj, "DistrictId", 0);
                 }
             }
             @Language("SQL")
@@ -2896,26 +2898,22 @@ public class ClientAndroidInterface {
             );
             if (CallerId != 2) {
                 query.append(" I.FamilyId = ").append(FamilyId).append(" \n");
-                if (Offline == null || Integer.parseInt(Offline) == 0) {
-                    if (CallerId == 1) {
-                        query.append(" AND  I.InsureeId < 0").append("");
-                    }
-                }
             } else {
                 query.append("(");
                 for (int j = 0; j < verifiedId.size(); j++) {
 
                     if (getFamilyStatus(Integer.parseInt(verifiedId.get(j))) == 0) {
+
                         if ((verifiedId.size() - j) == 1) {
-                            query.append("I.InsureeId < 0 AND  I.FamilyId == ").append(verifiedId.get(j));
+                            query.append("I.FamilyId = ").append(verifiedId.get(j));
                         } else {
-                            query.append("I.InsureeId < 0 AND  I.FamilyId == ").append(verifiedId.get(j)).append(" OR ");
+                            query.append("I.FamilyId = ").append(verifiedId.get(j)).append(" OR ");
                         }
                     } else {
                         if ((verifiedId.size() - j) == 1) {
-                            query.append(" I.FamilyId == ").append(verifiedId.get(j));
+                            query.append(" I.FamilyId = ").append(verifiedId.get(j));
                         } else {
-                            query.append(" I.FamilyId == ").append(verifiedId.get(j)).append(" OR ");
+                            query.append(" I.FamilyId = ").append(verifiedId.get(j)).append(" OR ");
                         }
                     }
                 }
@@ -3127,32 +3125,24 @@ public class ClientAndroidInterface {
             @NonNull Pair<String, byte[]>[] insureeImages
     ) throws JSONException {
         JSONObject familyObj = familyArray.getJSONObject(0);
-
-        Family family = familyFromJSONObject(familyObj, insureesArray, insureeImages);
         try {
-            new UpdateFamily().execute(family);
-        } catch (Exception e) {
-            enrolMessages.add(e.getMessage());
-            return -400;
-        }
-
-        for (int j = 0; j < policiesArray.length(); j++) {
-            JSONArray policyPremiums = new JSONArray();
-            String policyId = policiesArray.getJSONObject(j).getString("PolicyId");
-            for (int k = 0; k < premiumsArray.length(); k++) {
-                JSONObject premiumObject = premiumsArray.getJSONObject(k);
-                if (StringUtils.equals(policyId, premiumObject.getString("PolicyId"))) {
-                    policyPremiums.put(premiumObject);
+            Family family = familyFromJSONObject(familyObj, insureesArray, insureeImages);
+            for (int j = 0; j < policiesArray.length(); j++) {
+                JSONArray policyPremiums = new JSONArray();
+                String policyId = policiesArray.getJSONObject(j).getString("PolicyId");
+                for (int k = 0; k < premiumsArray.length(); k++) {
+                    JSONObject premiumObject = premiumsArray.getJSONObject(k);
+                    if (StringUtils.equals(policyId, premiumObject.getString("PolicyId"))) {
+                        policyPremiums.put(premiumObject);
+                    }
                 }
+                policiesArray.getJSONObject(j).put("premium", policyPremiums);
             }
-            policiesArray.getJSONObject(j).put("premium", policyPremiums);
-        }
-
-        List<Family.Policy> policies = familyPolicyFromJSONObject(family.getUuid(), policiesArray);
-        try {
-            new CreatePolicy().execute(policies);
+            List<Family.Policy> policies = familyPolicyFromJSONObject(family.getUuid(), policiesArray);
+            new UpdateFamily().execute(family, policies);
         } catch (Exception e) {
-            enrolMessages.add(e.getMessage());
+            e.printStackTrace();
+            enrolMessages.add(Objects.requireNonNullElse(e.getMessage(), "Something went wrong updating the family"));
             return -400;
         }
 
@@ -3197,7 +3187,7 @@ public class ClientAndroidInterface {
                 /* chfId = */ object.getString("CHFID"),
                 /* isHead = */ JsonUtils.getBooleanOrDefault(object, "isHead", false),
                 /* id = */ Integer.parseInt(object.getString("InsureeId")),
-                /* uuid = */ JsonUtils.getStringOrDefault(object,"InsureeUUID"),
+                /* uuid = */ JsonUtils.getStringOrDefault(object, "InsureeUUID"),
                 /* familyId = */ Integer.parseInt(object.getString("FamilyId")),
                 /* familyUuid = */ familyUUID,
                 /* identificationNumber = */ JsonUtils.getStringOrDefault(object, "IdentificationNumber"),
@@ -3231,10 +3221,9 @@ public class ClientAndroidInterface {
         List<Family.Policy> policies = new ArrayList<>();
         for (int i = 0; i < array.length(); i++) {
             JSONObject object = array.getJSONObject(i);
-            String policyUuid = UUID.randomUUID().toString();
             policies.add(new Family.Policy(
                     /* id = */ Integer.parseInt(object.getString("PolicyId")),
-                    /* uuid = */ policyUuid,
+                    /* uuid = */ null,
                     /* familyId = */ Integer.parseInt(object.getString("FamilyId")),
                     /* familyUuid = */ familyUUID,
                     /* enrollDate = */ Objects.requireNonNull(JsonUtils.getDateOrDefault(object, "EnrollDate")),
@@ -3248,7 +3237,7 @@ public class ClientAndroidInterface {
                     /* stage = */ JsonUtils.getStringOrDefault(object, "PolicyStage"),
                     /* isOffline = */ JsonUtils.getBooleanOrDefault(object, "isOffline", false),
                     /* controlNumber = */ JsonUtils.getStringOrDefault(object, "ControlNumber"),
-                    /* premiums = */ object.has("premium") ? familyPolicyPremiumsFromJSONObject(policyUuid, object.getJSONArray("premium")) : Collections.emptyList()
+                    /* premiums = */ object.has("premium") ? familyPolicyPremiumsFromJSONObject(object.getJSONArray("premium")) : Collections.emptyList()
             ));
         }
         return policies;
@@ -3256,7 +3245,6 @@ public class ClientAndroidInterface {
 
     @NonNull
     private List<Family.Policy.Premium> familyPolicyPremiumsFromJSONObject(
-            @NonNull String policyUuid,
             @NonNull JSONArray array
     ) throws JSONException {
         List<Family.Policy.Premium> premiums = new ArrayList<>();
@@ -3265,7 +3253,7 @@ public class ClientAndroidInterface {
             premiums.add(new Family.Policy.Premium(
                     /* id = */ Integer.parseInt(object.getString("PremiumId")),
                     /* policyId = */ Integer.parseInt(object.getString("PolicyId")),
-                    /* policyUuid = */ policyUuid,
+                    /* policyUuid = */ null,
                     /* payerId = */ JsonUtils.getIntegerOrDefault(object, "PayerId"),
                     /* amount = */ JsonUtils.getDoubleOrDefault(object, "Amount"),
                     /* receipt = */ JsonUtils.getStringOrDefault(object, "Receipt"),
@@ -3313,9 +3301,8 @@ public class ClientAndroidInterface {
                     File[] files = GetListOfImages(global.getImageFolder(), PhotoPath);
 
                     if (files.length > 0) {
-                        try {
-                            byte[] imgContent = new byte[(int) files[0].length()];
-                            copy(PhotoPath, imgContent);
+                        try (InputStream in = new FileInputStream(files[0])) {
+                            byte[] imgContent = IOUtils.toByteArray(in);
                             if (CallerId != 2) {
                                 images[j] = new Pair<>(files[0].getName(), imgContent);
                             }
@@ -3348,18 +3335,6 @@ public class ClientAndroidInterface {
             }
         }
         return images;
-    }
-
-    public static void copy(String name, byte[] data) throws IOException {
-        String photosDir = Global.getGlobal().getSubdirectory("Photos");
-
-        File file = new File(photosDir + File.separator + name);
-        if (!file.exists() && !file.createNewFile()) {
-            throw new IOException("Cannot create file '" + file.getAbsolutePath() + "'");
-        }
-        try (OutputStream out = new FileOutputStream(file)) {
-            out.write(data);
-        }
     }
 
     public String getEnrolmentExportFilename() {
@@ -3772,39 +3747,40 @@ public class ClientAndroidInterface {
                 }
                 String renewalInsureeNo = "";
 
-                HttpResponse response;
-                int responseCode;
                 int uploadStatus;
 
                 try {
                     JSONObject obj = new JSONObject(jsonText).getJSONObject("Policy");
-                    renewalInsureeNo = obj.getString("CHFID");
-                    int renewalId = Integer.parseInt(obj.getString("RenewalId"));
-                    uploadStatus = new DeletePolicyRenewal().execute(renewalId);
-
+                    PolicyRenewalRequest request = policyRenewalRequestFromJson(obj);
+                    renewalInsureeNo = request.getChfId();
+                    uploadStatus = new RenewPolicy().execute(request);
                 } catch (JSONException e) {
                     Log.e(LOG_TAG_RENEWAL, "Invalid renewal json format", e);
                     messageBuilder.append(String.format(messageFormat, renewalInsureeNo, activity.getResources().getString(R.string.InvalidRenewalFile)));
-                    continue;
+                    uploadStatus = ToRestApi.RenewalStatus.UNEXPECTED_EXCEPTION;
                 } catch (IOException e) {
                     Log.e(LOG_TAG_RENEWAL, "Error while sending renewal", e);
                     messageBuilder.append(String.format(messageFormat, renewalInsureeNo, activity.getResources().getString(R.string.SomethingWrongServer)));
-                    continue;
+                    uploadStatus = ToRestApi.RenewalStatus.UNEXPECTED_EXCEPTION;
                 } catch (HttpException e) {
                     Log.e(LOG_TAG_RENEWAL, "Error while sending renewal", e);
                     if (e.getCode() == HttpsURLConnection.HTTP_NOT_FOUND) {
                         messageBuilder.append(String.format(messageFormat, renewalInsureeNo, activity.getResources().getString(R.string.NotFound)));
-                        break;
+                        uploadStatus = ToRestApi.RenewalStatus.UNEXPECTED_EXCEPTION;
                     } else if (e.getCode() == HttpsURLConnection.HTTP_UNAUTHORIZED) {
                         messageBuilder.append(String.format(messageFormat, renewalInsureeNo, activity.getResources().getString(R.string.LoginFail)));
                         break;
                     } else {
                         throw e;
                     }
+                } catch (IllegalArgumentException e) {
+                    Log.e(LOG_TAG_RENEWAL, "Error while sending renewal", e);
+                    messageBuilder.append(String.format(messageFormat, renewalInsureeNo, activity.getResources().getString(R.string.InvalidRenewalFile) + ": " + e.getMessage()));
+                    uploadStatus = ToRestApi.RenewalStatus.REJECTED;
                 } catch (Exception e) {
                     Log.e(LOG_TAG_RENEWAL, "Error while sending renewal", e);
-                    messageBuilder.append(String.format(messageFormat, renewalInsureeNo, activity.getResources().getString(R.string.InvalidRenewalFile)));
-                    continue;
+                    messageBuilder.append(String.format(messageFormat, renewalInsureeNo, activity.getResources().getString(R.string.InvalidRenewalFile) + ": " + e.getMessage()));
+                    uploadStatus = ToRestApi.RenewalStatus.UNEXPECTED_EXCEPTION;
                 }
 
                 if (messages.containsKey(uploadStatus)) {
@@ -3824,9 +3800,9 @@ public class ClientAndroidInterface {
             String failMessage = activity.getResources().getString(R.string.RenewalRejected);
             String resultMessage;
             if (acceptedRenewals == 0) {
-                resultMessage = failMessage;
+                resultMessage = failMessage + "\n" + messageBuilder;
             } else if (acceptedRenewals != jsonFiles.length) {
-                resultMessage = successMessage + "\n" + messageBuilder.toString();
+                resultMessage = successMessage + "\n" + messageBuilder;
             } else {
                 resultMessage = successMessage;
             }
@@ -3835,6 +3811,23 @@ public class ClientAndroidInterface {
 
             pd.dismiss();
         }).start();
+    }
+
+    @NonNull
+    private PolicyRenewalRequest policyRenewalRequestFromJson(@NonNull JSONObject obj) throws Exception {
+        return new PolicyRenewalRequest(
+                /* renewalId = */ Integer.parseInt(obj.getString("RenewalId")),
+                /* officerId = */ JsonUtils.getIntegerOrDefault(obj, "OfficerId", getOfficerId()),
+                /* officerCode = */ obj.getString("Officer"),
+                /* chfId = */ obj.getString("CHFID"),
+                /* receiptNumber = */ obj.getString("ReceiptNo"),
+                /* productCode = */ obj.getString("ProductCode"),
+                /* amount = */ Double.parseDouble(obj.getString("Amount")),
+                /* date = */ AppInformation.DateTimeInfo.getDefaultDateFormatter().parse(obj.getString("Date")),
+                /* discontinued = */ Boolean.valueOf(obj.getString("Discontinue")),
+                /* payerId = */ Integer.parseInt(obj.getString("PayerId")),
+                /* payType = */ JsonUtils.getStringOrDefault(obj, "PayType", "C", true)
+        );
     }
 
     private File[] GetListOfImages(String DirectoryPath, final String FileName) {
@@ -4346,7 +4339,8 @@ public class ClientAndroidInterface {
     @JavascriptInterface
     @SuppressWarnings("unused")
     public void getScannedNumber() {
-        Intent intent = new Intent("com.google.zxing.client.android.SCAN");
+        Intent intent = new Intent(activity, com.google.zxing.client.android.CaptureActivity.class);
+        intent.setAction("com.google.zxing.client.android.SCAN");
         intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
         try {
             activity.startActivityForResult(intent, RESULT_SCAN);
@@ -4642,7 +4636,6 @@ public class ClientAndroidInterface {
         String path = activity.getApplicationInfo().dataDir + "/Images/";
         File Directory = new File(path);
         FilenameFilter filter = (dir, filename) -> filename.contains("0");
-        File[] newFiles = Directory.listFiles(filter);
         return Directory.listFiles(filter);
     }
 

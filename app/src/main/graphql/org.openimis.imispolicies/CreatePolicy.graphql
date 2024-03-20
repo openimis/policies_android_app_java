@@ -1,6 +1,0 @@
-mutation CreatePolicy ($input: CreatePolicyMutationInput!){
-    createPolicy(input: $input) {
-        clientMutationId
-        internalId
-    }
-}

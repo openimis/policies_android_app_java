@@ -29,8 +29,11 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -88,6 +91,7 @@ public class Renewal extends AppCompatActivity {
     private ProgressDialog pd;
     private CheckBox chkDiscontinue;
     private Spinner spPayer;
+    private Spinner spPayType;
     private Spinner spProduct;
     private String FileName;
     private EditText etControlNumber;
@@ -122,6 +126,7 @@ public class Renewal extends AppCompatActivity {
         chkDiscontinue = findViewById(R.id.chkDiscontinue);
         PolicyValue = findViewById(R.id.txtPolicyValue);
         spPayer = findViewById(R.id.spPayer);
+        spPayType = findViewById(R.id.spPayType);
         spProduct = findViewById(R.id.spProduct);
         etControlNumber = findViewById(R.id.etControlNumber);
         btnScan = findViewById(R.id.btnScan);
@@ -176,8 +181,8 @@ public class Renewal extends AppCompatActivity {
             BindSpinnerPayers();
         }
 
-        final PayerAdapter adapter = new PayerAdapter(Renewal.this);
-        spPayer.setAdapter(adapter);
+//        final PayerAdapter adapter = new PayerAdapter(Renewal.this);
+//        spPayer.setAdapter(adapter);
 
         chkDiscontinue.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (chkDiscontinue.isChecked())
@@ -218,7 +223,8 @@ public class Renewal extends AppCompatActivity {
         });
 
         btnScan.setOnClickListener(v -> {
-                    Intent intent = new Intent("com.google.zxing.client.android.SCAN");
+                    Intent intent = new Intent(this, com.google.zxing.client.android.CaptureActivity.class);
+                    intent.setAction("com.google.zxing.client.android.SCAN");
                     intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
                     try {
                         startActivityForResult(intent, INTENT_ACTIVITY_SCAN_CODE);
@@ -260,9 +266,24 @@ public class Renewal extends AppCompatActivity {
         });
     }
 
-    private String GetSelectedPayer() {
+    @NonNull
+    private String getSelectedPayer() {
         int selectedPosition = spPayer.getSelectedItemPosition();
         return selectedPosition != INVALID_POSITION ? PayersList.get(selectedPosition).get("PayerId") : "0";
+    }
+
+    @Nullable
+    private String getSelectedPayType() {
+        int selectedPosition = spPayType.getSelectedItemPosition();
+        String[] enumValues = getResources().getStringArray(R.array.pay_types_enum);
+        if (selectedPosition < 0 || selectedPosition >= enumValues.length) {
+            return null;
+        }
+        String value = enumValues[selectedPosition];
+        if (value.isEmpty()) {
+            return null;
+        }
+        return value;
     }
 
     private String GetSelectedProduct() {
@@ -278,7 +299,6 @@ public class Renewal extends AppCompatActivity {
             String d = AppInformation.DateTimeInfo.getDefaultFileDatetimeFormatter().format(date);
             FileName = "Renewal_" + d + "_" + etCHFID.getText().toString() + "_" + etReceiptNo.getText().toString() + ".xml";
             d = AppInformation.DateTimeInfo.getDefaultDateFormatter().format(date);
-            String PayerId = GetSelectedPayer();
             //Create XML file
             File policyXML = new File(global.getSubdirectory("Renewal"), FileName);
 
@@ -294,6 +314,10 @@ public class Renewal extends AppCompatActivity {
             serializer.startTag(null, "RenewalId");
             serializer.text(String.valueOf(RenewalId));
             serializer.endTag(null, "RenewalId");
+
+            serializer.startTag(null, "OfficerId");
+            serializer.text(String.valueOf(Global.getGlobal().getOfficerId()));
+            serializer.endTag(null, "OfficerId");
 
             serializer.startTag(null, "Officer");
             serializer.text(etOfficer.getText().toString());
@@ -323,9 +347,13 @@ public class Renewal extends AppCompatActivity {
             serializer.text(String.valueOf(chkDiscontinue.isChecked()));
             serializer.endTag(null, "Discontinue");
 
-            serializer.startTag(null, "PayerId");
-            serializer.text(PayerId);
-            serializer.endTag(null, "PayerId");
+            serializer.startTag(null, "payerId");
+            serializer.text(getSelectedPayer());
+            serializer.endTag(null, "payerId");
+
+            serializer.startTag(null, "PayType");
+            serializer.text(getSelectedPayType());
+            serializer.endTag(null, "PayType");
 
             if (ca.IsBulkCNUsed()) {
                 serializer.startTag(null, "ControlNumber");
@@ -349,9 +377,6 @@ public class Renewal extends AppCompatActivity {
         Date date = Calendar.getInstance().getTime();
         String d = AppInformation.DateTimeInfo.getDefaultFileDatetimeFormatter().format(date);
         FileName = "RenewalJSON_" + d + "_" + etCHFID.getText().toString() + "_" + etReceiptNo.getText().toString() + ".json";
-        String PayerId = GetSelectedPayer();
-        String ProductCode = GetSelectedProduct();
-        d = AppInformation.DateTimeInfo.getDefaultDateFormatter().format(date);
 
         //Create XML file
         File policyJSON = new File(global.getSubdirectory("Renewal"), FileName);
@@ -362,14 +387,16 @@ public class Renewal extends AppCompatActivity {
             JSONObject RenewalObject = new JSONObject();
 
             RenewalObject.put("RenewalId", String.valueOf(RenewalId));
+            RenewalObject.put("OfficerId", Global.getGlobal().getOfficerId());
             RenewalObject.put("Officer", etOfficer.getText().toString());
             RenewalObject.put("CHFID", etCHFID.getText().toString());
             RenewalObject.put("ReceiptNo", etReceiptNo.getText().toString());
             RenewalObject.put("ProductCode", etProductCode.getText().toString());
             RenewalObject.put("Amount", etAmount.getText().toString());
-            RenewalObject.put("Date", d);
+            RenewalObject.put("Date", AppInformation.DateTimeInfo.getDefaultDateFormatter().format(date));
             RenewalObject.put("Discontinue", String.valueOf(chkDiscontinue.isChecked()));
-            RenewalObject.put("PayerId", PayerId);
+            RenewalObject.put("PayerId", getSelectedPayer());
+            RenewalObject.put("PayType", getSelectedPayType());
 
             if (ca.IsBulkCNUsed()) {
                 RenewalObject.put("ControlNumber", etControlNumber.getText().toString());
@@ -407,6 +434,7 @@ public class Renewal extends AppCompatActivity {
                             if (global.isNetworkAvailable()) {
                                 new DeletePolicyRenewal().execute(RenewalUUID);
                             } else {
+                                WriteJSON();
                                 WriteXML();
                             }
                         } catch (Exception e) {
@@ -455,18 +483,16 @@ public class Renewal extends AppCompatActivity {
     }
 
     private void BindSpinnerPayers(int LocationId) {
-        String result = ca.getPayersByDistrictId(LocationId);
-
-        JSONArray jsonArray;
-        JSONObject object;
-
         try {
-            jsonArray = new JSONArray(result);
-
+            JSONArray jsonArray = new JSONArray(ca.getPayersByDistrictId(LocationId));
             PayersList.clear();
-
+            if (jsonArray.length() == 0) {
+                spPayer.setVisibility(View.GONE);
+                return;
+            }
+            spPayer.setVisibility(View.VISIBLE);
             for (int i = 0; i < jsonArray.length(); i++) {
-                object = jsonArray.getJSONObject(i);
+                JSONObject object = jsonArray.getJSONObject(i);
 
                 // Enter an empty record
                 if (i == 0) {
@@ -587,6 +613,15 @@ public class Renewal extends AppCompatActivity {
             return false;
         }
 
+        if (spPayType.getVisibility() == View.VISIBLE && getSelectedPayType() == null) {
+            runOnUiThread(() -> {
+                ca.ShowDialog(getResources().getString(R.string.MissingPayType));
+                spPayType.requestFocus();
+            });
+
+            return false;
+        }
+
         if (spProduct.getVisibility() == View.VISIBLE && spProduct.getSelectedItemPosition() == 0) {
             runOnUiThread(() -> {
                 ca.ShowDialog(getResources().getString(R.string.MissingProductCode));
@@ -606,7 +641,7 @@ public class Renewal extends AppCompatActivity {
         }
 
         if (global.isNetworkAvailable() && etReceiptNo.getVisibility() == View.VISIBLE) {
-            if (etReceiptNo.getText().toString().trim().length() > 0) {
+            if (!etReceiptNo.getText().toString().trim().isEmpty()) {
                 HttpResponse response = null;
 
                 try {
