@@ -223,7 +223,8 @@ public class Renewal extends AppCompatActivity {
         });
 
         btnScan.setOnClickListener(v -> {
-                    Intent intent = new Intent("com.google.zxing.client.android.SCAN");
+                    Intent intent = new Intent(this, com.google.zxing.client.android.CaptureActivity.class);
+                    intent.setAction("com.google.zxing.client.android.SCAN");
                     intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
                     try {
                         startActivityForResult(intent, INTENT_ACTIVITY_SCAN_CODE);

@@ -78,7 +78,6 @@ import org.openimis.imispolicies.network.exception.UserNotAuthenticatedException
 import org.openimis.imispolicies.tools.ImageManager;
 import org.openimis.imispolicies.tools.Log;
 import org.openimis.imispolicies.tools.StorageManager;
-import org.openimis.imispolicies.usecase.DeletePolicyRenewal;
 import org.openimis.imispolicies.usecase.FetchFamily;
 import org.openimis.imispolicies.usecase.FetchMasterData;
 import org.openimis.imispolicies.usecase.Login;
@@ -124,8 +123,6 @@ import java.util.UUID;
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 import javax.net.ssl.HttpsURLConnection;
-
-import cz.msebera.android.httpclient.HttpResponse;
 
 public class ClientAndroidInterface {
     private static final String LOG_TAG_RENEWAL = "RENEWAL";
@@ -3778,11 +3775,11 @@ public class ClientAndroidInterface {
                     }
                 } catch (IllegalArgumentException e) {
                     Log.e(LOG_TAG_RENEWAL, "Error while sending renewal", e);
-                    messageBuilder.append(String.format(messageFormat, renewalInsureeNo, activity.getResources().getString(R.string.InvalidRenewalFile)+": "+e.getMessage()));
+                    messageBuilder.append(String.format(messageFormat, renewalInsureeNo, activity.getResources().getString(R.string.InvalidRenewalFile) + ": " + e.getMessage()));
                     uploadStatus = ToRestApi.RenewalStatus.REJECTED;
                 } catch (Exception e) {
                     Log.e(LOG_TAG_RENEWAL, "Error while sending renewal", e);
-                    messageBuilder.append(String.format(messageFormat, renewalInsureeNo, activity.getResources().getString(R.string.InvalidRenewalFile)+": "+e.getMessage()));
+                    messageBuilder.append(String.format(messageFormat, renewalInsureeNo, activity.getResources().getString(R.string.InvalidRenewalFile) + ": " + e.getMessage()));
                     uploadStatus = ToRestApi.RenewalStatus.UNEXPECTED_EXCEPTION;
                 }
 
@@ -4342,7 +4339,8 @@ public class ClientAndroidInterface {
     @JavascriptInterface
     @SuppressWarnings("unused")
     public void getScannedNumber() {
-        Intent intent = new Intent("com.google.zxing.client.android.SCAN");
+        Intent intent = new Intent(activity, com.google.zxing.client.android.CaptureActivity.class);
+        intent.setAction("com.google.zxing.client.android.SCAN");
         intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
         try {
             activity.startActivityForResult(intent, RESULT_SCAN);
