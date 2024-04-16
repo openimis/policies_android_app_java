@@ -214,6 +214,12 @@ public class ClientAndroidInterface {
 
     @JavascriptInterface
     @SuppressWarnings("unused")
+    public boolean isFamilyModificationDisabled() {
+        return BuildConfig.DISABLE_FAMILY_MODIFICATION;
+    }
+
+    @JavascriptInterface
+    @SuppressWarnings("unused")
     public String getSpecificControlHtml(String FieldName) {
         String tableName = "tblControls";
         String[] columns = {"Adjustibility"};
