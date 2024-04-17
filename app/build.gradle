@@ -153,7 +153,7 @@ android {
         }
         gambia {
             applicationId "org.openimis.imispolicies.gambia"
-            buildConfigField "String", "API_BASE_URL", '"https://gambiatest.bluesquare.org/"'
+            buildConfigField "String", "API_BASE_URL", '"https://openimis.nhia.gm/"'
             buildConfigField "boolean", "DISABLE_FAMILY_MODIFICATION", 'true'
             resValue "string", "app_name_policies", System.getenv("CLI_APP_NAME") ?: "Policies Gambia"
             dimension = 'std'
