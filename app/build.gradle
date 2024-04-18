@@ -82,7 +82,7 @@ android {
     productFlavors {
         demoProd {
             applicationId "org.openimis.imispolicies.demoProd"
-            buildConfigField "String", "API_BASE_URL", '"https://demo.openimis.org/"'
+            buildConfigField "String", "API_BASE_URL", '"https://develop.openimis.org/"'
             resValue "string", "app_name_policies", "Policies Demo"
             dimension = 'std'
         }

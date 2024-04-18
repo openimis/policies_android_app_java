@@ -90,6 +90,7 @@ public class SQLHandler extends SQLiteOpenHelper {
     public static final String tblRenewals = "tblRenewals";
     public static final String tblBulkControlNumbers = "tblBulkControlNumbers";
     public static final String tblFamilySMS = "tblFamilySMS";
+    public static final String tblIncomeLevel = "tblIncomeLevel";
 
     public SQLHandler(Context context) {
         super(context, DBNAME, null, DATABASE_VERSION);
@@ -411,6 +412,12 @@ public class SQLHandler extends SQLiteOpenHelper {
                             "ControlNumber TEXT," +
                             "Amount REAL," +
                             "PolicyId INTEGER" + ")"
+            );
+            sqLiteDatabase.execSQL(
+                    "CREATE TABLE 'tblIncomeLevel' (" +
+                            "Id INTEGER," +
+                            "FrenchVersion TEXT," +
+                            "EnglishVersion TEXT" +")"
             );
         } catch (Exception e) {
             e.printStackTrace();

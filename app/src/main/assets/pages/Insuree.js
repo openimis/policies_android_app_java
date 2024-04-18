@@ -214,6 +214,7 @@ function fillDropdowns() {
     fillFSPDistricts();
     fillFSPCategory();
     fillVulnerability();
+    fillPaymentMethods();
 }
 
 // called from java after the image was selected by the user
@@ -335,6 +336,20 @@ function fillFSP(DistrictId, HFLevel) {
 function fillVulnerability() {
     var $Vulnerability = Android.getVulnerability();
     bindDropdown('ddlVulnerability', $Vulnerability, 'value', 'key', "", Android.getString('SelectVulnerability'));
+}
+
+function fillPaymentMethods(){
+    var $PaymentMethods = Android.getPaymentMethod();
+    bindDropdown('ddlPaymentMethod', $PaymentMethods, 'Code', 'Method', null, null);
+}
+
+function fillIncomeLevels(){
+    $textLanguage = "FrenchVersion";
+    if (Android.getSelectedLanguage() != "en") {
+        $textLanguage = "EnglishVersion";
+    }
+    var $IncomeLevels = Android.getIncomeLevels();
+    bindDropdown('ddlIncomeLevel', $IncomeLevels, 'Id', $textLanguage, null, Android.getString('SelectIncomeLevel'));
 }
 
 function createJSONString() {

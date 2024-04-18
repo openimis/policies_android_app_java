@@ -58,17 +58,17 @@ In case of dispute arising out or in relation to the use of the program, it is s
             <span strName="PovertyStatus">Poverty Status</span>
             <select id="ddlPovertyStatus" datafield="Poverty"></select>
         </li>
-        <li id="Confirmation">
+        <li style="display:none;">
             <span strName="ConfirmationType">Confirmation Type</span>
             <select id="ddlConfirmationType" datafield="ConfirmationType"></select>
         </li>
-        <li id="ConfirmationNo">
+        <li style="display:none;">
             <span strName="ConfirmationNo">Confirmation No.</span>
             <input type="text" id="txtConfirmationNo" datafield="ConfirmationNo"/>
         </li>
         <li id="FamilyType">
             <span strName="GroupType">Group Type</span>
-            <select id="ddlGroupType" datafield="FamilyType"></select>
+            <select id="ddlGroupType" datafield="FamilyType" required></select>
         </li>
         <li style="display:none;">
             <span strName="Ethnicity">Ethnicity</span>
@@ -78,11 +78,11 @@ In case of dispute arising out or in relation to the use of the program, it is s
             <span strName="PermanentAddress">Permanent Address Details</span>
             <textarea id="txtPermanentAddress" datafield="FamilyAddress"></textarea>
         </li>
-        <li id="ApprovalOfSMS">
+        <li style="display:none;">
             <span strName="approvalOfSMS">Allow SMS Messages</span>
             <select id="ddlApprovalOfSMS" datafield="ApprovalOfSMS"></select>
         </li>
-        <li id="LanguageOfSMS">
+        <li style="display:none;">
             <span strName="languageOfSMS">Language of SMS</span>
             <select id="ddlLanguageOfSMS" datafield="LanguageOfSMS"></select>
         </li>

@@ -573,6 +573,38 @@ public class ClientAndroidInterface {
 
     @JavascriptInterface
     @SuppressWarnings("unused")
+    public String getPaymentMethod() {
+        JSONArray paymentMethods = new JSONArray();
+        JSONObject object = new JSONObject();
+
+        try {
+            object.put("Code", "");
+            object.put("Method", activity.getResources().getString(R.string.SelectPaymentMethod));
+            paymentMethods.put(object);
+
+            object = new JSONObject();
+            object.put("Code", "MO");
+            object.put("Method", activity.getResources().getString(R.string.MobileMoney));
+            paymentMethods.put(object);
+
+            object = new JSONObject();
+            object.put("Code", "PB");
+            object.put("Method", activity.getResources().getString(R.string.BankDebit));
+            paymentMethods.put(object);
+
+            object = new JSONObject();
+            object.put("Code", "TP");
+            object.put("Method", activity.getResources().getString(R.string.TiersPay));
+            paymentMethods.put(object);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return paymentMethods.toString();
+    }
+
+    @JavascriptInterface
+    @SuppressWarnings("unused")
     public String getProfessions() {
         String tableName = "tblProfessions";
         String[] columns = {"ProfessionId", "Profession", "AltLanguage"};
@@ -3983,6 +4015,7 @@ public class ClientAndroidInterface {
         JSONArray Relations = new JSONArray();
         JSONArray PhoneDefaults = new JSONArray();
         JSONArray Genders = new JSONArray();
+        JSONArray IncomeLevels = new JSONArray();
         //JSONArray OfficerVillages = new JSONArray();
 
         try {
@@ -4055,6 +4088,28 @@ public class ClientAndroidInterface {
             insertRelations(Relations);
             insertPhoneDefaults(PhoneDefaults);
             insertGenders(Genders);
+
+            JSONObject object = new JSONObject();
+            object.put("Id", 0);
+            object.put("FrenchVersion", "Néant");
+            object.put("EnglishVersion", "Nothing");
+            IncomeLevels.put(object);
+
+            object = new JSONObject();
+            object.put("Id", 1);
+            object.put("FrenchVersion", "<30.000");
+            object.put("EnglishVersion", "<30.000");
+            IncomeLevels.put(object);
+
+            object = new JSONObject();
+            object.put("Id", 2);
+            object.put("FrenchVersion", "30.000 - 40.000");
+            object.put("EnglishVersion", "30.000 - 40.000");
+            IncomeLevels.put(object);
+
+            insertIncomeLevel(IncomeLevels);
+
+
         } catch (JSONException e) {
             e.printStackTrace();
             throw new UserException(activity.getResources().getString(R.string.DownloadMasterDataFailed), e);
@@ -5270,5 +5325,23 @@ public class ClientAndroidInterface {
                 R.string.ConfirmExportLogs,
                 (d, i) -> new Thread(() -> Log.zipLogFiles(activity)).start()
         );
+    }
+
+    @WorkerThread
+    private void insertIncomeLevel(JSONArray jsonArray) throws JSONException {
+        String[] Columns = getColumnNames(jsonArray);
+        sqlHandler.insertData("tblIncomeLevel", Columns, jsonArray, "DELETE FROM tblIncomeLevel;");
+    }
+
+    @JavascriptInterface
+    @SuppressWarnings("unused")
+    public String getIncomeLevels() {
+        String tableName = "tblIncomeLevel";
+        String[] columns = {"Id", "FrenchVersion", "EnglishVersion"};
+        String where = null;
+
+        JSONArray incomeLevels = sqlHandler.getResult(tableName, columns, null, null);
+
+        return incomeLevels.toString();
     }
 }
