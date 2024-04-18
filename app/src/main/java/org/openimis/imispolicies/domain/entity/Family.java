@@ -168,6 +168,9 @@ public class Family implements Parcelable {
 
     @Nullable
     public String getAddress() {
+        if ("0".equals(address)) {
+            return null;
+        }
         return address;
     }
 
@@ -181,11 +184,17 @@ public class Family implements Parcelable {
 
     @Nullable
     public String getConfirmationNumber() {
+        if ("0".equals(confirmationNumber)) {
+            return null;
+        }
         return confirmationNumber;
     }
 
     @Nullable
     public String getConfirmationType() {
+        if ("0".equals(confirmationType)) {
+            return null;
+        }
         return confirmationType;
     }
 
