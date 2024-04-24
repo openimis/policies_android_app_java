@@ -891,7 +891,7 @@ type ClaimGQLType implements Node {
   uuid: String!
   category: String
   insuree: InsureeGQLType!
-  code: String!
+  code: String
   dateFrom: Date!
   dateTo: Date
   status: Int!
@@ -4519,7 +4519,7 @@ type Mutation {
   createTicketAttachment(input: CreateTicketAttachmentMutationInput!): CreateTicketAttachmentMutationPayload
   updateTicketAttachment(input: UpdateTicketAttachmentMutationInput!): UpdateTicketAttachmentMutationPayload
   mobileEnrollment(input: MobileEnrollmentMutationInput!): MobileEnrollmentMutationPayload
-  mobilePolicyRenewalAndPremium(input: MobilePolicyRenewalAndPremiumInput!): MobilePolicyRenewalAndPremiumPayload
+  mobilePolicyRenewalAndPremium(input: MobilePolicyRenewalAndPremiumMutationInput!): MobilePolicyRenewalAndPremiumMutationPayload
   generateInvoicesForTimePeriod(input: GenerateTimeframeInvoicesInput!): GenerateTimeframeInvoicesPayload
   deleteInvoice(input: DeleteInvoiceMutationInput!): DeleteInvoiceMutationPayload
   createInvoicePayment(input: CreateInvoicePaymentMutationInput!): CreateInvoicePaymentMutationPayload
@@ -4592,6 +4592,12 @@ type Mutation {
   Create a new claim. The claim items and services can all be entered with this call
   """
   createClaim(input: CreateClaimMutationInput!): CreateClaimMutationPayload
+  """
+  Create a new draft claim. It will not be saved into the system, its purpose is just to check eligibility.
+The purpose of this mutation is to compensate the missing FHIR API draft claim functionality.
+The claim items and services can all be entered with this call
+  """
+  createDraftClaim(input: CreateDraftClaimMutationInput!): CreateDraftClaimMutationPayload
   """
   Update a claim. The claim items and services can all be updated with this call
   """
@@ -5184,12 +5190,12 @@ input PremiumEnrollmentGQLType {
   policyId: Int!
 }
 
-type MobilePolicyRenewalAndPremiumPayload {
+type MobilePolicyRenewalAndPremiumMutationPayload {
   internalId: String
   clientMutationId: String
 }
 
-input MobilePolicyRenewalAndPremiumInput {
+input MobilePolicyRenewalAndPremiumMutationInput {
   clientMutationLabel: String
   clientMutationDetails: [String]
   """
@@ -6717,6 +6723,55 @@ input ClaimAttachmentInputType {
   mime: String
   url: String
   document: String
+}
+
+"""
+Create a new draft claim. It will not be saved into the system, its purpose is just to check eligibility.
+The purpose of this mutation is to compensate the missing FHIR API draft claim functionality.
+The claim items and services can all be entered with this call
+"""
+type CreateDraftClaimMutationPayload {
+  internalId: String
+  clientMutationId: String
+}
+
+input CreateDraftClaimMutationInput {
+  clientMutationLabel: String
+  clientMutationDetails: [String]
+  """
+  Extension data to be used by signals. Will not be pushed to mutation implementation.
+  """
+  mutationExtensions: ParsedJSONString
+  code: ClaimCodeInputType!
+  insureeId: String!
+  dateFrom: Date!
+  dateTo: Date
+  icdCode: DiagnosisCodeInputType!
+  altIcdCode1: DiagnosisCodeInputType
+  altIcdCode2: DiagnosisCodeInputType
+  altIcdCode3: DiagnosisCodeInputType
+  altIcdCode4: DiagnosisCodeInputType
+  visitType: String!
+  claimAdminCode: String!
+  items: [DraftClaimItemInputType]
+  services: [DraftClaimServiceInputType]
+  clientMutationId: String
+}
+
+scalar DiagnosisCodeInputType
+
+input DraftClaimItemInputType {
+  itemCode: ItemOrServiceCodeInputType!
+  qtyProvided: Decimal!
+  priceAsked: Decimal!
+}
+
+scalar ItemOrServiceCodeInputType
+
+input DraftClaimServiceInputType {
+  serviceCode: ItemOrServiceCodeInputType!
+  qtyProvided: Decimal!
+  priceAsked: Decimal!
 }
 
 """
