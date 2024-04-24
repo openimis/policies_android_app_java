@@ -7,7 +7,7 @@ import com.apollographql.apollo.api.Response;
 
 import org.openimis.imispolicies.RenewPolicyMutation;
 import org.openimis.imispolicies.domain.entity.PolicyRenewalRequest;
-import org.openimis.imispolicies.type.MobilePolicyRenewalAndPremiumInput;
+import org.openimis.imispolicies.type.MobilePolicyRenewalAndPremiumMutationInput;
 
 import java.util.Objects;
 import java.util.UUID;
@@ -18,7 +18,7 @@ public class RenewPolicyGraphQLRequest extends BaseGraphQLRequest {
     @NonNull
     public String execute(PolicyRenewalRequest request) throws Exception {
         Response<RenewPolicyMutation.Data> response = makeSynchronous(new RenewPolicyMutation(
-                MobilePolicyRenewalAndPremiumInput.builder()
+                MobilePolicyRenewalAndPremiumMutationInput.builder()
                         .renewalId(request.getRenewalId())
                         .renewalDate(request.getDate())
                         .officerId(request.getOfficerId())
