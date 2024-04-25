@@ -215,6 +215,7 @@ function fillDropdowns() {
     fillFSPCategory();
     fillVulnerability();
     fillPaymentMethods();
+    fillIncomeLevels();
 }
 
 // called from java after the image was selected by the user
@@ -349,7 +350,7 @@ function fillIncomeLevels(){
         $textLanguage = "EnglishVersion";
     }
     var $IncomeLevels = Android.getIncomeLevels();
-    bindDropdown('ddlIncomeLevel', $IncomeLevels, 'Id', $textLanguage, null, Android.getString('SelectIncomeLevel'));
+    bindDropdown('ddlIncomeLevel', $IncomeLevels, 'Id', $textLanguage, "", Android.getString('SelectIncomeLevel'));
 }
 
 function createJSONString() {

@@ -414,7 +414,7 @@ public class SQLHandler extends SQLiteOpenHelper {
                             "PolicyId INTEGER" + ")"
             );
             sqLiteDatabase.execSQL(
-                    "CREATE TABLE 'tblIncomeLevel' (" +
+                    "CREATE TABLE " + tblIncomeLevel + "(" +
                             "Id INTEGER," +
                             "FrenchVersion TEXT," +
                             "EnglishVersion TEXT" +")"
@@ -458,6 +458,7 @@ public class SQLHandler extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + tblRecordedPolicies);
         db.execSQL("DROP TABLE IF EXISTS " + tblRelations);
         db.execSQL("DROP TABLE IF EXISTS " + tblRenewals);
+        db.execSQL("DROP TABLE IF EXISTS " + tblIncomeLevel);
         if (oldVersion < 2) {
             String sql = "ALTER TABLE tblRenewals ADD COLUMN LocationId INTEGER;";
             db.execSQL(sql);

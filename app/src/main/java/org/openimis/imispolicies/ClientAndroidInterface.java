@@ -368,7 +368,7 @@ public class ClientAndroidInterface {
     @JavascriptInterface
     @SuppressWarnings("unused")
     public String getRegions() {
-        Integer officerLocationId = getOfficerLocationId();
+        Integer officerLocationId = 19;
         @Language("SQL")
         String Query = "SELECT LocationId, LocationName FROM tblLocations WHERE LocationId = (SELECT L.ParentLocationId LocationId FROM tblLocations L";
         if (officerLocationId != null) {
@@ -637,9 +637,9 @@ public class ClientAndroidInterface {
         String where = null;
         String OrderBy = "SortOrder";
 
-        JSONArray Educations = sqlHandler.getResult(tableName, columns, null, OrderBy);
+        JSONArray identificationTypes = sqlHandler.getResult(tableName, columns, null, OrderBy);
 
-        return Educations.toString();
+        return identificationTypes.toString();
     }
 
     @JavascriptInterface
@@ -4015,7 +4015,6 @@ public class ClientAndroidInterface {
         JSONArray Relations = new JSONArray();
         JSONArray PhoneDefaults = new JSONArray();
         JSONArray Genders = new JSONArray();
-        JSONArray IncomeLevels = new JSONArray();
         //JSONArray OfficerVillages = new JSONArray();
 
         try {
@@ -4089,6 +4088,33 @@ public class ClientAndroidInterface {
             insertPhoneDefaults(PhoneDefaults);
             insertGenders(Genders);
 
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+            throw new UserException(activity.getResources().getString(R.string.DownloadMasterDataFailed), e);
+        }
+    }
+
+    @WorkerThread
+    private void processNewFormat(JSONObject masterData) throws UserException {
+        try {
+            JSONArray IncomeLevels = new JSONArray();
+            insertConfirmationTypes((JSONArray) masterData.get("confirmationTypes"));
+            insertControls((JSONArray) masterData.get("controls"));
+            insertEducation((JSONArray) masterData.get("education"));
+            insertFamilyTypes((JSONArray) masterData.get("familyTypes"));
+            insertHF((JSONArray) masterData.get("hf"));
+            insertIdentificationTypes((JSONArray) masterData.get("identificationTypes"));
+            insertLanguages((JSONArray) masterData.get("languages"));
+            insertLocations((JSONArray) masterData.get("locations"));
+            insertOfficers((JSONArray) masterData.get("officers"));
+            insertPayers((JSONArray) masterData.get("payers"));
+            insertProducts((JSONArray) masterData.get("products"));
+            insertProfessions((JSONArray) masterData.get("professions"));
+            insertRelations((JSONArray) masterData.get("relations"));
+            insertPhoneDefaults((JSONArray) masterData.get("phoneDefaults"));
+            insertGenders((JSONArray) masterData.get("genders"));
+
             JSONObject object = new JSONObject();
             object.put("Id", 0);
             object.put("FrenchVersion", "Néant");
@@ -4108,32 +4134,6 @@ public class ClientAndroidInterface {
             IncomeLevels.put(object);
 
             insertIncomeLevel(IncomeLevels);
-
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-            throw new UserException(activity.getResources().getString(R.string.DownloadMasterDataFailed), e);
-        }
-    }
-
-    @WorkerThread
-    private void processNewFormat(JSONObject masterData) throws UserException {
-        try {
-            insertConfirmationTypes((JSONArray) masterData.get("confirmationTypes"));
-            insertControls((JSONArray) masterData.get("controls"));
-            insertEducation((JSONArray) masterData.get("education"));
-            insertFamilyTypes((JSONArray) masterData.get("familyTypes"));
-            insertHF((JSONArray) masterData.get("hf"));
-            insertIdentificationTypes((JSONArray) masterData.get("identificationTypes"));
-            insertLanguages((JSONArray) masterData.get("languages"));
-            insertLocations((JSONArray) masterData.get("locations"));
-            insertOfficers((JSONArray) masterData.get("officers"));
-            insertPayers((JSONArray) masterData.get("payers"));
-            insertProducts((JSONArray) masterData.get("products"));
-            insertProfessions((JSONArray) masterData.get("professions"));
-            insertRelations((JSONArray) masterData.get("relations"));
-            insertPhoneDefaults((JSONArray) masterData.get("phoneDefaults"));
-            insertGenders((JSONArray) masterData.get("genders"));
         } catch (JSONException e) {
             e.printStackTrace();
             throw new UserException(activity.getResources().getString(R.string.DownloadMasterDataFailed), e);
@@ -5338,9 +5338,9 @@ public class ClientAndroidInterface {
     public String getIncomeLevels() {
         String tableName = "tblIncomeLevel";
         String[] columns = {"Id", "FrenchVersion", "EnglishVersion"};
-        String where = null;
 
         JSONArray incomeLevels = sqlHandler.getResult(tableName, columns, null, null);
+        Log.e("incomes", incomeLevels.toString());
 
         return incomeLevels.toString();
     }
