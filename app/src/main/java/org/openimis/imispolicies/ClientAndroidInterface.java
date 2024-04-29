@@ -1189,7 +1189,7 @@ public class ClientAndroidInterface {
     @SuppressWarnings("unused")
     public String getInsuree(int InsureeId) {
         @Language("SQL")
-        String Query = "SELECT InsureeId, FamilyId, CHFID, LastName, OtherNames, DOB, Gender, Marital, isHead, IdentificationNumber, Phone, isOffline , PhotoPath, CardIssued, Relationship, Profession, Education, Email, TypeOfId, I.HFID, CurrentAddress,R.LocationId CurRegion, D.LocationId CurDistrict, W.LocationId CurWard,  I.CurVillage, HFR.LocationId FSPRegion, HFD.LocationId FSPDistrict, HF.HFLevel FSPCategory, I.Vulnerability\n" +
+        String Query = "SELECT InsureeId, FamilyId, CHFID, LastName, OtherNames, DOB, Gender, Marital, isHead, IdentificationNumber, Phone, isOffline , PhotoPath, CardIssued, Relationship, Profession, Education, Email, TypeOfId, I.HFID, CurrentAddress,R.LocationId CurRegion, D.LocationId CurDistrict, W.LocationId CurWard,  I.CurVillage, HFR.LocationId FSPRegion, HFD.LocationId FSPDistrict, HF.HFLevel FSPCategory, I.Vulnerability, ProfessionalSituation, IncomeLevel, PaymentMethod\n" +
                 "FROM tblInsuree I\n" +
                 "LEFT OUTER JOIN tblLocations V ON V.LocationId = I.CurVillage\n" +
                 "LEFT OUTER JOIN tblLocations W ON W.LocationId = V.ParentLocationId\n" +
@@ -4127,19 +4127,19 @@ public class ClientAndroidInterface {
             insertGenders((JSONArray) masterData.get("genders"));
 
             JSONObject object = new JSONObject();
-            object.put("Id", 0);
+            object.put("Id", "0");
             object.put("FrenchVersion", "Néant");
             object.put("EnglishVersion", "Nothing");
             IncomeLevels.put(object);
 
             object = new JSONObject();
-            object.put("Id", 1);
+            object.put("Id", "1");
             object.put("FrenchVersion", "<30.000");
             object.put("EnglishVersion", "<30.000");
             IncomeLevels.put(object);
 
             object = new JSONObject();
-            object.put("Id", 2);
+            object.put("Id", "2");
             object.put("FrenchVersion", "30.000 - 40.000");
             object.put("EnglishVersion", "30.000 - 40.000");
             IncomeLevels.put(object);
