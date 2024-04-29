@@ -957,6 +957,14 @@ public class ClientAndroidInterface {
             if (!TextUtils.isEmpty(data.get("ddlEducation")) && !data.get("ddlEducation").equals("0"))
                 Education = Integer.valueOf(data.get("ddlEducation"));
 
+            Integer IncomeLevel = null;
+            if (!TextUtils.isEmpty(data.get("ddlIncomeLevel")) && !data.get("ddlIncomeLevel").equals("0"))
+                IncomeLevel = Integer.valueOf(data.get("ddlIncomeLevel"));
+
+            String PaymentMethod = "null";
+            if (!TextUtils.isEmpty(data.get("ddlPaymentMethod")) && !data.get("ddlPaymentMethod").equals("0"))
+                PaymentMethod = data.get("ddlPaymentMethod");
+
             String IdentificationType = "null";
             if (!TextUtils.isEmpty(data.get("ddlIdentificationType")) && !data.get("ddlIdentificationType").equals(""))
                 IdentificationType = (data.get("ddlIdentificationType"));
@@ -994,10 +1002,13 @@ public class ClientAndroidInterface {
 
             //values.put("isOffline", isOffline);
             values.put("Relationship", Relation);
+            values.put("ProfessionalSituation", data.get("txtProfessionalSituation"));
             values.put("Profession", Profession);
             values.put("Education", Education);
             values.put("Email", data.get("txtEmail"));
             values.put("TypeOfId", IdentificationType);
+            values.put("IncomeLevel", IncomeLevel);
+            values.put("PaymentMethod", PaymentMethod);
 
             if (data.get("ddlVulnerability") != null && !data.get("ddlVulnerability").equals("")) {
                 values.put("Vulnerability", data.get("ddlVulnerability"));

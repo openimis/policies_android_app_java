@@ -222,7 +222,10 @@ public class SQLHandler extends SQLiteOpenHelper {
                             "CurrentAddress TEXT," +
                             "GeoLocation TEXT," +
                             "CurVillage NUMERIC," +
-                            "Vulnerability BOOLEAN" + ")"
+                            "Vulnerability BOOLEAN," +
+                            "ProfessionalSituation TEXT," +
+                            "IncomeLevel NUMERIC," +
+                            "PaymentMethod TEXT" + ")"
             );
             sqLiteDatabase.execSQL(
                     "CREATE TABLE 'tblInsureePolicy' (" +

@@ -350,7 +350,7 @@ function fillIncomeLevels(){
         $textLanguage = "EnglishVersion";
     }
     var $IncomeLevels = Android.getIncomeLevels();
-    bindDropdown('ddlIncomeLevel', $IncomeLevels, 'Id', $textLanguage, "", Android.getString('SelectIncomeLevel'));
+    bindDropdown('ddlIncomeLevel', $IncomeLevels, 'Id', $textLanguage, null, Android.getString('SelectIncomeLevel'));
 }
 
 function createJSONString() {
