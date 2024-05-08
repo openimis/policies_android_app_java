@@ -215,6 +215,7 @@ function fillDropdowns() {
     fillFSPCategory();
     fillVulnerability();
     fillPaymentMethods();
+    fillIncomeLevels();
 }
 
 // called from java after the image was selected by the user

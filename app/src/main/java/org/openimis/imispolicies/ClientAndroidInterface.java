@@ -368,7 +368,7 @@ public class ClientAndroidInterface {
     @JavascriptInterface
     @SuppressWarnings("unused")
     public String getRegions() {
-        Integer officerLocationId = getOfficerLocationId();
+        Integer officerLocationId = 19;
         @Language("SQL")
         String Query = "SELECT LocationId, LocationName FROM tblLocations WHERE LocationId = (SELECT L.ParentLocationId LocationId FROM tblLocations L";
         if (officerLocationId != null) {
@@ -637,9 +637,9 @@ public class ClientAndroidInterface {
         String where = null;
         String OrderBy = "SortOrder";
 
-        JSONArray Educations = sqlHandler.getResult(tableName, columns, null, OrderBy);
+        JSONArray identificationTypes = sqlHandler.getResult(tableName, columns, null, OrderBy);
 
-        return Educations.toString();
+        return identificationTypes.toString();
     }
 
     @JavascriptInterface
@@ -957,6 +957,14 @@ public class ClientAndroidInterface {
             if (!TextUtils.isEmpty(data.get("ddlEducation")) && !data.get("ddlEducation").equals("0"))
                 Education = Integer.valueOf(data.get("ddlEducation"));
 
+            Integer IncomeLevel = null;
+            if (!TextUtils.isEmpty(data.get("ddlIncomeLevel")) && !data.get("ddlIncomeLevel").equals("0"))
+                IncomeLevel = Integer.valueOf(data.get("ddlIncomeLevel"));
+
+            String PaymentMethod = "null";
+            if (!TextUtils.isEmpty(data.get("ddlPaymentMethod")) && !data.get("ddlPaymentMethod").equals("0"))
+                PaymentMethod = data.get("ddlPaymentMethod");
+
             String IdentificationType = "null";
             if (!TextUtils.isEmpty(data.get("ddlIdentificationType")) && !data.get("ddlIdentificationType").equals(""))
                 IdentificationType = (data.get("ddlIdentificationType"));
@@ -994,10 +1002,13 @@ public class ClientAndroidInterface {
 
             //values.put("isOffline", isOffline);
             values.put("Relationship", Relation);
+            values.put("ProfessionalSituation", data.get("txtProfessionalSituation"));
             values.put("Profession", Profession);
             values.put("Education", Education);
             values.put("Email", data.get("txtEmail"));
             values.put("TypeOfId", IdentificationType);
+            values.put("IncomeLevel", IncomeLevel);
+            values.put("PaymentMethod", PaymentMethod);
 
             if (data.get("ddlVulnerability") != null && !data.get("ddlVulnerability").equals("")) {
                 values.put("Vulnerability", data.get("ddlVulnerability"));
@@ -1178,7 +1189,7 @@ public class ClientAndroidInterface {
     @SuppressWarnings("unused")
     public String getInsuree(int InsureeId) {
         @Language("SQL")
-        String Query = "SELECT InsureeId, FamilyId, CHFID, LastName, OtherNames, DOB, Gender, Marital, isHead, IdentificationNumber, Phone, isOffline , PhotoPath, CardIssued, Relationship, Profession, Education, Email, TypeOfId, I.HFID, CurrentAddress,R.LocationId CurRegion, D.LocationId CurDistrict, W.LocationId CurWard,  I.CurVillage, HFR.LocationId FSPRegion, HFD.LocationId FSPDistrict, HF.HFLevel FSPCategory, I.Vulnerability\n" +
+        String Query = "SELECT InsureeId, FamilyId, CHFID, LastName, OtherNames, DOB, Gender, Marital, isHead, IdentificationNumber, Phone, isOffline , PhotoPath, CardIssued, Relationship, Profession, Education, Email, TypeOfId, I.HFID, CurrentAddress,R.LocationId CurRegion, D.LocationId CurDistrict, W.LocationId CurWard,  I.CurVillage, HFR.LocationId FSPRegion, HFD.LocationId FSPDistrict, HF.HFLevel FSPCategory, I.Vulnerability, ProfessionalSituation, IncomeLevel, PaymentMethod\n" +
                 "FROM tblInsuree I\n" +
                 "LEFT OUTER JOIN tblLocations V ON V.LocationId = I.CurVillage\n" +
                 "LEFT OUTER JOIN tblLocations W ON W.LocationId = V.ParentLocationId\n" +
@@ -4015,7 +4026,6 @@ public class ClientAndroidInterface {
         JSONArray Relations = new JSONArray();
         JSONArray PhoneDefaults = new JSONArray();
         JSONArray Genders = new JSONArray();
-        JSONArray IncomeLevels = new JSONArray();
         //JSONArray OfficerVillages = new JSONArray();
 
         try {
@@ -4089,26 +4099,6 @@ public class ClientAndroidInterface {
             insertPhoneDefaults(PhoneDefaults);
             insertGenders(Genders);
 
-            JSONObject object = new JSONObject();
-            object.put("Id", 0);
-            object.put("FrenchVersion", "Néant");
-            object.put("EnglishVersion", "Nothing");
-            IncomeLevels.put(object);
-
-            object = new JSONObject();
-            object.put("Id", 1);
-            object.put("FrenchVersion", "<30.000");
-            object.put("EnglishVersion", "<30.000");
-            IncomeLevels.put(object);
-
-            object = new JSONObject();
-            object.put("Id", 2);
-            object.put("FrenchVersion", "30.000 - 40.000");
-            object.put("EnglishVersion", "30.000 - 40.000");
-            IncomeLevels.put(object);
-
-            insertIncomeLevel(IncomeLevels);
-
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -4119,6 +4109,7 @@ public class ClientAndroidInterface {
     @WorkerThread
     private void processNewFormat(JSONObject masterData) throws UserException {
         try {
+            JSONArray IncomeLevels = new JSONArray();
             insertConfirmationTypes((JSONArray) masterData.get("confirmationTypes"));
             insertControls((JSONArray) masterData.get("controls"));
             insertEducation((JSONArray) masterData.get("education"));
@@ -4134,6 +4125,26 @@ public class ClientAndroidInterface {
             insertRelations((JSONArray) masterData.get("relations"));
             insertPhoneDefaults((JSONArray) masterData.get("phoneDefaults"));
             insertGenders((JSONArray) masterData.get("genders"));
+
+            JSONObject object = new JSONObject();
+            object.put("Id", "0");
+            object.put("FrenchVersion", "Néant");
+            object.put("EnglishVersion", "Nothing");
+            IncomeLevels.put(object);
+
+            object = new JSONObject();
+            object.put("Id", "1");
+            object.put("FrenchVersion", "<30.000");
+            object.put("EnglishVersion", "<30.000");
+            IncomeLevels.put(object);
+
+            object = new JSONObject();
+            object.put("Id", "2");
+            object.put("FrenchVersion", "30.000 - 40.000");
+            object.put("EnglishVersion", "30.000 - 40.000");
+            IncomeLevels.put(object);
+
+            insertIncomeLevel(IncomeLevels);
         } catch (JSONException e) {
             e.printStackTrace();
             throw new UserException(activity.getResources().getString(R.string.DownloadMasterDataFailed), e);
@@ -5338,9 +5349,9 @@ public class ClientAndroidInterface {
     public String getIncomeLevels() {
         String tableName = "tblIncomeLevel";
         String[] columns = {"Id", "FrenchVersion", "EnglishVersion"};
-        String where = null;
 
         JSONArray incomeLevels = sqlHandler.getResult(tableName, columns, null, null);
+        Log.e("incomes", incomeLevels.toString());
 
         return incomeLevels.toString();
     }
