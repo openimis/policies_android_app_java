@@ -485,4 +485,6 @@
     <string name="ProfessionalSituation">Situation Professionnelle</string>
     <string name="SelectIncomeLevel">Choisir le niveau de revenu</string>
     <string name="IncomeLevel">Niveau de revenu</string>
+    <string name="FamilyAndSubFamilies">Famille et sous-familles</string>
+    <string name="AddNewSubFamily">Ajouter une sous-famille</string>
 </resources>

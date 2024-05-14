@@ -460,6 +460,7 @@ public class ClientAndroidInterface {
         String OrderBy = "SortOrder";
 
         JSONArray GroupTypes = sqlHandler.getResult(tableName, columns, null, OrderBy);
+        Log.e("familyType", GroupTypes.toString());
 
         return GroupTypes.toString();
     }
@@ -836,6 +837,119 @@ public class ClientAndroidInterface {
         return FamilyId;
     }
 
+    @JavascriptInterface
+    @SuppressWarnings("unused")
+    public int SaveSubFamily(String SubFamilyData, String InsureeData, int FamilyId) {
+
+        int SubFamilyId = 0;
+        int InsureeId = 0;
+
+        try {
+            int MaxFamilyId = getNextAvailableSubFamilyId();
+
+            if (InsureeData.length() > 0) {
+                int validation = isValidInsureeData(jsonToTable(InsureeData));
+                if (validation > 0) {
+                    throw new UserException(activity.getResources().getString(validation));
+                }
+            }
+
+            //Insert Family
+            //===============================================================================
+            HashMap<String, String> data = jsonToTable(SubFamilyData);
+            ContentValues values = new ContentValues();
+
+
+            SubFamilyId = Integer.parseInt(data.get("hfFamilyId"));
+
+            int LocationId = Integer.parseInt(data.get("ddlVillage"));
+
+            Boolean Poverty = null;
+            if (!TextUtils.isEmpty(data.get("ddlPovertyStatus"))) {
+                Poverty = "1".equals(data.get("ddlPovertyStatus"));
+            }
+
+            String FamilyType = null;
+            if (!TextUtils.isEmpty(data.get("ddlGroupType")) && !"0".equals(data.get("ddlGroupType")))
+                FamilyType = data.get("ddlGroupType");
+
+            String PermanentAddress = data.get("txtPermanentAddress");
+
+            String Ethnicity = data.get("ddlEthnicity");
+
+            String ConfirmationNo = data.get("txtConfirmationNo");
+            String ConfirmationType = data.get("ddlConfirmationType");
+            int isOffline = getFamilyStatus(SubFamilyId);
+
+            values.put("LocationId", LocationId);
+            values.put("Poverty", Poverty);
+            values.put("FamilyAddress", PermanentAddress);
+            values.put("Ethnicity", Ethnicity);
+            values.put("ConfirmationNo", ConfirmationNo);
+            values.put("ConfirmationType", ConfirmationType);
+            values.put("FamilyId", FamilyId);
+
+            if (SubFamilyId == 0) {
+                values.put("isOffline", isOffline);
+                values.put("SubFamilyId", MaxFamilyId);
+                sqlHandler.insertData("tblSubFamilies", values);
+                SubFamilyId = MaxFamilyId;
+            } else {
+                int Online = 2;
+                if (isOffline == 0 || isOffline == 2) {
+                    isOffline = 0;
+                    values.put("isOffline", 2);
+                }
+                sqlHandler.updateData("tblSubFamilies", values, "SubFamilyId = ? AND (isOffline = ? OR isOffline = ?) ", new String[]{String.valueOf(SubFamilyId), String.valueOf(isOffline), String.valueOf(Online)}, false);
+            }
+            if (InsureeData.length() > 0) {
+                //Insert Insuree
+                //==========================================================================================
+                InsureeId = SaveInsuree(InsureeData, SubFamilyId, 1, -1, 0);//herman new
+
+                //Update insureeId in tblFamilies
+                //==========================================================================================
+                ContentValues cvUpdate = new ContentValues();
+                cvUpdate.put("InsureeId", InsureeId);
+                if (getFamilyStatus(FamilyId) == 1) {
+                    cvUpdate.put("isOffline", 1);
+                } else {
+                    cvUpdate.put("isOffline", 2);
+                }
+
+                String[] whereArgs = {String.valueOf(FamilyId)};
+
+                sqlHandler.updateData("tblSubFamilies", cvUpdate, "SubFamilyId= ?", whereArgs);
+            }
+            addOrUpdateFamilySmsFromDll(FamilyId, data);
+
+            return FamilyId;
+
+        } catch (UserException e) {
+            e.printStackTrace();
+            if (InsureeId != 0)
+                sqlHandler.deleteData("tblInsuree", "InsureeId = ?", new String[]{String.valueOf(InsureeId)});
+            if (FamilyId > 0 && InsureeData.length() > 0)
+                sqlHandler.deleteData("tblFamilies", "FamilyId", new String[]{String.valueOf(FamilyId)});
+            FamilyId = 0;
+            ShowDialog(activity.getResources().getString(R.string.ErrorOccurred));
+
+        } catch (Exception e) {
+            e.printStackTrace();
+
+            if (InsureeId != 0)
+                sqlHandler.deleteData("tblInsuree", "InsureeId = ?", new String[]{String.valueOf(InsureeId)});
+
+            if (FamilyId > 0 && InsureeData.length() > 0)
+                sqlHandler.deleteData("tblFamilies", "FamilyId = ?", new String[]{String.valueOf(FamilyId)});
+
+            FamilyId = 0;
+            ShowDialog(e.getMessage());
+        }
+
+        return FamilyId;
+    }
+
     private JSONObject getFamilySMS(String familyId) {
         // tblFamilySMS and tblFamily are in 1:1 relation, therefore only one record is returned
         @Language("SQL")
@@ -897,7 +1011,7 @@ public class ClientAndroidInterface {
         } else {
             Result = 0;
         }
-        return Result;
+        return 0;
     }
 
 
@@ -1164,7 +1278,7 @@ public class ClientAndroidInterface {
     @SuppressWarnings("unused")
     public String getAllFamilies() {
         @Language("SQL")
-        String Query = "SELECT F.FamilyId, I.CHFID, I.OtherNames ||\" \"||  I.LastName InsureeName, R.LocationName RegionName, D.LocationName DistrictName, W.LocationName WardName, V.LocationName VillageName, F.isOffline \n" +
+        String Query = "SELECT F.FamilyId, I.CHFID, I.OtherNames ||\" \"||  I.LastName InsureeName, R.LocationName RegionName, D.LocationName DistrictName, W.LocationName WardName, V.LocationName VillageName, F.isOffline, F.FamilyType \n" +
                 "FROM tblFamilies F\n" +
                 "INNER JOIN tblInsuree I ON I.InsureeId = F.InsureeId\n" +
                 "INNER JOIN tblLocations V ON V.LocationId = F.LocationId\n" +
@@ -5292,6 +5406,10 @@ public class ClientAndroidInterface {
 
     private int getNextAvailableFamilyId() {
         return getMaxIdFromTable("FamilyId", "tblFamilies");
+    }
+
+    private int getNextAvailableSubFamilyId() {
+        return getMaxIdFromTable("SubFamilyId", "tblSubFamilies");
     }
 
     private int getNextAvailablePremiumId() {

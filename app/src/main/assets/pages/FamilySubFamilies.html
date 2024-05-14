@@ -25,7 +25,7 @@ In case of dispute arising out or in relation to the use of the program, it is s
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-    <title>Families</title>
+    <title>Family Policies</title>
     <link href="../CSS/Style.CSS" rel="stylesheet" type="text/css"/>
     <script src="../JS/jquery-3.2.1.min.js"></script>
     <script src="../JS/exact.js"></script>
@@ -33,37 +33,63 @@ In case of dispute arising out or in relation to the use of the program, it is s
     <link href="../CSS/jquery-ui.css" rel="stylesheet" type="text/css"/>
     <script src="../JS/jquery-ui.js"></script>
 
-    <script type="text/javascript" src="Enrollment.js"></script>
+    <script type="text/javascript" src="FamilySubFamilies.js"></script>
 
 </head>
 <body>
 <div id="dialog-confirm" title="Confirm" style="display:none">
-    <p><span id="msgAlert" class="ui-icon-alert" style="float:left; margin:2px 2px 2px 0;"></span></p>
+    <p><span id="msgAlert" class="ui-icon-alert" style="float:left; margin:2px 2px 2px 0;"></span>
+    </p>
 </div>
+<div class="topPanel">
+    <img src="../images/plus.png" alt="New" class="plusButton"/>
+</div>
+
 <div>
-    <div class="topPanel">
-        <img src="../images/plus.png" alt="New" class="plusButton" id="btnAddNew"/>
-    </div>
-
     <ul class="ulList">
-        <li class="dot-side-menu">
-            <div>
+        <li>
+            <div class="PolicyFamilyTop">
                 <input type="hidden" id="hfIsOffline" value="1">
-                <input type="hidden" id="hfFamilyId" value="0" />
-                <input type="hidden" id="hfFamilyType" />
-                <h3 id="InsuranceNumber"></h3>
+                <input type="hidden" id="hfPolicyId" value="0">
+                <h3 class="left" id="ProductCode"></h3>
+                <h3 class="right" id="PolicyStatus"></h3>
+                <div class="dropdown">
+                    <div id="menuDrop" class="dropdown-content">
+                        <ul class="ulMenu">
+                            <li id="liEdit">Edit</li>
+                            <li id="liDelete">Delete</li>
+                            <li id="liPay">Payment</li>
+
+                        </ul>
+                    </div>
+                    <div class="clearFix"></div>
+                </div>
             </div>
 
-            <div>
-                <h4 id="InsureeName"></h4>
-                <span id="Region"></span> &#8594; <span id="District"></span> &#8594; <span
-                    id="Ward"></span> &#8594; <span id="Village"></span>
-            </div>
+
+            <h4 id="ProductName"></h4>
+            <p>
+                <span class="spLabel">Effective Date : </span>
+                <span id="EffectiveDate"></span>
+                <span class="spLabel">Expire Date :</span>
+                <span id="ExpireDate"></span>
+            </p>
+            <p>
+                <span class="spLabel">Start Date : </span>
+                <span id="StartDate"></span>
+                <span class="spLabel">Policy Value : </span>
+                <label id="PolicyValue"></label>
+            </p>
+            <p id="ControlNumberSection">
+                <span class="spLabel">Control Number : </span>
+                <span id="ControlNumber"></span>
+            </p>
+
         </li>
-
     </ul>
 </div>
+<div class="footer">
 
-
+</div>
 </body>
 </html>

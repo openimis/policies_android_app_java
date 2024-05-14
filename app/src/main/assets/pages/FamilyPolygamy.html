@@ -23,47 +23,79 @@ advised of the possibility of such damages.
 
 In case of dispute arising out or in relation to the use of the program, it is subject to the public law of Switzerland. The place of jurisdiction is Berne.-->
 <!DOCTYPE html>
+<!--suppress ALL -->
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-    <title>Families</title>
+    <title>Family And Sub-Families</title>
     <link href="../CSS/Style.CSS" rel="stylesheet" type="text/css"/>
     <script src="../JS/jquery-3.2.1.min.js"></script>
     <script src="../JS/exact.js"></script>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no" charset="utf-8"/>
-    <link href="../CSS/jquery-ui.css" rel="stylesheet" type="text/css"/>
-    <script src="../JS/jquery-ui.js"></script>
 
-    <script type="text/javascript" src="Enrollment.js"></script>
+    <script type="text/javascript" src="FamilyPolygamy.js"></script>
+
+    <style>
+        .spGender{
+            float: Right;
+            Color: red;
+            font-weight: 900;
+        }
+
+    </style>
 
 </head>
 <body>
-<div id="dialog-confirm" title="Confirm" style="display:none">
-    <p><span id="msgAlert" class="ui-icon-alert" style="float:left; margin:2px 2px 2px 0;"></span></p>
+<div id="divProgress">
+    <span id="spPleaseWait"></span>
 </div>
-<div>
-    <div class="topPanel">
-        <img src="../images/plus.png" alt="New" class="plusButton" id="btnAddNew"/>
+<div class="container">
+    <div class="overview-top">
+        <input type="hidden" id="hfLocationId" datafield="LocationId"/>
+        <input type="hidden" id="hfRegionId" datafield="RegionId"/>
+        <input type="hidden" id="hfDistrictId" datafield="DistrictId"/>
+        <ul class="family-location">
+            <li id="RegionName" class='lft' style="font-size: 12px;"><span dataField="RegionName"></span></li>
+            <li id="DistrictName" class='rght' style="font-size: 12px;"><span dataField="DistrictName"></span></li>
+            <li id="WardName" class='lft' style="font-size: 12px;"><span dataField="WardName"></span></li>
+            <li id="VillageName" class='rght' style="font-size: 12px;"><span dataField="VillageName"></span></li>
+        </ul>
+    </div>
+    <div class="Overview-policy">
+        <img style="display:none;" src="../images/plus.png" alt="New" class="plusButton" id="btnNewInsuree"/>
+        <p class="SubFamily-label">
+            SubFamily
+        </p>
     </div>
 
-    <ul class="ulList">
-        <li class="dot-side-menu">
-            <div>
-                <input type="hidden" id="hfIsOffline" value="1">
-                <input type="hidden" id="hfFamilyId" value="0" />
-                <input type="hidden" id="hfFamilyType" />
-                <h3 id="InsuranceNumber"></h3>
-            </div>
+    <div class="Overview-middle">
+        <ul class="ulList" id="ulList">
+            <li class="dot-side-menu" >
+                <input type="hidden" id="hfIsOffline" datafield="isOffline"/>
+                <input type="hidden" id="hfInsureeId" value="0"/>
+                <input type="hidden" id="hfIsHead" value="0"/>
+                <div>
+                    <h3  class="left" id="CHFID"></h3>
+                    <!--<h3 class="right" id="spGender"></h3>-->
+                    <div class="clearFix"></div>
+                </div>
 
-            <div>
-                <h4 id="InsureeName"></h4>
-                <span id="Region"></span> &#8594; <span id="District"></span> &#8594; <span
-                    id="Ward"></span> &#8594; <span id="Village"></span>
-            </div>
-        </li>
+                <div>
+                    <h4 id="InsureeName"></h4>
+                    <span id=spDOB></span>
+                </div>
 
-    </ul>
+                <!--<span id="spGender" class="spGender"></span>-->
+            </li>
+        </ul>
+    </div>
 </div>
+<div class="footer">
 
-
+</div>
 </body>
 </html>
+
+
+
+
+

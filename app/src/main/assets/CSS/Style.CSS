@@ -129,6 +129,17 @@ float:left;
     text-align: center;
     font-family: monospace;
 }
+
+.SubFamily-label{
+    float:right;
+    padding: 0px !important;
+    width: 100px;
+    left: 0px;
+    font-weight: 900;
+    font-size: 1.5em;
+    text-align: center;
+    font-family: monospace;
+}
 .Overview-policy{
     width:100%;
     padding:2px;
