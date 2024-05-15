@@ -109,6 +109,14 @@ android {
             resValue "string", "app_name_policies", "Policies MV DEV"
             dimension = 'std'
         }
+        dev {
+            applicationId "org.openimis.imispolicies.mv"
+            buildConfigField "String", "API_BASE_URL", '"https://develop.openimis.org/"'
+            buildConfigField "boolean", "SHOW_PAYMENT_MENU", 'true'
+            buildConfigField "String", "API_VERSION", '"3"'
+            resValue "string", "app_name_policies", "Policies DEV"
+            dimension = 'std'
+        }
         bephaDev {
             applicationId "org.openimis.imispolicies.bepha"
             buildConfigField "String", "API_BASE_URL", '"http://149.210.235.40/devupgrade/"'
@@ -157,6 +165,9 @@ android {
 
         mvDev.java.srcDir 'src/master/java'
         mvDev.res.srcDirs = ['src/master/res', 'src/localeMv/res']
+
+        dev.java.srcDir 'src/master/java'
+        dev.res.srcDirs = ['src/master/res', 'src/localeMv/res']
 
         local.java.srcDir 'src/master/java'
         local.res.srcDirs = ['src/master/res', 'src/localeMv/res']

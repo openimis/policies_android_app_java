@@ -715,6 +715,7 @@ public class ClientAndroidInterface {
 
 
             FamilyId = Integer.parseInt(data.get("hfFamilyId"));
+            String FamilyUUID = data.get("FamilyUUID") != null ? data.get("FamilyUUID") : UUID.randomUUID().toString();
 
             int LocationId = Integer.parseInt(data.get("ddlVillage"));
 
@@ -744,6 +745,7 @@ public class ClientAndroidInterface {
             values.put("ConfirmationType", ConfirmationType);
 
             if (FamilyId == 0) {
+                values.put("FamilyUUID", FamilyUUID);
                 values.put("isOffline", isOffline);
                 values.put("FamilyId", MaxFamilyId);
                 sqlHandler.insertData("tblFamilies", values);
@@ -759,12 +761,16 @@ public class ClientAndroidInterface {
             if (InsureeData.length() > 0) {
                 //Insert Insuree
                 //==========================================================================================
-                InsureeId = SaveInsuree(InsureeData, FamilyId, 1, -1, 0);//herman new
+                JSONObject insuree = SaveInsuree(InsureeData, FamilyId, 1, -1, 0);
+                InsureeId = insuree.getInt("InsureeId");
+                String InsureeUUID = insuree.getString("InsureeUUID");
 
                 //Update insureeId in tblFamilies
                 //==========================================================================================
                 ContentValues cvUpdate = new ContentValues();
                 cvUpdate.put("InsureeId", InsureeId);
+                cvUpdate.put("InsureeUUID", InsureeUUID);
+
                 if (getFamilyStatus(FamilyId) == 1) {
                     cvUpdate.put("isOffline", 1);
                 } else {
@@ -871,7 +877,7 @@ public class ClientAndroidInterface {
 
     @JavascriptInterface
     @SuppressWarnings("unused")
-    public int SaveInsuree(String InsureeData, int FamilyId, int isHead, int ExceedThreshold, int PolicyId) throws Exception {
+    public JSONObject SaveInsuree(String InsureeData, int FamilyId, int isHead, int ExceedThreshold, int PolicyId) throws Exception {
         inProgress = true;
 
         int InsureeId;
@@ -880,13 +886,17 @@ public class ClientAndroidInterface {
         int insureeIsOffline;
         int MaxInsureeId;
         int rtInsureeId;
+        String InsureeUUID;
+
         try {
             HashMap<String, String> data = jsonToTable(InsureeData);
 
             int validation = isValidInsureeData(data);
             if (validation > 0) {
+                JSONObject error = new JSONObject();
+                error.put("error", 7);
                 ShowDialog(activity.getResources().getString(validation));
-                return 7;
+                return error;
             }
 
             MaxInsureeId = getNextAvailableInsureeId();
@@ -894,6 +904,15 @@ public class ClientAndroidInterface {
 
             InsureeId = Integer.parseInt(data.get("hfInsureeId"));
             rtInsureeId = InsureeId;
+
+            String tableName = "tblFamilies";
+            String[] columns = {"FamilyUUID"};
+            String where = "FamilyId = " + FamilyId;
+
+            InsureeUUID = data.get("InsureeUUID") != null ? data.get("InsureeUUID") : UUID.randomUUID().toString();
+            JSONArray FamilyUUID_JSON = sqlHandler.getResult(tableName, columns, where, null);
+
+            String FamilyUUID = FamilyUUID_JSON.getJSONObject(0).getString("FamilyUUID");
 
             String s1 = data.get("hfisHead");
             if (Objects.equals(s1, "true") || Objects.equals(s1, "1")) IsHeadSet = 1;
@@ -936,6 +955,8 @@ public class ClientAndroidInterface {
                 PhotoPath = copyImageFromGalleryToApplication(newPhotoPath, data.get("txtInsuranceNumber"));
             }
 
+            values.put("InsureeUUID", InsureeUUID);
+            values.put("FamilyUUID", FamilyUUID);
             values.put("FamilyId", FamilyId);
             values.put("CHFID", data.get("txtInsuranceNumber"));
             values.put("LastName", data.get("txtLastName"));
@@ -943,6 +964,7 @@ public class ClientAndroidInterface {
             values.put("DOB", data.get("txtBirthDate"));
             values.put("Gender", data.get("ddlGender"));
             values.put("Marital", Marital);
+
             if (IsHeadSet == -1) {
                 values.put("isHead", isHead);
             } else {
@@ -1038,7 +1060,10 @@ public class ClientAndroidInterface {
             throw new Exception(e.getMessage());
         }
 
-        return rtInsureeId;
+        JSONObject result = new JSONObject();
+        result.put("InsureeId", rtInsureeId);
+        result.put("InsureeUUID", InsureeUUID);
+        return result;
     }
 
     private String copyImageFromGalleryToApplication(String selectedPath, String InsuranceNumber) {
