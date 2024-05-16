@@ -132,8 +132,8 @@ public class SQLHandler extends SQLiteOpenHelper {
             );
             sqLiteDatabase.execSQL(
                     "CREATE TABLE " + tblFamilies + "(" +
-                            "FamilyId INTEGER," +
-                            "InsureeId NUMERIC," +
+                            "FamilyUUID TEXT," +
+                            "InsureeUUID TEXT," +
                             "LocationId NUMERIC," +
                             "Poverty BOOLEAN," +
                             "isOffline NUMERIC," +
@@ -198,8 +198,8 @@ public class SQLHandler extends SQLiteOpenHelper {
             );
             sqLiteDatabase.execSQL(
                     "CREATE TABLE 'tblInsuree' (" +
-                            "InsureeId INTEGER," +
-                            "FamilyId NUMERIC," +
+                            "InsureeUUID TEXT," +
+                            "FamilyUUID TEXT," +
                             "CHFID TEXT," +
                             "LastName TEXT," +
                             "OtherNames TEXT," +
@@ -225,9 +225,9 @@ public class SQLHandler extends SQLiteOpenHelper {
             );
             sqLiteDatabase.execSQL(
                     "CREATE TABLE 'tblInsureePolicy' (" +
-                            "InsureePolicyId INTEGER," +
-                            "InsureeId INTEGER," +
-                            "PolicyId NUMERIC," +
+                            "InsureePolicyUUID TEXT," +
+                            "InsureeUUID TEXT," +
+                            "PolicyUUID TEXT," +
                             "EnrollmentDate DATE," +
                             "StartDate DATE," +
                             "EffectiveDate DATE," +
@@ -251,6 +251,7 @@ public class SQLHandler extends SQLiteOpenHelper {
             sqLiteDatabase.execSQL(
                     "CREATE TABLE 'tblOfficer' (" +
                             "OfficerId NUMERIC," +
+                            "OfficerUUID TEXT," +
                             "Code TEXT," +
                             "LastName TEXT," +
                             "OtherNames TEXT," +
@@ -267,8 +268,8 @@ public class SQLHandler extends SQLiteOpenHelper {
             );
             sqLiteDatabase.execSQL(
                     "CREATE TABLE 'tblPolicy' (" +
-                            "PolicyId INTEGER," +
-                            "FamilyId NUMERIC," +
+                            "PolicyUUID TEXT," +
+                            "FamilyUUID TEXT," +
                             "EnrollDate DATE," +
                             "StartDate DATE," +
                             "EffectiveDate DATE," +
@@ -282,8 +283,8 @@ public class SQLHandler extends SQLiteOpenHelper {
             );
             sqLiteDatabase.execSQL(
                     "CREATE TABLE 'tblPremium' (" +
-                            "PremiumId INTEGER," +
-                            "PolicyId NUMERIC," +
+                            "PremiumUUID TEXT," +
+                            "PolicyUUID TEXT," +
                             "PayerId NUMERIC," +
                             "Amount NUMERIC," +
                             "Receipt TEXT," +
