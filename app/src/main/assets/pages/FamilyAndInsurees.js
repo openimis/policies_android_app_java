@@ -2,19 +2,19 @@ $(document).ready(function () {
 
     document.title = Android.getString('FamilyAndInsurees');
 
-    var FamilyId = queryString("f");
+    var FamilyUUID = queryString("f");
     var LocationId = null;
     var RegionId = null;
     var DistrictId = null;
-    var InsureeId = null;
+    var InsureeUUID = null;
     var Action = null;
 
-    var url = 'Enrollment.html?f=' + FamilyId;
+    var url = 'Enrollment.html?f=' + FamilyUUID;
     Android.SetUrl(url);
 
-    if (FamilyId != 0) {
-        LoadFamilyHeader(parseInt(FamilyId))
-        LoadInsurees(parseInt(FamilyId));
+    if (FamilyUUID.length != 0) {
+        LoadFamilyHeader(FamilyUUID)
+        LoadInsurees(FamilyUUID);
     }
 
     $(".family-location").click(function () {
@@ -22,14 +22,14 @@ $(document).ready(function () {
     });
 
     $('#btnNewInsuree').click(function () {
-        var url = 'FamilyAndInsurees.html?f=' + FamilyId;
+        var url = 'FamilyAndInsurees.html?f=' + FamilyUUID;
         Android.SetUrl(url);
-        window.open('Insuree.html?f=' + FamilyId, '_self');
+        window.open('Insuree.html?f=' + FamilyUUID, '_self');
     });
 
 
     $('.ulList li').click(function () {
-        InsureeId = parseInt($(this).find('#hfInsureeId').val());
+        InsureeUUID = $(this).find('#hfInsureeId').val();
         //window.open("Insuree.html?i=" + InsureeId + "&f=" + FamilyId, "_self");
 
     });
@@ -47,9 +47,9 @@ $(document).ready(function () {
     contextMenu.createContextMenu([Android.getString('Edit'), Android.getString('Delete')], function () {
         var clicked = $(this).text();
         if (clicked == Android.getString('Edit')) {
-            var url = 'FamilyAndInsurees.html?f=' + FamilyId;
+            var url = 'FamilyAndInsurees.html?f=' + FamilyUUID;
             Android.SetUrl(url);
-            window.open("Insuree.html?i=" + InsureeId + "&f=" + FamilyId, "_self");
+            window.open("Insuree.html?i=" + InsureeUUID + "&f=" + FamilyUUID, "_self");
         }
         else if (clicked == Android.getString('Delete')) {
             //$("#divProgress").show();
@@ -60,20 +60,20 @@ $(document).ready(function () {
 
                 $("#divProgress").show();
 
-                deletedSuccess = parseInt(Android.DeleteOnlineData(InsureeId, 'I'));
+                deletedSuccess = parseInt(Android.DeleteOnlineData(InsureeUUID, 'I'));
 
 
             }
             else {
 
-                deletedSuccess = Android.DeleteInsuree(InsureeId);
+                deletedSuccess = Android.DeleteInsuree(InsureeUUID);
             }
 
             if (deletedSuccess == 1) {
 
                 $("#divProgress").hide();
                 //Android.ShowDialog(Android.getString('InsureeDeleted'));
-                window.open('FamilyAndInsurees.html?f=' + FamilyId + '&l=' + LocationId + '&r=' + RegionId + '&d=' + DistrictId, '_self');
+                window.open('FamilyAndInsurees.html?f=' + FamilyUUID + '&l=' + LocationId + '&r=' + RegionId + '&d=' + DistrictId, '_self');
             }
             else if (deletedSuccess == 2) {
                 $("#divProgress").hide();
@@ -92,17 +92,17 @@ $(document).ready(function () {
 
 });
 
-function LoadInsurees(FamilyId) {
-    var Insurees = Android.getInsureesForFamily(FamilyId);
+function LoadInsurees(FamilyUUID) {
+    var Insurees = Android.getInsureesForFamily(FamilyUUID);
     var ctls = ["CHFID", "InsureeName", "hfInsureeId", "spDOB", "spGender", "hfIsHead", "InsureeId", "hfIsOffline"];
-    var Columns = ["CHFID", "InsureeName", "InsureeId", "DOB", "Gender", "isHead", "InsureeId", "isOffline"];
+    var Columns = ["CHFID", "InsureeName", "InsureeUUID", "DOB", "Gender", "isHead", "InsureeId", "isOffline"];
     LoadList(Insurees, '.ulList', ctls, Columns);
 
     HighlightHOF();
 
 }
-function LoadFamilyHeader(FamilyId) {
-    var FamilyHeader = Android.getFamilyHeader(FamilyId);
+function LoadFamilyHeader(FamilyUUID) {
+    var FamilyHeader = Android.getFamilyHeader(FamilyUUID);
     bindDataFromDatafield(FamilyHeader);
 }
 function AssignDotClass() {

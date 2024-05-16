@@ -1,5 +1,4 @@
 $(document).ready(function () {
-
     //Hide the relationship if the insuree is the HOF
     if (sessionStorage.getItem("FamilyData") !== null) {
         $("#Relationship").hide();
@@ -73,19 +72,19 @@ $(document).ready(function () {
             var jsonInsuree = createJSONString();
 
             if (sessionStorage.getItem("FamilyData") !== null) {
-                var FamilyId = Android.SaveFamily(sessionStorage.getItem("FamilyData"), jsonInsuree);
+                var FamilyUUID = Android.SaveFamily(sessionStorage.getItem("FamilyData"), jsonInsuree);
 
-                if (FamilyId > 0) {
+                if (FamilyUUID.length > 0) {
                     sessionStorage.removeItem("FamilyData");
                     $(this).attr("disabled", "disabled");
 
-                    window.open("FamilyAndInsurees.html?f=" + FamilyId, "_self");
+                    window.open("FamilyAndInsurees.html?f=" + FamilyUUID, "_self");
 
                 }
 
             } else {
-                var FamilyId = parseInt(queryString('f'));
-                var FamilyPolicy = Android.getFamilyPolicy(FamilyId);
+                var FamilyUUID = queryString('f');
+                var FamilyPolicy = Android.getFamilyPolicy(FamilyUUID);
                 var $Policy = $.parseJSON(FamilyPolicy);
                 var MemberCount = parseInt($Policy[0]["MemberCount"]);
                 var Threshold = parseInt($Policy[0]["Threshold"]);
@@ -106,12 +105,14 @@ $(document).ready(function () {
                     }
 
                 }
-                var InsureeId = Android.SaveInsuree(jsonInsuree, FamilyId, 0, parseInt(ExceedThreshold), PolicyId);
+                var result = Android.SaveInsuree(jsonInsuree, FamilyUUID, 0, parseInt(ExceedThreshold), PolicyId);
+
                 if (PolicyId > 0 && TotalIns >= MemberCount) {
                     $("#divProgress").hide();
                 } else {
                     $("#divProgress").hide();
-                    window.open("FamilyAndInsurees.html?f=" + FamilyId, "_self");
+                    alert("Family UUID: " + FamilyUUID);
+                    window.open("FamilyAndInsurees.html?f=" + FamilyUUID, "_self");
                 }
             }
         } else {
@@ -130,13 +131,13 @@ $(document).ready(function () {
     }
 
     //if insureeid is passed load the insuree
-    var InsureeId = queryString("i");
-    var FamilyId = queryString("f");
+    var InsureeUUID = queryString("i");
+    var FamilyUUID = queryString("f");
 
     $('#btnScan').attr('src', '../images/scan.png');
 
-    if (parseInt(InsureeId) > 0 || parseInt(InsureeId) < 0) {
-        var Insuree = Android.getInsuree(parseInt(InsureeId));
+    if (InsureeUUID.length > 0) {
+        var Insuree = Android.getInsuree(InsureeUUID);
         bindDataFromDatafield(Insuree);
         var PhotoPath = $.parseJSON(Insuree)[0]["PhotoPath"];
         var IsOffline = parseInt($.parseJSON(Insuree)[0]["isOffline"]);

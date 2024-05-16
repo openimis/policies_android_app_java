@@ -15,7 +15,6 @@ public class Family implements Parcelable {
 
     @NonNull
     private final String headChfId;
-    private final int id;
     @NonNull
     private final String uuid;
     @Nullable
@@ -42,7 +41,6 @@ public class Family implements Parcelable {
 
     public Family(
             @NonNull String headChfId,
-            int id,
             @NonNull String uuid,
             @Nullable SMS sms,
             @Nullable Integer locationId,
@@ -56,7 +54,6 @@ public class Family implements Parcelable {
             @NonNull List<Member> members
     ) {
         this.headChfId = headChfId;
-        this.id = id;
         this.uuid = uuid;
         this.sms = sms;
         this.locationId = locationId;
@@ -72,7 +69,6 @@ public class Family implements Parcelable {
 
     protected Family(Parcel in) {
         headChfId = Objects.requireNonNull(in.readString());
-        id = in.readInt();
         uuid = Objects.requireNonNull(in.readString());
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             sms = in.readParcelable(SMS.class.getClassLoader(), SMS.class);
@@ -94,7 +90,6 @@ public class Family implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(headChfId);
-        dest.writeInt(id);
         dest.writeString(uuid);
         dest.writeParcelable(sms, flags);
         dest.writeInt(locationId != null ? locationId : -1);
@@ -127,9 +122,6 @@ public class Family implements Parcelable {
         throw new IllegalStateException("The members list (size: '" + members.size() + "') didn't contain an insuree with the head chfId: '" + headChfId + "'");
     }
 
-    public int getId() {
-        return id;
-    }
 
     @NonNull
     public String getUuid() {
@@ -254,10 +246,8 @@ public class Family implements Parcelable {
         @NonNull
         private final String chfId;
         private final boolean isHead;
-        private final int id;
         @Nullable
         private final String uuid;
-        private final int familyId;
         @NonNull
         private final String familyUuid;
         @Nullable
@@ -302,9 +292,7 @@ public class Family implements Parcelable {
         public Member(
                 @NonNull String chfId,
                 boolean isHead,
-                int id,
                 @Nullable String uuid,
-                int familyId,
                 @NonNull String familyUuid,
                 @Nullable String identificationNumber,
                 @NonNull String lastName,
@@ -329,9 +317,7 @@ public class Family implements Parcelable {
         ) {
             this.chfId = chfId;
             this.isHead = isHead;
-            this.id = id;
             this.uuid = uuid;
-            this.familyId = familyId;
             this.familyUuid = familyUuid;
             this.identificationNumber = identificationNumber;
             this.lastName = lastName;
@@ -358,9 +344,7 @@ public class Family implements Parcelable {
         protected Member(Parcel in) {
             chfId = Objects.requireNonNull(in.readString());
             isHead = in.readByte() != 0;
-            id = in.readInt();
             uuid = Objects.requireNonNull(in.readString());
-            familyId = in.readInt();
             familyUuid = Objects.requireNonNull(in.readString());
             identificationNumber = in.readString();
             lastName = Objects.requireNonNull(in.readString());
@@ -408,9 +392,7 @@ public class Family implements Parcelable {
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeString(chfId);
             dest.writeByte((byte) (isHead ? 1 : 0));
-            dest.writeInt(id);
             dest.writeString(uuid);
-            dest.writeInt(familyId);
             dest.writeString(familyUuid);
             dest.writeString(identificationNumber);
             dest.writeString(lastName);
@@ -468,17 +450,9 @@ public class Family implements Parcelable {
             return isHead;
         }
 
-        public int getId() {
-            return id;
-        }
-
         @Nullable
         public String getUuid() {
             return uuid;
-        }
-
-        public int getFamilyId() {
-            return familyId;
         }
 
         @NonNull
@@ -598,10 +572,8 @@ public class Family implements Parcelable {
     }
 
     public static class Policy implements Parcelable {
-        private final int id;
         @NonNull
         private final String uuid;
-        private final int familyId;
         @NonNull
         private final String familyUUID;
         @NonNull
@@ -628,9 +600,7 @@ public class Family implements Parcelable {
         private final List<Premium> premiums;
 
         public Policy(
-                int id,
                 @NonNull String uuid,
-                int familyId,
                 @NonNull String familyUUID,
                 @NonNull Date enrollDate,
                 @NonNull Date startDate,
@@ -645,9 +615,7 @@ public class Family implements Parcelable {
                 @Nullable String controlNumber,
                 @NonNull List<Premium> premiums
         ) {
-            this.id = id;
             this.uuid = uuid;
-            this.familyId = familyId;
             this.familyUUID = familyUUID;
             this.enrollDate = enrollDate;
             this.startDate = startDate;
@@ -664,9 +632,7 @@ public class Family implements Parcelable {
         }
 
         protected Policy(Parcel in) {
-            id = in.readInt();
             uuid = in.readString();
-            familyId = in.readInt();
             familyUUID = in.readString();
             enrollDate = new Date(in.readLong());
             startDate = new Date(in.readLong());
@@ -693,9 +659,7 @@ public class Family implements Parcelable {
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
-            dest.writeInt(id);
             dest.writeString(uuid);
-            dest.writeInt(familyId);
             dest.writeString(familyUUID);
             dest.writeLong(enrollDate.getTime());
             dest.writeLong(startDate.getTime());
@@ -726,17 +690,9 @@ public class Family implements Parcelable {
             return 0;
         }
 
-        public int getId() {
-            return id;
-        }
-
         @NonNull
         public String getUuid() {
             return uuid;
-        }
-
-        public int getFamilyId() {
-            return familyId;
         }
 
         @NonNull
@@ -815,8 +771,8 @@ public class Family implements Parcelable {
         };
 
         public static class Premium implements Parcelable {
-            private final int id;
-            private final int policyId;
+            @NonNull
+            private final String uuid;
             @NonNull
             private final String policyUuid;
             @Nullable
@@ -833,8 +789,7 @@ public class Family implements Parcelable {
             private final boolean isOffline;
 
             public Premium(
-                    int id,
-                    int policyId,
+                    @NonNull String uuid,
                     @NonNull String policyUuid,
                     @Nullable Integer payerId,
                     @Nullable Double amount,
@@ -844,8 +799,7 @@ public class Family implements Parcelable {
                     boolean isPhotoFee,
                     boolean isOffline
             ) {
-                this.id = id;
-                this.policyId = policyId;
+                this.uuid = uuid;
                 this.policyUuid = policyUuid;
                 this.payerId = payerId;
                 this.amount = amount;
@@ -856,9 +810,8 @@ public class Family implements Parcelable {
                 this.isOffline = isOffline;
             }
 
-            protected Premium(Parcel in) {
-                id = in.readInt();
-                policyId = in.readInt();
+            public Premium(Parcel in) {
+                uuid = in.readString();
                 policyUuid = in.readString();
                 if (in.readByte() == 0) {
                     payerId = null;
@@ -880,8 +833,7 @@ public class Family implements Parcelable {
 
             @Override
             public void writeToParcel(Parcel dest, int flags) {
-                dest.writeInt(id);
-                dest.writeInt(policyId);
+                dest.writeString(uuid);
                 dest.writeString(policyUuid);
                 if (payerId == null) {
                     dest.writeByte((byte) 0);
@@ -907,12 +859,9 @@ public class Family implements Parcelable {
                 return 0;
             }
 
-            public int getId() {
-                return id;
-            }
-
-            public int getPolicyId() {
-                return policyId;
+            @NonNull
+            public String getUuid() {
+                return uuid;
             }
 
             @NonNull

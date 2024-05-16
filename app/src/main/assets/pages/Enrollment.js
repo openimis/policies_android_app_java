@@ -12,7 +12,7 @@ $(document).ready(function () {
 
 
     $('.ulList li').click(function () {
-        FamilyId = parseInt($(this).find('#hfFamilyId').val());
+        FamilyId = $(this).find('#hfFamilyId').val();
         //<!--window.open('FamilyAndInsurees.html?f=' + FamilyId, '_self');-->
 
     });
@@ -87,7 +87,7 @@ $(document).ready(function () {
 function LoadFamilies() {
     var Families = Android.getAllFamilies();
     var ctls = ["hfFamilyId", "InsuranceNumber", "InsureeName", "Region", "District", "Ward", "Village", "FamilyId", "spFamilyId", "hfIsOffline"];
-    var Columns = ["FamilyId", "CHFID", "InsureeName", "RegionName", "DistrictName", "WardName", "VillageName", "FamilyId", "FamilyId", "isOffline"];
+    var Columns = ["FamilyUUID", "CHFID", "InsureeName", "RegionName", "DistrictName", "WardName", "VillageName", "FamilyId", "FamilyId", "isOffline"];
     LoadList(Families, '.ulList', ctls, Columns);
 }
 

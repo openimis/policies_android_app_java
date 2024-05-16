@@ -930,12 +930,12 @@ public class SQLHandler extends SQLiteOpenHelper {
         return result;
     }
 
-    public void assignCnToPolicy(int policyId, String controlNumber) {
+    public void assignCnToPolicy(String policyUUID, String controlNumber) {
         try {
             if (isFetchedControlNumber(controlNumber)) {
                 openDatabase();
                 ContentValues values = new ContentValues();
-                values.put("PolicyId", policyId);
+                values.put("PolicyUUID", policyUUID);
                 mDatabase.update(tblBulkControlNumbers,
                         values,
                         "ControlNumber = ?",
@@ -944,7 +944,7 @@ public class SQLHandler extends SQLiteOpenHelper {
                 openDatabase();
                 JSONArray policyData = cursorToJsonArray(mDatabase.rawQuery(
                         "SELECT po.PolicyValue, UPPER(pr.ProductCode) as ProductCode FROM tblPolicy po INNER JOIN tblProduct pr on pr.ProdId=po.ProdId WHERE PolicyId = ?",
-                        new String[]{String.valueOf(policyId)}));
+                        new String[]{String.valueOf(policyUUID)}));
 
                 if (policyData.length() == 0) {
                     return;
@@ -952,7 +952,7 @@ public class SQLHandler extends SQLiteOpenHelper {
 
                 ContentValues values = new ContentValues();
                 values.put("OfficerCode", global.getOfficerCode());
-                values.put("PolicyId", policyId);
+                values.put("PolicyUUID", policyUUID);
                 values.put("Amount", policyData.getJSONObject(0).getString("PolicyValue"));
                 values.put("ProductCode", policyData.getJSONObject(0).getString("ProductCode"));
                 values.put("ControlNumber", controlNumber);
@@ -966,7 +966,7 @@ public class SQLHandler extends SQLiteOpenHelper {
         }
     }
 
-    public void clearCnAssignedToPolicy(int policyId) {
+    public void clearCnAssignedToPolicy(String policyUUID) {
         openDatabase();
         ContentValues values = new ContentValues();
         values.put("PolicyId", (String) null);
@@ -975,11 +975,11 @@ public class SQLHandler extends SQLiteOpenHelper {
             mDatabase.update(tblBulkControlNumbers,
                     values,
                     "PolicyId = ? and Id IS NOT NULL",
-                    new String[]{String.valueOf(policyId)});
+                    new String[]{policyUUID});
 
             mDatabase.delete(tblBulkControlNumbers,
                     "PolicyId = ? and Id IS NULL",
-                    new String[]{String.valueOf(policyId)});
+                    new String[]{policyUUID});
         } catch (Exception e) {
             e.printStackTrace();
         } finally {

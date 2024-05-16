@@ -2,7 +2,7 @@ $(document).ready(function () {
 
     document.title = Android.getString('AddNewFamily');
     var FamilyId = queryString('f');
-
+    alert(FamilyId);
     if (parseInt(FamilyId) != 0)
         $('#btnNext').val(Android.getString("Save"));
 

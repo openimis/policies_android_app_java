@@ -237,16 +237,8 @@ public class MainActivity extends AppCompatActivity
         global.setImageFolder(global.getSubdirectory("Images"));
         //Check if database exists
         File database = global.getDatabasePath(SQLHandler.DBNAME);
-        if (!database.exists()) {
-            sqlHandler.getReadableDatabase();
-            if (copyDatabase(this)) {
-                Toast.makeText(this, "Copy database success", Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(this, "Copy database failed", Toast.LENGTH_SHORT).show();
-                return;
-            }
-        } else
-            sqlHandler.getReadableDatabase();
+
+        sqlHandler.getReadableDatabase();
 
         //Create image folder
         createImageFolder();
@@ -603,28 +595,6 @@ public class MainActivity extends AppCompatActivity
         return aBuffer;
     }
 
-    private boolean copyDatabase(Context context) {
-        try {
-            InputStream inputStream = getApplicationContext().getAssets().open("database/" + SQLHandler.DBNAME);
-            String outFileName = getApplicationContext().getApplicationInfo().dataDir + "/databases/" + SQLHandler.DBNAME;
-            OutputStream outputStream = new FileOutputStream(outFileName);
-            byte[] buffer = new byte[1024];
-            int length;
-
-            while ((length = inputStream.read(buffer)) > 0) {
-                outputStream.write(buffer, 0, length);
-            }
-            outputStream.flush();
-            outputStream.close();
-
-            Log.w(LOG_TAG, "DB Copied");
-            return true;
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
 
     private void createImageFolder() {
         File imageFolder = new File(global.getImageFolder());
