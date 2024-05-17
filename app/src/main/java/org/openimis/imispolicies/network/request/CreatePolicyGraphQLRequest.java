@@ -20,7 +20,7 @@ public class CreatePolicyGraphQLRequest extends BaseGraphQLRequest {
         Response<CreatePolicyMutation.Data> response = makeSynchronous(new CreatePolicyMutation(
                 CreatePolicyMutationInput.builder()
                         .uuid(policy.getUuid())
-                        .familyId(policy.getFamilyId())
+                        .familyUuid(policy.getFamilyUUID())
                         .enrollDate(policy.getEnrollDate())
                         .startDate(policy.getStartDate())
                         .expiryDate(policy.getExpiryDate())

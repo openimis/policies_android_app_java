@@ -23,7 +23,7 @@ public class CreateInsureeGraphQLRequest extends BaseGraphQLRequest {
                 CreateInsureeMutationInput.builder()
                         .chfId(member.getChfId())
                         .uuid(member.getUuid())
-                        .familyId(member.getFamilyId())
+                        .familyUuid(member.getFamilyUuid())
                         .head(member.isHead())
                         .passport(member.getIdentificationNumber())
                         .typeOfIdId(member.getTypeOfId())

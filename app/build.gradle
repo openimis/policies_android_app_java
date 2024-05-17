@@ -110,7 +110,7 @@ android {
             dimension = 'std'
         }
         dev {
-            applicationId "org.openimis.imispolicies.mv"
+            applicationId "org.openimis.imispolicies.dev"
             buildConfigField "String", "API_BASE_URL", '"https://develop.openimis.org/"'
             buildConfigField "boolean", "SHOW_PAYMENT_MENU", 'true'
             buildConfigField "String", "API_VERSION", '"3"'

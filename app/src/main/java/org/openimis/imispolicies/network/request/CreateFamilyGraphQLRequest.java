@@ -20,7 +20,6 @@ public class CreateFamilyGraphQLRequest extends BaseGraphQLRequest {
         Family.Member head = family.getHead();
         Response<CreateFamilyMutation.Data> response = makeSynchronous(new CreateFamilyMutation(
                 CreateFamilyMutationInput.builder()
-                        .id(family.getId())
                         .uuid(family.getUuid())
                         .locationId(family.getLocationId())
                         .poverty(family.isPoor())
@@ -32,7 +31,7 @@ public class CreateFamilyGraphQLRequest extends BaseGraphQLRequest {
                         .isOffline(family.isOffline())
                         .headInsuree(
                                 FamilyHeadInsureeInputType.builder()
-                                        .id(head.getId())
+                                        .uuid(head.getUuid())
                                         .chfId(head.getChfId())
                                         .lastName(head.getLastName())
                                         .otherNames(head.getOtherNames())

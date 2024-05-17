@@ -41,7 +41,6 @@ public class FetchFamily {
         GetFamilyQuery.Node node = getFamilyGraphQLRequest.get(headChfId);
         return new Family(
                 /* headChfId = */ headChfId,
-                /* id = */ IdUtils.getIdFromGraphQLString(node.id()),
                 /* uuid = */ node.uuid(),
                 /* sms = */ null,
                 /* locationId = */ node.location() != null ? IdUtils.getIdFromGraphQLString(Objects.requireNonNull(node.location()).id()) : null,
@@ -62,9 +61,7 @@ public class FetchFamily {
         return new Family.Member(
                 /* chfId = */ Objects.requireNonNull(member.chfId()),
                 /* isHead = */ member.head(),
-                /* id = */ IdUtils.getIdFromGraphQLString(member.id()),
                 /* uuid = */ member.uuid(),
-                /* familyId = */ IdUtils.getIdFromGraphQLString(family.id()),
                 /* familyUuid = */ family.uuid(),
                 /* identificationNumber = */ member.passport(),
                 /* lastName = */ member.lastName(),

@@ -86,15 +86,17 @@ $(document).ready(function () {
                 var FamilyUUID = queryString('f');
                 var FamilyPolicy = Android.getFamilyPolicy(FamilyUUID);
                 var $Policy = $.parseJSON(FamilyPolicy);
-                var MemberCount = parseInt($Policy[0]["MemberCount"]);
-                var Threshold = parseInt($Policy[0]["Threshold"]);
-                var TotalIns = parseInt($Policy[0]["Ins"]);
-                var PolicyId = parseInt($Policy[0]["PolicyId"]);
-                var IsNewIns = parseInt($("#hfInsureeId").val());
+                if ($Policy.length > 0){
+                    var MemberCount = parseInt($Policy[0]["MemberCount"]);
+                    var Threshold = parseInt($Policy[0]["Threshold"]);
+                    var TotalIns = parseInt($Policy[0]["Ins"]);
+                    var PolicyId = parseInt($Policy[0]["PolicyId"]);
+                }
+                var IsNewIns = $("#hfInsureeId").val();
                 var MemberDialog = -1;
                 var ExceedThreshold = -1;
 
-                if (PolicyId > 0 && IsNewIns == 0) {
+                if (PolicyId > 0 && IsNewIns.length == 0) {
                     if (TotalIns >= MemberCount) {
                         ExceedThreshold = 0;
                         Android.ShowDialog(Android.getString('ExceedMemberCount'));
@@ -111,7 +113,6 @@ $(document).ready(function () {
                     $("#divProgress").hide();
                 } else {
                     $("#divProgress").hide();
-                    alert("Family UUID: " + FamilyUUID);
                     window.open("FamilyAndInsurees.html?f=" + FamilyUUID, "_self");
                 }
             }
@@ -131,8 +132,8 @@ $(document).ready(function () {
     }
 
     //if insureeid is passed load the insuree
-    var InsureeUUID = queryString("i");
-    var FamilyUUID = queryString("f");
+    var InsureeUUID = queryString("i") || '';
+    var FamilyUUID = queryString("f") || '';
 
     $('#btnScan').attr('src', '../images/scan.png');
 
@@ -183,7 +184,8 @@ $(document).ready(function () {
         $('#ddlFSP').val($.parseJSON(Insuree)[0]["HFID"]);
 
     } else {
-        $("#hfInsureeId").val(0);
+        $("#hfInsureeId").val("");
+
     }
 
     $("#imgInsuree").click(function () {

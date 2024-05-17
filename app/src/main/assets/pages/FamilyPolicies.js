@@ -5,29 +5,29 @@ $(document).ready(function () {
         $('#ControlNumberSection').hide();
     }
 
-    var FamilyId = queryString("f");
+    var FamilyUUID = queryString("f");
     var LocationId = parseInt(queryString("l"));
     var RegionId = parseInt(queryString("r"));
     var DistrictId = parseInt(queryString("d"));
 
-    var url = 'FamilyAndInsurees.html?f=' + FamilyId;
+    var url = 'FamilyAndInsurees.html?f=' + FamilyUUID;
     Android.SetUrl(url);
 
     var Action = 'none';
-    var PolicyId = null;
+    var PolicyUUID = null;
 
-    LoadFamilyPolicies(parseInt(FamilyId));
+    LoadFamilyPolicies(FamilyUUID);
 
     $(".plusButton").click(function () {
-        var url = 'FamilyPolicies.html?f=' + FamilyId + '&l=' + LocationId + '&r=' + RegionId + '&d=' + DistrictId;
+        var url = 'FamilyPolicies.html?f=' + FamilyUUID + '&l=' + LocationId + '&r=' + RegionId + '&d=' + DistrictId;
         Android.SetUrl(url);
-        window.open('Policy.html?f=' + FamilyId + '&l=' + LocationId + '&p=' + 0 + '&r=' + RegionId + '&d=' + DistrictId, '_self');
+        window.open('Policy.html?f=' + FamilyUUID + '&l=' + LocationId + '&p=' + '&r=' + RegionId + '&d=' + DistrictId, '_self');
 
     });
 
     $('.ulList li').click(function () {
-        PolicyId = parseInt($(this).find('#hfPolicyId').val());
-        //window.open("PolicyPremium.html?p=" + PolicyId + "&f=" + FamilyId + "&l=" + LocationId + '&r=' + RegionId + '&d=' + DistrictId, "_self");
+        PolicyUUID = $(this).find('#hfPolicyId').val();
+
     });
 
     AssignDotClass();
@@ -35,15 +35,15 @@ $(document).ready(function () {
     contextMenuHandler = function () {
         var clicked = $(this).text();
         if (clicked == Android.getString('Edit')) {
-            var url = 'FamilyPolicies.html?f=' + FamilyId + '&l=' + LocationId + '&r=' + RegionId + '&d=' + DistrictId;
+            var url = 'FamilyPolicies.html?f=' + FamilyUUID + '&l=' + LocationId + '&r=' + RegionId + '&d=' + DistrictId;
             Android.SetUrl(url);
-            window.open("Policy.html?p=" + PolicyId + "&f=" + FamilyId + "&l=" + LocationId + '&r=' + RegionId + '&d=' + DistrictId, "_self");
+            window.open("Policy.html?p=" + PolicyUUID + "&f=" + FamilyUUID + "&l=" + LocationId + '&r=' + RegionId + '&d=' + DistrictId, "_self");
         }
         else if (clicked == Android.getString('Payment')) {
-            var url = 'FamilyPolicies.html?f=' + FamilyId + '&l=' + LocationId + '&r=' + RegionId + '&d=' + DistrictId;
+            var url = 'FamilyPolicies.html?f=' + FamilyUUID + '&l=' + LocationId + '&r=' + RegionId + '&d=' + DistrictId;
             Android.SetUrl(url);
 
-            window.open("PolicyPremium.html?p=" + PolicyId + "&f=" + FamilyId + "&l=" + LocationId + '&r=' + RegionId + '&d=' + DistrictId, "_self");
+            window.open("PolicyPremium.html?p=" + PolicyUUID + "&f=" + FamilyUUID + "&l=" + LocationId + '&r=' + RegionId + '&d=' + DistrictId, "_self");
 
         }
         else if (clicked == Android.getString('Delete')) {
@@ -64,14 +64,14 @@ $(document).ready(function () {
 
                             if (isOffline == 0 || isOffline == 2) {
 
-                                PolicyDeleted = parseInt(Android.DeleteOnlineData(PolicyId, 'PO'));
+                                PolicyDeleted = parseInt(Android.DeleteOnlineData(PolicyUUID, 'PO'));
                             }
                             else {
-                                PolicyDeleted = Android.DeletePolicy(PolicyId);
+                                PolicyDeleted = Android.DeletePolicy(PolicyUUID);
                             }
                             if (PolicyDeleted == 1) {
                                 Android.ShowDialog(Android.getString('PolicyDeleted'));
-                                window.open('FamilyPolicies.html?f=' + FamilyId + "&l=" + LocationId + '&r=' + RegionId + '&d=' + DistrictId, "_self");
+                                window.open('FamilyPolicies.html?f=' + FamilyUUID + "&l=" + LocationId + '&r=' + RegionId + '&d=' + DistrictId, "_self");
                             }
                             else if (PolicyDeleted == -1) {
                                 Android.ShowDialog(Android.getString('LoginToDeleteOnlineData'));
@@ -98,10 +98,10 @@ $(document).ready(function () {
     contextMenu.createContextMenu(contextMenuList, contextMenuHandler);
 });
 
-function LoadFamilyPolicies(FamilyId) {
-    var Policies = Android.getFamilyPolicies(FamilyId);
-    var ctls = ["ProductCode", "ProductName", "StartDate", "ExpireDate", "PolicyValue", "PolicyStatus", "EffectiveDate", "hfPolicyId", "PolicyId", "hfIsOffline", "ControlNumber"];
-    var Columns = ["ProductCode", "ProductName", "StartDate", "ExpiryDate", "PolicyValue", "PolicyStatus", "EffectiveDate", "PolicyId", "PolicyId", "isOffline", "ControlNumber"];
+function LoadFamilyPolicies(FamilyUUID) {
+    var Policies = Android.getFamilyPolicies(FamilyUUID);
+    var ctls = ["ProductCode", "ProductName", "StartDate", "ExpireDate", "PolicyValue", "PolicyStatus", "EffectiveDate", "hfPolicyId", "PolicyUUID", "hfIsOffline", "ControlNumber"];
+    var Columns = ["ProductCode", "ProductName", "StartDate", "ExpiryDate", "PolicyValue", "PolicyStatus", "EffectiveDate", "PolicyUUID", "PolicyUUID", "isOffline", "ControlNumber"];
     LoadList(Policies, '.ulList', ctls, Columns);
 }
 

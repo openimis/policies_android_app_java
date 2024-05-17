@@ -18,7 +18,7 @@ $(document).ready(function () {
     }
 
     $(".family-location").click(function () {
-        window.open('Family.html?f=' + FamilyId);
+        window.open('Family.html?f=' + FamilyUUID);
     });
 
     $('#btnNewInsuree').click(function () {
@@ -30,7 +30,6 @@ $(document).ready(function () {
 
     $('.ulList li').click(function () {
         InsureeUUID = $(this).find('#hfInsureeId').val();
-        //window.open("Insuree.html?i=" + InsureeId + "&f=" + FamilyId, "_self");
 
     });
 
@@ -39,7 +38,7 @@ $(document).ready(function () {
         RegionId = $('#hfRegionId').val();
         DistrictId = $('#hfDistrictId').val();
 
-        window.open('FamilyPolicies.html?f=' + FamilyId + '&l=' + LocationId + '&r=' + RegionId + '&d=' + DistrictId, '_self');
+        window.open('FamilyPolicies.html?f=' + FamilyUUID + '&l=' + LocationId + '&r=' + RegionId + '&d=' + DistrictId, '_self');
     });
 
 

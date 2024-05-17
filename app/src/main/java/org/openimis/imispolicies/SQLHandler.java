@@ -32,11 +32,14 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+
 import androidx.annotation.NonNull;
+
 import android.text.TextUtils;
 
 import org.intellij.lang.annotations.Language;
 import org.openimis.imispolicies.tools.Log;
+
 import android.util.Xml;
 
 import org.json.JSONArray;
@@ -336,7 +339,7 @@ public class SQLHandler extends SQLiteOpenHelper {
             sqLiteDatabase.execSQL(
                     "CREATE TABLE 'tblRecordedPolicies' (" +
                             "Id INTEGER PRIMARY KEY AUTOINCREMENT," +
-                            "PolicyId INTEGER," +
+                            "PolicyUUID TEXT," +
                             "InsuranceNumber TEXT," +
                             "LastName TEXT," +
                             "OtherNames TEXT," +
@@ -411,7 +414,13 @@ public class SQLHandler extends SQLiteOpenHelper {
                             "OfficerCode TEXT," +
                             "ControlNumber TEXT," +
                             "Amount REAL," +
-                            "PolicyId INTEGER" + ")"
+                            "PolicyUUID TEXT" + ")"
+            );
+            sqLiteDatabase.execSQL(
+                    "CREATE TABLE " + tblFamilySMS + "(" +
+                            "FamilyUUID TEXT," +
+                            "ApprovalOfSMS INTEGER," +
+                            "LanguageOfSMS TEXT" + ")"
             );
         } catch (Exception e) {
             e.printStackTrace();
@@ -549,6 +558,7 @@ public class SQLHandler extends SQLiteOpenHelper {
         closeDatabase();
         return resultSet;
     }
+
     @NonNull
     public JSONArray getResult(@Language("SQL") String Query, String[] args) {
         return getResult(Query, args, "0");
@@ -785,7 +795,6 @@ public class SQLHandler extends SQLiteOpenHelper {
     }
 
     public int updateData(String tableName, ContentValues contentValues, String whereClause, String[] whereArgs, boolean throwOnNoRowsUpdated) throws UserException {
-        openDatabase();
         int rowsUpdated = 0;
         try {
             openDatabase();

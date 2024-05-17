@@ -8,12 +8,12 @@ $(document).ready(function () {
     $("#dialog-confirm").attr("title", Android.getString('Confirm'));
 
     var LocationId = parseInt(queryString("l"));
-    var FamilyId = parseInt(queryString("f"));
+    var FamilyUUID = queryString("f");
     var strOfficerLocation = Android.getOfficerLocation();
     var $Locations = $.parseJSON(strOfficerLocation);
     var RegionId = parseInt($Locations[0]["RegionId"]);
     var DistrictId = parseInt($Locations[0]["DistrictId"]);
-    var policyId = parseInt(queryString("p"));
+    var policyUUID = queryString("p") || '';
 
     var HasCycle = null;
     var fStartDate = null;
@@ -27,8 +27,8 @@ $(document).ready(function () {
     //LoadOfficers(LocationId, null);
     LoadProduct(RegionId, DistrictId, null);
 
-    if (policyId != 0) {
-        var strPolicy = Android.getPolicy(policyId);
+    if (policyUUID.length != 0) {
+        var strPolicy = Android.getPolicy(policyUUID);
         var $Policy = $.parseJSON(strPolicy);
         $("#ddlProduct").val($Policy[0]["ProdId"]);
         $("#ddlOfficer").val($Policy[0]["OfficerId"]);
@@ -56,7 +56,7 @@ $(document).ready(function () {
         var HSCycle = false;
         if ($('#hfHasCycle').val()) HSCycle = true;
 
-        var NewPolicyValue = Android.getPolicyValue(EnrolmentDate, ProdId, FamilyId, $('#hffStartDate').val(), HSCycle, parseInt(policyId), PolicyStage, isOffline);
+        var NewPolicyValue = Android.getPolicyValue(EnrolmentDate, ProdId, FamilyUUID, $('#hffStartDate').val(), HSCycle, policyUUID, PolicyStage, isOffline);
         var PolicyStatusValue = $("#hfPolicyStatus").val();
 
         if (NewPolicyValue != CurrentPolicyValue) {
@@ -86,7 +86,7 @@ $(document).ready(function () {
     $('#txtEnrolmentDate, #ddlProduct').change(function () {
         var EnrolmentDate = $('#txtEnrolmentDate').val();
         var ProdId = $('#ddlProduct').val();
-        getPolicyPeriod(EnrolmentDate, parseInt(ProdId), parseInt(FamilyId), parseInt(policyId));
+        getPolicyPeriod(EnrolmentDate, parseInt(ProdId), FamilyUUID, policyUUID);
 
     });
 
@@ -109,8 +109,9 @@ $(document).ready(function () {
 
     function savePolicy() {
         var jsonPolicy = createJSONString();
-        var PPolicyId = Android.SavePolicy(jsonPolicy, parseInt(FamilyId), parseInt(policyId));
-        window.open('FamilyPolicies.html?f=' + FamilyId + '&l=' + LocationId + '&r=' + RegionId + '&d=' + DistrictId, "_self");
+        var PPolicyUUID = Android.SavePolicy(jsonPolicy, FamilyUUID, policyUUID);
+
+        window.open('FamilyPolicies.html?f=' + FamilyUUID + '&l=' + LocationId + '&r=' + RegionId + '&d=' + DistrictId, "_self");
         $('#btnSave').attr("disabled", "disabled")
     }
 
@@ -160,11 +161,11 @@ $(document).ready(function () {
     $('#txtStartDate').change(function () {
         var txtStartDate = $('#txtStartDate').val();
         var ProdId = $('#ddlProduct').val();
-        getPolicyPeriod(txtStartDate, parseInt(ProdId), parseInt(FamilyId), parseInt(policyId));
+        getPolicyPeriod(txtStartDate, parseInt(ProdId), FamilyUUID, policyUUID);
     });
 });
 
-function getPolicyPeriod(EnrolmentDate, ProdId, FamilyId, policyId) {
+function getPolicyPeriod(EnrolmentDate, ProdId, FamilyUUID, policyUUID) {
     if (EnrolmentDate.length == 0 || ProdId == 0)
         return false;
 
@@ -183,7 +184,8 @@ function getPolicyPeriod(EnrolmentDate, ProdId, FamilyId, policyId) {
     fStartDate = getDateForJS(StartDate)
     //fStartDate = moment(fStartDate).toDate();
     var isOffline = $('#hfOffline').val();
-    var PolicyValue = Android.getPolicyValue(EnrolmentDate, parseInt(ProdId), FamilyId, fStartDate, HasCycle, 0, "N", isOffline);
+
+    var PolicyValue = Android.getPolicyValue(EnrolmentDate, parseInt(ProdId), FamilyUUID, fStartDate, HasCycle, '', "N", isOffline);
 
     $('#spPolicyValue').text(PolicyValue);
     $('#hfPolicyValue').val(PolicyValue);

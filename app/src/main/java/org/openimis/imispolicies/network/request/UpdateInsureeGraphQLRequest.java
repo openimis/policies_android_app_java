@@ -22,21 +22,20 @@ public class UpdateInsureeGraphQLRequest extends BaseGraphQLRequest {
     public UpdateInsureeMutation.Data update(
             @NonNull Family.Member member
     ) throws Exception {
-        return update(member, member.getFamilyId());
+        return update(member, member.getFamilyUuid());
     }
 
     @WorkerThread
     @NonNull
     public UpdateInsureeMutation.Data update(
             @NonNull Family.Member member,
-            @Nullable Integer familyId
+            @Nullable String familyUuid
         ) throws Exception {
         Response<UpdateInsureeMutation.Data> response = makeSynchronous(new UpdateInsureeMutation(
                 UpdateInsureeMutationInput.builder()
-                        .id(member.getId())
                         .chfId(member.getChfId())
                         .uuid(member.getUuid())
-                        .familyId(member.getFamilyId())
+                        .familyUuid(member.getFamilyUuid())
                         .head(member.isHead())
                         .passport(member.getIdentificationNumber())
                         .typeOfIdId(member.getTypeOfId())

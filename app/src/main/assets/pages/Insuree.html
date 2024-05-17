@@ -45,13 +45,14 @@ In case of dispute arising out or in relation to the use of the program, it is s
             <select id="ddlRelationship" dataField="Relationship"></select>
         </li>
         <li>
-            <input type="hidden" datafield="InsureeId" id="hfInsureeId" value="0"/>
+            <input type="hidden" datafield="InsureeUUID" id="hfInsureeId" value=""/>
             <input type="hidden" datafld="isOffline" id="hfIsOffline" value="."/>
             <input type="hidden" datafield="isHead" id="hfisHead" value="-1"/>
             <span strName="InsuranceNumber">Insurance Number</span>
             <div style="display:flex">
-            <input type="text" maxlength="12" id="txtInsuranceNumber" dataField="CHFID" onkeyup="getImage()" min="0" required />
-            <img src="" alt="Scan" id="btnScan" style="width:50px !important"  />
+                <input type="text" maxlength="12" id="txtInsuranceNumber" dataField="CHFID"
+                       onkeyup="getImage()" min="0" required/>
+                <img src="" alt="Scan" id="btnScan" style="width:50px !important"/>
             </div>
         </li>
         <li>
@@ -63,8 +64,8 @@ In case of dispute arising out or in relation to the use of the program, it is s
             <input type="text" maxlength="50" id="txtLastName" dataField="LastName" required/>
         </li>
         <li>
-            <input type="hidden" id="hfImagePath" datafield="PhotoPath" />
-            <input type="hidden" id="hfNewPhotoPath" datafield="newPhotoPath" />
+            <input type="hidden" id="hfImagePath" datafield="PhotoPath"/>
+            <input type="hidden" id="hfNewPhotoPath" datafield="newPhotoPath"/>
             <div id="imgDiv">
                 <img src="" alt="Image" onerror="noImage(this);" id="imgInsuree"/>
             </div>
@@ -127,9 +128,10 @@ In case of dispute arising out or in relation to the use of the program, it is s
         </li>
         <li id="IdentificationNumber">
             <span strName="IdentificationNumber">Identification Number</span>
-            <input type="text" id="txtIdentificationNumber" maxlength="50" datafield="IdentificationNumber"/>
+            <input type="text" id="txtIdentificationNumber" maxlength="50"
+                   datafield="IdentificationNumber"/>
         </li>
-		<li id="Vulnerability">
+        <li id="Vulnerability">
             <span strName="Vulnerability">Vulnerability</span>
             <select id="ddlVulnerability" datafield="Vulnerability"></select>
         </li>
