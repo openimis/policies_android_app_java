@@ -28,7 +28,6 @@ public class UpdateFamilyGraphQLRequest extends BaseGraphQLRequest {
                         .ethnicity(family.getEthnicity())
                         .confirmationNo(family.getConfirmationNumber())
                         .confirmationTypeId(family.getConfirmationType())
-                        .isOffline(family.isOffline())
                         .headInsuree(
                                 FamilyHeadInsureeInputType.builder()
                                         .uuid(head.getUuid())

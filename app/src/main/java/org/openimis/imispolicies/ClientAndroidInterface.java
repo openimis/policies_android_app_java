@@ -3153,7 +3153,6 @@ public class ClientAndroidInterface {
                 /* ethnicity = */ JsonUtils.getStringOrDefault(json, "Ethnicity"),
                 /* confirmationNumber = */ JsonUtils.getStringOrDefault(json, "ConfirmationNo"),
                 /* confirmationType = */ JsonUtils.getStringOrDefault(json, "ConfirmationType"),
-                /* isOffline = */ JsonUtils.getBooleanOrDefault(json, "isOffline", false),
                 /* members = */ members
         );
     }
@@ -3187,8 +3186,7 @@ public class ClientAndroidInterface {
                 /* currentVillage = */ JsonUtils.getIntegerOrDefault(object, "CurVillage"),
                 /* geolocation = */ JsonUtils.getStringOrDefault(object, "GeoLocation"),
                 /* photoPath = */ image != null ? image.first : null,
-                /* photoBytes = */ image != null ? image.second : null,
-                /* isOffline = */ JsonUtils.getBooleanOrDefault(object, "isOffline", false)
+                /* photoBytes = */ image != null ? image.second : null
         );
     }
 
@@ -3213,7 +3211,6 @@ public class ClientAndroidInterface {
                     /* productId = */ JsonUtils.getIntegerOrDefault(object, "ProdId"),
                     /* officerId = */ Integer.parseInt(object.getString("OfficerId")),
                     /* stage = */ JsonUtils.getStringOrDefault(object, "PolicyStage"),
-                    /* isOffline = */ JsonUtils.getBooleanOrDefault(object, "isOffline", false),
                     /* controlNumber = */ JsonUtils.getStringOrDefault(object, "ControlNumber"),
                     /* premiums = */ object.has("premium") ? familyPolicyPremiumsFromJSONObject(policyUuid, object.getJSONArray("premium")) : Collections.emptyList()
             ));
@@ -3237,8 +3234,7 @@ public class ClientAndroidInterface {
                     /* receipt = */ JsonUtils.getStringOrDefault(object, "Receipt"),
                     /* payDate = */ JsonUtils.getDateOrDefault(object, "PayDate"),
                     /* payType = */ JsonUtils.getStringOrDefault(object, "PayType"),
-                    /* isPhotoFee = */ JsonUtils.getBooleanOrDefault(object, "isPhotoFee", false),
-                    /* isOffline = */ JsonUtils.getBooleanOrDefault(object, "isOffline", false)
+                    /* isPhotoFee = */ JsonUtils.getBooleanOrDefault(object, "isPhotoFee", false)
             ));
         }
         return premiums;
@@ -4716,12 +4712,12 @@ public class ClientAndroidInterface {
         jsonObject.put("insureeUUID", family.getHead().getUuid());
         jsonObject.put("locationId", family.getLocationId());
         jsonObject.put("poverty", family.isPoor());
-        jsonObject.put("isOffline", family.isOffline());
         jsonObject.put("familyType", family.getType());
         jsonObject.put("familyAddress", family.getAddress());
         jsonObject.put("ethnicity", family.getEthnicity());
         jsonObject.put("confirmationNo", family.getConfirmationNumber());
         jsonObject.put("confirmationType", family.getConfirmationType());
+        jsonObject.put("isOffline", 0);
         array.put(jsonObject);
         return array;
     }
@@ -4753,11 +4749,10 @@ public class ClientAndroidInterface {
         jsonObject.put("dob", DateUtils.toDateString(member.getDateOfBirth()));
         jsonObject.put("gender", member.getGender());
         jsonObject.put("marital", member.getMarital());
-        jsonObject.put("isHead", member.isHead());
+        jsonObject.put("isHead", member.isHead() ? 1 : 0);
         jsonObject.put("phone", member.getPhone());
         jsonObject.put("photoPath", member.getPhotoPath());
         jsonObject.put("cardIssued", member.isCardIssued());
-        jsonObject.put("isOffline", member.isOffline());
         jsonObject.put("relationship", member.getRelationship());
         jsonObject.put("profession", member.getProfession());
         jsonObject.put("education", member.getEducation());
@@ -4767,6 +4762,7 @@ public class ClientAndroidInterface {
         jsonObject.put("currentAddress", member.getCurrentAddress());
         jsonObject.put("geoLocation", member.getGeolocation());
         jsonObject.put("curVillage", member.getCurrentVillage());
+        jsonObject.put("isOffline", 0);
         return jsonObject;
     }
 
@@ -4775,7 +4771,7 @@ public class ClientAndroidInterface {
     @SuppressWarnings("unused")
     public int getTotalFamilyOnline() {
         @Language("SQL")
-        String FamilyQuery = "SELECT count(1) Families FROM tblfamilies F INNER JOIN tblInsuree I ON F.FamilyUUID = I.FamilyUUID WHERE F.isOffline = 0 Group By F.FamilyUUID";
+        String FamilyQuery = "SELECT count(1) Families FROM tblfamilies F INNER JOIN tblInsuree I ON F.FamilyUUID = I.FamilyUUID WHERE F.isOffline = 0 AND I.isHead = 1 Group By F.FamilyUUID";
         JSONArray Families = sqlHandler.getResult(FamilyQuery, null);
         int TotalFamilies = 0;
         try {

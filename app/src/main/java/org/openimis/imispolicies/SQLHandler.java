@@ -214,7 +214,7 @@ public class SQLHandler extends SQLiteOpenHelper {
                             "Phone TEXT," +
                             "PhotoPath TEXT," +
                             "CardIssued BOOLEAN," +
-                            "isOffline BOOLEAN," +
+                            "isOffline NUMERIC," +
                             "Relationship NUMERIC," +
                             "Profession NUMERIC," +
                             "Education NUMERIC," +

@@ -32,7 +32,6 @@ public class Family implements Parcelable {
     private final String confirmationNumber;
     @Nullable
     private final String confirmationType;
-    private final boolean isOffline;
     @NonNull
     private final List<Member> members;
 
@@ -50,7 +49,6 @@ public class Family implements Parcelable {
             @Nullable String ethnicity,
             @Nullable String confirmationNumber,
             @Nullable String confirmationType,
-            boolean isOffline,
             @NonNull List<Member> members
     ) {
         this.headChfId = headChfId;
@@ -63,7 +61,6 @@ public class Family implements Parcelable {
         this.ethnicity = ethnicity;
         this.confirmationNumber = confirmationNumber;
         this.confirmationType = confirmationType;
-        this.isOffline = isOffline;
         this.members = members;
     }
 
@@ -83,7 +80,6 @@ public class Family implements Parcelable {
         ethnicity = in.readString();
         confirmationNumber = in.readString();
         confirmationType = in.readString();
-        isOffline = in.readByte() != 0;
         members = Objects.requireNonNull(in.createTypedArrayList(Member.CREATOR));
     }
 
@@ -99,7 +95,6 @@ public class Family implements Parcelable {
         dest.writeString(ethnicity);
         dest.writeString(confirmationNumber);
         dest.writeString(confirmationType);
-        dest.writeByte((byte) (isOffline ? 1 : 0));
         dest.writeTypedList(members);
     }
 
@@ -165,10 +160,6 @@ public class Family implements Parcelable {
     @Nullable
     public String getConfirmationType() {
         return confirmationType;
-    }
-
-    public boolean isOffline() {
-        return isOffline;
     }
 
     @NonNull
@@ -287,7 +278,6 @@ public class Family implements Parcelable {
         private final String photoPath;
         @Nullable
         private final byte[] photoBytes;
-        private final boolean isOffline;
 
         public Member(
                 @NonNull String chfId,
@@ -312,8 +302,8 @@ public class Family implements Parcelable {
                 @Nullable Integer currentVillage,
                 @Nullable String geolocation,
                 @Nullable String photoPath,
-                @Nullable byte[] photoBytes,
-                boolean isOffline
+                @Nullable byte[] photoBytes
+
         ) {
             this.chfId = chfId;
             this.isHead = isHead;
@@ -338,7 +328,7 @@ public class Family implements Parcelable {
             this.geolocation = geolocation;
             this.photoPath = photoPath;
             this.photoBytes = photoBytes;
-            this.isOffline = isOffline;
+
         }
 
         protected Member(Parcel in) {
@@ -385,7 +375,7 @@ public class Family implements Parcelable {
             } else {
                 photoBytes = null;
             }
-            isOffline = in.readByte() != 0;
+
         }
 
         @Override
@@ -433,7 +423,7 @@ public class Family implements Parcelable {
             } else {
                 dest.writeInt(-1);
             }
-            dest.writeByte((byte) (isOffline ? 1 : 0));
+
         }
 
         @Override
@@ -554,10 +544,6 @@ public class Family implements Parcelable {
             return photoBytes;
         }
 
-        public boolean isOffline() {
-            return isOffline;
-        }
-
         public static final Creator<Member> CREATOR = new Creator<>() {
             @Override
             public Member createFromParcel(Parcel in) {
@@ -593,7 +579,6 @@ public class Family implements Parcelable {
         private final int officerId;
         @Nullable
         private final String policyStage;
-        private final boolean isOffline;
         @Nullable
         private final String controlNumber;
         @NonNull
@@ -611,7 +596,6 @@ public class Family implements Parcelable {
                 @Nullable Integer productId,
                 int officerId,
                 @Nullable String policyStage,
-                boolean isOffline,
                 @Nullable String controlNumber,
                 @NonNull List<Premium> premiums
         ) {
@@ -626,7 +610,6 @@ public class Family implements Parcelable {
             this.productId = productId;
             this.officerId = officerId;
             this.policyStage = policyStage;
-            this.isOffline = isOffline;
             this.controlNumber = controlNumber;
             this.premiums = premiums;
         }
@@ -652,7 +635,6 @@ public class Family implements Parcelable {
             }
             officerId = in.readInt();
             policyStage = in.readString();
-            isOffline = in.readByte() != 0;
             controlNumber = in.readString();
             premiums = in.createTypedArrayList(Premium.CREATOR);
         }
@@ -663,7 +645,7 @@ public class Family implements Parcelable {
             dest.writeString(familyUUID);
             dest.writeLong(enrollDate.getTime());
             dest.writeLong(startDate.getTime());
-            dest.writeLong(effectiveDate != null ? effectiveDate.getTime() :-1);
+            dest.writeLong(effectiveDate != null ? effectiveDate.getTime() : -1);
             dest.writeLong(expiryDate.getTime());
             dest.writeString(status);
             if (value == null) {
@@ -680,7 +662,6 @@ public class Family implements Parcelable {
             }
             dest.writeInt(officerId);
             dest.writeString(policyStage);
-            dest.writeByte((byte) (isOffline ? 1 : 0));
             dest.writeString(controlNumber);
             dest.writeTypedList(premiums);
         }
@@ -744,10 +725,6 @@ public class Family implements Parcelable {
             return policyStage;
         }
 
-        public boolean isOffline() {
-            return isOffline;
-        }
-
         @Nullable
         public String getControlNumber() {
             return controlNumber;
@@ -786,7 +763,6 @@ public class Family implements Parcelable {
             @Nullable
             private final String payType;
             private final boolean isPhotoFee;
-            private final boolean isOffline;
 
             public Premium(
                     @NonNull String uuid,
@@ -796,8 +772,7 @@ public class Family implements Parcelable {
                     @Nullable String receipt,
                     @Nullable Date payDate,
                     @Nullable String payType,
-                    boolean isPhotoFee,
-                    boolean isOffline
+                    boolean isPhotoFee
             ) {
                 this.uuid = uuid;
                 this.policyUuid = policyUuid;
@@ -807,7 +782,7 @@ public class Family implements Parcelable {
                 this.payDate = payDate;
                 this.payType = payType;
                 this.isPhotoFee = isPhotoFee;
-                this.isOffline = isOffline;
+
             }
 
             public Premium(Parcel in) {
@@ -828,7 +803,7 @@ public class Family implements Parcelable {
                 payDate = payDateLong != -1 ? new Date(payDateLong) : null;
                 payType = in.readString();
                 isPhotoFee = in.readByte() != 0;
-                isOffline = in.readByte() != 0;
+
             }
 
             @Override
@@ -851,7 +826,7 @@ public class Family implements Parcelable {
                 dest.writeLong(payDate != null ? payDate.getTime() : -1);
                 dest.writeString(payType);
                 dest.writeByte((byte) (isPhotoFee ? 1 : 0));
-                dest.writeByte((byte) (isOffline ? 1 : 0));
+
             }
 
             @Override
@@ -896,10 +871,6 @@ public class Family implements Parcelable {
 
             public boolean isPhotoFee() {
                 return isPhotoFee;
-            }
-
-            public boolean isOffline() {
-                return isOffline;
             }
 
             public static final Creator<Premium> CREATOR = new Creator<>() {

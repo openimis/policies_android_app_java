@@ -25,7 +25,6 @@ public class CreatePremiumGraphQLRequest extends BaseGraphQLRequest {
                         .receipt(premium.getReceipt())
                         .payDate(premium.getPayDate())
                         .payType(premium.getPayType())
-                        .isOffline(premium.isOffline())
                         .isPhotoFee(premium.isPhotoFee())
                         .build()
         ));

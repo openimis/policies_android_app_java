@@ -25,7 +25,6 @@ query GetFamily($headChfId: String) {
                 confirmationType {
                     code
                 }
-                isOffline
                 members(validityTo_Isnull:true) {
                     edges {
                         node {
@@ -75,7 +74,7 @@ query GetFamily($headChfId: String) {
                                 filename
                                 folder
                             }
-                            offline
+                            
                         }
                     }
                 }

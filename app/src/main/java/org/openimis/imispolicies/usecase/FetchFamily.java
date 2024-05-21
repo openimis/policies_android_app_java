@@ -50,7 +50,6 @@ public class FetchFamily {
                 /* ethnicity = */ node.ethnicity(),
                 /* confirmationNumber = */ node.confirmationNo(),
                 /* confirmationType = */ node.confirmationType() != null ? Objects.requireNonNull(node.confirmationType()).code() : null,
-                /* isOffline = */ node.isOffline() != null ? Objects.requireNonNull(node.isOffline()) : false,
                 /* insurees = */ Mapper.map(node.members().edges(), (edge) -> toMember(edge, node))
         );
     }
@@ -81,8 +80,7 @@ public class FetchFamily {
                 /* currentVillage = */ member.currentVillage() != null ? IdUtils.getIdFromGraphQLString(Objects.requireNonNull(member.currentVillage()).id()) : null,
                 /* geolocation = */ member.geolocation(),
                 /* photoPath = */ downloadPhoto(member.photo()),
-                /* photoBytes = */ null, // We already saved them on disk, no need to pass them here.
-                /* isOffline = */ member.offline() != null ? Objects.requireNonNull(member.offline()) : false
+                /* photoBytes = */ null // We already saved them on disk, no need to pass them here.
         );
     }
 
