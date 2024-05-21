@@ -59,7 +59,7 @@ $(document).ready(function () {
 
                 $("#divProgress").show();
 
-                deletedSuccess = parseInt(Android.DeleteOnlineData(InsureeUUID, 'I'));
+                deletedSuccess = Android.DeleteOnlineData(InsureeUUID, 'I');
 
 
             }

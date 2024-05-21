@@ -767,12 +767,6 @@ public class ClientAndroidInterface {
                 ContentValues cvUpdate = new ContentValues();
                 cvUpdate.put("InsureeUUID", InsureeUUID);
 
-                if (getFamilyStatus(FamilyUUID) == 1) {
-                    cvUpdate.put("isOffline", 1);
-                } else {
-                    cvUpdate.put("isOffline", 2);
-                }
-
                 String[] whereArgs = {FamilyUUID};
 
                 sqlHandler.updateData("tblFamilies", cvUpdate, "FamilyUUID= ?", whereArgs);
@@ -783,9 +777,9 @@ public class ClientAndroidInterface {
 
         } catch (UserException e) {
             e.printStackTrace();
-            if (InsureeUUID.length() != 0)
+            if (!InsureeUUID.isEmpty())
                 sqlHandler.deleteData("tblInsuree", "InsureeUUID = ?", new String[]{String.valueOf(InsureeUUID)});
-            if (FamilyUUID.length() > 0 && InsureeData.length() > 0)
+            if (!FamilyUUID.isEmpty() && !InsureeData.isEmpty())
                 sqlHandler.deleteData("tblFamilies", "FamilyUUID", new String[]{String.valueOf(FamilyUUID)});
             FamilyUUID = "";
             ShowDialog(activity.getResources().getString(R.string.ErrorOccurred));
@@ -793,7 +787,7 @@ public class ClientAndroidInterface {
         } catch (Exception e) {
             e.printStackTrace();
 
-            if (InsureeUUID.length() != 0)
+            if (!InsureeUUID.isEmpty())
                 sqlHandler.deleteData("tblInsuree", "InsureeUUID = ?", new String[]{String.valueOf(InsureeUUID)});
 
             if (FamilyUUID.length() > 0 && InsureeData.length() > 0)
@@ -1356,7 +1350,7 @@ public class ClientAndroidInterface {
         String PreviousPolicyUUID = "";
         Date PreviousExpiryDate;
 
-        if (PolicyUUID.length() > 0) {
+        if (!PolicyUUID.isEmpty()) {
             @Language("SQL")
             String PreviousPolicy = "SELECT  FamilyUUID,  ProdId,  PolicyStage,  EnrollDate, ExpiryDate, isOffline FROM tblPolicy WHERE PolicyUUID = '" + PolicyUUID + "'";
             JSONArray PrvPolicyArray = sqlHandler.getResult(PreviousPolicy, null);
@@ -1448,7 +1442,7 @@ public class ClientAndroidInterface {
         //Get   Previous Expiry Date
         if (PreviousPolicyUUID.length() > 0) {
             @Language("SQL")
-            String PED_Query = "SELECT ExpiryDate FROM tblPolicy WHERE  PolicyUUIDId =" + PreviousPolicyUUID;
+            String PED_Query = "SELECT ExpiryDate FROM tblPolicy WHERE  PolicyUUIDId ='" + PreviousPolicyUUID + "'";
             JSONArray PED_Array = sqlHandler.getResult(PED_Query, null);
             JSONObject PEDObject = PED_Array.getJSONObject(0);
             Date prvDate = null;
@@ -1465,7 +1459,7 @@ public class ClientAndroidInterface {
         Date StartDate = null;
         try {
             EnrollDate = format.parse(enrollDate);
-            if (PolicyUUID.length() > 0) ExpiryDate = format.parse(expiryDate);
+            if (!PolicyUUID.isEmpty()) ExpiryDate = format.parse(expiryDate);
             StartDate = format.parse(startDate);
         } catch (ParseException e) {
             e.printStackTrace();
@@ -1832,8 +1826,6 @@ public class ClientAndroidInterface {
     public String SavePremiums(String PremiumData, String PolicyUUID, String PremiumUUID, String FamilyUUID) throws Exception {
         inProgress = true;
         int isOffline = 1;
-        String rtPremiumUUID = PremiumUUID;
-        //  String CHFID = "";
         String ReceiptNo = "";
         try {
 
@@ -1851,7 +1843,9 @@ public class ClientAndroidInterface {
             values.put("IsPhotoFee", data.get("ddlPhotoFee"));
 
             //TODO: Need to verify this block
-            if (rtPremiumUUID.length() == 0) {
+            if (PremiumUUID.isEmpty()) {
+                PremiumUUID = UUID.randomUUID().toString();
+                values.put("PremiumUUID", PremiumUUID);
                 sqlHandler.insertData("tblPremium", values);
 
             } else {
@@ -1868,7 +1862,7 @@ public class ClientAndroidInterface {
         }
         while (inProgress) {
         }
-        return rtPremiumUUID;
+        return PremiumUUID;
     }
 
     @JavascriptInterface
@@ -2011,7 +2005,7 @@ public class ClientAndroidInterface {
         int isHead = 1;
         boolean res = true;
         @Language("SQL")
-        String CHFIDQUERY = "SELECT CHFID,isOffline FROM tblInsuree WHERE isHead = " + isHead + " AND FamilyUUID = " + FamilyUUID;
+        String CHFIDQUERY = "SELECT CHFID,isOffline FROM tblInsuree WHERE isHead = " + isHead + " AND FamilyUUID = '" + FamilyUUID + "'";
 
         JSONArray JsonCHFID = sqlHandler.getResult(CHFIDQUERY, null);
         try {
@@ -2146,7 +2140,7 @@ public class ClientAndroidInterface {
         String FamilyUUID;
         try {
             @Language("SQL")
-            String Query = "SELECT FamilyUUID FROM tblInsuree WHERE InsureeUUID = " + InsureeUUID;
+            String Query = "SELECT FamilyUUID FROM tblInsuree WHERE InsureeUUID = '" + InsureeUUID + "'";
             JSONArray FID = sqlHandler.getResult(Query, null);
             JSONObject Ob = FID.getJSONObject(0);
             FamilyUUID = Ob.getString("FamilyUUID");
@@ -2163,7 +2157,7 @@ public class ClientAndroidInterface {
                 String InsureeQuery = "DELETE FROM tblInsuree WHERE InsureeUUID=?";
                 String arg[] = {InsureeUUID};
                 JSONArray result = sqlHandler.getResult(InsureeQuery, arg);
-                //Added by Salumu on 12/12/2017 to delete InsureePolicy
+
                 DeleteInsureePolicy("", InsureeUUID);
                 getFamilyPolicies(FamilyUUID);
                 res = 1;
@@ -2677,7 +2671,7 @@ public class ClientAndroidInterface {
 
                 Query = "SELECT F.FamilyUUID, F.InsureeUUID, F.LocationId, I.CHFID AS HOFCHFID, NULLIF(F.Poverty,'null') Poverty, NULLIF(F.FamilyType,'null') FamilyType, NULLIF(F.FamilyAddress,'null') FamilyAddress, NULLIF(F.Ethnicity,'null') Ethnicity, NULLIF(F.ConfirmationNo,'null') ConfirmationNo, F.ConfirmationType ConfirmationType,F.isOffline FROM tblFamilies F\n" +
                         "INNER JOIN tblInsuree I ON I.InsureeUUID = F.InsureeUUID WHERE F.InsureeUUID != ''";
-                Query += " AND F.FamilyUUID = " + FamilyUUID;
+                Query += " AND F.FamilyUUID = '" + FamilyUUID + "'";
                 JSONArray familyArray = sqlHandler.getResult(Query, null);
                 if (familyArray.length() == 0) {
                     result = false;
@@ -2687,7 +2681,7 @@ public class ClientAndroidInterface {
                 Query = "SELECT I.InsureeUUID, I.FamilyUUID, I.CHFID, I.LastName, I.OtherNames, I.DOB, I.Gender, NULLIF(I.Marital,'null') Marital, I.isHead, NULLIF(I.IdentificationNumber,'null') IdentificationNumber, NULLIF(I.Phone,'null') Phone, REPLACE(I.PhotoPath, RTRIM(PhotoPath, REPLACE(PhotoPath, '/', '')), '') PhotoPath, NULLIF(I.CardIssued,'null') CardIssued, NULLIF(I.Relationship,'null') Relationship, NULLIF(I.Profession,'null') Profession, NULLIF(I.Education,'null') Education, NULLIF(I.Email,'null') Email, CASE WHEN I.TypeOfId='null' THEN null ELSE I.TypeOfId END TypeOfId, NULLIF(I.HFID,'null') HFID, NULLIF(I.CurrentAddress,'null') CurrentAddress, NULLIF(I.GeoLocation,'null') GeoLocation, NULLIF(I.CurVillage,'null') CurVillage,I.isOffline \n" +
                         "FROM tblInsuree I \n" +
                         "WHERE I.InsureeUUID != ''";
-                Query += " AND I.FamilyUUID  = " + FamilyUUID;
+                Query += " AND I.FamilyUUID  = '" + FamilyUUID + "'";
                 JSONArray insureesArray = sqlHandler.getResult(Query, null);
                 if (IsOffline == 1) {
                     if (insureesArray.length() == 0) {
@@ -2697,7 +2691,7 @@ public class ClientAndroidInterface {
                 //get Policies
                 Query = "SELECT PolicyUUID, FamilyUUID, EnrollDate, StartDate, NULLIF(EffectiveDate,'null') EffectiveDate, ExpiryDate, Policystatus, PolicyValue, ProdId, OfficerId, PolicyStage, isOffline\n" +
                         "FROM tblPolicy ";
-                Query += " WHERE FamilyUUID = " + FamilyUUID;
+                Query += " WHERE FamilyUUID = '" + FamilyUUID + "'";
                 JSONArray policiesArray = sqlHandler.getResult(Query, null);
 
                 if (IsOffline == 1 && isPolicyRequired() && policiesArray.length() == 0) { //Family offline without a policy
@@ -2709,7 +2703,7 @@ public class ClientAndroidInterface {
                 Query = "SELECT PR.PremiumUUID, PR.PolicyUUID, NULLIF(PR.PayerId,'null') PayerId, PR.Amount, PR.Receipt, PR.PayDate, PR.PayType, PR.isPhotoFee,PR.isOffline\n" +
                         "FROM tblPremium PR\n" +
                         "INNER JOIN tblPolicy PL ON PL.PolicyUUID = PR.PolicyUUID";
-                Query += " WHERE FamilyUUID = " + FamilyUUID;
+                Query += " WHERE FamilyUUID = '" + FamilyUUID + "'";
                 JSONArray premiumsArray = sqlHandler.getResult(Query, null);
                 if (IsOffline == 1 || policiesArray.length() != 0) { //Family offline or policy added to online family
                     if (isContributionRequired() && premiumsArray.length() == 0) {
@@ -2813,13 +2807,13 @@ public class ClientAndroidInterface {
             );
 
             if (CallerId != 2) {
-                query.append(" F.FamilyUUID = ").append(FamilyUUID).append("");
+                query.append(" F.FamilyUUID = '").append(FamilyUUID).append("'");
             } else {
                 for (int j = 0; j < verifiedId.size(); j++) {
                     if ((verifiedId.size() - j) == 1) {
-                        query.append(" F.FamilyUUID == ").append(verifiedId.get(j)).append("");
+                        query.append(" F.FamilyUUID == '").append(verifiedId.get(j)).append("'");
                     } else {
-                        query.append(" F.FamilyUUID == ").append(verifiedId.get(j)).append(" OR");
+                        query.append(" F.FamilyUUID == '").append(verifiedId.get(j)).append("' OR");
                     }
                 }
                 if (verifiedId.size() == 0) {
@@ -2873,7 +2867,7 @@ public class ClientAndroidInterface {
                     "SELECT I.InsureeUUID, I.FamilyUUID, I.CHFID, I.LastName, I.OtherNames, I.DOB, I.Gender, NULLIF(I.Marital,'') Marital, I.isHead, NULLIF(I.IdentificationNumber,'null') IdentificationNumber, NULLIF(I.Phone,'null') Phone, REPLACE(I.PhotoPath, RTRIM(PhotoPath, REPLACE(PhotoPath, '/', '')), '') PhotoPath, NULLIF(I.CardIssued,'null') CardIssued, NULLIF(I.Relationship,'null') Relationship, NULLIF(I.Profession,'null') Profession, NULLIF(I.Education,'null') Education, NULLIF(I.Email,'null') Email, CASE WHEN I.TypeOfId='null' THEN null ELSE I.TypeOfId END TypeOfId, NULLIF(I.HFID,'null') HFID, NULLIF(I.CurrentAddress,'null') CurrentAddress, NULLIF(I.GeoLocation,'null') GeoLocation, NULLIF(I.CurVillage,'null') CurVillage,I.isOffline, I.Vulnerability FROM tblInsuree I WHERE "
             );
             if (CallerId != 2) {
-                query.append(" I.FamilyUUID = ").append(FamilyUUID).append(" \n");
+                query.append(" I.FamilyUUID = '").append(FamilyUUID).append("' \n");
                 if (Offline == null || Integer.parseInt(Offline) == 0) {
                     if (CallerId == 1) {
                         //query.append(" AND  I.InsureeId < 0").append("");
@@ -2885,15 +2879,15 @@ public class ClientAndroidInterface {
 
                     if (getFamilyStatus(verifiedId.get(j)) == 0) {
                         if ((verifiedId.size() - j) == 1) {
-                            query.append("I.FamilyUUID == ").append(verifiedId.get(j));
+                            query.append("I.FamilyUUID == '").append(verifiedId.get(j)).append("'");
                         } else {
-                            query.append("I.FamilyUUID == ").append(verifiedId.get(j)).append(" OR ");
+                            query.append("I.FamilyUUID == '").append(verifiedId.get(j)).append("' OR ");
                         }
                     } else {
                         if ((verifiedId.size() - j) == 1) {
-                            query.append(" I.FamilyUUID == ").append(verifiedId.get(j));
+                            query.append(" I.FamilyUUID == '").append(verifiedId.get(j)).append("'");
                         } else {
-                            query.append(" I.FamilyUUID == ").append(verifiedId.get(j)).append(" OR ");
+                            query.append(" I.FamilyUUID == '").append(verifiedId.get(j)).append("' OR ");
                         }
                     }
                 }
@@ -2930,13 +2924,13 @@ public class ClientAndroidInterface {
                     "SELECT p.PolicyUUID, FamilyUUID, EnrollDate, StartDate, NULLIF(EffectiveDate,'null') EffectiveDate, ExpiryDate, Policystatus, PolicyValue, ProdId, OfficerId, PolicyStage, isOffline, bcn.ControlNumber FROM tblPolicy p LEFT JOIN tblBulkControlNumbers bcn on p.PolicyUUID=bcn.PolicyUUID WHERE "
             );
             if (CallerId != 2) {
-                query.append(" FamilyUUID = ").append(FamilyUUID);
+                query.append(" FamilyUUID = '").append(FamilyUUID).append("'");
             } else {
                 for (int j = 0; j < verifiedId.size(); j++) {
                     if ((verifiedId.size() - j) == 1) {
-                        query.append(" FamilyUUID == ").append(verifiedId.get(j));
+                        query.append(" FamilyUUID == '").append(verifiedId.get(j)).append("'");
                     } else {
-                        query.append(" FamilyUUID == ").append(verifiedId.get(j)).append(" OR");
+                        query.append(" FamilyUUID == '").append(verifiedId.get(j)).append("' OR");
                     }
                 }
                 if (verifiedId.size() == 0) {
@@ -2962,13 +2956,13 @@ public class ClientAndroidInterface {
                         "SELECT PR.PremiumUUID, PR.PolicyUUID, NULLIF(PR.PayerId,'null') PayerId, PR.Amount, PR.Receipt, PR.PayDate, PR.PayType, PR.isPhotoFee,PR.isOffline FROM tblPremium PR INNER JOIN tblPolicy PL ON PL.PolicyUUID = PR.PolicyUUID WHERE "
                 );
                 if (CallerId != 2) {
-                    query.append(" FamilyUUID = ").append(FamilyUUID);
+                    query.append(" FamilyUUID = '").append(FamilyUUID).append("'");
                 } else {
                     for (int j = 0; j < verifiedId.size(); j++) {
                         if ((verifiedId.size() - j) == 1) {
-                            query.append(" FamilyUUID == ").append(verifiedId.get(j));
+                            query.append(" FamilyUUID == '").append(verifiedId.get(j)).append("'");
                         } else {
-                            query.append(" FamilyUUID == ").append(verifiedId.get(j)).append(" OR");
+                            query.append(" FamilyUUID == '").append(verifiedId.get(j)).append("' OR");
                         }
 
                     }
@@ -2994,8 +2988,8 @@ public class ClientAndroidInterface {
                         "SELECT DISTINCT(IP.InsureeUUID) AS InsureeUUID,IP.PolicyUUID,IP.EffectiveDate FROM tblInsureePolicy IP INNER JOIN tblPolicy PL ON PL.PolicyUUID = IP.PolicyUUID"
                 );
                 if (CallerId == 1) {
-                    query.append(" AND  PL.FamilyUUID = ").append(FamilyUUID); // JOIN
-                    query.append(" WHERE PL.FamilyUUID = ").append(FamilyUUID); // WHERE CLAUSE
+                    query.append(" AND  PL.FamilyUUID = '").append(FamilyUUID).append("'"); // JOIN
+                    query.append(" WHERE PL.FamilyUUID = '").append(FamilyUUID).append("'"); // WHERE CLAUSE
                 }
 
                 queryIP = query.toString();
@@ -3027,7 +3021,7 @@ public class ClientAndroidInterface {
                             sqlHandler.updateData("tblPremium", values, "PremiumUUID = ?", new String[]{"0"});
                             rtEnrolledId = EnrolResult;
                         } else if (policiesArray.length() > 0) {
-                            UpdateQuery = "UPDATE tblPolicy SET PolicyUUID = " + EnrolResult + ", isOffline = 2 WHERE LEN(PolicyUUID) = 0 AND isOffline = 0";
+                            UpdateQuery = "UPDATE tblPolicy SET PolicyUUID = '" + EnrolResult + "', isOffline = 2 WHERE LEN(PolicyUUID) = 0 AND isOffline = 0";
                             sqlHandler.getResult(UpdateQuery, null);
                             rtEnrolledId = EnrolResult;
                         } else if (insureesArray.length() > 0) {
@@ -3587,7 +3581,7 @@ public class ClientAndroidInterface {
         if (familyUUIDs.size() != 0) {
             where = combineFamilyUUIdsInWhereStatement(familyUUIDs);
         } else {
-            where = " FamilyUUID = " + familyUUIDs;
+            where = " FamilyUUID = '" + familyUUIDs + "'";
         }
         deleteUploadedTableData(tableName, where);
     }
@@ -3596,9 +3590,9 @@ public class ClientAndroidInterface {
         StringBuilder combined = new StringBuilder();
         for (int j = 0; j < familyUUIDs.size(); j++) {
             if ((familyUUIDs.size() - j) == 1) {
-                combined.append(" FamilyUUID == ").append(familyUUIDs.get(j));
+                combined.append(" FamilyUUID == '").append(familyUUIDs.get(j)).append("'");
             } else {
-                combined.append(" FamilyUUID == ").append(familyUUIDs.get(j)).append(" OR");
+                combined.append(" FamilyUUID == '").append(familyUUIDs.get(j)).append("' OR");
             }
         }
         return combined.toString();
@@ -4350,9 +4344,9 @@ public class ClientAndroidInterface {
                 "LEFT JOIN(\n" +
                 "SELECT Threshold,MemberCount, PolicyUUID FROM tblPolicy  PL\n" +
                 "INNER JOIN tblProduct PR ON PL.ProdId = PR.ProdId\n" +
-                "WHERE PL.FamilyUUID =" + FamilyUUID + "\n" +
+                "WHERE PL.FamilyUUID ='" + FamilyUUID + "'\n" +
                 "LIMIT 1) Policy ON 1 =1\n" +
-                "WHERE I.FamilyUUID=" + FamilyUUID + " \n" +
+                "WHERE I.FamilyUUID='" + FamilyUUID + "' \n" +
                 "GROUP BY PolicyUUID ";
         JSONArray FamilyPolicy = sqlHandler.getResult(Query, null);
         return FamilyPolicy.toString();
@@ -4457,7 +4451,7 @@ public class ClientAndroidInterface {
     @SuppressWarnings("unused")
     public void SaveInsureePolicy(String InsureUUID, String FamilyUUID, Boolean Activate, int isOffline) {
         @Language("SQL")
-        String InsQuery = "SELECT count(1) TotalIns FROM tblInsuree I WHERE FamilyUUID =" + FamilyUUID;
+        String InsQuery = "SELECT count(1) TotalIns FROM tblInsuree I WHERE FamilyUUID ='" + FamilyUUID + "'";
         JSONArray InsArray = sqlHandler.getResult(InsQuery, null);
         JSONObject InsObject = null;
         int TotalIns = 0;
@@ -4479,7 +4473,7 @@ public class ClientAndroidInterface {
             e.printStackTrace();
         }
         @Language("SQL")
-        String PolicyQuery = " SELECT PolicyUUID,PolicyValue,EffectiveDate,PolicyStage,ProdID,StartDate, EnrollDate,isOffline FROM tblPolicy WHERE FamilyUUID  =  " + FamilyUUID;
+        String PolicyQuery = " SELECT PolicyUUID,PolicyValue,EffectiveDate,PolicyStage,ProdID,StartDate, EnrollDate,isOffline FROM tblPolicy WHERE FamilyUUID  =  '" + FamilyUUID + "'";
         JSONArray PolicyArray = sqlHandler.getResult(PolicyQuery, null);
         JSONObject PolicyObject = null;
         for (int i = 0; i < PolicyArray.length(); i++) {
@@ -4554,8 +4548,8 @@ public class ClientAndroidInterface {
             e.printStackTrace();
         }
         @Language("SQL")
-        String SavePolicyInsuree = "INSERT INTO tblInsureePolicy(InsureeUUID,PolicyUUID,EnrollmentDate,StartDate,EffectiveDate,ExpiryDate,isOffline)\n" +
-                "SELECT InsureeUUID ,PolicyUUID ,EnrollDate,StartDate, EffectiveDate ,ExpiryDate,I.isOffline FROM tblPolicy P\n" +
+        String SavePolicyInsuree = "INSERT INTO tblInsureePolicy(InsureePolicyUUID, InsureeUUID,PolicyUUID,EnrollmentDate,StartDate,EffectiveDate,ExpiryDate,isOffline)\n" +
+                "SELECT '" + UUID.randomUUID().toString() + "', InsureeUUID ,PolicyUUID ,EnrollDate,StartDate, EffectiveDate ,ExpiryDate,I.isOffline FROM tblPolicy P\n" +
                 "INNER JOIN tblInsuree I ON  I.FamilyUUID = P.FamilyUUID\n" +
                 "WHERE PolicyUUID = '" + PolicyUUID + "'\n" +
                 "LIMIT " + MaxMember;
@@ -4567,7 +4561,7 @@ public class ClientAndroidInterface {
     public void UpdateInsureePolicy(String PolicyUUID) {//herman new
         ContentValues values = new ContentValues();
         @Language("SQL")
-        String PolicyQuery = "SELECT EffectiveDate FROM tblPolicy WHERE PolicyUUID = " + PolicyUUID;
+        String PolicyQuery = "SELECT EffectiveDate FROM tblPolicy WHERE PolicyUUID = '" + PolicyUUID + "'";
         JSONArray Policy = sqlHandler.getResult(PolicyQuery, null);
         String EffectiveDate = null;
         JSONObject O = null;
@@ -4848,7 +4842,7 @@ public class ClientAndroidInterface {
     @SuppressWarnings("unused")
     public int getCountPremiums(String policyUUID) {
         @Language("SQL")
-        String PremiumQuery = "SELECT count(1) Premiums  FROM  tblPremium  WHERE isPhotoFee = 'false' AND PolicyUUID = " + policyUUID + "";
+        String PremiumQuery = "SELECT count(1) Premiums  FROM  tblPremium  WHERE isPhotoFee = 'false' AND PolicyUUID = '" + policyUUID + "'";
         JSONArray Premium = sqlHandler.getResult(PremiumQuery, null);
         int TotalPremiums = 0;
         try {
@@ -4935,9 +4929,10 @@ public class ClientAndroidInterface {
     }
 
     private int getFamilyStatus(String FamilyUUID) throws JSONException {
-        if (FamilyUUID.length() < 0) return 0;
+        // Family UUID is empty, therefore considering a new family being created
+        if (FamilyUUID.isEmpty()) return 1;
         @Language("SQL")
-        String Query = "SELECT isOffline FROM tblFamilies WHERE FamilyUUID = " + FamilyUUID;
+        String Query = "SELECT isOffline FROM tblFamilies WHERE FamilyUUID = '" + FamilyUUID + "'";
         JSONArray jsonArray = sqlHandler.getResult(Query, null);
         if (jsonArray.length() == 0) return 1;
         JSONObject object = jsonArray.getJSONObject(0);
@@ -4948,9 +4943,9 @@ public class ClientAndroidInterface {
     }
 
     private int getInsureeStatus(String InsureeUUID) throws JSONException {//herman
-        if (InsureeUUID.length() == 0) return 1;
+        if (InsureeUUID.isEmpty()) return 1;
         @Language("SQL")
-        String Query = "SELECT isOffline FROM tblInsuree WHERE InsureeUUID = " + InsureeUUID;
+        String Query = "SELECT isOffline FROM tblInsuree WHERE InsureeUUID = '" + InsureeUUID + "'";
         JSONArray jsonArray = sqlHandler.getResult(Query, null);
         if (jsonArray.length() == 0) {
             return 1;
@@ -4990,7 +4985,7 @@ public class ClientAndroidInterface {
     public void DeleteInsureePolicy(String PolicyUUID, String InsureeUUID) {
         try {
             String TableName = "tblInsureePolicy";
-            String WhereClause = "PolicyUUID=" + PolicyUUID + " OR InsureeUUID=" + InsureeUUID + "";
+            String WhereClause = "PolicyUUID='" + PolicyUUID + "' OR InsureeUUID='" + InsureeUUID + "'";
             sqlHandler.deleteData(TableName, WhereClause, null);
         } catch (Exception ex) {
             ex.printStackTrace();

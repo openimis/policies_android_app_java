@@ -86,11 +86,12 @@ $(document).ready(function () {
                 var FamilyUUID = queryString('f');
                 var FamilyPolicy = Android.getFamilyPolicy(FamilyUUID);
                 var $Policy = $.parseJSON(FamilyPolicy);
+
                 if ($Policy.length > 0){
                     var MemberCount = parseInt($Policy[0]["MemberCount"]);
                     var Threshold = parseInt($Policy[0]["Threshold"]);
                     var TotalIns = parseInt($Policy[0]["Ins"]);
-                    var PolicyId = parseInt($Policy[0]["PolicyId"]);
+                    var PolicyId = $Policy[0]["PolicyId"];
                 }
                 var IsNewIns = $("#hfInsureeId").val();
                 var MemberDialog = -1;
