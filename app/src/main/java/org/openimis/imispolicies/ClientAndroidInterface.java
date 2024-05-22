@@ -1017,8 +1017,7 @@ public class ClientAndroidInterface {
                 }
 
             } else {//Existing Insuree
-                //TODO: Need to verify if we need isOffline
-                //values.put("isOffline", insureeIsOffline);
+                values.put("isOffline", isOffline);
                 //sqlHandler.updateData("tblInsuree", values, "InsureeUUID = ? AND (isOffline = ?)", new String[]{String.valueOf(InsureeUUID), String.valueOf(insureeIsOffline)});
                 sqlHandler.updateData("tblInsuree", values, "InsureeUUID = ?", new String[]{String.valueOf(InsureeUUID)});
 
@@ -4180,7 +4179,7 @@ public class ClientAndroidInterface {
     @SuppressWarnings("unused")
     public int getTotalFamily() {
         @Language("SQL")
-        String FamilyQuery = "SELECT count(1) Families  FROM  tblfamilies WHERE isoffline = 1 OR isoffline = 0"; // WHERE isoffline = 1 OR isoffline = 0
+        String FamilyQuery = "SELECT count(1) Families  FROM  tblfamilies WHERE isoffline = 1";
         JSONArray Families = sqlHandler.getResult(FamilyQuery, null);
         JSONObject object = null;
         int TotalFamilies = 0;
@@ -4201,7 +4200,7 @@ public class ClientAndroidInterface {
     @SuppressWarnings("unused")
     public int getTotalInsuree() {
         @Language("SQL")
-        String InsureeQuery = "SELECT count(1) Insuree FROM tblInsuree WHERE isoffline !=''"; //WHERE isoffline = 1 OR isoffline = 0
+        String InsureeQuery = "SELECT count(1) Insuree FROM tblInsuree WHERE isoffline = 1";
         JSONArray Insuree = sqlHandler.getResult(InsureeQuery, null);
         JSONObject object = null;
         int TotalInsuree = 0;
@@ -4771,7 +4770,7 @@ public class ClientAndroidInterface {
     @SuppressWarnings("unused")
     public int getTotalFamilyOnline() {
         @Language("SQL")
-        String FamilyQuery = "SELECT count(1) Families FROM tblfamilies F INNER JOIN tblInsuree I ON F.FamilyUUID = I.FamilyUUID WHERE F.isOffline = 0 AND I.isHead = 1 Group By F.FamilyUUID";
+        String FamilyQuery = "SELECT count(1) Families FROM tblfamilies F INNER JOIN tblInsuree I ON F.FamilyUUID = I.FamilyUUID WHERE F.isOffline = 2 AND I.isHead = 1 Group By F.FamilyUUID";
         JSONArray Families = sqlHandler.getResult(FamilyQuery, null);
         int TotalFamilies = 0;
         try {
@@ -4790,7 +4789,7 @@ public class ClientAndroidInterface {
     public int getTotalInsureeOnline() {
         @Language("SQL")
         //TODO: Need to verify the effect of InsureeId < 0
-        String InsureeQuery = "SELECT count(1) Insuree  FROM tblInsuree WHERE isOffline = 0"; // AND InsureeId < 0";
+        String InsureeQuery = "SELECT count(1) Insuree  FROM tblInsuree WHERE isOffline = 2";
         JSONArray Insuree = sqlHandler.getResult(InsureeQuery, null);
         int TotalInsuree = 0;
         try {
@@ -4935,6 +4934,8 @@ public class ClientAndroidInterface {
 
         String s1 = object.getString("isOffline");
         if (s1.equals("true") || s1.equals("1")) return 1;
+        if (s1.equals("false") || s1.equals("0") || s1.equals("2"))
+            return 2; // If the family was downloaded from the server then set the offline = 2, meaning it was modified
         else return 0;
     }
 

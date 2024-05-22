@@ -2,6 +2,7 @@ $(document).ready(function () {
 
     document.title = Android.getString('AddNewFamily');
     var FamilyUuid = queryString('f');
+
     if (FamilyUuid.length != 0)
         $('#btnNext').val(Android.getString("Save"));
 

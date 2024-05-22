@@ -205,8 +205,8 @@
     <string name="Version">Version</string>
     <string name="Name">Name</string>
     <string name="ReleaseDate">Release Date</string>
-    <string name="TotalFamily">Total Families</string>
-    <string name="TotalInsuree">Total Insurees</string>
+    <string name="TotalFamily">New Families</string>
+    <string name="TotalInsuree">New Insurees</string>
     <string name="TotalPolicy">Total Policies</string>
     <string name="TotalPremium">Total Contributions</string>
     <string name="UploadEnrollment">Upload Enrolments</string>

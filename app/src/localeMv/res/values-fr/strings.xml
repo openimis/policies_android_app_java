@@ -205,8 +205,8 @@
     <string name="Version">Version :</string>
     <string name="Name">Nom :</string>
     <string name="ReleaseDate">Date de sortie</string>
-    <string name="TotalFamily">Total de familles :</string>
-    <string name="TotalInsuree">Total des assurés :</string>
+    <string name="TotalFamily">Nouvelles familles</string>
+    <string name="TotalInsuree">Nouvelles assurés :</string>
     <string name="TotalPolicy">Total des contrats :</string>
     <string name="TotalPremium">Total des contributions :</string>
     <string name="UploadEnrollment">Téléverser les adhésions</string>
