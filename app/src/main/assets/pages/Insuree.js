@@ -11,7 +11,6 @@ $(document).ready(function () {
     Android.shutDownProgress();
     $("#hfNewPhotoPath").val("");
     var FamilyId = queryString('f');
-    console.log('familyId:', FamilyId)
 
     var FSPDistrictCss = $('#FSPDistrict').css('display');
     if (FSPDistrictCss == 'none') $('#FSPRegion').css("display", "none");
@@ -89,6 +88,7 @@ $(document).ready(function () {
                 }
 
             } else if(sessionStorage.getItem("SubFamilyData") !== null){
+                var FamilyId = queryString('f');
                 var SubFamilyId = Android.SaveSubFamily(sessionStorage.getItem("SubFamilyData"), jsonInsuree,parseInt(FamilyId));
                 if (SubFamilyId > 0) {
                      sessionStorage.removeItem("SubFamilyData");

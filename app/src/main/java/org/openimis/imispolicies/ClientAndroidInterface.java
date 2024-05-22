@@ -842,6 +842,7 @@ public class ClientAndroidInterface {
 
         int SubFamilyId = 0;
         int InsureeId = 0;
+        Log.e("familyId",String.valueOf(FamilyId));
 
         try {
             int MaxFamilyId = getNextAvailableFamilyId();
@@ -1283,9 +1284,29 @@ public class ClientAndroidInterface {
                 "INNER JOIN tblLocations V ON V.LocationId = F.LocationId\n" +
                 "INNER JOIN tblLocations W ON W.LocationId = V.ParentLocationId\n" +
                 "INNER JOIN tblLocations D ON D.LocationId = W.ParentLocationId\n" +
-                "INNER JOIN tblLocations R ON R.LocationId = D.ParentLocationId";
+                "INNER JOIN tblLocations R ON R.LocationId = D.ParentLocationId\n" +
+                "WHERE ParentId IS NULL";
 
         JSONArray Families = sqlHandler.getResult(Query, null);
+
+        return Families.toString();
+    }
+
+    @JavascriptInterface
+    @SuppressWarnings("unused")
+    public String getAllSubFamilies(int FamilyId) {
+        @Language("SQL")
+        String Query = "SELECT F.FamilyId, I.CHFID, I.OtherNames ||\" \"||  I.LastName InsureeName, R.LocationName RegionName, D.LocationName DistrictName, W.LocationName WardName, V.LocationName VillageName, F.isOffline, F.FamilyType \n" +
+                "FROM tblFamilies F\n" +
+                "INNER JOIN tblInsuree I ON I.InsureeId = F.InsureeId\n" +
+                "INNER JOIN tblLocations V ON V.LocationId = F.LocationId\n" +
+                "INNER JOIN tblLocations W ON W.LocationId = V.ParentLocationId\n" +
+                "INNER JOIN tblLocations D ON D.LocationId = W.ParentLocationId\n" +
+                "INNER JOIN tblLocations R ON R.LocationId = D.ParentLocationId\n" +
+                "WHERE ParentId =" + FamilyId;
+
+        JSONArray Families = sqlHandler.getResult(Query, null);
+        Log.e("subfamilies", Families.toString());
 
         return Families.toString();
     }

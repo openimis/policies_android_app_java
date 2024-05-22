@@ -14,9 +14,9 @@ $(document).ready(function () {
     Android.SetUrl(url);
 
     var Action = 'none';
-    var PolicyId = null;
+    var SubFamilyId = null;
 
-    LoadFamilyPolicies(parseInt(FamilyId));
+    LoadFamilySubFamilies(parseInt(FamilyId));
 
     $(".plusButton").click(function () {
         var url = 'FamilySubFamilies.html?f=' + FamilyId + '&l=' + LocationId + '&r=' + RegionId + '&d=' + DistrictId;
@@ -25,7 +25,7 @@ $(document).ready(function () {
     });
 
     $('.ulList li').click(function () {
-        PolicyId = parseInt($(this).find('#hfPolicyId').val());
+        SubFamilyId = parseInt($(this).find('#hfFamilyId').val());
         //window.open("PolicyPremium.html?p=" + PolicyId + "&f=" + FamilyId + "&l=" + LocationId + '&r=' + RegionId + '&d=' + DistrictId, "_self");
     });
 
@@ -97,11 +97,11 @@ $(document).ready(function () {
     contextMenu.createContextMenu(contextMenuList, contextMenuHandler);
 });
 
-function LoadFamilyPolicies(FamilyId) {
-    var Policies = Android.getFamilyPolicies(FamilyId);
-    var ctls = ["ProductCode", "ProductName", "StartDate", "ExpireDate", "PolicyValue", "PolicyStatus", "EffectiveDate", "hfPolicyId", "PolicyId", "hfIsOffline", "ControlNumber"];
-    var Columns = ["ProductCode", "ProductName", "StartDate", "ExpiryDate", "PolicyValue", "PolicyStatus", "EffectiveDate", "PolicyId", "PolicyId", "isOffline", "ControlNumber"];
-    LoadList(Policies, '.ulList', ctls, Columns);
+function LoadFamilySubFamilies(FamilyId) {
+    var SubFamilies = Android.getAllSubFamilies(FamilyId);
+    var ctls = ["hfFamilyId", "InsuranceNumber", "InsureeName", "Region", "District", "Ward", "Village", "FamilyId", "spFamilyId", "hfIsOffline", "hfFamilyType"];
+    var Columns = ["FamilyId", "CHFID", "InsureeName", "RegionName", "DistrictName", "WardName", "VillageName", "FamilyId", "FamilyId", "isOffline", "FamilyType"];
+    LoadList(SubFamilies, '.ulList', ctls, Columns);
 }
 
 function AssignDotClass() {

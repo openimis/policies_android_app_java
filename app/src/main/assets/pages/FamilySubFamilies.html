@@ -47,44 +47,19 @@ In case of dispute arising out or in relation to the use of the program, it is s
 
 <div>
     <ul class="ulList">
-        <li>
-            <div class="PolicyFamilyTop">
+        <li class="dot-side-menu">
+            <div>
                 <input type="hidden" id="hfIsOffline" value="1">
-                <input type="hidden" id="hfPolicyId" value="0">
-                <h3 class="left" id="ProductCode"></h3>
-                <h3 class="right" id="PolicyStatus"></h3>
-                <div class="dropdown">
-                    <div id="menuDrop" class="dropdown-content">
-                        <ul class="ulMenu">
-                            <li id="liEdit">Edit</li>
-                            <li id="liDelete">Delete</li>
-                            <li id="liPay">Payment</li>
-
-                        </ul>
-                    </div>
-                    <div class="clearFix"></div>
-                </div>
+                <input type="hidden" id="hfFamilyId" value="0" />
+                <input type="hidden" id="hfFamilyType" />
+                <h3 id="InsuranceNumber"></h3>
             </div>
 
-
-            <h4 id="ProductName"></h4>
-            <p>
-                <span class="spLabel">Effective Date : </span>
-                <span id="EffectiveDate"></span>
-                <span class="spLabel">Expire Date :</span>
-                <span id="ExpireDate"></span>
-            </p>
-            <p>
-                <span class="spLabel">Start Date : </span>
-                <span id="StartDate"></span>
-                <span class="spLabel">Policy Value : </span>
-                <label id="PolicyValue"></label>
-            </p>
-            <p id="ControlNumberSection">
-                <span class="spLabel">Control Number : </span>
-                <span id="ControlNumber"></span>
-            </p>
-
+            <div>
+                <h4 id="InsureeName"></h4>
+                <span id="Region"></span> &#8594; <span id="District"></span> &#8594; <span
+                    id="Ward"></span> &#8594; <span id="Village"></span>
+            </div>
         </li>
     </ul>
 </div>
