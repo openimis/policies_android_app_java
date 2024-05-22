@@ -21,8 +21,7 @@ $(document).ready(function () {
     $(".plusButton").click(function () {
         var url = 'FamilySubFamilies.html?f=' + FamilyId + '&l=' + LocationId + '&r=' + RegionId + '&d=' + DistrictId;
         Android.SetUrl(url);
-        window.open('SubFamily.html?f=' + FamilyId + '&l=' + LocationId + '&p=' + 0 + '&r=' + RegionId + '&d=' + DistrictId, '_self');
-
+        window.open('SubFamily.html?f=' + FamilyId + '&sf=0', '_self');
     });
 
     $('.ulList li').click(function () {

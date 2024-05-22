@@ -1,7 +1,7 @@
 $(document).ready(function () {
 
     //Hide the relationship if the insuree is the HOF
-    if (sessionStorage.getItem("FamilyData") !== null) {
+    if (sessionStorage.getItem("FamilyData") !== null || sessionStorage.getItem("SubFamilyData") !== null) {
         $("#Relationship").hide();
         $("#ddlRelationship").prop("required", false);
     }
@@ -10,6 +10,8 @@ $(document).ready(function () {
     document.title = Android.getString('AddEditInsuree');
     Android.shutDownProgress();
     $("#hfNewPhotoPath").val("");
+    var FamilyId = queryString('f');
+    console.log('familyId:', FamilyId)
 
     var FSPDistrictCss = $('#FSPDistrict').css('display');
     if (FSPDistrictCss == 'none') $('#FSPRegion').css("display", "none");
@@ -86,6 +88,13 @@ $(document).ready(function () {
                     }
                 }
 
+            } else if(sessionStorage.getItem("SubFamilyData") !== null){
+                var SubFamilyId = Android.SaveSubFamily(sessionStorage.getItem("SubFamilyData"), jsonInsuree,parseInt(FamilyId));
+                if (SubFamilyId > 0) {
+                     sessionStorage.removeItem("SubFamilyData");
+                         $(this).attr("disabled", "disabled");
+                         window.open("FamilyAndInsurees.html?f=" + SubFamilyId, "_self");
+                     }
             } else {
                 var FamilyId = parseInt(queryString('f'));
                 var FamilyPolicy = Android.getFamilyPolicy(FamilyId);

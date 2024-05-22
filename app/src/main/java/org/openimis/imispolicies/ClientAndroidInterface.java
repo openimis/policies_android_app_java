@@ -460,7 +460,6 @@ public class ClientAndroidInterface {
         String OrderBy = "SortOrder";
 
         JSONArray GroupTypes = sqlHandler.getResult(tableName, columns, null, OrderBy);
-        Log.e("familyType", GroupTypes.toString());
 
         return GroupTypes.toString();
     }
@@ -845,7 +844,7 @@ public class ClientAndroidInterface {
         int InsureeId = 0;
 
         try {
-            int MaxFamilyId = getNextAvailableSubFamilyId();
+            int MaxFamilyId = getNextAvailableFamilyId();
 
             if (InsureeData.length() > 0) {
                 int validation = isValidInsureeData(jsonToTable(InsureeData));
@@ -887,12 +886,12 @@ public class ClientAndroidInterface {
             values.put("Ethnicity", Ethnicity);
             values.put("ConfirmationNo", ConfirmationNo);
             values.put("ConfirmationType", ConfirmationType);
-            values.put("FamilyId", FamilyId);
+            values.put("ParentId", FamilyId);
 
             if (SubFamilyId == 0) {
                 values.put("isOffline", isOffline);
-                values.put("SubFamilyId", MaxFamilyId);
-                sqlHandler.insertData("tblSubFamilies", values);
+                values.put("FamilyId", MaxFamilyId);
+                sqlHandler.insertData("tblFamilies", values);
                 SubFamilyId = MaxFamilyId;
             } else {
                 int Online = 2;
@@ -900,7 +899,7 @@ public class ClientAndroidInterface {
                     isOffline = 0;
                     values.put("isOffline", 2);
                 }
-                sqlHandler.updateData("tblSubFamilies", values, "SubFamilyId = ? AND (isOffline = ? OR isOffline = ?) ", new String[]{String.valueOf(SubFamilyId), String.valueOf(isOffline), String.valueOf(Online)}, false);
+                sqlHandler.updateData("tblFamilies", values, "FamilyId = ? AND (isOffline = ? OR isOffline = ?) ", new String[]{String.valueOf(SubFamilyId), String.valueOf(isOffline), String.valueOf(Online)}, false);
             }
             if (InsureeData.length() > 0) {
                 //Insert Insuree
@@ -917,13 +916,13 @@ public class ClientAndroidInterface {
                     cvUpdate.put("isOffline", 2);
                 }
 
-                String[] whereArgs = {String.valueOf(FamilyId)};
+                String[] whereArgs = {String.valueOf(SubFamilyId)};
 
-                sqlHandler.updateData("tblSubFamilies", cvUpdate, "SubFamilyId= ?", whereArgs);
+                sqlHandler.updateData("tblFamilies", cvUpdate, "FamilyId= ?", whereArgs);
             }
             addOrUpdateFamilySmsFromDll(FamilyId, data);
 
-            return FamilyId;
+            return SubFamilyId;
 
         } catch (UserException e) {
             e.printStackTrace();
@@ -5406,10 +5405,6 @@ public class ClientAndroidInterface {
 
     private int getNextAvailableFamilyId() {
         return getMaxIdFromTable("FamilyId", "tblFamilies");
-    }
-
-    private int getNextAvailableSubFamilyId() {
-        return getMaxIdFromTable("SubFamilyId", "tblSubFamilies");
     }
 
     private int getNextAvailablePremiumId() {

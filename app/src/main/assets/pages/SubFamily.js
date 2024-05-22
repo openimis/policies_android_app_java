@@ -2,9 +2,9 @@ $(document).ready(function () {
 
     document.title = Android.getString('AddNewSubFamily');
     var FamilyId = queryString('f');
-    var SubFamilyId = queryString('sf');
+    var SubFamilyId = queryString('sf')
 
-    if (parseInt(FamilyId) != 0)
+    if (parseInt(SubFamilyId) != 0)
         $('#btnNext').val(Android.getString("Save"));
 
     fillDropdowns();
@@ -30,9 +30,14 @@ $(document).ready(function () {
         var passed = isFormValidated();
 
         if (passed == true) {
-            var SubFamilyId = Android.SaveSubFamily(sessionStorage.getItem("SubFamilyData"), jsonInsuree, parseInt(FamilyId));
-            window.open('FamilySubFamilies.html?f=' + FamilyId, '_self');
-            window.open('SubInsuree.html?f=' + FamilyId + '&sf=' + SubFamilyId, "_self");
+            if (SubFamilyId == 0 || SubFamilyId == null || SubFamilyId == undefined) {
+                saveFamilyLocally();
+                window.open("Insuree.html?f=" + FamilyId, "_self");
+            } else {
+                var subFamilyData = createJSONString();
+                Android.SaveFamily(subFamilyData, '');
+                window.open("FamilyAndInsurees.html?f=" + SubFamilyId, "_self");
+            }
         }
         else
             Android.ShowDialog(Android.getString('FieldRequired'));
@@ -40,8 +45,8 @@ $(document).ready(function () {
 
     //if FamilyId > 0; Load family
 
-    if (parseInt(FamilyId) != 0) {
-        var strFamily = Android.getFamily(parseInt(FamilyId));
+    if (parseInt(SubFamilyId) != 0) {
+        var strFamily = Android.getFamily(parseInt(SubFamilyId));
 
         var $Family = $.parseJSON(strFamily);
         $("#ddlRegion").val($Family[0]["RegionId"]).trigger("change");
@@ -82,7 +87,7 @@ function fillDropdowns() {
     getLanguageOfSMS();
 }
 
-function saveSubFamilyLocally() {
+function saveFamilyLocally() {
     var jsonFamily = getControlsValuesJSON('li');
     sessionStorage.setItem("SubFamilyData", jsonFamily);
 }
