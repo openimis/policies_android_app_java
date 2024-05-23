@@ -13,6 +13,7 @@ $(document).ready(function () {
 
     $('.ulList li').click(function () {
         FamilyId = parseInt($(this).find('#hfFamilyId').val());
+        FamilyType = $(this).find('#hfFamilyType').val();
         //<!--window.open('FamilyAndInsurees.html?f=' + FamilyId, '_self');-->
 
     });
@@ -23,7 +24,11 @@ $(document).ready(function () {
         if (clicked == Android.getString('Edit')) {
             var url = 'Enrollment.html?f=' + FamilyId;
             Android.SetUrl(url);
-            window.open('FamilyAndInsurees.html?f=' + FamilyId, '_self');
+            if(FamilyType == "P"){
+                window.open('FamilyPolygamy.html?f=' + FamilyId, '_self');
+            }else{
+                window.open('FamilyAndInsurees.html?f=' + FamilyId, '_self');
+            }
         }
         else if (clicked == Android.getString('Delete')) {
             var isOffline = Android.getFamilyStat(FamilyId);
@@ -86,8 +91,8 @@ $(document).ready(function () {
 
 function LoadFamilies() {
     var Families = Android.getAllFamilies();
-    var ctls = ["hfFamilyId", "InsuranceNumber", "InsureeName", "Region", "District", "Ward", "Village", "FamilyId", "spFamilyId", "hfIsOffline"];
-    var Columns = ["FamilyId", "CHFID", "InsureeName", "RegionName", "DistrictName", "WardName", "VillageName", "FamilyId", "FamilyId", "isOffline"];
+    var ctls = ["hfFamilyId", "InsuranceNumber", "InsureeName", "Region", "District", "Ward", "Village", "FamilyId", "spFamilyId", "hfIsOffline", "hfFamilyType"];
+    var Columns = ["FamilyId", "CHFID", "InsureeName", "RegionName", "DistrictName", "WardName", "VillageName", "FamilyId", "FamilyId", "isOffline", "FamilyType"];
     LoadList(Families, '.ulList', ctls, Columns);
 }
 

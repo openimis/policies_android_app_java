@@ -127,6 +127,7 @@
     <string name="FamilyHasPolicy">La famille a un contrat, veuillez d\'abord supprimer le contrat.</string>
     <string name="InsureeNotDeleted">Assuré non supprimé</string>
     <string name="FamilyDeleted">Famille supprimée</string>
+    <string name="SubFamilyDeleted">Sous-famille supprimée</string>
     <string name="Scan">Scanner</string>
     <string name="InsureeName">Nom de l\'assuré</string>
     <string name="ReadOnly">La carte SD est en mode lecture seule. Veuillez régler le mode de lecture/écriture et redémarrer l\'application.</string>
@@ -485,4 +486,6 @@
     <string name="ProfessionalSituation">Situation Professionnelle</string>
     <string name="SelectIncomeLevel">Choisir le niveau de revenu</string>
     <string name="IncomeLevel">Niveau de revenu</string>
+    <string name="FamilyAndSubFamilies">Famille et sous-familles</string>
+    <string name="AddNewSubFamily">Ajouter une sous-famille</string>
 </resources>

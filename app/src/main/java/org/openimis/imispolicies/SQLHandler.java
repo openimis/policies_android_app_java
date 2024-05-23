@@ -142,7 +142,9 @@ public class SQLHandler extends SQLiteOpenHelper {
                             "FamilyAddress TEXT," +
                             "Ethnicity TEXT," +
                             "ConfirmationNo TEXT," +
-                            "ConfirmationType TEXT" + ")"
+                            "ConfirmationType TEXT," +
+                            "ParentId INTEGER" +
+                            ")"
             );
             sqLiteDatabase.execSQL(
                     "CREATE TABLE " + tblFamilyTypes + "(" +
