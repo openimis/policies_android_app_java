@@ -127,6 +127,7 @@
     <string name="FamilyHasPolicy">Family has policy please delete the policy first</string>
     <string name="InsureeNotDeleted">Insuree has not deleted</string>
     <string name="FamilyDeleted">Family deleted</string>
+    <string name="SubFamilyDeleted">SubFamily deleted</string>
     <string name="Scan">Scan</string>
     <string name="InsureeName">Insuree Name</string>
     <string name="ReadOnly">SD Card is set to readonly mode. Please set the mode to read/write and restart the application.</string>

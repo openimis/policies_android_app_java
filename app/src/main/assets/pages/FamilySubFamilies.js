@@ -31,26 +31,22 @@ $(document).ready(function () {
 
     AssignDotClass();
 
-    contextMenuHandler = function () {
+    contextMenu.createContextMenu([Android.getString('Edit'), Android.getString('Delete')], function () {
         var clicked = $(this).text();
         if (clicked == Android.getString('Edit')) {
-            var url = 'FamilyPolicies.html?f=' + FamilyId + '&l=' + LocationId + '&r=' + RegionId + '&d=' + DistrictId;
+            var url = 'FamilySubFamilies.html?f=' + FamilyId + '&l=' + LocationId + '&r=' + RegionId + '&d=' + DistrictId;
             Android.SetUrl(url);
-            window.open("Policy.html?p=" + PolicyId + "&f=" + FamilyId + "&l=" + LocationId + '&r=' + RegionId + '&d=' + DistrictId, "_self");
-        }
-        else if (clicked == Android.getString('Payment')) {
-            var url = 'FamilyPolicies.html?f=' + FamilyId + '&l=' + LocationId + '&r=' + RegionId + '&d=' + DistrictId;
-            Android.SetUrl(url);
-
-            window.open("PolicyPremium.html?p=" + PolicyId + "&f=" + FamilyId + "&l=" + LocationId + '&r=' + RegionId + '&d=' + DistrictId, "_self");
-
+            window.open('FamilyAndInsurees.html?f=' + SubFamilyId + '&type=P', '_self');
         }
         else if (clicked == Android.getString('Delete')) {
-            var isOffline = $('#hfIsOffline').val();
-            var PolicyDeleted = -1;
-            $('#msgAlert').text(Android.getString('DeletePolicyPremium'));
-            var isOffline = $('#hfIsOffline').val();
-            var deletedSuccess = -1;
+            var isOffline = Android.getFamilyStat(SubFamilyId);
+            if (isOffline == 0 || isOffline == 2) {
+                $('#msgAlert').text(Android.getString('DeleteFamilyOnlyOffline'));
+            } else {
+                $('#msgAlert').text(Android.getString('DeleteFamily'));
+            }
+            var isOffline = Android.getFamilyStat(SubFamilyId);
+            var deletedSuccess = 0;
             $("#dialog-confirm").dialog({
                 resizable: false,
                 height: "auto",
@@ -62,18 +58,29 @@ $(document).ready(function () {
                         click: function () {
 
                             if (isOffline == 0 || isOffline == 2) {
+                                //deletedSuccess = parseInt(Android.DeleteOnlineData(FamilyId, 'F'));
+                                var resul = Android.DeleteOnlineDataF(SubFamilyId);
+                                if (resul == 1) {
+                                    window.open('FamilySubFamilies.html?f=' + FamilyId, '_self');
+                                    Android.ShowDialog(Android.getString('SubFamilyDeleted'));
+                                    //Android.informUser();
+                                }
+                            } else {
+                                deletedSuccess = parseInt(Android.DeleteFamily(SubFamilyId));
+                                LoadFamilySubFamilies();
+                            }
+                            if (deletedSuccess == 1) {
 
-                                PolicyDeleted = parseInt(Android.DeleteOnlineData(PolicyId, 'PO'));
-                            }
-                            else {
-                                PolicyDeleted = Android.DeletePolicy(PolicyId);
-                            }
-                            if (PolicyDeleted == 1) {
-                                Android.ShowDialog(Android.getString('PolicyDeleted'));
-                                window.open('FamilyPolicies.html?f=' + FamilyId + "&l=" + LocationId + '&r=' + RegionId + '&d=' + DistrictId, "_self");
-                            }
-                            else if (PolicyDeleted == -1) {
+                                Android.ShowDialog(Android.getString('SubFamilyDeleted'));
+                                window.open('FamilySubFamilies.html?f=' + FamilyId, '_self');
+                            } else if (deletedSuccess == -1) {
                                 Android.ShowDialog(Android.getString('LoginToDeleteOnlineData'));
+                            } else if (deletedSuccess == 3) {
+                                var resul = Android.DeleteOnlineDataF(SubFamilyId);
+                                if (resul == 1) {
+                                    window.open('FamilySubFamilies.html?f=' + FamilyId, '_self');
+                                    Android.informUser();
+                                }
                             }
                             $(this).dialog("close");
                         }
@@ -86,15 +93,8 @@ $(document).ready(function () {
                     }
                 ]
             });
-        }
-    }
-
-    contextMenuList = [Android.getString('Edit'), Android.getString('Delete')];
-    if(Android.getRule('ShowPaymentOption', true)) {
-        contextMenuList.push(Android.getString('Payment'));
-    }
-
-    contextMenu.createContextMenu(contextMenuList, contextMenuHandler);
+        };
+    })
 });
 
 function LoadFamilySubFamilies(FamilyId) {

@@ -10,7 +10,9 @@ $(document).ready(function () {
     var Action = null;
 
     var url = 'Enrollment.html?f=' + FamilyId;
-    Android.SetUrl(url);
+    if(queryString("type") != "P"){
+        Android.SetUrl(url);
+    }
 
     if (FamilyId != 0) {
         LoadFamilyHeader(parseInt(FamilyId))
