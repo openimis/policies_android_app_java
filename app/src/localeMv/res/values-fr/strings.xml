@@ -128,6 +128,7 @@
     <string name="InsureeNotDeleted">Assuré non supprimé</string>
     <string name="FamilyDeleted">Famille supprimée</string>
     <string name="SubFamilyDeleted">Sous-famille supprimée</string>
+    <string name="SubFamilyDetached">Sous-famille détachée</string>
     <string name="Scan">Scanner</string>
     <string name="InsureeName">Nom de l\'assuré</string>
     <string name="ReadOnly">La carte SD est en mode lecture seule. Veuillez régler le mode de lecture/écriture et redémarrer l\'application.</string>
@@ -488,4 +489,7 @@
     <string name="IncomeLevel">Niveau de revenu</string>
     <string name="FamilyAndSubFamilies">Famille et sous-familles</string>
     <string name="AddNewSubFamily">Ajouter une sous-famille</string>
+    <string name="Detach">Détacher</string>
+    <string name="ErrorDetach">Erreur lors du détachement de la sous-famille</string>
+    <string name="DetachFamily">Le détachement de la sous-famille transformera celle-ci en famille simple</string>
 </resources>
