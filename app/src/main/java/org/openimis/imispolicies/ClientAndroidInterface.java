@@ -2418,6 +2418,16 @@ public class ClientAndroidInterface {
         return 1;
     }
 
+    @JavascriptInterface
+    @SuppressWarnings("unused")
+    public int DetachFamily(int FamilyId){
+        String[] familyIdArgument = new String[]{String.valueOf(FamilyId)};
+        @Language("SQL")
+        String FamilyQuery = "UPDATE  tblFamilies SET ParentId = NULL WHERE FamilyId = ?";
+        sqlHandler.getResult(FamilyQuery, familyIdArgument);
+        return 1;
+    }
+
     public String OfflineEnquire(String CHFID) {
         sqlHandler.isPrivate = false;
         @Language("SQL")

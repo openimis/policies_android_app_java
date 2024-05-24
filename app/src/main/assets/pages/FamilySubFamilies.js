@@ -31,12 +31,42 @@ $(document).ready(function () {
 
     AssignDotClass();
 
-    contextMenu.createContextMenu([Android.getString('Edit'), Android.getString('Delete')], function () {
+    contextMenu.createContextMenu([Android.getString('Edit'), Android.getString('Detach'), Android.getString('Delete')], function () {
         var clicked = $(this).text();
         if (clicked == Android.getString('Edit')) {
             var url = 'FamilySubFamilies.html?f=' + FamilyId + '&l=' + LocationId + '&r=' + RegionId + '&d=' + DistrictId;
             Android.SetUrl(url);
             window.open('FamilyAndInsurees.html?f=' + SubFamilyId + '&type=P', '_self');
+        }
+        if (clicked == Android.getString('Detach')) {
+            var detachSuccess = 0;
+            $('#msgAlert').text(Android.getString('DetachFamily'));
+            $("#dialog-confirm").dialog({
+                resizable: false,
+                height: "auto",
+                width: 350,
+                modal: true,
+                buttons: [
+                    {
+                        text: Android.getString("Ok"),
+                        click: function () {
+                            detachSuccess = parseInt(Android.DetachFamily(SubFamilyId));
+                            if (detachSuccess == 1) {
+                                Android.ShowDialog(Android.getString('SubFamilyDetached'));
+                                window.open('FamilySubFamilies.html?f=' + FamilyId, '_self');
+                            } else if (detachSuccess == -1) {
+                                Android.ShowDialog(Android.getString('ErrorDetach'));
+                            }
+                        }
+                    },
+                    {
+                        text: Android.getString("Cancel"),
+                        click: function () {
+                            $(this).dialog("close");
+                        }
+                    }
+                ]
+            });
         }
         else if (clicked == Android.getString('Delete')) {
             var isOffline = Android.getFamilyStat(SubFamilyId);
