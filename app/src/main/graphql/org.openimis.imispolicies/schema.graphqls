@@ -6886,6 +6886,9 @@ input CreateInsureeMutationInput {
   residentialDistrict: String
   residentialProvince: String
   houseNumber: String
+  professionalSituation: String
+  incomeLevelId: Int
+  preferredPaymentMethod: String
   clientMutationId: String
 }
 
@@ -6942,6 +6945,9 @@ input UpdateInsureeMutationInput {
   residentialAlley: String
   isLocal: String
   usualResidence: String
+  professionalSituation: String
+  incomeLevelId: Int
+  preferredPaymentMethod: String
   occupation: String
   fatherName: String
   motherName: String
