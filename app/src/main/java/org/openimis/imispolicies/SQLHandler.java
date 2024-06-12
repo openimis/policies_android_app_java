@@ -91,6 +91,7 @@ public class SQLHandler extends SQLiteOpenHelper {
     public static final String tblBulkControlNumbers = "tblBulkControlNumbers";
     public static final String tblFamilySMS = "tblFamilySMS";
     public static final String tblIncomeLevel = "tblIncomeLevel";
+    public static final String tblContributionPlan = "tblContributionPlan";
 
     public SQLHandler(Context context) {
         super(context, DBNAME, null, DATABASE_VERSION);
@@ -282,6 +283,7 @@ public class SQLHandler extends SQLiteOpenHelper {
                             "PolicyStatus NUMERIC," +
                             "PolicyValue NUMERIC," +
                             "ProdId NUMERIC," +
+                            "ContributionPlanId NUMERIC," +
                             "OfficerId NUMERIC," +
                             "isOffline NUMERIC," +
                             "PolicyStage TEXT" + ")"
@@ -423,6 +425,17 @@ public class SQLHandler extends SQLiteOpenHelper {
                             "Id INTEGER," +
                             "FrenchVersion TEXT," +
                             "EnglishVersion TEXT" +")"
+            );
+            sqLiteDatabase.execSQL(
+                    "CREATE TABLE " + tblContributionPlan + "(" +
+                            "Id INTEGER," +
+                            "Code TEXT," +
+                            "Name TEXT," +
+                            "ProductId INTEGER," +
+                            "CalculationRules TEXT,"+
+                            "Periodicity TEXT," +
+                            "ValidFrom DATE," +
+                            "ValidTo Date" +")"
             );
         } catch (Exception e) {
             e.printStackTrace();

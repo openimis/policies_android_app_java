@@ -82,7 +82,7 @@ android {
     productFlavors {
         demoProd {
             applicationId "org.openimis.imispolicies.demoProd"
-            buildConfigField "String", "API_BASE_URL", '"https://develop.openimis.org/"'
+            buildConfigField "String", "API_BASE_URL", '"https://demo.openimis.org/"'
             resValue "string", "app_name_policies", "Policies Demo"
             dimension = 'std'
         }
@@ -244,5 +244,4 @@ dependencies {
     androidTestImplementation('androidx.test.espresso:espresso-core:3.1.0', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    testImplementation 'junit:junit:4.13.2'
 }

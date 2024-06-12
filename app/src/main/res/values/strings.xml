@@ -485,4 +485,6 @@
     <string name="Detach">Detach</string>
     <string name="ErrorDetach">Error while detached family</string>
     <string name="DetachFamily">Detach family will make this sub-family to be a family</string>
+    <string name="SelectContribution">Select contribution plan</string>
+    <string name="ContributionPlan">Contribution Plan</string>
 </resources>
