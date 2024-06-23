@@ -326,6 +326,16 @@ public class ClientAndroidInterface {
         return true;
     }
 
+    @JavascriptInterface
+    @SuppressWarnings("unused")
+    public boolean isValidIdentificationNumber(String identificationnumber) {
+        if (identificationnumber.length() < 7) {
+            ShowDialog(activity.getResources().getString(R.string.InvalidIdentificationNumber));
+            return false;
+        }
+        return true;
+    }
+
     //get Region Without Officer
     @JavascriptInterface
     @SuppressWarnings("unused")
@@ -4254,10 +4264,11 @@ public class ClientAndroidInterface {
     private void processNewFormat(JSONObject masterData) throws UserException {
         try {
             JSONArray IncomeLevels = new JSONArray();
+            JSONArray FamilyTypes = new JSONArray();
             insertConfirmationTypes((JSONArray) masterData.get("confirmationTypes"));
             insertControls((JSONArray) masterData.get("controls"));
             insertEducation((JSONArray) masterData.get("education"));
-            insertFamilyTypes((JSONArray) masterData.get("familyTypes"));
+            //insertFamilyTypes((JSONArray) masterData.get("familyTypes"));
             insertHF((JSONArray) masterData.get("hf"));
             insertIdentificationTypes((JSONArray) masterData.get("identificationTypes"));
             insertLanguages((JSONArray) masterData.get("languages"));
@@ -4269,6 +4280,23 @@ public class ClientAndroidInterface {
             insertRelations((JSONArray) masterData.get("relations"));
             insertPhoneDefaults((JSONArray) masterData.get("phoneDefaults"));
             insertGenders((JSONArray) masterData.get("genders"));
+
+            //insert custom FamilyTypes
+            JSONObject fType = new JSONObject();
+            fType.put("FamilyTypeCode", "F");
+            fType.put("FamilyType", "Family");
+            fType.put("SortOrder", 1);
+            fType.put("AltLanguage", "Famille");
+            FamilyTypes.put(fType);
+
+            fType = new JSONObject();
+            fType.put("FamilyTypeCode", "P");
+            fType.put("FamilyType", "Household");
+            fType.put("SortOrder", 2);
+            fType.put("AltLanguage", "Ménage");
+            FamilyTypes.put(fType);
+
+            insertFamilyTypes(FamilyTypes);
 
             JSONObject object = new JSONObject();
             object.put("Id", "0");
@@ -4286,6 +4314,48 @@ public class ClientAndroidInterface {
             object.put("Id", "2");
             object.put("FrenchVersion", "30.000 - 40.000");
             object.put("EnglishVersion", "30.000 - 40.000");
+            IncomeLevels.put(object);
+
+            object = new JSONObject();
+            object.put("Id", "3");
+            object.put("FrenchVersion", "40.000 - 50.000");
+            object.put("EnglishVersion", "40.000 - 50.000");
+            IncomeLevels.put(object);
+
+            object = new JSONObject();
+            object.put("Id", "4");
+            object.put("FrenchVersion", "50.000 - 60.000");
+            object.put("EnglishVersion", "50.000 - 60.000");
+            IncomeLevels.put(object);
+
+            object = new JSONObject();
+            object.put("Id", "5");
+            object.put("FrenchVersion", "60.000 - 75.000");
+            object.put("EnglishVersion", "60.000 - 75.000");
+            IncomeLevels.put(object);
+
+            object = new JSONObject();
+            object.put("Id", "6");
+            object.put("FrenchVersion", "75.000 - 200.000");
+            object.put("EnglishVersion", "75.000 - 200.000");
+            IncomeLevels.put(object);
+
+            object = new JSONObject();
+            object.put("Id", "7");
+            object.put("FrenchVersion", "200.000 - 300.000");
+            object.put("EnglishVersion", "200.000 - 300.000");
+            IncomeLevels.put(object);
+
+            object = new JSONObject();
+            object.put("Id", "8");
+            object.put("FrenchVersion", "300.000 - 600.000");
+            object.put("EnglishVersion", "300.000 - 600.000");
+            IncomeLevels.put(object);
+
+            object = new JSONObject();
+            object.put("Id", "9");
+            object.put("FrenchVersion", "> 600.000");
+            object.put("EnglishVersion", "> 600.000");
             IncomeLevels.put(object);
 
             insertIncomeLevel(IncomeLevels);

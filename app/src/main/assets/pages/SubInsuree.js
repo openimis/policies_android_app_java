@@ -60,6 +60,19 @@ $(document).ready(function () {
         $("#hfNewPhotoPath").val("");
     });
 
+    $('#txtBirthDate').change(function () {
+        fillAge($(this).val());
+    });
+
+    $("#txtIdentificationNumber").change(function(){
+        var Ins = $('#txtIdentificationNumber').val();
+        var ans = Android.isValidIdentificationNumber(Ins);
+        if (ans != true) {
+            $('#txtIdentificationNumber').val("");
+            $('#txtInsuranceNumber').focus();
+        }
+    })
+
 
     $('#spPleaseWait').text(Android.getString('saving'));
 
@@ -367,4 +380,17 @@ function getImage() {
         $('#imgInsuree').attr('src', '');
     }
     $("#hfImagePath").val($('#imgInsuree').attr('src'));
+}
+
+function fillAge(Birthday){
+    var today = new Date ();
+    var birthDate = new Date (Birthday)
+
+    var age = today.getFullYear() - birthDate.getFullYear();
+
+    if(age < 21){
+        $("#Education").show();
+    }else{
+        $("#Education").hide();
+    }
 }

@@ -492,4 +492,5 @@
     <string name="Detach">Détacher</string>
     <string name="ErrorDetach">Erreur lors du détachement de la sous-famille</string>
     <string name="DetachFamily">Le détachement de la sous-famille transformera celle-ci en famille simple</string>
+    <string name="InvalidIdentificationNumber">Le numéro d\'identification doit contenir 7 caractères</string>
 </resources>
