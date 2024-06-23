@@ -25,7 +25,8 @@ $(document).ready(function () {
     $("#ddlOfficer").val(parseInt(OfficerId));
 
     //LoadOfficers(LocationId, null);
-    LoadProduct(RegionId, DistrictId, null);
+    //LoadProduct(RegionId, DistrictId, null);
+    LoadContributionPlan(null);
 
     if (policyId != 0) {
         var strPolicy = Android.getPolicy(policyId);
@@ -86,7 +87,7 @@ $(document).ready(function () {
     $('#txtEnrolmentDate, #ddlProduct').change(function () {
         var EnrolmentDate = $('#txtEnrolmentDate').val();
         var ProdId = $('#ddlProduct').val();
-        getPolicyPeriod(EnrolmentDate, parseInt(ProdId), parseInt(FamilyId), parseInt(policyId));
+        //getPolicyPeriod(EnrolmentDate, parseInt(ProdId), parseInt(FamilyId), parseInt(policyId));
 
     });
 
@@ -105,6 +106,20 @@ $(document).ready(function () {
                 $('#AssignedControlNumber').val(controlNumber);
             }
         }
+    });
+
+    $('#ddlContributionPlan').change(function () {
+           var CPId = $('#ddlContributionPlan').val();
+           var policyValue = Android.GetContributionPlanValue(parseInt(FamilyId),CPId);
+           var finalValue;
+           console.log("calculation rule object:",policyValue);
+           var fun = JSON.parse(policyValue);
+           with(fun) {
+                   // prints "foo"
+                   console.log("final value:",eval(f));
+                   finalValue = eval(f);
+               }
+           $('#hfPolicyValue').val(finalValue);
     });
 
     function savePolicy() {
@@ -159,8 +174,8 @@ $(document).ready(function () {
 
     $('#txtStartDate').change(function () {
         var txtStartDate = $('#txtStartDate').val();
-        var ProdId = $('#ddlProduct').val();
-        getPolicyPeriod(txtStartDate, parseInt(ProdId), parseInt(FamilyId), parseInt(policyId));
+        var CPId = $('#ddlContributionPlan').val();
+        //getPolicyPeriod(txtStartDate, parseInt(CPId), parseInt(FamilyId), parseInt(policyId));
     });
 });
 
@@ -205,6 +220,11 @@ function LoadOfficers(LocationId, EnrolmentDate) {
 function LoadProduct(RegionId, DistrictId, EnrolmentDate) {
     var $Products = Android.getProducts(parseInt(RegionId), parseInt(DistrictId), EnrolmentDate);
     bindDropdown('ddlProduct', $Products, 'ProdId', 'ProductNameCombined', 0, Android.getString('SelectProduct'));
+}
+
+function LoadContributionPlan(EnrolmentDate) {
+    var $ContributionPlans = Android.getContributionPlans(EnrolmentDate);
+    bindDropdown('ddlContributionPlan', $ContributionPlans, 'Id', 'CombinedName', 0, Android.getString('SelectContribution'));
 }
 
 function createJSONString() {

@@ -34,6 +34,10 @@ public class Family implements Parcelable {
     @Nullable
     private final String confirmationType;
     private final boolean isOffline;
+
+    @Nullable
+    private final Integer parentId;
+
     @NonNull
     private final List<Member> members;
 
@@ -53,6 +57,7 @@ public class Family implements Parcelable {
             @Nullable String confirmationNumber,
             @Nullable String confirmationType,
             boolean isOffline,
+            @Nullable Integer parentId,
             @NonNull List<Member> members
     ) {
         this.headChfId = headChfId;
@@ -67,6 +72,7 @@ public class Family implements Parcelable {
         this.confirmationNumber = confirmationNumber;
         this.confirmationType = confirmationType;
         this.isOffline = isOffline;
+        this.parentId = parentId;
         this.members = members;
     }
 
@@ -88,6 +94,8 @@ public class Family implements Parcelable {
         confirmationNumber = in.readString();
         confirmationType = in.readString();
         isOffline = in.readByte() != 0;
+        int pId = in.readInt();
+        parentId = pId;
         members = Objects.requireNonNull(in.createTypedArrayList(Member.CREATOR));
     }
 
@@ -105,6 +113,7 @@ public class Family implements Parcelable {
         dest.writeString(confirmationNumber);
         dest.writeString(confirmationType);
         dest.writeByte((byte) (isOffline ? 1 : 0));
+        dest.writeInt(parentId);
         dest.writeTypedList(members);
     }
 
@@ -177,6 +186,11 @@ public class Family implements Parcelable {
 
     public boolean isOffline() {
         return isOffline;
+    }
+
+    @Nullable
+    public Integer getParentId() {
+        return parentId;
     }
 
     @NonNull
@@ -293,6 +307,16 @@ public class Family implements Parcelable {
         private final Integer currentVillage;
         @Nullable
         private final String geolocation;
+
+        @Nullable
+        private final String professionalSituation;
+
+        @Nullable
+        private final Integer incomeLevel;
+
+        @Nullable
+        private final String paymentMethod;
+
         @Nullable
         private final String photoPath;
         @Nullable
@@ -323,6 +347,9 @@ public class Family implements Parcelable {
                 @Nullable String currentAddress,
                 @Nullable Integer currentVillage,
                 @Nullable String geolocation,
+                @Nullable String professionalSituation,
+                @Nullable Integer incomeLevel,
+                @Nullable String paymentMethod,
                 @Nullable String photoPath,
                 @Nullable byte[] photoBytes,
                 boolean isOffline
@@ -350,6 +377,9 @@ public class Family implements Parcelable {
             this.currentAddress = currentAddress;
             this.currentVillage = currentVillage;
             this.geolocation = geolocation;
+            this.professionalSituation = professionalSituation;
+            this.incomeLevel = incomeLevel;
+            this.paymentMethod = paymentMethod;
             this.photoPath = photoPath;
             this.photoBytes = photoBytes;
             this.isOffline = isOffline;
@@ -393,6 +423,9 @@ public class Family implements Parcelable {
             int villageId = in.readInt();
             currentVillage = villageId != -1 ? villageId : null;
             geolocation = in.readString();
+            professionalSituation = in.readString();
+            incomeLevel = in.readInt();
+            paymentMethod = in.readString();
             photoPath = in.readString();
             int size = in.readInt();
             if (size >= 0) {
@@ -444,6 +477,9 @@ public class Family implements Parcelable {
             dest.writeString(currentAddress);
             dest.writeInt(currentVillage != null ? currentVillage : -1);
             dest.writeString(geolocation);
+            dest.writeString(professionalSituation);
+            dest.writeInt(incomeLevel);
+            dest.writeString(paymentMethod);
             dest.writeString(photoPath);
             if (photoBytes != null) {
                 dest.writeInt(photoBytes.length);
@@ -569,6 +605,15 @@ public class Family implements Parcelable {
         public String getGeolocation() {
             return geolocation;
         }
+
+        @Nullable
+        public String getProfessionalSituation(){ return professionalSituation; }
+
+        @Nullable
+        public Integer getIncomeLevel(){ return incomeLevel;}
+
+        @Nullable
+        public String getPaymentMethod(){ return paymentMethod;}
 
         @Nullable
         public String getPhotoPath() {
