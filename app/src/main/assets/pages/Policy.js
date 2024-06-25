@@ -31,13 +31,15 @@ $(document).ready(function () {
     if (policyId != 0) {
         var strPolicy = Android.getPolicy(policyId);
         var $Policy = $.parseJSON(strPolicy);
-        $("#ddlProduct").val($Policy[0]["ProdId"]);
+        //$("#ddlProduct").val($Policy[0]["ProdId"]);
+        $("#ddlContributionPlan").val($Policy[0]["ContributionPlanId"]);
         $("#ddlOfficer").val($Policy[0]["OfficerId"]);
         var PolicyStage = $Policy[0]["PolicyStage"];
         var StartDate = $Policy[0]["StartDate"];
         var EnrolmentDate = $Policy[0]["EnrollDate"];
         var ExpiryDate = $Policy[0]["ExpiryDate"];
-        var ProdId = parseInt($Policy[0]["ProdId"]);
+        //var ProdId = parseInt($Policy[0]["ProdId"]);
+        var CPId = parseInt($Policy[0]["ContributionPlanId"]);
         var CurrentPolicyValue = $Policy[0]["PolicyValue"];
         var isOffline = parseInt($Policy[0]["isOffline"]);
 
@@ -57,18 +59,19 @@ $(document).ready(function () {
         var HSCycle = false;
         if ($('#hfHasCycle').val()) HSCycle = true;
 
-        var NewPolicyValue = Android.getPolicyValue(EnrolmentDate, ProdId, FamilyId, $('#hffStartDate').val(), HSCycle, parseInt(policyId), PolicyStage, isOffline);
+        //var NewPolicyValue = Android.getPolicyValue(EnrolmentDate, ProdId, FamilyId, $('#hffStartDate').val(), HSCycle, parseInt(policyId), PolicyStage, isOffline);
         var PolicyStatusValue = $("#hfPolicyStatus").val();
 
-        if (NewPolicyValue != CurrentPolicyValue) {
+        /*if (NewPolicyValue != CurrentPolicyValue) {
             var Vdate = new Date(EnrolmentDate);  //or your date here
             var NewDate = ((Vdate.getMonth() + 1) + '/' + Vdate.getDate() + '/' + Vdate.getFullYear());
             Android.ShowDialog(Android.getString('PolicyValueChange') + NewDate + ' ' + Android.getString('Changed'));
 
-        }
+        }*/
 
         $("#txtEnrolmentDate").prop('disabled', false);
         $("#ddlProduct").prop('disabled', false);
+        $("#ddlContributionPlan").prop('disabled', false);
         $("#txtStartDate").prop('disabled', true);
         if (PolicyStatusValue == 1) {
             $("#txtExpiryDate").prop('disabled', false);
