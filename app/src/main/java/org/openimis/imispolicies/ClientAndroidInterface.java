@@ -1905,13 +1905,14 @@ public class ClientAndroidInterface {
         //getPolicyValue(String enrollDate, int ProductId, int FamilyId, String startDate, boolean HasCycle, int PolicyId, String PolicyStage, int IsOffline) throws JSONException {
         boolean isValueChanged = false;
         @Language("SQL")
-        String QueryPolicyValue = "SELECT P.PolicyId,Pro.ProdId , EffectiveDate, PolicyValue, StartDate, ExpiryDate, EnrollDate,FamilyId,PolicyStage,IsOffline, ContributionPlanId FROM tblPolicy P\n" +
-                "INNER JOIN tblProduct Pro ON Pro.ProdId = P.ProdId\n" +
+        String QueryPolicyValue = "SELECT P.PolicyId, CP.ProductId, ContributionPlanId, EffectiveDate, PolicyValue, StartDate, ExpiryDate, EnrollDate,FamilyId,PolicyStage,IsOffline FROM tblPolicy P\n" +
+                "INNER JOIN tblContributionPlan CP ON CP.Id = P.ContributionPlanId\n" +
                 "WHERE FamilyId = " + FamilyId;
         JSONArray PolicyValueArray = sqlHandler.getResult(QueryPolicyValue, null);
         JSONObject ValueObject = null;
         String enrollDate = null;
-        int ContributionPlanId;
+        int CPId;
+        int ProductId;
         String startDate;
         boolean HasCycle = false;
         int PolicyId;
@@ -1925,7 +1926,8 @@ public class ClientAndroidInterface {
             try {
                 ValueObject = PolicyValueArray.getJSONObject(i);
                 enrollDate = ValueObject.getString("EnrollDate");
-                ContributionPlanId = ValueObject.getInt("ContributionPlanId");
+                CPId = ValueObject.getInt("ContributionPlanId");
+                ProductId = ValueObject.getInt("ProductId");
 
                 PolicyId = ValueObject.getInt("PolicyId");
                 PolicyStage = ValueObject.getString("StartDate");
@@ -1933,19 +1935,19 @@ public class ClientAndroidInterface {
                 IsOffline = ValueObject.getInt("isOffline");
                 PolicyValue = ValueObject.getString("PolicyValue");
 
-                getCycle = getPolicyPeriod(ContributionPlanId, enrollDate);
-                JSONArray CycleArray = new JSONArray();
+                //getCycle = getPolicyPeriod(ProductId, enrollDate);
+                //JSONArray CycleArray = new JSONArray();
                 //CycleArray.put(getCycle).getJSONArray(0);
-                JSONArray newJArray = new JSONArray(getCycle);
-                JSONObject o = null;
-                o = newJArray.getJSONObject(0);
-                startDate = o.getString("StartDate");
-                HasCycle = o.getBoolean("HasCycle");
+                //JSONArray newJArray = new JSONArray(getCycle);
+                //JSONObject o = null;
+                //o = newJArray.getJSONObject(0);
+                //startDate = o.getString("StartDate");
+                //HasCycle = o.getBoolean("HasCycle");
                 //Cycle affect start date
-                NewPolicyValue = getPolicyValue(enrollDate, ContributionPlanId, FamilyId, startDate, HasCycle, PolicyId, PolicyStage, IsOffline);
-                Double doublePolicyValue = Double.valueOf(PolicyValue);
-                Double doubleNewPolicyValue = Double.valueOf(NewPolicyValue);
-                if (!doublePolicyValue.equals(doubleNewPolicyValue)) {
+                //NewPolicyValue = getPolicyValue(enrollDate, ProductId, FamilyId, startDate, HasCycle, PolicyId, PolicyStage, IsOffline);
+                //Double doublePolicyValue = Double.valueOf(PolicyValue);
+                //Double doubleNewPolicyValue = Double.valueOf(NewPolicyValue);
+                /*if (!doublePolicyValue.equals(doubleNewPolicyValue)) {
                     if (!isValueChanged) isValueChanged = true;
 
                     ContentValues values = new ContentValues();
@@ -1955,7 +1957,7 @@ public class ClientAndroidInterface {
                     } catch (UserException e) {
                         e.printStackTrace();
                     }
-                }
+                }*/
 
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -1963,13 +1965,13 @@ public class ClientAndroidInterface {
         }
 
         @Language("SQL")
-        String Query = "SELECT  P.PolicyId, Prod.ProductCode, ProductName, EffectiveDate, PolicyValue, StartDate, EnrollDate, bcn.ControlNumber, ContributionPlanId, \n" +
+        String Query = "SELECT  P.PolicyId, CP.Code, CP.Name, EffectiveDate, PolicyValue, StartDate, EnrollDate, bcn.ControlNumber, \n" +
                 "   CASE    WHEN PolicyStatus = 1 THEN '" + activity.getResources().getString(R.string.Idle) + "'   " +
                 "   WHEN PolicyStatus = 2 THEN '" + activity.getResources().getString(R.string.Active) + "'  " +
                 "   WHEN PolicyStatus = 4 THEN '" + activity.getResources().getString(R.string.Suspended) + "'  " +
                 "   WHEN PolicyStatus = 8 THEN '" + activity.getResources().getString(R.string.Expired) + "'  END  PolicyStatus, " +
                 "   PolicyStatus PolicyStatusValue, P.ExpiryDate, isOffline FROM tblPolicy P \n" +
-                "   INNER JOIN tblProduct Prod ON P.ProdId=Prod.ProdId  \n " +
+                "   INNER JOIN tblContributionPlan CP ON P.ContributionPlanId=CP.Id  \n " +
                 "   LEFT JOIN tblBulkControlNumbers bcn on P.PolicyId=bcn.PolicyId " +
                 "   WHERE FamilyId = ?";
 
@@ -1991,13 +1993,13 @@ public class ClientAndroidInterface {
     @SuppressWarnings("unused")
     public String getPolicy(int PolicyId) {
         @Language("SQL")
-        String Query = "SELECT  P.PolicyId, P.ProdId, OfficerId , Prod.ProductCode, ProductName, PolicyStage, EffectiveDate, IFNULL(PolicyValue,0) PolicyValue, StartDate, EnrollDate, bcn.ControlNumber, \n" +
+        String Query = "SELECT  P.PolicyId, P.ContributionPlanId, OfficerId , CP.Code, CP.Name, PolicyStage, EffectiveDate, IFNULL(PolicyValue,0) PolicyValue, StartDate, EnrollDate, bcn.ControlNumber, \n" +
                 "   CASE    WHEN PolicyStatus = 1 THEN '" + activity.getResources().getString(R.string.Idle) + "'   " +
                 "   WHEN PolicyStatus = 2 THEN '" + activity.getResources().getString(R.string.Active) + "'  " +
                 "   WHEN PolicyStatus = 4 THEN '" + activity.getResources().getString(R.string.Suspended) + "'  " +
                 "   WHEN PolicyStatus = 8 THEN '" + activity.getResources().getString(R.string.Expired) + "'  END  PolicyStatus, " +
                 "   PolicyStatus  PolicyStatusValue, P.ExpiryDate, (IFNULL(PolicyValue,0) - IFNULL(Contribution,0)) Balance ,  IFNULL(Contribution,0) Contribution, P.isOffline  FROM tblPolicy P \n" +
-                "   INNER JOIN tblProduct Prod ON P.ProdId=Prod.ProdId  \n " +
+                "   INNER JOIN tblContributionPlan CP ON P.ContributionPlanId=CP.Id  \n " +
                 "   LEFT JOIN (SELECT MAX(PolicyId) PolicyId, IFNULL(Sum(Amount),0) Contribution ,PremiumId " +
                 "   FROM  tblPremium WHERE PolicyId = " + PolicyId + " AND isPhotoFee = 'false' ) " +
                 "   Pre ON Pre.PolicyId=P.PolicyId \n " +
@@ -2006,6 +2008,7 @@ public class ClientAndroidInterface {
 
         String[] arg = {String.valueOf(PolicyId)};
         JSONArray Policies = sqlHandler.getResult(Query, arg, "");
+        Log.e("policy",Policies.toString());
         return Policies.toString();
     }
 
@@ -5031,12 +5034,13 @@ public class ClientAndroidInterface {
                 " INNER JOIN tblPolicy P ON P.ProdId =Prod.ProdId \n" +
                 " WHERE PolicyId =" + PolicyId + " LIMIT 1";
         JSONArray MCArray = sqlHandler.getResult(MemberCount, null);
-        try {
+        MaxMember = 100;
+        /*try {
             JSONObject MCObject = MCArray.getJSONObject(0);
             MaxMember = Integer.parseInt(MCObject.getString("MemberCount"));
         } catch (JSONException e) {
             e.printStackTrace();
-        }
+        }*/
         @Language("SQL")
         String SavePolicyInsuree = "INSERT INTO tblInsureePolicy(InsureePolicyId,InsureeId,PolicyId,EnrollmentDate,StartDate,EffectiveDate,ExpiryDate,isOffline)\n" +
                 "SELECT " + MaxInsureePolicyId + ",  InsureeId ,PolicyId ,EnrollDate,StartDate, EffectiveDate ,ExpiryDate,I.isOffline FROM tblPolicy P\n" +
