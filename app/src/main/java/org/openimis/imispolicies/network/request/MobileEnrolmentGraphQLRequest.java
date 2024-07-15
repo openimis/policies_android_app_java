@@ -55,6 +55,7 @@ public class MobileEnrolmentGraphQLRequest extends BaseGraphQLRequest {
                                                 .genderId(head.getGender())
                                                 .dob(head.getDateOfBirth())
                                                 .cardIssued(head.isCardIssued())
+                                                .phone(head.getPhone())
                                                 .photo(
                                                         PhotoInputType.builder()
                                                                 .filename(head.getPhotoPath())
