@@ -92,6 +92,12 @@ android {
             resValue "string", "app_name_policies", "Policies Release"
             dimension = 'std'
         }
+        comoresDev {
+            applicationId "org.openimis.imispolicies.comoresDev"
+            buildConfigField "String", "API_BASE_URL", '"https://dev.amg.km/"'
+            resValue "string", "app_name_policies", "Policies Comores"
+            dimension = 'std'
+        }
         chfDev {
             applicationId "org.openimis.imispolicies.chfdev"
             buildConfigField "String", "API_BASE_URL", '"http://chf-dev.swisstph-mis.ch/"'
@@ -152,6 +158,9 @@ android {
         }
     }
     sourceSets {
+        comoresDev.java.srcDir 'src/master/java'
+        comoresDev.res.srcDirs = ['src/master/res', 'src/localeMv/res']
+
         chfDev.java.srcDir 'src/chf/java'
         chfDev.res.srcDirs = ['src/chf/res', 'src/localeChf/res']
 

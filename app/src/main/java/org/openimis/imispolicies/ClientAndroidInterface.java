@@ -378,11 +378,11 @@ public class ClientAndroidInterface {
     @JavascriptInterface
     @SuppressWarnings("unused")
     public String getRegions() {
-        Integer officerLocationId = 19;
+        //Integer officerLocationId = 19;
         @Language("SQL")
         String Query = "SELECT LocationId, LocationName FROM tblLocations WHERE LocationId = (SELECT L.ParentLocationId LocationId FROM tblLocations L";
-        if (officerLocationId != null) {
-            Query += " WHERE L.LocationId = " + officerLocationId;
+        if (getOfficerLocationId() != null) {
+            Query += " WHERE L.LocationId = " + getOfficerLocationId();
         }
         Query += ")";
         return sqlHandler.getResult(Query, null).toString();
