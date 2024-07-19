@@ -119,9 +119,10 @@ $(document).ready(function () {
            var fun = JSON.parse(policyValue);
            with(fun) {
                    // prints "foo"
-                   console.log("final value:",eval(f));
-                   finalValue = eval(f);
+                   console.log("final value:",eval(remoteFunction));
+                   finalValue = eval(remoteFunction);
                }
+           $('#spPolicyValue').text(finalValue);
            $('#hfPolicyValue').val(finalValue);
     });
 

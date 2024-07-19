@@ -4495,20 +4495,9 @@ public class ClientAndroidInterface {
             contributionPlan.put("Name", "Plan 02");
             contributionPlan.put("ProductId", 4);
             contributionPlan.put("Periodicity", "");
-            contributionPlan.put("CalculationRules", "{\"value\":3000,\"mtEnfant\":500,\"mtAdultMan\":1000, \"mtAdultWoman\":500,\"f\": \"value+nbEnfant*mtEnfant+nbH*mtAdultMan+nbF*mtAdultWoman\"}");
+            contributionPlan.put("CalculationRules", "{\"value\":6000,\"mtEnfant\":500,\"mtAdultMan\":1000, \"mtAdultWoman\":500,\"remoteFunction\": \"(function(){ return value + numberOfChild * mtEnfant + numberOfMan * mtAdultMan + numberOfWoman * mtAdultWoman; }())\"}");
             contributionPlan.put("ValidFrom", DateUtils.dateFromString("05-06-2024") );
             contributionPlan.put("ValidTo", DateUtils.dateFromString("05-06-2025") );
-            ContributionPlans.put(contributionPlan);
-
-            contributionPlan = new JSONObject();
-            contributionPlan.put("Id", 2);
-            contributionPlan.put("Code", "CP03");
-            contributionPlan.put("Name", "Plan 03");
-            contributionPlan.put("ProductId", 6);
-            contributionPlan.put("Periodicity", "");
-            contributionPlan.put("CalculationRules", "{\"calculation_rule\": {\"rate\": 5}}");
-            contributionPlan.put("ValidFrom", DateUtils.dateFromString("05-06-2024") );
-            contributionPlan.put("ValidTo", DateUtils.dateFromString("05-06-2027") );
             ContributionPlans.put(contributionPlan);
 
             insertContributionPlan(ContributionPlans);
@@ -5753,14 +5742,14 @@ public class ClientAndroidInterface {
             JSONObject cp = contributionPlans.getJSONObject(0);
             Log.e("contrib plan", cp.toString());
 
-            //get calculation rules
+            //get calculation rules in calculation plan
             calculationRule = new JSONObject(cp.getString("CalculationRules"));
-            int nbEnfant = 0;
-            int nbH = 0;
-            int nbF = 0;
+            int numberOfChild = 0;
+            int numberOfMan = 0;
+            int numberOfWowan = 0;
 
             @Language("SQL")
-            String queryI = "SELECT DOB, Gender FROM tblInsuree WHERE FamilyId =" + familyId;
+            String queryI = "SELECT DOB, Gender FROM tblInsuree WHERE FamilyId =" + familyId; //get all insurees of family
             JSONArray insureesFamily = sqlHandler.getResult(queryI, null);
 
             for(int i=0; i< insureesFamily.length(); i++){
@@ -5770,19 +5759,19 @@ public class ClientAndroidInterface {
                 int age = 0;
                 age = today.getYear() - dob.getYear();
                 if(age <= 18){
-                    nbEnfant++;
+                    numberOfChild++;
                 }else{
                     if(insuree.getString("Gender").equals("M")){
-                        nbH++;
+                        numberOfMan++;
                     }else if(insuree.getString("Gender").equals("F")){
-                        nbF++;
+                        numberOfWowan++;
                     }
                 }
             }
 
-            calculationRule.put("nbEnfant",nbEnfant);
-            calculationRule.put("nbH",nbH);
-            calculationRule.put("nbF",nbF);
+            calculationRule.put("numberOfChild",numberOfChild);
+            calculationRule.put("numberOfMan",numberOfMan);
+            calculationRule.put("numberOfWoman",numberOfWowan);
 
         } catch (JSONException e) {
             throw new RuntimeException(e);
