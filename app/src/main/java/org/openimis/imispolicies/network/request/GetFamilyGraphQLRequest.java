@@ -16,14 +16,12 @@ public class GetFamilyGraphQLRequest extends BaseGraphQLRequest {
 
     @WorkerThread
     @NonNull
-    public GetFamilyQuery.Node get(@NonNull String headChfId) throws Exception {
-        List<GetFamilyQuery.Edge> edges = makeSynchronous(new GetFamilyQuery(
-                Input.fromNullable(headChfId)
-        )).getData().families().edges();
+    public GetFamilyQuery.Node get() throws Exception {
+        List<GetFamilyQuery.Edge> edges = makeSynchronous(new GetFamilyQuery()).getData().families().edges();
         if (edges.isEmpty()) {
             throw new HttpException(
                     /* code = */ HttpURLConnection.HTTP_NOT_FOUND,
-                    /* message = */ "No family found with head chfId: '" + headChfId + "'",
+                    /* message = */ "No family found",
                     /* body = */ null,
                     /* cause = */ null
             );

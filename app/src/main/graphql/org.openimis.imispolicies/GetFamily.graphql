@@ -1,5 +1,5 @@
-query GetFamily($headChfId: String) {
-    families(headInsuree_ChfId: $headChfId, first:1) {
+query GetFamily {
+    families(first:1,orderBy: ["-validityFrom"]) {
         edges {
             node {
                 legacyId

@@ -45,7 +45,7 @@ public class Family implements Parcelable {
     private Member head = null;
 
     public Family(
-            @NonNull String headChfId,
+            @Nullable String headChfId,
             int id,
             @NonNull String uuid,
             @Nullable SMS sms,

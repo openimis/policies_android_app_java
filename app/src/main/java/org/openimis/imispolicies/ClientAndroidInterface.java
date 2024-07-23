@@ -378,11 +378,11 @@ public class ClientAndroidInterface {
     @JavascriptInterface
     @SuppressWarnings("unused")
     public String getRegions() {
-        //Integer officerLocationId = 19;
+        Integer officerLocationId = 19;
         @Language("SQL")
         String Query = "SELECT LocationId, LocationName FROM tblLocations WHERE LocationId = (SELECT L.ParentLocationId LocationId FROM tblLocations L";
-        if (getOfficerLocationId() != null) {
-            Query += " WHERE L.LocationId = " + getOfficerLocationId();
+        if (getOfficerLocationId() == null) {
+            Query += " WHERE L.LocationId = " + officerLocationId;
         }
         Query += ")";
         return sqlHandler.getResult(Query, null).toString();
@@ -3449,7 +3449,7 @@ public class ClientAndroidInterface {
 
         Family existingFamily = null;
         try {
-            existingFamily = new FetchFamily().execute(insureeObj.getString("CHFID"));
+            existingFamily = new FetchFamily().execute();
         } catch (HttpException e) {
             if (e.getCode() != HttpURLConnection.HTTP_NOT_FOUND) {
                 throw e;
@@ -3460,6 +3460,7 @@ public class ClientAndroidInterface {
 
         if(existingFamily != null){
             if(familyObj.getString("FamilyType").equals("P")){
+                //if polygamy family
                 for (int j = 0; j < subFamilyArray.length(); j++) {
                     JSONObject subFamilyObj = subFamilyArray.getJSONObject(j);
                     JSONObject subInsureeObj = subInsureesArray.getJSONObject(j);
@@ -3470,6 +3471,27 @@ public class ClientAndroidInterface {
                         enrolMessages.add(e.getMessage());
                         return -400;
                     }
+                }
+            }else{
+                //if single family
+                for (int j = 0; j < policiesArray.length(); j++) {
+                    JSONArray policyPremiums = new JSONArray();
+                    String policyId = policiesArray.getJSONObject(j).getString("PolicyId");
+                    for (int k = 0; k < premiumsArray.length(); k++) {
+                        JSONObject premiumObject = premiumsArray.getJSONObject(k);
+                        if (StringUtils.equals(policyId, premiumObject.getString("PolicyId"))) {
+                            policyPremiums.put(premiumObject);
+                        }
+                    }
+                    policiesArray.getJSONObject(j).put("premium", policyPremiums);
+                }
+
+                List<Family.Policy> policies = familyPolicyFromJSONObject(existingFamily.getUuid(), existingFamily.getId(), policiesArray);
+                try {
+                    new CreatePolicy().execute(policies);
+                } catch (Exception e) {
+                    enrolMessages.add(e.getMessage());
+                    return -400;
                 }
             }
         }
@@ -3501,7 +3523,7 @@ public class ClientAndroidInterface {
                 /* confirmationNumber = */ JsonUtils.getStringOrDefault(json, "ConfirmationNo"),
                 /* confirmationType = */ JsonUtils.getStringOrDefault(json, "ConfirmationType"),
                 /* isOffline = */ JsonUtils.getBooleanOrDefault(json, "isOffline", false),
-                /* parentId = */ Integer.parseInt(json.getString("ParentId")),
+                /* parentId = */ json.has("ParentId") ? Integer.parseInt(json.getString("ParentId")): null,
                 /* members = */ members
         );
     }
@@ -5152,7 +5174,7 @@ public class ClientAndroidInterface {
             return 0;
         } else {
             try {
-                Family family = new FetchFamily().execute(insuranceNumber);
+                Family family = new FetchFamily().execute();
                 InsertFamilyDataFromOnline(family);
                 InsertInsureeDataFromOnline(family.getMembers());
                 return 1;

@@ -53,13 +53,13 @@ public class UpdateFamily {
     @WorkerThread
     public void execute(@NonNull Family family, @NonNull String insureeCHFID) throws Exception {
         Family existingFamily = null;
-        try {
-            existingFamily = fetchFamily.execute(insureeCHFID);
+        /*try {
+            //existingFamily = fetchFamily.execute();
         } catch (HttpException e) {
             if (e.getCode() != HttpURLConnection.HTTP_NOT_FOUND) {
                 throw e;
             }
-        }
+        }*/
         if (existingFamily == null) {
             createFamilyGraphQLRequest.create(family);
         } else {
@@ -83,7 +83,7 @@ public class UpdateFamily {
     private void insertOrUpdateInsuree(@NonNull Family.Member member, @Nullable String insureeCHFID ) throws Exception {
         Family existingFamily = null;
         try {
-            existingFamily = fetchFamily.execute(insureeCHFID);
+            existingFamily = fetchFamily.execute();
         } catch (HttpException e) {
             if (e.getCode() != HttpURLConnection.HTTP_NOT_FOUND) {
                 throw e;
