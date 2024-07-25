@@ -37,10 +37,10 @@ public class FetchFamily {
 
     @WorkerThread
     @NonNull
-    public Family execute() throws Exception {
-        GetFamilyQuery.Node node = getFamilyGraphQLRequest.get();
+    public Family execute(@NonNull String headChfId) throws Exception {
+        GetFamilyQuery.Node node = getFamilyGraphQLRequest.get(headChfId);
         return new Family(
-                /* headChfId = */ node.headInsuree().chfId() != null? Objects.requireNonNull(node.headInsuree().chfId()): null,
+                /* headChfId = */ headChfId,
                 /* id = */ IdUtils.getIdFromGraphQLString(node.id()),
                 /* uuid = */ node.uuid(),
                 /* sms = */ null,

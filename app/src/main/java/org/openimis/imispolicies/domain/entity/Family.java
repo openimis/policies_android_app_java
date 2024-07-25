@@ -666,6 +666,8 @@ public class Family implements Parcelable {
         private final int officerId;
         @Nullable
         private final String policyStage;
+        @Nullable
+        private final String contributionPlanId;
         private final boolean isOffline;
         @Nullable
         private final String controlNumber;
@@ -686,6 +688,7 @@ public class Family implements Parcelable {
                 @Nullable Integer productId,
                 int officerId,
                 @Nullable String policyStage,
+                @Nullable String contributionPlanId,
                 boolean isOffline,
                 @Nullable String controlNumber,
                 @NonNull List<Premium> premiums
@@ -703,6 +706,7 @@ public class Family implements Parcelable {
             this.productId = productId;
             this.officerId = officerId;
             this.policyStage = policyStage;
+            this.contributionPlanId = contributionPlanId;
             this.isOffline = isOffline;
             this.controlNumber = controlNumber;
             this.premiums = premiums;
@@ -731,6 +735,7 @@ public class Family implements Parcelable {
             }
             officerId = in.readInt();
             policyStage = in.readString();
+            contributionPlanId = in.readString();
             isOffline = in.readByte() != 0;
             controlNumber = in.readString();
             premiums = in.createTypedArrayList(Premium.CREATOR);
@@ -761,6 +766,7 @@ public class Family implements Parcelable {
             }
             dest.writeInt(officerId);
             dest.writeString(policyStage);
+            dest.writeString(contributionPlanId);
             dest.writeByte((byte) (isOffline ? 1 : 0));
             dest.writeString(controlNumber);
             dest.writeTypedList(premiums);
@@ -832,6 +838,9 @@ public class Family implements Parcelable {
         public String getPolicyStage() {
             return policyStage;
         }
+
+        @Nullable
+        public String getContributionPlanId(){ return contributionPlanId; }
 
         public boolean isOffline() {
             return isOffline;

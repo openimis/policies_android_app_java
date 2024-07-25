@@ -79,6 +79,7 @@ import org.openimis.imispolicies.tools.StorageManager;
 import org.openimis.imispolicies.usecase.CreatePolicy;
 import org.openimis.imispolicies.usecase.DeletePolicyRenewal;
 import org.openimis.imispolicies.usecase.FetchFamily;
+import org.openimis.imispolicies.usecase.FetchFamilyId;
 import org.openimis.imispolicies.usecase.FetchMasterData;
 import org.openimis.imispolicies.usecase.Login;
 import org.openimis.imispolicies.usecase.PostFeedback;
@@ -1864,6 +1865,11 @@ public class ClientAndroidInterface {
             values.put("ContributionPlanId", data.get("ddlContributionPlan"));
             values.put("OfficerId", data.get("ddlOfficer"));
 
+            @Language("SQL")
+            String query = "SELECT * FROM tblContributionPlan WHERE Id =" + Integer.parseInt(data.get("ddlContributionPlan"));
+            JSONArray contributionPlans = sqlHandler.getResult(query, null);
+            values.put("ProdId", contributionPlans.getJSONObject(0).getInt("ProductId"));
+
             String controlNumber = data.get("AssignedControlNumber");
             values.put("isOffline", isOffline);
 
@@ -3182,7 +3188,7 @@ public class ClientAndroidInterface {
 
             //get Policies
             query = new StringBuilder(
-                    "SELECT p.PolicyId AS PolicyId, FamilyId AS FamilyId, EnrollDate, StartDate, NULLIF(EffectiveDate,'null') EffectiveDate, ExpiryDate, Policystatus, PolicyValue, ProdId, OfficerId, PolicyStage, isOffline, bcn.ControlNumber FROM tblPolicy p LEFT JOIN tblBulkControlNumbers bcn on p.PolicyId=bcn.PolicyId WHERE "
+                    "SELECT p.PolicyId AS PolicyId, FamilyId AS FamilyId, EnrollDate, StartDate, NULLIF(EffectiveDate,'null') EffectiveDate, ExpiryDate, Policystatus, PolicyValue, ProdId, OfficerId, ContributionPlanId, PolicyStage, isOffline, bcn.ControlNumber FROM tblPolicy p LEFT JOIN tblBulkControlNumbers bcn on p.PolicyId=bcn.PolicyId WHERE "
             );
             if (CallerId != 2) {
                 query.append(" FamilyId = ").append(FamilyId);
@@ -3449,7 +3455,7 @@ public class ClientAndroidInterface {
 
         Family existingFamily = null;
         try {
-            existingFamily = new FetchFamily().execute();
+            existingFamily = new FetchFamilyId().execute();
         } catch (HttpException e) {
             if (e.getCode() != HttpURLConnection.HTTP_NOT_FOUND) {
                 throw e;
@@ -3577,6 +3583,9 @@ public class ClientAndroidInterface {
         for (int i = 0; i < array.length(); i++) {
             JSONObject object = array.getJSONObject(i);
             String policyUuid = UUID.randomUUID().toString();
+            @Language("SQL")
+            String query = "SELECT * FROM tblContributionPlan WHERE Id =" + Integer.parseInt(object.getString("ContributionPlanId"));
+            JSONArray contributionPlans = sqlHandler.getResult(query, null);
             policies.add(new Family.Policy(
                     /* id = */ Integer.parseInt(object.getString("PolicyId")),
                     /* uuid = */ policyUuid,
@@ -3591,6 +3600,7 @@ public class ClientAndroidInterface {
                     /* productId = */ JsonUtils.getIntegerOrDefault(object, "ProdId"),
                     /* officerId = */ Integer.parseInt(object.getString("OfficerId")),
                     /* stage = */ JsonUtils.getStringOrDefault(object, "PolicyStage"),
+                    /* contributionPlanId = */ JsonUtils.getStringOrDefault(contributionPlans.getJSONObject(0), "CpId"),
                     /* isOffline = */ JsonUtils.getBooleanOrDefault(object, "isOffline", false),
                     /* controlNumber = */ JsonUtils.getStringOrDefault(object, "ControlNumber"),
                     /* premiums = */ object.has("premium") ? familyPolicyPremiumsFromJSONObject(policyUuid, object.getJSONArray("premium")) : Collections.emptyList()
@@ -4412,12 +4422,12 @@ public class ClientAndroidInterface {
     private void processNewFormat(JSONObject masterData) throws UserException {
         try {
             JSONArray IncomeLevels = new JSONArray();
-            JSONArray FamilyTypes = new JSONArray();
+            //JSONArray FamilyTypes = new JSONArray();
             JSONArray ContributionPlans = new JSONArray();
             insertConfirmationTypes((JSONArray) masterData.get("confirmationTypes"));
             insertControls((JSONArray) masterData.get("controls"));
             insertEducation((JSONArray) masterData.get("education"));
-            //insertFamilyTypes((JSONArray) masterData.get("familyTypes"));
+            insertFamilyTypes((JSONArray) masterData.get("familyTypes"));
             insertHF((JSONArray) masterData.get("hf"));
             insertIdentificationTypes((JSONArray) masterData.get("identificationTypes"));
             insertLanguages((JSONArray) masterData.get("languages"));
@@ -4429,9 +4439,10 @@ public class ClientAndroidInterface {
             insertRelations((JSONArray) masterData.get("relations"));
             insertPhoneDefaults((JSONArray) masterData.get("phoneDefaults"));
             insertGenders((JSONArray) masterData.get("genders"));
+            //insertIncomeLevel((JSONArray) masterData.get("IncomeLevels"));
 
             //insert custom FamilyTypes
-            JSONObject fType = new JSONObject();
+            /*JSONObject fType = new JSONObject();
             fType.put("FamilyTypeCode", "F");
             fType.put("FamilyType", "Family");
             fType.put("SortOrder", 1);
@@ -4445,7 +4456,7 @@ public class ClientAndroidInterface {
             fType.put("AltLanguage", "Ménage");
             FamilyTypes.put(fType);
 
-            insertFamilyTypes(FamilyTypes);
+            insertFamilyTypes(FamilyTypes);*/
 
             //insert custom income levels
             JSONObject object = new JSONObject();
@@ -4520,6 +4531,7 @@ public class ClientAndroidInterface {
             contributionPlan.put("CalculationRules", "{\"value\":6000,\"mtEnfant\":500,\"mtAdultMan\":1000, \"mtAdultWoman\":500,\"remoteFunction\": \"(function(){ return value + numberOfChild * mtEnfant + numberOfMan * mtAdultMan + numberOfWoman * mtAdultWoman; }())\"}");
             contributionPlan.put("ValidFrom", DateUtils.dateFromString("05-06-2024") );
             contributionPlan.put("ValidTo", DateUtils.dateFromString("05-06-2025") );
+            contributionPlan.put("CpId", "9d95e3c6-7963-422e-8c3e-e5ebc9ab6199");
             ContributionPlans.put(contributionPlan);
 
             insertContributionPlan(ContributionPlans);
@@ -5174,7 +5186,7 @@ public class ClientAndroidInterface {
             return 0;
         } else {
             try {
-                Family family = new FetchFamily().execute();
+                Family family = new FetchFamily().execute(insuranceNumber);
                 InsertFamilyDataFromOnline(family);
                 InsertInsureeDataFromOnline(family.getMembers());
                 return 1;

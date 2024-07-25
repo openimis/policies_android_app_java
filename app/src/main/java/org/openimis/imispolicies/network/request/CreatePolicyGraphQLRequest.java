@@ -19,7 +19,6 @@ public class CreatePolicyGraphQLRequest extends BaseGraphQLRequest {
     public CreatePolicyMutation.Data create(@NonNull Family.Policy policy) throws Exception {
         Response<CreatePolicyMutation.Data> response = makeSynchronous(new CreatePolicyMutation(
                 CreatePolicyMutationInput.builder()
-                        .uuid(policy.getUuid())
                         .familyId(policy.getFamilyId())
                         .enrollDate(policy.getEnrollDate())
                         .startDate(policy.getStartDate())
@@ -27,6 +26,7 @@ public class CreatePolicyGraphQLRequest extends BaseGraphQLRequest {
                         .value(policy.getValue())
                         .productId(policy.getProductId())
                         .officerId(policy.getOfficerId())
+                        .contributionPlanId(policy.getContributionPlanId())
                         .build()
         ));
         return Objects.requireNonNull(response.getData());

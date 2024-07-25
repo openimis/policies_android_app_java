@@ -16,7 +16,7 @@ import java.net.HttpURLConnection;
 public class UpdateFamily {
 
     @NonNull
-    private final FetchFamily fetchFamily;
+    private final FetchFamilyId fetchFamilyId;
     @NonNull
     private final CreateFamilyGraphQLRequest createFamilyGraphQLRequest;
     @NonNull
@@ -28,7 +28,7 @@ public class UpdateFamily {
 
     public UpdateFamily() {
         this(
-                new FetchFamily(),
+                new FetchFamilyId(),
                 new CreateFamilyGraphQLRequest(),
                 new UpdateFamilyGraphQLRequest(),
                 new CreateInsureeGraphQLRequest(),
@@ -37,13 +37,13 @@ public class UpdateFamily {
     }
 
     public UpdateFamily(
-            @NonNull FetchFamily fetchFamily,
+            @NonNull FetchFamilyId fetchFamilyId,
             @NonNull CreateFamilyGraphQLRequest createFamilyGraphQLRequest,
             @NonNull UpdateFamilyGraphQLRequest updateFamilyGraphQLRequest,
             @NonNull CreateInsureeGraphQLRequest createInsureeGraphQLRequest,
             @NonNull UpdateInsureeGraphQLRequest updateInsureeGraphQLRequest
     ) {
-        this.fetchFamily = fetchFamily;
+        this.fetchFamilyId = fetchFamilyId;
         this.createFamilyGraphQLRequest = createFamilyGraphQLRequest;
         this.updateFamilyGraphQLRequest = updateFamilyGraphQLRequest;
         this.createInsureeGraphQLRequest = createInsureeGraphQLRequest;
@@ -83,7 +83,7 @@ public class UpdateFamily {
     private void insertOrUpdateInsuree(@NonNull Family.Member member, @Nullable String insureeCHFID ) throws Exception {
         Family existingFamily = null;
         try {
-            existingFamily = fetchFamily.execute();
+            existingFamily = fetchFamilyId.execute();
         } catch (HttpException e) {
             if (e.getCode() != HttpURLConnection.HTTP_NOT_FOUND) {
                 throw e;
