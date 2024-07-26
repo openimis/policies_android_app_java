@@ -6714,6 +6714,7 @@ input CreateFamilyMutationInput {
   confirmationTypeId: String
   jsonExt: JSONString
   contribution: JSONString
+  parentId: Int
   headInsuree: FamilyHeadInsureeInputType
   clientMutationId: String
 }

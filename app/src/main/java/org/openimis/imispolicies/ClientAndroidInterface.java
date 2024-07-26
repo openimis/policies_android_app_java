@@ -167,6 +167,18 @@ public class ClientAndroidInterface {
                 .build();
     }
 
+    public static void copy(String name, byte[] data) throws IOException {
+        String photosDir = Global.getGlobal().getSubdirectory("Photos");
+
+        File file = new File(photosDir + File.separator + name);
+        if (!file.exists() && !file.createNewFile()) {
+            throw new IOException("Cannot create file '" + file.getAbsolutePath() + "'");
+        }
+        try (OutputStream out = new FileOutputStream(file)) {
+            out.write(data);
+        }
+    }
+
     @JavascriptInterface
     @SuppressWarnings("unused")
     public void SetUrl(String Url) {
@@ -235,7 +247,6 @@ public class ClientAndroidInterface {
         }
         return Adjustibility;
     }
-
 
     @JavascriptInterface
     @SuppressWarnings("unused")
@@ -313,7 +324,6 @@ public class ClientAndroidInterface {
         }
         return "";
     }
-
 
     @JavascriptInterface
     @SuppressWarnings("unused")
@@ -1024,7 +1034,6 @@ public class ClientAndroidInterface {
         }
         return 0;
     }
-
 
     @JavascriptInterface
     @SuppressWarnings("unused")
@@ -2018,7 +2027,6 @@ public class ClientAndroidInterface {
         return Policies.toString();
     }
 
-
     @JavascriptInterface
     @SuppressWarnings("unused")
     public int getPolicyVal(String PolicyId) {
@@ -2355,7 +2363,6 @@ public class ClientAndroidInterface {
         }
     }
 
-
     @JavascriptInterface
     @SuppressWarnings("unused")
     public int DeletePolicy(int PolicyId) {
@@ -2477,7 +2484,6 @@ public class ClientAndroidInterface {
         JSONArray Renews = sqlHandler.getResult(Query, arg);
         return Renews.toString();
     }
-
 
     public void InsertRenewalsFromApi(@NonNull JSONArray result) {
         String TableName = "tblRenewals";
@@ -2883,7 +2889,8 @@ public class ClientAndroidInterface {
     }
 
     public boolean isPolicyRequired() {
-        return !getRule("AllowFamilyWithoutPolicy", false);
+        //return !getRule("AllowFamilyWithoutPolicy", true);
+        return false;
     }
 
     public boolean isContributionRequired() {
@@ -3067,7 +3074,7 @@ public class ClientAndroidInterface {
             int IsOffline = offlineString.equals("1") || offlineString.equalsIgnoreCase("true") ? 1 : 0;
 
             StringBuilder query = new StringBuilder(
-                    "SELECT F.FamilyUUID as FamilyUUID, F.FamilyId AS FamilyId, F.InsureeId AS InsureeId, F.LocationId, I.CHFID AS HOFCHFID, NULLIF(F.Poverty,'null') Poverty, NULLIF(F.FamilyType,'null') FamilyType, NULLIF(F.FamilyAddress,'null') FamilyAddress, NULLIF(F.Ethnicity,'null') Ethnicity, NULLIF(F.ConfirmationNo,'null') ConfirmationNo, F.ConfirmationType ConfirmationType,F.isOffline isOffline FROM tblFamilies F INNER JOIN tblInsuree I ON I.InsureeId = F.InsureeId WHERE"
+                    "SELECT F.FamilyUUID as FamilyUUID, F.FamilyId AS FamilyId, F.InsureeId AS InsureeId, F.LocationId, I.CHFID AS HOFCHFID, NULLIF(F.Poverty,'null') Poverty, NULLIF(F.FamilyType,'null') FamilyType, NULLIF(F.FamilyAddress,'null') FamilyAddress, NULLIF(F.Ethnicity,'null') Ethnicity, NULLIF(F.ConfirmationNo,'null') ConfirmationNo, F.ConfirmationType ConfirmationType,F.isOffline isOffline,F.ParentId ParentId FROM tblFamilies F INNER JOIN tblInsuree I ON I.InsureeId = F.InsureeId WHERE"
             );
 
             if (CallerId != 2) {
@@ -3292,38 +3299,37 @@ public class ClientAndroidInterface {
                                     familySMS.getString("ApprovalOfSMS").equals("1"));
                         }
                         sf1.put("FamilySMS", familySMS);
-                    }
-                    newSubFamilyArray.put(sf1);
-                    SubFamilyArray = newSubFamilyArray;
+                        newSubFamilyArray.put(sf1);
 
-                    //get subInsuree
-                    query = new StringBuilder(
-                            "SELECT I.InsureeUUID AS InsureeUUID, I.InsureeId AS InsureeId, I.FamilyId AS FamilyId, I.CHFID, I.LastName, I.OtherNames, I.DOB, I.Gender, NULLIF(I.Marital,'') Marital, I.isHead, NULLIF(I.IdentificationNumber,'null') IdentificationNumber, NULLIF(I.Phone,'null') Phone, REPLACE(I.PhotoPath, RTRIM(PhotoPath, REPLACE(PhotoPath, '/', '')), '') PhotoPath, NULLIF(I.CardIssued,'null') CardIssued, NULLIF(I.Relationship,'null') Relationship, NULLIF(I.Profession,'null') Profession, NULLIF(I.Education,'null') Education, NULLIF(I.Email,'null') Email, CASE WHEN I.TypeOfId='null' THEN null ELSE I.TypeOfId END TypeOfId, NULLIF(I.HFID,'null') HFID, NULLIF(I.CurrentAddress,'null') CurrentAddress, NULLIF(I.GeoLocation,'null') GeoLocation, NULLIF(I.CurVillage,'null') CurVillage,I.isOffline, I.Vulnerability FROM tblInsuree I WHERE "
-                    );
+                        //get subInsuree
+                        query = new StringBuilder(
+                                "SELECT I.InsureeUUID AS InsureeUUID, I.InsureeId AS InsureeId, I.FamilyId AS FamilyId, I.CHFID, I.LastName, I.OtherNames, I.DOB, I.Gender, NULLIF(I.Marital,'') Marital, I.isHead, NULLIF(I.IdentificationNumber,'null') IdentificationNumber, NULLIF(I.Phone,'null') Phone, REPLACE(I.PhotoPath, RTRIM(PhotoPath, REPLACE(PhotoPath, '/', '')), '') PhotoPath, NULLIF(I.CardIssued,'null') CardIssued, NULLIF(I.Relationship,'null') Relationship, NULLIF(I.Profession,'null') Profession, NULLIF(I.Education,'null') Education, NULLIF(I.Email,'null') Email, CASE WHEN I.TypeOfId='null' THEN null ELSE I.TypeOfId END TypeOfId, NULLIF(I.HFID,'null') HFID, NULLIF(I.CurrentAddress,'null') CurrentAddress, NULLIF(I.GeoLocation,'null') GeoLocation, NULLIF(I.CurVillage,'null') CurVillage,I.isOffline, I.Vulnerability FROM tblInsuree I WHERE "
+                        );
 
-                    query.append(" I.FamilyId = ").append(FId).append(" \n");
+                        query.append(" I.FamilyId = ").append(FId).append(" \n");
 
-                    querySI = query.toString();
-                    subInsureesArray = sqlHandler.getResult(querySI, null);
+                        querySI = query.toString();
+                        subInsureesArray = sqlHandler.getResult(querySI, null);
 
-                    if (subInsureesArray.length() > 0) {
-                        JSONObject o = subInsureesArray.getJSONObject(0);
-                        CHFNumber = o.getString("CHFID");
+                        if (subInsureesArray.length() > 0) {
+                            JSONObject o = subInsureesArray.getJSONObject(0);
+                            CHFNumber = o.getString("CHFID");
 
-                        JSONArray newSubInsureesArray = new JSONArray();
+                            JSONArray newSubInsureesArray = new JSONArray();
 
-                        for (int j = 0; j < subInsureesArray.length(); j++) {
-                            JSONObject ob = subInsureesArray.getJSONObject(j);
-                            String typeofId = ob.getString("TypeOfId");
+                            for (int n = 0; n < subInsureesArray.length(); n++) {
+                                JSONObject ob = subInsureesArray.getJSONObject(n);
+                                String ItypeofId = ob.getString("TypeOfId");
 
-                            if (typeofId.equals("0")) {
-                                ob.put("TypeOfId", "");
+                                if (ItypeofId.equals("0")) {
+                                    ob.put("TypeOfId", "");
+                                }
+                                newSubInsureesArray.put(ob);
                             }
-                            newSubInsureesArray.put(ob);
+                            subInsureesArray = newSubInsureesArray;
                         }
-
-                        subInsureesArray = newSubInsureesArray;
                     }
+                    SubFamilyArray = newSubFamilyArray;
                 }
 
                 //get InsureePolicy
@@ -3445,6 +3451,20 @@ public class ClientAndroidInterface {
     ) throws JSONException {
         JSONObject familyObj = familyArray.getJSONObject(0);
         JSONObject insureeObj = insureesArray.getJSONObject(0);
+        if(familyObj.getInt("ParentId") != 0){
+            Family existingFamily = null;
+            try {
+                existingFamily = new FetchFamilyId().execute();
+            } catch (HttpException e) {
+                if (e.getCode() != HttpURLConnection.HTTP_NOT_FOUND) {
+                    throw e;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            familyObj.put("ParentId",existingFamily.getId());
+        }
         Family family = familyFromJSONObject(familyObj, insureesArray, insureeImages);
         try {
             new UpdateFamily().execute(family, insureeObj.getString("CHFID"));
@@ -3464,44 +3484,25 @@ public class ClientAndroidInterface {
             e.printStackTrace();
         }
 
-        if(existingFamily != null){
-            if(familyObj.getString("FamilyType").equals("P")){
-                //if polygamy family
-                for (int j = 0; j < subFamilyArray.length(); j++) {
-                    JSONObject subFamilyObj = subFamilyArray.getJSONObject(j);
-                    JSONObject subInsureeObj = subInsureesArray.getJSONObject(j);
-                    Family subFamily = familyFromJSONObject(subFamilyObj, subInsureesArray, null);
-                    try {
-                        new UpdateFamily().execute(subFamily,subInsureeObj.getString("CHFID"));
-                    } catch (Exception e) {
-                        enrolMessages.add(e.getMessage());
-                        return -400;
-                    }
-                }
-            }else{
-                //if single family
-                for (int j = 0; j < policiesArray.length(); j++) {
-                    JSONArray policyPremiums = new JSONArray();
-                    String policyId = policiesArray.getJSONObject(j).getString("PolicyId");
-                    for (int k = 0; k < premiumsArray.length(); k++) {
-                        JSONObject premiumObject = premiumsArray.getJSONObject(k);
-                        if (StringUtils.equals(policyId, premiumObject.getString("PolicyId"))) {
-                            policyPremiums.put(premiumObject);
-                        }
-                    }
-                    policiesArray.getJSONObject(j).put("premium", policyPremiums);
-                }
-
-                List<Family.Policy> policies = familyPolicyFromJSONObject(existingFamily.getUuid(), existingFamily.getId(), policiesArray);
-                try {
-                    new CreatePolicy().execute(policies);
-                } catch (Exception e) {
-                    enrolMessages.add(e.getMessage());
-                    return -400;
+        for (int j = 0; j < policiesArray.length(); j++) {
+            JSONArray policyPremiums = new JSONArray();
+            String policyId = policiesArray.getJSONObject(j).getString("PolicyId");
+            for (int k = 0; k < premiumsArray.length(); k++) {
+                JSONObject premiumObject = premiumsArray.getJSONObject(k);
+                if (StringUtils.equals(policyId, premiumObject.getString("PolicyId"))) {
+                    policyPremiums.put(premiumObject);
                 }
             }
+            policiesArray.getJSONObject(j).put("premium", policyPremiums);
         }
 
+        List<Family.Policy> policies = familyPolicyFromJSONObject(existingFamily.getUuid(), existingFamily.getId(), policiesArray);
+        try {
+            new CreatePolicy().execute(policies);
+        } catch (Exception e) {
+            enrolMessages.add(e.getMessage());
+            return -400;
+        }
         return 0;
     }
 
@@ -3703,18 +3704,6 @@ public class ClientAndroidInterface {
             }
         }
         return images;
-    }
-
-    public static void copy(String name, byte[] data) throws IOException {
-        String photosDir = Global.getGlobal().getSubdirectory("Photos");
-
-        File file = new File(photosDir + File.separator + name);
-        if (!file.exists() && !file.createNewFile()) {
-            throw new IOException("Cannot create file '" + file.getAbsolutePath() + "'");
-        }
-        try (OutputStream out = new FileOutputStream(file)) {
-            out.write(data);
-        }
     }
 
     public String getEnrolmentExportFilename() {
