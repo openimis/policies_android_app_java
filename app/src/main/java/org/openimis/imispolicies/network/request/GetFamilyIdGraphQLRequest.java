@@ -5,21 +5,20 @@ import androidx.annotation.WorkerThread;
 
 import com.apollographql.apollo.api.Input;
 
+import org.openimis.imispolicies.GetFamilyIdQuery;
 import org.openimis.imispolicies.GetFamilyQuery;
 import org.openimis.imispolicies.network.exception.HttpException;
 
 import java.net.HttpURLConnection;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.CopyOnWriteArrayList;
 
-public class GetFamilyGraphQLRequest extends BaseGraphQLRequest {
+public class GetFamilyIdGraphQLRequest extends BaseGraphQLRequest {
 
     @WorkerThread
     @NonNull
-    public GetFamilyQuery.Node get(String Chfid) throws Exception {
-        List<GetFamilyQuery.Edge> edges = makeSynchronous(new GetFamilyQuery(Input.fromNullable(Chfid))).getData().families().edges();
+    public GetFamilyIdQuery.Node get() throws Exception {
+        List<GetFamilyIdQuery.Edge> edges = makeSynchronous(new GetFamilyIdQuery()).getData().families().edges();
         if (edges.isEmpty()) {
             throw new HttpException(
                     /* code = */ HttpURLConnection.HTTP_NOT_FOUND,
@@ -30,4 +29,5 @@ public class GetFamilyGraphQLRequest extends BaseGraphQLRequest {
         }
         return Objects.requireNonNull(edges.get(0).node());
     }
+
 }

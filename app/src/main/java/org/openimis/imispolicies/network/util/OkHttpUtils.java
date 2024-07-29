@@ -9,6 +9,8 @@ import org.openimis.imispolicies.BuildConfig;
 import org.openimis.imispolicies.Global;
 import org.openimis.imispolicies.network.okhttp.AuthorizationInterceptor;
 
+import java.util.concurrent.TimeUnit;
+
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
@@ -30,6 +32,9 @@ public class OkHttpUtils {
             synchronized (OkHttpUtils.class) {
                 if (client == null) {
                     OkHttpClient.Builder builder = new OkHttpClient.Builder();
+                    builder.connectTimeout(300, TimeUnit.SECONDS)
+                            .writeTimeout(300,TimeUnit.SECONDS)
+                            .readTimeout(300, TimeUnit.SECONDS);
                     HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
                     interceptor.setLevel(BuildConfig.DEBUG ? HttpLoggingInterceptor.Level.BODY : HttpLoggingInterceptor.Level.BASIC);
                     builder.addInterceptor(interceptor);
