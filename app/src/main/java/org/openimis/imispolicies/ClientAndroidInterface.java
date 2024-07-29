@@ -3032,10 +3032,9 @@ public class ClientAndroidInterface {
         int rtEnrolledId = 0;
         int EnrolResult = 0;
         String Offline = null;
-        boolean isPolygamy = false;
 
         @Language("SQL")
-        String queryF, queryI, queryPL, queryPR, queryIP, querySF, querySI,querySPL, querySPR;
+        String queryF, queryI, queryPL, queryPR, queryIP;
 
         //Verify Enrollments
         if (CallerId == 2) {
@@ -3060,6 +3059,7 @@ public class ClientAndroidInterface {
 
             String CHFNumber = null;
             JSONObject object = null;
+            boolean isPolygamy = false;
             try {
                 object = familiesToUpload.getJSONObject(i);
             } catch (JSONException e) {
@@ -3257,81 +3257,6 @@ public class ClientAndroidInterface {
                     }
                 }
 
-                //fetch subfamily for polygamy family
-                JSONArray SubFamilyArray = new JSONArray();
-                JSONArray subInsureesArray = new JSONArray();
-                if(isPolygamy){
-                    String FId = "";
-
-                    query = new StringBuilder(
-                            "SELECT F.FamilyUUID as FamilyUUID, F.FamilyId AS FamilyId, F.InsureeId AS InsureeId, F.LocationId, I.CHFID AS HOFCHFID, NULLIF(F.Poverty,'null') Poverty, NULLIF(F.FamilyType,'null') FamilyType, NULLIF(F.FamilyAddress,'null') FamilyAddress, NULLIF(F.Ethnicity,'null') Ethnicity, NULLIF(F.ConfirmationNo,'null') ConfirmationNo, F.ConfirmationType ConfirmationType,F.isOffline isOffline, F.ParentId ParentId FROM tblFamilies F INNER JOIN tblInsuree I ON I.InsureeId = F.InsureeId WHERE"
-                    );
-
-                    query.append(" F.ParentId = ").append(FamilyId).append("");
-
-
-                    querySF = query.toString();
-                    SubFamilyArray = sqlHandler.getResult(querySF, null);
-
-                    JSONArray newSubFamilyArray = new JSONArray();
-                    JSONObject sf1 = null;
-                    for (int j = 0; j < SubFamilyArray.length(); j++) {
-                        sf1 = SubFamilyArray.getJSONObject(j);
-                        String typeofId = sf1.getString("FamilyType");
-                        String ConfirmationType = sf1.getString("ConfirmationType");
-                        FId = sf1.getString("FamilyId");
-
-                        if (Offline.equals("2") || Offline.equals("0")) {
-                            // FId = "-" + FId;
-                            sf1.put("FamilyId", FId);
-                            sf1.put("isOffline", 0);
-                        }
-                        if (typeofId.equals("0")) {
-                            sf1.put("FamilyType", "");
-                        }
-                        if (ConfirmationType.equals("0") || ConfirmationType.equals("null")) {
-                            sf1.put("ConfirmationType", "");
-                        }
-                        JSONObject familySMS = getFamilySMS(FId);
-                        if (familySMS != null) {
-                            // Ensure ApprovalOfSMS Is sent as Boolean
-                            familySMS.put("ApprovalOfSMS",
-                                    familySMS.getString("ApprovalOfSMS").equals("1"));
-                        }
-                        sf1.put("FamilySMS", familySMS);
-                        newSubFamilyArray.put(sf1);
-
-                        //get subInsuree
-                        query = new StringBuilder(
-                                "SELECT I.InsureeUUID AS InsureeUUID, I.InsureeId AS InsureeId, I.FamilyId AS FamilyId, I.CHFID, I.LastName, I.OtherNames, I.DOB, I.Gender, NULLIF(I.Marital,'') Marital, I.isHead, NULLIF(I.IdentificationNumber,'null') IdentificationNumber, NULLIF(I.Phone,'null') Phone, REPLACE(I.PhotoPath, RTRIM(PhotoPath, REPLACE(PhotoPath, '/', '')), '') PhotoPath, NULLIF(I.CardIssued,'null') CardIssued, NULLIF(I.Relationship,'null') Relationship, NULLIF(I.Profession,'null') Profession, NULLIF(I.Education,'null') Education, NULLIF(I.Email,'null') Email, CASE WHEN I.TypeOfId='null' THEN null ELSE I.TypeOfId END TypeOfId, NULLIF(I.HFID,'null') HFID, NULLIF(I.CurrentAddress,'null') CurrentAddress, NULLIF(I.GeoLocation,'null') GeoLocation, NULLIF(I.CurVillage,'null') CurVillage,I.isOffline, I.Vulnerability FROM tblInsuree I WHERE "
-                        );
-
-                        query.append(" I.FamilyId = ").append(FId).append(" \n");
-
-                        querySI = query.toString();
-                        subInsureesArray = sqlHandler.getResult(querySI, null);
-
-                        if (subInsureesArray.length() > 0) {
-                            JSONObject o = subInsureesArray.getJSONObject(0);
-                            CHFNumber = o.getString("CHFID");
-
-                            JSONArray newSubInsureesArray = new JSONArray();
-
-                            for (int n = 0; n < subInsureesArray.length(); n++) {
-                                JSONObject ob = subInsureesArray.getJSONObject(n);
-                                String ItypeofId = ob.getString("TypeOfId");
-
-                                if (ItypeofId.equals("0")) {
-                                    ob.put("TypeOfId", "");
-                                }
-                                newSubInsureesArray.put(ob);
-                            }
-                            subInsureesArray = newSubInsureesArray;
-                        }
-                    }
-                    SubFamilyArray = newSubFamilyArray;
-                }
-
                 //get InsureePolicy
                 query = new StringBuilder(
                         "SELECT DISTINCT(IP.InsureeId) AS InsureeId,IP.PolicyId,IP.EffectiveDate FROM tblInsureePolicy IP INNER JOIN tblPolicy PL ON PL.PolicyId = IP.PolicyId"
@@ -3346,7 +3271,31 @@ public class ClientAndroidInterface {
                 if (CallerId != 2) {
                     Pair<String, byte[]>[] InsureeImages = FamilyPictures(insureesArray, 1);
                     if (myList.size() == 0) {
-                        EnrolResult = uploadEnrols(familyArray, insureesArray, policiesArray, premiumsArray, InsureeImages, SubFamilyArray,subInsureesArray);
+                        EnrolResult = uploadEnrols(familyArray, insureesArray, policiesArray, premiumsArray, InsureeImages);
+                        //if family is polygamic
+                        if(isPolygamy){
+                            int Fid = 0;
+                            Family existingFamily = null;
+                            try {
+                                existingFamily = new FetchFamilyId().execute();
+                            } catch (HttpException e) {
+                                if (e.getCode() != HttpURLConnection.HTTP_NOT_FOUND) {
+                                    throw e;
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+
+                            Fid = existingFamily.getId();
+
+                            ContentValues cv = new ContentValues();
+                            cv.put("ParentId", Fid);
+                            String[] queryArgs = {FamilyId};
+
+                            sqlHandler.updateData("tblFamilies", cv,
+                                    "ParentId= ?", queryArgs);
+
+                        }
                     } else {
                         ShowErrorMessages();
                         break;
@@ -3445,26 +3394,11 @@ public class ClientAndroidInterface {
             @NonNull JSONArray insureesArray,
             @NonNull JSONArray policiesArray,
             @NonNull JSONArray premiumsArray,
-            @NonNull Pair<String, byte[]>[] insureeImages,
-            @NonNull JSONArray subFamilyArray,
-            @NonNull JSONArray subInsureesArray
+            @NonNull Pair<String, byte[]>[] insureeImages
     ) throws JSONException {
         JSONObject familyObj = familyArray.getJSONObject(0);
         JSONObject insureeObj = insureesArray.getJSONObject(0);
-        if(familyObj.getInt("ParentId") != 0){
-            Family existingFamily = null;
-            try {
-                existingFamily = new FetchFamilyId().execute();
-            } catch (HttpException e) {
-                if (e.getCode() != HttpURLConnection.HTTP_NOT_FOUND) {
-                    throw e;
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
 
-            familyObj.put("ParentId",existingFamily.getId());
-        }
         Family family = familyFromJSONObject(familyObj, insureesArray, insureeImages);
         try {
             new UpdateFamily().execute(family, insureeObj.getString("CHFID"));
