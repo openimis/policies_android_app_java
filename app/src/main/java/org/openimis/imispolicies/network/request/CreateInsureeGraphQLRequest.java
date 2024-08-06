@@ -21,7 +21,6 @@ public class CreateInsureeGraphQLRequest extends BaseGraphQLRequest {
     public CreateInsureeMutation.Data create(@NonNull Family.Member member, @NonNull int familyId) throws Exception {
         Response<CreateInsureeMutation.Data> response = makeSynchronous(new CreateInsureeMutation(
                 CreateInsureeMutationInput.builder()
-                        .chfId(member.getChfId())
                         .familyId(familyId)
                         .head(member.isHead())
                         .passport(member.getIdentificationNumber())
@@ -38,9 +37,6 @@ public class CreateInsureeGraphQLRequest extends BaseGraphQLRequest {
                         .professionId(member.getProfession())
                         .educationId(member.getEducation())
                         .healthFacilityId(member.getHealthFacilityId())
-                        .currentAddress(member.getCurrentAddress())
-                        .currentVillageId(member.getCurrentVillage())
-                        .geolocation(member.getGeolocation())
                         .professionalSituation(member.getProfessionalSituation())
                         .incomeLevelId(member.getIncomeLevel())
                         .preferredPaymentMethod(member.getPaymentMethod())

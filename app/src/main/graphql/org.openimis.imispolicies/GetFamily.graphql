@@ -2,7 +2,6 @@ query GetFamily($headChfId: String) {
     families(headInsuree_ChfId: $headChfId, first:1) {
         edges {
             node {
-                legacyId
                 id
                 uuid
                 headInsuree {

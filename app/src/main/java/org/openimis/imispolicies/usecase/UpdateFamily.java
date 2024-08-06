@@ -8,6 +8,7 @@ import org.openimis.imispolicies.domain.entity.Family;
 import org.openimis.imispolicies.network.exception.HttpException;
 import org.openimis.imispolicies.network.request.CreateFamilyGraphQLRequest;
 import org.openimis.imispolicies.network.request.CreateInsureeGraphQLRequest;
+import org.openimis.imispolicies.network.request.CreateSubFamilyGraphQLRequest;
 import org.openimis.imispolicies.network.request.UpdateFamilyGraphQLRequest;
 import org.openimis.imispolicies.network.request.UpdateInsureeGraphQLRequest;
 
@@ -16,7 +17,7 @@ import java.net.HttpURLConnection;
 public class UpdateFamily {
 
     @NonNull
-    private final FetchFamily fetchFamily;
+    private final FetchFamilyId fetchFamilyId;
     @NonNull
     private final CreateFamilyGraphQLRequest createFamilyGraphQLRequest;
     @NonNull
@@ -25,42 +26,52 @@ public class UpdateFamily {
     private final CreateInsureeGraphQLRequest createInsureeGraphQLRequest;
     @NonNull
     private final UpdateInsureeGraphQLRequest updateInsureeGraphQLRequest;
+    @NonNull
+    private final CreateSubFamilyGraphQLRequest createSubFamilyGraphQLRequest;
 
     public UpdateFamily() {
         this(
-                new FetchFamily(),
+                new FetchFamilyId(),
                 new CreateFamilyGraphQLRequest(),
                 new UpdateFamilyGraphQLRequest(),
                 new CreateInsureeGraphQLRequest(),
-                new UpdateInsureeGraphQLRequest()
+                new UpdateInsureeGraphQLRequest(),
+                new CreateSubFamilyGraphQLRequest()
         );
     }
 
     public UpdateFamily(
-            @NonNull FetchFamily fetchFamily,
+            @NonNull FetchFamilyId fetchFamilyId,
             @NonNull CreateFamilyGraphQLRequest createFamilyGraphQLRequest,
             @NonNull UpdateFamilyGraphQLRequest updateFamilyGraphQLRequest,
             @NonNull CreateInsureeGraphQLRequest createInsureeGraphQLRequest,
-            @NonNull UpdateInsureeGraphQLRequest updateInsureeGraphQLRequest
+            @NonNull UpdateInsureeGraphQLRequest updateInsureeGraphQLRequest,
+            @NonNull CreateSubFamilyGraphQLRequest createSubFamilyGraphQLRequest
     ) {
-        this.fetchFamily = fetchFamily;
+        this.fetchFamilyId = fetchFamilyId;
         this.createFamilyGraphQLRequest = createFamilyGraphQLRequest;
         this.updateFamilyGraphQLRequest = updateFamilyGraphQLRequest;
         this.createInsureeGraphQLRequest = createInsureeGraphQLRequest;
         this.updateInsureeGraphQLRequest = updateInsureeGraphQLRequest;
+        this.createSubFamilyGraphQLRequest = createSubFamilyGraphQLRequest;
     }
 
     @WorkerThread
     public void execute(@NonNull Family family, @NonNull String insureeCHFID) throws Exception {
-        Family existingFamily = null;
-        try {
-            existingFamily = fetchFamily.execute(insureeCHFID);
+
+        /*try {
+            //existingFamily = fetchFamily.execute();
         } catch (HttpException e) {
             if (e.getCode() != HttpURLConnection.HTTP_NOT_FOUND) {
                 throw e;
             }
+        }*/
+        if(family.getParentId() != null && family.getParentId() != 0){
+            createSubFamilyGraphQLRequest.create(family);
+        }else{
+            createFamilyGraphQLRequest.create(family);
         }
-        if (existingFamily == null) {
+        /*if (existingFamily == null) {
             createFamilyGraphQLRequest.create(family);
         } else {
             updateFamilyGraphQLRequest.update(family);
@@ -73,7 +84,7 @@ public class UpdateFamily {
                 }
                 removeMemberFromFamily(existingMember);
             }
-        }
+        }*/
         for (Family.Member member : family.getMembers()) {
             insertOrUpdateInsuree(member, insureeCHFID);
         }
@@ -83,7 +94,7 @@ public class UpdateFamily {
     private void insertOrUpdateInsuree(@NonNull Family.Member member, @Nullable String insureeCHFID ) throws Exception {
         Family existingFamily = null;
         try {
-            existingFamily = fetchFamily.execute(insureeCHFID);
+            existingFamily = fetchFamilyId.execute();
         } catch (HttpException e) {
             if (e.getCode() != HttpURLConnection.HTTP_NOT_FOUND) {
                 throw e;

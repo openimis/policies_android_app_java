@@ -1,0 +1,17 @@
+query GetFamilyId {
+    families(first:1, orderBy: ["-validityFrom"]) {
+        edges {
+            node {
+                id
+                uuid
+                headInsuree {
+                    id
+                    uuid
+                    chfId
+                    lastName
+                    otherNames
+                }
+            }
+        }
+    }
+}

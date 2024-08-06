@@ -12,7 +12,7 @@ import org.openimis.imispolicies.type.FamilyHeadInsureeInputType;
 
 import java.util.Objects;
 
-public class CreateFamilyGraphQLRequest extends BaseGraphQLRequest {
+public class CreateSubFamilyGraphQLRequest extends BaseGraphQLRequest {
 
     @WorkerThread
     @NonNull
@@ -28,6 +28,7 @@ public class CreateFamilyGraphQLRequest extends BaseGraphQLRequest {
                         .confirmationNo(family.getConfirmationNumber())
                         .confirmationTypeId(family.getConfirmationType())
                         .isOffline(family.isOffline())
+                        .parentId(family.getParentId())
                         .headInsuree(
                                 FamilyHeadInsureeInputType.builder()
                                         .lastName(head.getLastName())
