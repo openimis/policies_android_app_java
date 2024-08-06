@@ -378,11 +378,11 @@ public class ClientAndroidInterface {
     @JavascriptInterface
     @SuppressWarnings("unused")
     public String getRegions() {
-        //Integer officerLocationId = 19;
+        Integer officerLocationId = 19;
         @Language("SQL")
         String Query = "SELECT LocationId, LocationName FROM tblLocations WHERE LocationId = (SELECT L.ParentLocationId LocationId FROM tblLocations L";
-        if (getOfficerLocationId() != null) {
-            Query += " WHERE L.LocationId = " + getOfficerLocationId();
+        if (getOfficerLocationId() == null) {
+            Query += " WHERE L.LocationId = " + officerLocationId;
         }
         Query += ")";
         return sqlHandler.getResult(Query, null).toString();
@@ -4389,13 +4389,10 @@ public class ClientAndroidInterface {
     @WorkerThread
     private void processNewFormat(JSONObject masterData) throws UserException {
         try {
-            JSONArray IncomeLevels = new JSONArray();
-            JSONArray FamilyTypes = new JSONArray();
-            JSONArray ContributionPlans = new JSONArray();
             insertConfirmationTypes((JSONArray) masterData.get("confirmationTypes"));
             insertControls((JSONArray) masterData.get("controls"));
             insertEducation((JSONArray) masterData.get("education"));
-            //insertFamilyTypes((JSONArray) masterData.get("familyTypes"));
+            insertFamilyTypes((JSONArray) masterData.get("familyTypes"));
             insertHF((JSONArray) masterData.get("hf"));
             insertIdentificationTypes((JSONArray) masterData.get("identificationTypes"));
             insertLanguages((JSONArray) masterData.get("languages"));
@@ -4407,106 +4404,28 @@ public class ClientAndroidInterface {
             insertRelations((JSONArray) masterData.get("relations"));
             insertPhoneDefaults((JSONArray) masterData.get("phoneDefaults"));
             insertGenders((JSONArray) masterData.get("genders"));
+            insertIncomeLevel((JSONArray) masterData.get("IncomeLevels"));
 
-            //insert custom FamilyTypes
-            JSONObject fType = new JSONObject();
-            fType.put("FamilyTypeCode", "F");
-            fType.put("FamilyType", "Family");
-            fType.put("SortOrder", 1);
-            fType.put("AltLanguage", "Famille");
-            FamilyTypes.put(fType);
+            JSONArray ContributionPlans = new JSONArray();
+            for(int i=0; i < masterData.getJSONArray("ContributionPlans").length(); i++){
+                JSONObject contrib = new JSONObject();
+                contrib.put("Id", i);
+                contrib.put("Code", masterData.getJSONArray("ContributionPlans").getJSONObject(i).getString("Code"));
+                contrib.put("Name", masterData.getJSONArray("ContributionPlans").getJSONObject(i).getString("Name"));
+                contrib.put("Periodicity", masterData.getJSONArray("ContributionPlans").getJSONObject(i).getString("Periodicity"));
 
-            fType = new JSONObject();
-            fType.put("FamilyTypeCode", "P");
-            fType.put("FamilyType", "Household");
-            fType.put("SortOrder", 2);
-            fType.put("AltLanguage", "Ménage");
-            FamilyTypes.put(fType);
-
-            insertFamilyTypes(FamilyTypes);
-
-            //insert custom income levels
-            JSONObject object = new JSONObject();
-            object.put("Id", "0");
-            object.put("FrenchVersion", "Néant");
-            object.put("EnglishVersion", "Nothing");
-            IncomeLevels.put(object);
-
-            object = new JSONObject();
-            object.put("Id", "1");
-            object.put("FrenchVersion", "<30.000");
-            object.put("EnglishVersion", "<30.000");
-            IncomeLevels.put(object);
-
-            object = new JSONObject();
-            object.put("Id", "2");
-            object.put("FrenchVersion", "30.000 - 40.000");
-            object.put("EnglishVersion", "30.000 - 40.000");
-            IncomeLevels.put(object);
-
-            object = new JSONObject();
-            object.put("Id", "3");
-            object.put("FrenchVersion", "40.000 - 50.000");
-            object.put("EnglishVersion", "40.000 - 50.000");
-            IncomeLevels.put(object);
-
-            object = new JSONObject();
-            object.put("Id", "4");
-            object.put("FrenchVersion", "50.000 - 60.000");
-            object.put("EnglishVersion", "50.000 - 60.000");
-            IncomeLevels.put(object);
-
-            object = new JSONObject();
-            object.put("Id", "5");
-            object.put("FrenchVersion", "60.000 - 75.000");
-            object.put("EnglishVersion", "60.000 - 75.000");
-            IncomeLevels.put(object);
-
-            object = new JSONObject();
-            object.put("Id", "6");
-            object.put("FrenchVersion", "75.000 - 200.000");
-            object.put("EnglishVersion", "75.000 - 200.000");
-            IncomeLevels.put(object);
-
-            object = new JSONObject();
-            object.put("Id", "7");
-            object.put("FrenchVersion", "200.000 - 300.000");
-            object.put("EnglishVersion", "200.000 - 300.000");
-            IncomeLevels.put(object);
-
-            object = new JSONObject();
-            object.put("Id", "8");
-            object.put("FrenchVersion", "300.000 - 600.000");
-            object.put("EnglishVersion", "300.000 - 600.000");
-            IncomeLevels.put(object);
-
-            object = new JSONObject();
-            object.put("Id", "9");
-            object.put("FrenchVersion", "> 600.000");
-            object.put("EnglishVersion", "> 600.000");
-            IncomeLevels.put(object);
-
-            insertIncomeLevel(IncomeLevels);
-
-            //insert custom contibution plan
-            JSONObject contributionPlan = new JSONObject();
-            contributionPlan.put("Id", 1);
-            contributionPlan.put("Code", "CP02");
-            contributionPlan.put("Name", "Plan 02");
-            contributionPlan.put("ProductId", 4);
-            contributionPlan.put("Periodicity", "");
-            contributionPlan.put("CalculationRules", "{\"value\":6000,\"mtEnfant\":500,\"mtAdultMan\":1000, \"mtAdultWoman\":500,\"remoteFunction\": \"(function(){ return value + numberOfChild * mtEnfant + numberOfMan * mtAdultMan + numberOfWoman * mtAdultWoman; }())\"}");
-            contributionPlan.put("ValidFrom", DateUtils.dateFromString("05-06-2024") );
-            contributionPlan.put("ValidTo", DateUtils.dateFromString("05-06-2025") );
-            ContributionPlans.put(contributionPlan);
-
+                JSONObject json_text = masterData.getJSONArray("ContributionPlans").getJSONObject(i).getJSONObject("Json_ext");
+                contrib.put("CalculationRules", json_text.get("calculation_rule").toString());
+                contrib.put("ValidFrom", masterData.getJSONArray("ContributionPlans").getJSONObject(i).getString("datevalidfrom"));
+                contrib.put("ValidTo", masterData.getJSONArray("ContributionPlans").getJSONObject(i).getString("datevalidto"));
+                contrib.put("CpId", masterData.getJSONArray("ContributionPlans").getJSONObject(i).getString("UUID"));
+                ContributionPlans.put(contrib);
+            }
             insertContributionPlan(ContributionPlans);
 
         } catch (JSONException e) {
             e.printStackTrace();
             throw new UserException(activity.getResources().getString(R.string.DownloadMasterDataFailed), e);
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
         }
     }
 
@@ -5714,7 +5633,7 @@ public class ClientAndroidInterface {
     @SuppressWarnings("unused")
     public String getIncomeLevels() {
         String tableName = "tblIncomeLevel";
-        String[] columns = {"Id", "FrenchVersion", "EnglishVersion"};
+        String[] columns = {"IncomeLevelID", "FrenchVersion", "EnglishVersion"};
 
         JSONArray incomeLevels = sqlHandler.getResult(tableName, columns, null, null);
 
