@@ -4364,7 +4364,7 @@ public class ClientAndroidInterface {
             JSONArray ContributionPlans = new JSONArray();
             for(int i=0; i < masterData.getJSONArray("ContributionPlans").length(); i++){
                 JSONObject contrib = new JSONObject();
-                contrib.put("Id", i);
+                contrib.put("Id", i+1);
                 contrib.put("Code", masterData.getJSONArray("ContributionPlans").getJSONObject(i).getString("Code"));
                 contrib.put("Name", masterData.getJSONArray("ContributionPlans").getJSONObject(i).getString("Name"));
                 contrib.put("Periodicity", masterData.getJSONArray("ContributionPlans").getJSONObject(i).getString("Periodicity"));
@@ -4374,6 +4374,7 @@ public class ClientAndroidInterface {
                 contrib.put("ValidFrom", masterData.getJSONArray("ContributionPlans").getJSONObject(i).getString("datevalidfrom"));
                 contrib.put("ValidTo", masterData.getJSONArray("ContributionPlans").getJSONObject(i).getString("datevalidto"));
                 contrib.put("CpId", masterData.getJSONArray("ContributionPlans").getJSONObject(i).getString("UUID"));
+                contrib.put("ProductId", masterData.getJSONArray("ContributionPlans").getJSONObject(i).getString("BenefitPlanID"));
                 ContributionPlans.put(contrib);
             }
             insertContributionPlan(ContributionPlans);
@@ -5642,7 +5643,6 @@ public class ClientAndroidInterface {
                     }
                 }
             }
-
             calculationRule.put("numberOfChild",numberOfChild);
             calculationRule.put("numberOfMan",numberOfMan);
             calculationRule.put("numberOfWoman",numberOfWowan);
