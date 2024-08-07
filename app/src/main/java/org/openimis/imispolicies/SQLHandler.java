@@ -435,8 +435,8 @@ public class SQLHandler extends SQLiteOpenHelper {
                             "CalculationRules TEXT,"+
                             "Periodicity TEXT," +
                             "ValidFrom DATE," +
-                            "ValidTo Date" +
-                            "CpId"+")"
+                            "ValidTo Date," +
+                            "CpId" +")"
             );
         } catch (Exception e) {
             e.printStackTrace();

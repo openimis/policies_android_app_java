@@ -694,7 +694,6 @@ public class MainActivity extends AppCompatActivity
             startActivity(intent);
         } else if (id == R.id.nav_enrolment) {
             wv.loadUrl("file:///android_asset/pages/Enrollment.html");
-            Log.e("genders:", ca.getGender());
         } else if (id == R.id.nav_modify_family) {
             global = (Global) getApplicationContext();
             if (global.isLoggedIn()) {
