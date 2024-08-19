@@ -70,6 +70,15 @@ $(document).ready(function () {
             fillAge($(this).val());
     });
 
+    $('#ddlRelationship').change(function () {
+        var relationId = $('#ddlRelationship').val();
+        if(relationId == 4){
+            $('#ddlEducation').prop("required", true);
+        }else{
+            $("#ddlEducation").prop("required", false);
+        }
+    });
+
     $("#txtIdentificationNumber").change(function(){
             var Ins = $('#txtIdentificationNumber').val();
             var ans = Android.isValidIdentificationNumber(Ins);
@@ -77,7 +86,7 @@ $(document).ready(function () {
                 $('#txtIdentificationNumber').val("");
                 $('#txtInsuranceNumber').focus();
             }
-        })
+    })
 
 
     $('#spPleaseWait').text(Android.getString('saving'));
@@ -172,6 +181,7 @@ $(document).ready(function () {
         bindDataFromDatafield(Insuree);
         var PhotoPath = $.parseJSON(Insuree)[0]["PhotoPath"];
         var IsOffline = parseInt($.parseJSON(Insuree)[0]["isOffline"]);
+        var education = parseInt($.parseJSON(Insuree)[0]["Education"])
         if ($.parseJSON(Insuree)[0]["isHead"] == "true" || $.parseJSON(Insuree)[0]["isHead"] == "false") {
             if ($.parseJSON(Insuree)[0]["isHead"] == "true") {
                 if(isPolygamy == 1){
@@ -183,6 +193,7 @@ $(document).ready(function () {
             }
         } else {
             var head = parseInt($.parseJSON(Insuree)[0]["isHead"]);
+
             if (head == 1) {
                 if(isPolygamy == 1){
                     $("#ddlRelationship").prop("required", true);
@@ -191,6 +202,12 @@ $(document).ready(function () {
                     $("#Relationship").hide();
                 }
             }
+        }
+
+        if(education == 3){
+           $("#ddlEducation").prop("required", true);
+        }else{
+           $("#ddlEducation").prop("required", false);
         }
 
 
