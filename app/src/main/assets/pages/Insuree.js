@@ -1,9 +1,15 @@
 $(document).ready(function () {
 
     //Hide the relationship if the insuree is the HOF
-    if (sessionStorage.getItem("FamilyData") !== null || sessionStorage.getItem("SubFamilyData") !== null) {
+    if (sessionStorage.getItem("FamilyData") !== null) {
         $("#Relationship").hide();
         $("#ddlRelationship").prop("required", false);
+    }
+
+    //show the relationship if is family polygame and hide payment method
+    if (sessionStorage.getItem("SubFamilyData") !== null) {
+        $('#PaymentMethod').hide();
+        $("#ddlRelationship").prop("required", true);
     }
 
 
@@ -157,6 +163,7 @@ $(document).ready(function () {
     //if insureeid is passed load the insuree
     var InsureeId = queryString("i");
     var FamilyId = queryString("f");
+    var isPolygamy = queryString("isPolygamy")
 
     $('#btnScan').attr('src', '../images/scan.png');
 
@@ -167,12 +174,22 @@ $(document).ready(function () {
         var IsOffline = parseInt($.parseJSON(Insuree)[0]["isOffline"]);
         if ($.parseJSON(Insuree)[0]["isHead"] == "true" || $.parseJSON(Insuree)[0]["isHead"] == "false") {
             if ($.parseJSON(Insuree)[0]["isHead"] == "true") {
-                $("#Relationship").hide();
+                if(isPolygamy == 1){
+                    $("#ddlRelationship").prop("required", true);
+                    $('#PaymentMethod').hide();
+                }else{
+                    $("#Relationship").hide();
+                }
             }
         } else {
             var head = parseInt($.parseJSON(Insuree)[0]["isHead"]);
             if (head == 1) {
-                $("#Relationship").hide();
+                if(isPolygamy == 1){
+                    $("#ddlRelationship").prop("required", true);
+                    $('#PaymentMethod').hide();
+                }else{
+                    $("#Relationship").hide();
+                }
             }
         }
 
