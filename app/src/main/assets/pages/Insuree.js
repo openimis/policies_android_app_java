@@ -106,7 +106,7 @@ $(document).ready(function () {
         var ans = Android.isValidIdentificationNumber(Ins);
         if (ans != true) {
             $('#txtIdentificationNumber').val("");
-            $('#txtInsuranceNumber').focus();
+            $('#txtIdentificationNumber').focus();
         }
     })
 
@@ -256,8 +256,9 @@ $(document).ready(function () {
         $('#ddlPaymentMethod').val($.parseJSON(Insuree)[0]["PaymentMethod"]);
 
         var Ins = $('#txtInsuranceNumber').val();
+        var name = $('#txtOtherNames').val() + $('#txtLastName').val();
         if (PhotoPath.length == 0) {
-            PhotoPath = Android.GetListOfImagesContain(Ins);
+            PhotoPath = Android.GetListOfImagesContain(name);
 
         }
 
@@ -463,7 +464,8 @@ function createJSONString() {
 
 function getImage() {
     var Ins = $('#txtInsuranceNumber').val();
-    var ImagePath = Android.GetListOfImagesContain(Ins);
+    var name = $('#txtOtherNames').val()+$('#txtLastName').val()
+    var ImagePath = Android.GetListOfImagesContain(name);
 
     if (ImagePath.length > 0) {
         $('#imgInsuree').attr('src', 'file://' + ImagePath);

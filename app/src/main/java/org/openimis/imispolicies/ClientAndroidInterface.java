@@ -1112,7 +1112,7 @@ public class ClientAndroidInterface {
             String newPhotoPath = data.get("hfNewPhotoPath");
 
             if (!"".equals(newPhotoPath)) {
-                PhotoPath = copyImageFromGalleryToApplication(newPhotoPath, data.get("txtInsuranceNumber"));
+                PhotoPath = copyImageFromGalleryToApplication(newPhotoPath, data.get("txtOtherNames")+data.get("txtLastName"));
             }
 
             values.put("FamilyId", FamilyId);
