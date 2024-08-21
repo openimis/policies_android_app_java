@@ -4,7 +4,7 @@ $(document).ready(function () {
     if (sessionStorage.getItem("FamilyData") !== null) {
         $("#Relationship").hide();
         $("#ddlRelationship").prop("required", false);
-    }else{
+    } else {
         $('#PaymentMethod').hide();
     }
 
@@ -71,43 +71,43 @@ $(document).ready(function () {
     });
 
     $('#txtBirthDate').change(function () {
-            fillAge($(this).val());
+        fillAge($(this).val());
     });
 
     $('#ddlRelationship').change(function () {
         var relationId = $('#ddlRelationship').val();
-        if(relationId == 4){
+        if (relationId == 4) {
             $('#ddlEducation').prop("required", true);
-        }else{
+        } else {
             $("#ddlEducation").prop("required", false);
         }
     });
 
-    $("#ddlMaritalStatus").change(function(){
+    $("#ddlMaritalStatus").change(function () {
         var maritalStatus = $("#ddlMaritalStatus").val();
-        if(maritalStatus == "P"){
+        if (maritalStatus == "P") {
             $('#OtherHousehold').show();
-        }else{
+        } else {
             $('#OtherHousehold').hide();
         }
     });
 
-    $("#ddlPaymentMethod").change(function(){
-            var paymentMethod = $("#ddlPaymentMethod").val();
-            if(paymentMethod == "PB"){
-                $('#AccountDetails').show();
-            }else{
-                $('#AccountDetails').hide();
-            }
-        });
+    $("#ddlPaymentMethod").change(function () {
+        var paymentMethod = $("#ddlPaymentMethod").val();
+        if (paymentMethod == "PB") {
+            $('#AccountDetails').show();
+        } else {
+            $('#AccountDetails').hide();
+        }
+    });
 
-    $("#txtIdentificationNumber").change(function(){
-            var Ins = $('#txtIdentificationNumber').val();
-            var ans = Android.isValidIdentificationNumber(Ins);
-            if (ans != true) {
-                $('#txtIdentificationNumber').val("");
-                $('#txtInsuranceNumber').focus();
-            }
+    $("#txtIdentificationNumber").change(function () {
+        var Ins = $('#txtIdentificationNumber').val();
+        var ans = Android.isValidIdentificationNumber(Ins);
+        if (ans != true) {
+            $('#txtIdentificationNumber').val("");
+            $('#txtInsuranceNumber').focus();
+        }
     })
 
 
@@ -123,58 +123,64 @@ $(document).ready(function () {
         if (passed == true) {
             var jsonInsuree = createJSONString();
 
-            if (sessionStorage.getItem("FamilyData") !== null) {
-                var FamilyId = Android.SaveFamily(sessionStorage.getItem("FamilyData"), jsonInsuree);
-                var FamilyType = sessionStorage.getItem("FamilyType");
+            if ($('#hfNewPhotoPath').val() != "" || $('#hfImagePath').val() != "") {
 
-                if (FamilyId > 0) {
-                    sessionStorage.removeItem("FamilyData");
-                    $(this).attr("disabled", "disabled");
-                    if(FamilyType == "P"){
-                        window.open("FamilyPolygamy.html?f=" + FamilyId, "_self");
-                    }else{
+                if (sessionStorage.getItem("FamilyData") !== null) {
+                    var FamilyId = Android.SaveFamily(sessionStorage.getItem("FamilyData"), jsonInsuree);
+                    var FamilyType = sessionStorage.getItem("FamilyType");
+
+                    if (FamilyId > 0) {
+                        sessionStorage.removeItem("FamilyData");
+                        $(this).attr("disabled", "disabled");
+                        if (FamilyType == "P") {
+                            window.open("FamilyPolygamy.html?f=" + FamilyId, "_self");
+                        } else {
+                            window.open("FamilyAndInsurees.html?f=" + FamilyId, "_self");
+                        }
+                    }
+
+                } else if (sessionStorage.getItem("SubFamilyData") !== null) {
+                    var FamilyId = queryString('f');
+                    var SubFamilyId = Android.SaveSubFamily(sessionStorage.getItem("SubFamilyData"), jsonInsuree, parseInt(FamilyId));
+                    if (SubFamilyId > 0) {
+                        sessionStorage.removeItem("SubFamilyData");
+                        $(this).attr("disabled", "disabled");
+                        window.open("FamilyAndInsurees.html?f=" + SubFamilyId, "_self");
+                    }
+                } else {
+                    var FamilyId = parseInt(queryString('f'));
+                    var FamilyPolicy = Android.getFamilyPolicy(FamilyId);
+                    var $Policy = $.parseJSON(FamilyPolicy);
+                    var MemberCount = parseInt($Policy[0]["MemberCount"]);
+                    var Threshold = parseInt($Policy[0]["Threshold"]);
+                    var TotalIns = parseInt($Policy[0]["Ins"]);
+                    var PolicyId = parseInt($Policy[0]["PolicyId"]);
+                    var IsNewIns = parseInt($("#hfInsureeId").val());
+                    var MemberDialog = -1;
+                    var ExceedThreshold = -1;
+
+                    if (PolicyId > 0 && IsNewIns == 0) {
+                        if (TotalIns >= MemberCount) {
+                            ExceedThreshold = 0;
+                            Android.ShowDialog(Android.getString('ExceedMemberCount'));
+                        } else if (TotalIns >= Threshold) {
+                            ExceedThreshold = 1;
+                        } else {
+                            ExceedThreshold = 0;
+                        }
+
+                    }
+                    var InsureeId = Android.SaveInsuree(jsonInsuree, FamilyId, 0, parseInt(ExceedThreshold), PolicyId);
+                    if (PolicyId > 0 && TotalIns >= MemberCount) {
+                        $("#divProgress").hide();
+                    } else {
+                        $("#divProgress").hide();
                         window.open("FamilyAndInsurees.html?f=" + FamilyId, "_self");
                     }
                 }
-
-            } else if(sessionStorage.getItem("SubFamilyData") !== null){
-                var FamilyId = queryString('f');
-                var SubFamilyId = Android.SaveSubFamily(sessionStorage.getItem("SubFamilyData"), jsonInsuree,parseInt(FamilyId));
-                if (SubFamilyId > 0) {
-                     sessionStorage.removeItem("SubFamilyData");
-                         $(this).attr("disabled", "disabled");
-                         window.open("FamilyAndInsurees.html?f=" + SubFamilyId, "_self");
-                     }
             } else {
-                var FamilyId = parseInt(queryString('f'));
-                var FamilyPolicy = Android.getFamilyPolicy(FamilyId);
-                var $Policy = $.parseJSON(FamilyPolicy);
-                var MemberCount = parseInt($Policy[0]["MemberCount"]);
-                var Threshold = parseInt($Policy[0]["Threshold"]);
-                var TotalIns = parseInt($Policy[0]["Ins"]);
-                var PolicyId = parseInt($Policy[0]["PolicyId"]);
-                var IsNewIns = parseInt($("#hfInsureeId").val());
-                var MemberDialog = -1;
-                var ExceedThreshold = -1;
-
-                if (PolicyId > 0 && IsNewIns == 0) {
-                    if (TotalIns >= MemberCount) {
-                        ExceedThreshold = 0;
-                        Android.ShowDialog(Android.getString('ExceedMemberCount'));
-                    } else if (TotalIns >= Threshold) {
-                        ExceedThreshold = 1;
-                    } else {
-                        ExceedThreshold = 0;
-                    }
-
-                }
-                var InsureeId = Android.SaveInsuree(jsonInsuree, FamilyId, 0, parseInt(ExceedThreshold), PolicyId);
-                if (PolicyId > 0 && TotalIns >= MemberCount) {
-                    $("#divProgress").hide();
-                } else {
-                    $("#divProgress").hide();
-                    window.open("FamilyAndInsurees.html?f=" + FamilyId, "_self");
-                }
+                $("#divProgress").hide();
+                Android.ShowDialog(Android.getString('PhotoRequired'));
             }
         } else {
             $("#divProgress").hide();
@@ -206,12 +212,13 @@ $(document).ready(function () {
         var education = parseInt($.parseJSON(Insuree)[0]["Education"]);
         var marital = $.parseJSON(Insuree)[0]["Marital"];
         var payment = $.parseJSON(Insuree)[0]["PaymentMethod"];
+        var dob = $.parseJSON(Insuree)[0]["dob"];
         if ($.parseJSON(Insuree)[0]["isHead"] == "true" || $.parseJSON(Insuree)[0]["isHead"] == "false") {
             if ($.parseJSON(Insuree)[0]["isHead"] == "true") {
-                if(isPolygamy == 1){
+                if (isPolygamy == 1) {
                     $("#ddlRelationship").prop("required", true);
                     $('#PaymentMethod').hide();
-                }else{
+                } else {
                     $("#Relationship").hide();
                     $('#PaymentMethod').show();
                 }
@@ -220,27 +227,29 @@ $(document).ready(function () {
             var head = parseInt($.parseJSON(Insuree)[0]["isHead"]);
 
             if (head == 1) {
-                if(isPolygamy == 1){
+                if (isPolygamy == 1) {
                     $("#ddlRelationship").prop("required", true);
                     $('#PaymentMethod').hide();
-                }else{
+                } else {
                     $("#Relationship").hide();
                     $('#PaymentMethod').show();
                 }
             }
         }
 
-        if(education == 3){
-           $("#ddlEducation").prop("required", true);
-        }else{
-           $("#ddlEducation").prop("required", false);
+        if (education == 3) {
+            $("#ddlEducation").prop("required", true);
+        } else {
+            $("#ddlEducation").prop("required", false);
         }
 
-        if (marital == 'P'){
-           $('#OtherHousehold').show();
+        fillAge(dob);
+
+        if (marital == 'P') {
+            $('#OtherHousehold').show();
         }
 
-        if(payment == 'PB'){
+        if (payment == 'PB') {
             $('#AccountDetails').show();
         }
 
@@ -433,12 +442,12 @@ function fillVulnerability() {
     bindDropdown('ddlVulnerability', $Vulnerability, 'value', 'key', "", Android.getString('SelectVulnerability'));
 }
 
-function fillPaymentMethods(){
+function fillPaymentMethods() {
     var $PaymentMethods = Android.getPaymentMethod();
     bindDropdown('ddlPaymentMethod', $PaymentMethods, 'Code', 'Method', null, null);
 }
 
-function fillIncomeLevels(){
+function fillIncomeLevels() {
     $textLanguage = "FrenchVersion";
     if (Android.getSelectedLanguage() != "en") {
         $textLanguage = "EnglishVersion";
@@ -464,15 +473,15 @@ function getImage() {
     $("#hfImagePath").val($('#imgInsuree').attr('src'));
 }
 
-function fillAge(Birthday){
-    var today = new Date ();
-    var birthDate = new Date (Birthday)
+function fillAge(Birthday) {
+    var today = new Date();
+    var birthDate = new Date(Birthday)
 
     var age = today.getFullYear() - birthDate.getFullYear();
 
-    if(age < 21){
+    if (age < 21) {
         $("#Education").show();
-    }else{
+    } else {
         $("#Education").hide();
     }
 }
