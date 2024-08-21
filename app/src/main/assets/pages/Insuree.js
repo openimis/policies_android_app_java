@@ -29,6 +29,7 @@ $(document).ready(function () {
     fillDropdowns();
     $('#OtherHousehold').hide();
     $('#AccountDetails').hide();
+    $('#Education').hide();
 
     $('#ddlCurrentRegion').change(function () {
         fillCurrentDistricts(parseInt($(this).val()));
