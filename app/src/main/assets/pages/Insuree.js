@@ -4,6 +4,8 @@ $(document).ready(function () {
     if (sessionStorage.getItem("FamilyData") !== null) {
         $("#Relationship").hide();
         $("#ddlRelationship").prop("required", false);
+    }else{
+        $('#PaymentMethod').hide();
     }
 
     //show the relationship if is family polygame and hide payment method
@@ -25,6 +27,8 @@ $(document).ready(function () {
     if (CurrentDistrictCss == 'none') $('#CurrentRegion').css("display", "none");
 
     fillDropdowns();
+    $('#OtherHousehold').hide();
+    $('#AccountDetails').hide();
 
     $('#ddlCurrentRegion').change(function () {
         fillCurrentDistricts(parseInt($(this).val()));
@@ -78,6 +82,24 @@ $(document).ready(function () {
             $("#ddlEducation").prop("required", false);
         }
     });
+
+    $("#ddlMaritalStatus").change(function(){
+        var maritalStatus = $("#ddlMaritalStatus").val();
+        if(maritalStatus == "P"){
+            $('#OtherHousehold').show();
+        }else{
+            $('#OtherHousehold').hide();
+        }
+    });
+
+    $("#ddlPaymentMethod").change(function(){
+            var paymentMethod = $("#ddlPaymentMethod").val();
+            if(paymentMethod == "PB"){
+                $('#AccountDetails').show();
+            }else{
+                $('#AccountDetails').hide();
+            }
+        });
 
     $("#txtIdentificationNumber").change(function(){
             var Ins = $('#txtIdentificationNumber').val();
@@ -181,7 +203,9 @@ $(document).ready(function () {
         bindDataFromDatafield(Insuree);
         var PhotoPath = $.parseJSON(Insuree)[0]["PhotoPath"];
         var IsOffline = parseInt($.parseJSON(Insuree)[0]["isOffline"]);
-        var education = parseInt($.parseJSON(Insuree)[0]["Education"])
+        var education = parseInt($.parseJSON(Insuree)[0]["Education"]);
+        var marital = $.parseJSON(Insuree)[0]["Marital"];
+        var payment = $.parseJSON(Insuree)[0]["PaymentMethod"];
         if ($.parseJSON(Insuree)[0]["isHead"] == "true" || $.parseJSON(Insuree)[0]["isHead"] == "false") {
             if ($.parseJSON(Insuree)[0]["isHead"] == "true") {
                 if(isPolygamy == 1){
@@ -189,6 +213,7 @@ $(document).ready(function () {
                     $('#PaymentMethod').hide();
                 }else{
                     $("#Relationship").hide();
+                    $('#PaymentMethod').show();
                 }
             }
         } else {
@@ -200,6 +225,7 @@ $(document).ready(function () {
                     $('#PaymentMethod').hide();
                 }else{
                     $("#Relationship").hide();
+                    $('#PaymentMethod').show();
                 }
             }
         }
@@ -210,6 +236,15 @@ $(document).ready(function () {
            $("#ddlEducation").prop("required", false);
         }
 
+        if (marital == 'P'){
+           $('#OtherHousehold').show();
+        }
+
+        if(payment == 'PB'){
+            $('#AccountDetails').show();
+        }
+
+        $('#ddlPaymentMethod').val($.parseJSON(Insuree)[0]["PaymentMethod"]);
 
         var Ins = $('#txtInsuranceNumber').val();
         if (PhotoPath.length == 0) {

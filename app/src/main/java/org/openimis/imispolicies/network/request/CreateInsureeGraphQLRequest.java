@@ -40,6 +40,8 @@ public class CreateInsureeGraphQLRequest extends BaseGraphQLRequest {
                         .professionalSituation(member.getProfessionalSituation())
                         .incomeLevelId(member.getIncomeLevel())
                         .preferredPaymentMethod(member.getPaymentMethod())
+                        .coordinates(member.getOtherHousehold())
+                        .bankCoordinates(member.getAccountDetails())
                         .photo(
                                 PhotoInputType.builder()
                                         .filename(member.getPhotoPath())

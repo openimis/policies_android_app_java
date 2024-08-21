@@ -582,6 +582,11 @@ public class ClientAndroidInterface {
             maritalStatus.put(object);
 
             object = new JSONObject();
+            object.put("Code", "P");
+            object.put("Status", activity.getResources().getString(R.string.Polygamy));
+            maritalStatus.put(object);
+
+            object = new JSONObject();
             object.put("Code", "N");
             object.put("Status", activity.getResources().getString(R.string.NotSpecified));
             maritalStatus.put(object);
@@ -1143,6 +1148,8 @@ public class ClientAndroidInterface {
             values.put("TypeOfId", IdentificationType);
             values.put("IncomeLevel", IncomeLevel);
             values.put("PaymentMethod", PaymentMethod);
+            values.put("OtherHousehold", data.get("txtOtherHousehold"));
+            values.put("AccountDetails", data.get("txtAccountDetails"));
 
             if (data.get("ddlVulnerability") != null && !data.get("ddlVulnerability").equals("")) {
                 values.put("Vulnerability", data.get("ddlVulnerability"));
@@ -1343,7 +1350,7 @@ public class ClientAndroidInterface {
     @SuppressWarnings("unused")
     public String getInsuree(int InsureeId) {
         @Language("SQL")
-        String Query = "SELECT InsureeId, FamilyId, CHFID, LastName, OtherNames, DOB, Gender, Marital, isHead, IdentificationNumber, Phone, isOffline , PhotoPath, CardIssued, Relationship, Profession, Education, Email, TypeOfId, I.HFID, CurrentAddress,R.LocationId CurRegion, D.LocationId CurDistrict, W.LocationId CurWard,  I.CurVillage, HFR.LocationId FSPRegion, HFD.LocationId FSPDistrict, HF.HFLevel FSPCategory, I.Vulnerability, ProfessionalSituation, IncomeLevel, PaymentMethod\n" +
+        String Query = "SELECT InsureeId, FamilyId, CHFID, LastName, OtherNames, DOB, Gender, Marital, isHead, IdentificationNumber, Phone, isOffline , PhotoPath, CardIssued, Relationship, Profession, Education, Email, TypeOfId, I.HFID, CurrentAddress,R.LocationId CurRegion, D.LocationId CurDistrict, W.LocationId CurWard,  I.CurVillage, HFR.LocationId FSPRegion, HFD.LocationId FSPDistrict, HF.HFLevel FSPCategory, I.Vulnerability, ProfessionalSituation, IncomeLevel, PaymentMethod, OtherHousehold, AccountDetails\n" +
                 "FROM tblInsuree I\n" +
                 "LEFT OUTER JOIN tblLocations V ON V.LocationId = I.CurVillage\n" +
                 "LEFT OUTER JOIN tblLocations W ON W.LocationId = V.ParentLocationId\n" +
@@ -3138,7 +3145,7 @@ public class ClientAndroidInterface {
 
             //get Insureesf
             query = new StringBuilder(
-                    "SELECT I.InsureeUUID AS InsureeUUID, I.InsureeId AS InsureeId, I.FamilyId AS FamilyId, I.CHFID, I.LastName, I.OtherNames, I.DOB, I.Gender, NULLIF(I.Marital,'') Marital, I.isHead, NULLIF(I.IdentificationNumber,'null') IdentificationNumber, NULLIF(I.Phone,'null') Phone, REPLACE(I.PhotoPath, RTRIM(PhotoPath, REPLACE(PhotoPath, '/', '')), '') PhotoPath, NULLIF(I.CardIssued,'null') CardIssued, NULLIF(I.Relationship,'null') Relationship, NULLIF(I.Profession,'null') Profession, NULLIF(I.Education,'null') Education, NULLIF(I.Email,'null') Email, CASE WHEN I.TypeOfId='null' THEN null ELSE I.TypeOfId END TypeOfId, NULLIF(I.HFID,'null') HFID, NULLIF(I.CurrentAddress,'null') CurrentAddress, NULLIF(I.GeoLocation,'null') GeoLocation, NULLIF(I.CurVillage,'null') CurVillage,I.isOffline, I.Vulnerability FROM tblInsuree I WHERE "
+                    "SELECT I.InsureeUUID AS InsureeUUID, I.InsureeId AS InsureeId, I.FamilyId AS FamilyId, I.CHFID, I.LastName, I.OtherNames, I.DOB, I.Gender, NULLIF(I.Marital,'') Marital, I.isHead, NULLIF(I.IdentificationNumber,'null') IdentificationNumber, NULLIF(I.Phone,'null') Phone, REPLACE(I.PhotoPath, RTRIM(PhotoPath, REPLACE(PhotoPath, '/', '')), '') PhotoPath, NULLIF(I.CardIssued,'null') CardIssued, NULLIF(I.Relationship,'null') Relationship, NULLIF(I.Profession,'null') Profession, NULLIF(I.Education,'null') Education, NULLIF(I.Email,'null') Email, CASE WHEN I.TypeOfId='null' THEN null ELSE I.TypeOfId END TypeOfId, NULLIF(I.HFID,'null') HFID, NULLIF(I.CurrentAddress,'null') CurrentAddress, NULLIF(I.GeoLocation,'null') GeoLocation, NULLIF(I.CurVillage,'null') CurVillage,I.isOffline, I.Vulnerability, I.IncomeLevel, I.PaymentMethod, I.OtherHousehold, I.AccountDetails FROM tblInsuree I WHERE "
             );
             if (CallerId != 2) {
                 query.append(" I.FamilyId = ").append(FamilyId).append(" \n");
@@ -3399,6 +3406,8 @@ public class ClientAndroidInterface {
         JSONObject familyObj = familyArray.getJSONObject(0);
         JSONObject insureeObj = insureesArray.getJSONObject(0);
 
+        Log.e("insurees",insureesArray.toString());
+
         Family family = familyFromJSONObject(familyObj, insureesArray, insureeImages);
         try {
             new UpdateFamily().execute(family, insureeObj.getString("CHFID"));
@@ -3502,6 +3511,8 @@ public class ClientAndroidInterface {
                 /* professionnal situation  = */ JsonUtils.getStringOrDefault(object, "ProfessionalSituation"),
                 /* income level = */ JsonUtils.getIntegerOrDefault(object, "IncomeLevel"),
                 /* payment method */ JsonUtils.getStringOrDefault(object, "PaymentMethod"),
+                /* otherhousehold */ JsonUtils.getStringOrDefault(object, "OtherHousehold"),
+                /* account details */ JsonUtils.getStringOrDefault(object, "AccountDetails"),
                 /* photoPath = */ image != null ? image.first : null,
                 /* photoBytes = */ image != null ? image.second : null,
                 /* isOffline = */ JsonUtils.getBooleanOrDefault(object, "isOffline", false)

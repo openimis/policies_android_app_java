@@ -318,6 +318,12 @@ public class Family implements Parcelable {
         private final String paymentMethod;
 
         @Nullable
+        private final String otherHousehold;
+
+        @Nullable
+        private final String accountDetails;
+
+        @Nullable
         private final String photoPath;
         @Nullable
         private final byte[] photoBytes;
@@ -350,6 +356,8 @@ public class Family implements Parcelable {
                 @Nullable String professionalSituation,
                 @Nullable Integer incomeLevel,
                 @Nullable String paymentMethod,
+                @Nullable String otherHousehold,
+                @Nullable String accountDetails,
                 @Nullable String photoPath,
                 @Nullable byte[] photoBytes,
                 boolean isOffline
@@ -380,6 +388,8 @@ public class Family implements Parcelable {
             this.professionalSituation = professionalSituation;
             this.incomeLevel = incomeLevel;
             this.paymentMethod = paymentMethod;
+            this.otherHousehold = otherHousehold;
+            this.accountDetails = accountDetails;
             this.photoPath = photoPath;
             this.photoBytes = photoBytes;
             this.isOffline = isOffline;
@@ -426,6 +436,8 @@ public class Family implements Parcelable {
             professionalSituation = in.readString();
             incomeLevel = in.readInt();
             paymentMethod = in.readString();
+            otherHousehold = in.readString();
+            accountDetails = in.readString();
             photoPath = in.readString();
             int size = in.readInt();
             if (size >= 0) {
@@ -480,6 +492,8 @@ public class Family implements Parcelable {
             dest.writeString(professionalSituation);
             dest.writeInt(incomeLevel);
             dest.writeString(paymentMethod);
+            dest.writeString(otherHousehold);
+            dest.writeString(accountDetails);
             dest.writeString(photoPath);
             if (photoBytes != null) {
                 dest.writeInt(photoBytes.length);
@@ -614,6 +628,12 @@ public class Family implements Parcelable {
 
         @Nullable
         public String getPaymentMethod(){ return paymentMethod;}
+
+        @Nullable
+        public String getOtherHousehold(){ return otherHousehold;}
+
+        @Nullable
+        public String getAccountDetails(){ return accountDetails;}
 
         @Nullable
         public String getPhotoPath() {
