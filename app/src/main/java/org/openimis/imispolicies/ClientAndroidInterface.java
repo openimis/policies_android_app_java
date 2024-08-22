@@ -390,9 +390,10 @@ public class ClientAndroidInterface {
     @SuppressWarnings("unused")
     public String getRegions() {
         Integer officerLocationId = 19;
+        //Integer officerLocationId = getOfficerLocationId();
         @Language("SQL")
         String Query = "SELECT LocationId, LocationName FROM tblLocations WHERE LocationId = (SELECT L.ParentLocationId LocationId FROM tblLocations L";
-        if (getOfficerLocationId() == null) {
+        if (officerLocationId != null) {
             Query += " WHERE L.LocationId = " + officerLocationId;
         }
         Query += ")";
@@ -3145,7 +3146,7 @@ public class ClientAndroidInterface {
 
             //get Insureesf
             query = new StringBuilder(
-                    "SELECT I.InsureeUUID AS InsureeUUID, I.InsureeId AS InsureeId, I.FamilyId AS FamilyId, I.CHFID, I.LastName, I.OtherNames, I.DOB, I.Gender, NULLIF(I.Marital,'') Marital, I.isHead, NULLIF(I.IdentificationNumber,'null') IdentificationNumber, NULLIF(I.Phone,'null') Phone, REPLACE(I.PhotoPath, RTRIM(PhotoPath, REPLACE(PhotoPath, '/', '')), '') PhotoPath, NULLIF(I.CardIssued,'null') CardIssued, NULLIF(I.Relationship,'null') Relationship, NULLIF(I.Profession,'null') Profession, NULLIF(I.Education,'null') Education, NULLIF(I.Email,'null') Email, CASE WHEN I.TypeOfId='null' THEN null ELSE I.TypeOfId END TypeOfId, NULLIF(I.HFID,'null') HFID, NULLIF(I.CurrentAddress,'null') CurrentAddress, NULLIF(I.GeoLocation,'null') GeoLocation, NULLIF(I.CurVillage,'null') CurVillage,I.isOffline, I.Vulnerability, I.IncomeLevel, I.PaymentMethod, I.OtherHousehold, I.AccountDetails FROM tblInsuree I WHERE "
+                    "SELECT I.InsureeUUID AS InsureeUUID, I.InsureeId AS InsureeId, I.FamilyId AS FamilyId, I.CHFID, I.LastName, I.OtherNames, I.DOB, I.Gender, NULLIF(I.Marital,'') Marital, I.isHead, NULLIF(I.IdentificationNumber,'null') IdentificationNumber, NULLIF(I.Phone,'null') Phone, REPLACE(I.PhotoPath, RTRIM(PhotoPath, REPLACE(PhotoPath, '/', '')), '') PhotoPath, NULLIF(I.CardIssued,'null') CardIssued, NULLIF(I.Relationship,'null') Relationship, NULLIF(I.Profession,'null') Profession, NULLIF(I.Education,'null') Education, NULLIF(I.Email,'null') Email, CASE WHEN I.TypeOfId='null' THEN null ELSE I.TypeOfId END TypeOfId, NULLIF(I.HFID,'null') HFID, NULLIF(I.CurrentAddress,'null') CurrentAddress, NULLIF(I.GeoLocation,'null') GeoLocation, NULLIF(I.CurVillage,'null') CurVillage,I.isOffline, I.Vulnerability, I.ProfessionalSituation, I.IncomeLevel, I.PaymentMethod, I.OtherHousehold, I.AccountDetails FROM tblInsuree I WHERE "
             );
             if (CallerId != 2) {
                 query.append(" I.FamilyId = ").append(FamilyId).append(" \n");
@@ -3405,8 +3406,6 @@ public class ClientAndroidInterface {
     ) throws JSONException {
         JSONObject familyObj = familyArray.getJSONObject(0);
         JSONObject insureeObj = insureesArray.getJSONObject(0);
-
-        Log.e("insurees",insureesArray.toString());
 
         Family family = familyFromJSONObject(familyObj, insureesArray, insureeImages);
         try {

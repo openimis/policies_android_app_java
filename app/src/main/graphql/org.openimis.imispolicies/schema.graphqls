@@ -6765,6 +6765,11 @@ input FamilyHeadInsureeInputType {
   residentialDistrict: String
   residentialProvince: String
   houseNumber: String
+  professionalSituation: String
+  incomeLevelId: Int
+  preferredPaymentMethod: String
+  bankCoordinates: String
+  coordinates: String
 }
 
 input PhotoInputType {
