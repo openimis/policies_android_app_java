@@ -49,7 +49,7 @@ $(document).ready(function () {
         if (clicked == Android.getString('Edit')) {
             var url = 'FamilyPolygamy.html?f=' + FamilyId;
             Android.SetUrl(url);
-            window.open("Insuree.html?i=" + InsureeId + "&f=" + FamilyId, "_self");
+            window.open("Insuree.html?i=" + InsureeId + "&f=" + FamilyId + '&isPolygamy=1', "_self");
         }
         else if (clicked == Android.getString('Delete')) {
             //$("#divProgress").show();

@@ -36,7 +36,7 @@ $(document).ready(function () {
         if (clicked == Android.getString('Edit')) {
             var url = 'FamilySubFamilies.html?f=' + FamilyId + '&l=' + LocationId + '&r=' + RegionId + '&d=' + DistrictId;
             Android.SetUrl(url);
-            window.open('FamilyAndInsurees.html?f=' + SubFamilyId + '&isPolygamy=1', '_self');
+            window.open('FamilyAndInsurees.html?f=' + SubFamilyId, '_self');
         }
         if (clicked == Android.getString('Detach')) {
             var detachSuccess = 0;

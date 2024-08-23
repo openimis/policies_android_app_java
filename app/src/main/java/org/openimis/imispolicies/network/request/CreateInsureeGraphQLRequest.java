@@ -11,6 +11,7 @@ import org.openimis.imispolicies.CreateInsureeMutation;
 import org.openimis.imispolicies.domain.entity.Family;
 import org.openimis.imispolicies.type.CreateInsureeMutationInput;
 import org.openimis.imispolicies.type.PhotoInputType;
+import org.openimis.imispolicies.util.DateUtils;
 
 import java.util.Objects;
 
@@ -50,6 +51,8 @@ public class CreateInsureeGraphQLRequest extends BaseGraphQLRequest {
                                                         Base64.encodeToString(member.getPhotoBytes(), Base64.DEFAULT) :
                                                         null
                                         )
+                                        .date(DateUtils.dateFromString("2024-08-22"))
+                                        .officerId(1)
                                         .build()
                         )
                         .build()
