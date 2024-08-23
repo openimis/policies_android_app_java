@@ -1,6 +1,7 @@
 $(document).ready(function () {
 
      $('#PaymentMethod').hide();
+     $("#Education").hide();
 
     //Hide the relationship if the insuree is the HOF
     if (sessionStorage.getItem("FamilyData") !== null || sessionStorage.getItem("SubFamilyData") !== null) {
@@ -69,15 +70,17 @@ $(document).ready(function () {
         $("#hfNewPhotoPath").val("");
     });
 
-    $('#txtBirthDate').change(function () {
-        fillAge($(this).val());
-    });
+    //$('#txtBirthDate').change(function () {
+    //    fillAge($(this).val());
+    //});
 
     $('#ddlRelationship').change(function () {
         var relationId = $('#ddlRelationship').val();
         if (relationId == 4) {
+            $("#Education").show();
             $('#ddlEducation').prop("required", true);
         } else {
+            $("#Education").hide();
             $("#ddlEducation").prop("required", false);
         }
     });
@@ -214,6 +217,7 @@ $(document).ready(function () {
         var PhotoPath = $.parseJSON(Insuree)[0]["PhotoPath"];
         var IsOffline = parseInt($.parseJSON(Insuree)[0]["isOffline"]);
         var marital = $.parseJSON(Insuree)[0]["Marital"];
+        var relation = $.parseJSON(Insuree)[0]["Relationship"];
         var payment = $.parseJSON(Insuree)[0]["PaymentMethod"];
         var dob = $.parseJSON(Insuree)[0]["DOB"];
         if ($.parseJSON(Insuree)[0]["isHead"] == "true" || $.parseJSON(Insuree)[0]["isHead"] == "false") {
@@ -238,7 +242,11 @@ $(document).ready(function () {
             }
         }
 
-        fillAge(dob);
+        //fillAge(dob);
+
+        if(relation == 4){
+            $("#Education").show();
+        }
 
         if (marital == 'P') {
             $('#OtherHousehold').show();
