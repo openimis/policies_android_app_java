@@ -215,7 +215,6 @@ $(document).ready(function () {
         bindDataFromDatafield(Insuree);
         var PhotoPath = $.parseJSON(Insuree)[0]["PhotoPath"];
         var IsOffline = parseInt($.parseJSON(Insuree)[0]["isOffline"]);
-        var relation = parseInt($.parseJSON(Insuree)[0]["Relationship"]);
         var marital = $.parseJSON(Insuree)[0]["Marital"];
         var payment = $.parseJSON(Insuree)[0]["PaymentMethod"];
         var dob = $.parseJSON(Insuree)[0]["DOB"];
@@ -237,12 +236,6 @@ $(document).ready(function () {
                 $('#PaymentMethod').hide();
                 $("#ddlRelationship").prop("required", true);
             }
-        }
-
-        if (relation == 4) {
-            $("#ddlEducation").prop("required", true);
-        } else {
-            $("#ddlEducation").prop("required", false);
         }
 
         fillAge(dob);
@@ -482,7 +475,13 @@ function fillAge(Birthday) {
 
     if (age < 21) {
         $("#Education").show();
+        if($("#ddlRelationship").val() == 4){
+            $("#ddlEducation").prop("required", true);
+        }else{
+            $("#ddlEducation").prop("required", false);
+        }
     } else {
         $("#Education").hide();
+        $("#ddlEducation").prop("required", false);
     }
 }
