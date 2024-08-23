@@ -9,8 +9,6 @@ $(document).ready(function () {
         $('#PaymentMethod').show();
     }
 
-    //$("#ddlRelationship").prop("required", true);
-
     var insuranceNumber = Math.floor(Math.random() * 9000000000) + 1000000000;
     $('#txtInsuranceNumber').val(insuranceNumber);
 
@@ -222,6 +220,7 @@ $(document).ready(function () {
             if ($.parseJSON(Insuree)[0]["isHead"] == "true") {
                 $("#Relationship").hide();
                 $('#PaymentMethod').show();
+                $("#ddlRelationship").prop("required", false);
             }else{
                 $('#PaymentMethod').hide();
                 $("#ddlRelationship").prop("required", true);
@@ -232,6 +231,7 @@ $(document).ready(function () {
             if (head == 1) {
                 $("#Relationship").hide();
                 $('#PaymentMethod').show();
+                $("#ddlRelationship").prop("required", false);
             }else{
                 $('#PaymentMethod').hide();
                 $("#ddlRelationship").prop("required", true);
