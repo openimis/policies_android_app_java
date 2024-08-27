@@ -22,6 +22,7 @@ public class CreateSubFamilyGraphQLRequest extends BaseGraphQLRequest {
     @NonNull
     public CreateFamilyMutation.Data create(@NonNull Family family) throws Exception {
         Family.Member head = family.getHead();
+        java.sql.Date date = new java.sql.Date(System.currentTimeMillis());
         Response<CreateFamilyMutation.Data> response = makeSynchronous(new CreateFamilyMutation(
                 CreateFamilyMutationInput.builder()
                         .locationId(22)
@@ -60,7 +61,7 @@ public class CreateSubFamilyGraphQLRequest extends BaseGraphQLRequest {
                                                                         Base64.encodeToString(head.getPhotoBytes(), Base64.DEFAULT) :
                                                                         null
                                                         )
-                                                        .date(DateUtils.dateFromString("2024-08-22"))
+                                                        .date(date)
                                                         .officerId(1)
                                                         .build()
                                         )
