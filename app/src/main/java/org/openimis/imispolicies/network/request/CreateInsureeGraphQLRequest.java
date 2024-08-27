@@ -13,6 +13,8 @@ import org.openimis.imispolicies.type.CreateInsureeMutationInput;
 import org.openimis.imispolicies.type.PhotoInputType;
 import org.openimis.imispolicies.util.DateUtils;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class CreateInsureeGraphQLRequest extends BaseGraphQLRequest {
@@ -20,6 +22,7 @@ public class CreateInsureeGraphQLRequest extends BaseGraphQLRequest {
     @WorkerThread
     @NonNull
     public CreateInsureeMutation.Data create(@NonNull Family.Member member, @NonNull int familyId) throws Exception {
+        java.sql.Date date = new java.sql.Date(System.currentTimeMillis());
         Response<CreateInsureeMutation.Data> response = makeSynchronous(new CreateInsureeMutation(
                 CreateInsureeMutationInput.builder()
                         .familyId(familyId)
@@ -51,7 +54,7 @@ public class CreateInsureeGraphQLRequest extends BaseGraphQLRequest {
                                                         Base64.encodeToString(member.getPhotoBytes(), Base64.DEFAULT) :
                                                         null
                                         )
-                                        .date(DateUtils.dateFromString("2024-08-22"))
+                                        .date(date)
                                         .officerId(1)
                                         .build()
                         )

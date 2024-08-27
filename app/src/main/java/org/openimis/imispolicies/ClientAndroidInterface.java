@@ -98,6 +98,7 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.nio.file.Files;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.text.ParseException;
@@ -3611,10 +3612,10 @@ public class ClientAndroidInterface {
 
                 if (PhotoPath.length() > 0 && !PhotoPath.equals("null")) {
                     File[] files = GetListOfImages(global.getImageFolder(), PhotoPath);
-
                     if (files.length > 0) {
                         try {
-                            byte[] imgContent = new byte[(int) files[0].length()];
+                            //byte[] imgContent = new byte[(int) files[0].length()];
+                            byte[] imgContent = Files.readAllBytes(files[0].toPath());
                             copy(PhotoPath, imgContent);
                             if (CallerId != 2) {
                                 images[j] = new Pair<>(files[0].getName(), imgContent);
@@ -5625,7 +5626,6 @@ public class ClientAndroidInterface {
             String query = "SELECT * FROM tblContributionPlan WHERE Id =" + Integer.parseInt(CPId);
             JSONArray contributionPlans = sqlHandler.getResult(query, null);
             JSONObject cp = contributionPlans.getJSONObject(0);
-            Log.e("contrib plan", cp.toString());
 
             //get calculation rules in calculation plan
             calculationRule = new JSONObject(cp.getString("CalculationRules"));
