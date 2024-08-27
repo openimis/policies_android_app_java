@@ -483,6 +483,7 @@
     <string name="SelectPaymentMethod">Select payment method</string>
     <string name="PaymentMethod">Payment method</string>
     <string name="ProfessionalSituation">Professional Situation</string>
+    <string name="OtherHousehold">Other Household</string>
     <string name="SelectIncomeLevel">Select Income Level</string>
     <string name="IncomeLevel">Income Level</string>
 </resources>

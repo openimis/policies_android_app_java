@@ -87,6 +87,8 @@ public class FetchFamily {
                 /* professional situation = */ null,
                 /* incomeLevel = */ null,
                 /* payment method = */ null,
+                /* other household = */ null,
+                /* account details = */ null,
                 /* photoPath = */ downloadPhoto(member.photo()),
                 /* photoBytes = */ null, // We already saved them on disk, no need to pass them here.
                 /* isOffline = */ member.offline() != null ? Objects.requireNonNull(member.offline()) : false

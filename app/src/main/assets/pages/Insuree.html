@@ -42,7 +42,7 @@ In case of dispute arising out or in relation to the use of the program, it is s
     <ul class="ulEntry">
         <li id="Relationship">
             <span strName="Relation">Relation</span>
-            <select id="ddlRelationship" dataField="Relationship"></select>
+            <select id="ddlRelationship" dataField="Relationship" required></select>
         </li>
         <li style="display:none;">
             <input type="hidden" datafield="InsureeId" id="hfInsureeId" value="0"/>
@@ -63,8 +63,8 @@ In case of dispute arising out or in relation to the use of the program, it is s
             <input type="text" maxlength="50" id="txtLastName" dataField="LastName" required/>
         </li>
         <li>
-            <input type="hidden" id="hfImagePath" datafield="PhotoPath" />
-            <input type="hidden" id="hfNewPhotoPath" datafield="newPhotoPath" />
+            <input type="hidden" id="hfImagePath" datafield="PhotoPath"/>
+            <input type="hidden" id="hfNewPhotoPath" datafield="newPhotoPath"/>
             <div id="imgDiv">
                 <img src="" alt="Image" onerror="noImage(this);" id="imgInsuree"/>
             </div>
@@ -80,6 +80,10 @@ In case of dispute arising out or in relation to the use of the program, it is s
         <li id="MaritalStatus">
             <span strName="MaritalStatus">Marital Status</span>
             <select id="ddlMaritalStatus" datafield="Marital"></select>
+        </li>
+        <li id="OtherHousehold">
+            <span strName="OtherHousehold">Other Household</span>
+            <input type="text" maxlength="200" id="txtOtherHousehold" datafield="OtherHousehold"/>
         </li>
         <li id="BeneficiaryCard">
             <span strName="BeneficiaryCard">Beneficiary Card</span>
@@ -160,6 +164,10 @@ In case of dispute arising out or in relation to the use of the program, it is s
         <li id="PaymentMethod">
             <span strName="PaymentMethod">Payment Method</span>
             <select id="ddlPaymentMethod" datafield="PaymentMethod"></select>
+        </li>
+        <li id="AccountDetails">
+            <span strName="AccountDetails">Other Household</span>
+            <input type="text" maxlength="200" id="txtAccountDetails" datafield="AccountDetails"/>
         </li>
     </ul>
 </div>

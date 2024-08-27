@@ -98,6 +98,7 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.nio.file.Files;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.text.ParseException;
@@ -390,9 +391,10 @@ public class ClientAndroidInterface {
     @SuppressWarnings("unused")
     public String getRegions() {
         Integer officerLocationId = 19;
+        //Integer officerLocationId = getOfficerLocationId();
         @Language("SQL")
         String Query = "SELECT LocationId, LocationName FROM tblLocations WHERE LocationId = (SELECT L.ParentLocationId LocationId FROM tblLocations L";
-        if (getOfficerLocationId() == null) {
+        if (officerLocationId != null) {
             Query += " WHERE L.LocationId = " + officerLocationId;
         }
         Query += ")";
@@ -579,6 +581,11 @@ public class ClientAndroidInterface {
             object = new JSONObject();
             object.put("Code", "W");
             object.put("Status", activity.getResources().getString(R.string.Widowed));
+            maritalStatus.put(object);
+
+            object = new JSONObject();
+            object.put("Code", "P");
+            object.put("Status", activity.getResources().getString(R.string.Polygamy));
             maritalStatus.put(object);
 
             object = new JSONObject();
@@ -1143,6 +1150,8 @@ public class ClientAndroidInterface {
             values.put("TypeOfId", IdentificationType);
             values.put("IncomeLevel", IncomeLevel);
             values.put("PaymentMethod", PaymentMethod);
+            values.put("OtherHousehold", data.get("txtOtherHousehold"));
+            values.put("AccountDetails", data.get("txtAccountDetails"));
 
             if (data.get("ddlVulnerability") != null && !data.get("ddlVulnerability").equals("")) {
                 values.put("Vulnerability", data.get("ddlVulnerability"));
@@ -1343,7 +1352,7 @@ public class ClientAndroidInterface {
     @SuppressWarnings("unused")
     public String getInsuree(int InsureeId) {
         @Language("SQL")
-        String Query = "SELECT InsureeId, FamilyId, CHFID, LastName, OtherNames, DOB, Gender, Marital, isHead, IdentificationNumber, Phone, isOffline , PhotoPath, CardIssued, Relationship, Profession, Education, Email, TypeOfId, I.HFID, CurrentAddress,R.LocationId CurRegion, D.LocationId CurDistrict, W.LocationId CurWard,  I.CurVillage, HFR.LocationId FSPRegion, HFD.LocationId FSPDistrict, HF.HFLevel FSPCategory, I.Vulnerability, ProfessionalSituation, IncomeLevel, PaymentMethod\n" +
+        String Query = "SELECT InsureeId, FamilyId, CHFID, LastName, OtherNames, DOB, Gender, Marital, isHead, IdentificationNumber, Phone, isOffline , PhotoPath, CardIssued, Relationship, Profession, Education, Email, TypeOfId, I.HFID, CurrentAddress,R.LocationId CurRegion, D.LocationId CurDistrict, W.LocationId CurWard,  I.CurVillage, HFR.LocationId FSPRegion, HFD.LocationId FSPDistrict, HF.HFLevel FSPCategory, I.Vulnerability, ProfessionalSituation, IncomeLevel, PaymentMethod, OtherHousehold, AccountDetails\n" +
                 "FROM tblInsuree I\n" +
                 "LEFT OUTER JOIN tblLocations V ON V.LocationId = I.CurVillage\n" +
                 "LEFT OUTER JOIN tblLocations W ON W.LocationId = V.ParentLocationId\n" +
@@ -3138,7 +3147,7 @@ public class ClientAndroidInterface {
 
             //get Insureesf
             query = new StringBuilder(
-                    "SELECT I.InsureeUUID AS InsureeUUID, I.InsureeId AS InsureeId, I.FamilyId AS FamilyId, I.CHFID, I.LastName, I.OtherNames, I.DOB, I.Gender, NULLIF(I.Marital,'') Marital, I.isHead, NULLIF(I.IdentificationNumber,'null') IdentificationNumber, NULLIF(I.Phone,'null') Phone, REPLACE(I.PhotoPath, RTRIM(PhotoPath, REPLACE(PhotoPath, '/', '')), '') PhotoPath, NULLIF(I.CardIssued,'null') CardIssued, NULLIF(I.Relationship,'null') Relationship, NULLIF(I.Profession,'null') Profession, NULLIF(I.Education,'null') Education, NULLIF(I.Email,'null') Email, CASE WHEN I.TypeOfId='null' THEN null ELSE I.TypeOfId END TypeOfId, NULLIF(I.HFID,'null') HFID, NULLIF(I.CurrentAddress,'null') CurrentAddress, NULLIF(I.GeoLocation,'null') GeoLocation, NULLIF(I.CurVillage,'null') CurVillage,I.isOffline, I.Vulnerability FROM tblInsuree I WHERE "
+                    "SELECT I.InsureeUUID AS InsureeUUID, I.InsureeId AS InsureeId, I.FamilyId AS FamilyId, I.CHFID, I.LastName, I.OtherNames, I.DOB, I.Gender, NULLIF(I.Marital,'') Marital, I.isHead, NULLIF(I.IdentificationNumber,'null') IdentificationNumber, NULLIF(I.Phone,'null') Phone, REPLACE(I.PhotoPath, RTRIM(PhotoPath, REPLACE(PhotoPath, '/', '')), '') PhotoPath, NULLIF(I.CardIssued,'null') CardIssued, NULLIF(I.Relationship,'null') Relationship, NULLIF(I.Profession,'null') Profession, NULLIF(I.Education,'null') Education, NULLIF(I.Email,'null') Email, CASE WHEN I.TypeOfId='null' THEN null ELSE I.TypeOfId END TypeOfId, NULLIF(I.HFID,'null') HFID, NULLIF(I.CurrentAddress,'null') CurrentAddress, NULLIF(I.GeoLocation,'null') GeoLocation, NULLIF(I.CurVillage,'null') CurVillage,I.isOffline, I.Vulnerability, I.ProfessionalSituation, I.IncomeLevel, I.PaymentMethod, I.OtherHousehold, I.AccountDetails FROM tblInsuree I WHERE "
             );
             if (CallerId != 2) {
                 query.append(" I.FamilyId = ").append(FamilyId).append(" \n");
@@ -3502,6 +3511,8 @@ public class ClientAndroidInterface {
                 /* professionnal situation  = */ JsonUtils.getStringOrDefault(object, "ProfessionalSituation"),
                 /* income level = */ JsonUtils.getIntegerOrDefault(object, "IncomeLevel"),
                 /* payment method */ JsonUtils.getStringOrDefault(object, "PaymentMethod"),
+                /* otherhousehold */ JsonUtils.getStringOrDefault(object, "OtherHousehold"),
+                /* account details */ JsonUtils.getStringOrDefault(object, "AccountDetails"),
                 /* photoPath = */ image != null ? image.first : null,
                 /* photoBytes = */ image != null ? image.second : null,
                 /* isOffline = */ JsonUtils.getBooleanOrDefault(object, "isOffline", false)
@@ -3601,10 +3612,10 @@ public class ClientAndroidInterface {
 
                 if (PhotoPath.length() > 0 && !PhotoPath.equals("null")) {
                     File[] files = GetListOfImages(global.getImageFolder(), PhotoPath);
-
                     if (files.length > 0) {
                         try {
-                            byte[] imgContent = new byte[(int) files[0].length()];
+                            //byte[] imgContent = new byte[(int) files[0].length()];
+                            byte[] imgContent = Files.readAllBytes(files[0].toPath());
                             copy(PhotoPath, imgContent);
                             if (CallerId != 2) {
                                 images[j] = new Pair<>(files[0].getName(), imgContent);
@@ -5615,7 +5626,6 @@ public class ClientAndroidInterface {
             String query = "SELECT * FROM tblContributionPlan WHERE Id =" + Integer.parseInt(CPId);
             JSONArray contributionPlans = sqlHandler.getResult(query, null);
             JSONObject cp = contributionPlans.getJSONObject(0);
-            Log.e("contrib plan", cp.toString());
 
             //get calculation rules in calculation plan
             calculationRule = new JSONObject(cp.getString("CalculationRules"));

@@ -228,7 +228,9 @@ public class SQLHandler extends SQLiteOpenHelper {
                             "Vulnerability BOOLEAN," +
                             "ProfessionalSituation TEXT," +
                             "IncomeLevel NUMERIC," +
-                            "PaymentMethod TEXT" + ")"
+                            "PaymentMethod TEXT," +
+                            "OtherHousehold TEXT," +
+                            "AccountDetails TEXT" + ")"
             );
             sqLiteDatabase.execSQL(
                     "CREATE TABLE 'tblInsureePolicy' (" +

@@ -11,6 +11,7 @@ import org.openimis.imispolicies.network.request.CreateInsureeGraphQLRequest;
 import org.openimis.imispolicies.network.request.CreateSubFamilyGraphQLRequest;
 import org.openimis.imispolicies.network.request.UpdateFamilyGraphQLRequest;
 import org.openimis.imispolicies.network.request.UpdateInsureeGraphQLRequest;
+import org.openimis.imispolicies.tools.Log;
 
 import java.net.HttpURLConnection;
 
@@ -100,12 +101,13 @@ public class UpdateFamily {
                 throw e;
             }
         }
-        if(existingFamily != null){
-            try {
-                createInsureeGraphQLRequest.create(member, existingFamily.getId());
-            } catch (Exception e) {
-                updateInsureeGraphQLRequest.update(member, existingFamily.getId());
-            }
+        Log.e("isHOF",String.valueOf(member.isHead()));
+        if(existingFamily != null && member.isHead() == false){
+                try {
+                    createInsureeGraphQLRequest.create(member, existingFamily.getId());
+                } catch (Exception e) {
+                    updateInsureeGraphQLRequest.update(member, existingFamily.getId());
+                }
         }
     }
 

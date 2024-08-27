@@ -65,6 +65,7 @@
     <string name="Single">Célibataire</string>
     <string name="Divorced">Divorcé</string>
     <string name="Widowed">Veuf</string>
+    <string name="Polygamy">Polygame</string>
     <string name="NotSpecified">Non spécifié</string>
     <string name="SelectBeneficiary">Sélectionner la carte de bénéficiaire</string>
     <string name="SelectProfession">Choisir un métier</string>
@@ -485,6 +486,7 @@
     <string name="SelectPaymentMethod">Choisir une méthode de paiement</string>
     <string name="PaymentMethod">Méthode de paiement</string>
     <string name="ProfessionalSituation">Situation Professionnelle</string>
+    <string name="OtherHousehold">Autre Ménage</string>
     <string name="SelectIncomeLevel">Choisir le niveau de revenu</string>
     <string name="IncomeLevel">Niveau de revenu</string>
     <string name="FamilyAndSubFamilies">Famille et sous-familles</string>
@@ -495,4 +497,5 @@
     <string name="InvalidIdentificationNumber">Le numéro d\'identification doit contenir 7 caractères</string>
     <string name="SelectContribution">Sél. un plan de contribution</string>
     <string name="ContributionPlan">Plan de contribution</string>
+    <string name="AccountDetails">Numéro du compte</string>
 </resources>
