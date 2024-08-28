@@ -1335,7 +1335,6 @@ public class ClientAndroidInterface {
                 "WHERE ParentId =" + FamilyId;
 
         JSONArray Families = sqlHandler.getResult(Query, null);
-        Log.e("subfamilies", Families.toString());
 
         return Families.toString();
     }
@@ -2463,6 +2462,23 @@ public class ClientAndroidInterface {
         @Language("SQL")
         String FamilyQuery = "DELETE FROM  tblFamilies WHERE FamilyId = ?";
         sqlHandler.getResult(FamilyQuery, familyIdArgument);
+
+        //delete subfamily for polygamy
+        JSONArray subFamilies = null;
+        try {
+            subFamilies = new JSONArray(getAllSubFamilies(FamilyId));
+
+            for(int i=0; i < subFamilies.length();i++){
+                JSONObject subfamily = subFamilies.getJSONObject(i);
+                DeleteFamily(subfamily.getInt("FamilyId"));
+            }
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
+
+
+
+
         return 1;
     }
 
