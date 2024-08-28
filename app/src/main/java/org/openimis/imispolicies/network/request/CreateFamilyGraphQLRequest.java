@@ -40,7 +40,7 @@ public class CreateFamilyGraphQLRequest extends BaseGraphQLRequest {
                                         .genderId(head.getGender())
                                         .dob(head.getDateOfBirth())
                                         .passport(head.getIdentificationNumber())
-                                        .cardIssued(false)
+                                        .cardIssued(head.isCardIssued())
                                         .typeOfIdId(head.getTypeOfId())
                                         .marital(head.getMarital())
                                         .phone(head.getPhone())
