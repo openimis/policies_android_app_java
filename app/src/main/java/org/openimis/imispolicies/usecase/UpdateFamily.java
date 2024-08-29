@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
 
+import org.openimis.imispolicies.Global;
 import org.openimis.imispolicies.domain.entity.Family;
 import org.openimis.imispolicies.network.exception.HttpException;
 import org.openimis.imispolicies.network.request.CreateFamilyGraphQLRequest;
@@ -58,8 +59,7 @@ public class UpdateFamily {
     }
 
     @WorkerThread
-    public void execute(@NonNull Family family, @NonNull String insureeCHFID) throws Exception {
-
+    public void execute(@NonNull Family family, @NonNull String insureeCHFID, @NonNull int officerId) throws Exception {
         /*try {
             //existingFamily = fetchFamily.execute();
         } catch (HttpException e) {
@@ -68,9 +68,9 @@ public class UpdateFamily {
             }
         }*/
         if(family.getParentId() != null && family.getParentId() != 0){
-            createSubFamilyGraphQLRequest.create(family);
+            createSubFamilyGraphQLRequest.create(family, officerId);
         }else{
-            createFamilyGraphQLRequest.create(family);
+            createFamilyGraphQLRequest.create(family, officerId);
         }
         /*if (existingFamily == null) {
             createFamilyGraphQLRequest.create(family);
@@ -87,12 +87,12 @@ public class UpdateFamily {
             }
         }*/
         for (Family.Member member : family.getMembers()) {
-            insertOrUpdateInsuree(member, insureeCHFID);
+            insertOrUpdateInsuree(member, insureeCHFID, officerId);
         }
     }
 
     @WorkerThread
-    private void insertOrUpdateInsuree(@NonNull Family.Member member, @Nullable String insureeCHFID ) throws Exception {
+    private void insertOrUpdateInsuree(@NonNull Family.Member member, @Nullable String insureeCHFID, @NonNull int officerId ) throws Exception {
         Family existingFamily = null;
         try {
             existingFamily = fetchFamilyId.execute();
@@ -104,7 +104,7 @@ public class UpdateFamily {
         Log.e("isHOF",String.valueOf(member.isHead()));
         if(existingFamily != null && member.isHead() == false){
                 try {
-                    createInsureeGraphQLRequest.create(member, existingFamily.getId());
+                    createInsureeGraphQLRequest.create(member, existingFamily.getId(), officerId);
                 } catch (Exception e) {
                     updateInsureeGraphQLRequest.update(member, existingFamily.getId());
                 }

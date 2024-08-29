@@ -3426,7 +3426,7 @@ public class ClientAndroidInterface {
 
         Family family = familyFromJSONObject(familyObj, insureesArray, insureeImages);
         try {
-            new UpdateFamily().execute(family, insureeObj.getString("CHFID"));
+            new UpdateFamily().execute(family, insureeObj.getString("CHFID"), global.getOfficerId());
         } catch (Exception e) {
             enrolMessages.add(e.getMessage());
             return -400;

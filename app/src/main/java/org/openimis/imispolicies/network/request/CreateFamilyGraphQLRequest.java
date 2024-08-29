@@ -8,6 +8,7 @@ import androidx.annotation.WorkerThread;
 import com.apollographql.apollo.api.Response;
 
 import org.openimis.imispolicies.CreateFamilyMutation;
+import org.openimis.imispolicies.Global;
 import org.openimis.imispolicies.domain.entity.Family;
 import org.openimis.imispolicies.type.CreateFamilyMutationInput;
 import org.openimis.imispolicies.type.FamilyHeadInsureeInputType;
@@ -20,7 +21,7 @@ public class CreateFamilyGraphQLRequest extends BaseGraphQLRequest {
 
     @WorkerThread
     @NonNull
-    public CreateFamilyMutation.Data create(@NonNull Family family) throws Exception {
+    public CreateFamilyMutation.Data create(@NonNull Family family, int officerId) throws Exception {
         Family.Member head = family.getHead();
         java.sql.Date date = new java.sql.Date(System.currentTimeMillis());
         Response<CreateFamilyMutation.Data> response = makeSynchronous(new CreateFamilyMutation(
@@ -61,7 +62,7 @@ public class CreateFamilyGraphQLRequest extends BaseGraphQLRequest {
                                                                         null
                                                         )
                                                         .date(date)
-                                                        .officerId(1)
+                                                        .officerId(officerId)
                                                         .build()
                                         )
                                         .build()

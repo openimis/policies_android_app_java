@@ -21,7 +21,7 @@ public class CreateInsureeGraphQLRequest extends BaseGraphQLRequest {
 
     @WorkerThread
     @NonNull
-    public CreateInsureeMutation.Data create(@NonNull Family.Member member, @NonNull int familyId) throws Exception {
+    public CreateInsureeMutation.Data create(@NonNull Family.Member member, @NonNull int familyId, @NonNull int officerId) throws Exception {
         java.sql.Date date = new java.sql.Date(System.currentTimeMillis());
         Response<CreateInsureeMutation.Data> response = makeSynchronous(new CreateInsureeMutation(
                 CreateInsureeMutationInput.builder()
@@ -55,7 +55,7 @@ public class CreateInsureeGraphQLRequest extends BaseGraphQLRequest {
                                                         null
                                         )
                                         .date(date)
-                                        .officerId(1)
+                                        .officerId(officerId)
                                         .build()
                         )
                         .build()
