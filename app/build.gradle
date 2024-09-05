@@ -133,7 +133,7 @@ android {
         }
         niger {
             applicationId "org.openimis.imispolicies.niger"
-            buildConfigField "String", "API_BASE_URL", '"https://imis.amd.ne/"'
+            buildConfigField "String", "API_BASE_URL", '"https://imis.msppas.ne/"'
             resValue "string", "app_name_policies", System.getenv("CLI_APP_NAME") ?: "Polices Niger"
             dimension = 'std'
         }
