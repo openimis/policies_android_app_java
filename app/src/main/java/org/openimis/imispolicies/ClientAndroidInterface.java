@@ -5691,8 +5691,6 @@ public class ClientAndroidInterface {
             throw new RuntimeException(e);
         }
 
-        Log.e("calculation rule",calculationRule.toString());
-
         return calculationRule.toString();
     }
 }
