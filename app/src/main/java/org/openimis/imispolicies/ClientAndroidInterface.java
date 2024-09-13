@@ -5650,22 +5650,36 @@ public class ClientAndroidInterface {
             int numberOfWowan = 0;
 
             @Language("SQL")
-            String queryI = "SELECT DOB, Gender FROM tblInsuree WHERE FamilyId =" + familyId; //get all insurees of family
+            String queryI = "SELECT DOB, Gender, Relationship FROM tblInsuree WHERE FamilyId =" + familyId; //get all insurees of family
             JSONArray insureesFamily = sqlHandler.getResult(queryI, null);
 
             for(int i=0; i< insureesFamily.length(); i++){
                 JSONObject insuree = insureesFamily.getJSONObject(i);
-                Date dob = JsonUtils.getDateOrDefault(insuree,"DOB");
-                Date today = new Date();
-                int age = 0;
-                age = today.getYear() - dob.getYear();
-                if(age <= 18){
-                    numberOfChild++;
-                }else{
-                    if(insuree.getString("Gender").equals("M")){
-                        numberOfMan++;
-                    }else if(insuree.getString("Gender").equals("F")){
-                        numberOfWowan++;
+
+                @Language("SQL")
+                String queryR = "SELECT Relation FROM tblRelations WHERE RelationId =" + insuree.getInt("Relationship"); //get all insurees of family
+                JSONArray insureeRelation = sqlHandler.getResult(queryR, null);
+
+                String relation = "";
+                if(insuree.getInt("Relationship") != 0){
+                    relation = insureeRelation.getJSONObject(0).getString("Relation");
+                }
+
+                if(insuree.getInt("Relationship") != 0
+                        &&  !relation.equals("Spouse")
+                        && !relation.equals("Son/Daughter")){
+                    Date dob = JsonUtils.getDateOrDefault(insuree,"DOB");
+                    Date today = new Date();
+                    int age = 0;
+                    age = today.getYear() - dob.getYear();
+                    if(age <= 18){
+                        numberOfChild++;
+                    }else{
+                        if(insuree.getString("Gender").equals("M")){
+                            numberOfMan++;
+                        }else if(insuree.getString("Gender").equals("F")){
+                            numberOfWowan++;
+                        }
                     }
                 }
             }
@@ -5676,6 +5690,8 @@ public class ClientAndroidInterface {
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
+
+        Log.e("calculation rule",calculationRule.toString());
 
         return calculationRule.toString();
     }
