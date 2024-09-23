@@ -176,6 +176,7 @@
     <string name="MissingReceiptNo">Veuillez entrer le numéro de reçu.</string>
     <string name="MissingProductCode">Veuillez entrer le code du Paquet de bénéfice</string>
     <string name="MissingAmount">Veuillez entrer le montant</string>
+    <string name="MissingPayType">Veuillez sélectionner un type de paiement</string>
     <string name="InvalidReceiptNo">Ce numéro de reçu est déjà utilisé.</string>
     <string name="NoFiles">Aucun fichier trouvé.</string>
     <string name="Of">De</string>
@@ -477,4 +478,8 @@
     <string name="CurrentResourceLanguage">Current resource language: %1$s</string>
     <string name="SystemLanguageNotSupported">Current system language is not supported. The app will use the default language.</string>
     <string name="SupportedLanguages">Supported languages:\n%1$s</string>
+    <string name="pay_type_select_one">Selectionnez un mode de paiement</string>
+    <string name="pay_type_cash">Cash</string>
+    <string name="pay_type_mobile_phone">Téléphone portable</string>
+    <string name="pay_type_bank_transfer">Virement banquaire</string>
 </resources>

@@ -176,6 +176,7 @@
     <string name="MissingReceiptNo">Please enter Receipt No.</string>
     <string name="MissingProductCode">Please enter product code</string>
     <string name="MissingAmount">Please enter amount</string>
+    <string name="MissingPayType">Please select a payment type</string>
     <string name="InvalidReceiptNo">This receipt number is already used.</string>
     <string name="NoFiles">No file found.</string>
     <string name="Of">Of</string>
@@ -478,4 +479,8 @@
     <string name="SystemLanguageNotSupported">Current system language is not supported. The app will use the default language.</string>
     <string name="SupportedLanguages">Supported languages:\n%1$s</string>
     <string name="DataDownloadedFailed">Data download failed</string>
+    <string name="pay_type_select_one">Select Payment Type</string>
+    <string name="pay_type_cash">Cash</string>
+    <string name="pay_type_mobile_phone">Mobile Phone</string>
+    <string name="pay_type_bank_transfer">Bank Transfer</string>
 </resources>
