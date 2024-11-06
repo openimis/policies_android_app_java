@@ -450,9 +450,9 @@ function fillPaymentMethods() {
 }
 
 function fillIncomeLevels() {
-    $textLanguage = "FrenchVersion";
+    $textLanguage = "FirstLanguage";
     if (Android.getSelectedLanguage() != "en") {
-        $textLanguage = "EnglishVersion";
+        $textLanguage = "SecondLanguage";
     }
     var $IncomeLevels = Android.getIncomeLevels();
     bindDropdown('ddlIncomeLevel', $IncomeLevels, 'IncomeLevelID', $textLanguage, null, Android.getString('SelectIncomeLevel'));

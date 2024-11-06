@@ -425,8 +425,8 @@ public class SQLHandler extends SQLiteOpenHelper {
             sqLiteDatabase.execSQL(
                     "CREATE TABLE " + tblIncomeLevel + "(" +
                             "Id INTEGER," +
-                            "FrenchVersion TEXT," +
-                            "EnglishVersion TEXT" +")"
+                            "FirstLanguage TEXT," +
+                            "SecondLanguage TEXT" +")"
             );
             sqLiteDatabase.execSQL(
                     "CREATE TABLE " + tblContributionPlan + "(" +

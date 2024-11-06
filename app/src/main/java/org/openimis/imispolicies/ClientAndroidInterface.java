@@ -390,8 +390,8 @@ public class ClientAndroidInterface {
     @JavascriptInterface
     @SuppressWarnings("unused")
     public String getRegions() {
-        Integer officerLocationId = 19;
-        //Integer officerLocationId = getOfficerLocationId();
+        //Integer officerLocationId = 19;
+        Integer officerLocationId = getOfficerLocationId();
         @Language("SQL")
         String Query = "SELECT LocationId, LocationName FROM tblLocations WHERE LocationId = (SELECT L.ParentLocationId LocationId FROM tblLocations L";
         if (officerLocationId != null) {
@@ -5616,7 +5616,7 @@ public class ClientAndroidInterface {
     @SuppressWarnings("unused")
     public String getIncomeLevels() {
         String tableName = "tblIncomeLevel";
-        String[] columns = {"IncomeLevelID", "FrenchVersion", "EnglishVersion"};
+        String[] columns = {"IncomeLevelID", "FirstLanguage", "SecondLanguage"};
 
         JSONArray incomeLevels = sqlHandler.getResult(tableName, columns, null, null);
 
