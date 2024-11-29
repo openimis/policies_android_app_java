@@ -6,27 +6,7 @@ on:
       api_base_url:
         description: URL of the REST API
         required: true
-        default: https://release.openimis.org/rest/
-      app_name:
-        description: Display name of the application
-        required: false
-        default: Policies Manual
-      app_dir:
-        description: Name of the folder in Documents, default IMIS-CLI
-        required: false
-      application_id:
-        description: Fully qualified name of the app
-        required: true
-        default: org.openimis.imispolicies.cli
-      cli_java_dir:
-        description: java source folder for custom functions. Only works with application_id_suffix .cli
-        required: false
-      cli_res_dir:
-        description: Resources folder for icons. Only works with application_id_suffix .cli
-        required: false
-      cli_assets_dir:
-        description: Asserts folder for images, json files.... Only works with .cli
-        required: false
+        default: https://test.amg.km/rest/
 # Branch is chosen by default in github manual actions
 
 jobs:
@@ -62,23 +42,11 @@ jobs:
           echo url ${{ github.event.inputs.api_base_url }}
           echo app name ${{ github.event.inputs.app_name }}
 
-          echo app dir ${{ github.event.inputs.app_dir }}
-          echo CLI_JAVA_DIR "${{ github.event.inputs.cli_java_dir }}"
-          echo CLI_RES_DIR "${{ github.event.inputs.cli_res_dir }}"
-          echo CLI_ASSETS_DIR "${{ github.event.inputs.cli_assets_dir }}"
-          echo APPLICATION_ID "${{ github.event.inputs.application_id }}"
-
       - name: build
         run: |
-          ./gradlew assembleCliDebug --stacktrace
+          ./gradlew assembleComoresDevDebug --stacktrace
         env:
           API_BASE_URL: "${{ github.event.inputs.api_base_url }}"
-          CLI_APP_NAME: "${{ github.event.inputs.app_name }}"
-          CLI_APP_DIR: "${{ github.event.inputs.app_dir }}"
-          CLI_JAVA_DIR: "${{ github.event.inputs.cli_java_dir }}"
-          CLI_RES_DIR: "${{ github.event.inputs.cli_res_dir }}"
-          CLI_ASSETS_DIR: "${{ github.event.inputs.cli_assets_dir }}"
-          APPLICATION_ID: "${{ github.event.inputs.application_id }}"
 
       - name: Environment info
         run: |
@@ -86,7 +54,7 @@ jobs:
 
       - uses: actions/upload-artifact@v2
         with:
-          name: openimis-policies-apk-${{github.run_number}}-${{github.sha}}
+          name: policies-comores-apk-${{github.run_number}}.apk
           path: ./app/build/outputs/**/*.apk
 
 #      - name: build
