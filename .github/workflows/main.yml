@@ -27,7 +27,7 @@ jobs:
 
       - name: build
         run: |
-          ./gradlew assembleDebug --stacktrace
+          ./gradlew assembleComoresDebug --stacktrace
 
       - name: Environment info
         run: |
