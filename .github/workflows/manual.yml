@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Setup JDK 17
         uses: actions/setup-java@v2
@@ -23,14 +23,14 @@ jobs:
           java-version: '17'
           cache: 'gradle'
           
-      - uses: actions/cache@v2
+      - uses: actions/cache@v4
         with:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
           key: ${{ runner.os }}-${{ github.event.inputs.application_id }}-${{ hashFiles('**/*.gradle*') }}-${{ hashFiles('**/gradle/wrapper/gradle-wrapper.properties') }}-${{ hashFiles('**/buildSrc/**/*.kt') }}
 
-      - uses: actions/cache@v2
+      - uses: actions/cache@v4
         with:
           path: |
             ~/.android
@@ -52,7 +52,7 @@ jobs:
         run: |
           gradle --version
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
           name: policies-comores-apk-${{github.run_number}}.apk
           path: ./app/build/outputs/**/*.apk
