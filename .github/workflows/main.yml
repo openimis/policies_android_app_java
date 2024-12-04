@@ -33,7 +33,7 @@ jobs:
         run: |
           gradle --version
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
           name: openimis-policies-apk-${{github.run_number}}-${{github.sha}}
           path: ./app/build/outputs/**/*.apk
@@ -46,7 +46,7 @@ jobs:
         run: |
           gradle --version
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
           name: openimis-policies-aab-${{github.run_number}}-${{github.sha}}
           path: ./app/build/outputs/**/*.aab
