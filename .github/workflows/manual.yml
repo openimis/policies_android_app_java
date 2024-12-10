@@ -68,6 +68,10 @@ jobs:
           echo CLI_ASSETS_DIR "${{ github.event.inputs.cli_assets_dir }}"
           echo APPLICATION_ID "${{ github.event.inputs.application_id }}"
 
+      - name: show gradlew permission
+        run: |
+          chmod +x gradlew
+
       - name: build
         run: |
           ./gradlew assembleCliDebug --stacktrace
