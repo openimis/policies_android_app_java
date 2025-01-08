@@ -1,6 +1,6 @@
 $(document).ready(function () {
 
-    document.title = Android.getString('FamilyAndInsurees');
+    document.title = Android.getString('FamilyAndSubFamilies');
 
     var FamilyId = queryString("f");
     var LocationId = null;
@@ -10,9 +10,7 @@ $(document).ready(function () {
     var Action = null;
 
     var url = 'Enrollment.html?f=' + FamilyId;
-    if(queryString("type") != "P"){
-        Android.SetUrl(url);
-    }
+    Android.SetUrl(url);
 
     if (FamilyId != 0) {
         LoadFamilyHeader(parseInt(FamilyId))
@@ -36,12 +34,12 @@ $(document).ready(function () {
 
     });
 
-    $('.Policy-label').click(function () {
+    $('.SubFamily-label').click(function () {
         LocationId = $('#hfLocationId').val();
         RegionId = $('#hfRegionId').val();
         DistrictId = $('#hfDistrictId').val();
 
-        window.open('FamilyPolicies.html?f=' + FamilyId + '&l=' + LocationId + '&r=' + RegionId + '&d=' + DistrictId, '_self');
+        window.open('FamilySubFamilies.html?f=' + FamilyId + '&l=' + LocationId + '&r=' + RegionId + '&d=' + DistrictId, '_self');
     });
 
 

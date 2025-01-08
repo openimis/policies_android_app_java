@@ -127,6 +127,8 @@
     <string name="FamilyHasPolicy">Family has policy please delete the policy first</string>
     <string name="InsureeNotDeleted">Insuree has not deleted</string>
     <string name="FamilyDeleted">Family deleted</string>
+    <string name="SubFamilyDeleted">SubFamily deleted</string>
+    <string name="SubFamilyDetached">SubFamily detached</string>
     <string name="Scan">Scan</string>
     <string name="InsureeName">Insuree Name</string>
     <string name="ReadOnly">SD Card is set to readonly mode. Please set the mode to read/write and restart the application.</string>
@@ -478,4 +480,9 @@
     <string name="SystemLanguageNotSupported">Current system language is not supported. The app will use the default language.</string>
     <string name="SupportedLanguages">Supported languages:\n%1$s</string>
     <string name="DataDownloadedFailed">Data download failed</string>
+    <string name="FamilyAndSubFamilies">Family and Sub-Families</string>
+    <string name="AddNewSubFamily">Add new sub-family</string>
+    <string name="Detach">Detach</string>
+    <string name="ErrorDetach">Error while detached family</string>
+    <string name="DetachFamily">Detach family will make this sub-family to be a family</string>
 </resources>

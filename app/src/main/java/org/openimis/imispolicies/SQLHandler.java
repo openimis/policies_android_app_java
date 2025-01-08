@@ -90,6 +90,7 @@ public class SQLHandler extends SQLiteOpenHelper {
     public static final String tblRenewals = "tblRenewals";
     public static final String tblBulkControlNumbers = "tblBulkControlNumbers";
     public static final String tblFamilySMS = "tblFamilySMS";
+    public static final String tblIncomeLevel = "tblIncomeLevel";
 
     public SQLHandler(Context context) {
         super(context, DBNAME, null, DATABASE_VERSION);
@@ -141,7 +142,9 @@ public class SQLHandler extends SQLiteOpenHelper {
                             "FamilyAddress TEXT," +
                             "Ethnicity TEXT," +
                             "ConfirmationNo TEXT," +
-                            "ConfirmationType TEXT" + ")"
+                            "ConfirmationType TEXT," +
+                            "ParentId INTEGER" +
+                            ")"
             );
             sqLiteDatabase.execSQL(
                     "CREATE TABLE " + tblFamilyTypes + "(" +
@@ -221,7 +224,10 @@ public class SQLHandler extends SQLiteOpenHelper {
                             "CurrentAddress TEXT," +
                             "GeoLocation TEXT," +
                             "CurVillage NUMERIC," +
-                            "Vulnerability BOOLEAN" + ")"
+                            "Vulnerability BOOLEAN," +
+                            "ProfessionalSituation TEXT," +
+                            "IncomeLevel NUMERIC," +
+                            "PaymentMethod TEXT" + ")"
             );
             sqLiteDatabase.execSQL(
                     "CREATE TABLE 'tblInsureePolicy' (" +
@@ -412,6 +418,12 @@ public class SQLHandler extends SQLiteOpenHelper {
                             "Amount REAL," +
                             "PolicyId INTEGER" + ")"
             );
+            sqLiteDatabase.execSQL(
+                    "CREATE TABLE " + tblIncomeLevel + "(" +
+                            "Id INTEGER," +
+                            "FrenchVersion TEXT," +
+                            "EnglishVersion TEXT" +")"
+            );
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -451,6 +463,7 @@ public class SQLHandler extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + tblRecordedPolicies);
         db.execSQL("DROP TABLE IF EXISTS " + tblRelations);
         db.execSQL("DROP TABLE IF EXISTS " + tblRenewals);
+        db.execSQL("DROP TABLE IF EXISTS " + tblIncomeLevel);
         if (oldVersion < 2) {
             String sql = "ALTER TABLE tblRenewals ADD COLUMN LocationId INTEGER;";
             db.execSQL(sql);

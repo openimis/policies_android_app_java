@@ -1,9 +1,10 @@
 $(document).ready(function () {
 
-    document.title = Android.getString('AddNewFamily');
+    document.title = Android.getString('AddNewSubFamily');
     var FamilyId = queryString('f');
+    var SubFamilyId = queryString('sf')
 
-    if (parseInt(FamilyId) != 0)
+    if (parseInt(SubFamilyId) != 0)
         $('#btnNext').val(Android.getString("Save"));
 
     fillDropdowns();
@@ -29,13 +30,13 @@ $(document).ready(function () {
         var passed = isFormValidated();
 
         if (passed == true) {
-            if (FamilyId == 0 || FamilyId == null || FamilyId == undefined) {
+            if (SubFamilyId == 0 || SubFamilyId == null || SubFamilyId == undefined) {
                 saveFamilyLocally();
-                window.open("Insuree.html", "_self");
+                window.open("Insuree.html?f=" + FamilyId, "_self");
             } else {
-                var familyData = createJSONString();
-                Android.SaveFamily(familyData, '');
-                window.open("FamilyAndInsurees.html?f=" + FamilyId, "_self");
+                var subFamilyData = createJSONString();
+                Android.SaveFamily(subFamilyData, '');
+                window.open("FamilyAndInsurees.html?f=" + SubFamilyId, "_self");
             }
         }
         else
@@ -44,8 +45,8 @@ $(document).ready(function () {
 
     //if FamilyId > 0; Load family
 
-    if (parseInt(FamilyId) != 0) {
-        var strFamily = Android.getFamily(parseInt(FamilyId));
+    if (parseInt(SubFamilyId) != 0) {
+        var strFamily = Android.getFamily(parseInt(SubFamilyId));
 
         var $Family = $.parseJSON(strFamily);
         $("#ddlRegion").val($Family[0]["RegionId"]).trigger("change");
@@ -88,8 +89,7 @@ function fillDropdowns() {
 
 function saveFamilyLocally() {
     var jsonFamily = getControlsValuesJSON('li');
-    sessionStorage.setItem("FamilyType",$('#ddlGroupType').val())
-    sessionStorage.setItem("FamilyData", jsonFamily);
+    sessionStorage.setItem("SubFamilyData", jsonFamily);
 }
 
 function getRegions() {
