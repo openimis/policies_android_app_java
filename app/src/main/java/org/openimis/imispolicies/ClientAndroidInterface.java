@@ -5264,4 +5264,9 @@ public class ClientAndroidInterface {
                 (d, i) -> new Thread(() -> Log.zipLogFiles(activity)).start()
         );
     }
+
+    @JavascriptInterface
+    public String getVersion(){
+        return BuildConfig.VERSION_NAME;
+    }
 }
