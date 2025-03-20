@@ -4519,6 +4519,7 @@ type Mutation {
   createTicketAttachment(input: CreateTicketAttachmentMutationInput!): CreateTicketAttachmentMutationPayload
   updateTicketAttachment(input: UpdateTicketAttachmentMutationInput!): UpdateTicketAttachmentMutationPayload
   mobileEnrollment(input: MobileEnrollmentMutationInput!): MobileEnrollmentMutationPayload
+  getCsrfToken(input: CsrfTokenMutationInput!): CsrfTokenMutationPayload
   mobilePolicyRenewalAndPremium(input: MobilePolicyRenewalAndPremiumInput!): MobilePolicyRenewalAndPremiumPayload
   generateInvoicesForTimePeriod(input: GenerateTimeframeInvoicesInput!): GenerateTimeframeInvoicesPayload
   deleteInvoice(input: DeleteInvoiceMutationInput!): DeleteInvoiceMutationPayload
@@ -5050,6 +5051,14 @@ input MobileEnrollmentMutationInput {
   policies: [PolicyEnrollmentGQLType]!
   premiums: [PremiumEnrollmentGQLType]!
   clientMutationId: String
+}
+
+type CsrfTokenMutationPayload {
+  csrfToken: String
+}
+
+input CsrfTokenMutationInput {
+    Authorization: String
 }
 
 input FamilyEnrollmentGQLType {

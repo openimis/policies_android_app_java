@@ -1,0 +1,5 @@
+mutation ($input: CsrfTokenMutationInput!) {
+    getCsrfToken(input: $input) {
+        csrfToken
+    }
+}
