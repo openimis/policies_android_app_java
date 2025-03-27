@@ -56,7 +56,6 @@ public class Login {
         try {
             TokenDto token = request.post(new LoginDto(username.trim(), password));
             repository.saveFhirToken(token.getToken(), new Date(token.getExpiresOn()), officerCode);
-
             if (isPaymentEnabled) {
                 token = loginToRestApi(username, password);
                 repository.saveRestToken(token.getToken(), new Date(token.getExpiresOn()), officerCode);
