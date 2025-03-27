@@ -11,15 +11,19 @@ import org.openimis.imispolicies.Token;
 import org.openimis.imispolicies.network.dto.LoginDto;
 import org.openimis.imispolicies.network.dto.TokenDto;
 import org.openimis.imispolicies.network.exception.HttpException;
+import org.openimis.imispolicies.network.request.GetCsrfTokenGraphQLMutation;
 import org.openimis.imispolicies.network.request.LoginRequest;
 import org.openimis.imispolicies.repository.LoginRepository;
+import org.openimis.imispolicies.tools.Log;
 
 import java.net.HttpURLConnection;
 import java.util.Date;
+import java.util.Objects;
 
 import cz.msebera.android.httpclient.HttpEntity;
 import cz.msebera.android.httpclient.HttpResponse;
 import cz.msebera.android.httpclient.util.EntityUtils;
+import okhttp3.Response;
 
 public class Login {
 
@@ -55,7 +59,11 @@ public class Login {
         }
         try {
             TokenDto token = request.post(new LoginDto(username.trim(), password));
+            Response response = new GetCsrfTokenGraphQLMutation().get(token.getToken());
+            String csrfToken = Objects.requireNonNull(response.body()).toString();
+            Log.e("response token", response.body().toString());
             repository.saveFhirToken(token.getToken(), new Date(token.getExpiresOn()), officerCode);
+            repository.saveCsrfToken(csrfToken);
             if (isPaymentEnabled) {
                 token = loginToRestApi(username, password);
                 repository.saveRestToken(token.getToken(), new Date(token.getExpiresOn()), officerCode);

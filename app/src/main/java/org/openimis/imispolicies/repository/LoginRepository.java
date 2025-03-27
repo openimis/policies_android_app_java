@@ -25,6 +25,7 @@ public class LoginRepository {
     private static final String FHIR_TOKEN = "fhir_token";
     private static final String FHIR_VALIDITY = "fhir_validity";
     private static final String FHIR_OFFICER_CODE = "fhir_officer_code";
+    private static final String CSRF_TOKEN = "csrf_token";
 
     private final SharedPreferences prefs;
     private final boolean isPaymentEnabled;
@@ -69,6 +70,9 @@ public class LoginRepository {
     public String getFhirToken() {
         return getToken(FHIR_TOKEN, FHIR_VALIDITY, FHIR_OFFICER_CODE);
     }
+
+    @Nullable
+    public String getCsrfToken() { return prefs.getString(CSRF_TOKEN, null);}
 
     /**
      * Logic taken from [Token.java]
@@ -166,5 +170,14 @@ public class LoginRepository {
     public void logout() {
         saveFhirToken(null, null, null);
         saveRestToken(null, null, null);
+    }
+
+    public void saveCsrfToken( @Nullable String csrfToken){
+        SharedPreferences.Editor editor = prefs.edit();
+        if (StringUtils.isEmpty(csrfToken)) {
+            editor.remove(CSRF_TOKEN);
+        } else {
+            editor.putString(CSRF_TOKEN, csrfToken);
+        }
     }
 }
