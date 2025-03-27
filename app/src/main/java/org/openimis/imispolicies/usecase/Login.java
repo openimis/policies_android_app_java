@@ -11,7 +11,6 @@ import org.openimis.imispolicies.Token;
 import org.openimis.imispolicies.network.dto.LoginDto;
 import org.openimis.imispolicies.network.dto.TokenDto;
 import org.openimis.imispolicies.network.exception.HttpException;
-import org.openimis.imispolicies.network.request.GetCsrfTokenGraphQLRequest;
 import org.openimis.imispolicies.network.request.LoginRequest;
 import org.openimis.imispolicies.repository.LoginRepository;
 
@@ -31,7 +30,6 @@ public class Login {
     @NonNull
     private final ToRestApi toRestApi;
     private final boolean isPaymentEnabled;
-    private final GetCsrfTokenGraphQLRequest csrfRequest;
 
     public Login() {
         this(Global.getGlobal().getLoginRepository(), new LoginRequest(), new ToRestApi(), BuildConfig.IS_PAYMENT_ENABLED);
@@ -58,7 +56,6 @@ public class Login {
         try {
             TokenDto token = request.post(new LoginDto(username.trim(), password));
             repository.saveFhirToken(token.getToken(), new Date(token.getExpiresOn()), officerCode);
-            fetchCsrfToken(token.getToken());
 
             if (isPaymentEnabled) {
                 token = loginToRestApi(username, password);
@@ -88,9 +85,5 @@ public class Login {
                 /* token = */ ob.getString("access_token"),
                 /* expiresOn = */ Token.getValidity(ob.getString("expires_on")).getTime()
         );
-    }
-
-    private void fetchCsrfToken(@NonNull String token){
-
     }
 }
