@@ -59,10 +59,8 @@ public class Login {
         }
         try {
             TokenDto token = request.post(new LoginDto(username.trim(), password));
-            Response response = new GetCsrfTokenGraphQLMutation().get(token.getToken());
-            String csrfToken = Objects.requireNonNull(response.body()).toString();
-            Log.e("response token", response.body().toString());
             repository.saveFhirToken(token.getToken(), new Date(token.getExpiresOn()), officerCode);
+            String csrfToken = new GetCsrfTokenGraphQLMutation().get();
             repository.saveCsrfToken(csrfToken);
             if (isPaymentEnabled) {
                 token = loginToRestApi(username, password);
