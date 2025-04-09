@@ -31,6 +31,7 @@ public abstract class BaseGraphQLRequest {
 
     private static final ApolloClient apolloClient = ApolloClient.builder()
             .okHttpClient(OkHttpUtils.getDefaultOkHttpClient())
+            .useHttpGetMethodForQueries(true)
             .serverUrl(URI)
             .addCustomTypeAdapter(CustomType.DATE, new DateCustomTypeAdapter())
             .addCustomTypeAdapter(CustomType.DATETIME, new DateTimeCustomTypeAdapter())
