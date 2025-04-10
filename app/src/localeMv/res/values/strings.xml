@@ -477,13 +477,4 @@
     <string name="CurrentResourceLanguage">Current resource language: %1$s</string>
     <string name="SystemLanguageNotSupported">Current system language is not supported. The app will use the default language.</string>
     <string name="SupportedLanguages">Supported languages:\n%1$s</string>
-    <string name="MobileMoney">Mobile Money</string>
-    <string name="BankDebit">Bank debit</string>
-    <string name="TiersPay">Unknow pay</string>
-    <string name="SelectPaymentMethod">Select payment method</string>
-    <string name="PaymentMethod">Payment method</string>
-    <string name="ProfessionalSituation">Professional Situation</string>
-    <string name="OtherHousehold">Other Household</string>
-    <string name="SelectIncomeLevel">Select Income Level</string>
-    <string name="IncomeLevel">Income Level</string>
 </resources>

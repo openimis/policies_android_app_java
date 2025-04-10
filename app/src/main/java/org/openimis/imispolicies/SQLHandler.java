@@ -225,12 +225,7 @@ public class SQLHandler extends SQLiteOpenHelper {
                             "CurrentAddress TEXT," +
                             "GeoLocation TEXT," +
                             "CurVillage NUMERIC," +
-                            "Vulnerability BOOLEAN," +
-                            "ProfessionalSituation TEXT," +
-                            "IncomeLevel NUMERIC," +
-                            "PaymentMethod TEXT," +
-                            "OtherHousehold TEXT," +
-                            "AccountDetails TEXT" + ")"
+                            "Vulnerability BOOLEAN" + ")"
             );
             sqLiteDatabase.execSQL(
                     "CREATE TABLE 'tblInsureePolicy' (" +
@@ -421,24 +416,6 @@ public class SQLHandler extends SQLiteOpenHelper {
                             "ControlNumber TEXT," +
                             "Amount REAL," +
                             "PolicyId INTEGER" + ")"
-            );
-            sqLiteDatabase.execSQL(
-                    "CREATE TABLE " + tblIncomeLevel + "(" +
-                            "Id INTEGER," +
-                            "FirstLanguage TEXT," +
-                            "SecondLanguage TEXT" +")"
-            );
-            sqLiteDatabase.execSQL(
-                    "CREATE TABLE " + tblContributionPlan + "(" +
-                            "Id INTEGER," +
-                            "Code TEXT," +
-                            "Name TEXT," +
-                            "ProductId INTEGER," +
-                            "CalculationRules TEXT,"+
-                            "Periodicity TEXT," +
-                            "ValidFrom DATE," +
-                            "ValidTo Date," +
-                            "CpId" +")"
             );
         } catch (Exception e) {
             e.printStackTrace();

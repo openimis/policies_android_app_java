@@ -1,7 +1,7 @@
 $(document).ready(function(){
     $("input[type=email]").blur(function(){
         var mail = $(this).val();
-        if( mail.length != 0 && !validateEmail(mail)){
+        if(!validateEmail(mail)){
             alert(Android.getString('InvalidEmail'));
             $(this).focus();
         }

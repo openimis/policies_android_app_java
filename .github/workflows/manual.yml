@@ -8,25 +8,25 @@ on:
         required: true
         default: https://release.openimis.org/rest/
       app_name:
-            description: Display name of the application
-            required: false
-            default: Policies Manual
+        description: Display name of the application
+        required: false
+        default: Policies Manual
       app_dir:
-            description: Name of the folder in Documents, default IMIS-CLI
-            required: false
+        description: Name of the folder in Documents, default IMIS-CLI
+        required: false
       application_id:
-            description: Fully qualified name of the app
-            required: true
-            default: org.openimis.imispolicies.cli
+        description: Fully qualified name of the app
+        required: true
+        default: org.openimis.imispolicies.cli
       cli_java_dir:
-            description: java source folder for custom functions. Only works with application_id_suffix .cli
-            required: false
+        description: java source folder for custom functions. Only works with application_id_suffix .cli
+        required: false
       cli_res_dir:
-            description: Resources folder for icons. Only works with application_id_suffix .cli
-            required: false
+        description: Resources folder for icons. Only works with application_id_suffix .cli
+        required: false
       cli_assets_dir:
-            description: Asserts folder for images, json files.... Only works with .cli
-            required: false
+        description: Asserts folder for images, json files.... Only works with .cli
+        required: false
 # Branch is chosen by default in github manual actions
 
 jobs:
@@ -89,7 +89,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: openimis-policies-apk-${{github.run_number}}.apk
+          name: openimis-policies-apk-${{github.run_number}}-${{github.sha}}
           path: ./app/build/outputs/**/*.apk
 
 #      - name: build

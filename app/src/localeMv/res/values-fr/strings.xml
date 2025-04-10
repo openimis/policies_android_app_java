@@ -482,7 +482,6 @@
     <string name="SystemLanguageNotSupported">Current system language is not supported. The app will use the default language.</string>
     <string name="SupportedLanguages">Supported languages:\n%1$s</string>
     <string name="OtherHousehold">Autre Ménage</string>
-    <string name="SelectIncomeLevel">Choisir le niveau de revenu</string>
     <string name="FamilyAndSubFamilies">Famille et sous-familles</string>
     <string name="AddNewSubFamily">Ajouter une sous-famille</string>
     <string name="Detach">Détacher</string>
@@ -492,5 +491,4 @@
     <string name="pay_type_cash">Cash</string>
     <string name="pay_type_mobile_phone">Téléphone portable</string>
     <string name="pay_type_bank_transfer">Virement banquaire</string>
->>>>>>> 07a8c8e3288c726bda18599caf3d2d1dd286cffc
 </resources>
