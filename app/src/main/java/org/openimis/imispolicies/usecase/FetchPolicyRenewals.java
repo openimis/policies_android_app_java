@@ -4,7 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.WorkerThread;
 
 import org.openimis.imispolicies.GetRenewalsQuery;
-import org.openimis.imispolicies.domain.PolicyRenewal;
+import org.openimis.imispolicies.domain.entity.PolicyRenewal;
 import org.openimis.imispolicies.domain.utils.IdUtils;
 import org.openimis.imispolicies.network.request.GetPolicyRenewalsGraphQLRequest;
 import org.openimis.imispolicies.network.util.Mapper;

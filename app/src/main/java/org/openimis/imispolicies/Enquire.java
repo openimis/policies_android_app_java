@@ -155,7 +155,8 @@ public class Enquire extends ImisActivity {
             }).start();
         });
         btnScan.setOnClickListener(v -> {
-            Intent intent = new Intent("com.google.zxing.client.android.SCAN");
+            Intent intent = new Intent(this, com.google.zxing.client.android.CaptureActivity.class);
+            intent.setAction("com.google.zxing.client.android.SCAN");
             intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
             startActivityForResult(intent, 1);
             ClearForm();

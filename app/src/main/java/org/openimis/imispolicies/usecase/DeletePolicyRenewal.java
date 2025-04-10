@@ -4,7 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.WorkerThread;
 
 import org.openimis.imispolicies.ToRestApi;
-import org.openimis.imispolicies.domain.PolicyRenewal;
+import org.openimis.imispolicies.domain.entity.PolicyRenewal;
 import org.openimis.imispolicies.network.exception.HttpException;
 import org.openimis.imispolicies.network.request.DeletePolicyRenewalGraphQLRequest;
 
@@ -17,20 +17,25 @@ public class DeletePolicyRenewal {
     private final FetchPolicyRenewals fetchPolicyRenewals;
     @NonNull
     private final DeletePolicyRenewalGraphQLRequest deletePolicyRenewalGraphQLRequest;
+    @NonNull
+    private final CheckMutation checkMutation;
 
     public DeletePolicyRenewal() {
         this(
                 new FetchPolicyRenewals(),
-                new DeletePolicyRenewalGraphQLRequest()
+                new DeletePolicyRenewalGraphQLRequest(),
+                new CheckMutation()
         );
     }
 
     public DeletePolicyRenewal(
             @NonNull FetchPolicyRenewals fetchPolicyRenewals,
-            @NonNull DeletePolicyRenewalGraphQLRequest deletePolicyRenewalGraphQLRequest
+            @NonNull DeletePolicyRenewalGraphQLRequest deletePolicyRenewalGraphQLRequest,
+            @NonNull CheckMutation checkMutation
     ) {
         this.fetchPolicyRenewals = fetchPolicyRenewals;
         this.deletePolicyRenewalGraphQLRequest = deletePolicyRenewalGraphQLRequest;
+        this.checkMutation = checkMutation;
     }
 
     @WorkerThread
@@ -46,7 +51,7 @@ public class DeletePolicyRenewal {
 
     @WorkerThread
     public int execute(@NonNull String uuid) throws Exception {
-        deletePolicyRenewalGraphQLRequest.delete(uuid);
+        checkMutation.execute(deletePolicyRenewalGraphQLRequest.delete(uuid), "Error while deleting policy renewal '"+uuid+"'");
         return ToRestApi.RenewalStatus.ACCEPTED;
     }
 }

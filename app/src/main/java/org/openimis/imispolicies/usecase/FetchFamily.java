@@ -84,11 +84,6 @@ public class FetchFamily {
                 /* currentAddress = */ member.currentAddress(),
                 /* currentVillage = */ member.currentVillage() != null ? IdUtils.getIdFromGraphQLString(Objects.requireNonNull(member.currentVillage()).id()) : null,
                 /* geolocation = */ member.geolocation(),
-                /* professional situation = */ null,
-                /* incomeLevel = */ null,
-                /* payment method = */ null,
-                /* other household = */ null,
-                /* account details = */ null,
                 /* photoPath = */ downloadPhoto(member.photo()),
                 /* photoBytes = */ null, // We already saved them on disk, no need to pass them here.
                 /* isOffline = */ member.offline() != null ? Objects.requireNonNull(member.offline()) : false

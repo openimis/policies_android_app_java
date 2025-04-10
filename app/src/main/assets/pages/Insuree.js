@@ -1,8 +1,5 @@
 $(document).ready(function () {
 
-     $('#PaymentMethod').hide();
-     $("#Education").hide();
-
     //Hide the relationship if the insuree is the HOF
     if (sessionStorage.getItem("FamilyData") !== null || sessionStorage.getItem("SubFamilyData") !== null) {
         $("#Relationship").hide();
@@ -319,8 +316,6 @@ function fillDropdowns() {
     fillFSPDistricts();
     fillFSPCategory();
     fillVulnerability();
-    fillPaymentMethods();
-    fillIncomeLevels();
 }
 
 // called from java after the image was selected by the user
@@ -442,20 +437,6 @@ function fillFSP(DistrictId, HFLevel) {
 function fillVulnerability() {
     var $Vulnerability = Android.getVulnerability();
     bindDropdown('ddlVulnerability', $Vulnerability, 'value', 'key', "", Android.getString('SelectVulnerability'));
-}
-
-function fillPaymentMethods() {
-    var $PaymentMethods = Android.getPaymentMethod();
-    bindDropdown('ddlPaymentMethod', $PaymentMethods, 'Code', 'Method', null, null);
-}
-
-function fillIncomeLevels() {
-    $textLanguage = "FirstLanguage";
-    if (Android.getSelectedLanguage() != "en") {
-        $textLanguage = "SecondLanguage";
-    }
-    var $IncomeLevels = Android.getIncomeLevels();
-    bindDropdown('ddlIncomeLevel', $IncomeLevels, 'IncomeLevelID', $textLanguage, null, Android.getString('SelectIncomeLevel'));
 }
 
 function createJSONString() {

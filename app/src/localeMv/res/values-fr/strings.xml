@@ -179,6 +179,7 @@
     <string name="MissingReceiptNo">Veuillez entrer le numéro de reçu.</string>
     <string name="MissingProductCode">Veuillez entrer le code du Paquet de bénéfice</string>
     <string name="MissingAmount">Veuillez entrer le montant</string>
+    <string name="MissingPayType">Veuillez sélectionner un type de paiement</string>
     <string name="InvalidReceiptNo">Ce numéro de reçu est déjà utilisé.</string>
     <string name="NoFiles">Aucun fichier trouvé.</string>
     <string name="Of">De</string>
@@ -480,22 +481,16 @@
     <string name="CurrentResourceLanguage">Current resource language: %1$s</string>
     <string name="SystemLanguageNotSupported">Current system language is not supported. The app will use the default language.</string>
     <string name="SupportedLanguages">Supported languages:\n%1$s</string>
-    <string name="MobileMoney">Mobile Money</string>
-    <string name="BankDebit">Prélèvement bancaire</string>
-    <string name="TiersPay">Tiers payant</string>
-    <string name="SelectPaymentMethod">Choisir une méthode de paiement</string>
-    <string name="PaymentMethod">Méthode de paiement</string>
-    <string name="ProfessionalSituation">Situation Professionnelle</string>
     <string name="OtherHousehold">Autre Ménage</string>
     <string name="SelectIncomeLevel">Choisir le niveau de revenu</string>
-    <string name="IncomeLevel">Niveau de revenu</string>
     <string name="FamilyAndSubFamilies">Famille et sous-familles</string>
     <string name="AddNewSubFamily">Ajouter une sous-famille</string>
     <string name="Detach">Détacher</string>
     <string name="ErrorDetach">Erreur lors du détachement de la sous-famille</string>
     <string name="DetachFamily">Le détachement de la sous-famille transformera celle-ci en famille simple</string>
-    <string name="InvalidIdentificationNumber">Le numéro d\'identification doit contenir 7 caractères</string>
-    <string name="SelectContribution">Sél. un plan de contribution</string>
-    <string name="ContributionPlan">Plan de contribution</string>
-    <string name="AccountDetails">Numéro du compte</string>
+    <string name="pay_type_select_one">Selectionnez un mode de paiement</string>
+    <string name="pay_type_cash">Cash</string>
+    <string name="pay_type_mobile_phone">Téléphone portable</string>
+    <string name="pay_type_bank_transfer">Virement banquaire</string>
+>>>>>>> 07a8c8e3288c726bda18599caf3d2d1dd286cffc
 </resources>

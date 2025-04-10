@@ -179,6 +179,7 @@
     <string name="MissingReceiptNo">Please enter Receipt No.</string>
     <string name="MissingProductCode">Please enter product code</string>
     <string name="MissingAmount">Please enter amount</string>
+    <string name="MissingPayType">Please select a payment type</string>
     <string name="InvalidReceiptNo">This receipt number is already used.</string>
     <string name="NoFiles">No file found.</string>
     <string name="Of">Of</string>
@@ -486,12 +487,8 @@
     <string name="Detach">Detach</string>
     <string name="ErrorDetach">Error while detached family</string>
     <string name="DetachFamily">Detach family will make this sub-family to be a family</string>
-    <string name="InvalidIdentificationNumber">Identification number must have 7 characters</string>
-    <string name="SelectContribution">Select contribution plan</string>
-    <string name="ContributionPlan">Contribution Plan</string>
-    <string name="AccountDetails">Account Details</string>
-    <string name="MobileMoney">Mobile Money</string>
-    <string name="BankDebit">Bank debit</string>
-    <string name="TiersPay">Unknow pay</string>
-    <string name="SelectPaymentMethod">Select payment method</string>
+    <string name="pay_type_select_one">Select Payment Type</string>
+    <string name="pay_type_cash">Cash</string>
+    <string name="pay_type_mobile_phone">Mobile Phone</string>
+    <string name="pay_type_bank_transfer">Bank Transfer</string>
 </resources>

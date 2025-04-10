@@ -65,3 +65,4 @@ app/release/output.json
 # Custom product flavours
 
 *custom-flavours.gradle
+*.aab
