@@ -4,12 +4,7 @@ $(document).ready(function () {
     if (sessionStorage.getItem("FamilyData") !== null || sessionStorage.getItem("SubFamilyData") !== null) {
         $("#Relationship").hide();
         $("#ddlRelationship").prop("required", false);
-        $('#PaymentMethod').show();
     }
-
-    var insuranceNumber = Math.floor(Math.random() * 9000000000) + 1000000000;
-    $('#txtInsuranceNumber').val(insuranceNumber);
-
 
     document.title = Android.getString('AddEditInsuree');
     Android.shutDownProgress();
@@ -23,9 +18,6 @@ $(document).ready(function () {
     if (CurrentDistrictCss == 'none') $('#CurrentRegion').css("display", "none");
 
     fillDropdowns();
-    $('#OtherHousehold').hide();
-    $('#AccountDetails').hide();
-    $('#Education').hide();
 
     $('#ddlCurrentRegion').change(function () {
         fillCurrentDistricts(parseInt($(this).val()));
@@ -67,49 +59,6 @@ $(document).ready(function () {
         $("#hfNewPhotoPath").val("");
     });
 
-    //$('#txtBirthDate').change(function () {
-    //    fillAge($(this).val());
-    //});
-
-    $('#ddlRelationship').change(function () {
-        var relationId = $('#ddlRelationship').val();
-        if (relationId == 4) {
-            $("#Education").show();
-            $('#ddlEducation').prop("required", true);
-        } else {
-            $("#Education").hide();
-            $("#ddlEducation").prop("required", false);
-        }
-    });
-
-    $("#ddlMaritalStatus").change(function () {
-        var maritalStatus = $("#ddlMaritalStatus").val();
-        if (maritalStatus == "P") {
-            $('#OtherHousehold').show();
-        } else {
-            $('#OtherHousehold').hide();
-        }
-    });
-
-    $("#ddlPaymentMethod").change(function () {
-        var paymentMethod = $("#ddlPaymentMethod").val();
-        if (paymentMethod == "PB") {
-            $('#AccountDetails').show();
-        } else {
-            $('#AccountDetails').hide();
-        }
-    });
-
-    $("#txtIdentificationNumber").change(function () {
-        var Ins = $('#txtIdentificationNumber').val();
-        var ans = Android.isValidIdentificationNumber(Ins);
-        if (ans != true) {
-            $('#txtIdentificationNumber').val("");
-            $('#txtIdentificationNumber').focus();
-        }
-    })
-
-
     $('#spPleaseWait').text(Android.getString('saving'));
 
     $('#btnSave').click(function () {
@@ -122,70 +71,64 @@ $(document).ready(function () {
         if (passed == true) {
             var jsonInsuree = createJSONString();
 
-            if ($('#hfNewPhotoPath').val() != "" || $('#hfImagePath').val() != "") {
+            if (sessionStorage.getItem("FamilyData") !== null) {
+                var FamilyId = Android.SaveFamily(sessionStorage.getItem("FamilyData"), jsonInsuree);
+                var FamilyType = sessionStorage.getItem("FamilyType");
 
-                if (sessionStorage.getItem("FamilyData") !== null) {
-                    var FamilyId = Android.SaveFamily(sessionStorage.getItem("FamilyData"), jsonInsuree);
-                    var FamilyType = sessionStorage.getItem("FamilyType");
-
-                    if (FamilyId > 0) {
-                        sessionStorage.removeItem("FamilyData");
-                        $(this).attr("disabled", "disabled");
-                        if (FamilyType == "P") {
-                            window.open("FamilyPolygamy.html?f=" + FamilyId, "_self");
-                        } else {
-                            window.open("FamilyAndInsurees.html?f=" + FamilyId, "_self");
-                        }
-                    }
-
-                } else if (sessionStorage.getItem("SubFamilyData") !== null) {
-                    var FamilyId = queryString('f');
-                    var SubFamilyId = Android.SaveSubFamily(sessionStorage.getItem("SubFamilyData"), jsonInsuree, parseInt(FamilyId));
-                    if (SubFamilyId > 0) {
-                        sessionStorage.removeItem("SubFamilyData");
-                        $(this).attr("disabled", "disabled");
-                        window.open("FamilyAndInsurees.html?f=" + SubFamilyId, "_self");
-                    }
-                } else {
-                    var FamilyId = parseInt(queryString('f'));
-                    var FamilyPolicy = Android.getFamilyPolicy(FamilyId);
-                    var $Policy = $.parseJSON(FamilyPolicy);
-                    var MemberCount = parseInt($Policy[0]["MemberCount"]);
-                    var Threshold = parseInt($Policy[0]["Threshold"]);
-                    var TotalIns = parseInt($Policy[0]["Ins"]);
-                    var PolicyId = parseInt($Policy[0]["PolicyId"]);
-                    var IsNewIns = parseInt($("#hfInsureeId").val());
-                    var MemberDialog = -1;
-                    var ExceedThreshold = -1;
-
-                    if (PolicyId > 0 && IsNewIns == 0) {
-                        if (TotalIns >= MemberCount) {
-                            ExceedThreshold = 0;
-                            Android.ShowDialog(Android.getString('ExceedMemberCount'));
-                        } else if (TotalIns >= Threshold) {
-                            ExceedThreshold = 1;
-                        } else {
-                            ExceedThreshold = 0;
-                        }
-
-                    }
-                    var InsureeId = Android.SaveInsuree(jsonInsuree, FamilyId, 0, parseInt(ExceedThreshold), PolicyId);
-                    if (PolicyId > 0 && TotalIns >= MemberCount) {
-                        $("#divProgress").hide();
+                if (FamilyId > 0) {
+                    sessionStorage.removeItem("FamilyData");
+                    $(this).attr("disabled", "disabled");
+                    if (FamilyType == "P") {
+                        window.open("FamilyPolygamy.html?f=" + FamilyId, "_self");
                     } else {
-                        var isPolygamy = queryString("isPolygamy");
-                        if(isPolygamy == 1){
-                            $("#divProgress").hide();
-                            window.open("FamilyPolygamy.html?f=" + FamilyId, "_self");
-                        }else{
-                            $("#divProgress").hide();
-                            window.open("FamilyAndInsurees.html?f=" + FamilyId, "_self");
-                        }
+                        window.open("FamilyAndInsurees.html?f=" + FamilyId, "_self");
                     }
                 }
+
+            } else if (sessionStorage.getItem("SubFamilyData") !== null) {
+                var FamilyId = queryString('f');
+                var SubFamilyId = Android.SaveSubFamily(sessionStorage.getItem("SubFamilyData"), jsonInsuree, parseInt(FamilyId));
+                if (SubFamilyId > 0) {
+                    sessionStorage.removeItem("SubFamilyData");
+                    $(this).attr("disabled", "disabled");
+                    window.open("FamilyAndInsurees.html?f=" + SubFamilyId, "_self");
+                }
             } else {
-                $("#divProgress").hide();
-                Android.ShowDialog(Android.getString('PhotoRequired'));
+                var FamilyId = parseInt(queryString('f'));
+                var FamilyPolicy = Android.getFamilyPolicy(FamilyId);
+                var $Policy = $.parseJSON(FamilyPolicy);
+                var MemberCount = parseInt($Policy[0]["MemberCount"]);
+                var Threshold = parseInt($Policy[0]["Threshold"]);
+                var TotalIns = parseInt($Policy[0]["Ins"]);
+                var PolicyId = parseInt($Policy[0]["PolicyId"]);
+                var IsNewIns = parseInt($("#hfInsureeId").val());
+                var MemberDialog = -1;
+                var ExceedThreshold = -1;
+
+                if (PolicyId > 0 && IsNewIns == 0) {
+                    if (TotalIns >= MemberCount) {
+                        ExceedThreshold = 0;
+                        Android.ShowDialog(Android.getString('ExceedMemberCount'));
+                    } else if (TotalIns >= Threshold) {
+                        ExceedThreshold = 1;
+                    } else {
+                        ExceedThreshold = 0;
+                    }
+
+                }
+                var InsureeId = Android.SaveInsuree(jsonInsuree, FamilyId, 0, parseInt(ExceedThreshold), PolicyId);
+                if (PolicyId > 0 && TotalIns >= MemberCount) {
+                    $("#divProgress").hide();
+                } else {
+                    var isPolygamy = queryString("isPolygamy");
+                    if (isPolygamy == 1) {
+                        $("#divProgress").hide();
+                        window.open("FamilyPolygamy.html?f=" + FamilyId, "_self");
+                    } else {
+                        $("#divProgress").hide();
+                        window.open("FamilyAndInsurees.html?f=" + FamilyId, "_self");
+                    }
+                }
             }
         } else {
             $("#divProgress").hide();
@@ -213,51 +156,22 @@ $(document).ready(function () {
         bindDataFromDatafield(Insuree);
         var PhotoPath = $.parseJSON(Insuree)[0]["PhotoPath"];
         var IsOffline = parseInt($.parseJSON(Insuree)[0]["isOffline"]);
-        var marital = $.parseJSON(Insuree)[0]["Marital"];
-        var relation = $.parseJSON(Insuree)[0]["Relationship"];
-        var payment = $.parseJSON(Insuree)[0]["PaymentMethod"];
         var dob = $.parseJSON(Insuree)[0]["DOB"];
         if ($.parseJSON(Insuree)[0]["isHead"] == "true" || $.parseJSON(Insuree)[0]["isHead"] == "false") {
             if ($.parseJSON(Insuree)[0]["isHead"] == "true") {
                 $("#Relationship").hide();
-                $('#PaymentMethod').show();
-                $("#ddlRelationship").prop("required", false);
-            }else{
-                $('#PaymentMethod').hide();
-                $("#ddlRelationship").prop("required", true);
             }
         } else {
             var head = parseInt($.parseJSON(Insuree)[0]["isHead"]);
-
             if (head == 1) {
                 $("#Relationship").hide();
-                $('#PaymentMethod').show();
-                $("#ddlRelationship").prop("required", false);
-            }else{
-                $('#PaymentMethod').hide();
-                $("#ddlRelationship").prop("required", true);
             }
         }
-
-        //fillAge(dob);
-
-        if(relation == 4){
-            $("#Education").show();
-        }
-
-        if (marital == 'P') {
-            $('#OtherHousehold').show();
-        }
-
-        if (payment == 'PB') {
-            $('#AccountDetails').show();
-        }
-
-        $('#ddlPaymentMethod').val($.parseJSON(Insuree)[0]["PaymentMethod"]);
 
         var Ins = $('#txtInsuranceNumber').val();
         if (PhotoPath.length == 0) {
             PhotoPath = Android.GetListOfImagesContain(Ins);
+
         }
 
         if (PhotoPath.length > 0) {
@@ -454,23 +368,4 @@ function getImage() {
         $('#imgInsuree').attr('src', '');
     }
     $("#hfImagePath").val($('#imgInsuree').attr('src'));
-}
-
-function fillAge(Birthday) {
-    var today = new Date();
-    var birthDate = new Date(Birthday)
-
-    var age = today.getFullYear() - birthDate.getFullYear();
-
-    if (age < 21) {
-        $("#Education").show();
-        if($("#ddlRelationship").val() == 4){
-            $("#ddlEducation").prop("required", true);
-        }else{
-            $("#ddlEducation").prop("required", false);
-        }
-    } else {
-        $("#Education").hide();
-        $("#ddlEducation").prop("required", false);
-    }
 }

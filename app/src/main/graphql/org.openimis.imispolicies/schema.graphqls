@@ -7345,7 +7345,6 @@ input CreatePolicyMutationInput {
   familyId: Int!
   officerId: Int!
   clientMutationId: String
-  contributionPlanId: String
 }
 
 type UpdatePolicyMutationPayload {

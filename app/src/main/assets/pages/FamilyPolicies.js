@@ -100,8 +100,8 @@ $(document).ready(function () {
 
 function LoadFamilyPolicies(FamilyId) {
     var Policies = Android.getFamilyPolicies(FamilyId);
-    var ctls = ["CPCode", "CPName", "StartDate", "ExpireDate", "PolicyValue", "PolicyStatus", "EffectiveDate", "hfPolicyId", "PolicyId", "hfIsOffline", "ControlNumber"];
-    var Columns = ["Code", "Name", "StartDate", "ExpiryDate", "PolicyValue", "PolicyStatus", "EffectiveDate", "PolicyId", "PolicyId", "isOffline", "ControlNumber"];
+    var ctls = ["ProductCode", "ProductName", "StartDate", "ExpireDate", "PolicyValue", "PolicyStatus", "EffectiveDate", "hfPolicyId", "PolicyId", "hfIsOffline", "ControlNumber"];
+    var Columns = ["ProductCode", "ProductName", "StartDate", "ExpiryDate", "PolicyValue", "PolicyStatus", "EffectiveDate", "PolicyId", "PolicyId", "isOffline", "ControlNumber"];
     LoadList(Policies, '.ulList', ctls, Columns);
 }
 

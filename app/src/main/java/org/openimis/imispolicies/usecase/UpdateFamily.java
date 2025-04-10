@@ -1,10 +1,8 @@
 package org.openimis.imispolicies.usecase;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
 
-import org.openimis.imispolicies.Global;
 import org.openimis.imispolicies.domain.entity.Family;
 import org.openimis.imispolicies.network.request.MobileEnrolmentGraphQLRequest;
 

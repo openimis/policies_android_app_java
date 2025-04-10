@@ -25,21 +25,18 @@ $(document).ready(function () {
     $("#ddlOfficer").val(parseInt(OfficerId));
 
     //LoadOfficers(LocationId, null);
-    //LoadProduct(RegionId, DistrictId, null);
-    LoadContributionPlan(null);
+    LoadProduct(RegionId, DistrictId, null);
 
     if (policyId != 0) {
         var strPolicy = Android.getPolicy(policyId);
         var $Policy = $.parseJSON(strPolicy);
-        //$("#ddlProduct").val($Policy[0]["ProdId"]);
-        $("#ddlContributionPlan").val($Policy[0]["ContributionPlanId"]);
+        $("#ddlProduct").val($Policy[0]["ProdId"]);
         $("#ddlOfficer").val($Policy[0]["OfficerId"]);
         var PolicyStage = $Policy[0]["PolicyStage"];
         var StartDate = $Policy[0]["StartDate"];
         var EnrolmentDate = $Policy[0]["EnrollDate"];
         var ExpiryDate = $Policy[0]["ExpiryDate"];
-        //var ProdId = parseInt($Policy[0]["ProdId"]);
-        var CPId = parseInt($Policy[0]["ContributionPlanId"]);
+        var ProdId = parseInt($Policy[0]["ProdId"]);
         var CurrentPolicyValue = $Policy[0]["PolicyValue"];
         var isOffline = parseInt($Policy[0]["isOffline"]);
 
@@ -59,19 +56,18 @@ $(document).ready(function () {
         var HSCycle = false;
         if ($('#hfHasCycle').val()) HSCycle = true;
 
-        //var NewPolicyValue = Android.getPolicyValue(EnrolmentDate, ProdId, FamilyId, $('#hffStartDate').val(), HSCycle, parseInt(policyId), PolicyStage, isOffline);
+        var NewPolicyValue = Android.getPolicyValue(EnrolmentDate, ProdId, FamilyId, $('#hffStartDate').val(), HSCycle, parseInt(policyId), PolicyStage, isOffline);
         var PolicyStatusValue = $("#hfPolicyStatus").val();
 
-        /*if (NewPolicyValue != CurrentPolicyValue) {
+        if (NewPolicyValue != CurrentPolicyValue) {
             var Vdate = new Date(EnrolmentDate);  //or your date here
             var NewDate = ((Vdate.getMonth() + 1) + '/' + Vdate.getDate() + '/' + Vdate.getFullYear());
             Android.ShowDialog(Android.getString('PolicyValueChange') + NewDate + ' ' + Android.getString('Changed'));
 
-        }*/
+        }
 
         $("#txtEnrolmentDate").prop('disabled', false);
         $("#ddlProduct").prop('disabled', false);
-        $("#ddlContributionPlan").prop('disabled', false);
         $("#txtStartDate").prop('disabled', true);
         if (PolicyStatusValue == 1) {
             $("#txtExpiryDate").prop('disabled', false);
@@ -90,7 +86,7 @@ $(document).ready(function () {
     $('#txtEnrolmentDate, #ddlProduct').change(function () {
         var EnrolmentDate = $('#txtEnrolmentDate').val();
         var ProdId = $('#ddlProduct').val();
-        //getPolicyPeriod(EnrolmentDate, parseInt(ProdId), parseInt(FamilyId), parseInt(policyId));
+        getPolicyPeriod(EnrolmentDate, parseInt(ProdId), parseInt(FamilyId), parseInt(policyId));
 
     });
 
@@ -109,21 +105,6 @@ $(document).ready(function () {
                 $('#AssignedControlNumber').val(controlNumber);
             }
         }
-    });
-
-    $('#ddlContributionPlan').change(function () {
-           var CPId = $('#ddlContributionPlan').val();
-           var policyValue = Android.GetContributionPlanValue(parseInt(FamilyId),CPId);
-           var finalValue;
-           console.log("calculation rule object:",policyValue);
-           var fun = JSON.parse(policyValue);
-           with(fun) {
-                   // prints "foo"
-                   console.log("final value:",eval(remoteFunction));
-                   finalValue = eval(remoteFunction);
-               }
-           $('#spPolicyValue').text(finalValue);
-           $('#hfPolicyValue').val(finalValue);
     });
 
     function savePolicy() {
@@ -178,8 +159,8 @@ $(document).ready(function () {
 
     $('#txtStartDate').change(function () {
         var txtStartDate = $('#txtStartDate').val();
-        var CPId = $('#ddlContributionPlan').val();
-        //getPolicyPeriod(txtStartDate, parseInt(CPId), parseInt(FamilyId), parseInt(policyId));
+        var ProdId = $('#ddlProduct').val();
+        getPolicyPeriod(txtStartDate, parseInt(CPId), parseInt(FamilyId), parseInt(policyId));
     });
 });
 
@@ -224,11 +205,6 @@ function LoadOfficers(LocationId, EnrolmentDate) {
 function LoadProduct(RegionId, DistrictId, EnrolmentDate) {
     var $Products = Android.getProducts(parseInt(RegionId), parseInt(DistrictId), EnrolmentDate);
     bindDropdown('ddlProduct', $Products, 'ProdId', 'ProductNameCombined', 0, Android.getString('SelectProduct'));
-}
-
-function LoadContributionPlan(EnrolmentDate) {
-    var $ContributionPlans = Android.getContributionPlans(EnrolmentDate);
-    bindDropdown('ddlContributionPlan', $ContributionPlans, 'Id', 'CombinedName', 0, Android.getString('SelectContribution'));
 }
 
 function createJSONString() {

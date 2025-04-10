@@ -90,8 +90,6 @@ public class SQLHandler extends SQLiteOpenHelper {
     public static final String tblRenewals = "tblRenewals";
     public static final String tblBulkControlNumbers = "tblBulkControlNumbers";
     public static final String tblFamilySMS = "tblFamilySMS";
-    public static final String tblIncomeLevel = "tblIncomeLevel";
-    public static final String tblContributionPlan = "tblContributionPlan";
 
     public SQLHandler(Context context) {
         super(context, DBNAME, null, DATABASE_VERSION);
@@ -280,7 +278,6 @@ public class SQLHandler extends SQLiteOpenHelper {
                             "PolicyStatus NUMERIC," +
                             "PolicyValue NUMERIC," +
                             "ProdId NUMERIC," +
-                            "ContributionPlanId NUMERIC," +
                             "OfficerId NUMERIC," +
                             "isOffline NUMERIC," +
                             "PolicyStage TEXT" + ")"
@@ -456,7 +453,6 @@ public class SQLHandler extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + tblRecordedPolicies);
         db.execSQL("DROP TABLE IF EXISTS " + tblRelations);
         db.execSQL("DROP TABLE IF EXISTS " + tblRenewals);
-        db.execSQL("DROP TABLE IF EXISTS " + tblIncomeLevel);
         if (oldVersion < 2) {
             String sql = "ALTER TABLE tblRenewals ADD COLUMN LocationId INTEGER;";
             db.execSQL(sql);
