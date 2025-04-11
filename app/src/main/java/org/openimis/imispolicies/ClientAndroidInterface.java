@@ -168,15 +168,6 @@ public class ClientAndroidInterface {
                 .build();
     }
 
-    public static void copy(String name, byte[] data) throws IOException {
-        String photosDir = Global.getGlobal().getSubdirectory("Photos");
-
-        File file = new File(photosDir + File.separator + name);
-        if (!file.exists() && !file.createNewFile()) {
-            throw new IOException("Cannot create file '" + file.getAbsolutePath() + "'");
-        }
-    }
-
     @JavascriptInterface
     @SuppressWarnings("unused")
     public void SetUrl(String Url) {
@@ -245,6 +236,7 @@ public class ClientAndroidInterface {
         }
         return Adjustibility;
     }
+
 
     @JavascriptInterface
     @SuppressWarnings("unused")
@@ -322,6 +314,7 @@ public class ClientAndroidInterface {
         }
         return "";
     }
+
 
     @JavascriptInterface
     @SuppressWarnings("unused")
@@ -580,38 +573,6 @@ public class ClientAndroidInterface {
         }
 
         return maritalStatus.toString();
-    }
-
-    @JavascriptInterface
-    @SuppressWarnings("unused")
-    public String getPaymentMethod() {
-        JSONArray paymentMethods = new JSONArray();
-        JSONObject object = new JSONObject();
-
-        try {
-            object.put("Code", "");
-            object.put("Method", activity.getResources().getString(R.string.SelectPaymentMethod));
-            paymentMethods.put(object);
-
-            object = new JSONObject();
-            object.put("Code", "MO");
-            object.put("Method", activity.getResources().getString(R.string.MobileMoney));
-            paymentMethods.put(object);
-
-            object = new JSONObject();
-            object.put("Code", "PB");
-            object.put("Method", activity.getResources().getString(R.string.BankDebit));
-            paymentMethods.put(object);
-
-            object = new JSONObject();
-            object.put("Code", "TP");
-            object.put("Method", activity.getResources().getString(R.string.TiersPay));
-            paymentMethods.put(object);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        return paymentMethods.toString();
     }
 
     @JavascriptInterface
@@ -1022,7 +983,7 @@ public class ClientAndroidInterface {
         } else {
             Result = 0;
         }
-        return 0;
+        return Result;
     }
 
     @JavascriptInterface
@@ -1081,14 +1042,6 @@ public class ClientAndroidInterface {
             if (!TextUtils.isEmpty(data.get("ddlEducation")) && !data.get("ddlEducation").equals("0"))
                 Education = Integer.valueOf(data.get("ddlEducation"));
 
-            Integer IncomeLevel = null;
-            if (!TextUtils.isEmpty(data.get("ddlIncomeLevel")) && !data.get("ddlIncomeLevel").equals("0"))
-                IncomeLevel = Integer.valueOf(data.get("ddlIncomeLevel"));
-
-            String PaymentMethod = "null";
-            if (!TextUtils.isEmpty(data.get("ddlPaymentMethod")) && !data.get("ddlPaymentMethod").equals("0"))
-                PaymentMethod = data.get("ddlPaymentMethod");
-
             String IdentificationType = "null";
             if (!TextUtils.isEmpty(data.get("ddlIdentificationType")) && !data.get("ddlIdentificationType").equals(""))
                 IdentificationType = (data.get("ddlIdentificationType"));
@@ -1128,15 +1081,10 @@ public class ClientAndroidInterface {
 
             //values.put("isOffline", isOffline);
             values.put("Relationship", Relation);
-            values.put("ProfessionalSituation", data.get("txtProfessionalSituation"));
             values.put("Profession", Profession);
             values.put("Education", Education);
             values.put("Email", data.get("txtEmail"));
             values.put("TypeOfId", IdentificationType);
-            values.put("IncomeLevel", IncomeLevel);
-            values.put("PaymentMethod", PaymentMethod);
-            values.put("OtherHousehold", data.get("txtOtherHousehold"));
-            values.put("AccountDetails", data.get("txtAccountDetails"));
 
             if (data.get("ddlVulnerability") != null && !data.get("ddlVulnerability").equals("")) {
                 values.put("Vulnerability", data.get("ddlVulnerability"));

@@ -156,7 +156,6 @@ $(document).ready(function () {
         bindDataFromDatafield(Insuree);
         var PhotoPath = $.parseJSON(Insuree)[0]["PhotoPath"];
         var IsOffline = parseInt($.parseJSON(Insuree)[0]["isOffline"]);
-        var dob = $.parseJSON(Insuree)[0]["DOB"];
         if ($.parseJSON(Insuree)[0]["isHead"] == "true" || $.parseJSON(Insuree)[0]["isHead"] == "false") {
             if ($.parseJSON(Insuree)[0]["isHead"] == "true") {
                 $("#Relationship").hide();

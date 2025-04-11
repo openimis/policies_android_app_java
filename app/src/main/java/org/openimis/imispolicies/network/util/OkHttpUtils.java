@@ -9,7 +9,6 @@ import org.openimis.imispolicies.BuildConfig;
 import org.openimis.imispolicies.Global;
 import org.openimis.imispolicies.network.okhttp.AuthorizationInterceptor;
 
-import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
