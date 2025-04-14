@@ -13,6 +13,7 @@ import org.json.JSONObject;
 import org.openimis.imispolicies.BuildConfig;
 import org.openimis.imispolicies.Global;
 import org.openimis.imispolicies.Token;
+import org.openimis.imispolicies.tools.Log;
 
 import java.util.Date;
 
@@ -72,7 +73,9 @@ public class LoginRepository {
     }
 
     @Nullable
-    public String getCsrfToken() { return prefs.getString(CSRF_TOKEN, null);}
+    public String getCsrfToken() {
+        return prefs.getString(CSRF_TOKEN, null);
+    }
 
     /**
      * Logic taken from [Token.java]
@@ -179,5 +182,6 @@ public class LoginRepository {
         } else {
             editor.putString(CSRF_TOKEN, csrfToken);
         }
+        editor.apply();
     }
 }

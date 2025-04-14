@@ -4797,6 +4797,7 @@ Skip indicates that the claim is not selected for review
   revokeToken(refreshToken: String): Revoke
   deleteTokenCookie: DeleteJSONWebTokenCookie
   deleteRefreshTokenCookie: DeleteRefreshTokenCookie
+  getCsrfToken: GetCsrfTokenMutationPayload
 }
 
 type CreateHeraSubscriptionMutationPayload {
@@ -8722,6 +8723,10 @@ type ResetPasswordMutationPayload {
   success: Boolean
   error: String
   clientMutationId: String
+}
+
+type GetCsrfTokenMutationPayload {
+  csrfToken: String
 }
 
 input ResetPasswordMutationInput {
