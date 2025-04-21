@@ -42,6 +42,7 @@ $(document).ready(function () {
         var StartDate = $Policy[0]["StartDate"];
         var EnrolmentDate = $Policy[0]["EnrollDate"];
         var ExpiryDate = $Policy[0]["ExpiryDate"];
+        var SigningDate = $Policy[0]["SigningDate"];
         //var ProdId = parseInt($Policy[0]["ProdId"]);
         var CPId = parseInt($Policy[0]["ContributionPlanId"]);
         var CurrentPolicyValue = $Policy[0]["PolicyValue"];
@@ -51,6 +52,7 @@ $(document).ready(function () {
 
         $('#txtStartDate').val((StartDate));
         $('#txtExpiryDate').val(ExpiryDate);
+        $('#txtSigningDate').val(SigningDate);
 
         if(Android.IsBulkCNUsed()) {
             if($Policy[0]["ControlNumber"]) {

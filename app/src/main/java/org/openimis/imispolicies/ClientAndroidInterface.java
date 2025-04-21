@@ -1881,6 +1881,7 @@ public class ClientAndroidInterface {
             values.put("PolicyValue", data.get("hfPolicyValue"));
             values.put("ContributionPlanId", data.get("ddlContributionPlan"));
             values.put("OfficerId", data.get("ddlOfficer"));
+            values.put("SigningDate", data.get("txtSigningDate"));
 
             @Language("SQL")
             String query = "SELECT * FROM tblContributionPlan WHERE Id =" + Integer.parseInt(data.get("ddlContributionPlan"));
@@ -1928,7 +1929,7 @@ public class ClientAndroidInterface {
         //getPolicyValue(String enrollDate, int ProductId, int FamilyId, String startDate, boolean HasCycle, int PolicyId, String PolicyStage, int IsOffline) throws JSONException {
         boolean isValueChanged = false;
         @Language("SQL")
-        String QueryPolicyValue = "SELECT P.PolicyId, CP.ProductId, ContributionPlanId, EffectiveDate, PolicyValue, StartDate, ExpiryDate, EnrollDate,FamilyId,PolicyStage,IsOffline FROM tblPolicy P\n" +
+        String QueryPolicyValue = "SELECT P.PolicyId, CP.ProductId, ContributionPlanId, EffectiveDate, PolicyValue, StartDate, ExpiryDate, EnrollDate, SigningDate,FamilyId,PolicyStage,IsOffline FROM tblPolicy P\n" +
                 "INNER JOIN tblContributionPlan CP ON CP.Id = P.ContributionPlanId\n" +
                 "WHERE FamilyId = " + FamilyId;
         JSONArray PolicyValueArray = sqlHandler.getResult(QueryPolicyValue, null);
@@ -2016,7 +2017,7 @@ public class ClientAndroidInterface {
     @SuppressWarnings("unused")
     public String getPolicy(int PolicyId) {
         @Language("SQL")
-        String Query = "SELECT  P.PolicyId, P.ContributionPlanId, OfficerId , CP.Code, CP.Name, PolicyStage, EffectiveDate, IFNULL(PolicyValue,0) PolicyValue, StartDate, EnrollDate, bcn.ControlNumber, \n" +
+        String Query = "SELECT  P.PolicyId, P.ContributionPlanId, OfficerId , CP.Code, CP.Name, PolicyStage, EffectiveDate, IFNULL(PolicyValue,0) PolicyValue, StartDate, EnrollDate, SigningDate, bcn.ControlNumber, \n" +
                 "   CASE    WHEN PolicyStatus = 1 THEN '" + activity.getResources().getString(R.string.Idle) + "'   " +
                 "   WHEN PolicyStatus = 2 THEN '" + activity.getResources().getString(R.string.Active) + "'  " +
                 "   WHEN PolicyStatus = 4 THEN '" + activity.getResources().getString(R.string.Suspended) + "'  " +
