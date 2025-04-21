@@ -5,6 +5,10 @@ $(document).ready(function () {
         $('#ControlNumber').hide();
     }
 
+    if(!Android.getRule("isVisibleSigningDate")){
+        $('#SigningDate').hide();
+    }
+
     $("#dialog-confirm").attr("title", Android.getString('Confirm'));
 
     var LocationId = parseInt(queryString("l"));

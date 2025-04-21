@@ -498,4 +498,5 @@
     <string name="SelectContribution">Sél. un plan de contribution</string>
     <string name="ContributionPlan">Plan de contribution</string>
     <string name="AccountDetails">Numéro du compte</string>
+    <string name="SigningDate">Date de signature</string>
 </resources>
