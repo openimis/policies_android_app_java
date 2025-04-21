@@ -282,6 +282,7 @@ public class SQLHandler extends SQLiteOpenHelper {
                             "StartDate DATE," +
                             "EffectiveDate DATE," +
                             "ExpiryDate DATE," +
+                            "SigningDate DATE," +
                             "PolicyStatus NUMERIC," +
                             "PolicyValue NUMERIC," +
                             "ProdId NUMERIC," +
