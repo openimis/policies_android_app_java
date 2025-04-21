@@ -7,7 +7,6 @@ $(document).ready(function () {
 
     if(!Android.getRule("isVisibleSigningDate")){
         $('#SigningDate').hide();
-        $("#txtSigningDate").prop("required", false);
     }
 
     $("#dialog-confirm").attr("title", Android.getString('Confirm'));
