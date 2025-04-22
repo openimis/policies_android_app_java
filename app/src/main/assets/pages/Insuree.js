@@ -115,6 +115,21 @@ $(document).ready(function () {
 
     $('#spPleaseWait').text(Android.getString('saving'));
 
+    $('#btnNext').click(function () {
+         var passed = isFormValidated();
+
+         if (passed == true) {
+             if (FamilyId == 0 || FamilyId == null || FamilyId == undefined) {
+                  saveInsureeLocally();
+                  window.open("Attachment.html", "_self");
+             } else {
+                   saveInsureeLocally();
+                   window.open("Attachment.html?f=" + FamilyId, "_self");
+             }
+         }else
+             Android.ShowDialog(Android.getString('FieldRequired'));
+    });
+
     $('#btnSave').click(function () {
         $("#divProgress").show();
 
@@ -492,4 +507,9 @@ function fillAge(Birthday) {
         $("#Education").hide();
         $("#ddlEducation").prop("required", false);
     }
+}
+
+function saveInsureeLocally() {
+     var jsonInsuree = createJSONString();
+     sessionStorage.setItem("InsureeData", jsonInsuree);
 }

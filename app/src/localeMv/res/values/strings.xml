@@ -487,4 +487,9 @@
     <string name="SelectIncomeLevel">Select Income Level</string>
     <string name="IncomeLevel">Income Level</string>
     <string name="SigningDate">Signing Date</string>
+    <string name="Attachment">Attachment</string>
+    <string name="NoneFile">No File</string>
+    <string name="AttachmentTitle">Title</string>
+    <string name="AttachmentFile">File</string>
+    <string name="NoFileAdded">No file added</string>
 </resources>

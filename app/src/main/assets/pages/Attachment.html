@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Add/Edit Attachments</title>
+    <link href="../CSS/Style.CSS" rel="stylesheet" type="text/css"/>
+    <script src="../JS/jquery-3.2.1.min.js"></script>
+    <script src="../JS/exact.js"></script>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" charset="utf-8"/>
+    <link href="../CSS/jquery-ui.css" rel="stylesheet" type="text/css"/>
+    <script src="../JS/jquery-ui.js"></script>
+
+    <script type="text/javascript" src="Attachment.js"></script>
+</head>
+<body>
+<div id="dialog-confirm" title="Confirm" style="display:none">
+    <p><span id="msgAlert" class="ui-icon-alert" style="float:left; margin:2px 2px 2px 0;"></span></p>
+</div>
+<div id="divProgress">
+    <span id="spPleaseWait"></span>
+</div>
+<div>
+
+    <ul class="ulEntry">
+        <li>
+            <span strName="AttachmentTitle">Title</span>
+            <input type="text" maxlength="50" id="txtTitleAttachment" dataField="Title" required/>
+        </li>
+        <li>
+            <span strName="AttachmentFile">File</span>
+            <input type="text" maxlength="50" id="txtFileAttachment" dataField="File" required/>
+        </li>
+        <div>
+            <img src="../images/plus.png" alt="New" class="plusButton" id="btnAddNew"/>
+        </div>
+    </ul>
+    <ul class="ulList" id="ulList">
+        <li class="dot-side-menu">
+            <div>
+                <input type="hidden" id="AttachmentId" value="0" />
+            </div>
+            <div>
+                <h3 id="AttachmentTitle"></h3>
+            </div>
+            <div>
+                <h4 id="AttachmentFile"></h4>
+            </div>
+        </li>
+    </ul>
+</div>
+<div class="footer">
+    <input type="submit" id="btnSave" strName="Save" value="Save">
+</div>
+</body>
+</html>

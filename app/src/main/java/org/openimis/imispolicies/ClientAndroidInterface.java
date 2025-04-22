@@ -32,6 +32,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
@@ -133,6 +134,8 @@ public class ClientAndroidInterface {
     public static int RESULT_LOAD_IMG = 1;
     public static int RESULT_SCAN = 100;
     public static boolean inProgress = true;
+    private JSONArray Attachments = new JSONArray();
+    private JSONArray TempAttachments = new JSONArray();
 
     @NonNull
     private final Activity activity;
@@ -151,6 +154,7 @@ public class ClientAndroidInterface {
     @NonNull
     private final Picasso picassoInstance;
     private int enrol_result;
+    private Context mContext;
 
 
     ClientAndroidInterface(@NonNull Activity activity) {
@@ -5693,5 +5697,88 @@ public class ClientAndroidInterface {
         }
 
         return calculationRule.toString();
+    }
+
+    @JavascriptInterface
+    public void addAttachment(int familyId, String title, String filename) throws JSONException {
+        String contentFile = ((MainActivity) activity).fileContent;
+        if (familyId != 0) {
+            int MaxAttachmentId = getNextAvailableAttachmentId();
+            ContentValues AttachmentValues = new ContentValues();
+            AttachmentValues.put("Filename", filename);
+            AttachmentValues.put("Id", MaxAttachmentId);
+            AttachmentValues.put("Title", title);
+            AttachmentValues.put("Content", contentFile);
+            AttachmentValues.put("FamilyId", familyId);
+            sqlHandler.insertData("tblInsureeAttachments", AttachmentValues);
+        } else {
+            JSONObject obj = new JSONObject();
+            obj.put("Title", title);
+            obj.put("Filename", filename);
+            obj.put("content", contentFile);
+            TempAttachments.put(obj);
+        }
+
+    }
+
+    @JavascriptInterface
+    public void SaveInsureeAttachments(int FamilyId) {
+        int MaxAttachmentId = 0;
+        try {
+
+            MaxAttachmentId = getNextAvailableAttachmentId();
+
+            for (int i = 0; i < Attachments.length(); i++) {
+                ContentValues AttachmentValues = new ContentValues();
+                JSONObject obj = Attachments.getJSONObject(i);
+                if (!obj.has("Id")) {
+                    AttachmentValues.put("Id", MaxAttachmentId);
+                    AttachmentValues.put("Filename", obj.getString("Filename"));
+                    AttachmentValues.put("Title", obj.getString("Title"));
+                    AttachmentValues.put("Content", obj.getString("content"));
+                    AttachmentValues.put("FamilyId", FamilyId);
+                    sqlHandler.insertData("tblInsureeAttachments", AttachmentValues);
+                }
+            }
+
+            TempAttachments = new JSONArray();
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    @JavascriptInterface
+    public String getInsureeAttachments(int FamilyId) throws JSONException {
+        Attachments = new JSONArray();
+
+        String Query = "SELECT Id,Title, Filename, Content, FamilyId \n" +
+                "FROM tblInsureeAttachments \n" +
+                "WHERE FamilyId = ?";
+        String[] args = {String.valueOf(FamilyId)};
+
+        JSONArray Attachs = sqlHandler.getResult(Query, args);
+        Log.e("Attachments", Attachs.toString());
+
+        for (int i = 0; i < Attachs.length(); i++) {
+            Attachments.put(Attachs.getJSONObject(i));
+        }
+
+        for (int i = 0; i < TempAttachments.length(); i++) {
+            Attachments.put(TempAttachments.getJSONObject(i));
+        }
+
+        return  Attachments.toString();
+
+    }
+
+    @JavascriptInterface
+    public void showAttachmentDialog() {
+        ((MainActivity) activity).PickAttachmentDialogFromPage();
+    }
+
+    private int getNextAvailableAttachmentId() {
+        return getMaxIdFromTable("Id", "tblInsureeAttachments");
     }
 }
