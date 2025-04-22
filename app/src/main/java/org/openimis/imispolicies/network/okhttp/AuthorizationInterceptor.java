@@ -15,6 +15,7 @@ import okhttp3.Response;
 
 public class AuthorizationInterceptor implements Interceptor {
     private static final String REQUESTED_WITH = "webapp";
+    private static final String USER_AGENT = "mobile_app";
 
     @NonNull
     private final LoginRepository repository;
@@ -37,6 +38,7 @@ public class AuthorizationInterceptor implements Interceptor {
         if(!StringUtils.isEmpty(csrfToken)){
             builder.addHeader("X-Csrftoken", csrfToken);
             builder.addHeader("X-Requested-With", REQUESTED_WITH);
+            builder.addHeader("User-Agent", USER_AGENT);
         }
         Response response = chain.proceed(builder.build());
         if (response.code() == HttpURLConnection.HTTP_UNAUTHORIZED) {
