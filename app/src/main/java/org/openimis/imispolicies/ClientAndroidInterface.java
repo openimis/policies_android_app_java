@@ -5765,7 +5765,6 @@ public class ClientAndroidInterface {
         String[] args = {String.valueOf(InsureeId)};
 
         JSONArray Attachs = sqlHandler.getResult(Query, args);
-        Log.e("Attachments", Attachs.toString());
 
         for (int i = 0; i < Attachs.length(); i++) {
             Attachments.put(Attachs.getJSONObject(i));
@@ -5793,10 +5792,22 @@ public class ClientAndroidInterface {
         Log.e("attachmentTitle", attachmentTitle);
         Log.e("attachmentName", attachmentName);
         if (InsureeId != 0) {
-            String[] attachmentIdArgument = new String[]{String.valueOf(attachmentId)};
-            String Query = "DELETE FROM tblInsureeAttachments WHERE Id = ?";
-            sqlHandler.getResult(Query, attachmentIdArgument);
-            return 1;
+            if(attachmentId != 0){
+                String[] attachmentIdArgument = new String[]{String.valueOf(attachmentId)};
+                String Query = "DELETE FROM tblInsureeAttachments WHERE Id = ?";
+                sqlHandler.getResult(Query, attachmentIdArgument);
+                return 1;
+            }else {
+                for (int i = 0; i < TempAttachments.length(); i++) {
+                    JSONObject obj = TempAttachments.getJSONObject(i);
+                    if (obj.getString("Title").equals(attachmentTitle)) {
+                        if(attachmentName.equals(obj.getString("Filename"))){
+                            TempAttachments.remove(i);
+                            return 1;
+                        }
+                    }
+                }
+            }
         } else {
             for (int i = 0; i < TempAttachments.length(); i++) {
                 JSONObject obj = TempAttachments.getJSONObject(i);

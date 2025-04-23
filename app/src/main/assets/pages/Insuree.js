@@ -201,9 +201,9 @@ $(document).ready(function () {
         Android.showDialog('bye');
     });
 
-//    window.onunload = function () {
-//        sessionStorage.removeItem("FamilyData");
-//    }
+    window.onunload = function () {
+        sessionStorage.removeItem("FamilyData");
+    }
 
     //if insureeid is passed load the insuree
     var InsureeId = queryString("i");

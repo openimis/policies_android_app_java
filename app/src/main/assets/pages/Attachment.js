@@ -37,12 +37,12 @@ $(document).ready(function () {
     $('#btnSave').click(function () {
         $("#divProgress").show();
 
-        if (Android.getInsureeAttachments(parseInt(queryString('f'))) === "[]") {
+        if (Android.getInsureeAttachments(parseInt(queryString('i'))) === "[]") {
             $("#divProgress").hide();
             Android.ShowDialog(Android.getString('AttachmentNotFound'));
         }else {
             Android.SaveInsureeAttachments(FamilyId, InsureeId);
-            if (isPolygamy) {
+            if (isPolygamy == 1) {
                 window.open("FamilyPolygamy.html?f=" + FamilyId, "_self");
             } else {
                 window.open("FamilyAndInsurees.html?f=" + FamilyId, "_self");
@@ -72,10 +72,11 @@ $(document).ready(function () {
                         text: Android.getString("Ok"),
                         click: function () {
                             AttachmentDeleted = parseInt(Android.DeleteAttachment(parseInt(InsureeId),AttachmentId,AttachmentTitle, AttachmentName));
-                            LoadAttachments();
+
                             if (AttachmentDeleted == 1) {
                                 Android.ShowDialog(Android.getString('AttachmentDeleted'));
-                                window.open('Attachment.html?f=' + FamilyId, "_self");
+                                location.reload()
+                                //window.open('Attachment.html?f=' + InsureeId, "_self");
                             }
                             $(this).dialog("close");
                         }

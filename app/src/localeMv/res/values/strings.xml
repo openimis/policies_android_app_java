@@ -495,4 +495,5 @@
     <string name="DeleteAttachment">Deleting of Attachment</string>
     <string name="AttachmentDeleted">Attachment deleted successfully</string>
     <string name="AttachmentNotFound">No attachment added. Please add attachment to continue</string>
+    <string name="FamilyPolygamy">Polygamous family</string>
 </resources>
