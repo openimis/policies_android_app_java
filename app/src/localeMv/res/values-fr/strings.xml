@@ -499,4 +499,12 @@
     <string name="ContributionPlan">Plan de contribution</string>
     <string name="AccountDetails">Numéro du compte</string>
     <string name="SigningDate">Date de signature</string>
+    <string name="Attachment">Pièces jointes</string>
+    <string name="NoneFile">Aucun fichier</string>
+    <string name="AttachmentTitle">Titre</string>
+    <string name="AttachmentFile">Fichier</string>
+    <string name="NoFileAdded">Aucun fichier ajouté</string>
+    <string name="DeleteAttachment">Suppression de la pièce jointe</string>
+    <string name="AttachmentDeleted">Pièce jointe supprimée avec succès</string>
+    <string name="AttachmentNotFound">Aucune pièce jointe trouvée. Veuillez ajouter une pièce jointe</string>
 </resources>

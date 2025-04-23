@@ -448,6 +448,7 @@ public class SQLHandler extends SQLiteOpenHelper {
                             "Title TEXT," +
                             "Filename TEXT," +
                             "Content TEXT," +
+                            "InsureeId INTEGER," +
                             "FamilyId INTEGER" + ")"
             );
         } catch (Exception e) {

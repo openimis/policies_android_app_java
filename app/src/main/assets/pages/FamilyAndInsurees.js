@@ -47,7 +47,7 @@ $(document).ready(function () {
 
 
     AssignDotClass();
-    contextMenu.createContextMenu([Android.getString('Edit'), Android.getString('Delete')], function () {
+    contextMenu.createContextMenu([Android.getString('Edit'), Android.getString('Delete'), Android.getString('Attachment')], function () {
         var clicked = $(this).text();
         if (clicked == Android.getString('Edit')) {
             var url = 'FamilyAndInsurees.html?f=' + FamilyId;
@@ -90,6 +90,10 @@ $(document).ready(function () {
                 Android.ShowDialog(Android.getString('InsureeNotDeleted'));
             }
 
+        } else if(clicked == Android.getString('Attachment')){
+            var url = 'FamilyAndInsurees.html?f=' + FamilyId;
+            Android.SetUrl(url);
+            window.open("Attachment.html?i=" + InsureeId + "&f=" + FamilyId, "_self");
         }
     });
 

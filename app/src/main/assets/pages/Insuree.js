@@ -115,21 +115,6 @@ $(document).ready(function () {
 
     $('#spPleaseWait').text(Android.getString('saving'));
 
-    $('#btnNext').click(function () {
-         var passed = isFormValidated();
-
-         if (passed == true) {
-             if (FamilyId == 0 || FamilyId == null || FamilyId == undefined) {
-                  saveInsureeLocally();
-                  window.open("Attachment.html", "_self");
-             } else {
-                   saveInsureeLocally();
-                   window.open("Attachment.html?f=" + FamilyId, "_self");
-             }
-         }else
-             Android.ShowDialog(Android.getString('FieldRequired'));
-    });
-
     $('#btnSave').click(function () {
         $("#divProgress").show();
 
@@ -216,9 +201,9 @@ $(document).ready(function () {
         Android.showDialog('bye');
     });
 
-    window.onunload = function () {
-        sessionStorage.removeItem("FamilyData");
-    }
+//    window.onunload = function () {
+//        sessionStorage.removeItem("FamilyData");
+//    }
 
     //if insureeid is passed load the insuree
     var InsureeId = queryString("i");
@@ -507,9 +492,4 @@ function fillAge(Birthday) {
         $("#Education").hide();
         $("#ddlEducation").prop("required", false);
     }
-}
-
-function saveInsureeLocally() {
-     var jsonInsuree = createJSONString();
-     sessionStorage.setItem("InsureeData", jsonInsuree);
 }

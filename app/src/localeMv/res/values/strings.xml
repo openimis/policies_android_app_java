@@ -492,4 +492,7 @@
     <string name="AttachmentTitle">Title</string>
     <string name="AttachmentFile">File</string>
     <string name="NoFileAdded">No file added</string>
+    <string name="DeleteAttachment">Deleting of Attachment</string>
+    <string name="AttachmentDeleted">Attachment deleted successfully</string>
+    <string name="AttachmentNotFound">No attachment added. Please add attachment to continue</string>
 </resources>

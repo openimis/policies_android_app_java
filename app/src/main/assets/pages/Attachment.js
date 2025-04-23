@@ -2,18 +2,12 @@ $(document).ready(function () {
 
     var InsureeId = queryString("i");
     var FamilyId = queryString("f");
+    var isPolygamy = queryString("isPolygamy")
     var AttachmentTitle = "";
     var AttachmentName = "";
     var AttachmentId = 0;
 
-    if (sessionStorage.getItem("FamilyData") !== null) {
-             var Attachments = Android.getInsureeAttachments(parseInt(queryString('f')));
-             var ctls = ["AttachmentTitle", "AttachmentFile", "AttachmentId"];
-             var Columns = ["Title", "Filename", "Id"];
-             LoadList(Attachments, '.ulList', ctls, Columns);
-    }else{
-        LoadAttachments();
-    }
+    LoadAttachments();
 
 
     $('.ulList li').click(function () {
@@ -30,7 +24,7 @@ $(document).ready(function () {
             var title = $('#txtTitleAttachment').val();
             var file = $('#txtFileAttachment').val();
 
-            Android.addAttachment(parseInt(FamilyId),title, file);
+            Android.addAttachment(parseInt(FamilyId), parseInt(InsureeId),title, file);
             window.location.reload();
 
         } else
@@ -45,71 +39,13 @@ $(document).ready(function () {
 
         if (Android.getInsureeAttachments(parseInt(queryString('f'))) === "[]") {
             $("#divProgress").hide();
-            Android.ShowDialog(Android.getString('AttachmentRequired'));
-        } else {
-            var jsonInsuree = sessionStorage.getItem("InsureeData");
-            if (sessionStorage.getItem("FamilyData") !== null) {
-                var FamilyId = Android.SaveFamily(sessionStorage.getItem("FamilyData"), jsonInsuree);
-                var FamilyType = sessionStorage.getItem("FamilyType");
-                Android.SaveInsureeAttachments(FamilyId);
-
-                if (FamilyId > 0) {
-                    sessionStorage.removeItem("FamilyData");
-                    sessionStorage.removeItem("InsureeData");
-                    $(this).attr("disabled", "disabled");
-
-                    if (FamilyType == "P") {
-                        window.open("FamilyPolygamy.html?f=" + FamilyId, "_self");
-                    } else {
-                        window.open("FamilyAndInsurees.html?f=" + FamilyId, "_self");
-                    }
-                }
-
-            } else if (sessionStorage.getItem("SubFamilyData") !== null) {
-                  var FamilyId = queryString('f');
-                  var SubFamilyId = Android.SaveSubFamily(sessionStorage.getItem("SubFamilyData"), jsonInsuree, parseInt(FamilyId));
-                  if (SubFamilyId > 0) {
-                      sessionStorage.removeItem("SubFamilyData");
-                      $(this).attr("disabled", "disabled");
-                      window.open("FamilyAndInsurees.html?f=" + SubFamilyId, "_self");
-                  }
+            Android.ShowDialog(Android.getString('AttachmentNotFound'));
+        }else {
+            Android.SaveInsureeAttachments(FamilyId, InsureeId);
+            if (isPolygamy) {
+                window.open("FamilyPolygamy.html?f=" + FamilyId, "_self");
             } else {
-                var FamilyId = parseInt(queryString('f'));
-                var FamilyPolicy = Android.getFamilyPolicy(FamilyId);
-                var $Policy = $.parseJSON(FamilyPolicy);
-                var MemberCount = parseInt($Policy[0]["MemberCount"]);
-                var Threshold = parseInt($Policy[0]["Threshold"]);
-                var TotalIns = parseInt($Policy[0]["Ins"]);
-                var PolicyId = parseInt($Policy[0]["PolicyId"]);
-                var IsNewIns = parseInt($("#hfInsureeId").val());
-                var MemberDialog = -1;
-                var ExceedThreshold = -1;
-
-                if (PolicyId > 0 && IsNewIns == 0) {
-                    if (TotalIns >= MemberCount) {
-                        ExceedThreshold = 0;
-                        Android.ShowDialog(Android.getString('ExceedMemberCount'));
-                    } else if (TotalIns >= Threshold) {
-                        ExceedThreshold = 1;
-                    } else {
-                        ExceedThreshold = 0;
-                    }
-
-                }
-                var InsureeId = Android.SaveInsuree(jsonInsuree, FamilyId, 0, parseInt(ExceedThreshold), PolicyId);
-                Android.SaveInsureeAttachments(FamilyId);
-                if (PolicyId > 0 && TotalIns >= MemberCount) {
-                    $("#divProgress").hide();
-                } else {
-                    var isPolygamy = queryString("isPolygamy");
-                    if(isPolygamy == 1){
-                        $("#divProgress").hide();
-                        window.open("FamilyPolygamy.html?f=" + FamilyId, "_self");
-                    }else{
-                        $("#divProgress").hide();
-                        window.open("FamilyAndInsurees.html?f=" + FamilyId, "_self");
-                    }
-                }
+                window.open("FamilyAndInsurees.html?f=" + FamilyId, "_self");
             }
         }
     });
@@ -135,7 +71,7 @@ $(document).ready(function () {
                     {
                         text: Android.getString("Ok"),
                         click: function () {
-                            AttachmentDeleted = parseInt(Android.DeleteAttachment(parseInt(FamilyId),AttachmentId,AttachmentTitle, AttachmentName));
+                            AttachmentDeleted = parseInt(Android.DeleteAttachment(parseInt(InsureeId),AttachmentId,AttachmentTitle, AttachmentName));
                             LoadAttachments();
                             if (AttachmentDeleted == 1) {
                                 Android.ShowDialog(Android.getString('AttachmentDeleted'));
@@ -164,7 +100,7 @@ function selectAttachmentCallback(attachName) {
 }
 
 function LoadAttachments() {
-    var Attachments = Android.getInsureeAttachments(parseInt(queryString('f')));
+    var Attachments = Android.getInsureeAttachments(parseInt(queryString('i')));
     var ctls = ["AttachmentTitle", "AttachmentFile", "AttachmentId"];
     var Columns = ["Title", "Filename", "Id"];
     LoadList(Attachments, '.ulList', ctls, Columns);
