@@ -32,6 +32,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
@@ -133,6 +134,8 @@ public class ClientAndroidInterface {
     public static int RESULT_LOAD_IMG = 1;
     public static int RESULT_SCAN = 100;
     public static boolean inProgress = true;
+    private JSONArray Attachments = new JSONArray();
+    private JSONArray TempAttachments = new JSONArray();
 
     @NonNull
     private final Activity activity;
@@ -151,6 +154,7 @@ public class ClientAndroidInterface {
     @NonNull
     private final Picasso picassoInstance;
     private int enrol_result;
+    private Context mContext;
 
 
     ClientAndroidInterface(@NonNull Activity activity) {
@@ -2463,6 +2467,10 @@ public class ClientAndroidInterface {
         @Language("SQL")
         String FamilyQuery = "DELETE FROM  tblFamilies WHERE FamilyId = ?";
         sqlHandler.getResult(FamilyQuery, familyIdArgument);
+
+        @Language("SQL")
+        String AttachmentQuery = "DELETE FROM  tblInsureeAttachments WHERE FamilyId = ?";
+        sqlHandler.getResult(AttachmentQuery, familyIdArgument);
 
         //delete subfamily for polygamy
         JSONArray subFamilies = null;
@@ -5693,5 +5701,125 @@ public class ClientAndroidInterface {
         }
 
         return calculationRule.toString();
+    }
+
+    @JavascriptInterface
+    public void addAttachment(int familyId, int insureeId, String title, String filename) throws JSONException {
+        String contentFile = ((MainActivity) activity).fileContent;
+        if (familyId != 0) {
+            int MaxAttachmentId = getNextAvailableAttachmentId();
+            ContentValues AttachmentValues = new ContentValues();
+            AttachmentValues.put("Filename", filename);
+            AttachmentValues.put("Id", MaxAttachmentId);
+            AttachmentValues.put("Title", title);
+            AttachmentValues.put("Content", contentFile);
+            AttachmentValues.put("FamilyId", familyId);
+            AttachmentValues.put("InsureeId", insureeId);
+            sqlHandler.insertData("tblInsureeAttachments", AttachmentValues);
+        } else {
+            JSONObject obj = new JSONObject();
+            obj.put("Title", title);
+            obj.put("Filename", filename);
+            obj.put("content", contentFile);
+            TempAttachments.put(obj);
+        }
+
+    }
+
+    @JavascriptInterface
+    public void SaveInsureeAttachments(int FamilyId, int InsureeId) {
+        int MaxAttachmentId = 0;
+        try {
+
+            MaxAttachmentId = getNextAvailableAttachmentId();
+
+            for (int i = 0; i < Attachments.length(); i++) {
+                ContentValues AttachmentValues = new ContentValues();
+                JSONObject obj = Attachments.getJSONObject(i);
+                if (!obj.has("Id")) {
+                    AttachmentValues.put("Id", MaxAttachmentId);
+                    AttachmentValues.put("Filename", obj.getString("Filename"));
+                    AttachmentValues.put("Title", obj.getString("Title"));
+                    AttachmentValues.put("Content", obj.getString("content"));
+                    AttachmentValues.put("FamilyId", FamilyId);
+                    AttachmentValues.put("InsureeId", InsureeId);
+                    sqlHandler.insertData("tblInsureeAttachments", AttachmentValues);
+                }
+            }
+
+            TempAttachments = new JSONArray();
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    @JavascriptInterface
+    public String getInsureeAttachments(int InsureeId) throws JSONException {
+        Attachments = new JSONArray();
+
+        String Query = "SELECT Id,Title, Filename, Content, FamilyId, InsureeId \n" +
+                "FROM tblInsureeAttachments \n" +
+                "WHERE InsureeId = ?";
+        String[] args = {String.valueOf(InsureeId)};
+
+        JSONArray Attachs = sqlHandler.getResult(Query, args);
+
+        for (int i = 0; i < Attachs.length(); i++) {
+            Attachments.put(Attachs.getJSONObject(i));
+        }
+
+        for (int i = 0; i < TempAttachments.length(); i++) {
+            Attachments.put(TempAttachments.getJSONObject(i));
+        }
+
+        return  Attachments.toString();
+
+    }
+
+    @JavascriptInterface
+    public void showAttachmentDialog() {
+        ((MainActivity) activity).PickAttachmentDialogFromPage();
+    }
+
+    private int getNextAvailableAttachmentId() {
+        return getMaxIdFromTable("Id", "tblInsureeAttachments");
+    }
+
+    @JavascriptInterface
+    public int DeleteAttachment(int InsureeId,int attachmentId, String attachmentTitle, String attachmentName) throws JSONException {
+        Log.e("attachmentTitle", attachmentTitle);
+        Log.e("attachmentName", attachmentName);
+        if (InsureeId != 0) {
+            if(attachmentId != 0){
+                String[] attachmentIdArgument = new String[]{String.valueOf(attachmentId)};
+                String Query = "DELETE FROM tblInsureeAttachments WHERE Id = ?";
+                sqlHandler.getResult(Query, attachmentIdArgument);
+                return 1;
+            }else {
+                for (int i = 0; i < TempAttachments.length(); i++) {
+                    JSONObject obj = TempAttachments.getJSONObject(i);
+                    if (obj.getString("Title").equals(attachmentTitle)) {
+                        if(attachmentName.equals(obj.getString("Filename"))){
+                            TempAttachments.remove(i);
+                            return 1;
+                        }
+                    }
+                }
+            }
+        } else {
+            for (int i = 0; i < TempAttachments.length(); i++) {
+                JSONObject obj = TempAttachments.getJSONObject(i);
+                if (obj.getString("Title").equals(attachmentTitle)) {
+                    if(attachmentName.equals(obj.getString("Filename"))){
+                        TempAttachments.remove(i);
+                        return 1;
+                    }
+                }
+            }
+        }
+
+        return -1;
     }
 }

@@ -1,6 +1,6 @@
 $(document).ready(function () {
 
-    document.title = Android.getString('FamilyAndSubFamilies');
+    document.title = Android.getString('FamilyPolygamy');
 
     var FamilyId = queryString("f");
     var LocationId = null;
@@ -44,7 +44,7 @@ $(document).ready(function () {
 
 
     AssignDotClass();
-    contextMenu.createContextMenu([Android.getString('Edit'), Android.getString('Delete')], function () {
+    contextMenu.createContextMenu([Android.getString('Edit'), Android.getString('Delete'), Android.getString('Attachment')], function () {
         var clicked = $(this).text();
         if (clicked == Android.getString('Edit')) {
             var url = 'FamilyPolygamy.html?f=' + FamilyId;
@@ -87,6 +87,11 @@ $(document).ready(function () {
                 Android.ShowDialog(Android.getString('InsureeNotDeleted'));
             }
 
+        }
+        else if(clicked == Android.getString('Attachment')){
+            var url = 'FamilyPolygamy.html?f=' + FamilyId;
+            Android.SetUrl(url);
+            window.open("Attachment.html?i=" + InsureeId + "&f=" + FamilyId + '&isPolygamy=1', "_self");
         }
     });
 
