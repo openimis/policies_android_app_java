@@ -498,4 +498,5 @@
     <string name="SelectContribution">Sél. un plan de contribution</string>
     <string name="ContributionPlan">Plan de contribution</string>
     <string name="AccountDetails">Numéro du compte</string>
+    <string name="Periodicity">Périodicité</string>
 </resources>

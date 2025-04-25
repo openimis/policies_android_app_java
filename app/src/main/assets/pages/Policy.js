@@ -1,5 +1,6 @@
 $(document).ready(function () {
     document.title = Android.getString('AddEditPolicy');
+    fillDropdowns();
 
     if(!Android.IsBulkCNUsed()) {
         $('#ControlNumber').hide();
@@ -33,6 +34,7 @@ $(document).ready(function () {
         var $Policy = $.parseJSON(strPolicy);
         //$("#ddlProduct").val($Policy[0]["ProdId"]);
         $("#ddlContributionPlan").val($Policy[0]["ContributionPlanId"]);
+         $("#ddlPeriodicity").val($Policy[0]["Periodicity"]);
         $("#ddlOfficer").val($Policy[0]["OfficerId"]);
         var PolicyStage = $Policy[0]["PolicyStage"];
         var StartDate = $Policy[0]["StartDate"];
@@ -234,4 +236,16 @@ function LoadContributionPlan(EnrolmentDate) {
 function createJSONString() {
     var jsonPolicy = getControlsValuesJSON('li');
     return jsonPolicy;
+}
+function getPeriodicityValue()  {
+    $textLanguage = "Name";
+    if (Android.getSelectedLanguage() != "en") {
+        $textLanguage = "AltLanguage";
+    }
+    var $Period= Android.getPeriodicity();
+    bindDropdown('ddlPeriodicity', $Period, 'Code', $textLanguage, 0, Android.getString('Periodicity'));
+}
+
+function fillDropdowns() {
+    getPeriodicityValue();
 }
