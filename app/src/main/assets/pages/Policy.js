@@ -243,7 +243,7 @@ function getPeriodicityValue()  {
         $textLanguage = "AltLanguage";
     }
     var $Period= Android.getPeriodicity();
-    bindDropdown('ddlPeriodicity', $Period, 'Code', $textLanguage, 0, Android.getString('Periodicity'));
+    bindDropdown('ddlPeriodicity', $Period, 'Code', $textLanguage, Android.getString('Periodicity'));
 }
 
 function fillDropdowns() {
