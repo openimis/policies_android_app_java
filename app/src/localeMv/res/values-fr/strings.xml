@@ -508,4 +508,5 @@
     <string name="AttachmentDeleted">Pièce jointe supprimée avec succès</string>
     <string name="AttachmentNotFound">Aucune pièce jointe trouvée. Veuillez ajouter une pièce jointe</string>
     <string name="FamilyPolygamy">Famille polygame</string>
+    <string name="PaymentDay">Jour de paiement</string>
 </resources>

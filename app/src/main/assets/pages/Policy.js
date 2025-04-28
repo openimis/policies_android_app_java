@@ -1,6 +1,8 @@
 $(document).ready(function () {
     document.title = Android.getString('AddEditPolicy');
 
+    fillDropdowns();
+
     if(!Android.IsBulkCNUsed()) {
         $('#ControlNumber').hide();
     }
@@ -38,6 +40,7 @@ $(document).ready(function () {
         //$("#ddlProduct").val($Policy[0]["ProdId"]);
         $("#ddlContributionPlan").val($Policy[0]["ContributionPlanId"]);
         $("#ddlOfficer").val($Policy[0]["OfficerId"]);
+        $("#ddlPaymentDay").val($Policy[0]["PaymentDay"]);
         var PolicyStage = $Policy[0]["PolicyStage"];
         var StartDate = $Policy[0]["StartDate"];
         var EnrolmentDate = $Policy[0]["EnrollDate"];
@@ -187,6 +190,17 @@ $(document).ready(function () {
         var CPId = $('#ddlContributionPlan').val();
         //getPolicyPeriod(txtStartDate, parseInt(CPId), parseInt(FamilyId), parseInt(policyId));
     });
+
+$('#txtSigningDate').on('change', function() {
+    var signingDate = $(this).val();
+    if (signingDate) {
+        $('#ddlPaymentDay').attr('required', true);
+    } else {
+        $('#ddlPaymentDay').removeAttr('required');
+    }
+});
+
+
 });
 
 function getPolicyPeriod(EnrolmentDate, ProdId, FamilyId, policyId) {
@@ -240,4 +254,11 @@ function LoadContributionPlan(EnrolmentDate) {
 function createJSONString() {
     var jsonPolicy = getControlsValuesJSON('li');
     return jsonPolicy;
+}
+function getPaymentDayValue() {
+    var PaymentDay = Android.getPaymentDay();
+    bindDropdown('ddlPaymentDay', PaymentDay, 'Value', 'Label', Android.getString(''));
+}
+function fillDropdowns() {
+    getPaymentDayValue();
 }

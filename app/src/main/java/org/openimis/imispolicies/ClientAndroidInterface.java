@@ -1886,6 +1886,7 @@ public class ClientAndroidInterface {
             values.put("ContributionPlanId", data.get("ddlContributionPlan"));
             values.put("OfficerId", data.get("ddlOfficer"));
             values.put("SigningDate", data.get("txtSigningDate"));
+            values.put("PaymentDay", data.get("ddlPaymentDay"));
 
             @Language("SQL")
             String query = "SELECT * FROM tblContributionPlan WHERE Id =" + Integer.parseInt(data.get("ddlContributionPlan"));
@@ -2021,7 +2022,7 @@ public class ClientAndroidInterface {
     @SuppressWarnings("unused")
     public String getPolicy(int PolicyId) {
         @Language("SQL")
-        String Query = "SELECT  P.PolicyId, P.ContributionPlanId, OfficerId , CP.Code, CP.Name, PolicyStage, EffectiveDate, IFNULL(PolicyValue,0) PolicyValue, StartDate, EnrollDate, SigningDate, bcn.ControlNumber, \n" +
+        String Query = "SELECT  P.PolicyId, P.ContributionPlanId, OfficerId , CP.Code, CP.Name, PolicyStage, EffectiveDate, IFNULL(PolicyValue,0) PolicyValue, StartDate, EnrollDate, SigningDate, bcn.ControlNumber, P.PaymentDay, \n" +
                 "   CASE    WHEN PolicyStatus = 1 THEN '" + activity.getResources().getString(R.string.Idle) + "'   " +
                 "   WHEN PolicyStatus = 2 THEN '" + activity.getResources().getString(R.string.Active) + "'  " +
                 "   WHEN PolicyStatus = 4 THEN '" + activity.getResources().getString(R.string.Suspended) + "'  " +
@@ -5822,4 +5823,35 @@ public class ClientAndroidInterface {
 
         return -1;
     }
-}
+    @JavascriptInterface
+    @SuppressWarnings("unused")
+    public String getPaymentDay() {
+        JSONArray PaymentDay = new JSONArray();
+        try {
+            JSONObject object = new JSONObject();
+            object.put("Value", "05");
+            object.put("Label", "05");
+            PaymentDay.put(object);
+
+            object = new JSONObject();
+            object.put("Value", "10");
+            object.put("Label", "10");
+            PaymentDay.put(object);
+
+            object = new JSONObject();
+            object.put("Value", "15");
+            object.put("Label", "15");
+            PaymentDay.put(object);
+
+            object = new JSONObject();
+            object.put("Value", "20");
+            object.put("Label", "20");
+            object.put("Default", false);
+            PaymentDay.put(object);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return PaymentDay.toString();
+    }
+    }
+

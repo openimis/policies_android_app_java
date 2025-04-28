@@ -494,4 +494,6 @@
     <string name="BankDebit">Bank debit</string>
     <string name="TiersPay">Unknow pay</string>
     <string name="SelectPaymentMethod">Select payment method</string>
+    <string name="PaymentDay">Payment day</string>
+    <string name="SelectPaymentDay">Payment day</string>
 </resources>
