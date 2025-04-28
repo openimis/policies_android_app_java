@@ -53,7 +53,8 @@ public class FetchFamily {
                 /* confirmationType = */ node.confirmationType() != null ? Objects.requireNonNull(node.confirmationType()).code() : null,
                 /* isOffline = */ node.isOffline() != null ? Objects.requireNonNull(node.isOffline()) : false,
                 /* familyId = */ null,
-                /* insurees = */ Mapper.map(node.members().edges(), (edge) -> toMember(edge, node))
+                /* insurees = */ Mapper.map(node.members().edges(), (edge) -> toMember(edge, node)),
+                /* attachments = */ node.attachments() != null ? Objects.requireNonNull(Mapper.map(node.attachments(), (attachment) -> toAttachment(attachment)))  : null
         );
     }
 
@@ -139,5 +140,15 @@ public class FetchFamily {
             return null;
         }
         return PhotoUtils.getPhotoBytes(photo.photo());
+    }
+
+    @NonNull
+    private Family.Attachment toAttachment(@NonNull GetFamilyQuery.Attachment attachment){
+        return new Family.Attachment(
+                /* tittle */ attachment.title(),
+                /* mime */ attachment.mime(),
+                /* filename */ attachment.filename(),
+                /* content */ attachment.document()
+        );
     }
 }

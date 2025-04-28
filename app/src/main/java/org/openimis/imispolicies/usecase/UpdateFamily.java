@@ -101,7 +101,6 @@ public class UpdateFamily {
                 throw e;
             }
         }
-        Log.e("isHOF",String.valueOf(member.isHead()));
         if(existingFamily != null && member.isHead() == false){
                 try {
                     createInsureeGraphQLRequest.create(member, existingFamily.getId(), officerId);
