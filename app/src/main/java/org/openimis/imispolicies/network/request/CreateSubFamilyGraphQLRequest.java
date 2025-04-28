@@ -37,9 +37,6 @@ public class CreateSubFamilyGraphQLRequest extends BaseGraphQLRequest {
                         .confirmationTypeId(family.getConfirmationType())
                         .isOffline(family.isOffline())
                         .parentId(family.getParentId())
-                        .attachments(
-                                family.getAttachments() != null ? Mapper.map(family.getAttachments(), dto -> toAttachment(dto)) : new ArrayList<>()
-                        )
                         .headInsuree(
                                 FamilyHeadInsureeInputType.builder()
                                         .lastName(head.getLastName())
@@ -76,16 +73,5 @@ public class CreateSubFamilyGraphQLRequest extends BaseGraphQLRequest {
                         .build()
         ));
         return Objects.requireNonNull(response.getData());
-    }
-
-    private FamilyAttachmentInputType toAttachment(
-            @NonNull Family.Attachment dto
-    ){
-        return FamilyAttachmentInputType.builder()
-                .title(dto.getTitle())
-                .filename(dto.getFilename())
-                .mime(dto.getMime())
-                .document(dto.getContent())
-                .build();
     }
 }
