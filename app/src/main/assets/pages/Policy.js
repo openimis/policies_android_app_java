@@ -89,8 +89,8 @@ $(document).ready(function () {
     $('#txtEnrolmentDate').change(function () {
         var EnrolmentDate = $('#txtEnrolmentDate').val();
         LoadProduct(RegionId, DistrictId, EnrolmentDate);
+        $("#txtSigningDate").prop('min',EnrolmentDate);
         //LoadOfficers(LocationId, EnrolmentDate);
-
     });
 
     $('#txtEnrolmentDate, #ddlProduct').change(function () {
