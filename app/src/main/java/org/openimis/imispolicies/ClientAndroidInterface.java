@@ -1885,6 +1885,7 @@ public class ClientAndroidInterface {
             values.put("PolicyValue", data.get("hfPolicyValue"));
             values.put("ContributionPlanId", data.get("ddlContributionPlan"));
             values.put("OfficerId", data.get("ddlOfficer"));
+            values.put("Periodicity", data.get("ddlPeriodicity"));
             values.put("SigningDate", data.get("txtSigningDate"));
 
             @Language("SQL")
@@ -2021,7 +2022,7 @@ public class ClientAndroidInterface {
     @SuppressWarnings("unused")
     public String getPolicy(int PolicyId) {
         @Language("SQL")
-        String Query = "SELECT  P.PolicyId, P.ContributionPlanId, OfficerId , CP.Code, CP.Name, PolicyStage, EffectiveDate, IFNULL(PolicyValue,0) PolicyValue, StartDate, EnrollDate, SigningDate, bcn.ControlNumber, \n" +
+        String Query = "SELECT  P.PolicyId, P.ContributionPlanId, OfficerId , CP.Code, CP.Name, PolicyStage, EffectiveDate, IFNULL(PolicyValue,0) PolicyValue, StartDate, EnrollDate, SigningDate, bcn.ControlNumber, P.Periodicity, \n" +
                 "   CASE    WHEN PolicyStatus = 1 THEN '" + activity.getResources().getString(R.string.Idle) + "'   " +
                 "   WHEN PolicyStatus = 2 THEN '" + activity.getResources().getString(R.string.Active) + "'  " +
                 "   WHEN PolicyStatus = 4 THEN '" + activity.getResources().getString(R.string.Suspended) + "'  " +
@@ -5745,6 +5746,40 @@ public class ClientAndroidInterface {
         }
 
         return calculationRule.toString();
+    }
+
+    @JavascriptInterface
+    @SuppressWarnings("unused")
+    public String getPeriodicity() {
+        JSONArray Periodicity = new JSONArray();
+        try {
+            JSONObject object = new JSONObject();
+            object.put("Code", "M");
+            object.put("Name", "Monthly");
+            object.put("AltLanguage", "Mensuelle");
+            Periodicity.put(object);
+
+            object = new JSONObject();
+            object.put("Code", "Q");
+            object.put("Name", "Quarterly");
+            object.put("AltLanguage", "Trismestrielle");
+            Periodicity.put(object);
+
+            object = new JSONObject();
+            object.put("Code", "S");
+            object.put("Name", "Semester");
+            object.put("AltLanguage", "Semestrielle");
+            Periodicity.put(object);
+
+            object = new JSONObject();
+            object.put("Code", "Y");
+            object.put("Name", "Yearly");
+            object.put("AltLanguage", "Annuelle");
+            Periodicity.put(object);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return Periodicity.toString();
     }
 
     @JavascriptInterface

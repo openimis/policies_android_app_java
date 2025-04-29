@@ -494,4 +494,5 @@
     <string name="BankDebit">Bank debit</string>
     <string name="TiersPay">Unknow pay</string>
     <string name="SelectPaymentMethod">Select payment method</string>
+    <string name="Periodicity">Periodicity</string>
 </resources>
