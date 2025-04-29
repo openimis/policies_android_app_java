@@ -438,6 +438,7 @@ public class SQLHandler extends SQLiteOpenHelper {
                             "Name TEXT," +
                             "ProductId INTEGER," +
                             "CalculationRules TEXT,"+
+                            "Periodicity TEXT," +
                             "ValidFrom DATE," +
                             "ValidTo Date," +
                             "CpId" +")"
