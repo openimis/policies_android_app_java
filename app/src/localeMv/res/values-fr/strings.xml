@@ -498,6 +498,7 @@
     <string name="SelectContribution">Sél. un plan de contribution</string>
     <string name="ContributionPlan">Plan de contribution</string>
     <string name="AccountDetails">Numéro du compte</string>
+    <string name="Periodicity">Périodicité</string>
     <string name="SigningDate">Date de signature</string>
     <string name="Attachment">Pièces jointes</string>
     <string name="NoneFile">Aucun fichier</string>

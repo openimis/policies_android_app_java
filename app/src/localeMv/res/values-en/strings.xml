@@ -477,5 +477,9 @@
     <string name="CurrentResourceLanguage">Current resource language: %1$s</string>
     <string name="SystemLanguageNotSupported">Current system language is not supported. The app will use the default language.</string>
     <string name="SupportedLanguages">Supported languages:\n%1$s</string>
+<<<<<<< HEAD
     <string name="PaymentDay">Payment day</string>
+=======
+    <string name="Periodicity">Periodicity</string>
+>>>>>>> 079e631344b33b326713dc8f3e08aa5ca91ea186
 </resources>

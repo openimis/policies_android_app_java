@@ -486,6 +486,7 @@
     <string name="OtherHousehold">Other Household</string>
     <string name="SelectIncomeLevel">Select Income Level</string>
     <string name="IncomeLevel">Income Level</string>
+    <string name="Periodicity">Periodicity</string>
     <string name="SigningDate">Signing Date</string>
     <string name="Attachment">Attachment</string>
     <string name="NoneFile">No File</string>

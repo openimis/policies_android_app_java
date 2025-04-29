@@ -1,6 +1,5 @@
 $(document).ready(function () {
     document.title = Android.getString('AddEditPolicy');
-
     fillDropdowns();
 
     if(!Android.IsBulkCNUsed()) {
@@ -39,6 +38,7 @@ $(document).ready(function () {
         var $Policy = $.parseJSON(strPolicy);
         //$("#ddlProduct").val($Policy[0]["ProdId"]);
         $("#ddlContributionPlan").val($Policy[0]["ContributionPlanId"]);
+         $("#ddlPeriodicity").val($Policy[0]["Periodicity"]);
         $("#ddlOfficer").val($Policy[0]["OfficerId"]);
         $("#ddlPaymentDay").val($Policy[0]["PaymentDay"]);
         var PolicyStage = $Policy[0]["PolicyStage"];
@@ -92,8 +92,8 @@ $(document).ready(function () {
     $('#txtEnrolmentDate').change(function () {
         var EnrolmentDate = $('#txtEnrolmentDate').val();
         LoadProduct(RegionId, DistrictId, EnrolmentDate);
+        $("#txtSigningDate").prop('min',EnrolmentDate);
         //LoadOfficers(LocationId, EnrolmentDate);
-
     });
 
     $('#txtEnrolmentDate, #ddlProduct').change(function () {
@@ -191,14 +191,14 @@ $(document).ready(function () {
         //getPolicyPeriod(txtStartDate, parseInt(CPId), parseInt(FamilyId), parseInt(policyId));
     });
 
-$('#txtSigningDate').on('change', function() {
-    var signingDate = $(this).val();
-    if (signingDate) {
-        $('#ddlPaymentDay').attr('required', true);
-    } else {
-        $('#ddlPaymentDay').removeAttr('required');
-    }
-});
+    $('#txtSigningDate').on('change', function() {
+        var signingDate = $(this).val();
+        if (signingDate) {
+            $('#ddlPaymentDay').attr('required', true);
+        } else {
+            $('#ddlPaymentDay').removeAttr('required');
+        }
+    });
 
 
 });
@@ -255,10 +255,22 @@ function createJSONString() {
     var jsonPolicy = getControlsValuesJSON('li');
     return jsonPolicy;
 }
+
+function fillDropdowns() {
+    getPaymentDayValue();
+    getPeriodicityValue();
+}
+
+function getPeriodicityValue()  {
+    $textLanguage = "Name";
+    if (Android.getSelectedLanguage() != "en") {
+        $textLanguage = "AltLanguage";
+    }
+    var $Period= Android.getPeriodicity();
+    bindDropdown('ddlPeriodicity', $Period, 'Code', $textLanguage, Android.getString('Periodicity'));
+}
+
 function getPaymentDayValue() {
     var PaymentDay = Android.getPaymentDay();
     bindDropdown('ddlPaymentDay', PaymentDay, 'Value', 'Label', Android.getString(''));
-}
-function fillDropdowns() {
-    getPaymentDayValue();
 }

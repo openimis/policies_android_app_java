@@ -1885,6 +1885,7 @@ public class ClientAndroidInterface {
             values.put("PolicyValue", data.get("hfPolicyValue"));
             values.put("ContributionPlanId", data.get("ddlContributionPlan"));
             values.put("OfficerId", data.get("ddlOfficer"));
+            values.put("Periodicity", data.get("ddlPeriodicity"));
             values.put("SigningDate", data.get("txtSigningDate"));
             values.put("PaymentDay", data.get("ddlPaymentDay"));
 
@@ -2022,7 +2023,7 @@ public class ClientAndroidInterface {
     @SuppressWarnings("unused")
     public String getPolicy(int PolicyId) {
         @Language("SQL")
-        String Query = "SELECT  P.PolicyId, P.ContributionPlanId, OfficerId , CP.Code, CP.Name, PolicyStage, EffectiveDate, IFNULL(PolicyValue,0) PolicyValue, StartDate, EnrollDate, SigningDate, bcn.ControlNumber, P.PaymentDay, \n" +
+        String Query = "SELECT  P.PolicyId, P.ContributionPlanId, OfficerId , CP.Code, CP.Name, PolicyStage, EffectiveDate, IFNULL(PolicyValue,0) PolicyValue, StartDate, EnrollDate, SigningDate, bcn.ControlNumber, P.Periodicity, P.PaymentDay , \n" +
                 "   CASE    WHEN PolicyStatus = 1 THEN '" + activity.getResources().getString(R.string.Idle) + "'   " +
                 "   WHEN PolicyStatus = 2 THEN '" + activity.getResources().getString(R.string.Active) + "'  " +
                 "   WHEN PolicyStatus = 4 THEN '" + activity.getResources().getString(R.string.Suspended) + "'  " +
@@ -2037,7 +2038,6 @@ public class ClientAndroidInterface {
 
         String[] arg = {String.valueOf(PolicyId)};
         JSONArray Policies = sqlHandler.getResult(Query, arg, "");
-        Log.e("policy",Policies.toString());
         return Policies.toString();
     }
 
@@ -3069,7 +3069,7 @@ public class ClientAndroidInterface {
         String Offline = null;
 
         @Language("SQL")
-        String queryF, queryI, queryPL, queryPR, queryIP;
+        String queryF, queryI, queryPL, queryPR, queryIP, queryAT;
 
         //Verify Enrollments
         if (CallerId == 2) {
@@ -3303,10 +3303,32 @@ public class ClientAndroidInterface {
 
                 queryIP = query.toString();
 
+                //get Attachments
+                query = new StringBuilder(
+                        "SELECT Title, Filename, Content FROM tblInsureeAttachments WHERE "
+                );
+                if (CallerId != 2) {
+                    query.append(" FamilyId = ").append(FamilyId);
+                } else {
+                    for (int j = 0; j < verifiedId.size(); j++) {
+                        if ((verifiedId.size() - j) == 1) {
+                            query.append(" FamilyId == ").append(verifiedId.get(j));
+                        } else {
+                            query.append(" FamilyId == ").append(verifiedId.get(j)).append(" OR");
+                        }
+                    }
+                    if (verifiedId.size() == 0) {
+                        query.append(" FamilyId != ''");
+                    }
+                }
+
+                queryAT = query.toString();
+                JSONArray attachmentsArray = sqlHandler.getResult(queryAT, null);
+
                 if (CallerId != 2) {
                     Pair<String, byte[]>[] InsureeImages = FamilyPictures(insureesArray, 1);
                     if (myList.size() == 0) {
-                        EnrolResult = uploadEnrols(familyArray, insureesArray, policiesArray, premiumsArray, InsureeImages);
+                        EnrolResult = uploadEnrols(familyArray, insureesArray, policiesArray, premiumsArray, InsureeImages, attachmentsArray);
                         //if family is polygamic
                         if(isPolygamy){
                             int Fid = 0;
@@ -3322,6 +3344,8 @@ public class ClientAndroidInterface {
                             }
 
                             Fid = existingFamily.getId();
+
+                            Log.e("familyId",String.valueOf(Fid));
 
                             ContentValues cv = new ContentValues();
                             cv.put("ParentId", Fid);
@@ -3429,12 +3453,13 @@ public class ClientAndroidInterface {
             @NonNull JSONArray insureesArray,
             @NonNull JSONArray policiesArray,
             @NonNull JSONArray premiumsArray,
-            @NonNull Pair<String, byte[]>[] insureeImages
+            @NonNull Pair<String, byte[]>[] insureeImages,
+            @NonNull JSONArray attachmentsArray
     ) throws JSONException {
         JSONObject familyObj = familyArray.getJSONObject(0);
         JSONObject insureeObj = insureesArray.getJSONObject(0);
 
-        Family family = familyFromJSONObject(familyObj, insureesArray, insureeImages);
+        Family family = familyFromJSONObject(familyObj, insureesArray, insureeImages, attachmentsArray);
         try {
             new UpdateFamily().execute(family, insureeObj.getString("CHFID"), global.getOfficerId());
         } catch (Exception e) {
@@ -3479,12 +3504,19 @@ public class ClientAndroidInterface {
     private Family familyFromJSONObject(
             @NonNull JSONObject json,
             @NonNull JSONArray insurees,
-            @NonNull Pair<String, byte[]>[] insureeImages
+            @NonNull Pair<String, byte[]>[] insureeImages,
+            @Nullable JSONArray attachments
     ) throws JSONException {
         List<Family.Member> members = new ArrayList<>();
+        List<Family.Attachment> familyAttachments = new ArrayList<>();
         String familyUUID = JsonUtils.getStringOrDefault(json, "FamilyUUID", UUID.randomUUID().toString(), true);
         for (int i = 0; i < insurees.length(); i++) {
             members.add(familyMemberFromJSONObject(familyUUID, insurees.getJSONObject(i), insureeImages[i]));
+        }
+        if(attachments != null){
+            for (int a = 0; a < attachments.length(); a++){
+                familyAttachments.add(familyAttachmentFromJSONObject(attachments.getJSONObject(a)));
+            }
         }
         return new Family(
                 /* headChfId = */ json.getString("HOFCHFID"),
@@ -3500,7 +3532,8 @@ public class ClientAndroidInterface {
                 /* confirmationType = */ JsonUtils.getStringOrDefault(json, "ConfirmationType"),
                 /* isOffline = */ JsonUtils.getBooleanOrDefault(json, "isOffline", false),
                 /* parentId = */ json.has("ParentId") ? Integer.parseInt(json.getString("ParentId")): null,
-                /* members = */ members
+                /* members = */ members,
+                /* attachments = */ familyAttachments
         );
     }
 
@@ -3542,6 +3575,17 @@ public class ClientAndroidInterface {
                 /* photoPath = */ image != null ? image.first : null,
                 /* photoBytes = */ image != null ? image.second : null,
                 /* isOffline = */ JsonUtils.getBooleanOrDefault(object, "isOffline", false)
+        );
+    }
+
+    private Family.Attachment familyAttachmentFromJSONObject(
+            @NonNull JSONObject object
+    ) throws JSONException {
+        return new Family.Attachment(
+                /* tittle */ object.getString("Title"),
+                /* mime */ "image/jpeg",
+                /* filename */ object.getString("Filename"),
+                /* content */ object.getString("Content")
         );
     }
 
@@ -5702,6 +5746,40 @@ public class ClientAndroidInterface {
         }
 
         return calculationRule.toString();
+    }
+
+    @JavascriptInterface
+    @SuppressWarnings("unused")
+    public String getPeriodicity() {
+        JSONArray Periodicity = new JSONArray();
+        try {
+            JSONObject object = new JSONObject();
+            object.put("Code", "M");
+            object.put("Name", "Monthly");
+            object.put("AltLanguage", "Mensuelle");
+            Periodicity.put(object);
+
+            object = new JSONObject();
+            object.put("Code", "Q");
+            object.put("Name", "Quarterly");
+            object.put("AltLanguage", "Trismestrielle");
+            Periodicity.put(object);
+
+            object = new JSONObject();
+            object.put("Code", "S");
+            object.put("Name", "Semester");
+            object.put("AltLanguage", "Semestrielle");
+            Periodicity.put(object);
+
+            object = new JSONObject();
+            object.put("Code", "Y");
+            object.put("Name", "Yearly");
+            object.put("AltLanguage", "Annuelle");
+            Periodicity.put(object);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return Periodicity.toString();
     }
 
     @JavascriptInterface
