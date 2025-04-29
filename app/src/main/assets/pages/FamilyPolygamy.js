@@ -1,6 +1,6 @@
 $(document).ready(function () {
 
-    document.title = Android.getString('FamilyAndSubFamilies');
+    document.title = Android.getString('FamilyPolygamy');
 
     var FamilyId = queryString("f");
     var LocationId = null;

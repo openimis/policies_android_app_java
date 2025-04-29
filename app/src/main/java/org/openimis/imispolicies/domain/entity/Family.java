@@ -7,6 +7,8 @@ import android.os.Parcelable;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import org.json.JSONArray;
+
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -42,6 +44,9 @@ public class Family implements Parcelable {
     private final List<Member> members;
 
     @Nullable
+    private final List<Attachment> attachments;
+
+    @Nullable
     private Member head = null;
 
     public Family(
@@ -58,7 +63,8 @@ public class Family implements Parcelable {
             @Nullable String confirmationType,
             boolean isOffline,
             @Nullable Integer parentId,
-            @NonNull List<Member> members
+            @NonNull List<Member> members,
+            @Nullable List<Attachment> attachments
     ) {
         this.headChfId = headChfId;
         this.id = id;
@@ -74,6 +80,7 @@ public class Family implements Parcelable {
         this.isOffline = isOffline;
         this.parentId = parentId;
         this.members = members;
+        this.attachments = attachments;
     }
 
     protected Family(Parcel in) {
@@ -97,6 +104,7 @@ public class Family implements Parcelable {
         int pId = in.readInt();
         parentId = pId;
         members = Objects.requireNonNull(in.createTypedArrayList(Member.CREATOR));
+        attachments = in.createTypedArrayList(Attachment.CREATOR);
     }
 
     @Override
@@ -115,6 +123,7 @@ public class Family implements Parcelable {
         dest.writeByte((byte) (isOffline ? 1 : 0));
         dest.writeInt(parentId);
         dest.writeTypedList(members);
+        dest.writeTypedList(attachments);
     }
 
     @Override
@@ -197,6 +206,9 @@ public class Family implements Parcelable {
     public List<Member> getMembers() {
         return members;
     }
+
+    @Nullable
+    public List<Attachment> getAttachments (){ return attachments;}
 
     public static final Creator<Family> CREATOR = new Creator<>() {
         @Override
@@ -1040,4 +1052,78 @@ public class Family implements Parcelable {
             };
         }
     }
+
+    public static class Attachment implements Parcelable {
+        @NonNull
+        private final String title;
+        @NonNull
+        private final String mime;
+        @NonNull
+        private final String filename;
+        @Nullable
+        private final String content;
+
+        public Attachment(
+                @NonNull String title,
+                @NonNull String mime,
+                @NonNull String filename,
+                @Nullable String content
+        ) {
+            this.title = title;
+            this.mime = mime;
+            this.filename = filename;
+            this.content = content;
+        }
+
+        protected Attachment(Parcel in) {
+            title = in.readString();
+            mime = in.readString();
+            filename = in.readString();
+            content = in.readString();
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeString(title);
+            dest.writeString(mime);
+            dest.writeString(filename);
+            dest.writeString(content);
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @NonNull
+        public String getTitle() {
+            return title;
+        }
+
+        @NonNull
+        public String getFilename() {
+            return filename;
+        }
+
+        @Nullable
+        public String getContent() {
+            return content;
+        }
+
+        @NonNull
+        public  String getMime() { return mime; }
+
+        public static final Creator<Attachment> CREATOR = new Creator<>() {
+            @Override
+            public Attachment createFromParcel(Parcel in) {
+                return new Attachment(in);
+            }
+
+            @Override
+            public Attachment[] newArray(int size) {
+                return new Attachment[size];
+            }
+        };
+    }
+
 }

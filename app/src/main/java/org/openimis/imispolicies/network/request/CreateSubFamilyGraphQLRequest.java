@@ -9,11 +9,14 @@ import com.apollographql.apollo.api.Response;
 
 import org.openimis.imispolicies.CreateFamilyMutation;
 import org.openimis.imispolicies.domain.entity.Family;
+import org.openimis.imispolicies.network.util.Mapper;
 import org.openimis.imispolicies.type.CreateFamilyMutationInput;
+import org.openimis.imispolicies.type.FamilyAttachmentInputType;
 import org.openimis.imispolicies.type.FamilyHeadInsureeInputType;
 import org.openimis.imispolicies.type.PhotoInputType;
 import org.openimis.imispolicies.util.DateUtils;
 
+import java.util.ArrayList;
 import java.util.Objects;
 
 public class CreateSubFamilyGraphQLRequest extends BaseGraphQLRequest {
@@ -25,7 +28,7 @@ public class CreateSubFamilyGraphQLRequest extends BaseGraphQLRequest {
         java.sql.Date date = new java.sql.Date(System.currentTimeMillis());
         Response<CreateFamilyMutation.Data> response = makeSynchronous(new CreateFamilyMutation(
                 CreateFamilyMutationInput.builder()
-                        .locationId(22)
+                        .locationId(family.getLocationId())
                         .poverty(family.isPoor())
                         .familyTypeId(family.getType())
                         .address(family.getAddress())

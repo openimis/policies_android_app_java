@@ -32,6 +32,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
@@ -133,6 +134,8 @@ public class ClientAndroidInterface {
     public static int RESULT_LOAD_IMG = 1;
     public static int RESULT_SCAN = 100;
     public static boolean inProgress = true;
+    private JSONArray Attachments = new JSONArray();
+    private JSONArray TempAttachments = new JSONArray();
 
     @NonNull
     private final Activity activity;
@@ -151,6 +154,7 @@ public class ClientAndroidInterface {
     @NonNull
     private final Picasso picassoInstance;
     private int enrol_result;
+    private Context mContext;
 
 
     ClientAndroidInterface(@NonNull Activity activity) {
@@ -1882,6 +1886,8 @@ public class ClientAndroidInterface {
             values.put("ContributionPlanId", data.get("ddlContributionPlan"));
             values.put("OfficerId", data.get("ddlOfficer"));
             values.put("Periodicity", data.get("ddlPeriodicity"));
+            values.put("SigningDate", data.get("txtSigningDate"));
+
             @Language("SQL")
             String query = "SELECT * FROM tblContributionPlan WHERE Id =" + Integer.parseInt(data.get("ddlContributionPlan"));
             JSONArray contributionPlans = sqlHandler.getResult(query, null);
@@ -1928,7 +1934,7 @@ public class ClientAndroidInterface {
         //getPolicyValue(String enrollDate, int ProductId, int FamilyId, String startDate, boolean HasCycle, int PolicyId, String PolicyStage, int IsOffline) throws JSONException {
         boolean isValueChanged = false;
         @Language("SQL")
-        String QueryPolicyValue = "SELECT P.PolicyId, CP.ProductId, ContributionPlanId, EffectiveDate, PolicyValue, StartDate, ExpiryDate, EnrollDate,FamilyId,PolicyStage,IsOffline FROM tblPolicy P\n" +
+        String QueryPolicyValue = "SELECT P.PolicyId, CP.ProductId, ContributionPlanId, EffectiveDate, PolicyValue, StartDate, ExpiryDate, EnrollDate, SigningDate,FamilyId,PolicyStage,IsOffline FROM tblPolicy P\n" +
                 "INNER JOIN tblContributionPlan CP ON CP.Id = P.ContributionPlanId\n" +
                 "WHERE FamilyId = " + FamilyId;
         JSONArray PolicyValueArray = sqlHandler.getResult(QueryPolicyValue, null);
@@ -2016,7 +2022,7 @@ public class ClientAndroidInterface {
     @SuppressWarnings("unused")
     public String getPolicy(int PolicyId) {
         @Language("SQL")
-        String Query = "SELECT  P.PolicyId, P.ContributionPlanId, OfficerId , CP.Code, CP.Name, PolicyStage, EffectiveDate, IFNULL(PolicyValue,0) PolicyValue, StartDate, EnrollDate, bcn.ControlNumber, P.Periodicity, \n" +
+        String Query = "SELECT  P.PolicyId, P.ContributionPlanId, OfficerId , CP.Code, CP.Name, PolicyStage, EffectiveDate, IFNULL(PolicyValue,0) PolicyValue, StartDate, EnrollDate, SigningDate, bcn.ControlNumber, P.Periodicity, \n" +
                 "   CASE    WHEN PolicyStatus = 1 THEN '" + activity.getResources().getString(R.string.Idle) + "'   " +
                 "   WHEN PolicyStatus = 2 THEN '" + activity.getResources().getString(R.string.Active) + "'  " +
                 "   WHEN PolicyStatus = 4 THEN '" + activity.getResources().getString(R.string.Suspended) + "'  " +
@@ -2462,6 +2468,10 @@ public class ClientAndroidInterface {
         @Language("SQL")
         String FamilyQuery = "DELETE FROM  tblFamilies WHERE FamilyId = ?";
         sqlHandler.getResult(FamilyQuery, familyIdArgument);
+
+        @Language("SQL")
+        String AttachmentQuery = "DELETE FROM  tblInsureeAttachments WHERE FamilyId = ?";
+        sqlHandler.getResult(AttachmentQuery, familyIdArgument);
 
         //delete subfamily for polygamy
         JSONArray subFamilies = null;
@@ -3059,7 +3069,7 @@ public class ClientAndroidInterface {
         String Offline = null;
 
         @Language("SQL")
-        String queryF, queryI, queryPL, queryPR, queryIP;
+        String queryF, queryI, queryPL, queryPR, queryIP, queryAT;
 
         //Verify Enrollments
         if (CallerId == 2) {
@@ -3293,10 +3303,32 @@ public class ClientAndroidInterface {
 
                 queryIP = query.toString();
 
+                //get Attachments
+                query = new StringBuilder(
+                        "SELECT Title, Filename, Content FROM tblInsureeAttachments WHERE "
+                );
+                if (CallerId != 2) {
+                    query.append(" FamilyId = ").append(FamilyId);
+                } else {
+                    for (int j = 0; j < verifiedId.size(); j++) {
+                        if ((verifiedId.size() - j) == 1) {
+                            query.append(" FamilyId == ").append(verifiedId.get(j));
+                        } else {
+                            query.append(" FamilyId == ").append(verifiedId.get(j)).append(" OR");
+                        }
+                    }
+                    if (verifiedId.size() == 0) {
+                        query.append(" FamilyId != ''");
+                    }
+                }
+
+                queryAT = query.toString();
+                JSONArray attachmentsArray = sqlHandler.getResult(queryAT, null);
+
                 if (CallerId != 2) {
                     Pair<String, byte[]>[] InsureeImages = FamilyPictures(insureesArray, 1);
                     if (myList.size() == 0) {
-                        EnrolResult = uploadEnrols(familyArray, insureesArray, policiesArray, premiumsArray, InsureeImages);
+                        EnrolResult = uploadEnrols(familyArray, insureesArray, policiesArray, premiumsArray, InsureeImages, attachmentsArray);
                         //if family is polygamic
                         if(isPolygamy){
                             int Fid = 0;
@@ -3312,6 +3344,8 @@ public class ClientAndroidInterface {
                             }
 
                             Fid = existingFamily.getId();
+
+                            Log.e("familyId",String.valueOf(Fid));
 
                             ContentValues cv = new ContentValues();
                             cv.put("ParentId", Fid);
@@ -3419,12 +3453,13 @@ public class ClientAndroidInterface {
             @NonNull JSONArray insureesArray,
             @NonNull JSONArray policiesArray,
             @NonNull JSONArray premiumsArray,
-            @NonNull Pair<String, byte[]>[] insureeImages
+            @NonNull Pair<String, byte[]>[] insureeImages,
+            @NonNull JSONArray attachmentsArray
     ) throws JSONException {
         JSONObject familyObj = familyArray.getJSONObject(0);
         JSONObject insureeObj = insureesArray.getJSONObject(0);
 
-        Family family = familyFromJSONObject(familyObj, insureesArray, insureeImages);
+        Family family = familyFromJSONObject(familyObj, insureesArray, insureeImages, attachmentsArray);
         try {
             new UpdateFamily().execute(family, insureeObj.getString("CHFID"), global.getOfficerId());
         } catch (Exception e) {
@@ -3469,12 +3504,19 @@ public class ClientAndroidInterface {
     private Family familyFromJSONObject(
             @NonNull JSONObject json,
             @NonNull JSONArray insurees,
-            @NonNull Pair<String, byte[]>[] insureeImages
+            @NonNull Pair<String, byte[]>[] insureeImages,
+            @Nullable JSONArray attachments
     ) throws JSONException {
         List<Family.Member> members = new ArrayList<>();
+        List<Family.Attachment> familyAttachments = new ArrayList<>();
         String familyUUID = JsonUtils.getStringOrDefault(json, "FamilyUUID", UUID.randomUUID().toString(), true);
         for (int i = 0; i < insurees.length(); i++) {
             members.add(familyMemberFromJSONObject(familyUUID, insurees.getJSONObject(i), insureeImages[i]));
+        }
+        if(attachments != null){
+            for (int a = 0; a < attachments.length(); a++){
+                familyAttachments.add(familyAttachmentFromJSONObject(attachments.getJSONObject(a)));
+            }
         }
         return new Family(
                 /* headChfId = */ json.getString("HOFCHFID"),
@@ -3490,7 +3532,8 @@ public class ClientAndroidInterface {
                 /* confirmationType = */ JsonUtils.getStringOrDefault(json, "ConfirmationType"),
                 /* isOffline = */ JsonUtils.getBooleanOrDefault(json, "isOffline", false),
                 /* parentId = */ json.has("ParentId") ? Integer.parseInt(json.getString("ParentId")): null,
-                /* members = */ members
+                /* members = */ members,
+                /* attachments = */ familyAttachments
         );
     }
 
@@ -3532,6 +3575,17 @@ public class ClientAndroidInterface {
                 /* photoPath = */ image != null ? image.first : null,
                 /* photoBytes = */ image != null ? image.second : null,
                 /* isOffline = */ JsonUtils.getBooleanOrDefault(object, "isOffline", false)
+        );
+    }
+
+    private Family.Attachment familyAttachmentFromJSONObject(
+            @NonNull JSONObject object
+    ) throws JSONException {
+        return new Family.Attachment(
+                /* tittle */ object.getString("Title"),
+                /* mime */ "image/jpeg",
+                /* filename */ object.getString("Filename"),
+                /* content */ object.getString("Content")
         );
     }
 
@@ -5693,6 +5747,7 @@ public class ClientAndroidInterface {
 
         return calculationRule.toString();
     }
+
     @JavascriptInterface
     @SuppressWarnings("unused")
     public String getPeriodicity() {
@@ -5725,5 +5780,125 @@ public class ClientAndroidInterface {
             e.printStackTrace();
         }
         return Periodicity.toString();
+    }
+
+    @JavascriptInterface
+    public void addAttachment(int familyId, int insureeId, String title, String filename) throws JSONException {
+        String contentFile = ((MainActivity) activity).fileContent;
+        if (familyId != 0) {
+            int MaxAttachmentId = getNextAvailableAttachmentId();
+            ContentValues AttachmentValues = new ContentValues();
+            AttachmentValues.put("Filename", filename);
+            AttachmentValues.put("Id", MaxAttachmentId);
+            AttachmentValues.put("Title", title);
+            AttachmentValues.put("Content", contentFile);
+            AttachmentValues.put("FamilyId", familyId);
+            AttachmentValues.put("InsureeId", insureeId);
+            sqlHandler.insertData("tblInsureeAttachments", AttachmentValues);
+        } else {
+            JSONObject obj = new JSONObject();
+            obj.put("Title", title);
+            obj.put("Filename", filename);
+            obj.put("content", contentFile);
+            TempAttachments.put(obj);
+        }
+
+    }
+
+    @JavascriptInterface
+    public void SaveInsureeAttachments(int FamilyId, int InsureeId) {
+        int MaxAttachmentId = 0;
+        try {
+
+            MaxAttachmentId = getNextAvailableAttachmentId();
+
+            for (int i = 0; i < Attachments.length(); i++) {
+                ContentValues AttachmentValues = new ContentValues();
+                JSONObject obj = Attachments.getJSONObject(i);
+                if (!obj.has("Id")) {
+                    AttachmentValues.put("Id", MaxAttachmentId);
+                    AttachmentValues.put("Filename", obj.getString("Filename"));
+                    AttachmentValues.put("Title", obj.getString("Title"));
+                    AttachmentValues.put("Content", obj.getString("content"));
+                    AttachmentValues.put("FamilyId", FamilyId);
+                    AttachmentValues.put("InsureeId", InsureeId);
+                    sqlHandler.insertData("tblInsureeAttachments", AttachmentValues);
+                }
+            }
+
+            TempAttachments = new JSONArray();
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    @JavascriptInterface
+    public String getInsureeAttachments(int InsureeId) throws JSONException {
+        Attachments = new JSONArray();
+
+        String Query = "SELECT Id,Title, Filename, Content, FamilyId, InsureeId \n" +
+                "FROM tblInsureeAttachments \n" +
+                "WHERE InsureeId = ?";
+        String[] args = {String.valueOf(InsureeId)};
+
+        JSONArray Attachs = sqlHandler.getResult(Query, args);
+
+        for (int i = 0; i < Attachs.length(); i++) {
+            Attachments.put(Attachs.getJSONObject(i));
+        }
+
+        for (int i = 0; i < TempAttachments.length(); i++) {
+            Attachments.put(TempAttachments.getJSONObject(i));
+        }
+
+        return  Attachments.toString();
+
+    }
+
+    @JavascriptInterface
+    public void showAttachmentDialog() {
+        ((MainActivity) activity).PickAttachmentDialogFromPage();
+    }
+
+    private int getNextAvailableAttachmentId() {
+        return getMaxIdFromTable("Id", "tblInsureeAttachments");
+    }
+
+    @JavascriptInterface
+    public int DeleteAttachment(int InsureeId,int attachmentId, String attachmentTitle, String attachmentName) throws JSONException {
+        Log.e("attachmentTitle", attachmentTitle);
+        Log.e("attachmentName", attachmentName);
+        if (InsureeId != 0) {
+            if(attachmentId != 0){
+                String[] attachmentIdArgument = new String[]{String.valueOf(attachmentId)};
+                String Query = "DELETE FROM tblInsureeAttachments WHERE Id = ?";
+                sqlHandler.getResult(Query, attachmentIdArgument);
+                return 1;
+            }else {
+                for (int i = 0; i < TempAttachments.length(); i++) {
+                    JSONObject obj = TempAttachments.getJSONObject(i);
+                    if (obj.getString("Title").equals(attachmentTitle)) {
+                        if(attachmentName.equals(obj.getString("Filename"))){
+                            TempAttachments.remove(i);
+                            return 1;
+                        }
+                    }
+                }
+            }
+        } else {
+            for (int i = 0; i < TempAttachments.length(); i++) {
+                JSONObject obj = TempAttachments.getJSONObject(i);
+                if (obj.getString("Title").equals(attachmentTitle)) {
+                    if(attachmentName.equals(obj.getString("Filename"))){
+                        TempAttachments.remove(i);
+                        return 1;
+                    }
+                }
+            }
+        }
+
+        return -1;
     }
 }
