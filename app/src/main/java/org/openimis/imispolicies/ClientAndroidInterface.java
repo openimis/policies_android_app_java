@@ -2014,7 +2014,7 @@ public class ClientAndroidInterface {
 
     @JavascriptInterface
     @SuppressWarnings("unused")
-    public String getPolicy(int PolicyId) {;
+    public String getPolicy(int PolicyId) {
         @Language("SQL")
         String Query = "SELECT  P.PolicyId, P.ContributionPlanId, OfficerId , CP.Code, CP.Name, PolicyStage, EffectiveDate, IFNULL(PolicyValue,0) PolicyValue, StartDate, EnrollDate, bcn.ControlNumber, P.Periodicity, \n" +
                 "   CASE    WHEN PolicyStatus = 1 THEN '" + activity.getResources().getString(R.string.Idle) + "'   " +
