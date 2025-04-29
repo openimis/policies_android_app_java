@@ -78,6 +78,14 @@ query GetFamily($headChfId: String) {
                         }
                     }
                 }
+                attachments{
+                    idAttachment,
+                    filename,
+                    document,
+                    title,
+                    date,
+                    mime
+                }
             }
         }
     }

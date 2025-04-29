@@ -10,11 +10,15 @@ import com.apollographql.apollo.api.Response;
 import org.openimis.imispolicies.CreateFamilyMutation;
 import org.openimis.imispolicies.Global;
 import org.openimis.imispolicies.domain.entity.Family;
+import org.openimis.imispolicies.network.util.Mapper;
 import org.openimis.imispolicies.type.CreateFamilyMutationInput;
+import org.openimis.imispolicies.type.FamilyAttachmentInputType;
 import org.openimis.imispolicies.type.FamilyHeadInsureeInputType;
 import org.openimis.imispolicies.type.PhotoInputType;
 import org.openimis.imispolicies.util.DateUtils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class CreateFamilyGraphQLRequest extends BaseGraphQLRequest {
@@ -26,7 +30,7 @@ public class CreateFamilyGraphQLRequest extends BaseGraphQLRequest {
         java.sql.Date date = new java.sql.Date(System.currentTimeMillis());
         Response<CreateFamilyMutation.Data> response = makeSynchronous(new CreateFamilyMutation(
                 CreateFamilyMutationInput.builder()
-                        .locationId(22)
+                        .locationId(family.getLocationId())
                         .poverty(family.isPoor())
                         .familyTypeId(family.getType())
                         .address(family.getAddress())
@@ -34,6 +38,9 @@ public class CreateFamilyGraphQLRequest extends BaseGraphQLRequest {
                         .confirmationNo(family.getConfirmationNumber())
                         .confirmationTypeId(family.getConfirmationType())
                         .isOffline(family.isOffline())
+                        .attachments(
+                                family.getAttachments() != null ? Mapper.map(family.getAttachments(), dto -> toAttachment(dto)) : new ArrayList<>()
+                        )
                         .headInsuree(
                                 FamilyHeadInsureeInputType.builder()
                                         .lastName(head.getLastName())
@@ -70,5 +77,16 @@ public class CreateFamilyGraphQLRequest extends BaseGraphQLRequest {
                         .build()
         ));
         return Objects.requireNonNull(response.getData());
+    }
+
+    private FamilyAttachmentInputType toAttachment(
+            @NonNull Family.Attachment dto
+    ){
+        return FamilyAttachmentInputType.builder()
+                .title(dto.getTitle())
+                .filename(dto.getFilename())
+                .mime(dto.getMime())
+                .document(dto.getContent())
+                .build();
     }
 }
