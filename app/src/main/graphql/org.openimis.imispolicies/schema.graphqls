@@ -6599,6 +6599,9 @@ input CreatePolicyMutationInput {
   officerId: Int!
   clientMutationId: String
   contributionPlanId: String
+  periodicity: String
+  signatureDate: String
+  paymentDay: String
 }
 
 type UpdatePolicyMutationPayload {
