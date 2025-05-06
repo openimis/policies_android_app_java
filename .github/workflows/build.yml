@@ -1,10 +1,10 @@
-name:  develop-comores2
+name:  develop-comores
 
 on:
   push:
-    branches: [ "develop-comores" ]
+    branches: [ "feature-31756" ]
   pull_request:
-    branches: [ "develop-comores" ]
+    branches: [ "feature-31756" ]
 
 jobs:
   build:
