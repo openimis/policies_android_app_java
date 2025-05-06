@@ -28,17 +28,29 @@ jobs:
     - name: Set up Gradle
       uses: gradle/gradle-build-action@v2
       with:
-        cache-disabled: true  # Évite l'erreur 422 du cache
+        # Solution pour l'erreur 422 - soit désactiver soit configurer proprement
+        cache-read-only: false
+        gradle-home-cache-cleanup: true
 
     - name: Build release APK
-      run: ./gradlew assembleComoresDevRelease
+      run: ./gradlew assembleComoresDevRelease --stacktrace
       env:
+        KEYSTORE_FILE: policies_comores.jks
         KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
         KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
         KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
 
-    - name: List APK files
-      run: find app/build/outputs/apk -type f
+    - name: Verify APK exists
+      run: |
+        APK_PATH="app/build/outputs/apk/comoresDev/release/app-comoresDev-release.apk"
+        if [ ! -f "$APK_PATH" ]; then
+          echo "::error::APK not found at $APK_PATH"
+          ls -R app/build/outputs/apk/
+          exit 1
+        else
+          echo "APK found at $APK_PATH"
+          ls -lh "$APK_PATH"
+        fi
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
