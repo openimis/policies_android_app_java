@@ -36,7 +36,7 @@ jobs:
         KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
 
     - name: Upload APK
-      uses: actions/upload-artifact@v3.1.3
+      uses: actions/upload-artifact@v4
       with:
         name: policies-release-apk
         path: app/build/outputs/apk/release/app-release.apk
