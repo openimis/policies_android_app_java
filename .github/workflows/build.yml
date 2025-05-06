@@ -27,6 +27,8 @@ jobs:
 
     - name: Set up Gradle
       uses: gradle/gradle-build-action@v2
+      with:
+        cache-disabled: true  # Évite l'erreur 422 du cache
 
     - name: Build release APK
       run: ./gradlew assembleComoresDevRelease
@@ -34,6 +36,9 @@ jobs:
         KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
         KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
         KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+
+    - name: List APK files
+      run: find app/build/outputs/apk -type f
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
