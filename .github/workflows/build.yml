@@ -31,7 +31,7 @@ jobs:
         cache-disabled: true  # Évite l'erreur 422 du cache
 
     - name: Build release APK
-      run: ./gradlew assembleComoresDevRelease
+      run: ./gradlew assembleComoresDevDebug  # Mettez à jour si nécessaire
       env:
         KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
         KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
@@ -44,4 +44,4 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: policies-release-apk
-        path: app/build/outputs/apk/comoresDev/release/app-comoresDev-release.apk  # Assurez-vous que ce chemin est correct
+        path: app/build/outputs/apk/comoresDev/debug/app-comoresDev-debug.apk  # Mettez à jour le chemin ici
