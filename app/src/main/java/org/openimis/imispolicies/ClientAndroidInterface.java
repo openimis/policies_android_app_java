@@ -5931,5 +5931,15 @@ public class ClientAndroidInterface {
         }
         return PaymentDay.toString();
     }
+
+    @JavascriptInterface
+    @SuppressWarnings("unused")
+    public int getTotalAttachments() {
+        @Language("SQL")
+        String AttachmentQuery = "SELECT count(1) Attachment  FROM  tblInsureeAttachments ";
+        JSONArray attachments = sqlHandler.getResult(AttachmentQuery, null);
+        JSONObject object = null;
+        return attachments.length();
+    }
     }
 

@@ -210,6 +210,7 @@
     <string name="ReleaseDate">Release Date</string>
     <string name="TotalFamily">Total Families</string>
     <string name="TotalInsuree">Total Insurees</string>
+    <string name="TotalAttachments">Total Attachments</string>
     <string name="TotalPolicy">Total Policies</string>
     <string name="TotalPremium">Total Contributions</string>
     <string name="UploadEnrollment">Upload Enrolments</string>
