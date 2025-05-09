@@ -210,6 +210,7 @@
     <string name="ReleaseDate">Date de sortie</string>
     <string name="TotalFamily">Total de familles :</string>
     <string name="TotalInsuree">Total des assurés :</string>
+    <string name="TotalAttachments">Total des pièces jointes :</string>
     <string name="TotalPolicy">Total des contrats :</string>
     <string name="TotalPremium">Total des contributions :</string>
     <string name="UploadEnrollment">Téléverser les adhésions</string>
