@@ -702,6 +702,12 @@ public class Family implements Parcelable {
         private final String contributionPlanId;
         private final boolean isOffline;
         @Nullable
+        private final String periodicity;
+         @Nullable
+        private final Date signingDate;
+         @Nullable
+        private final String paymentDay;
+        @Nullable
         private final String controlNumber;
         @NonNull
         private final List<Premium> premiums;
@@ -721,6 +727,9 @@ public class Family implements Parcelable {
                 int officerId,
                 @Nullable String policyStage,
                 @Nullable String contributionPlanId,
+                @Nullable String periodicity,
+                @Nullable Date signingDate,
+                @Nullable String paymentDay,
                 boolean isOffline,
                 @Nullable String controlNumber,
                 @NonNull List<Premium> premiums
@@ -739,6 +748,9 @@ public class Family implements Parcelable {
             this.officerId = officerId;
             this.policyStage = policyStage;
             this.contributionPlanId = contributionPlanId;
+            this.periodicity = periodicity;
+            this.signingDate = signingDate;
+            this.paymentDay = paymentDay;
             this.isOffline = isOffline;
             this.controlNumber = controlNumber;
             this.premiums = premiums;
@@ -768,6 +780,9 @@ public class Family implements Parcelable {
             officerId = in.readInt();
             policyStage = in.readString();
             contributionPlanId = in.readString();
+            periodicity = in.readString();
+            signingDate = new Date(in.readLong());
+            paymentDay = in.readString();
             isOffline = in.readByte() != 0;
             controlNumber = in.readString();
             premiums = in.createTypedArrayList(Premium.CREATOR);
@@ -799,6 +814,9 @@ public class Family implements Parcelable {
             dest.writeInt(officerId);
             dest.writeString(policyStage);
             dest.writeString(contributionPlanId);
+            dest.writeString(periodicity);
+            dest.writeLong(signingDate.getTime());
+            dest.writeString(paymentDay);
             dest.writeByte((byte) (isOffline ? 1 : 0));
             dest.writeString(controlNumber);
             dest.writeTypedList(premiums);
@@ -876,6 +894,21 @@ public class Family implements Parcelable {
 
         public boolean isOffline() {
             return isOffline;
+        }
+
+         @Nullable
+        public String getPeriodicity(){
+            return periodicity;
+        }
+
+         @Nullable
+        public Date getSigningDate(){
+            return signingDate;
+        }
+
+         @Nullable
+        public String getPaymentDay(){
+            return paymentDay;
         }
 
         @Nullable
