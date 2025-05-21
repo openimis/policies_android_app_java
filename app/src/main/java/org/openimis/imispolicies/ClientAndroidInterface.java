@@ -3610,7 +3610,6 @@ public class ClientAndroidInterface {
             @NonNull JSONArray array
     ) throws JSONException {
         List<Family.Policy> policies = new ArrayList<>();
-        Log.e("Policies",array.toString());
         for (int i = 0; i < array.length(); i++) {
             JSONObject object = array.getJSONObject(i);
             String policyUuid = UUID.randomUUID().toString();
@@ -4466,6 +4465,7 @@ public class ClientAndroidInterface {
                 contrib.put("Id", i+1);
                 contrib.put("Code", masterData.getJSONArray("ContributionPlans").getJSONObject(i).getString("Code"));
                 contrib.put("Name", masterData.getJSONArray("ContributionPlans").getJSONObject(i).getString("Name"));
+                contrib.put("Periodicity", masterData.getJSONArray("ContributionPlans").getJSONObject(i).getString("Periodicity"));
 
                 JSONObject json_text = masterData.getJSONArray("ContributionPlans").getJSONObject(i).getJSONObject("Json_ext");
                 contrib.put("CalculationRules", json_text.get("calculation_rule").toString());
