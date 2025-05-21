@@ -704,7 +704,7 @@ public class Family implements Parcelable {
         @Nullable
         private final String periodicity;
          @Nullable
-        private final Date signatureDate;
+        private final Date signingDate;
          @Nullable
         private final String paymentDay;
         @Nullable
@@ -728,7 +728,7 @@ public class Family implements Parcelable {
                 @Nullable String policyStage,
                 @Nullable String contributionPlanId,
                 @Nullable String periodicity,
-                @Nullable Date signatureDate,
+                @Nullable Date signingDate,
                 @Nullable String paymentDay,
                 boolean isOffline,
                 @Nullable String controlNumber,
@@ -749,7 +749,7 @@ public class Family implements Parcelable {
             this.policyStage = policyStage;
             this.contributionPlanId = contributionPlanId;
             this.periodicity = periodicity;
-            this.signatureDate = signatureDate;
+            this.signingDate = signingDate;
             this.paymentDay = paymentDay;
             this.isOffline = isOffline;
             this.controlNumber = controlNumber;
@@ -781,7 +781,7 @@ public class Family implements Parcelable {
             policyStage = in.readString();
             contributionPlanId = in.readString();
             periodicity = in.readString();
-            signatureDate = new Date(in.readLong());
+            signingDate = new Date(in.readLong());
             paymentDay = in.readString();
             isOffline = in.readByte() != 0;
             controlNumber = in.readString();
@@ -815,7 +815,7 @@ public class Family implements Parcelable {
             dest.writeString(policyStage);
             dest.writeString(contributionPlanId);
             dest.writeString(periodicity);
-            dest.writeLong(signatureDate.getTime());
+            dest.writeLong(signingDate.getTime());
             dest.writeString(paymentDay);
             dest.writeByte((byte) (isOffline ? 1 : 0));
             dest.writeString(controlNumber);
@@ -902,8 +902,8 @@ public class Family implements Parcelable {
         }
 
          @Nullable
-        public Date getSignatureDate(){
-            return signatureDate;
+        public Date getSigningDate(){
+            return signingDate;
         }
 
          @Nullable
