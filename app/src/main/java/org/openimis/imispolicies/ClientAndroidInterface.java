@@ -1968,6 +1968,7 @@ public class ClientAndroidInterface {
                 ValueObject = PolicyValueArray.getJSONObject(i);
                 enrollDate = ValueObject.getString("EnrollDate");
                 CPId = ValueObject.getInt("ContributionPlanId");
+                ProductId = ValueObject.getInt("ProductId");
                 periodicity = ValueObject.getString("Periodicity");
                 signingDate = ValueObject.getString("SigningDate");
                 paymentDay = ValueObject.getString("PaymentDay");
