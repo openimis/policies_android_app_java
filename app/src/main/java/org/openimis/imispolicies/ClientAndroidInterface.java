@@ -394,15 +394,11 @@ public class ClientAndroidInterface {
     @JavascriptInterface
     @SuppressWarnings("unused")
     public String getRegions() {
-        //Integer officerLocationId = 19;
         Integer officerLocationId = getOfficerLocationId();
-        @Language("SQL")
-        String Query = "SELECT LocationId, LocationName FROM tblLocations WHERE LocationId = (SELECT L.ParentLocationId LocationId FROM tblLocations L";
-        if (officerLocationId != null) {
-            Query += " WHERE L.LocationId = " + officerLocationId;
+        if (officerLocationId == null) {
+            return getRegionsWO();
         }
-        Query += ")";
-        return sqlHandler.getResult(Query, null).toString();
+        return sqlHandler.getResult("SELECT LocationId, LocationName FROM tblLocations WHERE LocationId = (SELECT L.ParentLocationId LocationId FROM tblLocations L WHERE L.LocationId = " + officerLocationId + ")", null).toString();
     }
 
     @JavascriptInterface
@@ -3487,33 +3483,34 @@ public class ClientAndroidInterface {
         Family existingFamily = null;
         try {
             existingFamily = new FetchFamilyId().execute();
+
+            for (int j = 0; j < policiesArray.length(); j++) {
+                JSONArray policyPremiums = new JSONArray();
+                String policyId = policiesArray.getJSONObject(j).getString("PolicyId");
+                for (int k = 0; k < premiumsArray.length(); k++) {
+                    JSONObject premiumObject = premiumsArray.getJSONObject(k);
+                    if (StringUtils.equals(policyId, premiumObject.getString("PolicyId"))) {
+                        policyPremiums.put(premiumObject);
+                    }
+                }
+                policiesArray.getJSONObject(j).put("premium", policyPremiums);
+            }
+            List<Family.Policy> policies = familyPolicyFromJSONObject(existingFamily.getUuid(), existingFamily.getId(), policiesArray);
+            try {
+                new CreatePolicy().execute(policies);
+            } catch (Exception e) {
+                enrolMessages.add(e.getMessage());
+                return -400;
+            }
         } catch (HttpException e) {
             if (e.getCode() != HttpURLConnection.HTTP_NOT_FOUND) {
                 throw e;
             }
         } catch (Exception e) {
             e.printStackTrace();
-        }
-
-        for (int j = 0; j < policiesArray.length(); j++) {
-            JSONArray policyPremiums = new JSONArray();
-            String policyId = policiesArray.getJSONObject(j).getString("PolicyId");
-            for (int k = 0; k < premiumsArray.length(); k++) {
-                JSONObject premiumObject = premiumsArray.getJSONObject(k);
-                if (StringUtils.equals(policyId, premiumObject.getString("PolicyId"))) {
-                    policyPremiums.put(premiumObject);
-                }
-            }
-            policiesArray.getJSONObject(j).put("premium", policyPremiums);
-        }
-
-        List<Family.Policy> policies = familyPolicyFromJSONObject(existingFamily.getUuid(), existingFamily.getId(), policiesArray);
-        try {
-            new CreatePolicy().execute(policies);
-        } catch (Exception e) {
-            enrolMessages.add(e.getMessage());
             return -400;
         }
+
         return 0;
     }
 
@@ -5955,6 +5952,16 @@ public class ClientAndroidInterface {
             e.printStackTrace();
         }
         return PaymentDay.toString();
+    }
+
+    @JavascriptInterface
+    @SuppressWarnings("unused")
+    public int getTotalAttachments() {
+        @Language("SQL")
+        String AttachmentQuery = "SELECT count(1) Attachment  FROM  tblInsureeAttachments ";
+        JSONArray attachments = sqlHandler.getResult(AttachmentQuery, null);
+        JSONObject object = null;
+        return attachments.length();
     }
     }
 

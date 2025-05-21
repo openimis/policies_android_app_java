@@ -6,6 +6,7 @@ $(document).ready(function () {
     var Policy = Android.getTotalPolicy();
     var Premium = Android.getTotalPremium();
     var SumPremium = Android.getSumPremium();
+    var Attachment = Android.getTotalAttachments();
 
     var FamiliesOnline = Android.getTotalFamilyOnline();
     var InsureeOnline = Android.getTotalInsureeOnline();
@@ -18,7 +19,7 @@ $(document).ready(function () {
     $('#TotalPolicies').text(Policy);
     $('#TotalPremium').text(Premium);
     $('#PremiumAmount').text(SumPremium);
-
+    $("#TotalAttachments").text(Attachment);
     $('#TotalFamiliesOnline').text(FamiliesOnline);
     $('#TotalInsureeOnline').text(InsureeOnline);
     //$('#TotalPoliciesOnline').text(PolicyOnline);
