@@ -1943,7 +1943,7 @@ public class ClientAndroidInterface {
         //getPolicyValue(String enrollDate, int ProductId, int FamilyId, String startDate, boolean HasCycle, int PolicyId, String PolicyStage, int IsOffline) throws JSONException {
         boolean isValueChanged = false;
         @Language("SQL")
-        String QueryPolicyValue = "SELECT P.PolicyId, CP.ProductId, ContributionPlanId, EffectiveDate, PolicyValue, StartDate, ExpiryDate, EnrollDate, SigningDate,FamilyId,PolicyStage,IsOffline, Periodicity, SiginingDate, PaymentDay, FROM tblPolicy P\n" +
+        String QueryPolicyValue = "SELECT P.PolicyId, CP.ProductId, ContributionPlanId, EffectiveDate, PolicyValue, StartDate, ExpiryDate, EnrollDate, SigningDate,FamilyId,PolicyStage,IsOffline, Periodicity, PaymentDay FROM tblPolicy P\n" +
                 "INNER JOIN tblContributionPlan CP ON CP.Id = P.ContributionPlanId\n" +
                 "WHERE FamilyId = " + FamilyId;
         JSONArray PolicyValueArray = sqlHandler.getResult(QueryPolicyValue, null);

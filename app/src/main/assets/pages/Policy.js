@@ -272,5 +272,5 @@ function getPeriodicityValue()  {
 
 function getPaymentDayValue() {
     var PaymentDay = Android.getPaymentDay();
-    bindDropdown('ddlPaymentDay', PaymentDay, 'Value', 'Label', Android.getString(''));
+    bindDropdown('ddlPaymentDay', PaymentDay, 'Value', 'Label', null);
 }
