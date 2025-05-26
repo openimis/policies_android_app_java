@@ -70,13 +70,13 @@ $(document).ready(function () {
         $("#hfNewPhotoPath").val("");
     });
 
-    //$('#txtBirthDate').change(function () {
-    //    fillAge($(this).val());
-    //});
+    $('#txtBirthDate').change(function () {
+        fillAge($(this).val());
+    });
 
     $('#ddlRelationship').change(function () {
         var relationId = $('#ddlRelationship').val();
-        if (relationId == 4) {
+        if (relationId == 3) {
             $("#Education").show();
             $('#ddlEducation').prop("required", true);
         } else {
@@ -484,7 +484,7 @@ function fillAge(Birthday) {
 
     if (age < 21) {
         $("#Education").show();
-        if($("#ddlRelationship").val() == 4){
+        if($("#ddlRelationship").val() == 3){
             $("#ddlEducation").prop("required", true);
         }else{
             $("#ddlEducation").prop("required", false);
