@@ -262,7 +262,7 @@ public class Enquire extends ImisActivity {
                     Log.e(LOG_TAG, "Fetching image failed", e);
                 }
 
-                if (insuree.getPolicies().size() == 1 && insuree.getPolicies().get(0).getExpiryDate() == null) {
+                if (insuree.getPolicies().size() == 1 && insuree.getPolicies().get(0).getExpiryDate() == null || insuree.getPolicies().isEmpty()) {
                     tvPolicyStatus.setText(getResources().getString(R.string.EnquirePolicyNotCovered));
                 } else {
                     tvPolicyStatus.setText(getResources().getString(R.string.EnquirePolicyCovered));
