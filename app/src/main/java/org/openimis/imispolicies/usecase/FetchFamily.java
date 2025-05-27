@@ -85,11 +85,11 @@ public class FetchFamily {
                 /* currentAddress = */ member.currentAddress(),
                 /* currentVillage = */ member.currentVillage() != null ? IdUtils.getIdFromGraphQLString(Objects.requireNonNull(member.currentVillage()).id()) : null,
                 /* geolocation = */ member.geolocation(),
-                /* professional situation = */ null,
-                /* incomeLevel = */ null,
-                /* payment method = */ null,
+                /* professional situation = */ member.professionalSituation(),
+                /* incomeLevel = */ member.incomeLevel() != null ? IdUtils.getIdFromGraphQLString(Objects.requireNonNull(member.incomeLevel()).id()) : null,
+                /* payment method = */ member.preferredPaymentMethod(),
                 /* other household = */ null,
-                /* account details = */ null,
+                /* account details = */ member.bankCoordinates(),
                 /* photoPath = */ downloadPhoto(member.photo()),
                 /* photoBytes = */ null, // We already saved them on disk, no need to pass them here.
                 /* isOffline = */ member.offline() != null ? Objects.requireNonNull(member.offline()) : false

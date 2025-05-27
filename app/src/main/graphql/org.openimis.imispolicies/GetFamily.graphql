@@ -75,6 +75,12 @@ query GetFamily($headChfId: String) {
                                 folder
                             }
                             offline
+                            incomeLevel {
+                                id
+                            }
+                            professionalSituation
+                            preferredPaymentMethod
+                            bankCoordinates
                         }
                     }
                 }

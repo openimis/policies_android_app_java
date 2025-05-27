@@ -5196,7 +5196,7 @@ public class ClientAndroidInterface {
             }
         }
         String[] Columns = {"identificationNumber", "familyId", "insureeId", "insureeUUID", "familyUUID", "chfid", "lastName", "otherNames", "dob", "gender", "marital", "isHead", "phone", "photoPath", "cardIssued",
-                "isOffline", "relationship", "profession", "education", "email", "typeOfId", "hfid", "currentAddress", "geoLocation", "curVillage"};
+                "isOffline", "relationship", "profession", "education", "email", "typeOfId", "hfid", "currentAddress", "geoLocation", "curVillage", "incomeLevel", "professionalSituation", "paymentMethod", "accountDetails"};
         sqlHandler.insertData("tblInsuree", Columns, array, "");
     }
 
@@ -5228,6 +5228,10 @@ public class ClientAndroidInterface {
         jsonObject.put("currentAddress", member.getCurrentAddress());
         jsonObject.put("geoLocation", member.getGeolocation());
         jsonObject.put("curVillage", member.getCurrentVillage());
+        jsonObject.put("incomeLevel", member.getIncomeLevel());
+        jsonObject.put("professionalSituation", member.getProfessionalSituation());
+        jsonObject.put("paymentMethod", member.getPaymentMethod());
+        jsonObject.put("accountDetails", member.getAccountDetails());
         return jsonObject;
     }
 
