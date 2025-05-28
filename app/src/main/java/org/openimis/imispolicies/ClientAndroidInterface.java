@@ -3191,11 +3191,6 @@ public class ClientAndroidInterface {
             );
             if (CallerId != 2) {
                 query.append(" I.FamilyId = ").append(FamilyId).append(" \n");
-                if (Offline == null || Integer.parseInt(Offline) == 0) {
-                    if (CallerId == 1) {
-                        query.append(" AND  I.InsureeId < 0").append("");
-                    }
-                }
             } else {
                 query.append("(");
                 for (int j = 0; j < verifiedId.size(); j++) {
@@ -3214,7 +3209,7 @@ public class ClientAndroidInterface {
                         }
                     }
                 }
-                if (verifiedId.size() == 0) {
+                if (verifiedId.isEmpty()) {
                     query.append(" I.InsureeId != ''");
                 }
                 query.append(")");
@@ -3481,10 +3476,8 @@ public class ClientAndroidInterface {
             return -400;
         }
 
-        Family existingFamily = null;
         try {
-            existingFamily = new FetchFamilyId().execute();
-
+            Family existingFamily = new FetchFamilyId().execute();
             for (int j = 0; j < policiesArray.length(); j++) {
                 JSONArray policyPremiums = new JSONArray();
                 String policyId = policiesArray.getJSONObject(j).getString("PolicyId");
@@ -5192,6 +5185,7 @@ public class ClientAndroidInterface {
             @Language("SQL")
             String QueryCheck = "SELECT InsureeUUID FROM tblInsuree WHERE Trim(CHFID) = '" + member.getChfId() + "' AND (isOffline IS false OR isOffline = 0 OR isOffline = 2)";
             if (sqlHandler.getResult(QueryCheck, null).length() == 0) {
+                Log.e("insuerr",toJSONObject(member).toString() );
                 array.put(toJSONObject(member));
             }
         }

@@ -33,6 +33,7 @@ public class UpdateInsureeGraphQLRequest extends BaseGraphQLRequest {
         ) throws Exception {
         Response<UpdateInsureeMutation.Data> response = makeSynchronous(new UpdateInsureeMutation(
                 UpdateInsureeMutationInput.builder()
+                        .uuid(member.getUuid())
                         .chfId(member.getChfId())
                         .familyId(familyId)
                         .head(member.isHead())

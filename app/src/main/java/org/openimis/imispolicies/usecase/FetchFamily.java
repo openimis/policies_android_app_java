@@ -52,7 +52,7 @@ public class FetchFamily {
                 /* confirmationNumber = */ node.confirmationNo(),
                 /* confirmationType = */ node.confirmationType() != null ? Objects.requireNonNull(node.confirmationType()).code() : null,
                 /* isOffline = */ node.isOffline() != null ? Objects.requireNonNull(node.isOffline()) : false,
-                /* familyId = */ null,
+                /* parentId = */ node.parent() != null ? IdUtils.getIdFromGraphQLString(node.parent().id())  : null,
                 /* insurees = */ Mapper.map(node.members().edges(), (edge) -> toMember(edge, node)),
                 /* attachments = */ node.attachments() != null ? Objects.requireNonNull(Mapper.map(node.attachments(), (attachment) -> toAttachment(attachment)))  : null
         );
@@ -74,12 +74,12 @@ public class FetchFamily {
                 /* dateOfBirth = */ member.dob(),
                 /* gender = */ Objects.requireNonNull(member.gender()).code(),
                 /* marital = */ member.marital(),
-                /* phone = */ member.phone(),
+                /* phone = */ member.phone() != null ? member.phone() : "",
                 /* cardIssued = */ member.cardIssued(),
                 /* relationship = */ member.relationship() != null ? Objects.requireNonNull(member.relationship()).id() : null,
                 /* profession = */ member.profession() != null ? Objects.requireNonNull(member.profession()).id() : null,
                 /* education = */ member.education() != null ? Objects.requireNonNull(member.education()).id() : null,
-                /* email = */ member.email(),
+                /* email = */ member.email() != null ? member.email() : "",
                 /* typeOfId = */ member.typeOfId() != null ? Objects.requireNonNull(member.typeOfId()).code() : null,
                 /* healthFacilityId = */ member.healthFacility() != null ? IdUtils.getIdFromGraphQLString(Objects.requireNonNull(member.healthFacility()).id()) : null,
                 /* currentAddress = */ member.currentAddress(),
@@ -89,7 +89,7 @@ public class FetchFamily {
                 /* incomeLevel = */ member.incomeLevel() != null ? IdUtils.getIdFromGraphQLString(Objects.requireNonNull(member.incomeLevel()).id()) : null,
                 /* payment method = */ member.preferredPaymentMethod(),
                 /* other household = */ null,
-                /* account details = */ member.bankCoordinates(),
+                /* account details = */ member.bankCoordinates() != null ? member.bankCoordinates() : "",
                 /* photoPath = */ downloadPhoto(member.photo()),
                 /* photoBytes = */ null, // We already saved them on disk, no need to pass them here.
                 /* isOffline = */ member.offline() != null ? Objects.requireNonNull(member.offline()) : false

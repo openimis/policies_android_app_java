@@ -19,8 +19,6 @@ import java.net.HttpURLConnection;
 public class UpdateFamily {
 
     @NonNull
-    private final FetchFamilyId fetchFamilyId;
-    @NonNull
     private final CreateFamilyGraphQLRequest createFamilyGraphQLRequest;
     @NonNull
     private final UpdateFamilyGraphQLRequest updateFamilyGraphQLRequest;
@@ -30,48 +28,74 @@ public class UpdateFamily {
     private final UpdateInsureeGraphQLRequest updateInsureeGraphQLRequest;
     @NonNull
     private final CreateSubFamilyGraphQLRequest createSubFamilyGraphQLRequest;
+    @NonNull
+    private final FetchInsureeInquire fetchInsureeInquire;
+    @NonNull
+    private final FetchFamily fetchFamily;
+    @NonNull
+    private final FetchFamilyId fetchFamilyId;
 
     public UpdateFamily() {
         this(
-                new FetchFamilyId(),
                 new CreateFamilyGraphQLRequest(),
                 new UpdateFamilyGraphQLRequest(),
                 new CreateInsureeGraphQLRequest(),
                 new UpdateInsureeGraphQLRequest(),
-                new CreateSubFamilyGraphQLRequest()
+                new CreateSubFamilyGraphQLRequest(),
+                new FetchInsureeInquire(),
+                new FetchFamily(),
+                new FetchFamilyId()
         );
     }
 
     public UpdateFamily(
-            @NonNull FetchFamilyId fetchFamilyId,
             @NonNull CreateFamilyGraphQLRequest createFamilyGraphQLRequest,
             @NonNull UpdateFamilyGraphQLRequest updateFamilyGraphQLRequest,
             @NonNull CreateInsureeGraphQLRequest createInsureeGraphQLRequest,
             @NonNull UpdateInsureeGraphQLRequest updateInsureeGraphQLRequest,
-            @NonNull CreateSubFamilyGraphQLRequest createSubFamilyGraphQLRequest
+            @NonNull CreateSubFamilyGraphQLRequest createSubFamilyGraphQLRequest,
+            @NonNull FetchInsureeInquire fetchInsureeInquire,
+            @NonNull FetchFamily fetchFamily,
+            @NonNull FetchFamilyId fetchFamilyId
     ) {
-        this.fetchFamilyId = fetchFamilyId;
         this.createFamilyGraphQLRequest = createFamilyGraphQLRequest;
         this.updateFamilyGraphQLRequest = updateFamilyGraphQLRequest;
         this.createInsureeGraphQLRequest = createInsureeGraphQLRequest;
         this.updateInsureeGraphQLRequest = updateInsureeGraphQLRequest;
         this.createSubFamilyGraphQLRequest = createSubFamilyGraphQLRequest;
+        this.fetchInsureeInquire = fetchInsureeInquire;
+        this.fetchFamily = fetchFamily;
+        this.fetchFamilyId = fetchFamilyId;
     }
 
     @WorkerThread
     public void execute(@NonNull Family family, @NonNull String insureeCHFID, @NonNull int officerId) throws Exception {
-        /*try {
-            //existingFamily = fetchFamily.execute();
+        try {
+            fetchFamily.execute(insureeCHFID);
+            updateFamilyGraphQLRequest.update(family, officerId);
+            for (Family.Member member : family.getMembers()) {
+                insertOrUpdateInsuree(member, officerId, family.getId());
+            }
         } catch (HttpException e) {
-            if (e.getCode() != HttpURLConnection.HTTP_NOT_FOUND) {
+            if (e.getCode() == HttpURLConnection.HTTP_NOT_FOUND) {
+                if(family.getParentId() != null && family.getParentId() != 0){
+                    createSubFamilyGraphQLRequest.create(family, officerId);
+                }else{
+                    createFamilyGraphQLRequest.create(family, officerId);
+                }
+                try{
+                    Family existingFamily = fetchFamilyId.execute();
+                    for (Family.Member member : family.getMembers()) {
+                        insertOrUpdateInsuree(member, officerId, existingFamily.getId());
+                    }
+                } catch (Exception e2){
+                    e2.printStackTrace();
+                }
+            } else {
                 throw e;
             }
-        }*/
-        if(family.getParentId() != null && family.getParentId() != 0){
-            createSubFamilyGraphQLRequest.create(family, officerId);
-        }else{
-            createFamilyGraphQLRequest.create(family, officerId);
         }
+
         /*if (existingFamily == null) {
             createFamilyGraphQLRequest.create(family);
         } else {
@@ -86,27 +110,19 @@ public class UpdateFamily {
                 removeMemberFromFamily(existingMember);
             }
         }*/
-        for (Family.Member member : family.getMembers()) {
-            insertOrUpdateInsuree(member, insureeCHFID, officerId);
-        }
     }
 
     @WorkerThread
-    private void insertOrUpdateInsuree(@NonNull Family.Member member, @Nullable String insureeCHFID, @NonNull int officerId ) throws Exception {
-        Family existingFamily = null;
+    private void insertOrUpdateInsuree(@NonNull Family.Member member, int officerId, int familyId ) throws Exception {
         try {
-            existingFamily = fetchFamilyId.execute();
+            fetchInsureeInquire.execute(member.getChfId());
+            updateInsureeGraphQLRequest.update(member, member.getFamilyId());
         } catch (HttpException e) {
-            if (e.getCode() != HttpURLConnection.HTTP_NOT_FOUND) {
+            if (e.getCode() == HttpURLConnection.HTTP_NOT_FOUND) {
+                createInsureeGraphQLRequest.create(member, familyId, officerId);
+            } else {
                 throw e;
             }
-        }
-        if(existingFamily != null && member.isHead() == false){
-                try {
-                    createInsureeGraphQLRequest.create(member, existingFamily.getId(), officerId);
-                } catch (Exception e) {
-                    updateInsureeGraphQLRequest.update(member, existingFamily.getId());
-                }
         }
     }
 
