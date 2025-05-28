@@ -3515,7 +3515,6 @@ public class ClientAndroidInterface {
             @NonNull Pair<String, byte[]>[] insureeImages,
             @Nullable JSONArray attachments
     ) throws JSONException {
-        Log.e("insurees", insurees.toString());
         List<Family.Member> members = new ArrayList<>();
         List<Family.Attachment> familyAttachments = new ArrayList<>();
         String familyUUID = JsonUtils.getStringOrDefault(json, "FamilyUUID", UUID.randomUUID().toString(), true);
@@ -5186,6 +5185,7 @@ public class ClientAndroidInterface {
             @Language("SQL")
             String QueryCheck = "SELECT InsureeUUID FROM tblInsuree WHERE Trim(CHFID) = '" + member.getChfId() + "' AND (isOffline IS false OR isOffline = 0 OR isOffline = 2)";
             if (sqlHandler.getResult(QueryCheck, null).length() == 0) {
+                Log.e("insuerr",toJSONObject(member).toString() );
                 array.put(toJSONObject(member));
             }
         }

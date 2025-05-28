@@ -84,6 +84,9 @@ query GetFamily($headChfId: String) {
                         }
                     }
                 }
+                parent{
+                    id
+                }
                 attachments{
                     idAttachment,
                     filename,

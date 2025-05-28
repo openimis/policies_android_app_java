@@ -43,6 +43,7 @@ public class UpdateFamilyGraphQLRequest extends BaseGraphQLRequest {
                         .headInsuree(
                                 FamilyHeadInsureeInputType.builder()
                                         .id(head.getId())
+                                        .uuid(head.getUuid())
                                         .chfId(head.getChfId())
                                         .lastName(head.getLastName())
                                         .otherNames(head.getOtherNames())
