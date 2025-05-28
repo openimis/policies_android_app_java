@@ -10,8 +10,10 @@ $(document).ready(function () {
         $('#PaymentMethod').show();
     }
 
-    var insuranceNumber = Math.floor(Math.random() * 9000000000) + 1000000000;
-    $('#txtInsuranceNumber').val(insuranceNumber);
+    if($('#txtInsuranceNumber').val() == ""){
+        var insuranceNumber = Math.floor(Math.random() * 9000000000) + 1000000000;
+        $('#txtInsuranceNumber').val(insuranceNumber);
+    }
 
 
     document.title = Android.getString('AddEditInsuree');
@@ -214,7 +216,6 @@ $(document).ready(function () {
 
     if (parseInt(InsureeId) > 0 || parseInt(InsureeId) < 0) {
         var Insuree = Android.getInsuree(parseInt(InsureeId));
-        console.log("insuree", Insuree)
         bindDataFromDatafield(Insuree);
         var PhotoPath = $.parseJSON(Insuree)[0]["PhotoPath"];
         var IsOffline = parseInt($.parseJSON(Insuree)[0]["isOffline"]);
@@ -467,14 +468,17 @@ function createJSONString() {
 
 function getImage() {
     var Ins = $('#txtInsuranceNumber').val();
-    var ImagePath = Android.GetListOfImagesContain(Ins);
-
-    if (ImagePath.length > 0) {
-        $('#imgInsuree').attr('src', 'file://' + ImagePath);
-    } else {
-        $('#imgInsuree').attr('src', '');
+    if($('#imgInsuree').attr('src') != ""){
+        $("#hfImagePath").val($('#imgInsuree').attr('src'));
+    } else{
+        var ImagePath = Android.GetListOfImagesContain(Ins);
+        if (ImagePath.length > 0) {
+           $('#imgInsuree').attr('src', 'file://' + ImagePath);
+        } else {
+           $('#imgInsuree').attr('src', '');
+        }
+        $("#hfImagePath").val($('#imgInsuree').attr('src'));
     }
-    $("#hfImagePath").val($('#imgInsuree').attr('src'));
 }
 
 function fillAge(Birthday) {

@@ -1168,7 +1168,7 @@ public class ClientAndroidInterface {
 //            if(isOffline == 1 || isOffline)
 
 
-            if (rtInsureeId == 0) {//New Insuaree
+            if (rtInsureeId == 0) {//New Insuree
                 values.put("isOffline", 1);
                 if (isOffline == 0 || isOffline == 2) {
                     if (isOffline == 2) isOffline = 0;
@@ -1216,6 +1216,7 @@ public class ClientAndroidInterface {
                 }
 
             } else {//Existing Insuree
+                Log.e("insuree", values.toString());
                 values.put("isOffline", insureeIsOffline);
                 sqlHandler.updateData("tblInsuree", values, "InsureeId = ? AND (isOffline = ?)", new String[]{String.valueOf(InsureeId), String.valueOf(insureeIsOffline)});
             }
