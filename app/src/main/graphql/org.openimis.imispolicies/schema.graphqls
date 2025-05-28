@@ -6839,6 +6839,7 @@ input UpdateFamilyMutationInput {
   jsonExt: JSONString
   contribution: JSONString
   headInsuree: FamilyHeadInsureeInputType
+  attachments: [FamilyAttachmentInputType]
   clientMutationId: String
 }
 
@@ -6993,6 +6994,7 @@ input UpdateInsureeMutationInput {
   residentialDistrict: String
   residentialProvince: String
   houseNumber: String
+  bankCoordinates: String
   clientMutationId: String
 }
 

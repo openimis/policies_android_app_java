@@ -3191,11 +3191,6 @@ public class ClientAndroidInterface {
             );
             if (CallerId != 2) {
                 query.append(" I.FamilyId = ").append(FamilyId).append(" \n");
-                if (Offline == null || Integer.parseInt(Offline) == 0) {
-                    if (CallerId == 1) {
-                        query.append(" AND  I.InsureeId < 0").append("");
-                    }
-                }
             } else {
                 query.append("(");
                 for (int j = 0; j < verifiedId.size(); j++) {
@@ -3214,7 +3209,7 @@ public class ClientAndroidInterface {
                         }
                     }
                 }
-                if (verifiedId.size() == 0) {
+                if (verifiedId.isEmpty()) {
                     query.append(" I.InsureeId != ''");
                 }
                 query.append(")");
@@ -3481,10 +3476,8 @@ public class ClientAndroidInterface {
             return -400;
         }
 
-        Family existingFamily = null;
         try {
-            existingFamily = new FetchFamilyId().execute();
-
+            Family existingFamily = new FetchFamilyId().execute();
             for (int j = 0; j < policiesArray.length(); j++) {
                 JSONArray policyPremiums = new JSONArray();
                 String policyId = policiesArray.getJSONObject(j).getString("PolicyId");
@@ -3522,6 +3515,7 @@ public class ClientAndroidInterface {
             @NonNull Pair<String, byte[]>[] insureeImages,
             @Nullable JSONArray attachments
     ) throws JSONException {
+        Log.e("insurees", insurees.toString());
         List<Family.Member> members = new ArrayList<>();
         List<Family.Attachment> familyAttachments = new ArrayList<>();
         String familyUUID = JsonUtils.getStringOrDefault(json, "FamilyUUID", UUID.randomUUID().toString(), true);
