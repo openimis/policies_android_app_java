@@ -5933,13 +5933,16 @@ public class ClientAndroidInterface {
     }
 
     @JavascriptInterface
-    @SuppressWarnings("unused")
-    public int getTotalAttachments() {
-        @Language("SQL")
-        String AttachmentQuery = "SELECT count(1) Attachment  FROM  tblInsureeAttachments ";
-        JSONArray attachments = sqlHandler.getResult(AttachmentQuery, null);
-        JSONObject object = null;
-        return attachments.length();
+    public String getTotalAttachments() throws JSONException {
+        String Query = "SELECT COUNT(*) AS total_count FROM tblInsureeAttachments";
+        JSONArray result = sqlHandler.getResult(Query, null);
+
+        if (result.length() > 0) {
+            JSONObject countObj = result.getJSONObject(0);
+            return countObj.getString("total_count");
+        }
+
+        return "0";
     }
     }
 
