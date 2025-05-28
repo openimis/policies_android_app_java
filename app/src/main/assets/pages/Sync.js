@@ -63,6 +63,9 @@ $(document).ready(function () {
                 case "liControlNumbers":
                     Android.launchControlNumbers();
                     break;
+                case "liCheckUpdate":
+                    Android.CheckAppUpdate();
+                    break;
             }
         } catch (e) {
             Android.ShowDialog(e.message);

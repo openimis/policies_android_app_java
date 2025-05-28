@@ -497,4 +497,5 @@
     <string name="SelectPaymentMethod">Select payment method</string>
     <string name="PaymentDay">Payment day</string>
     <string name="Periodicity">Periodicity</string>
+    <string name="CheckUpdate">Check for updates</string>
 </resources>
