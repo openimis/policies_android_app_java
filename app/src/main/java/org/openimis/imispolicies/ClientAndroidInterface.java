@@ -1216,9 +1216,9 @@ public class ClientAndroidInterface {
                 }
 
             } else {//Existing Insuree
-                Log.e("insuree", values.toString());
                 values.put("isOffline", insureeIsOffline);
-                sqlHandler.updateData("tblInsuree", values, "InsureeId = ? AND (isOffline = ?)", new String[]{String.valueOf(InsureeId), String.valueOf(insureeIsOffline)});
+                sqlHandler.updateData("tblInsuree", values, "InsureeId = ? AND (isOffline = ? OR isOffline = ?)",
+                        new String[]{String.valueOf(InsureeId), String.valueOf(insureeIsOffline), insureeIsOffline == 1 ? "true" : "false"});
             }
         } catch (NumberFormatException | UserException e) {
             e.printStackTrace();
@@ -1366,7 +1366,6 @@ public class ClientAndroidInterface {
         String[] args = {String.valueOf(InsureeId)};
 
         JSONArray Insuree = sqlHandler.getResult(Query, args);
-
         return Insuree.toString();
     }
 
