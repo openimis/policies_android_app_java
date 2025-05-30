@@ -1216,9 +1216,9 @@ public class ClientAndroidInterface {
                 }
 
             } else {//Existing Insuree
-                Log.e("insuree", values.toString());
                 values.put("isOffline", insureeIsOffline);
-                sqlHandler.updateData("tblInsuree", values, "InsureeId = ? AND (isOffline = ?)", new String[]{String.valueOf(InsureeId), String.valueOf(insureeIsOffline)});
+                sqlHandler.updateData("tblInsuree", values, "InsureeId = ? AND (isOffline = ? OR isOffline = ?)",
+                        new String[]{String.valueOf(InsureeId), String.valueOf(insureeIsOffline), insureeIsOffline == 1 ? "true" : "false"});
             }
         } catch (NumberFormatException | UserException e) {
             e.printStackTrace();
@@ -1366,7 +1366,6 @@ public class ClientAndroidInterface {
         String[] args = {String.valueOf(InsureeId)};
 
         JSONArray Insuree = sqlHandler.getResult(Query, args);
-
         return Insuree.toString();
     }
 
@@ -3192,11 +3191,6 @@ public class ClientAndroidInterface {
             );
             if (CallerId != 2) {
                 query.append(" I.FamilyId = ").append(FamilyId).append(" \n");
-                if (Offline == null || Integer.parseInt(Offline) == 0) {
-                    if (CallerId == 1) {
-                        query.append(" AND  I.InsureeId < 0").append("");
-                    }
-                }
             } else {
                 query.append("(");
                 for (int j = 0; j < verifiedId.size(); j++) {
@@ -3215,7 +3209,7 @@ public class ClientAndroidInterface {
                         }
                     }
                 }
-                if (verifiedId.size() == 0) {
+                if (verifiedId.isEmpty()) {
                     query.append(" I.InsureeId != ''");
                 }
                 query.append(")");
@@ -3482,10 +3476,8 @@ public class ClientAndroidInterface {
             return -400;
         }
 
-        Family existingFamily = null;
         try {
-            existingFamily = new FetchFamilyId().execute();
-
+            Family existingFamily = new FetchFamilyId().execute();
             for (int j = 0; j < policiesArray.length(); j++) {
                 JSONArray policyPremiums = new JSONArray();
                 String policyId = policiesArray.getJSONObject(j).getString("PolicyId");
@@ -4618,7 +4610,7 @@ public class ClientAndroidInterface {
     @SuppressWarnings("unused")
     public int getTotalFamily() {
         @Language("SQL")
-        String FamilyQuery = "SELECT count(1) Families  FROM  tblfamilies WHERE isoffline !=''"; // WHERE isoffline = 1 OR isoffline = 0
+        String FamilyQuery = "SELECT count(1) Families  FROM  tblfamilies WHERE isOffline = 1 or isOffline = 0 or isOffline = \"false\" or isOffline = \"true\""; // WHERE isoffline = 1 OR isoffline = 0
         JSONArray Families = sqlHandler.getResult(FamilyQuery, null);
         JSONObject object = null;
         int TotalFamilies = 0;
@@ -5193,6 +5185,7 @@ public class ClientAndroidInterface {
             @Language("SQL")
             String QueryCheck = "SELECT InsureeUUID FROM tblInsuree WHERE Trim(CHFID) = '" + member.getChfId() + "' AND (isOffline IS false OR isOffline = 0 OR isOffline = 2)";
             if (sqlHandler.getResult(QueryCheck, null).length() == 0) {
+                Log.e("insuerr",toJSONObject(member).toString() );
                 array.put(toJSONObject(member));
             }
         }

@@ -472,7 +472,12 @@ type FamilyGQLType implements Node {
   mutations: [FamilyMutationGQLType!]!
   policies(offset: Int, before: String, after: String, first: Int, last: Int, id: ID, uuid: String, enrollDate: Date, enrollDate_Lt: Date, enrollDate_Lte: Date, enrollDate_Gt: Date, enrollDate_Gte: Date, startDate: Date, startDate_Lt: Date, startDate_Lte: Date, startDate_Gt: Date, startDate_Gte: Date, effectiveDate: Date, effectiveDate_Lt: Date, effectiveDate_Lte: Date, effectiveDate_Gt: Date, effectiveDate_Gte: Date, expiryDate: Date, expiryDate_Lt: Date, expiryDate_Lte: Date, expiryDate_Gt: Date, expiryDate_Gte: Date, stage: String, status: Int, status_Lt: Int, status_Lte: Int, status_Gt: Int, status_Gte: Int, value: Float, value_Lt: Float, value_Lte: Float, value_Gt: Float, value_Gte: Float, product_Id: ID, product_Uuid: String, product_Code: String, product_Code_Icontains: String, product_Code_Istartswith: String, product_Name: String, product_Name_Icontains: String, product_Name_Istartswith: String, product_DateFrom: DateTime, product_DateFrom_Gt: DateTime, product_DateFrom_Gte: DateTime, product_DateFrom_Lt: DateTime, product_DateFrom_Lte: DateTime, product_DateTo: DateTime, product_DateTo_Gt: DateTime, product_DateTo_Gte: DateTime, product_DateTo_Lt: DateTime, product_DateTo_Lte: DateTime, product_Location_Isnull: Boolean, officer_Id: ID, officer_Uuid: String, officer_Code: String, officer_Code_Icontains: String, officer_LastName: String, officer_LastName_Icontains: String, officer_OtherNames: String, officer_OtherNames_Icontains: String, officer_Dob: Date): PolicyGQLTypeConnection!
   attachments: [FamilyAttachmentGQLType]
+  parent: ParentGQLType
   clientMutationId: String
+}
+
+type ParentGQLType {
+  id: ID
 }
 
 type FamilyAttachmentGQLType {
@@ -6839,6 +6844,7 @@ input UpdateFamilyMutationInput {
   jsonExt: JSONString
   contribution: JSONString
   headInsuree: FamilyHeadInsureeInputType
+  attachments: [FamilyAttachmentInputType]
   clientMutationId: String
 }
 
@@ -6993,6 +6999,7 @@ input UpdateInsureeMutationInput {
   residentialDistrict: String
   residentialProvince: String
   houseNumber: String
+  bankCoordinates: String
   clientMutationId: String
 }
 
