@@ -5968,5 +5968,10 @@ public class ClientAndroidInterface {
 
         return "0";
     }
+
+    @JavascriptInterface
+    public String getVersion(){
+        return BuildConfig.VERSION_NAME;
     }
+}
 
