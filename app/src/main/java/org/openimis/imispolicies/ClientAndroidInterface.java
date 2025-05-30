@@ -82,6 +82,7 @@ import org.openimis.imispolicies.usecase.DeletePolicyRenewal;
 import org.openimis.imispolicies.usecase.FetchFamily;
 import org.openimis.imispolicies.usecase.FetchFamilyId;
 import org.openimis.imispolicies.usecase.FetchMasterData;
+import org.openimis.imispolicies.usecase.FetchSubFamilies;
 import org.openimis.imispolicies.usecase.Login;
 import org.openimis.imispolicies.usecase.PostFeedback;
 import org.openimis.imispolicies.usecase.UpdateFamily;
@@ -5122,6 +5123,13 @@ public class ClientAndroidInterface {
                 Family family = new FetchFamily().execute(insuranceNumber);
                 InsertFamilyDataFromOnline(family);
                 InsertInsureeDataFromOnline(family.getMembers());
+                if(family.getType() != null && family.getType().equals("P")){
+                    List<Family> subFamilies = new FetchSubFamilies().execute(family.getUuid());
+                    for (Family family1 : subFamilies){
+                        InsertFamilyDataFromOnline(family1);
+                        InsertInsureeDataFromOnline(family1.getMembers());
+                    }
+                }
                 return 1;
             } catch (Exception e) {
                 Log.e("MODIFYFAMILY", "Error while downloading a family", e);
@@ -5141,7 +5149,7 @@ public class ClientAndroidInterface {
         String QueryCheck = "SELECT FamilyUUID FROM tblFamilies WHERE FamilyUUID = '" + family.getUuid() + "' AND (isOffline IS false OR isOffline = 0 OR isOffline = 2)";
         if (sqlHandler.getResult(QueryCheck, null).length() == 0) {
             String[] Columns = {"familyId", "familyUUID", "insureeId", "insureeUUID", "locationId", "poverty", "isOffline", "familyType",
-                    "familyAddress", "ethnicity", "confirmationNo", "confirmationType"};
+                    "familyAddress", "ethnicity", "confirmationNo", "confirmationType", "parentId"};
             sqlHandler.insertData("tblFamilies", Columns, toJSONArray(family), "");
 
             if (family.getSms() != null) {
@@ -5174,6 +5182,7 @@ public class ClientAndroidInterface {
         jsonObject.put("ethnicity", family.getEthnicity());
         jsonObject.put("confirmationNo", family.getConfirmationNumber());
         jsonObject.put("confirmationType", family.getConfirmationType());
+        jsonObject.put("parentId", family.getParentId());
         array.put(jsonObject);
         return array;
     }
@@ -5185,7 +5194,6 @@ public class ClientAndroidInterface {
             @Language("SQL")
             String QueryCheck = "SELECT InsureeUUID FROM tblInsuree WHERE Trim(CHFID) = '" + member.getChfId() + "' AND (isOffline IS false OR isOffline = 0 OR isOffline = 2)";
             if (sqlHandler.getResult(QueryCheck, null).length() == 0) {
-                Log.e("insuerr",toJSONObject(member).toString() );
                 array.put(toJSONObject(member));
             }
         }
@@ -5960,5 +5968,10 @@ public class ClientAndroidInterface {
 
         return "0";
     }
+
+    @JavascriptInterface
+    public String getVersion(){
+        return BuildConfig.VERSION_NAME;
     }
+}
 
