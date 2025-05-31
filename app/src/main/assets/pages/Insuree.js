@@ -216,7 +216,6 @@ $(document).ready(function () {
 
     if (parseInt(InsureeId) > 0 || parseInt(InsureeId) < 0) {
         var Insuree = Android.getInsuree(parseInt(InsureeId));
-        console.log(Insuree);
         bindDataFromDatafield(Insuree);
         var PhotoPath = $.parseJSON(Insuree)[0]["PhotoPath"];
         var IsOffline = parseInt($.parseJSON(Insuree)[0]["isOffline"]);
@@ -244,6 +243,12 @@ $(document).ready(function () {
                 $('#PaymentMethod').hide();
                 $("#ddlRelationship").prop("required", true);
             }
+        }
+
+        if($.parseJSON(Insuree)[0]["CardIssued"] == "true"){
+            $('#ddlBeneficiaryCard').val(1)
+        } else {
+            $('#ddlBeneficiaryCard').val(2)
         }
 
         //fillAge(dob);

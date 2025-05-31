@@ -81,6 +81,7 @@ query GetFamily($headChfId: String) {
                             professionalSituation
                             preferredPaymentMethod
                             bankCoordinates
+                            coordinates
                         }
                     }
                 }

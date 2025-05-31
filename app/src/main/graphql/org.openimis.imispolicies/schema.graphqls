@@ -441,6 +441,7 @@ type InsureeGQLType implements Node {
   professionalSituation: String
   preferredPaymentMethod: String
   bankCoordinates: String
+  coordinates: String
   clientMutationId: String
 }
 

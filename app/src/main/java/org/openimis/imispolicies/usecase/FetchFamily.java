@@ -88,7 +88,7 @@ public class FetchFamily {
                 /* professional situation = */ member.professionalSituation(),
                 /* incomeLevel = */ member.incomeLevel() != null ? IdUtils.getIdFromGraphQLString(Objects.requireNonNull(member.incomeLevel()).id()) : null,
                 /* payment method = */ member.preferredPaymentMethod(),
-                /* other household = */ null,
+                /* other household = */ member.coordinates(),
                 /* account details = */ member.bankCoordinates() != null ? member.bankCoordinates() : "",
                 /* photoPath = */ downloadPhoto(member.photo()),
                 /* photoBytes = */ null, // We already saved them on disk, no need to pass them here.
