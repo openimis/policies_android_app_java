@@ -3341,10 +3341,16 @@ public class ClientAndroidInterface {
                         EnrolResult = uploadEnrols(familyArray, insureesArray, policiesArray, premiumsArray, InsureeImages, attachmentsArray);
                         //if family is polygamic
                         if(isPolygamy){
-                            int Fid = 0;
-                            Family existingFamily = null;
                             try {
-                                existingFamily = new FetchFamilyId().execute();
+                                if(Offline.equals("1")){
+                                    Family existingFamily = new FetchFamilyId().execute();
+                                    int Fid = existingFamily.getId();
+                                    ContentValues cv = new ContentValues();
+                                    cv.put("ParentId", Fid);
+                                    String[] queryArgs = {FamilyId};
+                                    sqlHandler.updateData("tblFamilies", cv,
+                                            "ParentId= ?", queryArgs);
+                                }
                             } catch (HttpException e) {
                                 if (e.getCode() != HttpURLConnection.HTTP_NOT_FOUND) {
                                     throw e;
@@ -3352,18 +3358,6 @@ public class ClientAndroidInterface {
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
-
-                            Fid = existingFamily.getId();
-
-                            Log.e("familyId",String.valueOf(Fid));
-
-                            ContentValues cv = new ContentValues();
-                            cv.put("ParentId", Fid);
-                            String[] queryArgs = {FamilyId};
-
-                            sqlHandler.updateData("tblFamilies", cv,
-                                    "ParentId= ?", queryArgs);
-
                         }
                     } else {
                         ShowErrorMessages();
@@ -5125,9 +5119,9 @@ public class ClientAndroidInterface {
                 InsertInsureeDataFromOnline(family.getMembers());
                 if(family.getType() != null && family.getType().equals("P")){
                     List<Family> subFamilies = new FetchSubFamilies().execute(family.getUuid());
-                    for (Family family1 : subFamilies){
-                        InsertFamilyDataFromOnline(family1);
-                        InsertInsureeDataFromOnline(family1.getMembers());
+                    for (Family subFamily : subFamilies){
+                        InsertFamilyDataFromOnline(subFamily);
+                        InsertInsureeDataFromOnline(subFamily.getMembers());
                     }
                 }
                 return 1;

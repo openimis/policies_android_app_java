@@ -69,13 +69,16 @@ public class UpdateFamily {
     }
 
     @WorkerThread
-    public void execute(@NonNull Family family, @NonNull String insureeCHFID, @NonNull int officerId) throws Exception {
+    public void execute(
+            @NonNull Family family,
+            @NonNull String insureeCHFID,
+            int officerId
+    ) throws Exception {
+        int familyId = 0;
         try {
             fetchFamily.execute(insureeCHFID);
             updateFamilyGraphQLRequest.update(family, officerId);
-            for (Family.Member member : family.getMembers()) {
-                insertOrUpdateInsuree(member, officerId, family.getId());
-            }
+            familyId = family.getId();
         } catch (HttpException e) {
             if (e.getCode() == HttpURLConnection.HTTP_NOT_FOUND) {
                 if(family.getParentId() != null && family.getParentId() != 0){
@@ -85,15 +88,17 @@ public class UpdateFamily {
                 }
                 try{
                     Family existingFamily = fetchFamilyId.execute();
-                    for (Family.Member member : family.getMembers()) {
-                        insertOrUpdateInsuree(member, officerId, existingFamily.getId());
-                    }
-                } catch (Exception e2){
+                    familyId = existingFamily.getId();
+                } catch (Exception e2) {
                     e2.printStackTrace();
                 }
             } else {
                 throw e;
             }
+        }
+
+        for (Family.Member member : family.getMembers()) {
+            insertOrUpdateInsuree(member, officerId, familyId);
         }
 
         /*if (existingFamily == null) {
@@ -116,10 +121,12 @@ public class UpdateFamily {
     private void insertOrUpdateInsuree(@NonNull Family.Member member, int officerId, int familyId ) throws Exception {
         try {
             fetchInsureeInquire.execute(member.getChfId());
-            updateInsureeGraphQLRequest.update(member, member.getFamilyId());
+            updateInsureeGraphQLRequest.update(member);
         } catch (HttpException e) {
             if (e.getCode() == HttpURLConnection.HTTP_NOT_FOUND) {
-                createInsureeGraphQLRequest.create(member, familyId, officerId);
+                if(familyId != 0 && !member.isHead()){
+                    createInsureeGraphQLRequest.create(member, familyId, officerId);
+                }
             } else {
                 throw e;
             }
@@ -128,6 +135,6 @@ public class UpdateFamily {
 
     @WorkerThread
     private void removeMemberFromFamily(@NonNull Family.Member member) throws Exception {
-        updateInsureeGraphQLRequest.update(member, null);
+        updateInsureeGraphQLRequest.update(member);
     }
 }
