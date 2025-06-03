@@ -15,7 +15,6 @@ public class GetSubFamiliesGraphQLRequest extends BaseGraphQLRequest {
     @WorkerThread
     @NonNull
     public List<GetSubFamiliesQuery.Edge> get(String parentUuid) throws Exception {
-        List<GetSubFamiliesQuery.Edge> edges = makeSynchronous(new GetSubFamiliesQuery(Input.fromNullable(parentUuid))).getData().families().edges();
-        return edges;
+        return makeSynchronous(new GetSubFamiliesQuery(Input.fromNullable(parentUuid))).getData().families().edges();
     }
 }

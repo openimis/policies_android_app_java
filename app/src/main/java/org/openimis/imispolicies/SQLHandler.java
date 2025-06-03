@@ -93,6 +93,8 @@ public class SQLHandler extends SQLiteOpenHelper {
     public static final String tblIncomeLevel = "tblIncomeLevel";
     public static final String tblContributionPlan = "tblContributionPlan";
     public static final String tblInsureeAttachments = "tblInsureeAttachments";
+    public static final String tblMaritalStatus = "tblMaritalStatus";
+    public static final String tblPaymentMethod = "tblPaymentMethod";
 
     public SQLHandler(Context context) {
         super(context, DBNAME, null, DATABASE_VERSION);
@@ -287,7 +289,7 @@ public class SQLHandler extends SQLiteOpenHelper {
                             "PolicyStatus NUMERIC," +
                             "PolicyValue NUMERIC," +
                             "ProdId NUMERIC," +
-                            "ContributionPlanId NUMERIC," +
+                            "ContributionPlanId TEXT," +
                             "OfficerId NUMERIC," +
                             "isOffline NUMERIC," +
                             "Periodicity TEXT," +
@@ -453,6 +455,20 @@ public class SQLHandler extends SQLiteOpenHelper {
                             "InsureeId INTEGER," +
                             "FamilyId INTEGER" + ")"
             );
+            sqLiteDatabase.execSQL(
+                    "CREATE TABLE " + tblMaritalStatus + "(" +
+                            "Id INTEGER," +
+                            "Code TEXT," +
+                            "Status TEXT," +
+                            "AltLanguage TEXT" + ")"
+            );
+            sqLiteDatabase.execSQL(
+                    "CREATE TABLE " + tblPaymentMethod + "(" +
+                            "Id INTEGER," +
+                            "Code TEXT," +
+                            "Method TEXT," +
+                            "AltLanguage TEXT" + ")"
+            );
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -494,6 +510,8 @@ public class SQLHandler extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + tblRenewals);
         db.execSQL("DROP TABLE IF EXISTS " + tblIncomeLevel);
         db.execSQL("DROP TABLE IF EXISTS " + tblInsureeAttachments);
+        db.execSQL("DROP TABLE IF EXISTS " + tblMaritalStatus);
+        db.execSQL("DROP TABLE IF EXISTS " + tblPaymentMethod);
         if (oldVersion < 2) {
             String sql = "ALTER TABLE tblRenewals ADD COLUMN LocationId INTEGER;";
             db.execSQL(sql);
@@ -1109,5 +1127,74 @@ public class SQLHandler extends SQLiteOpenHelper {
     @NonNull
     public JSONArray getSupportedLanguages() {
         return getResult(tblLanguages, new String[]{"LanguageCode"}, null, null);
+    }
+
+    public int getProductId(String productCode) {
+        openDatabase();
+        String productId = null;
+        try (Cursor cursor = mDatabase.query(tblProduct,
+                new String[]{"ProdId"},
+                "ProductCode = ?",
+                new String[]{productCode},
+                null,
+                null,
+                null,
+                "1")) {
+            cursor.moveToFirst();
+            if (!cursor.isAfterLast()) {
+                productId = cursor.getString(0);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            closeDatabase();
+        }
+        return Integer.parseInt(Objects.requireNonNull(productId));
+    }
+
+    public int getOfficerId(String officerCode) {
+        openDatabase();
+        String officerId = null;
+        try (Cursor cursor = mDatabase.query(tblOfficer,
+                new String[]{"OfficerId"},
+                "Code = ?",
+                new String[]{officerCode},
+                null,
+                null,
+                null,
+                "1")) {
+            cursor.moveToFirst();
+            if (!cursor.isAfterLast()) {
+                officerId = cursor.getString(0);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            closeDatabase();
+        }
+        return Integer.parseInt(Objects.requireNonNull(officerId));
+    }
+
+    public String getContributionPlanId(String contributionPlanCode) {
+        openDatabase();
+        String cpId = null;
+        try (Cursor cursor = mDatabase.query(tblContributionPlan,
+                new String[]{"CpId"},
+                "Code = ?",
+                new String[]{contributionPlanCode},
+                null,
+                null,
+                null,
+                "1")) {
+            cursor.moveToFirst();
+            if (!cursor.isAfterLast()) {
+                cpId = cursor.getString(0);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            closeDatabase();
+        }
+        return cpId;
     }
 }

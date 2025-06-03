@@ -16,10 +16,10 @@ public class CreatePolicyGraphQLRequest extends BaseGraphQLRequest {
 
     @WorkerThread
     @NonNull
-    public CreatePolicyMutation.Data create(@NonNull Family.Policy policy) throws Exception {
+    public CreatePolicyMutation.Data create(@NonNull Family.Policy policy, int familyId) throws Exception {
         Response<CreatePolicyMutation.Data> response = makeSynchronous(new CreatePolicyMutation(
                 CreatePolicyMutationInput.builder()
-                        .familyId(policy.getFamilyId())
+                        .familyId(familyId)
                         .enrollDate(policy.getEnrollDate())
                         .startDate(policy.getStartDate())
                         .expiryDate(policy.getExpiryDate())

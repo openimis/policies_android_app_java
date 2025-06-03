@@ -82,6 +82,7 @@ import org.openimis.imispolicies.usecase.DeletePolicyRenewal;
 import org.openimis.imispolicies.usecase.FetchFamily;
 import org.openimis.imispolicies.usecase.FetchFamilyId;
 import org.openimis.imispolicies.usecase.FetchMasterData;
+import org.openimis.imispolicies.usecase.FetchPolicies;
 import org.openimis.imispolicies.usecase.FetchSubFamilies;
 import org.openimis.imispolicies.usecase.Login;
 import org.openimis.imispolicies.usecase.PostFeedback;
@@ -1792,9 +1793,8 @@ public class ClientAndroidInterface {
     @SuppressWarnings("unused")
     public String getContributionPlans(String EnrolmentDate) {
         @Language("SQL")
-        String ContributionPlanQuery = "SELECT  Id, Code, Name, Code ||\" - \"|| Name CombinedName  \n" +
+        String ContributionPlanQuery = "SELECT  Id, Code, Name, CpId, Code ||\" - \"|| Name CombinedName  \n" +
                 "FROM tblContributionPlan ";
-
 
         JSONArray ContributionPlans = sqlHandler.getResult(ContributionPlanQuery, null);
         return ContributionPlans.toString();
@@ -1945,7 +1945,7 @@ public class ClientAndroidInterface {
         boolean isValueChanged = false;
         @Language("SQL")
         String QueryPolicyValue = "SELECT P.PolicyId, CP.ProductId, ContributionPlanId, EffectiveDate, PolicyValue, StartDate, ExpiryDate, EnrollDate, SigningDate,FamilyId,PolicyStage,IsOffline, Periodicity, PaymentDay FROM tblPolicy P\n" +
-                "INNER JOIN tblContributionPlan CP ON CP.Id = P.ContributionPlanId\n" +
+                "INNER JOIN tblContributionPlan CP ON CP.CpId = P.ContributionPlanId\n" +
                 "WHERE FamilyId = " + FamilyId;
         JSONArray PolicyValueArray = sqlHandler.getResult(QueryPolicyValue, null);
         JSONObject ValueObject = null;
@@ -2016,7 +2016,7 @@ public class ClientAndroidInterface {
                 "   WHEN PolicyStatus = 4 THEN '" + activity.getResources().getString(R.string.Suspended) + "'  " +
                 "   WHEN PolicyStatus = 8 THEN '" + activity.getResources().getString(R.string.Expired) + "'  END  PolicyStatus, " +
                 "   PolicyStatus PolicyStatusValue, P.ExpiryDate, isOffline FROM tblPolicy P \n" +
-                "   INNER JOIN tblContributionPlan CP ON P.ContributionPlanId=CP.Id  \n " +
+                "   INNER JOIN tblContributionPlan CP ON P.ContributionPlanId=CP.CpId  \n " +
                 "   LEFT JOIN tblBulkControlNumbers bcn on P.PolicyId=bcn.PolicyId " +
                 "   WHERE FamilyId = ?";
 
@@ -3112,6 +3112,7 @@ public class ClientAndroidInterface {
             boolean isPolygamy = false;
             try {
                 object = familiesToUpload.getJSONObject(i);
+                Log.e("family object", object.toString());
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -3137,7 +3138,7 @@ public class ClientAndroidInterface {
                         query.append(" F.FamilyId == ").append(verifiedId.get(j)).append(" OR");
                     }
                 }
-                if (verifiedId.size() == 0) {
+                if (verifiedId.isEmpty()) {
                     query.append(" F.InsureeId != ''");
                 } else {
                     query.append(" AND F.InsureeId != ''");
@@ -3252,7 +3253,7 @@ public class ClientAndroidInterface {
                         query.append(" FamilyId == ").append(verifiedId.get(j)).append(" OR");
                     }
                 }
-                if (verifiedId.size() == 0) {
+                if (verifiedId.isEmpty()) {
                     query.append(" FamilyId != ''");
                 }
             }
@@ -3463,40 +3464,11 @@ public class ClientAndroidInterface {
         JSONObject familyObj = familyArray.getJSONObject(0);
         JSONObject insureeObj = insureesArray.getJSONObject(0);
 
-        Family family = familyFromJSONObject(familyObj, insureesArray, insureeImages, attachmentsArray);
+        Family family = familyFromJSONObject(familyObj, insureesArray, insureeImages, attachmentsArray, policiesArray, premiumsArray);
         try {
             new UpdateFamily().execute(family, insureeObj.getString("CHFID"), global.getOfficerId());
         } catch (Exception e) {
             enrolMessages.add(e.getMessage());
-            return -400;
-        }
-
-        try {
-            Family existingFamily = new FetchFamilyId().execute();
-            for (int j = 0; j < policiesArray.length(); j++) {
-                JSONArray policyPremiums = new JSONArray();
-                String policyId = policiesArray.getJSONObject(j).getString("PolicyId");
-                for (int k = 0; k < premiumsArray.length(); k++) {
-                    JSONObject premiumObject = premiumsArray.getJSONObject(k);
-                    if (StringUtils.equals(policyId, premiumObject.getString("PolicyId"))) {
-                        policyPremiums.put(premiumObject);
-                    }
-                }
-                policiesArray.getJSONObject(j).put("premium", policyPremiums);
-            }
-            List<Family.Policy> policies = familyPolicyFromJSONObject(existingFamily.getUuid(), existingFamily.getId(), policiesArray);
-            try {
-                new CreatePolicy().execute(policies);
-            } catch (Exception e) {
-                enrolMessages.add(e.getMessage());
-                return -400;
-            }
-        } catch (HttpException e) {
-            if (e.getCode() != HttpURLConnection.HTTP_NOT_FOUND) {
-                throw e;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
             return -400;
         }
 
@@ -3508,9 +3480,12 @@ public class ClientAndroidInterface {
             @NonNull JSONObject json,
             @NonNull JSONArray insurees,
             @NonNull Pair<String, byte[]>[] insureeImages,
-            @Nullable JSONArray attachments
+            @Nullable JSONArray attachments,
+            @NonNull JSONArray policiesArray,
+            @NonNull JSONArray premiumsArray
     ) throws JSONException {
         List<Family.Member> members = new ArrayList<>();
+        List<Family.Policy> policies = new ArrayList<>();
         List<Family.Attachment> familyAttachments = new ArrayList<>();
         String familyUUID = JsonUtils.getStringOrDefault(json, "FamilyUUID", UUID.randomUUID().toString(), true);
         for (int i = 0; i < insurees.length(); i++) {
@@ -3520,6 +3495,9 @@ public class ClientAndroidInterface {
             for (int a = 0; a < attachments.length(); a++){
                 familyAttachments.add(familyAttachmentFromJSONObject(attachments.getJSONObject(a)));
             }
+        }
+        for (int j = 0; j < policiesArray.length(); j++) {
+            policies.add(familyPolicyFromJSONObject(policiesArray.getJSONObject(j), premiumsArray, familyUUID));
         }
         return new Family(
                 /* headChfId = */ json.getString("HOFCHFID"),
@@ -3536,7 +3514,8 @@ public class ClientAndroidInterface {
                 /* isOffline = */ JsonUtils.getBooleanOrDefault(json, "isOffline", false),
                 /* parentId = */ json.has("ParentId") ? Integer.parseInt(json.getString("ParentId")): null,
                 /* members = */ members,
-                /* attachments = */ familyAttachments
+                /* attachments = */ familyAttachments,
+                /* policies = */ policies
         );
     }
 
@@ -3585,6 +3564,7 @@ public class ClientAndroidInterface {
             @NonNull JSONObject object
     ) throws JSONException {
         return new Family.Attachment(
+                /* id */ Integer.parseInt(object.getString("Id")),
                 /* tittle */ object.getString("Title"),
                 /* mime */ "image/jpeg",
                 /* filename */ object.getString("Filename"),
@@ -3593,42 +3573,43 @@ public class ClientAndroidInterface {
     }
 
     @NonNull
-    private List<Family.Policy> familyPolicyFromJSONObject(
-            @NonNull String familyUUID,
-            @NonNull int familyId,
-            @NonNull JSONArray array
+    private Family.Policy familyPolicyFromJSONObject(
+            @NonNull JSONObject policy,
+            @NonNull JSONArray premiumsArray,
+            @NonNull String familyUUID
     ) throws JSONException {
-        List<Family.Policy> policies = new ArrayList<>();
-        for (int i = 0; i < array.length(); i++) {
-            JSONObject object = array.getJSONObject(i);
-            String policyUuid = UUID.randomUUID().toString();
-            @Language("SQL")
-            String query = "SELECT * FROM tblContributionPlan WHERE Id =" + Integer.parseInt(object.getString("ContributionPlanId"));
-            JSONArray contributionPlans = sqlHandler.getResult(query, null);
-            policies.add(new Family.Policy(
-                    /* id = */ Integer.parseInt(object.getString("PolicyId")),
-                    /* uuid = */ policyUuid,
-                    /* familyId = */ familyId,
-                    /* familyUuid = */ familyUUID,
-                    /* enrollDate = */ Objects.requireNonNull(JsonUtils.getDateOrDefault(object, "EnrollDate")),
-                    /* startDate = */ Objects.requireNonNull(JsonUtils.getDateOrDefault(object, "StartDate")),
-                    /* effectiveDate = */ JsonUtils.getDateOrDefault(object, "EffectiveDate"),
-                    /* expiryDate = */ Objects.requireNonNull(JsonUtils.getDateOrDefault(object, "ExpiryDate")),
-                    /* status = */ JsonUtils.getStringOrDefault(object, "Policystatus"),
-                    /* value = */ JsonUtils.getDoubleOrDefault(object, "PolicyValue"),
-                    /* productId = */ JsonUtils.getIntegerOrDefault(object, "ProdId"),
-                    /* officerId = */ Integer.parseInt(object.getString("OfficerId")),
-                    /* stage = */ JsonUtils.getStringOrDefault(object, "PolicyStage"),
-                    /* contributionPlanId = */ JsonUtils.getStringOrDefault(contributionPlans.getJSONObject(0), "CpId"),
-                    /* periodicity = */ JsonUtils.getStringOrDefault(object, "Periodicity"),
-                    /* signingDate = */ JsonUtils.getDateOrDefault(object, "SigningDate"),
-                    /* paymentDay = */ JsonUtils.getStringOrDefault(object, "PaymentDay"),
-                    /* isOffline = */ JsonUtils.getBooleanOrDefault(object, "isOffline", false),
-                    /* controlNumber = */ JsonUtils.getStringOrDefault(object, "ControlNumber"),
-                    /* premiums = */ object.has("premium") ? familyPolicyPremiumsFromJSONObject(policyUuid, object.getJSONArray("premium")) : Collections.emptyList()
-            ));
+        JSONArray policyPremiums = new JSONArray();
+        String policyId = policy.getString("PolicyId");
+        String policyUuid = UUID.randomUUID().toString();
+        for (int k = 0; k < premiumsArray.length(); k++) {
+            JSONObject premiumObject = premiumsArray.getJSONObject(k);
+            if (StringUtils.equals(policyId, premiumObject.getString("PolicyId"))) {
+                policyPremiums.put(premiumObject);
+            }
         }
-        return policies;
+        policy.put("premium", policyPremiums);
+        return new Family.Policy(
+                /* id = */ Integer.parseInt(policyId),
+                /* uuid = */ policyUuid,
+                /* familyId = */ Integer.parseInt(policy.getString("FamilyId")),
+                /* familyUuid = */ familyUUID,
+                /* enrollDate = */ Objects.requireNonNull(JsonUtils.getDateOrDefault(policy, "EnrollDate")),
+                /* startDate = */ Objects.requireNonNull(JsonUtils.getDateOrDefault(policy, "StartDate")),
+                /* effectiveDate = */ JsonUtils.getDateOrDefault(policy, "EffectiveDate"),
+                /* expiryDate = */ Objects.requireNonNull(JsonUtils.getDateOrDefault(policy, "ExpiryDate")),
+                /* status = */ JsonUtils.getStringOrDefault(policy, "Policystatus"),
+                /* value = */ JsonUtils.getDoubleOrDefault(policy, "PolicyValue"),
+                /* productId = */ JsonUtils.getIntegerOrDefault(policy, "ProdId"),
+                /* officerId = */ Integer.parseInt(policy.getString("OfficerId")),
+                /* stage = */ JsonUtils.getStringOrDefault(policy, "PolicyStage"),
+                /* contributionPlanId = */ JsonUtils.getStringOrDefault(policy, "ContributionPlanId"),
+                /* periodicity = */ JsonUtils.getStringOrDefault(policy, "Periodicity"),
+                /* signingDate = */ JsonUtils.getDateOrDefault(policy, "SigningDate"),
+                /* paymentDay = */ JsonUtils.getStringOrDefault(policy, "PaymentDay"),
+                /* isOffline = */ JsonUtils.getBooleanOrDefault(policy, "isOffline", false),
+                /* controlNumber = */ JsonUtils.getStringOrDefault(policy, "ControlNumber"),
+                /* premiums = */ policy.has("premium") ? familyPolicyPremiumsFromJSONObject(policyUuid, policy.getJSONArray("premium")) : Collections.emptyList()
+        );
     }
 
     @NonNull
@@ -4450,18 +4431,19 @@ public class ClientAndroidInterface {
 
             JSONArray ContributionPlans = new JSONArray();
             for(int i=0; i < masterData.getJSONArray("ContributionPlans").length(); i++){
+                JSONObject cp = masterData.getJSONArray("ContributionPlans").getJSONObject(i);
                 JSONObject contrib = new JSONObject();
                 contrib.put("Id", i+1);
-                contrib.put("Code", masterData.getJSONArray("ContributionPlans").getJSONObject(i).getString("Code"));
-                contrib.put("Name", masterData.getJSONArray("ContributionPlans").getJSONObject(i).getString("Name"));
-                contrib.put("Periodicity", masterData.getJSONArray("ContributionPlans").getJSONObject(i).getString("Periodicity"));
+                contrib.put("Code", cp.getString("Code"));
+                contrib.put("Name", cp.getString("Name"));
+                contrib.put("Periodicity", cp.getString("Periodicity"));
 
                 JSONObject json_text = masterData.getJSONArray("ContributionPlans").getJSONObject(i).getJSONObject("Json_ext");
                 contrib.put("CalculationRules", json_text.get("calculation_rule").toString());
-                contrib.put("ValidFrom", masterData.getJSONArray("ContributionPlans").getJSONObject(i).getString("datevalidfrom"));
-                contrib.put("ValidTo", masterData.getJSONArray("ContributionPlans").getJSONObject(i).getString("datevalidto"));
-                contrib.put("CpId", masterData.getJSONArray("ContributionPlans").getJSONObject(i).getString("UUID"));
-                contrib.put("ProductId", masterData.getJSONArray("ContributionPlans").getJSONObject(i).getString("BenefitPlanID"));
+                contrib.put("ValidFrom", cp.getString("datevalidfrom"));
+                contrib.put("ValidTo", cp.getString("datevalidto"));
+                contrib.put("CpId", cp.getString("UUID"));
+                contrib.put("ProductId", cp.getString("BenefitPlanID"));
                 ContributionPlans.put(contrib);
             }
             insertContributionPlan(ContributionPlans);
@@ -4647,7 +4629,7 @@ public class ClientAndroidInterface {
     @SuppressWarnings("unused")
     public int getTotalPolicy() {
         @Language("SQL")
-        String PolicyQuery = "SELECT count(1) Policies  FROM  tblPolicy WHERE isoffline = 1 OR isoffline = 0"; //WHERE isoffline = 1 OR isoffline = 0
+        String PolicyQuery = "SELECT count(1) Policies  FROM  tblPolicy WHERE isoffline = 1 OR isoffline = 0 OR isOffline = \"True\" OR isOffline = \"false\""; //WHERE isoffline = 1 OR isoffline = 0
         JSONArray Policy = sqlHandler.getResult(PolicyQuery, null);
         JSONObject object = null;
         int TotalPolicies = 0;
@@ -5117,11 +5099,17 @@ public class ClientAndroidInterface {
                 Family family = new FetchFamily().execute(insuranceNumber);
                 InsertFamilyDataFromOnline(family);
                 InsertInsureeDataFromOnline(family.getMembers());
+                InsertAttachmentDataFromOnline(Objects.requireNonNull(family.getAttachments()));
+                JSONArray familyPolicies = new FetchPolicies().execute(family.getUuid());
+                InsertPolicyDataFromOnline(familyPolicies, family.getId());
                 if(family.getType() != null && family.getType().equals("P")){
                     List<Family> subFamilies = new FetchSubFamilies().execute(family.getUuid());
                     for (Family subFamily : subFamilies){
                         InsertFamilyDataFromOnline(subFamily);
                         InsertInsureeDataFromOnline(subFamily.getMembers());
+                        InsertAttachmentDataFromOnline(Objects.requireNonNull(subFamily.getAttachments()));
+                        JSONArray subFamilyPolicies = new FetchPolicies().execute(subFamily.getUuid());
+                        InsertPolicyDataFromOnline(subFamilyPolicies, subFamily.getId());
                     }
                 }
                 return 1;
@@ -5196,6 +5184,42 @@ public class ClientAndroidInterface {
         sqlHandler.insertData("tblInsuree", Columns, array, "");
     }
 
+    private void InsertPolicyDataFromOnline(@NonNull JSONArray policies, int familyId) throws JSONException {
+        JSONArray array = new JSONArray();
+        for (int i = 0; i< policies.length(); i++) {
+            JSONObject policyObject = policies.getJSONObject(i);
+            int prodId = 0;
+            int officerId = 0;
+            String contributionPlanId = sqlHandler.getContributionPlanId(policyObject.getString("ContributionPlanCode"));
+            officerId = sqlHandler.getOfficerId(policyObject.getString("OfficerCode"));
+            prodId = sqlHandler.getProductId(policyObject.getString("ProductCode"));
+            @Language("SQL")
+            String QueryCheck = "SELECT PolicyId FROM tblPolicy WHERE PolicyId = " + policyObject.getInt("PolicyId");
+            if (sqlHandler.getResult(QueryCheck, null).length() == 0) {
+                policyObject.put("ProdId",prodId);
+                policyObject.put("ContributionPlanId",contributionPlanId);
+                policyObject.put("OfficerId",officerId);
+                policyObject.put("FamilyId",familyId);
+                array.put(policyObject);
+            }
+        }
+        Log.e("policies", array.toString());
+        String[] Columns = {"PolicyId", "FamilyId", "EnrollDate", "StartDate", "EffectiveDate", "ExpiryDate", "SigningDate", "PolicyStatus",
+                "PolicyValue", "ProdId", "ContributionPlanId", "OfficerId", "PaymentDay", "Periodicity", "IsOffline"};
+        sqlHandler.insertData("tblPolicy", Columns, array, "");
+    }
+
+    private void InsertAttachmentDataFromOnline(@NonNull List<Family.Attachment> attachments) throws JSONException{
+        JSONArray array = new JSONArray();
+        for (Family.Attachment attachment : attachments){
+            @Language("SQL")
+            String QueryCheck = "SELECT Id FROM tblInsureeAttachments WHERE Id =" + attachment.getIdAttachment();
+            if (sqlHandler.getResult(QueryCheck, null).length() == 0) {
+                array.put(toAttachmentJSONObject(attachment));
+            }
+        }
+    }
+
     @NonNull
     private JSONObject toJSONObject(@NonNull Family.Member member) throws JSONException {
         JSONObject jsonObject = new JSONObject();
@@ -5229,6 +5253,37 @@ public class ClientAndroidInterface {
         jsonObject.put("paymentMethod", member.getPaymentMethod());
         jsonObject.put("accountDetails", member.getAccountDetails());
         jsonObject.put("otherHousehold", member.getOtherHousehold());
+        return jsonObject;
+    }
+
+    @NonNull
+    private JSONObject toPolicyJSONObject(@NonNull Family.Policy policy) throws JSONException {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("policyId", policy.getId());
+        jsonObject.put("familyId", policy.getFamilyId());
+        jsonObject.put("enrollDate", DateUtils.toDateString(policy.getEnrollDate()));
+        jsonObject.put("startDate", DateUtils.toDateString(policy.getStartDate()));
+        jsonObject.put("effectiveDate", policy.getEffectiveDate() != null ? DateUtils.toDateString(policy.getEffectiveDate()): null);
+        jsonObject.put("expiryDate", DateUtils.toDateString(policy.getExpiryDate()));
+        jsonObject.put("signingDate", policy.getSigningDate() != null ? DateUtils.toDateString(policy.getSigningDate()) : null);
+        jsonObject.put("policyStatus", policy.getStatus());
+        jsonObject.put("policyValue", policy.getValue());
+        jsonObject.put("prodId", policy.getProductId());
+        jsonObject.put("contributionPlanId", policy.getContributionPlanId());
+        jsonObject.put("officerId", policy.getOfficerId());
+        jsonObject.put("paymentDay", policy.getPaymentDay());
+        jsonObject.put("periodicity", policy.getPeriodicity());
+        jsonObject.put("policyStage", policy.getPolicyStage());
+        jsonObject.put("isOffline", policy.isOffline());
+        return jsonObject;
+    }
+
+    private JSONObject toAttachmentJSONObject (@NonNull Family.Attachment attachment) throws JSONException{
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("id", attachment.getIdAttachment());
+        jsonObject.put("title", attachment.getTitle());
+        jsonObject.put("filename", attachment.getFilename());
+        jsonObject.put("content", attachment.getContent());
         return jsonObject;
     }
 
@@ -5271,7 +5326,7 @@ public class ClientAndroidInterface {
     @SuppressWarnings("unused")
     public int getTotalPolicyOnline() {
         @Language("SQL")
-        String PolicyQuery = "SELECT count(1) Policies  FROM  tblPolicy WHERE isOffline = 0 ";
+        String PolicyQuery = "SELECT count(1) Policies  FROM  tblPolicy WHERE isOffline = 0 OR isOffline = false ";
         JSONArray Policy = sqlHandler.getResult(PolicyQuery, null);
         int TotalPolicies = 0;
         try {
@@ -5700,7 +5755,7 @@ public class ClientAndroidInterface {
     @SuppressWarnings("unused")
     public String getContributionPlans() {
         String tableName = "tblContributionPlan";
-        String[] columns = {"Id", "Code", "Name","ProductId", "CalculationRules" , "ValidFrom", "ValidTo"};
+        String[] columns = {"Id", "Code", "Name","ProductId", "CalculationRules" , "ValidFrom", "ValidTo", "CpId"};
 
         JSONArray contributionPlans = sqlHandler.getResult(tableName, columns, null, null);
 

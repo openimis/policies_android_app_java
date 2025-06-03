@@ -47,6 +47,9 @@ public class Family implements Parcelable {
     private final List<Attachment> attachments;
 
     @Nullable
+    private final List<Policy> policies;
+
+    @Nullable
     private Member head = null;
 
     public Family(
@@ -64,7 +67,8 @@ public class Family implements Parcelable {
             boolean isOffline,
             @Nullable Integer parentId,
             @NonNull List<Member> members,
-            @Nullable List<Attachment> attachments
+            @Nullable List<Attachment> attachments,
+            @Nullable List<Policy> policies
     ) {
         this.headChfId = headChfId;
         this.id = id;
@@ -81,6 +85,7 @@ public class Family implements Parcelable {
         this.parentId = parentId;
         this.members = members;
         this.attachments = attachments;
+        this.policies = policies;
     }
 
     protected Family(Parcel in) {
@@ -105,6 +110,7 @@ public class Family implements Parcelable {
         parentId = pId;
         members = Objects.requireNonNull(in.createTypedArrayList(Member.CREATOR));
         attachments = in.createTypedArrayList(Attachment.CREATOR);
+        policies = in.createTypedArrayList(Policy.CREATOR);
     }
 
     @Override
@@ -124,6 +130,7 @@ public class Family implements Parcelable {
         dest.writeInt(parentId);
         dest.writeTypedList(members);
         dest.writeTypedList(attachments);
+        dest.writeTypedList(policies);
     }
 
     @Override
@@ -209,6 +216,9 @@ public class Family implements Parcelable {
 
     @Nullable
     public List<Attachment> getAttachments (){ return attachments;}
+
+    @Nullable
+    public List<Policy> getPolicies (){ return policies; }
 
     public static final Creator<Family> CREATOR = new Creator<>() {
         @Override
@@ -1088,6 +1098,8 @@ public class Family implements Parcelable {
 
     public static class Attachment implements Parcelable {
         @NonNull
+        private final int idAttachment;
+        @NonNull
         private final String title;
         @NonNull
         private final String mime;
@@ -1097,11 +1109,13 @@ public class Family implements Parcelable {
         private final String content;
 
         public Attachment(
+                @NonNull int idAttachment,
                 @NonNull String title,
                 @NonNull String mime,
                 @NonNull String filename,
                 @Nullable String content
         ) {
+            this.idAttachment = idAttachment;
             this.title = title;
             this.mime = mime;
             this.filename = filename;
@@ -1109,6 +1123,7 @@ public class Family implements Parcelable {
         }
 
         protected Attachment(Parcel in) {
+            idAttachment = in.readInt();
             title = in.readString();
             mime = in.readString();
             filename = in.readString();
@@ -1117,6 +1132,7 @@ public class Family implements Parcelable {
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(idAttachment);
             dest.writeString(title);
             dest.writeString(mime);
             dest.writeString(filename);
@@ -1127,6 +1143,9 @@ public class Family implements Parcelable {
         public int describeContents() {
             return 0;
         }
+
+        @NonNull
+        public int getIdAttachment(){ return idAttachment; }
 
         @NonNull
         public String getTitle() {

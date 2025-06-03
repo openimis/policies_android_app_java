@@ -9,12 +9,15 @@ import org.openimis.imispolicies.domain.entity.Family;
 import org.openimis.imispolicies.network.exception.HttpException;
 import org.openimis.imispolicies.network.request.CreateFamilyGraphQLRequest;
 import org.openimis.imispolicies.network.request.CreateInsureeGraphQLRequest;
+import org.openimis.imispolicies.network.request.CreatePolicyGraphQLRequest;
+import org.openimis.imispolicies.network.request.CreatePremiumGraphQLRequest;
 import org.openimis.imispolicies.network.request.CreateSubFamilyGraphQLRequest;
 import org.openimis.imispolicies.network.request.UpdateFamilyGraphQLRequest;
 import org.openimis.imispolicies.network.request.UpdateInsureeGraphQLRequest;
 import org.openimis.imispolicies.tools.Log;
 
 import java.net.HttpURLConnection;
+import java.util.Objects;
 
 public class UpdateFamily {
 
@@ -34,6 +37,10 @@ public class UpdateFamily {
     private final FetchFamily fetchFamily;
     @NonNull
     private final FetchFamilyId fetchFamilyId;
+    @NonNull
+    private final CreatePolicyGraphQLRequest createPolicyGraphQLRequest;
+    @NonNull
+    private final CreatePremiumGraphQLRequest createPremiumGraphQLRequest;
 
     public UpdateFamily() {
         this(
@@ -44,7 +51,9 @@ public class UpdateFamily {
                 new CreateSubFamilyGraphQLRequest(),
                 new FetchInsureeInquire(),
                 new FetchFamily(),
-                new FetchFamilyId()
+                new FetchFamilyId(),
+                new CreatePolicyGraphQLRequest(),
+                new CreatePremiumGraphQLRequest()
         );
     }
 
@@ -56,7 +65,9 @@ public class UpdateFamily {
             @NonNull CreateSubFamilyGraphQLRequest createSubFamilyGraphQLRequest,
             @NonNull FetchInsureeInquire fetchInsureeInquire,
             @NonNull FetchFamily fetchFamily,
-            @NonNull FetchFamilyId fetchFamilyId
+            @NonNull FetchFamilyId fetchFamilyId,
+            @NonNull CreatePolicyGraphQLRequest createPolicyGraphQLRequest,
+            @NonNull CreatePremiumGraphQLRequest createPremiumGraphQLRequest
     ) {
         this.createFamilyGraphQLRequest = createFamilyGraphQLRequest;
         this.updateFamilyGraphQLRequest = updateFamilyGraphQLRequest;
@@ -66,6 +77,8 @@ public class UpdateFamily {
         this.fetchInsureeInquire = fetchInsureeInquire;
         this.fetchFamily = fetchFamily;
         this.fetchFamilyId = fetchFamilyId;
+        this.createPolicyGraphQLRequest = createPolicyGraphQLRequest;
+        this.createPremiumGraphQLRequest = createPremiumGraphQLRequest;
     }
 
     @WorkerThread
@@ -101,6 +114,10 @@ public class UpdateFamily {
             insertOrUpdateInsuree(member, officerId, familyId);
         }
 
+        for (Family.Policy policy : Objects.requireNonNull(family.getPolicies())){
+            insertOrUpdatePolicy(policy, familyId);
+        }
+
         /*if (existingFamily == null) {
             createFamilyGraphQLRequest.create(family);
         } else {
@@ -130,6 +147,14 @@ public class UpdateFamily {
             } else {
                 throw e;
             }
+        }
+    }
+
+    @WorkerThread
+    private void insertOrUpdatePolicy (@NonNull Family.Policy policy, int familyId) throws Exception{
+        createPolicyGraphQLRequest.create(policy, familyId);
+        for (Family.Policy.Premium premium : policy.getPremiums()) {
+            createPremiumGraphQLRequest.create(premium);
         }
     }
 

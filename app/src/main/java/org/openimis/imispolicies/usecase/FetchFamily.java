@@ -20,6 +20,7 @@ import org.openimis.imispolicies.util.StringUtils;
 
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.util.Collections;
 import java.util.Objects;
 
 public class FetchFamily {
@@ -54,7 +55,8 @@ public class FetchFamily {
                 /* isOffline = */ node.isOffline() != null ? Objects.requireNonNull(node.isOffline()) : false,
                 /* parentId = */ node.parent() != null ? IdUtils.getIdFromGraphQLString(node.parent().id())  : null,
                 /* insurees = */ Mapper.map(node.members().edges(), (edge) -> toMember(edge, node)),
-                /* attachments = */ node.attachments() != null ? Objects.requireNonNull(Mapper.map(node.attachments(), (attachment) -> toAttachment(attachment)))  : null
+                /* attachments = */ Mapper.map(Objects.requireNonNull(node.attachments()), (attachment) -> toAttachment(attachment)),
+                null
         );
     }
 
@@ -145,6 +147,7 @@ public class FetchFamily {
     @NonNull
     private Family.Attachment toAttachment(@NonNull GetFamilyQuery.Attachment attachment){
         return new Family.Attachment(
+                /* id */ attachment.idAttachment(),
                 /* tittle */ attachment.title(),
                 /* mime */ attachment.mime(),
                 /* filename */ attachment.filename(),
