@@ -1899,7 +1899,7 @@ public class ClientAndroidInterface {
             values.put("PaymentDay", data.get("ddlPaymentDay"));
 
             @Language("SQL")
-            String query = "SELECT * FROM tblContributionPlan WHERE Id =" + Integer.parseInt(data.get("ddlContributionPlan"));
+            String query = "SELECT * FROM tblContributionPlan WHERE CpId = '" + data.get("ddlContributionPlan") +"'";
             JSONArray contributionPlans = sqlHandler.getResult(query, null);
             values.put("ProdId", contributionPlans.getJSONObject(0).getInt("ProductId"));
 
@@ -5767,7 +5767,7 @@ public class ClientAndroidInterface {
         JSONObject calculationRule = new JSONObject();
         try {
             @Language("SQL")
-            String query = "SELECT * FROM tblContributionPlan WHERE Id =" + Integer.parseInt(CPId);
+            String query = "SELECT * FROM tblContributionPlan WHERE CpId = '" + CPId + "'";
             JSONArray contributionPlans = sqlHandler.getResult(query, null);
             JSONObject cp = contributionPlans.getJSONObject(0);
 
