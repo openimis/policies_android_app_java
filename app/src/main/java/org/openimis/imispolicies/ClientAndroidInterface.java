@@ -1918,7 +1918,12 @@ public class ClientAndroidInterface {
                 //InsertRecordedPolicies("new", String.valueOf(FamilyId), data.get("ddlProduct"), data.get("hfPolicyValue"), MaxPolicyId);
             } else {
                 int Online = 2;
-                sqlHandler.updateData("tblPolicy", values, "PolicyId = ? AND (isOffline = ? OR isOffline = ?) ", new String[]{String.valueOf(PolicyId), String.valueOf(isOffline), String.valueOf(Online)});
+                sqlHandler.updateData(
+                        "tblPolicy",
+                        values,
+                        "PolicyId = ? AND (isOffline = ? OR isOffline = ? OR isOffline = ? Or isOffline = ? ) ",
+                        new String[]{String.valueOf(PolicyId), String.valueOf(isOffline), String.valueOf(Online), String.valueOf(true), String.valueOf(false)}
+                );
                 if (IsBulkCNUsed()) {
                     sqlHandler.clearCnAssignedToPolicy(PolicyId);
                     sqlHandler.assignCnToPolicy(PolicyId, controlNumber);
@@ -3241,7 +3246,7 @@ public class ClientAndroidInterface {
 
             //get Policies
             query = new StringBuilder(
-                    "SELECT p.PolicyId AS PolicyId, FamilyId AS FamilyId, EnrollDate, StartDate, NULLIF(EffectiveDate,'null') EffectiveDate, ExpiryDate, Policystatus, PolicyValue, ProdId, OfficerId, ContributionPlanId, PolicyStage, isOffline, bcn.ControlNumber, Periodicity, SigningDate, PaymentDay FROM tblPolicy p LEFT JOIN tblBulkControlNumbers bcn on p.PolicyId=bcn.PolicyId WHERE "
+                    "SELECT p.PolicyId AS PolicyId, FamilyId AS FamilyId, PolicyUuid, EnrollDate, StartDate, NULLIF(EffectiveDate,'null') EffectiveDate, ExpiryDate, Policystatus, PolicyValue, ProdId, OfficerId, ContributionPlanId, PolicyStage, isOffline, bcn.ControlNumber, Periodicity, SigningDate, PaymentDay FROM tblPolicy p LEFT JOIN tblBulkControlNumbers bcn on p.PolicyId=bcn.PolicyId WHERE "
             );
             if (CallerId != 2) {
                 query.append(" FamilyId = ").append(FamilyId);
