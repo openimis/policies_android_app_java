@@ -2044,7 +2044,7 @@ public class ClientAndroidInterface {
                 "   WHEN PolicyStatus = 4 THEN '" + activity.getResources().getString(R.string.Suspended) + "'  " +
                 "   WHEN PolicyStatus = 8 THEN '" + activity.getResources().getString(R.string.Expired) + "'  END  PolicyStatus, " +
                 "   PolicyStatus  PolicyStatusValue, P.ExpiryDate, (IFNULL(PolicyValue,0) - IFNULL(Contribution,0)) Balance ,  IFNULL(Contribution,0) Contribution, P.isOffline  FROM tblPolicy P \n" +
-                "   INNER JOIN tblContributionPlan CP ON P.ContributionPlanId=CP.Id  \n " +
+                "   INNER JOIN tblContributionPlan CP ON P.ContributionPlanId=CP.CpId  \n " +
                 "   LEFT JOIN (SELECT MAX(PolicyId) PolicyId, IFNULL(Sum(Amount),0) Contribution ,PremiumId " +
                 "   FROM  tblPremium WHERE PolicyId = " + PolicyId + " AND isPhotoFee = 'false' ) " +
                 "   Pre ON Pre.PolicyId=P.PolicyId \n " +
