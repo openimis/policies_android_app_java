@@ -1481,6 +1481,10 @@ type PolicyGQLType implements Node {
   claimserviceSet: [ClaimServiceGQLType!]!
   policyholderinsureeSet(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID, version: Int, policyHolder_Id: UUID, policyHolder_Code: String, policyHolder_Code_Istartswith: String, policyHolder_Code_Icontains: String, policyHolder_Code_Iexact: String, policyHolder_Version: Int, policyHolder_TradeName: String, policyHolder_TradeName_Istartswith: String, policyHolder_TradeName_Icontains: String, policyHolder_TradeName_Iexact: String, policyHolder_Locations_Id: ID, policyHolder_Locations_Uuid: String, policyHolder_Locations_Code: String, policyHolder_Locations_Code_Istartswith: String, policyHolder_Locations_Code_Icontains: String, policyHolder_Locations_Code_Iexact: String, policyHolder_Locations_Code_Ne: String, policyHolder_Locations_Name: String, policyHolder_Locations_Name_Istartswith: String, policyHolder_Locations_Name_Icontains: String, policyHolder_Locations_Name_Iexact: String, policyHolder_Locations_Name_Ne: String, policyHolder_Locations_Type: String, policyHolder_Locations_Parent_Uuid: String, policyHolder_Locations_Parent_Uuid_In: [String], policyHolder_Locations_Parent_Parent_Uuid: String, policyHolder_Locations_Parent_Parent_Uuid_In: [String], policyHolder_Locations_Parent_Parent_Parent_Uuid: String, policyHolder_Locations_Parent_Parent_Parent_Uuid_In: [String], policyHolder_Locations_Parent_Id: ID, policyHolder_Locations_Parent_Id_In: [String], policyHolder_Phone: String, policyHolder_Phone_Istartswith: String, policyHolder_Phone_Icontains: String, policyHolder_Phone_Iexact: String, policyHolder_Fax: String, policyHolder_Fax_Istartswith: String, policyHolder_Fax_Icontains: String, policyHolder_Fax_Iexact: String, policyHolder_Email: String, policyHolder_Email_Istartswith: String, policyHolder_Email_Icontains: String, policyHolder_Email_Iexact: String, policyHolder_LegalForm: Int, policyHolder_ActivityCode: Int, policyHolder_AccountancyAccount: String, policyHolder_PaymentReference: String, policyHolder_DateCreated: DateTime, policyHolder_DateCreated_Lt: DateTime, policyHolder_DateCreated_Lte: DateTime, policyHolder_DateCreated_Gt: DateTime, policyHolder_DateCreated_Gte: DateTime, policyHolder_DateUpdated: DateTime, policyHolder_DateUpdated_Lt: DateTime, policyHolder_DateUpdated_Lte: DateTime, policyHolder_DateUpdated_Gt: DateTime, policyHolder_DateUpdated_Gte: DateTime, policyHolder_IsDeleted: Boolean, insuree_Uuid: String, insuree_ChfId: String, insuree_ChfId_Istartswith: String, insuree_ChfId_Icontains: String, insuree_ChfId_Iexact: String, insuree_LastName: String, insuree_LastName_Istartswith: String, insuree_LastName_Icontains: String, insuree_LastName_Iexact: String, insuree_OtherNames: String, insuree_OtherNames_Istartswith: String, insuree_OtherNames_Icontains: String, insuree_OtherNames_Iexact: String, insuree_Email: String, insuree_Email_Istartswith: String, insuree_Email_Icontains: String, insuree_Email_Iexact: String, insuree_Email_Isnull: Boolean, insuree_Phone: String, insuree_Phone_Istartswith: String, insuree_Phone_Icontains: String, insuree_Phone_Iexact: String, insuree_Phone_Isnull: Boolean, insuree_Dob: Date, insuree_Dob_Lt: Date, insuree_Dob_Lte: Date, insuree_Dob_Gt: Date, insuree_Dob_Gte: Date, insuree_Dob_Isnull: Boolean, insuree_Head: Boolean, insuree_Passport: String, insuree_Passport_Istartswith: String, insuree_Passport_Icontains: String, insuree_Passport_Iexact: String, insuree_Passport_Isnull: Boolean, insuree_Gender_Code: String, insuree_Marital: String, insuree_Marital_Isnull: Boolean, insuree_ValidityFrom: DateTime, insuree_ValidityFrom_Lt: DateTime, insuree_ValidityFrom_Lte: DateTime, insuree_ValidityFrom_Gt: DateTime, insuree_ValidityFrom_Gte: DateTime, insuree_ValidityFrom_Isnull: Boolean, insuree_ValidityTo: DateTime, insuree_ValidityTo_Lt: DateTime, insuree_ValidityTo_Lte: DateTime, insuree_ValidityTo_Gt: DateTime, insuree_ValidityTo_Gte: DateTime, insuree_ValidityTo_Isnull: Boolean, insuree_Photo_Id: ID, insuree_Photo_Isnull: Boolean, contributionPlanBundle_Id: UUID, contributionPlanBundle_Version: Int, contributionPlanBundle_Code: String, contributionPlanBundle_Code_Istartswith: String, contributionPlanBundle_Code_Icontains: String, contributionPlanBundle_Code_Iexact: String, contributionPlanBundle_Name: String, contributionPlanBundle_Name_Istartswith: String, contributionPlanBundle_Name_Icontains: String, contributionPlanBundle_Name_Iexact: String, contributionPlanBundle_Periodicity: Int, contributionPlanBundle_Periodicity_Lt: Int, contributionPlanBundle_Periodicity_Lte: Int, contributionPlanBundle_Periodicity_Gt: Int, contributionPlanBundle_Periodicity_Gte: Int, contributionPlanBundle_DateCreated: DateTime, contributionPlanBundle_DateCreated_Lt: DateTime, contributionPlanBundle_DateCreated_Lte: DateTime, contributionPlanBundle_DateCreated_Gt: DateTime, contributionPlanBundle_DateCreated_Gte: DateTime, contributionPlanBundle_DateUpdated: DateTime, contributionPlanBundle_DateUpdated_Lt: DateTime, contributionPlanBundle_DateUpdated_Lte: DateTime, contributionPlanBundle_DateUpdated_Gt: DateTime, contributionPlanBundle_DateUpdated_Gte: DateTime, contributionPlanBundle_UserCreated: ID, contributionPlanBundle_UserUpdated: ID, contributionPlanBundle_IsDeleted: Boolean, dateCreated: DateTime, dateCreated_Lt: DateTime, dateCreated_Lte: DateTime, dateCreated_Gt: DateTime, dateCreated_Gte: DateTime, dateUpdated: DateTime, dateUpdated_Lt: DateTime, dateUpdated_Lte: DateTime, dateUpdated_Gt: DateTime, dateUpdated_Gte: DateTime, userCreated: ID, userUpdated: ID, isDeleted: Boolean): PolicyHolderInsureeGQLTypeConnection!
   sumPremiums: Float
+  signatureDate: Date
+  contributionPlan: ContributionPlanGQLType
+  periodicity: String
+  paymentDay: Int
 }
 
 type ClaimDedRemGQLTypeConnection {
@@ -3911,6 +3915,11 @@ type PolicyByFamilyOrInsureeGQLType implements Node {
   validityFrom: Date
   validityTo: Date
   maxInstallments: Int
+  periodicity: String
+  signatureDate: Date
+  paymentDay: Int
+  contributionPlanCode: String
+  contributionPlanName: String
 }
 
 type EligibilityGQLType {
@@ -6639,6 +6648,10 @@ input UpdatePolicyMutationInput {
   productId: Int!
   familyId: Int!
   officerId: Int!
+  contributionPlanId: String
+  periodicity: String
+  signatureDate: Date
+  paymentDay: String
   clientMutationId: String
 }
 

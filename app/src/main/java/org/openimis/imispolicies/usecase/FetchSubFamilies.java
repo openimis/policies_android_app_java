@@ -7,6 +7,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
 
+import org.openimis.imispolicies.GetFamilyQuery;
 import org.openimis.imispolicies.GetSubFamiliesQuery;
 import org.openimis.imispolicies.Global;
 import org.openimis.imispolicies.domain.entity.Family;
@@ -59,7 +60,8 @@ public class FetchSubFamilies {
                 /* isOffline = */ node.isOffline() != null ? Objects.requireNonNull(node.isOffline()) : false,
                 /* parentId = */ node.parent() != null ? IdUtils.getIdFromGraphQLString(node.parent().id())  : null,
                 /* insurees = */ Mapper.map(node.members().edges(), (insuree) -> toMember(insuree, node)),
-                /* attachments = */ node.attachments() != null ? Objects.requireNonNull(Mapper.map(node.attachments(), (attachment) -> toAttachment(attachment)))  : null
+                /* attachments = */ node.attachments() != null ? Objects.requireNonNull(Mapper.map(node.attachments(), (attachment) -> toAttachment(attachment)))  : null,
+                null
         );
     }
 
@@ -93,7 +95,7 @@ public class FetchSubFamilies {
                 /* professional situation = */ member.professionalSituation(),
                 /* incomeLevel = */ member.incomeLevel() != null ? IdUtils.getIdFromGraphQLString(Objects.requireNonNull(member.incomeLevel()).id()) : null,
                 /* payment method = */ member.preferredPaymentMethod(),
-                /* other household = */ null,
+                /* other household = */ member.coordinates(),
                 /* account details = */ member.bankCoordinates() != null ? member.bankCoordinates() : "",
                 /* photoPath = */ downloadPhoto(member.photo()),
                 /* photoBytes = */ null, // We already saved them on disk, no need to pass them here.
@@ -150,6 +152,7 @@ public class FetchSubFamilies {
     @NonNull
     private Family.Attachment toAttachment(@NonNull GetSubFamiliesQuery.Attachment attachment){
         return new Family.Attachment(
+                /* id */ attachment.idAttachment(),
                 /* tittle */ attachment.title(),
                 /* mime */ attachment.mime(),
                 /* filename */ attachment.filename(),

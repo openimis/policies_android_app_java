@@ -31,7 +31,7 @@ public class CreatePolicy {
     @WorkerThread
     public void execute(List<Family.Policy> policies) throws Exception {
         for (Family.Policy policy : policies) {
-            createPolicyGraphQLRequest.create(policy);
+            createPolicyGraphQLRequest.create(policy, 0);
             for (Family.Policy.Premium premium : policy.getPremiums()) {
                 createPremiumGraphQLRequest.create(premium);
             }

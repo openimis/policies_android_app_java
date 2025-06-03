@@ -5,20 +5,21 @@ import androidx.annotation.WorkerThread;
 
 import com.apollographql.apollo.api.Response;
 
-
-import org.openimis.imispolicies.CreatePolicyMutation;
+import org.openimis.imispolicies.UpdatePolicyMutation;
 import org.openimis.imispolicies.domain.entity.Family;
-import org.openimis.imispolicies.type.CreatePolicyMutationInput;
+import org.openimis.imispolicies.type.UpdatePolicyMutationInput;
 
 import java.util.Objects;
 
-public class CreatePolicyGraphQLRequest extends BaseGraphQLRequest {
+public class UpdatePolicyGraphQLRequest extends BaseGraphQLRequest {
 
     @WorkerThread
     @NonNull
-    public CreatePolicyMutation.Data create(@NonNull Family.Policy policy, int familyId) throws Exception {
-        Response<CreatePolicyMutation.Data> response = makeSynchronous(new CreatePolicyMutation(
-                CreatePolicyMutationInput.builder()
+    public UpdatePolicyMutation.Data update(@NonNull Family.Policy policy, int familyId) throws Exception {
+        Response<UpdatePolicyMutation.Data> response = makeSynchronous(new UpdatePolicyMutation(
+                UpdatePolicyMutationInput.builder()
+                        .uuid(policy.getUuid())
+                        .id(policy.getId())
                         .familyId(familyId)
                         .enrollDate(policy.getEnrollDate())
                         .startDate(policy.getStartDate())

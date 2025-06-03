@@ -248,7 +248,7 @@ function LoadProduct(RegionId, DistrictId, EnrolmentDate) {
 
 function LoadContributionPlan(EnrolmentDate) {
     var $ContributionPlans = Android.getContributionPlans(EnrolmentDate);
-    bindDropdown('ddlContributionPlan', $ContributionPlans, 'Id', 'CombinedName', 0, Android.getString('SelectContribution'));
+    bindDropdown('ddlContributionPlan', $ContributionPlans, 'CpId', 'CombinedName', 0, Android.getString('SelectContribution'));
 }
 
 function createJSONString() {
