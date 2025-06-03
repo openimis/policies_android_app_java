@@ -280,6 +280,7 @@ public class SQLHandler extends SQLiteOpenHelper {
             sqLiteDatabase.execSQL(
                     "CREATE TABLE 'tblPolicy' (" +
                             "PolicyId INTEGER," +
+                            "PolicyUuid TEXT," +
                             "FamilyId NUMERIC," +
                             "EnrollDate DATE," +
                             "StartDate DATE," +

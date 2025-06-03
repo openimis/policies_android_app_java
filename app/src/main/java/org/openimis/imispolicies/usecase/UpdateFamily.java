@@ -14,6 +14,7 @@ import org.openimis.imispolicies.network.request.CreatePremiumGraphQLRequest;
 import org.openimis.imispolicies.network.request.CreateSubFamilyGraphQLRequest;
 import org.openimis.imispolicies.network.request.UpdateFamilyGraphQLRequest;
 import org.openimis.imispolicies.network.request.UpdateInsureeGraphQLRequest;
+import org.openimis.imispolicies.network.request.UpdatePolicyGraphQLRequest;
 import org.openimis.imispolicies.tools.Log;
 
 import java.net.HttpURLConnection;
@@ -41,6 +42,8 @@ public class UpdateFamily {
     private final CreatePolicyGraphQLRequest createPolicyGraphQLRequest;
     @NonNull
     private final CreatePremiumGraphQLRequest createPremiumGraphQLRequest;
+    @NonNull
+    private final UpdatePolicyGraphQLRequest updatePolicyGraphQLRequest;
 
     public UpdateFamily() {
         this(
@@ -53,7 +56,8 @@ public class UpdateFamily {
                 new FetchFamily(),
                 new FetchFamilyId(),
                 new CreatePolicyGraphQLRequest(),
-                new CreatePremiumGraphQLRequest()
+                new CreatePremiumGraphQLRequest(),
+                new UpdatePolicyGraphQLRequest()
         );
     }
 
@@ -67,7 +71,8 @@ public class UpdateFamily {
             @NonNull FetchFamily fetchFamily,
             @NonNull FetchFamilyId fetchFamilyId,
             @NonNull CreatePolicyGraphQLRequest createPolicyGraphQLRequest,
-            @NonNull CreatePremiumGraphQLRequest createPremiumGraphQLRequest
+            @NonNull CreatePremiumGraphQLRequest createPremiumGraphQLRequest,
+            @NonNull UpdatePolicyGraphQLRequest updatePolicyGraphQLRequest
     ) {
         this.createFamilyGraphQLRequest = createFamilyGraphQLRequest;
         this.updateFamilyGraphQLRequest = updateFamilyGraphQLRequest;
@@ -79,6 +84,7 @@ public class UpdateFamily {
         this.fetchFamilyId = fetchFamilyId;
         this.createPolicyGraphQLRequest = createPolicyGraphQLRequest;
         this.createPremiumGraphQLRequest = createPremiumGraphQLRequest;
+        this.updatePolicyGraphQLRequest = updatePolicyGraphQLRequest;
     }
 
     @WorkerThread
@@ -152,9 +158,16 @@ public class UpdateFamily {
 
     @WorkerThread
     private void insertOrUpdatePolicy (@NonNull Family.Policy policy, int familyId) throws Exception{
-        createPolicyGraphQLRequest.create(policy, familyId);
-        for (Family.Policy.Premium premium : policy.getPremiums()) {
-            createPremiumGraphQLRequest.create(premium);
+        if (policy.getUuid().isEmpty()){
+            createPolicyGraphQLRequest.create(policy, familyId);
+            for (Family.Policy.Premium premium : policy.getPremiums()) {
+                createPremiumGraphQLRequest.create(premium);
+            }
+        }else{
+            updatePolicyGraphQLRequest.update(policy, familyId);
+            for (Family.Policy.Premium premium : policy.getPremiums()) {
+                createPremiumGraphQLRequest.create(premium);
+            }
         }
     }
 

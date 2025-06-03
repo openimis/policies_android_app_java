@@ -32,6 +32,7 @@ public class FetchPolicies {
             GetPoliciesQuery.Node node = Objects.requireNonNull(edge.node());
             JSONObject policyObject = new JSONObject();
             policyObject.put("PolicyId",node.policyId());
+            policyObject.put("PolicyUuid",node.policyUuid());
             policyObject.put("EnrollDate",node.enrollDate() != null ? DateUtils.toDateString(Objects.requireNonNull(node.enrollDate())) : null);
             policyObject.put("StartDate",node.startDate() != null ? DateUtils.toDateString(Objects.requireNonNull(node.startDate())) : null);
             policyObject.put("EffectiveDate", node.effectiveDate() != null ? DateUtils.toDateString(Objects.requireNonNull(node.effectiveDate())): null);

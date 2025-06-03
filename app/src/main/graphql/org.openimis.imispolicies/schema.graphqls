@@ -6648,6 +6648,10 @@ input UpdatePolicyMutationInput {
   productId: Int!
   familyId: Int!
   officerId: Int!
+  contributionPlanId: String
+  periodicity: String
+  signatureDate: Date
+  paymentDay: String
   clientMutationId: String
 }
 

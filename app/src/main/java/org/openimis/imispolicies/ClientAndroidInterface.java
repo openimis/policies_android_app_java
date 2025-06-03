@@ -3580,7 +3580,7 @@ public class ClientAndroidInterface {
     ) throws JSONException {
         JSONArray policyPremiums = new JSONArray();
         String policyId = policy.getString("PolicyId");
-        String policyUuid = UUID.randomUUID().toString();
+        String policyUuid = policy.getString("PolicyUuid");
         for (int k = 0; k < premiumsArray.length(); k++) {
             JSONObject premiumObject = premiumsArray.getJSONObject(k);
             if (StringUtils.equals(policyId, premiumObject.getString("PolicyId"))) {
@@ -5204,7 +5204,7 @@ public class ClientAndroidInterface {
             }
         }
         Log.e("policies", array.toString());
-        String[] Columns = {"PolicyId", "FamilyId", "EnrollDate", "StartDate", "EffectiveDate", "ExpiryDate", "SigningDate", "PolicyStatus",
+        String[] Columns = {"PolicyId", "PolicyUuid", "FamilyId", "EnrollDate", "StartDate", "EffectiveDate", "ExpiryDate", "SigningDate", "PolicyStatus",
                 "PolicyValue", "ProdId", "ContributionPlanId", "OfficerId", "PaymentDay", "Periodicity", "IsOffline"};
         sqlHandler.insertData("tblPolicy", Columns, array, "");
     }

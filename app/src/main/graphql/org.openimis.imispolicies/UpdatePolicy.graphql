@@ -1,0 +1,6 @@
+mutation UpdatePolicy($input: UpdatePolicyMutationInput!) {
+    updatePolicy(input: $input){
+        clientMutationId
+        internalId
+    }
+}
