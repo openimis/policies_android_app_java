@@ -41,7 +41,7 @@ public class FetchFamily {
     public Family execute(@NonNull String headChfId, @NonNull String parentUuid) throws Exception {
         GetFamilyQuery.Node node = getFamilyGraphQLRequest.get(headChfId, parentUuid);
         return new Family(
-                /* headChfId = */ headChfId,
+                /* headChfId = */ node.headInsuree().chfId(),
                 /* id = */ IdUtils.getIdFromGraphQLString(node.id()),
                 /* uuid = */ node.uuid(),
                 /* sms = */ null,

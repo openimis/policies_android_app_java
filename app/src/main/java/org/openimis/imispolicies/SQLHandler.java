@@ -137,6 +137,7 @@ public class SQLHandler extends SQLiteOpenHelper {
                     "CREATE TABLE " + tblFamilies + "(" +
                             "FamilyId INTEGER," +
                             "InsureeId NUMERIC," +
+                            "InsureeChfId TEXT," +
                             "LocationId NUMERIC," +
                             "Poverty BOOLEAN," +
                             "isOffline NUMERIC," +

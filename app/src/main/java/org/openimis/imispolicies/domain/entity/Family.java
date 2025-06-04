@@ -150,6 +150,9 @@ public class Family implements Parcelable {
         if (head != null) {
             return head;
         }
+        if(members.isEmpty()){
+            return null;
+        }
         for (Member member : members) {
             if (headChfId.equals(member.getChfId()) || member.isHead) {
                 head = member;
@@ -158,6 +161,9 @@ public class Family implements Parcelable {
         }
         throw new IllegalStateException("The members list (size: '" + members.size() + "') didn't contain an insuree with the head chfId: '" + headChfId + "'");
     }
+
+    @NonNull
+    public String getHeadChfId(){ return headChfId; }
 
     public int getId() {
         return id;
