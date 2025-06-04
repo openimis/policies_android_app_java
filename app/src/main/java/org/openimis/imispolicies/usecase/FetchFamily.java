@@ -38,8 +38,8 @@ public class FetchFamily {
 
     @WorkerThread
     @NonNull
-    public Family execute(@NonNull String headChfId) throws Exception {
-        GetFamilyQuery.Node node = getFamilyGraphQLRequest.get(headChfId);
+    public Family execute(@NonNull String headChfId, @NonNull String parentUuid) throws Exception {
+        GetFamilyQuery.Node node = getFamilyGraphQLRequest.get(headChfId, parentUuid);
         return new Family(
                 /* headChfId = */ headChfId,
                 /* id = */ IdUtils.getIdFromGraphQLString(node.id()),
@@ -53,7 +53,8 @@ public class FetchFamily {
                 /* confirmationNumber = */ node.confirmationNo(),
                 /* confirmationType = */ node.confirmationType() != null ? Objects.requireNonNull(node.confirmationType()).code() : null,
                 /* isOffline = */ node.isOffline() != null ? Objects.requireNonNull(node.isOffline()) : false,
-                /* parentId = */ node.parent() != null ? IdUtils.getIdFromGraphQLString(node.parent().id())  : null,
+                /* parentId = */ node.parent() != null ? IdUtils.getIdFromGraphQLString(node.parent().id()) : null,
+                /* parentUuid = */ node.parent() != null ? Objects.requireNonNull(node.parent()).uuid()  : null,
                 /* insurees = */ Mapper.map(node.members().edges(), (edge) -> toMember(edge, node)),
                 /* attachments = */ Mapper.map(Objects.requireNonNull(node.attachments()), (attachment) -> toAttachment(attachment)),
                 null
@@ -90,7 +91,7 @@ public class FetchFamily {
                 /* professional situation = */ member.professionalSituation(),
                 /* incomeLevel = */ member.incomeLevel() != null ? IdUtils.getIdFromGraphQLString(Objects.requireNonNull(member.incomeLevel()).id()) : null,
                 /* payment method = */ member.preferredPaymentMethod(),
-                /* other household = */ member.coordinates(),
+                /* other household = */ member.coordinates() != null ? member.coordinates() : "",
                 /* account details = */ member.bankCoordinates() != null ? member.bankCoordinates() : "",
                 /* photoPath = */ downloadPhoto(member.photo()),
                 /* photoBytes = */ null, // We already saved them on disk, no need to pass them here.

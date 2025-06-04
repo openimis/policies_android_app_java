@@ -40,6 +40,9 @@ public class Family implements Parcelable {
     @Nullable
     private final Integer parentId;
 
+    @Nullable
+    private final String parentUuid;
+
     @NonNull
     private final List<Member> members;
 
@@ -66,6 +69,7 @@ public class Family implements Parcelable {
             @Nullable String confirmationType,
             boolean isOffline,
             @Nullable Integer parentId,
+            @Nullable String parentUuid,
             @NonNull List<Member> members,
             @Nullable List<Attachment> attachments,
             @Nullable List<Policy> policies
@@ -83,6 +87,7 @@ public class Family implements Parcelable {
         this.confirmationType = confirmationType;
         this.isOffline = isOffline;
         this.parentId = parentId;
+        this.parentUuid = parentUuid;
         this.members = members;
         this.attachments = attachments;
         this.policies = policies;
@@ -108,6 +113,7 @@ public class Family implements Parcelable {
         isOffline = in.readByte() != 0;
         int pId = in.readInt();
         parentId = pId;
+        parentUuid = in.readString();
         members = Objects.requireNonNull(in.createTypedArrayList(Member.CREATOR));
         attachments = in.createTypedArrayList(Attachment.CREATOR);
         policies = in.createTypedArrayList(Policy.CREATOR);
@@ -128,6 +134,7 @@ public class Family implements Parcelable {
         dest.writeString(confirmationType);
         dest.writeByte((byte) (isOffline ? 1 : 0));
         dest.writeInt(parentId);
+        dest.writeString(parentUuid);
         dest.writeTypedList(members);
         dest.writeTypedList(attachments);
         dest.writeTypedList(policies);
@@ -138,13 +145,13 @@ public class Family implements Parcelable {
         return 0;
     }
 
-    @NonNull
+    @Nullable
     public Member getHead() {
         if (head != null) {
             return head;
         }
         for (Member member : members) {
-            if (headChfId.equals(member.getChfId())) {
+            if (headChfId.equals(member.getChfId()) || member.isHead) {
                 head = member;
                 return member;
             }
@@ -208,6 +215,9 @@ public class Family implements Parcelable {
     public Integer getParentId() {
         return parentId;
     }
+
+    @Nullable
+    public String getParentUuid(){ return parentUuid; }
 
     @NonNull
     public List<Member> getMembers() {

@@ -86,6 +86,7 @@ query GetSubFamilies($familyUuid: String) {
                     }
                 }
                 parent{
+                    uuid
                     id
                 }
                 attachments{

@@ -95,7 +95,7 @@ public class UpdateFamily {
     ) throws Exception {
         int familyId = 0;
         try {
-            fetchFamily.execute(insureeCHFID);
+            fetchFamily.execute(insureeCHFID, "");
             updateFamilyGraphQLRequest.update(family, officerId);
             familyId = family.getId();
         } catch (HttpException e) {

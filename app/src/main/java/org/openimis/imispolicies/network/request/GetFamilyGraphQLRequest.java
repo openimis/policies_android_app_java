@@ -18,8 +18,8 @@ public class GetFamilyGraphQLRequest extends BaseGraphQLRequest {
 
     @WorkerThread
     @NonNull
-    public GetFamilyQuery.Node get(String Chfid) throws Exception {
-        List<GetFamilyQuery.Edge> edges = makeSynchronous(new GetFamilyQuery(Input.fromNullable(Chfid))).getData().families().edges();
+    public GetFamilyQuery.Node get(String chfId, String parentUuid) throws Exception {
+        List<GetFamilyQuery.Edge> edges = makeSynchronous(new GetFamilyQuery(Input.fromNullable(chfId), Input.fromNullable(parentUuid))).getData().families().edges();
         if (edges.isEmpty()) {
             throw new HttpException(
                     /* code = */ HttpURLConnection.HTTP_NOT_FOUND,
