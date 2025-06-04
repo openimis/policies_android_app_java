@@ -59,7 +59,7 @@ public class FetchSubFamilies {
                 /* confirmationType = */ node.confirmationType() != null ? Objects.requireNonNull(node.confirmationType()).code() : null,
                 /* isOffline = */ node.isOffline() != null ? Objects.requireNonNull(node.isOffline()) : false,
                 /* parentId = */ node.parent() != null ? IdUtils.getIdFromGraphQLString(node.parent().id())  : null,
-                /* parentUuid = */ node.parent() != null ? node.parent().uuid()  : null,
+                /* parentUuid = */ node.parent() != null ? Objects.requireNonNull(node.parent()).uuid()  : null,
                 /* insurees = */ Mapper.map(node.members().edges(), (insuree) -> toMember(insuree, node)),
                 /* attachments = */ node.attachments() != null ? Objects.requireNonNull(Mapper.map(node.attachments(), (attachment) -> toAttachment(attachment)))  : null,
                 null
@@ -96,7 +96,7 @@ public class FetchSubFamilies {
                 /* professional situation = */ member.professionalSituation(),
                 /* incomeLevel = */ member.incomeLevel() != null ? IdUtils.getIdFromGraphQLString(Objects.requireNonNull(member.incomeLevel()).id()) : null,
                 /* payment method = */ member.preferredPaymentMethod(),
-                /* other household = */ member.coordinates(),
+                /* other household = */ member.coordinates() != null ? member.coordinates() : "",
                 /* account details = */ member.bankCoordinates() != null ? member.bankCoordinates() : "",
                 /* photoPath = */ downloadPhoto(member.photo()),
                 /* photoBytes = */ null, // We already saved them on disk, no need to pass them here.

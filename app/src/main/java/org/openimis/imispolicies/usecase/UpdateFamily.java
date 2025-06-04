@@ -158,12 +158,12 @@ public class UpdateFamily {
 
     @WorkerThread
     private void insertOrUpdatePolicy (@NonNull Family.Policy policy, int familyId) throws Exception{
-        if (policy.getUuid().isEmpty()){
+        if (policy.getUuid().isEmpty() || policy.getUuid().equals("0")){
             createPolicyGraphQLRequest.create(policy, familyId);
             for (Family.Policy.Premium premium : policy.getPremiums()) {
                 createPremiumGraphQLRequest.create(premium);
             }
-        }else{
+        } else {
             updatePolicyGraphQLRequest.update(policy, familyId);
             for (Family.Policy.Premium premium : policy.getPremiums()) {
                 createPremiumGraphQLRequest.create(premium);

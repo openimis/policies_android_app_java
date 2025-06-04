@@ -71,6 +71,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.openimis.imispolicies.domain.entity.Family;
 import org.openimis.imispolicies.domain.entity.FeedbackRequest;
+import org.openimis.imispolicies.domain.entity.Insuree;
 import org.openimis.imispolicies.domain.entity.PendingFeedback;
 import org.openimis.imispolicies.network.exception.HttpException;
 import org.openimis.imispolicies.network.exception.UserNotAuthenticatedException;
@@ -81,6 +82,7 @@ import org.openimis.imispolicies.usecase.CreatePolicy;
 import org.openimis.imispolicies.usecase.DeletePolicyRenewal;
 import org.openimis.imispolicies.usecase.FetchFamily;
 import org.openimis.imispolicies.usecase.FetchFamilyId;
+import org.openimis.imispolicies.usecase.FetchInsureeInquire;
 import org.openimis.imispolicies.usecase.FetchMasterData;
 import org.openimis.imispolicies.usecase.FetchPolicies;
 import org.openimis.imispolicies.usecase.FetchSubFamilies;
@@ -818,7 +820,7 @@ public class ClientAndroidInterface {
                 }
                 sqlHandler.updateData("tblFamilies", values, "FamilyId = ? AND (isOffline = ? OR isOffline = ?) ", new String[]{String.valueOf(FamilyId), String.valueOf(isOffline), String.valueOf(Online)}, false);
             }
-            if (InsureeData.length() > 0) {
+            if (!InsureeData.isEmpty()) {
                 //Insert Insuree
                 //==========================================================================================
                 InsureeId = SaveInsuree(InsureeData, FamilyId, 1, -1, 0);//herman new
@@ -827,6 +829,7 @@ public class ClientAndroidInterface {
                 //==========================================================================================
                 ContentValues cvUpdate = new ContentValues();
                 cvUpdate.put("InsureeId", InsureeId);
+                cvUpdate.put("InsureeChfId", jsonToTable(InsureeData).get("txtInsuranceNumber"));
                 if (getFamilyStatus(FamilyId) == 1) {
                     cvUpdate.put("isOffline", 1);
                 } else {
@@ -872,7 +875,6 @@ public class ClientAndroidInterface {
 
         int SubFamilyId = 0;
         int InsureeId = 0;
-        Log.e("familyId",String.valueOf(FamilyId));
 
         try {
             int MaxFamilyId = getNextAvailableFamilyId();
@@ -932,7 +934,7 @@ public class ClientAndroidInterface {
                 }
                 sqlHandler.updateData("tblFamilies", values, "FamilyId = ? AND (isOffline = ? OR isOffline = ?) ", new String[]{String.valueOf(SubFamilyId), String.valueOf(isOffline), String.valueOf(Online)}, false);
             }
-            if (InsureeData.length() > 0) {
+            if (!InsureeData.isEmpty()) {
                 //Insert Insuree
                 //==========================================================================================
                 InsureeId = SaveInsuree(InsureeData, SubFamilyId, 1, -1, 0);//herman new
@@ -941,6 +943,7 @@ public class ClientAndroidInterface {
                 //==========================================================================================
                 ContentValues cvUpdate = new ContentValues();
                 cvUpdate.put("InsureeId", InsureeId);
+                cvUpdate.put("InsureeChfId", jsonToTable(InsureeData).get("txtInsuranceNumber"));
                 if (getFamilyStatus(FamilyId) == 1) {
                     cvUpdate.put("isOffline", 1);
                 } else {
@@ -1312,7 +1315,7 @@ public class ClientAndroidInterface {
         @Language("SQL")
         String Query = "SELECT F.FamilyId, I.CHFID, I.OtherNames ||\" \"||  I.LastName InsureeName, R.LocationName RegionName, D.LocationName DistrictName, W.LocationName WardName, V.LocationName VillageName, F.isOffline, F.FamilyType \n" +
                 "FROM tblFamilies F\n" +
-                "INNER JOIN tblInsuree I ON I.InsureeId = F.InsureeId\n" +
+                "INNER JOIN tblInsuree I ON I.CHFID = F.InsureeChfId\n" +
                 "INNER JOIN tblLocations V ON V.LocationId = F.LocationId\n" +
                 "INNER JOIN tblLocations W ON W.LocationId = V.ParentLocationId\n" +
                 "INNER JOIN tblLocations D ON D.LocationId = W.ParentLocationId\n" +
@@ -3322,7 +3325,7 @@ public class ClientAndroidInterface {
 
                 //get Attachments
                 query = new StringBuilder(
-                        "SELECT Title, Filename, Content FROM tblInsureeAttachments WHERE "
+                        "SELECT Id, Title, Filename, Content FROM tblInsureeAttachments WHERE "
                 );
                 if (CallerId != 2) {
                     query.append(" FamilyId = ").append(FamilyId);
@@ -5145,7 +5148,7 @@ public class ClientAndroidInterface {
         String QueryCheck = "SELECT FamilyUUID FROM tblFamilies WHERE FamilyUUID = '" + family.getUuid() + "' AND (isOffline IS false OR isOffline = 0 OR isOffline = 2)";
         if (sqlHandler.getResult(QueryCheck, null).length() == 0) {
             String[] Columns = {"familyId", "familyUUID", "insureeId", "insureeUUID", "locationId", "poverty", "isOffline", "familyType",
-                    "familyAddress", "ethnicity", "confirmationNo", "confirmationType", "parentId"};
+                    "familyAddress", "ethnicity", "confirmationNo", "confirmationType", "parentId", "insureeChfId"};
             sqlHandler.insertData("tblFamilies", Columns, toJSONArray(family), "");
 
             if (family.getSms() != null) {
@@ -5169,7 +5172,8 @@ public class ClientAndroidInterface {
         jsonObject.put("familyId", family.getId());
         jsonObject.put("familyUUID", family.getUuid());
         jsonObject.put("insureeId", family.getHead() != null ? family.getHead().getId() : null);
-        jsonObject.put("insureeUUID", family.getHead().getUuid());
+        jsonObject.put("insureeUUID", family.getHead() != null ?  family.getHead().getUuid(): null);
+        jsonObject.put("insureeChfId", family.getHeadChfId());
         jsonObject.put("locationId", family.getLocationId());
         jsonObject.put("poverty", family.isPoor());
         jsonObject.put("isOffline", family.isOffline());
@@ -5196,6 +5200,19 @@ public class ClientAndroidInterface {
         String[] Columns = {"identificationNumber", "familyId", "insureeId", "insureeUUID", "familyUUID", "chfid", "lastName", "otherNames", "dob", "gender", "marital", "isHead", "phone", "photoPath", "cardIssued",
                 "isOffline", "relationship", "profession", "education", "email", "typeOfId", "hfid", "currentAddress", "geoLocation", "curVillage", "incomeLevel", "professionalSituation", "paymentMethod", "accountDetails", "otherHousehold"};
         sqlHandler.insertData("tblInsuree", Columns, array, "");
+    }
+
+    private void InsertInsureeDataFromOnline(@NonNull Family.Member member) throws Exception {
+        JSONArray array = new JSONArray();
+        @Language("SQL")
+        String QueryCheck = "SELECT InsureeUUID FROM tblInsuree WHERE Trim(CHFID) = '" + member.getChfId() + "' AND (isOffline IS false OR isOffline = 0 OR isOffline = 2)";
+        if (sqlHandler.getResult(QueryCheck, null).length() == 0) {
+            array.put(toJSONObject(member));
+
+            String[] Columns = {"identificationNumber", "familyId", "insureeId", "insureeUUID", "familyUUID", "chfid", "lastName", "otherNames", "dob", "gender", "marital", "isHead", "phone", "photoPath", "cardIssued",
+                    "isOffline", "relationship", "profession", "education", "email", "typeOfId", "hfid", "currentAddress", "geoLocation", "curVillage", "incomeLevel", "professionalSituation", "paymentMethod", "accountDetails", "otherHousehold"};
+            sqlHandler.insertData("tblInsuree", Columns, array, "");
+        }
     }
 
     private void InsertPolicyDataFromOnline(@NonNull JSONArray policies, int familyId) throws JSONException {
@@ -5266,28 +5283,6 @@ public class ClientAndroidInterface {
         jsonObject.put("paymentMethod", member.getPaymentMethod());
         jsonObject.put("accountDetails", member.getAccountDetails());
         jsonObject.put("otherHousehold", member.getOtherHousehold());
-        return jsonObject;
-    }
-
-    @NonNull
-    private JSONObject toPolicyJSONObject(@NonNull Family.Policy policy) throws JSONException {
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("policyId", policy.getId());
-        jsonObject.put("familyId", policy.getFamilyId());
-        jsonObject.put("enrollDate", DateUtils.toDateString(policy.getEnrollDate()));
-        jsonObject.put("startDate", DateUtils.toDateString(policy.getStartDate()));
-        jsonObject.put("effectiveDate", policy.getEffectiveDate() != null ? DateUtils.toDateString(policy.getEffectiveDate()): null);
-        jsonObject.put("expiryDate", DateUtils.toDateString(policy.getExpiryDate()));
-        jsonObject.put("signingDate", policy.getSigningDate() != null ? DateUtils.toDateString(policy.getSigningDate()) : null);
-        jsonObject.put("policyStatus", policy.getStatus());
-        jsonObject.put("policyValue", policy.getValue());
-        jsonObject.put("prodId", policy.getProductId());
-        jsonObject.put("contributionPlanId", policy.getContributionPlanId());
-        jsonObject.put("officerId", policy.getOfficerId());
-        jsonObject.put("paymentDay", policy.getPaymentDay());
-        jsonObject.put("periodicity", policy.getPeriodicity());
-        jsonObject.put("policyStage", policy.getPolicyStage());
-        jsonObject.put("isOffline", policy.isOffline());
         return jsonObject;
     }
 
