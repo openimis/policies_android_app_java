@@ -3519,7 +3519,7 @@ public class ClientAndroidInterface {
                 /* confirmationType = */ JsonUtils.getStringOrDefault(json, "ConfirmationType"),
                 /* isOffline = */ JsonUtils.getBooleanOrDefault(json, "isOffline", false),
                 /* parentId = */ json.has("ParentId") ? Integer.parseInt(json.getString("ParentId")): null,
-                /* parentUuid = */ json.has("ParentUuid") ? json.getString("ParentId") : null,
+                /* parentUuid = */ json.has("ParentUuid") ? json.getString("ParentUuid") : null,
                 /* members = */ members,
                 /* attachments = */ familyAttachments,
                 /* policies = */ policies
@@ -5217,7 +5217,6 @@ public class ClientAndroidInterface {
                 array.put(policyObject);
             }
         }
-        Log.e("policies", array.toString());
         String[] Columns = {"PolicyId", "PolicyUuid", "FamilyId", "EnrollDate", "StartDate", "EffectiveDate", "ExpiryDate", "SigningDate", "PolicyStatus",
                 "PolicyValue", "ProdId", "ContributionPlanId", "OfficerId", "PaymentDay", "Periodicity", "IsOffline"};
         sqlHandler.insertData("tblPolicy", Columns, array, "");
