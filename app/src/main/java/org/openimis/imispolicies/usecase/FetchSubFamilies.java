@@ -59,6 +59,7 @@ public class FetchSubFamilies {
                 /* confirmationType = */ node.confirmationType() != null ? Objects.requireNonNull(node.confirmationType()).code() : null,
                 /* isOffline = */ node.isOffline() != null ? Objects.requireNonNull(node.isOffline()) : false,
                 /* parentId = */ node.parent() != null ? IdUtils.getIdFromGraphQLString(node.parent().id())  : null,
+                /* parentUuid = */ node.parent() != null ? node.parent().uuid()  : null,
                 /* insurees = */ Mapper.map(node.members().edges(), (insuree) -> toMember(insuree, node)),
                 /* attachments = */ node.attachments() != null ? Objects.requireNonNull(Mapper.map(node.attachments(), (attachment) -> toAttachment(attachment)))  : null,
                 null

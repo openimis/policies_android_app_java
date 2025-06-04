@@ -491,10 +491,11 @@
     <string name="SelectContribution">Select contribution plan</string>
     <string name="ContributionPlan">Contribution Plan</string>
     <string name="AccountDetails">Account Details</string>
-    <string name="MobileMoney">Mobile Money</string>
+    <string name="MobileMoney">Mobile Payment</string>
     <string name="BankDebit">Bank debit</string>
     <string name="TiersPay">Unknow pay</string>
     <string name="SelectPaymentMethod">Select payment method</string>
+    <string name="NonePayment">Bank transfer</string>
     <string name="PaymentDay">Payment day</string>
     <string name="Periodicity">Periodicity</string>
 </resources>

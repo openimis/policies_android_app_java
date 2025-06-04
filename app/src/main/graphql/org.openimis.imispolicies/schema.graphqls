@@ -479,6 +479,7 @@ type FamilyGQLType implements Node {
 
 type ParentGQLType {
   id: ID
+  uuid: String
 }
 
 type FamilyAttachmentGQLType {

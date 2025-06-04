@@ -609,7 +609,7 @@ public class ClientAndroidInterface {
 
         try {
             object.put("Code", "");
-            object.put("Method", activity.getResources().getString(R.string.SelectPaymentMethod));
+            object.put("Method", activity.getResources().getString(R.string.NonePayment));
             paymentMethods.put(object);
 
             object = new JSONObject();
@@ -3109,6 +3109,7 @@ public class ClientAndroidInterface {
         if (length == 0) {
             return 999;
         }
+        Log.e("families to upload", familiesToUpload.toString());
         //Loop through each familyId and get Header, Insuree, Policy and Premium details
         for (int i = 0; i < length; i++) {
 
@@ -3343,7 +3344,7 @@ public class ClientAndroidInterface {
 
                 if (CallerId != 2) {
                     Pair<String, byte[]>[] InsureeImages = FamilyPictures(insureesArray, 1);
-                    if (myList.size() == 0) {
+                    if (myList.isEmpty()) {
                         EnrolResult = uploadEnrols(familyArray, insureesArray, policiesArray, premiumsArray, InsureeImages, attachmentsArray);
                         //if family is polygamic
                         if(isPolygamy){
@@ -3518,6 +3519,7 @@ public class ClientAndroidInterface {
                 /* confirmationType = */ JsonUtils.getStringOrDefault(json, "ConfirmationType"),
                 /* isOffline = */ JsonUtils.getBooleanOrDefault(json, "isOffline", false),
                 /* parentId = */ json.has("ParentId") ? Integer.parseInt(json.getString("ParentId")): null,
+                /* parentUuid = */ json.has("ParentUuid") ? json.getString("ParentId") : null,
                 /* members = */ members,
                 /* attachments = */ familyAttachments,
                 /* policies = */ policies
@@ -5101,12 +5103,10 @@ public class ClientAndroidInterface {
             return 0;
         } else {
             try {
-                Family family = new FetchFamily().execute(insuranceNumber);
+                Family family = new FetchFamily().execute(insuranceNumber, "");
                 InsertFamilyDataFromOnline(family);
                 InsertInsureeDataFromOnline(family.getMembers());
                 InsertAttachmentDataFromOnline(Objects.requireNonNull(family.getAttachments()));
-                JSONArray familyPolicies = new FetchPolicies().execute(family.getUuid());
-                InsertPolicyDataFromOnline(familyPolicies, family.getId());
                 if(family.getType() != null && family.getType().equals("P")){
                     List<Family> subFamilies = new FetchSubFamilies().execute(family.getUuid());
                     for (Family subFamily : subFamilies){
@@ -5116,6 +5116,15 @@ public class ClientAndroidInterface {
                         JSONArray subFamilyPolicies = new FetchPolicies().execute(subFamily.getUuid());
                         InsertPolicyDataFromOnline(subFamilyPolicies, subFamily.getId());
                     }
+                } else {
+                    JSONArray familyPolicies = new FetchPolicies().execute(family.getUuid());
+                    InsertPolicyDataFromOnline(familyPolicies, family.getId());
+                }
+                if(family.getParentUuid() != null){
+                    Family parentFamily = new FetchFamily().execute("",family.getParentUuid());
+                    InsertFamilyDataFromOnline(parentFamily);
+                    InsertInsureeDataFromOnline(parentFamily.getMembers());
+                    InsertAttachmentDataFromOnline(Objects.requireNonNull(parentFamily.getAttachments()));
                 }
                 return 1;
             } catch (Exception e) {
@@ -5159,7 +5168,7 @@ public class ClientAndroidInterface {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("familyId", family.getId());
         jsonObject.put("familyUUID", family.getUuid());
-        jsonObject.put("insureeId", family.getHead().getId());
+        jsonObject.put("insureeId", family.getHead() != null ? family.getHead().getId() : null);
         jsonObject.put("insureeUUID", family.getHead().getUuid());
         jsonObject.put("locationId", family.getLocationId());
         jsonObject.put("poverty", family.isPoor());
