@@ -3604,7 +3604,7 @@ public class ClientAndroidInterface {
                 /* startDate = */ Objects.requireNonNull(JsonUtils.getDateOrDefault(policy, "StartDate")),
                 /* effectiveDate = */ JsonUtils.getDateOrDefault(policy, "EffectiveDate"),
                 /* expiryDate = */ Objects.requireNonNull(JsonUtils.getDateOrDefault(policy, "ExpiryDate")),
-                /* status = */ JsonUtils.getStringOrDefault(policy, "Policystatus"),
+                /* status = */ JsonUtils.getStringOrDefault(policy, "PolicyStatus"),
                 /* value = */ JsonUtils.getDoubleOrDefault(policy, "PolicyValue"),
                 /* productId = */ JsonUtils.getIntegerOrDefault(policy, "ProdId"),
                 /* officerId = */ Integer.parseInt(policy.getString("OfficerId")),
