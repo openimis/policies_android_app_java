@@ -44,6 +44,8 @@ public class UpdateFamily {
     private final CreatePremiumGraphQLRequest createPremiumGraphQLRequest;
     @NonNull
     private final UpdatePolicyGraphQLRequest updatePolicyGraphQLRequest;
+    @NonNull
+    private final CheckMutation checkMutation;
 
     public UpdateFamily() {
         this(
@@ -57,7 +59,8 @@ public class UpdateFamily {
                 new FetchFamilyId(),
                 new CreatePolicyGraphQLRequest(),
                 new CreatePremiumGraphQLRequest(),
-                new UpdatePolicyGraphQLRequest()
+                new UpdatePolicyGraphQLRequest(),
+                new CheckMutation()
         );
     }
 
@@ -72,7 +75,8 @@ public class UpdateFamily {
             @NonNull FetchFamilyId fetchFamilyId,
             @NonNull CreatePolicyGraphQLRequest createPolicyGraphQLRequest,
             @NonNull CreatePremiumGraphQLRequest createPremiumGraphQLRequest,
-            @NonNull UpdatePolicyGraphQLRequest updatePolicyGraphQLRequest
+            @NonNull UpdatePolicyGraphQLRequest updatePolicyGraphQLRequest,
+            @NonNull CheckMutation checkMutation
     ) {
         this.createFamilyGraphQLRequest = createFamilyGraphQLRequest;
         this.updateFamilyGraphQLRequest = updateFamilyGraphQLRequest;
@@ -85,6 +89,7 @@ public class UpdateFamily {
         this.createPolicyGraphQLRequest = createPolicyGraphQLRequest;
         this.createPremiumGraphQLRequest = createPremiumGraphQLRequest;
         this.updatePolicyGraphQLRequest = updatePolicyGraphQLRequest;
+        this.checkMutation = checkMutation;
     }
 
     @WorkerThread
@@ -96,14 +101,23 @@ public class UpdateFamily {
         int familyId = 0;
         try {
             fetchFamily.execute(insureeCHFID, "");
-            updateFamilyGraphQLRequest.update(family, officerId);
+            checkMutation.execute(
+                    updateFamilyGraphQLRequest.update(family, officerId),
+                    "Érreur lors de la mise à jour de la famille '" + family.getHeadChfId() + "'"
+            );
             familyId = family.getId();
         } catch (HttpException e) {
             if (e.getCode() == HttpURLConnection.HTTP_NOT_FOUND) {
                 if(family.getParentId() != null && family.getParentId() != 0){
-                    createSubFamilyGraphQLRequest.create(family, officerId);
+                    checkMutation.execute(
+                            createSubFamilyGraphQLRequest.create(family, officerId),
+                            "Érreur lors de la création de la sous-famille '" + family.getHeadChfId() + "'"
+                    );
                 }else{
-                    createFamilyGraphQLRequest.create(family, officerId);
+                    checkMutation.execute(
+                            createFamilyGraphQLRequest.create(family, officerId),
+                            "Érreur lors de la création de la famille '" + family.getHeadChfId() + "'"
+                    );
                 }
                 try{
                     Family existingFamily = fetchFamilyId.execute();
@@ -144,14 +158,19 @@ public class UpdateFamily {
     private void insertOrUpdateInsuree(@NonNull Family.Member member, int officerId, int familyId ) throws Exception {
         try {
             fetchInsureeInquire.execute(member.getChfId());
-            updateInsureeGraphQLRequest.update(member);
+            checkMutation.execute(
+                    updateInsureeGraphQLRequest.update(member),
+                    "Érreur lors de la mise à jour de l'assuré '" + member.getChfId() + "'"
+            );
+
         } catch (HttpException e) {
             if (e.getCode() == HttpURLConnection.HTTP_NOT_FOUND) {
                 if(familyId != 0 && !member.isHead()){
-                    createInsureeGraphQLRequest.create(member, familyId, officerId);
+                    checkMutation.execute(
+                            createInsureeGraphQLRequest.create(member, familyId, officerId),
+                            "Érreur lors de la création de l'assuré '" + member.getChfId() + "'"
+                    );
                 }
-            } else {
-                throw e;
             }
         }
     }
@@ -159,14 +178,27 @@ public class UpdateFamily {
     @WorkerThread
     private void insertOrUpdatePolicy (@NonNull Family.Policy policy, int familyId) throws Exception{
         if (policy.getUuid().isEmpty() || policy.getUuid().equals("0")){
-            createPolicyGraphQLRequest.create(policy, familyId);
+            checkMutation.execute(
+                    createPolicyGraphQLRequest.create(policy, familyId),
+                    "Érreur lors de la création de la police '" + policy.getUuid() + "'"
+            );
+
             for (Family.Policy.Premium premium : policy.getPremiums()) {
-                createPremiumGraphQLRequest.create(premium);
+                checkMutation.execute(
+                        createPremiumGraphQLRequest.create(premium),
+                        "Érreur lors de la création de la cotisation '" + policy.getUuid() + "'"
+                );
             }
         } else {
-            updatePolicyGraphQLRequest.update(policy, familyId);
+            checkMutation.execute(
+                    updatePolicyGraphQLRequest.update(policy, familyId),
+                    "Érreur lors de la mise à jour de la police '" + policy.getUuid() + "'"
+            );
             for (Family.Policy.Premium premium : policy.getPremiums()) {
-                createPremiumGraphQLRequest.create(premium);
+                checkMutation.execute(
+                        createPremiumGraphQLRequest.create(premium),
+                        "Érreur lors de la création de la cotisation '" + policy.getUuid() + "'"
+                );
             }
         }
     }

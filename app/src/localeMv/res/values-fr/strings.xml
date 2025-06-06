@@ -512,4 +512,5 @@
     <string name="FamilyPolygamy">Famille polygame</string>
     <string name="PaymentDay">Jour de paiement</string>
     <string name="NonePayment">Virement Bancaire</string>
+    <string name="ConnectionReset">Échec de connexion. Veuillez réessayer</string>
 </resources>

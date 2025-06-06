@@ -23,7 +23,7 @@ public class CreateSubFamilyGraphQLRequest extends BaseGraphQLRequest {
 
     @WorkerThread
     @NonNull
-    public CreateFamilyMutation.Data create(@NonNull Family family, @NonNull int officerId) throws Exception {
+    public String create(@NonNull Family family, @NonNull int officerId) throws Exception {
         Family.Member head = family.getHead();
         java.sql.Date date = new java.sql.Date(System.currentTimeMillis());
         Response<CreateFamilyMutation.Data> response = makeSynchronous(new CreateFamilyMutation(
@@ -72,6 +72,10 @@ public class CreateSubFamilyGraphQLRequest extends BaseGraphQLRequest {
                         )
                         .build()
         ));
-        return Objects.requireNonNull(response.getData());
+        return Objects.requireNonNull(
+                Objects.requireNonNull(
+                                Objects.requireNonNull(response.getData(), "data is null")
+                                        .createFamily(), "create family is null")
+                        .clientMutationId(), "clientMutationId is null");
     }
 }

@@ -498,4 +498,5 @@
     <string name="NonePayment">Bank transfer</string>
     <string name="PaymentDay">Payment day</string>
     <string name="Periodicity">Periodicity</string>
+    <string name="ConnectionReset">connection failure. Please try again</string>
 </resources>

@@ -6861,6 +6861,7 @@ input UpdateFamilyMutationInput {
   headInsuree: FamilyHeadInsureeInputType
   attachments: [FamilyAttachmentInputType]
   clientMutationId: String
+  parentId: Int
 }
 
 """

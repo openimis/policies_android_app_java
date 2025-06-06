@@ -16,15 +16,18 @@ import org.openimis.imispolicies.util.DateUtils;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.UUID;
 
 public class CreateInsureeGraphQLRequest extends BaseGraphQLRequest {
 
     @WorkerThread
     @NonNull
-    public CreateInsureeMutation.Data create(@NonNull Family.Member member, int familyId, int officerId) throws Exception {
+    public String create(@NonNull Family.Member member, int familyId, int officerId) throws Exception {
         java.sql.Date date = new java.sql.Date(System.currentTimeMillis());
         Response<CreateInsureeMutation.Data> response = makeSynchronous(new CreateInsureeMutation(
                 CreateInsureeMutationInput.builder()
+                        .clientMutationId(UUID.randomUUID().toString())
+                        .clientMutationLabel("Create insuree '" + member.getChfId() + "'")
                         .familyId(familyId)
                         .head(member.isHead())
                         .passport(member.getIdentificationNumber())
@@ -60,6 +63,10 @@ public class CreateInsureeGraphQLRequest extends BaseGraphQLRequest {
                         )
                         .build()
         ));
-        return Objects.requireNonNull(response.getData());
+        return Objects.requireNonNull(
+                Objects.requireNonNull(
+                                Objects.requireNonNull(response.getData(), "data is null")
+                                        .createInsuree(), "create insuree is null")
+                        .clientMutationId(), "clientMutationId is null");
     }
 }
