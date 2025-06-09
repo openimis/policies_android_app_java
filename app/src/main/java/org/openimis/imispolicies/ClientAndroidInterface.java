@@ -1496,7 +1496,6 @@ public class ClientAndroidInterface {
         } else if (Periodicity.equals("Y")){
             InsurancePeriod = 12;
         }
-        Log.e("insurance period", String.valueOf(InsurancePeriod));
 
         Date dateWithGracePeriod1 = null;
         Date dateWithGracePeriod2 = null;
@@ -3119,7 +3118,6 @@ public class ClientAndroidInterface {
         if (length == 0) {
             return 999;
         }
-        Log.e("families to upload", familiesToUpload.toString());
         //Loop through each familyId and get Header, Insuree, Policy and Premium details
         for (int i = 0; i < length; i++) {
 
@@ -3128,7 +3126,6 @@ public class ClientAndroidInterface {
             boolean isPolygamy = false;
             try {
                 object = familiesToUpload.getJSONObject(i);
-                Log.e("family object", object.toString());
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -3164,7 +3161,6 @@ public class ClientAndroidInterface {
 
             queryF = query.toString();
             JSONArray familyArray = sqlHandler.getResult(queryF, null);
-            Log.e("family arr", familyArray.toString());
 
             JSONArray newFamilyArray = new JSONArray();
             JSONObject ob1 = null;
@@ -6153,7 +6149,6 @@ public class ClientAndroidInterface {
 
     @JavascriptInterface
     public int getContributionPlanProduct(String contributionPlanId){
-        Log.e("cp id", contributionPlanId);
         int prodId = sqlHandler.getContributionProductId(contributionPlanId);
         return prodId;
     }

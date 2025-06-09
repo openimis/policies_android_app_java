@@ -125,11 +125,9 @@ $(document).ready(function () {
            var policyValue = Android.GetContributionPlanValue(parseInt(FamilyId),CPId);
            var finalValue;
 
-           console.log("calculation rule object:",policyValue);
            var fun = JSON.parse(policyValue);
            with(fun) {
                    // prints "foo"
-                   // console.log("final value:",eval(remoteFunction));
                    finalValue = eval(remoteFunction);
                }
            $('#spPolicyValue').text(finalValue);
