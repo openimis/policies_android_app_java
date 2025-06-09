@@ -1458,7 +1458,7 @@ public class ClientAndroidInterface {
 
     @JavascriptInterface
     @SuppressWarnings("unused")
-    public String getPolicyPeriod(int ProdId, String EnrollDate) throws ParseException, JSONException {
+    public String getPolicyPeriod(int ProdId, String EnrollDate, String Periodicity) throws ParseException, JSONException {
 
         SimpleDateFormat format = AppInformation.DateTimeInfo.getDefaultDateFormatter();
         Date dEnrollDate = format.parse(EnrollDate);
@@ -1487,6 +1487,16 @@ public class ClientAndroidInterface {
         Date StartDate;
         Date ExpiryDate;
         int InsurancePeriod = Integer.parseInt(object.getString("InsurancePeriod"));
+        if(Periodicity.equals("M")){
+            InsurancePeriod = 1;
+        } else if(Periodicity.equals("Q")){
+            InsurancePeriod = 3;
+        } else if(Periodicity.equals("S")){
+            InsurancePeriod = 6;
+        } else if (Periodicity.equals("Y")){
+            InsurancePeriod = 12;
+        }
+        Log.e("insurance period", String.valueOf(InsurancePeriod));
 
         Date dateWithGracePeriod1 = null;
         Date dateWithGracePeriod2 = null;
@@ -1741,7 +1751,7 @@ public class ClientAndroidInterface {
 
         String PolicyPeriod = null;
         try {
-            PolicyPeriod = getPolicyPeriod(ProductId, enrollDate);
+            PolicyPeriod = getPolicyPeriod(ProductId, enrollDate, null);
         } catch (ParseException e) {
             e.printStackTrace();
         }

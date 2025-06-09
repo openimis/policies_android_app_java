@@ -96,7 +96,7 @@ $(document).ready(function () {
         //LoadOfficers(LocationId, EnrolmentDate);
     });
 
-    $('#txtEnrolmentDate, #ddlContributionPlan').change(function () {
+    $('#txtEnrolmentDate, #ddlContributionPlan, #ddlPeriodicity').change(function () {
         var EnrolmentDate = $('#txtEnrolmentDate').val();
         var ProdId = $('#ddlProduct').val();
         var ContributionPlanId = $('#ddlContributionPlan').val();
@@ -201,7 +201,6 @@ $(document).ready(function () {
         }
     });
 
-
 });
 
 function getPolicyPeriod(EnrolmentDate, CpId, FamilyId, policyId) {
@@ -209,7 +208,8 @@ function getPolicyPeriod(EnrolmentDate, CpId, FamilyId, policyId) {
         return false;
 
     var ProdId = Android.getContributionPlanProduct(CpId);
-    var Period = $.parseJSON(Android.getPolicyPeriod(parseInt(ProdId), EnrolmentDate));
+    var Periodicity = $('#ddlPeriodicity').val()
+    var Period = $.parseJSON(Android.getPolicyPeriod(parseInt(ProdId), EnrolmentDate, Periodicity));
 
     var StartDate = new Date(Period[0]["StartDate"]);
     var ExpiryDate = new Date(Period[0]["ExpiryDate"]);
@@ -226,9 +226,14 @@ function getPolicyPeriod(EnrolmentDate, CpId, FamilyId, policyId) {
     var isOffline = $('#hfOffline').val();
     //var PolicyValue = Android.getPolicyValue(EnrolmentDate, ProdId, FamilyId, fStartDate, HasCycle, 0, "N", isOffline);
     var PolicyValue = Android.GetContributionPlanValue(parseInt(FamilyId),CpId)
+    var finalValue;
+    var fun = JSON.parse(PolicyValue);
+    with(fun) {
+        finalValue = eval(remoteFunction);
+    }
 
-    $('#spPolicyValue').text(PolicyValue);
-    $('#hfPolicyValue').val(PolicyValue);
+    $('#spPolicyValue').text(finalValue);
+    $('#hfPolicyValue').val(finalValue);
 
     $('#hfHasCycle').val(HasCycle);
     $('#hffStartDate').val(fStartDate);
