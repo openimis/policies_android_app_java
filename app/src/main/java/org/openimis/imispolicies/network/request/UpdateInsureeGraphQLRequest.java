@@ -21,8 +21,10 @@ public class UpdateInsureeGraphQLRequest extends BaseGraphQLRequest {
     @WorkerThread
     @NonNull
     public String update(
-            @NonNull Family.Member member
+            @NonNull Family.Member member,
+            int officerId
         ) throws Exception {
+        java.sql.Date date = new java.sql.Date(System.currentTimeMillis());
         Response<UpdateInsureeMutation.Data> response = makeSynchronous(new UpdateInsureeMutation(
                 UpdateInsureeMutationInput.builder()
                         .clientMutationId(UUID.randomUUID().toString())
@@ -59,6 +61,8 @@ public class UpdateInsureeGraphQLRequest extends BaseGraphQLRequest {
                                                         Base64.encodeToString(member.getPhotoBytes(), Base64.DEFAULT) :
                                                         null
                                         )
+                                        .officerId(officerId)
+                                        .date(date)
                                         .build()
                         )
                         .build()

@@ -159,7 +159,7 @@ public class UpdateFamily {
         try {
             fetchInsureeInquire.execute(member.getChfId());
             checkMutation.execute(
-                    updateInsureeGraphQLRequest.update(member),
+                    updateInsureeGraphQLRequest.update(member, officerId),
                     "Érreur lors de la mise à jour de l'assuré '" + member.getChfId() + "'"
             );
 
@@ -190,10 +190,7 @@ public class UpdateFamily {
                 );
             }
         } else {
-            checkMutation.execute(
-                    updatePolicyGraphQLRequest.update(policy, familyId),
-                    "Érreur lors de la mise à jour de la police '" + policy.getUuid() + "'"
-            );
+            updatePolicyGraphQLRequest.update(policy, familyId);
             for (Family.Policy.Premium premium : policy.getPremiums()) {
                 checkMutation.execute(
                         createPremiumGraphQLRequest.create(premium),
@@ -204,7 +201,7 @@ public class UpdateFamily {
     }
 
     @WorkerThread
-    private void removeMemberFromFamily(@NonNull Family.Member member) throws Exception {
-        updateInsureeGraphQLRequest.update(member);
+    private void removeMemberFromFamily(@NonNull Family.Member member, int officerId) throws Exception {
+        updateInsureeGraphQLRequest.update(member, officerId);
     }
 }

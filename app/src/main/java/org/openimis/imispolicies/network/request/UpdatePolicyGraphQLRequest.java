@@ -16,7 +16,7 @@ public class UpdatePolicyGraphQLRequest extends BaseGraphQLRequest {
 
     @WorkerThread
     @NonNull
-    public String update(@NonNull Family.Policy policy, int familyId) throws Exception {
+    public UpdatePolicyMutation.Data update(@NonNull Family.Policy policy, int familyId) throws Exception {
         Response<UpdatePolicyMutation.Data> response = makeSynchronous(new UpdatePolicyMutation(
                 UpdatePolicyMutationInput.builder()
                         .clientMutationId(UUID.randomUUID().toString())
@@ -36,10 +36,6 @@ public class UpdatePolicyGraphQLRequest extends BaseGraphQLRequest {
                         .periodicity(policy.getPeriodicity())
                         .build()
         ));
-        return Objects.requireNonNull(
-                Objects.requireNonNull(
-                                Objects.requireNonNull(response.getData(), "data is null")
-                                        .updatePolicy(), "update policy is null")
-                        .clientMutationId(), "clientMutationId is null");
+        return Objects.requireNonNull(response.getData());
     }
 }
