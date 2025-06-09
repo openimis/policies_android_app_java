@@ -3410,7 +3410,9 @@ public class ClientAndroidInterface {
                         }
 
                         DeleteUploadedData(Integer.parseInt(FamilyId), verifiedId, CallerId);
-                        //DeleteFamily(Integer.parseInt(FamilyId));
+                        if (!isPolygamy){
+                            DeleteFamily(Integer.parseInt(FamilyId));
+                        }
                     }
 
                 } else {
@@ -3457,7 +3459,7 @@ public class ClientAndroidInterface {
         }
 
         //delete polygamous family without head insuree
-        JSONArray familiesToDelete = sqlHandler.getResult("SELECT FamilyId, isOffline FROM tblFamilies WHERE InsureeId == NULL ORDER BY FamilyId", null);
+        JSONArray familiesToDelete = sqlHandler.getResult("SELECT FamilyId, isOffline FROM tblFamilies WHERE InsureeId IS NULL ORDER BY FamilyId", null);
         for (int f = 0; f < familiesToDelete.length(); f++){
             DeleteFamily(Integer.parseInt(familiesToDelete.getJSONObject(f).getString("FamilyId")));
         }
