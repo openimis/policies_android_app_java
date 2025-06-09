@@ -1565,7 +1565,7 @@ public class ClientAndroidInterface {
 
     @JavascriptInterface
     @SuppressWarnings("unused")
-    public double getPolicyValue(String enrollDate, int ProductId, int FamilyId, String startDate, boolean HasCycle, int PolicyId, String PolicyStage, int IsOffline) throws JSONException {
+    public double getPolicyValue(String enrollDate, String CpId, int ProductId, int FamilyId, String startDate, boolean HasCycle, int PolicyId, String PolicyStage, int IsOffline) throws JSONException {
         Date ExpiryDate = null;
         String expiryDate = null;
         int PreviousPolicyId = 0;
@@ -6128,7 +6128,9 @@ public class ClientAndroidInterface {
 
     @JavascriptInterface
     public int getContributionPlanProduct(String contributionPlanId){
-
+        Log.e("cp id", contributionPlanId);
+        int prodId = sqlHandler.getContributionProductId(contributionPlanId);
+        return prodId;
     }
 }
 

@@ -96,7 +96,7 @@ $(document).ready(function () {
         //LoadOfficers(LocationId, EnrolmentDate);
     });
 
-    $('#txtEnrolmentDate, #ddlProduct').change(function () {
+    $('#txtEnrolmentDate, #ddlContributionPlan').change(function () {
         var EnrolmentDate = $('#txtEnrolmentDate').val();
         var ProdId = $('#ddlProduct').val();
         var ContributionPlanId = $('#ddlContributionPlan').val();
@@ -124,7 +124,6 @@ $(document).ready(function () {
            var CPId = $('#ddlContributionPlan').val();
            var policyValue = Android.GetContributionPlanValue(parseInt(FamilyId),CPId);
            var finalValue;
-           var productId = Android.getContributionPlanProduct(CPId);
 
            console.log("calculation rule object:",policyValue);
            var fun = JSON.parse(policyValue);
@@ -206,10 +205,11 @@ $(document).ready(function () {
 });
 
 function getPolicyPeriod(EnrolmentDate, CpId, FamilyId, policyId) {
-    if (EnrolmentDate.length == 0 || CpId == '')
+    if (EnrolmentDate.length == 0 || CpId == 0)
         return false;
 
-    var Period = $.parseJSON(Android.getPolicyPeriod(CpId, EnrolmentDate));
+    var ProdId = Android.getContributionPlanProduct(CpId);
+    var Period = $.parseJSON(Android.getPolicyPeriod(parseInt(ProdId), EnrolmentDate));
 
     var StartDate = new Date(Period[0]["StartDate"]);
     var ExpiryDate = new Date(Period[0]["ExpiryDate"]);
@@ -224,7 +224,8 @@ function getPolicyPeriod(EnrolmentDate, CpId, FamilyId, policyId) {
     fStartDate = getDateForJS(StartDate)
     //fStartDate = moment(fStartDate).toDate();
     var isOffline = $('#hfOffline').val();
-    var PolicyValue = Android.getPolicyValue(EnrolmentDate, CpId, FamilyId, fStartDate, HasCycle, 0, "N", isOffline);
+    //var PolicyValue = Android.getPolicyValue(EnrolmentDate, ProdId, FamilyId, fStartDate, HasCycle, 0, "N", isOffline);
+    var PolicyValue = Android.GetContributionPlanValue(parseInt(FamilyId),CpId)
 
     $('#spPolicyValue').text(PolicyValue);
     $('#hfPolicyValue').val(PolicyValue);
