@@ -511,5 +511,11 @@
     <string name="AttachmentNotFound">Aucune pièce jointe trouvée. Veuillez ajouter une pièce jointe</string>
     <string name="FamilyPolygamy">Famille polygame</string>
     <string name="PaymentDay">Jour de paiement</string>
+    <string name="CheckUpdate">Vérification des mises à jour</string>
+    <string name="Update">Mise à jour</string>
+    <string name="UpdateAvailable">Mise à jour disponible</string>
+    <string name="Download">Télécharger</string>
+    <string name="NoUpdateAvailable">Aucune mise à jour disponible</string>
+    <string name="DownloadStart">Téléchargement démarré</string>
     <string name="NonePayment">Virement Bancaire</string>
 </resources>

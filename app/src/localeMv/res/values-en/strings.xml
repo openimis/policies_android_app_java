@@ -480,4 +480,5 @@
     <string name="SupportedLanguages">Supported languages:\n%1$s</string>
     <string name="PaymentDay">Payment day</string>
     <string name="Periodicity">Periodicity</string>
+    <string name="CheckUpdate">Check for updates</string>
 </resources>

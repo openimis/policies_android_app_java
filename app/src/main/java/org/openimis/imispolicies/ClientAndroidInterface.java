@@ -30,6 +30,7 @@ import static android.provider.MediaStore.EXTRA_OUTPUT;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.DownloadManager;
 import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.content.Context;
@@ -42,6 +43,7 @@ import android.icu.text.DecimalFormat;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.os.Environment;
 import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.text.TextUtils;
@@ -97,12 +99,15 @@ import org.openimis.imispolicies.util.StringUtils;
 import org.openimis.imispolicies.util.UriUtils;
 import org.openimis.imispolicies.util.ZipUtils;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.URL;
 import java.nio.file.Files;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
@@ -6025,6 +6030,97 @@ public class ClientAndroidInterface {
         }
 
         return "0";
+    }
+
+    @JavascriptInterface
+    public void CheckAppUpdate() {
+        ProgressDialog pd = ProgressDialog.show(
+                activity,
+                activity.getResources().getString(R.string.Update),
+                activity.getResources().getString(R.string.CheckUpdate)
+        );
+
+        new Thread(() -> {
+            try {
+                String currentVersion = BuildConfig.VERSION_NAME;
+                boolean updateAvailable = false;
+
+                URL url = new URL("https://api.github.com/repos/mngoe/policies_android_app_java/releases");
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                connection.setRequestProperty("Accept", "application/vnd.github.v3+json");
+
+                BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                StringBuilder response = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    response.append(line);
+                }
+                reader.close();
+                connection.disconnect();
+
+                JSONArray releases = new JSONArray(response.toString());
+
+                String latestVersion = "";
+                String tag_name = "";
+
+                for (int i = 0; i < releases.length(); i++) {
+                    JSONObject release = releases.getJSONObject(i);
+                    if(release.getString("tag_name").equals(activity.getResources().getString(R.string.release_tag))){
+                            tag_name = release.getString("tag_name");
+                        String releaseName = release.getString("name");
+                        if(!releaseName.equals(currentVersion)){
+                            latestVersion = releaseName;
+                            updateAvailable = true;
+                        }
+                    }
+                }
+
+                boolean finalUpdateAvailable = updateAvailable;
+                String finalVersion = latestVersion;
+                String finalTagName = tag_name;
+
+                activity.runOnUiThread(() -> {
+                    pd.dismiss();
+                    if (finalUpdateAvailable) {
+                        new AlertDialog.Builder(activity)
+                                .setTitle(activity.getResources().getString(R.string.UpdateAvailable))
+                                .setMessage("Version : " + finalVersion)
+                                .setPositiveButton(activity.getResources().getString(R.string.Download), (dialog, which) -> downloadUpdate(finalVersion, finalTagName))
+                                .setNegativeButton(activity.getResources().getString(R.string.Cancel), null)
+                                .show();
+                    } else {
+                        Toast.makeText(activity, activity.getResources().getString(R.string.NoUpdateAvailable), Toast.LENGTH_LONG).show();
+                    }
+                });
+
+            } catch (Exception e) {
+                activity.runOnUiThread(() -> {
+                    pd.dismiss();
+                    Toast.makeText(activity, "Erreur : " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+            }
+        }).start();
+    }
+    @JavascriptInterface
+    public void downloadUpdate(String lastVersion, String tagName) {
+        try {
+            String fileName = "app-" + BuildConfig.FLAVOR + "-debug.apk";
+            String apkUrl = "https://github.com/mngoe/policies_android_app_java/releases/download/" + tagName + "/" + fileName;
+
+            DownloadManager.Request request = new DownloadManager.Request(Uri.parse(apkUrl))
+                    .setTitle("Mise à jour OpenIMIS")
+                    .setDescription("Mise à jour " + tagName)
+                    .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName)
+                    .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+
+            DownloadManager manager = (DownloadManager) activity.getSystemService(Context.DOWNLOAD_SERVICE);
+            manager.enqueue(request);
+
+            Toast.makeText(activity, activity.getResources().getString(R.string.DownloadStart), Toast.LENGTH_SHORT).show();
+
+        } catch (Exception e) {
+            Toast.makeText(activity, "Échec du téléchargement: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
     }
 
     @JavascriptInterface

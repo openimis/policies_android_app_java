@@ -498,4 +498,10 @@
     <string name="NonePayment">Bank transfer</string>
     <string name="PaymentDay">Payment day</string>
     <string name="Periodicity">Periodicity</string>
+    <string name="CheckUpdate">Checking for updates</string>
+    <string name="Update">Update</string>
+    <string name="UpdateAvailable">Update available</string>
+    <string name="Download">Download</string>
+    <string name="NoUpdateAvailable">No update available</string>
+    <string name="DownloadStart">Download Start</string>
 </resources>
