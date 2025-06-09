@@ -8,6 +8,7 @@ $(document).ready(function () {
         $("#Relationship").hide();
         $("#ddlRelationship").prop("required", false);
         $('#PaymentMethod').show();
+        $("#txtPhoneNumber").prop("required", true);
     }
 
     if($('#txtInsuranceNumber').val() == ""){
@@ -228,6 +229,7 @@ $(document).ready(function () {
                 $("#Relationship").hide();
                 $('#PaymentMethod').show();
                 $("#ddlRelationship").prop("required", false);
+                $("#txtPhoneNumber").prop("required", true);
             }else{
                 $('#PaymentMethod').hide();
                 $("#ddlRelationship").prop("required", true);
@@ -239,9 +241,11 @@ $(document).ready(function () {
                 $("#Relationship").hide();
                 $('#PaymentMethod').show();
                 $("#ddlRelationship").prop("required", false);
+                $("#txtPhoneNumber").prop("required", true);
             }else{
                 $('#PaymentMethod').hide();
                 $("#ddlRelationship").prop("required", true);
+                $("#txtPhoneNumber").prop("required", false);
             }
         }
 
@@ -358,7 +362,7 @@ function fillRelationship() {
         $textLanguage = "AltLanguage";
     }
     var $Relations = Android.getRelationships();
-    bindDropdown('ddlRelationship', $Relations, 'RelationId', $textLanguage, 0, Android.getString('SelectRelationship'));
+    bindDropdown('ddlRelationship', $Relations, 'RelationId', $textLanguage, 0, Android.getString('Nothing'));
 }
 
 function fillGender() {
@@ -392,7 +396,7 @@ function fillFSPRegions() {
 
 function fillCurrentDistricts(RegionId) {
     var $Districts = Android.getDistrictsWO(RegionId);
-    bindDropdown('ddlCurrentDistrict', $Districts, 'LocationId', 'LocationName', null, Android.getString('SelectDistrict'));
+    bindDropdown('ddlCurrentDistrict', $Districts, 'LocationId', 'LocationName',null, Android.getString('SelectDistrict'));
 }
 
 function fillCurrentWards(DistrictId) {
