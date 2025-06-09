@@ -5973,12 +5973,16 @@ public class ClientAndroidInterface {
     }
     @JavascriptInterface
     public void CheckAppUpdate() {
-        ProgressDialog pd = ProgressDialog.show(activity, "Mise à jour", "Vérification en cours...");
+        ProgressDialog pd = ProgressDialog.show(
+                activity,
+                activity.getResources().getString(R.string.Update),
+                activity.getResources().getString(R.string.CheckUpdate)
+        );
 
         new Thread(() -> {
             try {
-                String currentVersion = BuildConfig.VERSION_NAME; // ex: comores-0
-                Log.d("CheckUpdate", "Version actuelle: " + currentVersion);
+                String currentVersion = BuildConfig.VERSION_NAME;
+                boolean updateAvailable = false;
 
                 URL url = new URL("https://api.github.com/repos/mngoe/policies_android_app_java/releases");
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -5996,47 +6000,39 @@ public class ClientAndroidInterface {
                 JSONArray releases = new JSONArray(response.toString());
 
                 String latestVersion = "";
-                String latestTagName = "";
-                boolean updateAvailable = false;
+                String tag_name = "";
 
                 for (int i = 0; i < releases.length(); i++) {
                     JSONObject release = releases.getJSONObject(i);
-                    String tagName = release.optString("tag_name", "");
-                    String releaseName = release.optString("name", "");
-
-                    if (tagName.startsWith("comores-")) {
-                        int releaseNum = Integer.parseInt(tagName.split("-")[1]);
-                        int currentNum = Integer.parseInt(currentVersion.split("-")[1]);
-
-                        if (releaseNum > currentNum) {
+                    if(release.getString("tag_name").equals(activity.getResources().getString(R.string.release_tag))){
+                            tag_name = release.getString("tag_name");
+                        String releaseName = release.getString("name");
+                        if(!releaseName.equals(currentVersion)){
                             latestVersion = releaseName;
-                            latestTagName = tagName;
                             updateAvailable = true;
-                            break; // prend uniquement le premier plus récent
                         }
                     }
                 }
 
                 boolean finalUpdateAvailable = updateAvailable;
-                String finalTag = latestTagName;
                 String finalVersion = latestVersion;
+                String finalTagName = tag_name;
 
                 activity.runOnUiThread(() -> {
                     pd.dismiss();
                     if (finalUpdateAvailable) {
                         new AlertDialog.Builder(activity)
-                                .setTitle("Mise à jour disponible")
-                                .setMessage("Nouvelle version : " + finalVersion + "\nVersion actuelle : " + currentVersion)
-                                .setPositiveButton("Télécharger", (dialog, which) -> downloadUpdate(finalTag))
-                                .setNegativeButton("Annuler", null)
+                                .setTitle(activity.getResources().getString(R.string.UpdateAvailable))
+                                .setMessage("Version : " + finalVersion)
+                                .setPositiveButton(activity.getResources().getString(R.string.Download), (dialog, which) -> downloadUpdate(finalVersion, finalTagName))
+                                .setNegativeButton(activity.getResources().getString(R.string.Cancel), null)
                                 .show();
                     } else {
-                        Toast.makeText(activity, "Vous avez déjà la dernière version (" + currentVersion + ")", Toast.LENGTH_LONG).show();
+                        Toast.makeText(activity, activity.getResources().getString(R.string.NoUpdateAvailable), Toast.LENGTH_LONG).show();
                     }
                 });
 
             } catch (Exception e) {
-                Log.e("CheckUpdate", "Erreur lors de la vérification: ", e);
                 activity.runOnUiThread(() -> {
                     pd.dismiss();
                     Toast.makeText(activity, "Erreur : " + e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -6045,24 +6041,23 @@ public class ClientAndroidInterface {
         }).start();
     }
     @JavascriptInterface
-    public void downloadUpdate(String tagName) {
+    public void downloadUpdate(String lastVersion, String tagName) {
         try {
             String fileName = "app-" + BuildConfig.FLAVOR + "-debug.apk";
             String apkUrl = "https://github.com/mngoe/policies_android_app_java/releases/download/" + tagName + "/" + fileName;
 
             DownloadManager.Request request = new DownloadManager.Request(Uri.parse(apkUrl))
                     .setTitle("Mise à jour OpenIMIS")
-                    .setDescription("Téléchargement de la version " + tagName)
+                    .setDescription("Mise à jour " + tagName)
                     .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName)
                     .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
 
             DownloadManager manager = (DownloadManager) activity.getSystemService(Context.DOWNLOAD_SERVICE);
             manager.enqueue(request);
 
-            Toast.makeText(activity, "Téléchargement démarré", Toast.LENGTH_SHORT).show();
+            Toast.makeText(activity, activity.getResources().getString(R.string.DownloadStart), Toast.LENGTH_SHORT).show();
 
         } catch (Exception e) {
-            Log.e("DownloadUpdate", "Erreur lors du téléchargement: ", e);
             Toast.makeText(activity, "Échec du téléchargement: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
