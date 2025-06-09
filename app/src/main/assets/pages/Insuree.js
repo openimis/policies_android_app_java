@@ -8,6 +8,7 @@ $(document).ready(function () {
         $("#Relationship").hide();
         $("#ddlRelationship").prop("required", false);
         $('#PaymentMethod').show();
+        $("#txtPhoneNumber").prop("required", true);
     }
 
     if($('#txtInsuranceNumber').val() == ""){
@@ -228,6 +229,7 @@ $(document).ready(function () {
                 $("#Relationship").hide();
                 $('#PaymentMethod').show();
                 $("#ddlRelationship").prop("required", false);
+                $("#txtPhoneNumber").prop("required", true);
             }else{
                 $('#PaymentMethod').hide();
                 $("#ddlRelationship").prop("required", true);
@@ -239,9 +241,11 @@ $(document).ready(function () {
                 $("#Relationship").hide();
                 $('#PaymentMethod').show();
                 $("#ddlRelationship").prop("required", false);
+                $("#txtPhoneNumber").prop("required", true);
             }else{
                 $('#PaymentMethod').hide();
                 $("#ddlRelationship").prop("required", true);
+                $("#txtPhoneNumber").prop("required", false);
             }
         }
 
