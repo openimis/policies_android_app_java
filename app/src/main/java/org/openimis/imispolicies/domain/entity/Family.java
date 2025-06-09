@@ -154,7 +154,7 @@ public class Family implements Parcelable {
             return null;
         }
         for (Member member : members) {
-            if (headChfId.equals(member.getChfId()) || member.isHead) {
+            if (headChfId.equals(member.getChfId())) {
                 head = member;
                 return member;
             }
