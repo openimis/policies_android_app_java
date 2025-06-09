@@ -18,6 +18,7 @@ import org.openimis.imispolicies.util.DateUtils;
 
 import java.util.ArrayList;
 import java.util.Objects;
+import java.util.UUID;
 
 public class CreateSubFamilyGraphQLRequest extends BaseGraphQLRequest {
 
@@ -28,6 +29,8 @@ public class CreateSubFamilyGraphQLRequest extends BaseGraphQLRequest {
         java.sql.Date date = new java.sql.Date(System.currentTimeMillis());
         Response<CreateFamilyMutation.Data> response = makeSynchronous(new CreateFamilyMutation(
                 CreateFamilyMutationInput.builder()
+                        .clientMutationId(UUID.randomUUID().toString())
+                        .clientMutationLabel("Create family '" + family.getHeadChfId() + "'")
                         .locationId(family.getLocationId())
                         .poverty(family.isPoor())
                         .familyTypeId(family.getType())
