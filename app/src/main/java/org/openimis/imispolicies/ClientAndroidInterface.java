@@ -1458,7 +1458,7 @@ public class ClientAndroidInterface {
 
     @JavascriptInterface
     @SuppressWarnings("unused")
-    public String getPolicyPeriod(int ProdId, String EnrollDate) throws ParseException, JSONException {
+    public String getPolicyPeriod(int ProdId, String EnrollDate, String Periodicity) throws ParseException, JSONException {
 
         SimpleDateFormat format = AppInformation.DateTimeInfo.getDefaultDateFormatter();
         Date dEnrollDate = format.parse(EnrollDate);
@@ -1487,6 +1487,15 @@ public class ClientAndroidInterface {
         Date StartDate;
         Date ExpiryDate;
         int InsurancePeriod = Integer.parseInt(object.getString("InsurancePeriod"));
+        if(Periodicity.equals("M")){
+            InsurancePeriod = 1;
+        } else if(Periodicity.equals("Q")){
+            InsurancePeriod = 3;
+        } else if(Periodicity.equals("S")){
+            InsurancePeriod = 6;
+        } else if (Periodicity.equals("Y")){
+            InsurancePeriod = 12;
+        }
 
         Date dateWithGracePeriod1 = null;
         Date dateWithGracePeriod2 = null;
@@ -1741,7 +1750,7 @@ public class ClientAndroidInterface {
 
         String PolicyPeriod = null;
         try {
-            PolicyPeriod = getPolicyPeriod(ProductId, enrollDate);
+            PolicyPeriod = getPolicyPeriod(ProductId, enrollDate, null);
         } catch (ParseException e) {
             e.printStackTrace();
         }
@@ -3109,7 +3118,6 @@ public class ClientAndroidInterface {
         if (length == 0) {
             return 999;
         }
-        Log.e("families to upload", familiesToUpload.toString());
         //Loop through each familyId and get Header, Insuree, Policy and Premium details
         for (int i = 0; i < length; i++) {
 
@@ -3118,7 +3126,6 @@ public class ClientAndroidInterface {
             boolean isPolygamy = false;
             try {
                 object = familiesToUpload.getJSONObject(i);
-                Log.e("family object", object.toString());
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -3154,7 +3161,6 @@ public class ClientAndroidInterface {
 
             queryF = query.toString();
             JSONArray familyArray = sqlHandler.getResult(queryF, null);
-            Log.e("family arr", familyArray.toString());
 
             JSONArray newFamilyArray = new JSONArray();
             JSONObject ob1 = null;
@@ -6143,7 +6149,6 @@ public class ClientAndroidInterface {
 
     @JavascriptInterface
     public int getContributionPlanProduct(String contributionPlanId){
-        Log.e("cp id", contributionPlanId);
         int prodId = sqlHandler.getContributionProductId(contributionPlanId);
         return prodId;
     }
