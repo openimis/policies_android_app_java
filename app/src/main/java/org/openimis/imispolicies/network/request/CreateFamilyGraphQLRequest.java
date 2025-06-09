@@ -20,16 +20,19 @@ import org.openimis.imispolicies.util.DateUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 public class CreateFamilyGraphQLRequest extends BaseGraphQLRequest {
 
     @WorkerThread
     @NonNull
-    public CreateFamilyMutation.Data create(@NonNull Family family, int officerId) throws Exception {
+    public String create(@NonNull Family family, int officerId) throws Exception {
         Family.Member head = family.getHead();
         java.sql.Date date = new java.sql.Date(System.currentTimeMillis());
         Response<CreateFamilyMutation.Data> response = makeSynchronous(new CreateFamilyMutation(
                 CreateFamilyMutationInput.builder()
+                        .clientMutationId(UUID.randomUUID().toString())
+                        .clientMutationLabel("Create family '" + family.getHeadChfId() + "'")
                         .locationId(family.getLocationId())
                         .poverty(family.isPoor())
                         .familyTypeId(family.getType())
@@ -76,7 +79,11 @@ public class CreateFamilyGraphQLRequest extends BaseGraphQLRequest {
                         )
                         .build()
         ));
-        return Objects.requireNonNull(response.getData());
+        return Objects.requireNonNull(
+                Objects.requireNonNull(
+                                Objects.requireNonNull(response.getData(), "data is null")
+                                        .createFamily(), "create family is null")
+                        .clientMutationId(), "clientMutationId is null");
     }
 
     private FamilyAttachmentInputType toAttachment(

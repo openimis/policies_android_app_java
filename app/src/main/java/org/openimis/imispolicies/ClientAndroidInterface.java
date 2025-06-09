@@ -2041,7 +2041,6 @@ public class ClientAndroidInterface {
             activity.runOnUiThread(() -> ShowDialog(activity.getResources().getString(R.string.PolicyValueChange) + finalEnrollDate + "," + "has been changed from " + finalPolicyValue + " to " + finalNewPolicyValue));
         }
 
-        Log.e("policies", Policies.toString());
         return Policies.toString();
     }
 
@@ -3066,7 +3065,7 @@ public class ClientAndroidInterface {
             if (IsOffline == 1) {
                 if (!getRule("AllowInsureeWithoutPhoto")) {
                     String PhotoPath = Insureeobject.getString("PhotoPath");
-                    if (PhotoPath.length() == 0 || PhotoPath.equals("null")) {
+                    if (PhotoPath.isEmpty() || PhotoPath.equals("null")) {
                         myList.add(getInsureeValidationError(
                                 Insureeobject.getString("CHFID"),
                                 Insureeobject.getString("LastName"),
@@ -3155,6 +3154,7 @@ public class ClientAndroidInterface {
 
             queryF = query.toString();
             JSONArray familyArray = sqlHandler.getResult(queryF, null);
+            Log.e("family arr", familyArray.toString());
 
             JSONArray newFamilyArray = new JSONArray();
             JSONObject ob1 = null;
@@ -3410,9 +3410,10 @@ public class ClientAndroidInterface {
                         }
 
                         DeleteUploadedData(Integer.parseInt(FamilyId), verifiedId, CallerId);
-                        //DeleteFamily(Integer.parseInt(FamilyId));
+                        if (!isPolygamy){
+                            DeleteFamily(Integer.parseInt(FamilyId));
+                        }
                     }
-
 
                 } else {
                     String ErrMsg;
@@ -3458,7 +3459,7 @@ public class ClientAndroidInterface {
         }
 
         //delete polygamous family without head insuree
-        JSONArray familiesToDelete = sqlHandler.getResult("SELECT FamilyId, isOffline FROM tblFamilies WHERE InsureeId == NULL ORDER BY FamilyId", null);
+        JSONArray familiesToDelete = sqlHandler.getResult("SELECT FamilyId, isOffline FROM tblFamilies WHERE InsureeId IS NULL ORDER BY FamilyId", null);
         for (int f = 0; f < familiesToDelete.length(); f++){
             DeleteFamily(Integer.parseInt(familiesToDelete.getJSONObject(f).getString("FamilyId")));
         }
@@ -5969,8 +5970,6 @@ public class ClientAndroidInterface {
 
     @JavascriptInterface
     public int DeleteAttachment(int InsureeId,int attachmentId, String attachmentTitle, String attachmentName) throws JSONException {
-        Log.e("attachmentTitle", attachmentTitle);
-        Log.e("attachmentName", attachmentName);
         if (InsureeId != 0) {
             if(attachmentId != 0){
                 String[] attachmentIdArgument = new String[]{String.valueOf(attachmentId)};

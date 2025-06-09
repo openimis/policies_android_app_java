@@ -12,8 +12,8 @@ import java.util.concurrent.TimeoutException;
 
 public class CheckMutation {
 
-    private static final long DEFAULT_TIMEOUT = 30_000L;
-    private static final long DEFAULT_DELAY = 500L;
+    private static final long DEFAULT_TIMEOUT = 60_000L;
+    private static final long DEFAULT_DELAY = 600L;
     private static final int STATUS_RECEIVED = 0;
     private static final int STATUS_ERROR = 1;
 

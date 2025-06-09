@@ -12,14 +12,17 @@ import org.openimis.imispolicies.type.CreatePolicyMutationInput;
 import org.openimis.imispolicies.type.CreatePremiumMutationInput;
 
 import java.util.Objects;
+import java.util.UUID;
 
 public class CreatePremiumGraphQLRequest extends BaseGraphQLRequest {
 
     @WorkerThread
     @NonNull
-    public CreatePremiumMutation.Data create(@NonNull Family.Policy.Premium premium) throws Exception {
+    public String create(@NonNull Family.Policy.Premium premium) throws Exception {
         Response<CreatePremiumMutation.Data> response = makeSynchronous(new CreatePremiumMutation(
                 CreatePremiumMutationInput.builder()
+                        .clientMutationId(UUID.randomUUID().toString())
+                        .clientMutationLabel("Create contribution '" + premium.getPolicyUuid() + "'")
                         .policyUuid(premium.getPolicyUuid())
                         .amount(premium.getAmount())
                         .receipt(premium.getReceipt())
@@ -29,6 +32,10 @@ public class CreatePremiumGraphQLRequest extends BaseGraphQLRequest {
                         .isPhotoFee(premium.isPhotoFee())
                         .build()
         ));
-        return Objects.requireNonNull(response.getData());
+        return Objects.requireNonNull(
+                Objects.requireNonNull(
+                                Objects.requireNonNull(response.getData(), "data is null")
+                                        .createPremium(), "mobileEnrollment is null")
+                        .clientMutationId(), "clientMutationId is null");
     }
 }

@@ -14,16 +14,21 @@ import org.openimis.imispolicies.type.PhotoInputType;
 import org.openimis.imispolicies.type.UpdateInsureeMutationInput;
 
 import java.util.Objects;
+import java.util.UUID;
 
 public class UpdateInsureeGraphQLRequest extends BaseGraphQLRequest {
 
     @WorkerThread
     @NonNull
-    public UpdateInsureeMutation.Data update(
-            @NonNull Family.Member member
+    public String update(
+            @NonNull Family.Member member,
+            int officerId
         ) throws Exception {
+        java.sql.Date date = new java.sql.Date(System.currentTimeMillis());
         Response<UpdateInsureeMutation.Data> response = makeSynchronous(new UpdateInsureeMutation(
                 UpdateInsureeMutationInput.builder()
+                        .clientMutationId(UUID.randomUUID().toString())
+                        .clientMutationLabel("Update insuree '" + member.getChfId() + "'")
                         .uuid(member.getUuid())
                         .chfId(member.getChfId())
                         .familyId(member.getFamilyId())
@@ -56,10 +61,16 @@ public class UpdateInsureeGraphQLRequest extends BaseGraphQLRequest {
                                                         Base64.encodeToString(member.getPhotoBytes(), Base64.DEFAULT) :
                                                         null
                                         )
+                                        .officerId(officerId)
+                                        .date(date)
                                         .build()
                         )
                         .build()
         ));
-        return Objects.requireNonNull(response.getData());
+        return Objects.requireNonNull(
+                Objects.requireNonNull(
+                                Objects.requireNonNull(response.getData(), "data is null")
+                                        .updateInsuree(), "update insuree is null")
+                        .clientMutationId(), "clientMutationId is null");
     }
 }
