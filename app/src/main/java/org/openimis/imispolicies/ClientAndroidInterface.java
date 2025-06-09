@@ -568,13 +568,14 @@ public class ClientAndroidInterface {
         JSONObject object = new JSONObject();
 
         try {
-            object.put("Code", "");
-            object.put("Status", activity.getResources().getString(R.string.SelectMaritalStatus));
+            object = new JSONObject();
+            object.put("Code", "N");
+            object.put("Status", activity.getResources().getString(R.string.NotSpecified));
             maritalStatus.put(object);
 
             object = new JSONObject();
-            object.put("Code", "M");
-            object.put("Status", activity.getResources().getString(R.string.Married));
+            object.put("Code", "W");
+            object.put("Status", activity.getResources().getString(R.string.Widowed));
             maritalStatus.put(object);
 
             object = new JSONObject();
@@ -588,8 +589,8 @@ public class ClientAndroidInterface {
             maritalStatus.put(object);
 
             object = new JSONObject();
-            object.put("Code", "W");
-            object.put("Status", activity.getResources().getString(R.string.Widowed));
+            object.put("Code", "M");
+            object.put("Status", activity.getResources().getString(R.string.Married));
             maritalStatus.put(object);
 
             object = new JSONObject();
@@ -597,10 +598,7 @@ public class ClientAndroidInterface {
             object.put("Status", activity.getResources().getString(R.string.Polygamy));
             maritalStatus.put(object);
 
-            object = new JSONObject();
-            object.put("Code", "N");
-            object.put("Status", activity.getResources().getString(R.string.NotSpecified));
-            maritalStatus.put(object);
+
         } catch (JSONException e) {
             e.printStackTrace();
         }

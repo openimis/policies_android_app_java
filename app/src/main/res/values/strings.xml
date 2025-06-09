@@ -504,4 +504,5 @@
     <string name="Download">Download</string>
     <string name="NoUpdateAvailable">No update available</string>
     <string name="DownloadStart">Download Start</string>
+    <string name="Nothing">Nothing</string>
 </resources>

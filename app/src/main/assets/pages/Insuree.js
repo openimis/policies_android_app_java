@@ -362,7 +362,7 @@ function fillRelationship() {
         $textLanguage = "AltLanguage";
     }
     var $Relations = Android.getRelationships();
-    bindDropdown('ddlRelationship', $Relations, 'RelationId', $textLanguage, 0, Android.getString('SelectRelationship'));
+    bindDropdown('ddlRelationship', $Relations, 'RelationId', $textLanguage, 0, Android.getString('Nothing'));
 }
 
 function fillGender() {
