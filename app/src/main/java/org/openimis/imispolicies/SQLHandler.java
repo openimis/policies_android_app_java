@@ -137,6 +137,7 @@ public class SQLHandler extends SQLiteOpenHelper {
                     "CREATE TABLE " + tblFamilies + "(" +
                             "FamilyId INTEGER," +
                             "InsureeId NUMERIC," +
+                            "InsureeChfId TEXT," +
                             "LocationId NUMERIC," +
                             "Poverty BOOLEAN," +
                             "isOffline NUMERIC," +
@@ -278,6 +279,7 @@ public class SQLHandler extends SQLiteOpenHelper {
             sqLiteDatabase.execSQL(
                     "CREATE TABLE 'tblPolicy' (" +
                             "PolicyId INTEGER," +
+                            "PolicyUuid TEXT," +
                             "FamilyId NUMERIC," +
                             "EnrollDate DATE," +
                             "StartDate DATE," +
@@ -287,7 +289,7 @@ public class SQLHandler extends SQLiteOpenHelper {
                             "PolicyStatus NUMERIC," +
                             "PolicyValue NUMERIC," +
                             "ProdId NUMERIC," +
-                            "ContributionPlanId NUMERIC," +
+                            "ContributionPlanId TEXT," +
                             "OfficerId NUMERIC," +
                             "isOffline NUMERIC," +
                             "Periodicity TEXT," +
@@ -1109,5 +1111,74 @@ public class SQLHandler extends SQLiteOpenHelper {
     @NonNull
     public JSONArray getSupportedLanguages() {
         return getResult(tblLanguages, new String[]{"LanguageCode"}, null, null);
+    }
+
+    public int getProductId(String productCode) {
+        openDatabase();
+        String productId = null;
+        try (Cursor cursor = mDatabase.query(tblProduct,
+                new String[]{"ProdId"},
+                "ProductCode = ?",
+                new String[]{productCode},
+                null,
+                null,
+                null,
+                "1")) {
+            cursor.moveToFirst();
+            if (!cursor.isAfterLast()) {
+                productId = cursor.getString(0);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            closeDatabase();
+        }
+        return Integer.parseInt(Objects.requireNonNull(productId));
+    }
+
+    public int getOfficerId(String officerCode) {
+        openDatabase();
+        String officerId = null;
+        try (Cursor cursor = mDatabase.query(tblOfficer,
+                new String[]{"OfficerId"},
+                "Code = ?",
+                new String[]{officerCode},
+                null,
+                null,
+                null,
+                "1")) {
+            cursor.moveToFirst();
+            if (!cursor.isAfterLast()) {
+                officerId = cursor.getString(0);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            closeDatabase();
+        }
+        return Integer.parseInt(Objects.requireNonNull(officerId));
+    }
+
+    public String getContributionPlanId(String contributionPlanCode) {
+        openDatabase();
+        String cpId = null;
+        try (Cursor cursor = mDatabase.query(tblContributionPlan,
+                new String[]{"CpId"},
+                "Code = ?",
+                new String[]{contributionPlanCode},
+                null,
+                null,
+                null,
+                "1")) {
+            cursor.moveToFirst();
+            if (!cursor.isAfterLast()) {
+                cpId = cursor.getString(0);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            closeDatabase();
+        }
+        return cpId;
     }
 }

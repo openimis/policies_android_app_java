@@ -8,38 +8,43 @@ import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
 
 import org.openimis.imispolicies.GetFamilyQuery;
+import org.openimis.imispolicies.GetSubFamiliesQuery;
 import org.openimis.imispolicies.Global;
 import org.openimis.imispolicies.domain.entity.Family;
 import org.openimis.imispolicies.domain.utils.IdUtils;
 import org.openimis.imispolicies.domain.utils.PhotoUtils;
-import org.openimis.imispolicies.network.request.GetFamilyGraphQLRequest;
 import org.openimis.imispolicies.network.request.GetPhotoBytesRequest;
+import org.openimis.imispolicies.network.request.GetSubFamiliesGraphQLRequest;
 import org.openimis.imispolicies.network.util.Mapper;
 import org.openimis.imispolicies.tools.Log;
 import org.openimis.imispolicies.util.StringUtils;
 
 import java.io.FileOutputStream;
 import java.io.OutputStream;
-import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
-public class FetchFamily {
+public class FetchSubFamilies {
 
     @NonNull
-    private final GetFamilyGraphQLRequest getFamilyGraphQLRequest;
+    private final GetSubFamiliesGraphQLRequest getSubFamiliesGraphQLRequest;
 
-    public FetchFamily() {
-        this(new GetFamilyGraphQLRequest());
-    }
+    public FetchSubFamilies() {this(new GetSubFamiliesGraphQLRequest());}
 
-    public FetchFamily(@NonNull GetFamilyGraphQLRequest getFamilyGraphQLRequest) {
-        this.getFamilyGraphQLRequest = getFamilyGraphQLRequest;
+    public FetchSubFamilies(@NonNull GetSubFamiliesGraphQLRequest getSubFamiliesGraphQLRequest){
+        this.getSubFamiliesGraphQLRequest = getSubFamiliesGraphQLRequest;
     }
 
     @WorkerThread
     @NonNull
-    public Family execute(@NonNull String headChfId, @NonNull String parentUuid) throws Exception {
-        GetFamilyQuery.Node node = getFamilyGraphQLRequest.get(headChfId, parentUuid);
+    public List<Family> execute (@NonNull String parentUuid) throws Exception {
+        List<GetSubFamiliesQuery.Edge> edges = getSubFamiliesGraphQLRequest.get(parentUuid);
+        return Mapper.map(edges, this::toFamily);
+    }
+
+    @NonNull
+    private Family toFamily (@NonNull GetSubFamiliesQuery.Edge edge){
+        GetSubFamiliesQuery.Node node = Objects.requireNonNull(edge.node());
         return new Family(
                 /* headChfId = */ node.headInsuree().chfId(),
                 /* id = */ IdUtils.getIdFromGraphQLString(node.id()),
@@ -53,17 +58,17 @@ public class FetchFamily {
                 /* confirmationNumber = */ node.confirmationNo(),
                 /* confirmationType = */ node.confirmationType() != null ? Objects.requireNonNull(node.confirmationType()).code() : null,
                 /* isOffline = */ node.isOffline() != null ? Objects.requireNonNull(node.isOffline()) : false,
-                /* parentId = */ node.parent() != null ? IdUtils.getIdFromGraphQLString(node.parent().id()) : null,
+                /* parentId = */ node.parent() != null ? IdUtils.getIdFromGraphQLString(node.parent().id())  : null,
                 /* parentUuid = */ node.parent() != null ? Objects.requireNonNull(node.parent()).uuid()  : null,
-                /* insurees = */ Mapper.map(node.members().edges(), (edge) -> toMember(edge, node)),
-                /* attachments = */ Mapper.map(Objects.requireNonNull(node.attachments()), (attachment) -> toAttachment(attachment)),
+                /* insurees = */ Mapper.map(node.members().edges(), (insuree) -> toMember(insuree, node)),
+                /* attachments = */ node.attachments() != null ? Objects.requireNonNull(Mapper.map(node.attachments(), (attachment) -> toAttachment(attachment)))  : null,
                 null
         );
     }
 
     @NonNull
-    private Family.Member toMember(@NonNull GetFamilyQuery.Edge1 edge, @NonNull GetFamilyQuery.Node family) {
-        GetFamilyQuery.Node1 member = Objects.requireNonNull(edge.node());
+    private Family.Member toMember(@NonNull GetSubFamiliesQuery.Edge1 edge, @NonNull GetSubFamiliesQuery.Node family) {
+        GetSubFamiliesQuery.Node1 member = Objects.requireNonNull(edge.node());
         return new Family.Member(
                 /* chfId = */ Objects.requireNonNull(member.chfId()),
                 /* isHead = */ member.head(),
@@ -100,7 +105,7 @@ public class FetchFamily {
     }
 
     @Nullable
-    private String downloadPhoto(@Nullable GetFamilyQuery.Photo photo) {
+    private String downloadPhoto(@Nullable GetSubFamiliesQuery.Photo photo) {
         String photoPath = getPhotoPath(photo);
         if (photoPath != null) {
             String[] photoPathSegments = photoPath.split("[\\\\/]");
@@ -130,7 +135,7 @@ public class FetchFamily {
     }
 
     @Nullable
-    private String getPhotoPath(@Nullable GetFamilyQuery.Photo photo) {
+    private String getPhotoPath(@Nullable GetSubFamiliesQuery.Photo photo) {
         if (photo == null) {
             return null;
         }
@@ -138,7 +143,7 @@ public class FetchFamily {
     }
 
     @Nullable
-    private byte[] getPhotoBytes(@Nullable GetFamilyQuery.Photo photo) {
+    private byte[] getPhotoBytes(@Nullable GetSubFamiliesQuery.Photo photo) {
         if (photo == null) {
             return null;
         }
@@ -146,7 +151,7 @@ public class FetchFamily {
     }
 
     @NonNull
-    private Family.Attachment toAttachment(@NonNull GetFamilyQuery.Attachment attachment){
+    private Family.Attachment toAttachment(@NonNull GetSubFamiliesQuery.Attachment attachment){
         return new Family.Attachment(
                 /* id */ attachment.idAttachment(),
                 /* tittle */ attachment.title(),

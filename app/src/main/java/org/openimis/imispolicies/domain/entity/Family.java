@@ -40,11 +40,17 @@ public class Family implements Parcelable {
     @Nullable
     private final Integer parentId;
 
+    @Nullable
+    private final String parentUuid;
+
     @NonNull
     private final List<Member> members;
 
     @Nullable
     private final List<Attachment> attachments;
+
+    @Nullable
+    private final List<Policy> policies;
 
     @Nullable
     private Member head = null;
@@ -63,8 +69,10 @@ public class Family implements Parcelable {
             @Nullable String confirmationType,
             boolean isOffline,
             @Nullable Integer parentId,
+            @Nullable String parentUuid,
             @NonNull List<Member> members,
-            @Nullable List<Attachment> attachments
+            @Nullable List<Attachment> attachments,
+            @Nullable List<Policy> policies
     ) {
         this.headChfId = headChfId;
         this.id = id;
@@ -79,8 +87,10 @@ public class Family implements Parcelable {
         this.confirmationType = confirmationType;
         this.isOffline = isOffline;
         this.parentId = parentId;
+        this.parentUuid = parentUuid;
         this.members = members;
         this.attachments = attachments;
+        this.policies = policies;
     }
 
     protected Family(Parcel in) {
@@ -103,8 +113,10 @@ public class Family implements Parcelable {
         isOffline = in.readByte() != 0;
         int pId = in.readInt();
         parentId = pId;
+        parentUuid = in.readString();
         members = Objects.requireNonNull(in.createTypedArrayList(Member.CREATOR));
         attachments = in.createTypedArrayList(Attachment.CREATOR);
+        policies = in.createTypedArrayList(Policy.CREATOR);
     }
 
     @Override
@@ -122,8 +134,10 @@ public class Family implements Parcelable {
         dest.writeString(confirmationType);
         dest.writeByte((byte) (isOffline ? 1 : 0));
         dest.writeInt(parentId);
+        dest.writeString(parentUuid);
         dest.writeTypedList(members);
         dest.writeTypedList(attachments);
+        dest.writeTypedList(policies);
     }
 
     @Override
@@ -131,19 +145,25 @@ public class Family implements Parcelable {
         return 0;
     }
 
-    @NonNull
+    @Nullable
     public Member getHead() {
         if (head != null) {
             return head;
         }
+        if(members.isEmpty()){
+            return null;
+        }
         for (Member member : members) {
-            if (headChfId.equals(member.getChfId())) {
+            if (headChfId.equals(member.getChfId()) || member.isHead) {
                 head = member;
                 return member;
             }
         }
         throw new IllegalStateException("The members list (size: '" + members.size() + "') didn't contain an insuree with the head chfId: '" + headChfId + "'");
     }
+
+    @NonNull
+    public String getHeadChfId(){ return headChfId; }
 
     public int getId() {
         return id;
@@ -202,6 +222,9 @@ public class Family implements Parcelable {
         return parentId;
     }
 
+    @Nullable
+    public String getParentUuid(){ return parentUuid; }
+
     @NonNull
     public List<Member> getMembers() {
         return members;
@@ -209,6 +232,9 @@ public class Family implements Parcelable {
 
     @Nullable
     public List<Attachment> getAttachments (){ return attachments;}
+
+    @Nullable
+    public List<Policy> getPolicies (){ return policies; }
 
     public static final Creator<Family> CREATOR = new Creator<>() {
         @Override
@@ -1088,6 +1114,8 @@ public class Family implements Parcelable {
 
     public static class Attachment implements Parcelable {
         @NonNull
+        private final int idAttachment;
+        @NonNull
         private final String title;
         @NonNull
         private final String mime;
@@ -1097,11 +1125,13 @@ public class Family implements Parcelable {
         private final String content;
 
         public Attachment(
+                @NonNull int idAttachment,
                 @NonNull String title,
                 @NonNull String mime,
                 @NonNull String filename,
                 @Nullable String content
         ) {
+            this.idAttachment = idAttachment;
             this.title = title;
             this.mime = mime;
             this.filename = filename;
@@ -1109,6 +1139,7 @@ public class Family implements Parcelable {
         }
 
         protected Attachment(Parcel in) {
+            idAttachment = in.readInt();
             title = in.readString();
             mime = in.readString();
             filename = in.readString();
@@ -1117,6 +1148,7 @@ public class Family implements Parcelable {
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(idAttachment);
             dest.writeString(title);
             dest.writeString(mime);
             dest.writeString(filename);
@@ -1127,6 +1159,9 @@ public class Family implements Parcelable {
         public int describeContents() {
             return 0;
         }
+
+        @NonNull
+        public int getIdAttachment(){ return idAttachment; }
 
         @NonNull
         public String getTitle() {

@@ -1,5 +1,5 @@
-query GetFamily($headChfId: String, $parentUuid: String) {
-    families(headInsuree_ChfId_Icontains: $headChfId, uuid: $parentUuid first:1) {
+query GetSubFamilies($familyUuid: String) {
+    families(parent_Uuid: $familyUuid) {
         edges {
             node {
                 id

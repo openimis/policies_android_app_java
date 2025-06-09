@@ -245,6 +245,12 @@ $(document).ready(function () {
             }
         }
 
+        if($.parseJSON(Insuree)[0]["CardIssued"] == "true"){
+            $('#ddlBeneficiaryCard').val(1)
+        } else {
+            $('#ddlBeneficiaryCard').val(2)
+        }
+
         //fillAge(dob);
 
         if(relation == 4){

@@ -481,9 +481,9 @@
     <string name="CurrentResourceLanguage">Current resource language: %1$s</string>
     <string name="SystemLanguageNotSupported">Current system language is not supported. The app will use the default language.</string>
     <string name="SupportedLanguages">Supported languages:\n%1$s</string>
-    <string name="MobileMoney">Mobile Money</string>
+    <string name="MobileMoney">Paiement mobile</string>
     <string name="BankDebit">Prélèvement bancaire</string>
-    <string name="TiersPay">Tiers payant</string>
+    <string name="TiersPay">Versement compte AMG</string>
     <string name="SelectPaymentMethod">Choisir une méthode de paiement</string>
     <string name="PaymentMethod">Méthode de paiement</string>
     <string name="ProfessionalSituation">Situation Professionnelle</string>
@@ -517,4 +517,5 @@
     <string name="Download">Télécharger</string>
     <string name="NoUpdateAvailable">Aucune mise à jour disponible</string>
     <string name="DownloadStart">Téléchargement démarré</string>
+    <string name="NonePayment">Virement Bancaire</string>
 </resources>

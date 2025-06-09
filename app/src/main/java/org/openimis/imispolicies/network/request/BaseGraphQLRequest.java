@@ -26,7 +26,7 @@ import java.util.concurrent.TimeoutException;
 
 public abstract class BaseGraphQLRequest {
 
-    private static final long TIME_OUT_IN_MS = 120_000;
+    private static final long TIME_OUT_IN_MS = 600_000;
     private static final String URI = BuildConfig.API_BASE_URL + "api/graphql";
 
     private static final ApolloClient apolloClient = ApolloClient.builder()
