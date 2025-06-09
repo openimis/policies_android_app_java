@@ -1136,6 +1136,29 @@ public class SQLHandler extends SQLiteOpenHelper {
         return Integer.parseInt(Objects.requireNonNull(productId));
     }
 
+    public int getContributionProductId(String contributionPlanId) {
+        openDatabase();
+        String productId = null;
+        try (Cursor cursor = mDatabase.query(tblContributionPlan,
+                new String[]{"ProductId"},
+                "CpId = ?",
+                new String[]{contributionPlanId},
+                null,
+                null,
+                null,
+                "1")) {
+            cursor.moveToFirst();
+            if (!cursor.isAfterLast()) {
+                productId = cursor.getString(0);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            closeDatabase();
+        }
+        return Integer.parseInt(Objects.requireNonNull(productId));
+    }
+
     public int getOfficerId(String officerCode) {
         openDatabase();
         String officerId = null;

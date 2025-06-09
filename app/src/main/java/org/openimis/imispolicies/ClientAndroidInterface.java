@@ -1565,7 +1565,7 @@ public class ClientAndroidInterface {
 
     @JavascriptInterface
     @SuppressWarnings("unused")
-    public double getPolicyValue(String enrollDate, int ProductId, int FamilyId, String startDate, boolean HasCycle, int PolicyId, String PolicyStage, int IsOffline) throws JSONException {
+    public double getPolicyValue(String enrollDate, String CpId, int ProductId, int FamilyId, String startDate, boolean HasCycle, int PolicyId, String PolicyStage, int IsOffline) throws JSONException {
         Date ExpiryDate = null;
         String expiryDate = null;
         int PreviousPolicyId = 0;
@@ -2049,7 +2049,7 @@ public class ClientAndroidInterface {
     @SuppressWarnings("unused")
     public String getPolicy(int PolicyId) {
         @Language("SQL")
-        String Query = "SELECT  P.PolicyId, P.ContributionPlanId, OfficerId , CP.Code, CP.Name, PolicyStage, EffectiveDate, IFNULL(PolicyValue,0) PolicyValue, StartDate, EnrollDate, SigningDate, bcn.ControlNumber, P.Periodicity, P.PaymentDay , \n" +
+        String Query = "SELECT  P.PolicyId, P.ContributionPlanId,  OfficerId , CP.Code, CP.Name, PolicyStage, EffectiveDate, IFNULL(PolicyValue,0) PolicyValue, StartDate, EnrollDate, SigningDate, bcn.ControlNumber, P.Periodicity, P.PaymentDay , \n" +
                 "   CASE    WHEN PolicyStatus = 1 THEN '" + activity.getResources().getString(R.string.Idle) + "'   " +
                 "   WHEN PolicyStatus = 2 THEN '" + activity.getResources().getString(R.string.Active) + "'  " +
                 "   WHEN PolicyStatus = 4 THEN '" + activity.getResources().getString(R.string.Suspended) + "'  " +
@@ -6124,6 +6124,13 @@ public class ClientAndroidInterface {
     @JavascriptInterface
     public String getVersion(){
         return BuildConfig.VERSION_NAME;
+    }
+
+    @JavascriptInterface
+    public int getContributionPlanProduct(String contributionPlanId){
+        Log.e("cp id", contributionPlanId);
+        int prodId = sqlHandler.getContributionProductId(contributionPlanId);
+        return prodId;
     }
 }
 
