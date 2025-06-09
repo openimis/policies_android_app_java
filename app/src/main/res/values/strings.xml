@@ -505,4 +505,5 @@
     <string name="NoUpdateAvailable">No update available</string>
     <string name="DownloadStart">Download Start</string>
     <string name="Nothing">Nothing</string>
+    <string name="ConnectionReset">connection failure. Please try again</string>
 </resources>

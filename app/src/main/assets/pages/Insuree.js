@@ -396,18 +396,18 @@ function fillFSPRegions() {
 
 function fillCurrentDistricts(RegionId) {
     var $Districts = Android.getDistrictsWO(RegionId);
-    bindDropdown('ddlCurrentDistrict', $Districts, 'LocationId', 'LocationName', 0, Android.getString('SelectDistrict'));
+    bindDropdown('ddlCurrentDistrict', $Districts, 'LocationId', 'LocationName',null, Android.getString('SelectDistrict'));
 }
 
 function fillCurrentWards(DistrictId) {
     var $Wards = Android.getWards(parseInt(DistrictId));
-    bindDropdown('ddlCurrentMunicipality', $Wards, 'LocationId', 'LocationName', 0, Android.getString('SelectWard'));
+    bindDropdown('ddlCurrentMunicipality', $Wards, 'LocationId', 'LocationName', null, Android.getString('SelectWard'));
 
 }
 
 function fillCurrentVillages(WardId) {
     var $Villages = Android.getVillages(parseInt(WardId));
-    bindDropdown('ddlCurrentVillage', $Villages, 'LocationId', 'LocationName', 0, Android.getString('SelectVillage'));
+    bindDropdown('ddlCurrentVillage', $Villages, 'LocationId', 'LocationName', null, Android.getString('SelectVillage'));
 }
 
 function fillProfessions() {
@@ -416,7 +416,7 @@ function fillProfessions() {
         $textLanguage = "AltLanguage";
     }
     var $Professions = Android.getProfessions();
-    bindDropdown('ddlProfession', $Professions, 'ProfessionId', $textLanguage, 0, Android.getString('SelectProfession'));
+    bindDropdown('ddlProfession', $Professions, 'ProfessionId', $textLanguage, null, null);
 }
 
 function fillEducations() {
@@ -425,7 +425,7 @@ function fillEducations() {
         $textLanguage = "AltLanguage";
     }
     var $Educations = Android.getEducations();
-    bindDropdown('ddlEducation', $Educations, 'EducationId', $textLanguage, 0, Android.getString('SelectEducation'));
+    bindDropdown('ddlEducation', $Educations, 'EducationId', $textLanguage, null, Android.getString('SelectEducation'));
 }
 
 function fillIdentificationTypes() {
@@ -439,7 +439,7 @@ function fillIdentificationTypes() {
 
 function fillFSPDistricts(RegionId) {
     var $Districts = Android.getDistrictsWO(parseInt(RegionId));
-    bindDropdown('ddlFSPDistrict', $Districts, 'LocationId', 'LocationName', 0, Android.getString('SelectDistrict'));
+    bindDropdown('ddlFSPDistrict', $Districts, 'LocationId', 'LocationName', null, Android.getString('SelectDistrict'));
 }
 
 function fillFSPCategory() {
@@ -449,7 +449,7 @@ function fillFSPCategory() {
 
 function fillFSP(DistrictId, HFLevel) {
     var $HF = Android.getHF(parseInt(DistrictId), HFLevel);
-    bindDropdown('ddlFSP', $HF, 'HFID', 'HF', 0, Android.getString('SelectHF'));
+    bindDropdown('ddlFSP', $HF, 'HFID', 'HF', null, Android.getString('SelectHF'));
 }
 
 function fillVulnerability() {

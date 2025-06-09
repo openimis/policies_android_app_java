@@ -2500,9 +2500,8 @@ public class ClientAndroidInterface {
         sqlHandler.getResult(AttachmentQuery, familyIdArgument);
 
         //delete subfamily for polygamy
-        JSONArray subFamilies = null;
         try {
-            subFamilies = new JSONArray(getAllSubFamilies(FamilyId));
+            JSONArray subFamilies = new JSONArray(getAllSubFamilies(FamilyId));
 
             for(int i=0; i < subFamilies.length();i++){
                 JSONObject subfamily = subFamilies.getJSONObject(i);
@@ -2511,10 +2510,6 @@ public class ClientAndroidInterface {
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
-
-
-
-
         return 1;
     }
 
@@ -2850,11 +2845,11 @@ public class ClientAndroidInterface {
                     e.printStackTrace();
                 }
                 finalPd.dismiss();
-                if (myList.size() == 0) {
+                if (myList.isEmpty()) {
                     activity.runOnUiThread(() -> {
                         if (enrol_result != 999) {
                             //if error is encountered
-                            if (enrolMessages.size() > 0) {
+                            if (!enrolMessages.isEmpty()) {
                                 CharSequence[] charSequence = enrolMessages.toArray(new CharSequence[0]);
                                 AlertDialog.Builder builder = new AlertDialog.Builder(activity);
                                 builder.setTitle(activity.getResources().getString(R.string.UploadFailureReport));
@@ -2896,11 +2891,11 @@ public class ClientAndroidInterface {
             } catch (Exception e) {
                 Log.e("ENROL XML", "Error while creating enrolment xml", e);
             }
-            if (myList.size() == 0) {
+            if (myList.isEmpty()) {
                 activity.runOnUiThread(() -> {
                     if (enrol_result != 999) {
                         //if error is encountered
-                        if (enrolMessages.size() > 0) {
+                        if (!enrolMessages.isEmpty()) {
                             CharSequence[] charSequences = enrolMessages.toArray(new CharSequence[(enrolMessages.size())]);
                             AlertDialog.Builder builder = new AlertDialog.Builder(activity);
                             builder.setTitle(activity.getResources().getString(R.string.UploadFailureReport));
@@ -3052,7 +3047,7 @@ public class ClientAndroidInterface {
             }
         }
 
-        if (myList.size() != 0) {
+        if (!myList.isEmpty()) {
             ShowErrorMessages();
             myList.clear();
         }
@@ -3100,7 +3095,7 @@ public class ClientAndroidInterface {
         //Verify Enrollments
         if (CallerId == 2) {
             verifiedId = VerifyFamily();
-            if (verifiedId.size() == 0) {
+            if (verifiedId.isEmpty()) {
                 return 999;
             }
         }
@@ -3298,7 +3293,7 @@ public class ClientAndroidInterface {
                         }
 
                     }
-                    if (verifiedId.size() == 0) {
+                    if (verifiedId.isEmpty()) {
                         query.append(" PR.PolicyId != ''");
                     }
                 }
@@ -3340,7 +3335,7 @@ public class ClientAndroidInterface {
                             query.append(" FamilyId == ").append(verifiedId.get(j)).append(" OR");
                         }
                     }
-                    if (verifiedId.size() == 0) {
+                    if (verifiedId.isEmpty()) {
                         query.append(" FamilyId != ''");
                     }
                 }
@@ -3409,13 +3404,13 @@ public class ClientAndroidInterface {
                         sqlHandler.updateData("tblFamilies", valuesF, "FamilyId = ?", new String[]{FamilyId});
                     }
 
-                    if (myList.size() == 0) {
+                    if (myList.isEmpty()) {
                         if (CallerId == 1) {
                             DeleteImages(insureesArray, verifiedId, CallerId);
                         }
 
                         DeleteUploadedData(Integer.parseInt(FamilyId), verifiedId, CallerId);
-                        DeleteFamily(Integer.parseInt(FamilyId));
+                        //DeleteFamily(Integer.parseInt(FamilyId));
                     }
 
 
@@ -3461,6 +3456,13 @@ public class ClientAndroidInterface {
                 }
             }
         }
+
+        //delete polygamous family without head insuree
+        JSONArray familiesToDelete = sqlHandler.getResult("SELECT FamilyId, isOffline FROM tblFamilies WHERE InsureeId == NULL ORDER BY FamilyId", null);
+        for (int f = 0; f < familiesToDelete.length(); f++){
+            DeleteFamily(Integer.parseInt(familiesToDelete.getJSONObject(f).getString("FamilyId")));
+        }
+
         if (rtEnrolledId > 0) return rtEnrolledId;
         return EnrolResult;
     }
@@ -3474,13 +3476,23 @@ public class ClientAndroidInterface {
             @NonNull JSONArray attachmentsArray
     ) throws JSONException {
         JSONObject familyObj = familyArray.getJSONObject(0);
-        JSONObject insureeObj = insureesArray.getJSONObject(0);
+        JSONObject insureeObj = new JSONObject();
+        for (int i=0; i < insureesArray.length(); i++){
+            if(familyObj.getString("HOFCHFID").equals(insureesArray.getJSONObject(i).getString("CHFID"))){
+                insureeObj = insureesArray.getJSONObject(i);
+            }
+        }
 
-        Family family = familyFromJSONObject(familyObj, insureesArray, insureeImages, attachmentsArray, policiesArray, premiumsArray);
         try {
+            Family family = familyFromJSONObject(familyObj, insureesArray, insureeImages, attachmentsArray, policiesArray, premiumsArray);
             new UpdateFamily().execute(family, insureeObj.getString("CHFID"), global.getOfficerId());
         } catch (Exception e) {
-            enrolMessages.add(e.getMessage());
+            if(e.getMessage().contains("Failed to execute http call")){
+                enrolMessages.add(activity.getResources().getString(R.string.ConnectionReset));
+            } else {
+                e.printStackTrace();
+                enrolMessages.add(e.getMessage());
+            }
             return -400;
         }
 
@@ -3815,7 +3827,7 @@ public class ClientAndroidInterface {
         for (int j = 0; j < insurees.length(); j++) {
             try {
                 JSONObject Insureeobject = insurees.getJSONObject(j);
-                if (CallerId == 2 && FamilyIDs.size() != 0) {
+                if (CallerId == 2 && !FamilyIDs.isEmpty()) {
                     for (int x = 0; x < FamilyIDs.size(); x++) {
                         if ((Insureeobject.getString("FamilyId").equals(FamilyIDs.get(x)))) {
                             String PhotoPath = (Insureeobject.getString("PhotoPath"));
@@ -3950,7 +3962,7 @@ public class ClientAndroidInterface {
     }
 
     private void DeleteUploadedData(final int FamilyId, ArrayList<String> FamilyIDs, int CallerId) {
-        if (FamilyIDs.size() == 0) {
+        if (FamilyIDs.isEmpty()) {
             FamilyIDs = new ArrayList<>() {{
                 add(String.valueOf(FamilyId));
             }};
@@ -3971,7 +3983,7 @@ public class ClientAndroidInterface {
     private void deleteUploadedTableData(String tableName, ArrayList<String> familyIDs) {
         @Language("SQL")
         String where;
-        if (familyIDs.size() != 0) {
+        if (!familyIDs.isEmpty()) {
             where = combineFamilyIdsInWhereStatement(familyIDs);
         } else {
             where = " FamilyId = " + familyIDs;
@@ -5129,7 +5141,9 @@ public class ClientAndroidInterface {
                 if(family.getParentUuid() != null){
                     Family parentFamily = new FetchFamily().execute("",family.getParentUuid());
                     InsertFamilyDataFromOnline(parentFamily);
-                    InsertInsureeDataFromOnline(parentFamily.getMembers());
+                    if(!parentFamily.getMembers().isEmpty()){
+                        InsertInsureeDataFromOnline(parentFamily.getMembers());
+                    }
                     InsertAttachmentDataFromOnline(Objects.requireNonNull(parentFamily.getAttachments()));
                 }
                 return 1;
@@ -5137,6 +5151,8 @@ public class ClientAndroidInterface {
                 Log.e("MODIFYFAMILY", "Error while downloading a family", e);
                 if (e instanceof HttpException && ((HttpException) e).getCode() == HttpURLConnection.HTTP_NOT_FOUND) {
                     ShowDialog(activity.getResources().getString(R.string.InsuranceNumberNotFound));
+                } else if(e.getMessage().contains("Failed to execute http call")){
+                    ShowDialog(activity.getResources().getString(R.string.ConnectionReset));
                 } else {
                     ShowDialog(activity.getResources().getString(R.string.SomethingWrongServer) + ": " + e.getMessage());
                 }
@@ -5273,15 +5289,15 @@ public class ClientAndroidInterface {
         jsonObject.put("cardIssued", member.isCardIssued());
         jsonObject.put("isOffline", member.isOffline());
         jsonObject.put("relationship", member.getRelationship());
-        jsonObject.put("profession", member.getProfession());
-        jsonObject.put("education", member.getEducation());
+        jsonObject.put("profession", member.getProfession() != null ? member.getProfession() : "");
+        jsonObject.put("education", member.getEducation() != null ? member.getEducation() : "");
         jsonObject.put("email", member.getEmail());
         jsonObject.put("typeOfId", member.getTypeOfId());
-        jsonObject.put("hfid", member.getHealthFacilityId());
+        jsonObject.put("hfid", member.getHealthFacilityId() != null ? member.getHealthFacilityId() : "");
         jsonObject.put("currentAddress", member.getCurrentAddress());
         jsonObject.put("geoLocation", member.getGeolocation());
         jsonObject.put("curVillage", member.getCurrentVillage());
-        jsonObject.put("incomeLevel", member.getIncomeLevel());
+        jsonObject.put("incomeLevel", member.getIncomeLevel() != null ? member.getIncomeLevel() : "");
         jsonObject.put("professionalSituation", member.getProfessionalSituation());
         jsonObject.put("paymentMethod", member.getPaymentMethod());
         jsonObject.put("accountDetails", member.getAccountDetails());

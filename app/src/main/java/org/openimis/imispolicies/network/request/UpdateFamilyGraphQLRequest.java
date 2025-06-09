@@ -37,6 +37,7 @@ public class UpdateFamilyGraphQLRequest extends BaseGraphQLRequest {
                         .confirmationNo(family.getConfirmationNumber())
                         .confirmationTypeId(family.getConfirmationType())
                         .isOffline(family.isOffline())
+                        .parentId(family.getParentId())
                         .attachments(
                                 family.getAttachments() != null ? Mapper.map(family.getAttachments(), dto -> toAttachment(dto)) : new ArrayList<>()
                         )
@@ -55,8 +56,8 @@ public class UpdateFamilyGraphQLRequest extends BaseGraphQLRequest {
                                         .marital(head.getMarital())
                                         .phone(head.getPhone())
                                         .email(head.getEmail())
-                                        .professionId(head.getProfession())
-                                        .educationId(head.getEducation() == 0 ? null:head.getEducation())
+                                        .professionId(head.getProfession() != null && head.getProfession() != 0 ? head.getProfession() : null)
+                                        .educationId(head.getEducation() != null && head.getEducation() != 0 ? head.getEducation() : null)
                                         .professionalSituation(head.getProfessionalSituation())
                                         .incomeLevelId(head.getIncomeLevel())
                                         .preferredPaymentMethod(head.getPaymentMethod())
