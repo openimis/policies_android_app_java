@@ -107,13 +107,8 @@ $(document).ready(function () {
 
                 }
                 var InsureeId = Android.SaveInsuree(jsonInsuree, FamilyId, 0, parseInt(ExceedThreshold), PolicyId);
-                if (PolicyId > 0 && TotalIns >= MemberCount) {
-                    $("#divProgress").hide();
-                    window.open("FamilyAndInsurees.html?f=" + FamilyId, "_self");
-                } else {
-                    $("#divProgress").hide();
-                    window.open("FamilyAndInsurees.html?f=" + FamilyId, "_self");
-                }
+                $("#divProgress").hide();
+                window.open("FamilyAndInsurees.html?f=" + FamilyId, "_self");               
             }
         } else {
             $("#divProgress").hide();
