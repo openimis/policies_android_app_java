@@ -1316,7 +1316,7 @@ public class ClientAndroidInterface {
     @SuppressWarnings("unused")
     public String getAllFamilies() {
         @Language("SQL")
-        String Query = "SELECT F.FamilyId, I.CHFID, I.OtherNames ||\" \"||  I.LastName InsureeName, R.LocationName RegionName, D.LocationName DistrictName, W.LocationName WardName, V.LocationName VillageName, F.isOffline, F.FamilyType \n" +
+        String Query = "SELECT F.FamilyId, I.CHFID, I.OtherNames ||\" \"||  I.LastName InsureeName, R.LocationName RegionName, D.LocationName DistrictName, W.LocationName WardName, V.LocationName VillageName, F.isOffline, F.FamilyType, F.ParentId \n" +
                 "FROM tblFamilies F\n" +
                 "INNER JOIN tblInsuree I ON I.CHFID = F.InsureeChfId\n" +
                 "INNER JOIN tblLocations V ON V.LocationId = F.LocationId\n" +

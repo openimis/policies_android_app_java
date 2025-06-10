@@ -40,7 +40,7 @@ public class UpdateFamilyGraphQLRequest extends BaseGraphQLRequest {
                         .confirmationNo(family.getConfirmationNumber())
                         .confirmationTypeId(family.getConfirmationType())
                         .isOffline(family.isOffline())
-                        .parentId(family.getParentId())
+                        .parentId(family.getParentId() != null && family.getParentId() != 0 ? family.getParentId() : null)
                         .attachments(
                                 family.getAttachments() != null ? Mapper.map(family.getAttachments(), dto -> toAttachment(dto)) : new ArrayList<>()
                         )
