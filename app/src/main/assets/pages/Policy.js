@@ -120,7 +120,7 @@ $(document).ready(function () {
         }
     });
 
-    $('#ddlContributionPlan').change(function () {
+    /*$('#ddlContributionPlan').change(function () {
            var CPId = $('#ddlContributionPlan').val();
            var policyValue = Android.GetContributionPlanValue(parseInt(FamilyId),CPId);
            var finalValue;
@@ -129,10 +129,13 @@ $(document).ready(function () {
            with(fun) {
                    // prints "foo"
                    finalValue = eval(remoteFunction);
-               }
+           }
+
+           var periodicity = $('#ddlPeriodicity').val();
+
            $('#spPolicyValue').text(finalValue);
            $('#hfPolicyValue').val(finalValue);
-    });
+    });*/
 
     function savePolicy() {
         var jsonPolicy = createJSONString();
@@ -228,6 +231,17 @@ function getPolicyPeriod(EnrolmentDate, CpId, FamilyId, policyId) {
     var fun = JSON.parse(PolicyValue);
     with(fun) {
         finalValue = eval(remoteFunction);
+    }
+
+    var periodicity = $('#ddlPeriodicity').val();
+    if(periodicity == "M") {
+        finalValue = finalValue * 1;
+    } else if (periodicity == "Q") {
+        finalValue = finalValue * 3;
+    } else if (periodicity == "S") {
+        finalValue = finalValue * 6;
+    } else if (periodicity == "Y") {
+        finalValue = finalValue * 12;
     }
 
     $('#spPolicyValue').text(finalValue);
