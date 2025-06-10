@@ -224,8 +224,9 @@ $(document).ready(function () {
         var relation = $.parseJSON(Insuree)[0]["Relationship"];
         var payment = $.parseJSON(Insuree)[0]["PaymentMethod"];
         var dob = $.parseJSON(Insuree)[0]["DOB"];
+        var familyHeader = Android.getFamilyHeader(parseInt(FamilyId));
         if ($.parseJSON(Insuree)[0]["isHead"] == "true" || $.parseJSON(Insuree)[0]["isHead"] == "false") {
-            if ($.parseJSON(Insuree)[0]["isHead"] == "true") {
+            if ($.parseJSON(Insuree)[0]["CHFID"] == $.parseJSON(familyHeader)[0]["InsureeChfId"]) {
                 $("#Relationship").hide();
                 $('#PaymentMethod').show();
                 $("#ddlRelationship").prop("required", false);
@@ -235,9 +236,9 @@ $(document).ready(function () {
                 $("#ddlRelationship").prop("required", true);
             }
         } else {
-            var head = parseInt($.parseJSON(Insuree)[0]["isHead"]);
+            //var head = parseInt($.parseJSON(Insuree)[0]["isHead"]);
 
-            if (head == 1) {
+            if ($.parseJSON(Insuree)[0]["CHFID"] == $.parseJSON(familyHeader)[0]["InsureeChfId"]) {
                 $("#Relationship").hide();
                 $('#PaymentMethod').show();
                 $("#ddlRelationship").prop("required", false);
@@ -255,9 +256,9 @@ $(document).ready(function () {
             $('#ddlBeneficiaryCard').val(2)
         }
 
-        //fillAge(dob);
+        fillAge(dob);
 
-        if(relation == 4){
+        if(relation == 3){
             $("#Education").show();
         }
 
