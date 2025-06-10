@@ -362,7 +362,7 @@ function fillRelationship() {
         $textLanguage = "AltLanguage";
     }
     var $Relations = Android.getRelationships();
-    bindDropdown('ddlRelationship', $Relations, 'RelationId', $textLanguage, 0, Android.getString('Nothing'));
+    bindDropdown('ddlRelationship', $Relations, 'RelationId', $textLanguage, null, null);
 }
 
 function fillGender() {
@@ -386,12 +386,12 @@ function fillBeneficiaryCard() {
 
 function fillCurrentRegion() {
     var $Regions = Android.getRegionsWO();
-    bindDropdown('ddlCurrentRegion', $Regions, 'LocationId', 'LocationName', 0, Android.getString('SelectRegion'));
+    bindDropdown('ddlCurrentRegion', $Regions, 'LocationId', 'LocationName', null, Android.getString('SelectRegion'));
 }
 
 function fillFSPRegions() {
     var $Regions = Android.getRegionsWO();
-    bindDropdown('ddlFSPRegion', $Regions, 'LocationId', 'LocationName', 0, Android.getString('SelectRegion'));
+    bindDropdown('ddlFSPRegion', $Regions, 'LocationId', 'LocationName', null, Android.getString('SelectRegion'));
 }
 
 function fillCurrentDistricts(RegionId) {
