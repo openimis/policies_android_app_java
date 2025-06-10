@@ -5827,9 +5827,11 @@ public class ClientAndroidInterface {
                     relation = insureeRelation.getJSONObject(0).getString("Relation");
                 }
 
-                if(insuree.getInt("Relationship") != 0
-                        &&  !relation.equals("Spouse")
-                        && !relation.equals("Son/Daughter")){
+                if(
+                        insuree.getInt("Relationship") != 0 &&
+                                insuree.getInt("Relationship") != 1 &&
+                                insuree.getInt("Relationship") != 2 &&
+                                insuree.getInt("Relationship") != 3){
                     Date dob = JsonUtils.getDateOrDefault(insuree,"DOB");
                     Date today = new Date();
                     int age = 0;
