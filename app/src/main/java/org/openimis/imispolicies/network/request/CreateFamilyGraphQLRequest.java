@@ -35,7 +35,7 @@ public class CreateFamilyGraphQLRequest extends BaseGraphQLRequest {
                         .clientMutationLabel("Create family '" + family.getHeadChfId() + "'")
                         .locationId(family.getLocationId())
                         .poverty(family.isPoor())
-                        .familyTypeId(family.getType())
+                        .familyTypeId(family.getType() != null ? family.getType() : "H")
                         .address(family.getAddress())
                         .ethnicity(family.getEthnicity())
                         .confirmationNo(family.getConfirmationNumber())
@@ -44,6 +44,7 @@ public class CreateFamilyGraphQLRequest extends BaseGraphQLRequest {
                         .attachments(
                                 family.getAttachments() != null ? Mapper.map(family.getAttachments(), dto -> toAttachment(dto)) : new ArrayList<>()
                         )
+                        .parentId(family.getParentId() != null && family.getParentId() != 0 ? family.getParentId() : null)
                         .headInsuree(
                                 FamilyHeadInsureeInputType.builder()
                                         .lastName(head.getLastName())
@@ -89,10 +90,12 @@ public class CreateFamilyGraphQLRequest extends BaseGraphQLRequest {
     private FamilyAttachmentInputType toAttachment(
             @NonNull Family.Attachment dto
     ){
+        java.sql.Date date = new java.sql.Date(System.currentTimeMillis());
         return FamilyAttachmentInputType.builder()
                 .title(dto.getTitle())
                 .filename(dto.getFilename())
                 .mime(dto.getMime())
+                .date(date)
                 .document(dto.getContent())
                 .build();
     }

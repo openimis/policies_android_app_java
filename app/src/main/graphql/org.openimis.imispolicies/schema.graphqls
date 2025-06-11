@@ -483,7 +483,7 @@ type ParentGQLType {
 }
 
 type FamilyAttachmentGQLType {
-  idAttachment: Int!
+  idAttachment: ID!
   filename: String!
   document: String!
   title: String!
@@ -6766,6 +6766,7 @@ input FamilyAttachmentInputType {
   mime: String
   filename: String
   document: String
+  date: Date
 }
 
 input FamilyHeadInsureeInputType {

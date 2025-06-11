@@ -1,8 +1,10 @@
 $(document).ready(function () {
 
-    var InsureeId = queryString("i");
+    document.title = Android.getString('FamilyAndAttachment');
+
     var FamilyId = queryString("f");
-    var isPolygamy = queryString("isPolygamy")
+    var subFamilyId = queryString("s");
+    var isSubfamily = queryString("isSubfamily")
     var AttachmentTitle = "";
     var AttachmentName = "";
     var AttachmentId = 0;
@@ -24,9 +26,13 @@ $(document).ready(function () {
             var title = $('#txtTitleAttachment').val();
             var file = $('#txtFileAttachment').val();
 
-            Android.addAttachment(parseInt(FamilyId), parseInt(InsureeId),title, file);
-            window.location.reload();
-
+            if(isSubfamily == 1){
+                Android.addAttachment(parseInt(subFamilyId),title, file);
+                window.location.reload();
+            } else {
+                Android.addAttachment(parseInt(FamilyId),title, file);
+                window.location.reload();
+            }
         } else
             Android.ShowDialog(Android.getString('FieldRequired'));
 
@@ -37,15 +43,21 @@ $(document).ready(function () {
     $('#btnSave').click(function () {
         $("#divProgress").show();
 
-        if (Android.getInsureeAttachments(parseInt(queryString('i'))) === "[]") {
-            $("#divProgress").hide();
-            Android.ShowDialog(Android.getString('AttachmentNotFound'));
-        }else {
-            Android.SaveInsureeAttachments(FamilyId, InsureeId);
-            if (isPolygamy == 1) {
-                window.open("FamilyPolygamy.html?f=" + FamilyId, "_self");
+        if(isSubfamily == 1){
+            if ( Android.getFamilyAttachments(parseInt(queryString('s'))) === "[]"){
+                $("#divProgress").hide();
+                Android.ShowDialog(Android.getString('AttachmentNotFound'));
             } else {
-                window.open("FamilyAndInsurees.html?f=" + FamilyId, "_self");
+                Android.SaveFamilyAttachments(subFamilyId);
+                window.open("FamilySubFamilies.html?f=" + FamilyId, "_self");
+            }
+        } else {
+            if ( Android.getFamilyAttachments(parseInt(queryString('f'))) === "[]"){
+                $("#divProgress").hide();
+                Android.ShowDialog(Android.getString('AttachmentNotFound'));
+            } else {
+                Android.SaveFamilyAttachments(FamilyId);
+                window.open("Enrollment.html", "_self");
             }
         }
     });
@@ -55,7 +67,7 @@ $(document).ready(function () {
     });
 
     AssignDotClass();
-    contextMenu.createContextMenu([Android.getString(Android.getString('Delete'))], function () {
+    contextMenu.createContextMenu([Android.getString('Delete')], function () {
         var clicked = $(this).text();
 
         if (clicked == Android.getString('Delete')) {
@@ -71,12 +83,11 @@ $(document).ready(function () {
                     {
                         text: Android.getString("Ok"),
                         click: function () {
-                            AttachmentDeleted = parseInt(Android.DeleteAttachment(parseInt(InsureeId),AttachmentId,AttachmentTitle, AttachmentName));
+                            AttachmentDeleted = parseInt(Android.DeleteAttachment(parseInt(subFamilyId),AttachmentId,AttachmentTitle, AttachmentName));
 
                             if (AttachmentDeleted == 1) {
                                 Android.ShowDialog(Android.getString('AttachmentDeleted'));
                                 location.reload()
-                                //window.open('Attachment.html?f=' + InsureeId, "_self");
                             }
                             $(this).dialog("close");
                         }
@@ -101,7 +112,12 @@ function selectAttachmentCallback(attachName) {
 }
 
 function LoadAttachments() {
-    var Attachments = Android.getInsureeAttachments(parseInt(queryString('i')));
+    var Attachments;
+    if(queryString('isSubfamily') == 1){
+        Attachments = Android.getFamilyAttachments(parseInt(queryString('s')));
+    } else {
+        Attachments = Android.getFamilyAttachments(parseInt(queryString('f')));
+    }
     var ctls = ["AttachmentTitle", "AttachmentFile", "AttachmentId"];
     var Columns = ["Title", "Filename", "Id"];
     LoadList(Attachments, '.ulList', ctls, Columns);

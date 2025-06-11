@@ -3347,6 +3347,7 @@ public class ClientAndroidInterface {
                 }
 
                 queryAT = query.toString();
+                Log.e("query", queryAT);
                 JSONArray attachmentsArray = sqlHandler.getResult(queryAT, null);
 
                 if (CallerId != 2) {
@@ -5131,13 +5132,13 @@ public class ClientAndroidInterface {
                 Family family = new FetchFamily().execute(insuranceNumber, "");
                 InsertFamilyDataFromOnline(family);
                 InsertInsureeDataFromOnline(family.getMembers());
-                InsertAttachmentDataFromOnline(Objects.requireNonNull(family.getAttachments()));
+                InsertAttachmentDataFromOnline(Objects.requireNonNull(family.getAttachments()), family.getId());
                 if(family.getType() != null && family.getType().equals("P")){
                     List<Family> subFamilies = new FetchSubFamilies().execute(family.getUuid());
                     for (Family subFamily : subFamilies){
                         InsertFamilyDataFromOnline(subFamily);
                         InsertInsureeDataFromOnline(subFamily.getMembers());
-                        InsertAttachmentDataFromOnline(Objects.requireNonNull(subFamily.getAttachments()));
+                        InsertAttachmentDataFromOnline(Objects.requireNonNull(subFamily.getAttachments()), subFamily.getId());
                         JSONArray subFamilyPolicies = new FetchPolicies().execute(subFamily.getUuid());
                         InsertPolicyDataFromOnline(subFamilyPolicies, subFamily.getId());
                     }
@@ -5151,7 +5152,6 @@ public class ClientAndroidInterface {
                     if(!parentFamily.getMembers().isEmpty()){
                         InsertInsureeDataFromOnline(parentFamily.getMembers());
                     }
-                    InsertAttachmentDataFromOnline(Objects.requireNonNull(parentFamily.getAttachments()));
                 }
                 return 1;
             } catch (Exception e) {
@@ -5265,15 +5265,17 @@ public class ClientAndroidInterface {
         sqlHandler.insertData("tblPolicy", Columns, array, "");
     }
 
-    private void InsertAttachmentDataFromOnline(@NonNull List<Family.Attachment> attachments) throws JSONException{
+    private void InsertAttachmentDataFromOnline(@NonNull List<Family.Attachment> attachments, int familyId) throws JSONException{
         JSONArray array = new JSONArray();
         for (Family.Attachment attachment : attachments){
             @Language("SQL")
             String QueryCheck = "SELECT Id FROM tblInsureeAttachments WHERE Id =" + attachment.getIdAttachment();
             if (sqlHandler.getResult(QueryCheck, null).length() == 0) {
-                array.put(toAttachmentJSONObject(attachment));
+                array.put(toAttachmentJSONObject(attachment, familyId));
             }
         }
+        String[] Columns = {"Id","Title", "Filename", "Content", "FamilyId"};
+        sqlHandler.insertData("tblInsureeAttachments", Columns, array, "");
     }
 
     @NonNull
@@ -5312,12 +5314,13 @@ public class ClientAndroidInterface {
         return jsonObject;
     }
 
-    private JSONObject toAttachmentJSONObject (@NonNull Family.Attachment attachment) throws JSONException{
+    private JSONObject toAttachmentJSONObject (@NonNull Family.Attachment attachment, int familyId) throws JSONException{
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("id", attachment.getIdAttachment());
-        jsonObject.put("title", attachment.getTitle());
-        jsonObject.put("filename", attachment.getFilename());
-        jsonObject.put("content", attachment.getContent());
+        jsonObject.put("Id", attachment.getIdAttachment());
+        jsonObject.put("Title", attachment.getTitle());
+        jsonObject.put("Filename", attachment.getFilename());
+        jsonObject.put("Content", attachment.getContent());
+        jsonObject.put("FamilyId", familyId);
         return jsonObject;
     }
 
@@ -5893,7 +5896,7 @@ public class ClientAndroidInterface {
     }
 
     @JavascriptInterface
-    public void addAttachment(int familyId, int insureeId, String title, String filename) throws JSONException {
+    public void addAttachment(int familyId, String title, String filename) throws JSONException {
         String contentFile = ((MainActivity) activity).fileContent;
         if (familyId != 0) {
             int MaxAttachmentId = getNextAvailableAttachmentId();
@@ -5903,7 +5906,6 @@ public class ClientAndroidInterface {
             AttachmentValues.put("Title", title);
             AttachmentValues.put("Content", contentFile);
             AttachmentValues.put("FamilyId", familyId);
-            AttachmentValues.put("InsureeId", insureeId);
             sqlHandler.insertData("tblInsureeAttachments", AttachmentValues);
         } else {
             JSONObject obj = new JSONObject();
@@ -5916,7 +5918,7 @@ public class ClientAndroidInterface {
     }
 
     @JavascriptInterface
-    public void SaveInsureeAttachments(int FamilyId, int InsureeId) {
+    public void SaveFamilyAttachments(int FamilyId) {
         int MaxAttachmentId = 0;
         try {
 
@@ -5931,7 +5933,6 @@ public class ClientAndroidInterface {
                     AttachmentValues.put("Title", obj.getString("Title"));
                     AttachmentValues.put("Content", obj.getString("content"));
                     AttachmentValues.put("FamilyId", FamilyId);
-                    AttachmentValues.put("InsureeId", InsureeId);
                     sqlHandler.insertData("tblInsureeAttachments", AttachmentValues);
                 }
             }
@@ -5945,13 +5946,13 @@ public class ClientAndroidInterface {
     }
 
     @JavascriptInterface
-    public String getInsureeAttachments(int InsureeId) throws JSONException {
+    public String getFamilyAttachments(int FamilyId) throws JSONException {
         Attachments = new JSONArray();
 
         String Query = "SELECT Id,Title, Filename, Content, FamilyId, InsureeId \n" +
                 "FROM tblInsureeAttachments \n" +
-                "WHERE InsureeId = ?";
-        String[] args = {String.valueOf(InsureeId)};
+                "WHERE FamilyId = ?";
+        String[] args = {String.valueOf(FamilyId)};
 
         JSONArray Attachs = sqlHandler.getResult(Query, args);
 
@@ -5977,8 +5978,8 @@ public class ClientAndroidInterface {
     }
 
     @JavascriptInterface
-    public int DeleteAttachment(int InsureeId,int attachmentId, String attachmentTitle, String attachmentName) throws JSONException {
-        if (InsureeId != 0) {
+    public int DeleteAttachment(int FamilyId,int attachmentId, String attachmentTitle, String attachmentName) throws JSONException {
+        if (FamilyId != 0) {
             if(attachmentId != 0){
                 String[] attachmentIdArgument = new String[]{String.valueOf(attachmentId)};
                 String Query = "DELETE FROM tblInsureeAttachments WHERE Id = ?";

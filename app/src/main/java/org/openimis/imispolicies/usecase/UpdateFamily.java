@@ -108,17 +108,10 @@ public class UpdateFamily {
             familyId = family.getId();
         } catch (HttpException e) {
             if (e.getCode() == HttpURLConnection.HTTP_NOT_FOUND) {
-                if(family.getParentId() != null && family.getParentId() != 0){
-                    checkMutation.execute(
-                            createSubFamilyGraphQLRequest.create(family, officerId),
-                            "Érreur lors de la création de la sous-famille '" + family.getHeadChfId() + "'"
-                    );
-                }else{
-                    checkMutation.execute(
-                            createFamilyGraphQLRequest.create(family, officerId),
-                            "Érreur lors de la création de la famille '" + family.getHeadChfId() + "'"
-                    );
-                }
+                checkMutation.execute(
+                        createFamilyGraphQLRequest.create(family, officerId),
+                        "Érreur lors de la création de la famille '" + family.getHeadChfId() + "'"
+                );
                 try{
                     Family existingFamily = fetchFamilyId.execute();
                     familyId = existingFamily.getId();

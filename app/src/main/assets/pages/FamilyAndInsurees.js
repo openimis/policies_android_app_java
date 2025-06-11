@@ -3,15 +3,20 @@ $(document).ready(function () {
     document.title = Android.getString('FamilyAndInsurees');
 
     var FamilyId = queryString("f");
+    var parentId = queryString("p");
     var isPolygamy = queryString("isPolygamy");
+    var isSubfamily = queryString("isSubfamily");
     var LocationId = null;
     var RegionId = null;
     var DistrictId = null;
     var InsureeId = null;
     var Action = null;
 
-    var url = 'Enrollment.html?f=' + FamilyId;
-    if(isPolygamy != 1){
+    if(isSubfamily != 1){
+        var url = 'Enrollment.html?f=' + FamilyId;
+        Android.SetUrl(url);
+    }else {
+        var url = 'FamilySubFamilies.html?f=' + parentId;
         Android.SetUrl(url);
     }
 
@@ -47,7 +52,7 @@ $(document).ready(function () {
 
 
     AssignDotClass();
-    contextMenu.createContextMenu([Android.getString('Edit'), Android.getString('Delete'), Android.getString('Attachment')], function () {
+    contextMenu.createContextMenu([Android.getString('Edit'), Android.getString('Delete')], function () {
         var clicked = $(this).text();
         if (clicked == Android.getString('Edit')) {
             var url = 'FamilyAndInsurees.html?f=' + FamilyId;
@@ -90,10 +95,6 @@ $(document).ready(function () {
                 Android.ShowDialog(Android.getString('InsureeNotDeleted'));
             }
 
-        } else if(clicked == Android.getString('Attachment')){
-            var url = 'FamilyAndInsurees.html?f=' + FamilyId;
-            Android.SetUrl(url);
-            window.open("Attachment.html?i=" + InsureeId + "&f=" + FamilyId, "_self");
         }
     });
 

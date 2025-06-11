@@ -19,7 +19,7 @@ $(document).ready(function () {
     });
 
     AssignDotClass();
-    contextMenu.createContextMenu([Android.getString('Edit'), Android.getString('Delete')], function () {
+    contextMenu.createContextMenu([Android.getString('Edit'), Android.getString('Delete'), Android.getString('Attachment')], function () {
         var clicked = $(this).text();
         if (clicked == Android.getString('Edit')) {
             var url = 'Enrollment.html?f=' + FamilyId;
@@ -62,7 +62,6 @@ $(document).ready(function () {
                             LoadFamilies();
                         }
                         if (deletedSuccess == 1) {
-
                             Android.ShowDialog(Android.getString('FamilyDeleted'));
                             window.open('Enrollment.html', '_self');
                         } else if (deletedSuccess == -1) {
@@ -85,6 +84,11 @@ $(document).ready(function () {
                     }
                 ]
             });
+        }
+        else if(clicked == Android.getString('Attachment')){
+            var url = 'Enrollment.html?f=' + FamilyId;
+            Android.SetUrl(url);
+            window.open("Attachment.html?f=" + FamilyId, "_self");
         }
     });
 });

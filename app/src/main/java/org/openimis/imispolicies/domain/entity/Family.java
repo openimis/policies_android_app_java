@@ -1125,7 +1125,7 @@ public class Family implements Parcelable {
         private final String content;
 
         public Attachment(
-                @NonNull int idAttachment,
+                int idAttachment,
                 @NonNull String title,
                 @NonNull String mime,
                 @NonNull String filename,

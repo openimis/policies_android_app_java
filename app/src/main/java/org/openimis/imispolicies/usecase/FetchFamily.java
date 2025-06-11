@@ -148,7 +148,7 @@ public class FetchFamily {
     @NonNull
     private Family.Attachment toAttachment(@NonNull GetFamilyQuery.Attachment attachment){
         return new Family.Attachment(
-                /* id */ attachment.idAttachment(),
+                /* id */ Integer.parseInt(attachment.idAttachment()),
                 /* tittle */ attachment.title(),
                 /* mime */ attachment.mime(),
                 /* filename */ attachment.filename(),

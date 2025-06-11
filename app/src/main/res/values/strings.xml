@@ -506,4 +506,5 @@
     <string name="DownloadStart">Download Start</string>
     <string name="Nothing">Nothing</string>
     <string name="ConnectionReset">connection failure. Please try again</string>
+    <string name="FamilyAndAttachment">Families attachments</string>
 </resources>

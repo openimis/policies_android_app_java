@@ -153,7 +153,7 @@ public class FetchSubFamilies {
     @NonNull
     private Family.Attachment toAttachment(@NonNull GetSubFamiliesQuery.Attachment attachment){
         return new Family.Attachment(
-                /* id */ attachment.idAttachment(),
+                /* id */ Integer.parseInt(attachment.idAttachment()),
                 /* tittle */ attachment.title(),
                 /* mime */ attachment.mime(),
                 /* filename */ attachment.filename(),

@@ -31,12 +31,12 @@ $(document).ready(function () {
 
     AssignDotClass();
 
-    contextMenu.createContextMenu([Android.getString('Edit'), Android.getString('Detach'), Android.getString('Delete')], function () {
+    contextMenu.createContextMenu([Android.getString('Edit'), Android.getString('Detach'), Android.getString('Attachment'), Android.getString('Delete')], function () {
         var clicked = $(this).text();
         if (clicked == Android.getString('Edit')) {
             var url = 'FamilySubFamilies.html?f=' + FamilyId + '&l=' + LocationId + '&r=' + RegionId + '&d=' + DistrictId;
             Android.SetUrl(url);
-            window.open('FamilyAndInsurees.html?f=' + SubFamilyId, '_self');
+            window.open('FamilyAndInsurees.html?f=' + SubFamilyId + '&p=' + FamilyId + '&isSubfamily=1', '_self');
         }
         if (clicked == Android.getString('Detach')) {
             var detachSuccess = 0;
@@ -67,6 +67,11 @@ $(document).ready(function () {
                     }
                 ]
             });
+        }
+        else if(clicked == Android.getString('Attachment')){
+            var url = 'FamilySubFamilies.html?f=' + FamilyId + '&l=' + LocationId + '&r=' + RegionId + '&d=' + DistrictId;
+            Android.SetUrl(url);
+            window.open("Attachment.html?f=" + FamilyId + '&s=' + SubFamilyId + '&isSubfamily=1', "_self");
         }
         else if (clicked == Android.getString('Delete')) {
             var isOffline = Android.getFamilyStat(SubFamilyId);

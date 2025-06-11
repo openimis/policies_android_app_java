@@ -39,6 +39,8 @@ $(document).ready(function () {
         RegionId = $('#hfRegionId').val();
         DistrictId = $('#hfDistrictId').val();
 
+        var url = 'FamilyPolygamy.html?f=' + FamilyId;
+        Android.SetUrl(url);
         window.open('FamilySubFamilies.html?f=' + FamilyId + '&l=' + LocationId + '&r=' + RegionId + '&d=' + DistrictId, '_self');
     });
 
