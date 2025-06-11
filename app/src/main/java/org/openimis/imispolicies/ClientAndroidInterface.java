@@ -686,7 +686,7 @@ public class ClientAndroidInterface {
         String OrderBy = "SortOrder";
 
         JSONArray Relations = sqlHandler.getResult(tableName, columns, null, OrderBy);
-
+        Relations.remove(0);
         return Relations.toString();
     }
 
