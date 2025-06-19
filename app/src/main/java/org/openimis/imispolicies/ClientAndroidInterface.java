@@ -5838,7 +5838,7 @@ public class ClientAndroidInterface {
                     Date today = new Date();
                     int age = 0;
                     age = today.getYear() - dob.getYear();
-                    if(age <= 18){
+                    if(age < 18){
                         numberOfChild++;
                     }else{
                         if(insuree.getString("Gender").equals("M")){
