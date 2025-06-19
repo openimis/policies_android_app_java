@@ -507,4 +507,5 @@
     <string name="Nothing">Nothing</string>
     <string name="ConnectionReset">connection failure. Please try again</string>
     <string name="FamilyAndAttachment">Families attachments</string>
+    <string name="invalidPeriodicity">For this contribution plan the periodicity must be greater than or equal to</string>
 </resources>

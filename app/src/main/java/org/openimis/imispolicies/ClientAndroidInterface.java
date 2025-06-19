@@ -1322,8 +1322,7 @@ public class ClientAndroidInterface {
                 "INNER JOIN tblLocations V ON V.LocationId = F.LocationId\n" +
                 "INNER JOIN tblLocations W ON W.LocationId = V.ParentLocationId\n" +
                 "INNER JOIN tblLocations D ON D.LocationId = W.ParentLocationId\n" +
-                "INNER JOIN tblLocations R ON R.LocationId = D.ParentLocationId\n" +
-                "WHERE ParentId IS NULL";
+                "INNER JOIN tblLocations R ON R.LocationId = D.ParentLocationId";
 
         JSONArray Families = sqlHandler.getResult(Query, null);
 
@@ -5146,13 +5145,13 @@ public class ClientAndroidInterface {
                     JSONArray familyPolicies = new FetchPolicies().execute(family.getUuid());
                     InsertPolicyDataFromOnline(familyPolicies, family.getId());
                 }
-                if(family.getParentUuid() != null){
-                    Family parentFamily = new FetchFamily().execute("",family.getParentUuid());
-                    InsertFamilyDataFromOnline(parentFamily);
-                    if(!parentFamily.getMembers().isEmpty()){
-                        InsertInsureeDataFromOnline(parentFamily.getMembers());
-                    }
-                }
+//                if(family.getParentUuid() != null){
+//                    Family parentFamily = new FetchFamily().execute("",family.getParentUuid());
+//                    InsertFamilyDataFromOnline(parentFamily);
+//                    if(!parentFamily.getMembers().isEmpty()){
+//                        InsertInsureeDataFromOnline(parentFamily.getMembers());
+//                    }
+//                }
                 return 1;
             } catch (Exception e) {
                 Log.e("MODIFYFAMILY", "Error while downloading a family", e);
@@ -6154,6 +6153,28 @@ public class ClientAndroidInterface {
     public int getContributionPlanProduct(String contributionPlanId){
         int prodId = sqlHandler.getContributionProductId(contributionPlanId);
         return prodId;
+    }
+
+    @JavascriptInterface
+    public String getCPCode(String CpId) {
+        return sqlHandler.getContributionPlanCode(CpId);
+    }
+
+    @JavascriptInterface
+    @SuppressWarnings("unused")
+    public boolean isValidPeriodicity(String CpCode, String Periodicity) {
+        if(CpCode.equals("AMOS1") || CpCode.equals("AMOS2") || CpCode.equals("AMOS3") || CpCode.equals("AMOS4")){
+            if(Periodicity.equals("M")){
+                ShowDialog(activity.getResources().getString(R.string.invalidPeriodicity) + " Trimestrielle");
+                return false;
+            }
+        } else if(CpCode.equals("AMS")){
+            if(!Periodicity.equals("Y")){
+                ShowDialog(activity.getResources().getString(R.string.invalidPeriodicity) + " Annuelle");
+                return false;
+            }
+        }
+        return true;
     }
 }
 

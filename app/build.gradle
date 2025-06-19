@@ -38,7 +38,7 @@ android {
         minSdkVersion 21
         targetSdkVersion 33
         versionCode gitVersionCode
-        versionName "1.2.8"
+        versionName "1.2.9"
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         vectorDrawables {
             useSupportLibrary = true
@@ -95,7 +95,7 @@ android {
         comoresDev {
             applicationId "org.openimis.imispolicies.comoresDev"
             buildConfigField "String", "API_BASE_URL", '"https://dev.amg.km/"'
-            resValue "string", "app_name_policies", "Policies Comores"
+            resValue "string", "app_name_policies", "Policies Comores Dev"
             dimension = 'std'
             resValue "string", "release_tag", "comores-dev"
         }

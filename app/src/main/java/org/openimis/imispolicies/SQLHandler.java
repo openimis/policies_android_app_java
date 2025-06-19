@@ -1204,4 +1204,27 @@ public class SQLHandler extends SQLiteOpenHelper {
         }
         return cpId;
     }
+
+    public String getContributionPlanCode(String contributionPlanId) {
+        openDatabase();
+        String cpCode = null;
+        try (Cursor cursor = mDatabase.query(tblContributionPlan,
+                new String[]{"Code"},
+                "CpId = ?",
+                new String[]{contributionPlanId},
+                null,
+                null,
+                null,
+                "1")) {
+            cursor.moveToFirst();
+            if (!cursor.isAfterLast()) {
+                cpCode = cursor.getString(0);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            closeDatabase();
+        }
+        return cpCode;
+    }
 }
