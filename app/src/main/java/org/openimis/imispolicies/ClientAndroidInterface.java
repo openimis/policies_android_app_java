@@ -6176,5 +6176,30 @@ public class ClientAndroidInterface {
         }
         return true;
     }
+
+    @JavascriptInterface
+    public int getAgeOfMajority(int DefaultAge){
+        int defaultAge = 18;
+        boolean rule = false;
+        @Language("SQL")
+        String Query = "SELECT RuleValue FROM tblIMISDefaultsPhone WHERE RuleName=?";
+        String[] arg = {rulename};
+        JSONArray rulevalue = sqlHandler.getResult(Query, arg);
+
+        try {
+            if (rulevalue.length() > 0) {
+                JSONObject RuleObject = rulevalue.getJSONObject(0);
+
+                rule = RuleObject.getBoolean("RuleValue");
+            } else {
+                rule = defaultValue;
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return rule;
+        return getRule(rulename, false);
+
+    }
 }
 

@@ -497,8 +497,9 @@ function fillAge(Birthday) {
     var birthDate = new Date(Birthday)
 
     var age = today.getFullYear() - birthDate.getFullYear();
+    var ageOfMajority = Android.getAgeOfMajority();
 
-    if (age < 21) {
+    if (age < ageOfMajority) {
         $("#Education").show();
         if($("#ddlRelationship").val() == 3){
             $("#ddlEducation").prop("required", true);
