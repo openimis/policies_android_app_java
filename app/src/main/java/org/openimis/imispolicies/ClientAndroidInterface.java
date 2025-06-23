@@ -5838,7 +5838,8 @@ public class ClientAndroidInterface {
                     Date today = new Date();
                     int age = 0;
                     age = today.getYear() - dob.getYear();
-                    if(age < 18){
+                    int ageOfMajority = getAgeOfMajority();
+                    if(age < ageOfMajority){
                         numberOfChild++;
                     }else{
                         if(insuree.getString("Gender").equals("M")){
@@ -6175,6 +6176,26 @@ public class ClientAndroidInterface {
             }
         }
         return true;
+    }
+
+    @JavascriptInterface
+    public int getAgeOfMajority(){
+        int defaultAge = 18;
+        @Language("SQL")
+        String Query = "SELECT Usage FROM tblIMISDefaultsPhone WHERE RuleName=?";
+        String[] arg = {"AgeOfMajority"};
+        JSONArray value = sqlHandler.getResult(Query, arg);
+        try {
+            if (value.length() > 0) {
+                JSONObject ConfigObject = value.getJSONObject(0);
+
+                defaultAge = ConfigObject.getInt("Usage");
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return defaultAge;
+
     }
 }
 

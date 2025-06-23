@@ -193,7 +193,8 @@ public class SQLHandler extends SQLiteOpenHelper {
             sqLiteDatabase.execSQL(
                     "CREATE TABLE 'tblIMISDefaultsPhone' (" +
                             "RuleName TEXT," +
-                            "RuleValue BIT" + ")"
+                            "RuleValue BIT," +
+                            "Usage TEXT" + ")"
             );
             sqLiteDatabase.execSQL(
                     "CREATE TABLE 'tblIdentificationTypes' (" +
