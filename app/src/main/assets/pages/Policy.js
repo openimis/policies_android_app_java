@@ -23,6 +23,7 @@ $(document).ready(function () {
     var HasCycle = null;
     var fStartDate = null;
     $("#txtEffectiveDate").prop('disabled', true);
+    $("#txtExpiryDate").prop('disabled', true);
 
     $("#Officer").hide();
     var OfficerId = Android.getOfficerId();
