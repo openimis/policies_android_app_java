@@ -354,7 +354,7 @@ public class ClientAndroidInterface {
     @JavascriptInterface
     @SuppressWarnings("unused")
     public boolean isValidIdentificationNumber(String identificationnumber) {
-        if (identificationnumber.length() < 7) {
+        if (identificationnumber.length() != 7 && identificationnumber.length() != 9) {
             ShowDialog(activity.getResources().getString(R.string.InvalidIdentificationNumber));
             return false;
         }

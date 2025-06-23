@@ -495,7 +495,7 @@
     <string name="Detach">Détacher</string>
     <string name="ErrorDetach">Erreur lors du détachement de la sous-famille</string>
     <string name="DetachFamily">Le détachement de la sous-famille transformera celle-ci en famille simple</string>
-    <string name="InvalidIdentificationNumber">Le numéro d\'identification doit contenir 7 ou 8 caractères</string>
+    <string name="InvalidIdentificationNumber">Le numéro d\'identification doit contenir 7 ou 9 caractères</string>
     <string name="SelectContribution">Sél. un régime de cotisation</string>
     <string name="ContributionPlan">Régime de cotisation</string>
     <string name="AccountDetails">Numéro du compte</string>
