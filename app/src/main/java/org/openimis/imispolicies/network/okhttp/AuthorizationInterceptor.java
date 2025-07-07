@@ -34,6 +34,9 @@ public class AuthorizationInterceptor implements Interceptor {
         Request.Builder builder = chain.request().newBuilder();
         builder.addHeader("Authorization", "bearer " + token.trim());
         builder.addHeader("User-Agent", USER_AGENT);
+        if(!StringUtils.isEmpty(csrfToken)){
+            builder.addHeader("X-Csrftoken", csrfToken);
+        }
         Response response = chain.proceed(builder.build());
         if (response.code() == HttpURLConnection.HTTP_UNAUTHORIZED) {
             repository.saveFhirToken(null, null, null);
