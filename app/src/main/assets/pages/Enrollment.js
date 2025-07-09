@@ -86,9 +86,15 @@ $(document).ready(function () {
             });
         }
         else if(clicked == Android.getString('Attachment')){
-            var url = 'Enrollment.html?f=' + FamilyId;
-            Android.SetUrl(url);
-            window.open("Attachment.html?f=" + FamilyId, "_self");
+            if(FamilyType == "P"){
+                //print message
+                Android.ShowToast(Android.getString('CannotAddAttachment'))
+            }else {
+                var url = 'Enrollment.html?f=' + FamilyId;
+                Android.SetUrl(url);
+                window.open("Attachment.html?f=" + FamilyId, "_self");
+            }
+
         }
     });
 });
