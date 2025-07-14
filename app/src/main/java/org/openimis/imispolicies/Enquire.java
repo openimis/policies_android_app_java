@@ -55,6 +55,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.squareup.picasso.Picasso;
 
+import org.json.JSONObject;
 import org.openimis.imispolicies.domain.entity.Insuree;
 import org.openimis.imispolicies.domain.entity.Policy;
 import org.openimis.imispolicies.network.exception.HttpException;
@@ -385,7 +386,8 @@ public class Enquire extends ImisActivity {
         switch (requestCode) {
             case REQUEST_SCAN_QR_CODE:
                 if (resultCode == RESULT_OK) {
-                    String CHFID = data.getStringExtra("SCAN_RESULT");
+                    String result = data.getStringExtra("SCAN_RESULT");
+                    String CHFID = result.substring(result.indexOf(":")+2,result.indexOf("}")-1);
                     etCHFID.setText(CHFID);
 
                     pd = ProgressDialog.show(Enquire.this, "", getResources().getString(R.string.GetingInsuuree));

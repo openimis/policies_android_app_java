@@ -283,7 +283,8 @@ public class Acquire extends AppCompatActivity {
                 break;
             case SCAN_QR_REQUEST_CODE:
                 if (resultCode == RESULT_OK) {
-                    String insureeNumber = data.getStringExtra("SCAN_RESULT");
+                    String result = data.getStringExtra("SCAN_RESULT");
+                    String insureeNumber = result.substring(result.indexOf(":")+2,result.indexOf("}")-1);
                     etCHFID.setText(insureeNumber);
                 }
                 break;
