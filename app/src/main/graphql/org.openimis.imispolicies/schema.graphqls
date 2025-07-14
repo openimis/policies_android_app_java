@@ -6645,14 +6645,14 @@ input UpdatePolicyMutationInput {
   enrollDate: Date!
   startDate: Date!
   expiryDate: Date!
-  value: Decimal!
+  value: String!
   productId: Int!
   familyId: Int!
   officerId: Int!
   contributionPlanId: String
   periodicity: String
   signatureDate: Date
-  paymentDay: String
+  paymentDay: Int
   clientMutationId: String
 }
 
