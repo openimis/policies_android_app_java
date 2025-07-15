@@ -79,6 +79,26 @@ query GetFamily($headChfId: String) {
                         }
                     }
                 }
+                policies{
+                    edges {
+                        node {
+                            id
+                            uuid
+                            product {
+                                id
+                            }
+                            officer {
+                                id
+                            }
+                            value
+                            enrollDate
+                            effectiveDate
+                            startDate
+                            expiryDate
+                            status
+                        }
+                    }
+                }
             }
         }
     }

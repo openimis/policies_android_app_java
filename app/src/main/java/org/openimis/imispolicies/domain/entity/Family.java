@@ -36,6 +36,8 @@ public class Family implements Parcelable {
     private final boolean isOffline;
     @NonNull
     private final List<Member> members;
+    @Nullable
+    private final List<Policy> policies;
 
     @Nullable
     private Member head = null;
@@ -53,7 +55,8 @@ public class Family implements Parcelable {
             @Nullable String confirmationNumber,
             @Nullable String confirmationType,
             boolean isOffline,
-            @NonNull List<Member> members
+            @NonNull List<Member> members,
+            @Nullable List<Policy> policies
     ) {
         this.headChfId = headChfId;
         this.id = id;
@@ -68,6 +71,7 @@ public class Family implements Parcelable {
         this.confirmationType = confirmationType;
         this.isOffline = isOffline;
         this.members = members;
+        this.policies = policies;
     }
 
     protected Family(Parcel in) {
@@ -89,6 +93,7 @@ public class Family implements Parcelable {
         confirmationType = in.readString();
         isOffline = in.readByte() != 0;
         members = Objects.requireNonNull(in.createTypedArrayList(Member.CREATOR));
+        policies = in.createTypedArrayList(Policy.CREATOR);
     }
 
     @Override
@@ -106,6 +111,7 @@ public class Family implements Parcelable {
         dest.writeString(confirmationType);
         dest.writeByte((byte) (isOffline ? 1 : 0));
         dest.writeTypedList(members);
+        dest.writeTypedList(policies);
     }
 
     @Override
@@ -197,6 +203,9 @@ public class Family implements Parcelable {
     public List<Member> getMembers() {
         return members;
     }
+
+    @Nullable
+    public List<Policy> getPolicies (){ return policies; }
 
     public static final Creator<Family> CREATOR = new Creator<>() {
         @Override
