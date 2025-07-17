@@ -51,6 +51,7 @@ import android.util.Base64;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.WindowManager;
 import android.webkit.JavascriptInterface;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -2843,6 +2844,9 @@ public class ClientAndroidInterface {
     @SuppressWarnings("unused")
     public void uploadEnrolment() throws Exception {
         final ProgressDialog finalPd = ProgressDialog.show(activity, activity.getResources().getString(R.string.Sync), activity.getResources().getString(R.string.SyncProcessing));
+        activity.runOnUiThread(() -> {
+            activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        });
         try {
             new Thread(() -> {
                 try {
