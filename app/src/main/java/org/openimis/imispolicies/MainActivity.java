@@ -44,6 +44,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -500,6 +501,7 @@ public class MainActivity extends AppCompatActivity
                                     if (!global.isNetworkAvailable()) {
                                         PickMasterDataFileDialog();
                                     } else {
+                                        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
                                         new MasterDataAsync(this).execute();
                                     }
                                     //ca.downloadMasterData();
@@ -526,6 +528,7 @@ public class MainActivity extends AppCompatActivity
                             if (!global.isNetworkAvailable()) {
                                 PickMasterDataFileDialog();
                             } else {
+                                getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
                                 new MasterDataAsync(this).execute();
                             }
                         })
