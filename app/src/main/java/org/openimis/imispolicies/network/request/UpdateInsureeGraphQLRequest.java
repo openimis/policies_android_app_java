@@ -28,7 +28,7 @@ public class UpdateInsureeGraphQLRequest extends BaseGraphQLRequest {
         Response<UpdateInsureeMutation.Data> response = makeSynchronous(new UpdateInsureeMutation(
                 UpdateInsureeMutationInput.builder()
                         .clientMutationId(UUID.randomUUID().toString())
-                        .clientMutationLabel("Update insuree '" + member.getChfId() + "'")
+                        .clientMutationId("Update insuree '" + member.getChfId() + "'")
                         .uuid(member.getUuid())
                         .chfId(member.getChfId())
                         .familyId(member.getFamilyId())
@@ -50,8 +50,11 @@ public class UpdateInsureeGraphQLRequest extends BaseGraphQLRequest {
                         .currentAddress(member.getCurrentAddress())
                         .currentVillageId(member.getCurrentVillage() != null && member.getCurrentVillage() != 0 ? member.getCurrentVillage() : null)
                         .geolocation(member.getGeolocation())
+                        .residenceEnvironmentId(member.getResidenceEnvironment() == 0 ? null : member.getResidenceEnvironment()) // Now supported in mobile GraphQL schema
                         .incomeLevelId(member.getIncomeLevel())
                         .preferredPaymentMethod(member.getPaymentMethod())
+                        // .coordinates(member.getOtherHousehold()) // Not supported in UpdateInsureeGraphQLRequest
+                        // .bankCoordinates(member.getAccountDetails()) // Not supported in UpdateInsureeGraphQLRequest
                         .professionalSituation(member.getProfessionalSituation())
                         .photo(
                                 PhotoInputType.builder()

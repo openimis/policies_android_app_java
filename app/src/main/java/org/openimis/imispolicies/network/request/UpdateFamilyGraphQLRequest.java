@@ -29,9 +29,8 @@ public class UpdateFamilyGraphQLRequest extends BaseGraphQLRequest {
         Response<UpdateFamilyMutation.Data> response = makeSynchronous(new UpdateFamilyMutation(
                 UpdateFamilyMutationInput.builder()
                         .clientMutationId(UUID.randomUUID().toString())
-                        .clientMutationLabel("Update family '" + family.getHeadChfId() + "'")
-                        .id(family.getId())
-                        .uuid(family.getUuid())
+                        .clientMutationId("Update family '" + family.getHeadChfId() + "'")
+                        .id(String.valueOf(family.getId()))
                         .locationId(family.getLocationId())
                         .poverty(family.isPoor())
                         .familyTypeId(family.getType())

@@ -90,6 +90,7 @@ public class FetchFamily {
                 /* geolocation = */ member.geolocation(),
                 /* professional situation = */ member.professionalSituation(),
                 /* incomeLevel = */ member.incomeLevel() != null ? IdUtils.getIdFromGraphQLString(Objects.requireNonNull(member.incomeLevel()).id()) : null,
+                /* residenceEnvironment = */ null, // Add missing parameter
                 /* payment method = */ member.preferredPaymentMethod(),
                 /* other household = */ member.coordinates() != null ? member.coordinates() : "",
                 /* account details = */ member.bankCoordinates() != null ? member.bankCoordinates() : "",

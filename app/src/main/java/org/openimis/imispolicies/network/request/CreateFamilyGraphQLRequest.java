@@ -32,7 +32,7 @@ public class CreateFamilyGraphQLRequest extends BaseGraphQLRequest {
         Response<CreateFamilyMutation.Data> response = makeSynchronous(new CreateFamilyMutation(
                 CreateFamilyMutationInput.builder()
                         .clientMutationId(UUID.randomUUID().toString())
-                        .clientMutationLabel("Create family '" + family.getHeadChfId() + "'")
+                        .clientMutationId("Create family '" + family.getHeadChfId() + "'")
                         .locationId(family.getLocationId())
                         .poverty(family.isPoor())
                         .familyTypeId(family.getType() != null ? family.getType() : "H")

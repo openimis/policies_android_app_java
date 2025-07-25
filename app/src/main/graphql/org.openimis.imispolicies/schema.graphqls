@@ -8202,6 +8202,392 @@ type DeleteRefreshTokenCookie {
   deleted: Boolean!
 }
 
+# ResidenceEnvironment type definition
+type ResidenceEnvironmentGQLType {
+  id: ID!
+  code: String!
+  name: String!
+  altLanguage: String
+}
+
+type NoDisabilityGQLType {
+  id: Int
+  code: String
+  name: String
+  altLanguage: String
+}
+
+type NonDisablingDiseaseGQLType {
+  id: Int
+  code: String
+  name: String
+  altLanguage: String
+}
+
+type MutualInsuranceCoverageGQLType {
+  id: Int
+  code: String
+  name: String
+  altLanguage: String
+}
+
+type HousingTypeGQLType {
+  id: Int
+  code: String
+  name: String
+  altLanguage: String
+}
+
+# Photo input type definition
+input PhotoInputType {
+  photo: String
+  filename: String
+  date: Date
+  officerId: Int
+}
+
+# Family type definition (basic)
+type FamilyGQLType {
+  id: ID!
+  uuid: String
+  headInsuree: InsureeGQLType
+  location: LocationGQLType
+  poverty: Boolean
+  familyType: FamilyTypeGQLType
+  address: String
+  isOffline: Boolean
+  ethnicity: String
+  confirmationNo: String
+  confirmationType: ConfirmationTypeGQLType
+  members(validityTo_Isnull: Boolean): InsureeGQLTypeConnection
+  parent: FamilyGQLType
+  attachments: [FamilyAttachmentGQLType]
+}
+
+# Family Attachment type definition
+type FamilyAttachmentGQLType {
+  idAttachment: ID!
+  filename: String
+  document: String
+  title: String
+  date: Date
+  mime: String
+}
+
+# Family Attachment input type definition
+input FamilyAttachmentInputType {
+  idAttachment: ID
+  filename: String
+  document: String
+  title: String
+  date: Date
+  mime: String
+}
+
+# Family Head Insuree input type definition
+input FamilyHeadInsureeInputType {
+  id: Int
+  uuid: String
+  chfId: String
+  lastName: String!
+  otherNames: String!
+  dob: Date!
+  genderId: String!
+  marital: String
+  passport: String
+  phone: String
+  email: String
+  currentAddress: String
+  geoLocation: String
+  curVillage: Int
+  head: Boolean
+  cardIssued: Boolean
+  relationshipId: Int
+  professionId: Int
+  educationId: Int
+  typeOfIdId: String
+  identificationNumber: String
+  residenceEnvironmentId: Int
+  incomeLevelId: Int
+  preferredPaymentMethod: String
+  coordinates: String
+  bankCoordinates: String
+  professionalSituation: String
+  photo: PhotoInputType
+}
+
+# Family Type definition
+type FamilyTypeGQLType {
+  code: String!
+  name: String
+}
+
+# Confirmation Type definition
+type ConfirmationTypeGQLType {
+  code: String!
+  name: String
+}
+
+# Premium type definition (basic)
+type PremiumGQLType {
+  id: ID!
+  uuid: String
+  policy: PolicyGQLType
+  payer: PayerGQLType
+  amount: Float
+  receipt: String
+  payDate: Date
+  payType: String
+}
+
+# Payer type definition (basic)
+type PayerGQLType {
+  id: ID!
+  uuid: String
+  name: String
+  code: String
+}
+
+# Input types for Insuree mutations
+input CreateInsureeMutationInput {
+  familyId: Int
+  chfId: String!
+  lastName: String!
+  otherNames: String!
+  dob: Date!
+  genderId: String!
+  marital: String
+  passport: String
+  phone: String
+  email: String
+  currentAddress: String
+  geoLocation: String
+  curVillage: Int
+  head: Boolean
+  cardIssued: Boolean
+  relationshipId: Int
+  professionId: Int
+  educationId: Int
+  typeOfIdId: String
+  identificationNumber: String
+  residenceEnvironmentId: Int
+  incomeLevelId: Int
+  preferredPaymentMethod: String
+  coordinates: String
+  bankCoordinates: String
+  healthFacilityId: Int
+  professionalSituation: String
+  photo: PhotoInputType
+  clientMutationId: String
+}
+
+input UpdateInsureeMutationInput {
+  uuid: String!
+  familyId: Int
+  chfId: String
+  lastName: String
+  otherNames: String
+  dob: Date
+  genderId: String
+  marital: String
+  passport: String
+  phone: String
+  email: String
+  currentAddress: String
+  geoLocation: String
+  geolocation: String
+  curVillage: Int
+  currentVillageId: Int
+  head: Boolean
+  cardIssued: Boolean
+  relationshipId: Int
+  professionId: Int
+  educationId: Int
+  typeOfIdId: String
+  identificationNumber: String
+  residenceEnvironmentId: Int
+  incomeLevelId: Int
+  preferredPaymentMethod: String
+  coordinates: String
+  bankCoordinates: String
+  healthFacilityId: Int
+  professionalSituation: String
+  photo: PhotoInputType
+  officerId: Int
+  clientMutationId: String
+}
+
+# Input types for Family mutations
+input CreateFamilyMutationInput {
+  headInsuree: FamilyHeadInsureeInputType
+  locationId: Int
+  poverty: Boolean
+  familyTypeId: String
+  address: String
+  isOffline: Boolean
+  ethnicity: String
+  confirmationNo: String
+  confirmationTypeId: String
+  parentId: Int
+  attachments: [FamilyAttachmentInputType]
+  clientMutationId: String
+}
+
+input UpdateFamilyMutationInput {
+  id: String!
+  headInsuree: FamilyHeadInsureeInputType
+  locationId: Int
+  poverty: Boolean
+  familyTypeId: String
+  address: String
+  isOffline: Boolean
+  ethnicity: String
+  confirmationNo: String
+  confirmationTypeId: String
+  parentId: Int
+  attachments: [FamilyAttachmentInputType]
+  clientMutationId: String
+}
+
+# Input types for Policy mutations
+input CreatePolicyMutationInput {
+  familyId: Int!
+  productId: Int!
+  officerId: Int
+  enrollDate: Date!
+  startDate: Date!
+  effectiveDate: Date
+  expiryDate: Date
+  contributionPlanId: String
+  paymentDay: String
+  signatureDate: Date
+  periodicity: String
+  value: Float
+  clientMutationId: String
+}
+
+input UpdatePolicyMutationInput {
+  uuid: String!
+  familyId: Int
+  productId: Int
+  officerId: Int
+  enrollDate: Date
+  startDate: Date
+  effectiveDate: Date
+  expiryDate: Date
+  contributionPlanId: String
+  paymentDay: String
+  signatureDate: Date
+  periodicity: String
+  value: Float
+  clientMutationId: String
+}
+
+input RenewPolicyMutationInput {
+  uuid: String!
+  officerId: Int
+  clientMutationId: String
+}
+
+input DeletePolicyRenewalsMutationInput {
+  uuids: [String!]!
+  clientMutationId: String
+}
+
+input CreatePremiumMutationInput {
+  policyUuid: String!
+  payerId: Int
+  amount: Float!
+  receipt: String
+  payDate: Date!
+  payType: String
+  isOffline: Boolean
+  isPhotoFee: Boolean
+  clientMutationId: String
+}
+
+# Mutation type definition
+type Mutation {
+  # Family mutations
+  createFamily(input: CreateFamilyMutationInput!): CreateFamilyMutationPayload
+  updateFamily(input: UpdateFamilyMutationInput!): UpdateFamilyMutationPayload
+  
+  # Insuree mutations
+  createInsuree(input: CreateInsureeMutationInput!): CreateInsureeMutationPayload
+  updateInsuree(input: UpdateInsureeMutationInput!): UpdateInsureeMutationPayload
+  
+  # Policy mutations
+  createPolicy(input: CreatePolicyMutationInput!): CreatePolicyMutationPayload
+  updatePolicy(input: UpdatePolicyMutationInput!): UpdatePolicyMutationPayload
+  renewPolicy(input: RenewPolicyMutationInput!): RenewPolicyMutationPayload
+  deletePolicyRenewals(input: DeletePolicyRenewalsMutationInput!): DeletePolicyRenewalsMutationPayload
+  
+  # Premium mutations
+  createPremium(input: CreatePremiumMutationInput!): CreatePremiumMutationPayload
+  
+  # Authentication mutations (existing)
+  tokenAuth(username: String!, password: String!): OpenimisObtainJSONWebToken
+  verifyToken(token: String!): Verify
+  refreshToken(refreshToken: String!): Refresh
+  revokeToken(refreshToken: String!): Revoke
+  deleteTokenCookie: DeleteJSONWebTokenCookie
+  deleteRefreshTokenCookie: DeleteRefreshTokenCookie
+}
+
+# Mutation payload types
+type CreateFamilyMutationPayload {
+  clientMutationId: String
+  family: FamilyGQLType
+  internalId: String
+}
+
+type UpdateFamilyMutationPayload {
+  clientMutationId: String
+  family: FamilyGQLType
+  internalId: String
+}
+
+type CreateInsureeMutationPayload {
+  clientMutationId: String
+  insuree: InsureeGQLType
+  internalId: String
+}
+
+type UpdateInsureeMutationPayload {
+  clientMutationId: String
+  insuree: InsureeGQLType
+  internalId: String
+}
+
+type CreatePolicyMutationPayload {
+  clientMutationId: String
+  policy: PolicyGQLType
+  internalId: String
+}
+
+type UpdatePolicyMutationPayload {
+  clientMutationId: String
+  policy: PolicyGQLType
+  internalId: String
+}
+
+type RenewPolicyMutationPayload {
+  clientMutationId: String
+  policy: PolicyGQLType
+  internalId: String
+}
+
+type DeletePolicyRenewalsMutationPayload {
+  clientMutationId: String
+  internalId: String
+}
+
+type CreatePremiumMutationPayload {
+  clientMutationId: String
+  premium: PremiumGQLType
+  internalId: String
+}
+
 schema {
   query: Query
   mutation: Mutation

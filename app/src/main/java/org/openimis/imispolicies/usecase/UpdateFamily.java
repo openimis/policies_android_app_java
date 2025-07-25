@@ -100,14 +100,18 @@ public class UpdateFamily {
     ) throws Exception {
         int familyId = 0;
         try {
+            Log.d("UpdateFamily", "Fetching family for CHFID: " + insureeCHFID);
             fetchFamily.execute(insureeCHFID, "");
+            Log.d("UpdateFamily", "Updating existing family: " + family.getHeadChfId());
             checkMutation.execute(
                     updateFamilyGraphQLRequest.update(family, officerId),
                     "Érreur lors de la mise à jour de la famille '" + family.getHeadChfId() + "'"
             );
             familyId = family.getId();
         } catch (HttpException e) {
+            Log.d("UpdateFamily", "HttpException caught: " + e.getCode() + " - " + e.getMessage());
             if (e.getCode() == HttpURLConnection.HTTP_NOT_FOUND) {
+                Log.d("UpdateFamily", "Family not found, creating new family: " + family.getHeadChfId());
                 checkMutation.execute(
                         createFamilyGraphQLRequest.create(family, officerId),
                         "Érreur lors de la création de la famille '" + family.getHeadChfId() + "'"
@@ -116,9 +120,11 @@ public class UpdateFamily {
                     Family existingFamily = fetchFamilyId.execute();
                     familyId = existingFamily.getId();
                 } catch (Exception e2) {
+                    Log.e("UpdateFamily", "Error fetching family ID after creation", e2);
                     e2.printStackTrace();
                 }
             } else {
+                Log.e("UpdateFamily", "Unexpected HttpException: " + e.getCode(), e);
                 throw e;
             }
         }

@@ -37,6 +37,10 @@ import android.text.TextUtils;
 
 import org.intellij.lang.annotations.Language;
 import org.openimis.imispolicies.tools.Log;
+import org.openimis.imispolicies.domain.entity.NoDisability;
+import org.openimis.imispolicies.domain.entity.NonDisablingDisease;
+import org.openimis.imispolicies.domain.entity.MutualInsuranceCoverage;
+import org.openimis.imispolicies.domain.entity.HousingType;
 import android.util.Xml;
 
 import org.json.JSONArray;
@@ -59,7 +63,7 @@ public class SQLHandler extends SQLiteOpenHelper {
     private final Context context;
     private final Global global;
     private SQLiteDatabase mDatabase;
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 3;
 
     //table names
     private static final String android_metadata = "android_metadata";
@@ -91,6 +95,11 @@ public class SQLHandler extends SQLiteOpenHelper {
     public static final String tblBulkControlNumbers = "tblBulkControlNumbers";
     public static final String tblFamilySMS = "tblFamilySMS";
     public static final String tblIncomeLevel = "tblIncomeLevel";
+    public static final String tblResidenceEnvironment = "tblResidenceEnvironment";
+    public static final String tblNoDisability = "tblNoDisability";
+    public static final String tblNonDisablingDisease = "tblNonDisablingDisease";
+    public static final String tblMutualInsuranceCoverage = "tblMutualInsuranceCoverage";
+    public static final String tblHousingType = "tblHousingType";
     public static final String tblContributionPlan = "tblContributionPlan";
     public static final String tblInsureeAttachments = "tblInsureeAttachments";
 
@@ -231,9 +240,14 @@ public class SQLHandler extends SQLiteOpenHelper {
                             "Vulnerability BOOLEAN," +
                             "ProfessionalSituation TEXT," +
                             "IncomeLevel NUMERIC," +
+                            "ResidenceEnvironment NUMERIC," +
                             "PaymentMethod TEXT," +
                             "OtherHousehold TEXT," +
-                            "AccountDetails TEXT" + ")"
+                            "AccountDetails TEXT," +
+                            "NoDisability NUMERIC," +
+                            "NonDisablingDisease NUMERIC," +
+                            "MutualInsuranceCoverage NUMERIC," +
+                            "HousingType NUMERIC" + ")"
             );
             sqLiteDatabase.execSQL(
                     "CREATE TABLE 'tblInsureePolicy' (" +
@@ -430,10 +444,50 @@ public class SQLHandler extends SQLiteOpenHelper {
                             "PolicyId INTEGER" + ")"
             );
             sqLiteDatabase.execSQL(
-                    "CREATE TABLE " + tblIncomeLevel + "(" +
-                            "Id INTEGER," +
-                            "FirstLanguage TEXT," +
-                            "SecondLanguage TEXT" +")"
+                    "CREATE TABLE " + tblIncomeLevel + "("
+                            + "Code INTEGER PRIMARY KEY,"
+                            + "IncomeLevel VARCHAR(100),"
+                            + "AltLanguage VARCHAR(100),"
+                            + "SortOrder INTEGER" +")"
+            );
+            sqLiteDatabase.execSQL(
+                    "CREATE TABLE " + tblResidenceEnvironment + "("
+                            + "Code INTEGER PRIMARY KEY,"
+                            + "ResidenceEnvironment VARCHAR(100),"
+                            + "AltLanguage VARCHAR(100),"
+                            + "SortOrder INTEGER" + ")"
+            );
+            
+            sqLiteDatabase.execSQL(
+                    "CREATE TABLE " + tblNoDisability + "("
+                            + "Code INTEGER PRIMARY KEY,"
+                            + "NoDisabilityLabel VARCHAR(100),"
+                            + "AltLanguage VARCHAR(100),"
+                            + "SortOrder INTEGER" +")"
+            );
+            
+            sqLiteDatabase.execSQL(
+                    "CREATE TABLE " + tblNonDisablingDisease + "("
+                            + "Code INTEGER PRIMARY KEY,"
+                            + "NonDisablingDisease VARCHAR(100),"
+                            + "AltLanguage VARCHAR(100),"
+                            + "SortOrder INTEGER" +")"
+            );
+            
+            sqLiteDatabase.execSQL(
+                    "CREATE TABLE " + tblMutualInsuranceCoverage + "("
+                            + "Code INTEGER PRIMARY KEY,"
+                            + "MutualInsuranceCoverage VARCHAR(150),"
+                            + "AltLanguage VARCHAR(150),"
+                            + "SortOrder INTEGER" +")"
+            );
+            
+            sqLiteDatabase.execSQL(
+                    "CREATE TABLE " + tblHousingType + "("
+                            + "Code INTEGER PRIMARY KEY,"
+                            + "HousingType VARCHAR(150),"
+                            + "AltLanguage VARCHAR(150),"
+                            + "SortOrder INTEGER" +")"
             );
             sqLiteDatabase.execSQL(
                     "CREATE TABLE " + tblContributionPlan + "(" +
@@ -469,6 +523,7 @@ public class SQLHandler extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        // Drop all existing tables
         db.execSQL("DROP TABLE IF EXISTS " + android_metadata);
         db.execSQL("DROP TABLE IF EXISTS " + sqlite_sequence);
         db.execSQL("DROP TABLE IF EXISTS " + tblConfirmationTypes);
@@ -496,12 +551,16 @@ public class SQLHandler extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + tblRelations);
         db.execSQL("DROP TABLE IF EXISTS " + tblRenewals);
         db.execSQL("DROP TABLE IF EXISTS " + tblIncomeLevel);
+        db.execSQL("DROP TABLE IF EXISTS " + tblResidenceEnvironment);
         db.execSQL("DROP TABLE IF EXISTS " + tblInsureeAttachments);
-        if (oldVersion < 2) {
-            String sql = "ALTER TABLE tblRenewals ADD COLUMN LocationId INTEGER;";
-            db.execSQL(sql);
-            Log.d("Upgrade", "DB Version upgraded from 1 to 2");
-        }
+        db.execSQL("DROP TABLE IF EXISTS " + tblBulkControlNumbers);
+        db.execSQL("DROP TABLE IF EXISTS " + tblFamilySMS);
+        db.execSQL("DROP TABLE IF EXISTS " + tblContributionPlan);
+        
+        // Recreate all tables with the current schema
+        onCreate(db);
+        
+        Log.d("Upgrade", "DB Version upgraded from " + oldVersion + " to " + newVersion);
     }
 
     @Override
@@ -526,6 +585,77 @@ public class SQLHandler extends SQLiteOpenHelper {
     public void closeDatabase() {
         if (mDatabase != null) {
             mDatabase.close();
+        }
+    }
+    
+    private boolean tableExists(SQLiteDatabase db, String tableName) {
+        try (Cursor cursor = db.rawQuery(
+                "SELECT name FROM sqlite_master WHERE type='table' AND name=?", 
+                new String[]{tableName})) {
+            return cursor.moveToFirst();
+        } catch (Exception e) {
+            android.util.Log.e("SQLHandler", "Error checking if table exists: " + e.getMessage());
+            return false;
+        }
+    }
+    
+    private boolean columnExists(SQLiteDatabase db, String tableName, String columnName) {
+        try (Cursor cursor = db.rawQuery("PRAGMA table_info(" + tableName + ")", null)) {
+            while (cursor.moveToNext()) {
+                String name = cursor.getString(cursor.getColumnIndex("name"));
+                if (columnName.equals(name)) {
+                    return true;
+                }
+            }
+            return false;
+        } catch (Exception e) {
+            android.util.Log.e("SQLHandler", "Error checking if column exists: " + e.getMessage());
+            return false;
+        }
+    }
+    
+    private void ensureInsureeTableHasRequiredColumns() {
+        try {
+            openDatabase();
+            
+            // Check and add ResidenceEnvironment column if missing
+            if (!columnExists(mDatabase, "tblInsuree", "ResidenceEnvironment")) {
+                android.util.Log.d("SQLHandler", "Adding missing ResidenceEnvironment column to tblInsuree");
+                mDatabase.execSQL("ALTER TABLE tblInsuree ADD COLUMN ResidenceEnvironment NUMERIC");
+                android.util.Log.d("SQLHandler", "ResidenceEnvironment column added successfully");
+            }
+            
+            // Check and add IncomeLevel column if missing
+            if (!columnExists(mDatabase, "tblInsuree", "IncomeLevel")) {
+                android.util.Log.d("SQLHandler", "Adding missing IncomeLevel column to tblInsuree");
+                mDatabase.execSQL("ALTER TABLE tblInsuree ADD COLUMN IncomeLevel NUMERIC");
+                android.util.Log.d("SQLHandler", "IncomeLevel column added successfully");
+            }
+            
+            // Check and add other potentially missing columns
+            if (!columnExists(mDatabase, "tblInsuree", "PaymentMethod")) {
+                android.util.Log.d("SQLHandler", "Adding missing PaymentMethod column to tblInsuree");
+                mDatabase.execSQL("ALTER TABLE tblInsuree ADD COLUMN PaymentMethod TEXT");
+                android.util.Log.d("SQLHandler", "PaymentMethod column added successfully");
+            }
+            
+            if (!columnExists(mDatabase, "tblInsuree", "OtherHousehold")) {
+                android.util.Log.d("SQLHandler", "Adding missing OtherHousehold column to tblInsuree");
+                mDatabase.execSQL("ALTER TABLE tblInsuree ADD COLUMN OtherHousehold TEXT");
+                android.util.Log.d("SQLHandler", "OtherHousehold column added successfully");
+            }
+            
+            if (!columnExists(mDatabase, "tblInsuree", "AccountDetails")) {
+                android.util.Log.d("SQLHandler", "Adding missing AccountDetails column to tblInsuree");
+                mDatabase.execSQL("ALTER TABLE tblInsuree ADD COLUMN AccountDetails TEXT");
+                android.util.Log.d("SQLHandler", "AccountDetails column added successfully");
+            }
+            
+        } catch (Exception e) {
+            android.util.Log.e("SQLHandler", "Error ensuring tblInsuree has required columns: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            closeDatabase();
         }
     }
 
@@ -819,6 +949,11 @@ public class SQLHandler extends SQLiteOpenHelper {
 
     public void insertData(String tableName, ContentValues contentValues) {
         try {
+            // Ensure tblInsuree has required columns before inserting
+            if ("tblInsuree".equals(tableName)) {
+                ensureInsureeTableHasRequiredColumns();
+            }
+            
             openDatabase();
             mDatabase.insertOrThrow(tableName, null, contentValues);
         } catch (SQLException e) {
@@ -1227,5 +1362,763 @@ public class SQLHandler extends SQLiteOpenHelper {
             closeDatabase();
         }
         return cpCode;
+    }
+
+    // Méthodes pour gérer les données ResidenceEnvironment
+    public void insertResidenceEnvironment(int code, String residenceEnvironment, String altLanguage, int sortOrder) {
+        android.util.Log.d("SQLHandler", "Inserting ResidenceEnvironment: Code=" + code + ", Name=" + residenceEnvironment);
+        openDatabase();
+        try {
+            // Check if table exists, create it if it doesn't
+            if (!tableExists(mDatabase, tblResidenceEnvironment)) {
+                android.util.Log.d("SQLHandler", "Table " + tblResidenceEnvironment + " doesn't exist, creating it");
+                mDatabase.execSQL(
+                    "CREATE TABLE " + tblResidenceEnvironment + "("
+                            + "Code INTEGER PRIMARY KEY,"
+                            + "ResidenceEnvironment VARCHAR(100),"
+                            + "AltLanguage VARCHAR(100),"
+                            + "SortOrder INTEGER" + ")"
+                );
+                android.util.Log.d("SQLHandler", "Table " + tblResidenceEnvironment + " created successfully");
+            }
+            
+            ContentValues values = new ContentValues();
+            values.put("Code", code);
+            values.put("ResidenceEnvironment", residenceEnvironment);
+            values.put("AltLanguage", altLanguage);
+            values.put("SortOrder", sortOrder);
+            mDatabase.insertWithOnConflict(tblResidenceEnvironment, null, values, SQLiteDatabase.CONFLICT_REPLACE);
+            android.util.Log.d("SQLHandler", "ResidenceEnvironment inserted successfully");
+        } catch (Exception e) {
+            android.util.Log.e("SQLHandler", "Error inserting ResidenceEnvironment: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            closeDatabase();
+        }
+    }
+
+    public JSONArray getResidenceEnvironments() {
+        android.util.Log.d("SQLHandler", "Getting ResidenceEnvironments from database");
+        try {
+            openDatabase();
+            // Check if table exists, create it if it doesn't
+            if (!tableExists(mDatabase, tblResidenceEnvironment)) {
+                android.util.Log.d("SQLHandler", "Table " + tblResidenceEnvironment + " doesn't exist, creating it");
+                mDatabase.execSQL(
+                    "CREATE TABLE " + tblResidenceEnvironment + "("
+                            + "Code INTEGER PRIMARY KEY,"
+                            + "ResidenceEnvironment VARCHAR(100),"
+                            + "AltLanguage VARCHAR(100),"
+                            + "SortOrder INTEGER" + ")"
+                );
+                android.util.Log.d("SQLHandler", "Table " + tblResidenceEnvironment + " created successfully");
+            }
+            closeDatabase();
+            
+            JSONArray result = getResult(tblResidenceEnvironment, null, null, "SortOrder ASC");
+            android.util.Log.d("SQLHandler", "Found " + result.length() + " ResidenceEnvironments in database");
+            return result;
+        } catch (Exception e) {
+            android.util.Log.e("SQLHandler", "Error getting ResidenceEnvironments: " + e.getMessage());
+            e.printStackTrace();
+            return new JSONArray();
+        }
+    }
+
+    public String getResidenceEnvironmentByCode(int code) {
+        openDatabase();
+        String residenceEnvironment = null;
+        try {
+            // Check if table exists, create it if it doesn't
+            if (!tableExists(mDatabase, tblResidenceEnvironment)) {
+                android.util.Log.d("SQLHandler", "Table " + tblResidenceEnvironment + " doesn't exist, creating it");
+                mDatabase.execSQL(
+                    "CREATE TABLE " + tblResidenceEnvironment + "("
+                            + "Code INTEGER PRIMARY KEY,"
+                            + "ResidenceEnvironment VARCHAR(100),"
+                            + "AltLanguage VARCHAR(100),"
+                            + "SortOrder INTEGER" + ")"
+                );
+                android.util.Log.d("SQLHandler", "Table " + tblResidenceEnvironment + " created successfully");
+            }
+            
+            try (Cursor cursor = mDatabase.query(tblResidenceEnvironment,
+                    new String[]{"ResidenceEnvironment"},
+                    "Code = ?",
+                    new String[]{String.valueOf(code)},
+                    null,
+                    null,
+                    null,
+                    "1")) {
+                cursor.moveToFirst();
+                if (!cursor.isAfterLast()) {
+                    residenceEnvironment = cursor.getString(0);
+                }
+            }
+        } catch (Exception e) {
+            android.util.Log.e("SQLHandler", "Error getting ResidenceEnvironment by code: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            closeDatabase();
+        }
+        return residenceEnvironment;
+    }
+
+    public void insertResidenceEnvironments(JSONArray residenceEnvironments) {
+        android.util.Log.d("SQLHandler", "Starting to insert " + residenceEnvironments.length() + " ResidenceEnvironments");
+        try {
+            openDatabase();
+            
+            // Check if table exists, create it if it doesn't
+            if (!tableExists(mDatabase, tblResidenceEnvironment)) {
+                android.util.Log.d("SQLHandler", "Table " + tblResidenceEnvironment + " doesn't exist, creating it");
+                mDatabase.execSQL(
+                    "CREATE TABLE " + tblResidenceEnvironment + "("
+                            + "Code INTEGER PRIMARY KEY,"
+                            + "ResidenceEnvironment VARCHAR(100),"
+                            + "AltLanguage VARCHAR(100),"
+                            + "SortOrder INTEGER" + ")"
+                );
+                android.util.Log.d("SQLHandler", "Table " + tblResidenceEnvironment + " created successfully");
+            }
+            
+            // Clear existing data
+            mDatabase.delete(tblResidenceEnvironment, null, null);
+            android.util.Log.d("SQLHandler", "Cleared existing ResidenceEnvironments from table");
+            closeDatabase();
+            
+            // Insert new data
+            for (int i = 0; i < residenceEnvironments.length(); i++) {
+                JSONObject item = residenceEnvironments.getJSONObject(i);
+                insertResidenceEnvironment(
+                    item.getInt("Code"),
+                    item.getString("ResidenceEnvironment"),
+                    item.optString("AltLanguage", ""),
+                    item.optInt("SortOrder", 0)
+                );
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            android.util.Log.e("SQLHandler", "Error inserting ResidenceEnvironments: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    // ==================== IncomeLevel Methods ====================
+    public void insertIncomeLevel(int code, String incomeLevel, String altLanguage, int sortOrder) {
+        android.util.Log.d("SQLHandler", "Inserting IncomeLevel: Code=" + code + ", Name=" + incomeLevel);
+        openDatabase();
+        try {
+            // Check if table exists, create it if it doesn't
+            if (!tableExists(mDatabase, tblIncomeLevel)) {
+                android.util.Log.d("SQLHandler", "Table " + tblIncomeLevel + " doesn't exist, creating it");
+                mDatabase.execSQL(
+                    "CREATE TABLE " + tblIncomeLevel + "("
+                            + "Code INTEGER PRIMARY KEY,"
+                            + "IncomeLevel VARCHAR(100),"
+                            + "AltLanguage VARCHAR(100),"
+                            + "SortOrder INTEGER" + ")"
+                );
+                android.util.Log.d("SQLHandler", "Table " + tblIncomeLevel + " created successfully");
+            }
+            
+            ContentValues values = new ContentValues();
+            values.put("Code", code);
+            values.put("IncomeLevel", incomeLevel);
+            values.put("AltLanguage", altLanguage);
+            values.put("SortOrder", sortOrder);
+            mDatabase.insertWithOnConflict(tblIncomeLevel, null, values, SQLiteDatabase.CONFLICT_REPLACE);
+            android.util.Log.d("SQLHandler", "IncomeLevel inserted successfully");
+        } catch (Exception e) {
+            android.util.Log.e("SQLHandler", "Error inserting IncomeLevel: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            closeDatabase();
+        }
+    }
+
+    public JSONArray getIncomeLevels() {
+        android.util.Log.d("SQLHandler", "Getting IncomeLevels from database");
+        try {
+            openDatabase();
+            // Check if table exists, create it if it doesn't
+            if (!tableExists(mDatabase, tblIncomeLevel)) {
+                android.util.Log.d("SQLHandler", "Table " + tblIncomeLevel + " doesn't exist, creating it");
+                mDatabase.execSQL(
+                    "CREATE TABLE " + tblIncomeLevel + "("
+                            + "Code INTEGER PRIMARY KEY,"
+                            + "IncomeLevel VARCHAR(100),"
+                            + "AltLanguage VARCHAR(100),"
+                            + "SortOrder INTEGER" + ")"
+                );
+                android.util.Log.d("SQLHandler", "Table " + tblIncomeLevel + " created successfully");
+            }
+            closeDatabase();
+            
+            JSONArray result = getResult(tblIncomeLevel, null, null, "SortOrder ASC");
+            android.util.Log.d("SQLHandler", "Found " + result.length() + " IncomeLevels in database");
+            return result;
+        } catch (Exception e) {
+            android.util.Log.e("SQLHandler", "Error getting IncomeLevels: " + e.getMessage());
+            e.printStackTrace();
+            return new JSONArray();
+        }
+    }
+
+    public String getIncomeLevelByCode(int code) {
+        openDatabase();
+        String incomeLevel = null;
+        try {
+            // Check if table exists, create it if it doesn't
+            if (!tableExists(mDatabase, tblIncomeLevel)) {
+                android.util.Log.d("SQLHandler", "Table " + tblIncomeLevel + " doesn't exist, creating it");
+                mDatabase.execSQL(
+                    "CREATE TABLE " + tblIncomeLevel + "("
+                            + "Code INTEGER PRIMARY KEY,"
+                            + "IncomeLevel VARCHAR(100),"
+                            + "AltLanguage VARCHAR(100),"
+                            + "SortOrder INTEGER" + ")"
+                );
+                android.util.Log.d("SQLHandler", "Table " + tblIncomeLevel + " created successfully");
+            }
+            
+            try (Cursor cursor = mDatabase.query(tblIncomeLevel,
+                    new String[]{"IncomeLevel"},
+                    "Code = ?",
+                    new String[]{String.valueOf(code)},
+                    null,
+                    null,
+                    null,
+                    "1")) {
+                cursor.moveToFirst();
+                if (!cursor.isAfterLast()) {
+                    incomeLevel = cursor.getString(0);
+                }
+            }
+        } catch (Exception e) {
+            android.util.Log.e("SQLHandler", "Error getting IncomeLevel by code: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            closeDatabase();
+        }
+        return incomeLevel;
+    }
+
+    public void insertIncomeLevels(JSONArray incomeLevels) {
+        android.util.Log.d("SQLHandler", "📥 SERVER DATA RECEIVED: Starting to insert " + incomeLevels.length() + " IncomeLevels from server response");
+        android.util.Log.d("SQLHandler", "📋 Raw JSON data: " + incomeLevels.toString());
+        try {
+            openDatabase();
+            
+            // Check if table exists, create it if it doesn't
+            if (!tableExists(mDatabase, tblIncomeLevel)) {
+                android.util.Log.d("SQLHandler", "Table " + tblIncomeLevel + " doesn't exist, creating it");
+                mDatabase.execSQL(
+                    "CREATE TABLE " + tblIncomeLevel + "("
+                            + "Code INTEGER PRIMARY KEY,"
+                            + "IncomeLevel VARCHAR(100),"
+                            + "AltLanguage VARCHAR(100),"
+                            + "SortOrder INTEGER" + ")"
+                );
+                android.util.Log.d("SQLHandler", "Table " + tblIncomeLevel + " created successfully");
+            }
+            
+            // Clear existing data
+            mDatabase.delete(tblIncomeLevel, null, null);
+            android.util.Log.d("SQLHandler", "Cleared existing IncomeLevels from table");
+            closeDatabase();
+            
+            // Insert new data
+            for (int i = 0; i < incomeLevels.length(); i++) {
+                JSONObject item = incomeLevels.getJSONObject(i);
+                int code = item.optInt("Code", item.optInt("code", 0));
+                String incomeLevel = item.optString("IncomeLevel", item.optString("incomeLevel", item.optString("name", "")));
+                String altLanguage = item.optString("AltLanguage", item.optString("altLanguage", ""));
+                int sortOrder = item.optInt("SortOrder", item.optInt("sortOrder", 0));
+                
+                android.util.Log.d("SQLHandler", "📝 Inserting IncomeLevel [" + (i+1) + "/" + incomeLevels.length() + "]: Code=" + code + ", IncomeLevel='" + incomeLevel + "', AltLanguage='" + altLanguage + "', SortOrder=" + sortOrder);
+                
+                insertIncomeLevel(code, incomeLevel, altLanguage, sortOrder);
+            }
+            android.util.Log.d("SQLHandler", "✅ Successfully populated " + tblIncomeLevel + " table with " + incomeLevels.length() + " records from server");
+        } catch (JSONException e) {
+            android.util.Log.e("SQLHandler", "❌ JSON parsing error while inserting IncomeLevels: " + e.getMessage());
+            e.printStackTrace();
+        } catch (Exception e) {
+            android.util.Log.e("SQLHandler", "❌ Database error while inserting IncomeLevels: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    // ==================== NoDisability Methods ====================
+    public void insertNoDisability(NoDisability noDisability) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put("Code", noDisability.getCode());
+        values.put("NoDisabilityLabel", noDisability.getName());
+        values.put("AltLanguage", noDisability.getAltLanguage());
+        values.put("SortOrder", noDisability.getId()); // Using Id as SortOrder for compatibility
+        db.insert(tblNoDisability, null, values);
+        db.close();
+    }
+
+    public JSONArray getNoDisabilities() {
+        try {
+            openDatabase();
+            // Check if table exists, create it if it doesn't
+            if (!tableExists(mDatabase, tblNoDisability)) {
+                android.util.Log.d("SQLHandler", "Table " + tblNoDisability + " doesn't exist, creating it");
+                mDatabase.execSQL(
+                    "CREATE TABLE " + tblNoDisability + "("
+                            + "Code INTEGER PRIMARY KEY,"
+                            + "NoDisabilityLabel VARCHAR(100),"
+                            + "AltLanguage VARCHAR(100),"
+                            + "SortOrder INTEGER" +")"
+                );
+                android.util.Log.d("SQLHandler", "Table " + tblNoDisability + " created successfully");
+            }
+            closeDatabase();
+            
+            JSONArray result = getResult(tblNoDisability, null, null, "SortOrder ASC");
+            android.util.Log.d("SQLHandler", "Found " + result.length() + " NoDisabilities in database");
+            return result;
+        } catch (Exception e) {
+            android.util.Log.e("SQLHandler", "Error getting NoDisabilities: " + e.getMessage());
+            e.printStackTrace();
+            return new JSONArray();
+        }
+    }
+
+
+
+    // ==================== NonDisablingDisease Methods ====================
+    public void insertNonDisablingDisease(NonDisablingDisease nonDisablingDisease) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put("Code", nonDisablingDisease.getCode());
+        values.put("NonDisablingDisease", nonDisablingDisease.getName());
+        values.put("AltLanguage", nonDisablingDisease.getAltLanguage());
+        values.put("SortOrder", nonDisablingDisease.getId()); // Using Id as SortOrder for compatibility
+        db.insert(tblNonDisablingDisease, null, values);
+        db.close();
+    }
+
+    public JSONArray getNonDisablingDiseases() {
+        try {
+            openDatabase();
+            // Check if table exists, create it if it doesn't
+            if (!tableExists(mDatabase, tblNonDisablingDisease)) {
+                android.util.Log.d("SQLHandler", "Table " + tblNonDisablingDisease + " doesn't exist, creating it");
+                mDatabase.execSQL(
+                    "CREATE TABLE " + tblNonDisablingDisease + "("
+                            + "Code INTEGER PRIMARY KEY,"
+                            + "NonDisablingDisease VARCHAR(100),"
+                            + "AltLanguage VARCHAR(100),"
+                            + "SortOrder INTEGER" +")"
+                );
+                android.util.Log.d("SQLHandler", "Table " + tblNonDisablingDisease + " created successfully");
+            }
+            closeDatabase();
+            
+            JSONArray result = getResult(tblNonDisablingDisease, null, null, "SortOrder ASC");
+            android.util.Log.d("SQLHandler", "Found " + result.length() + " NonDisablingDiseases in database");
+            return result;
+        } catch (Exception e) {
+            android.util.Log.e("SQLHandler", "Error getting NonDisablingDiseases: " + e.getMessage());
+            e.printStackTrace();
+            return new JSONArray();
+        }
+    }
+
+
+
+    // ==================== MutualInsuranceCoverage Methods ====================
+    public void insertMutualInsuranceCoverage(MutualInsuranceCoverage mutualInsuranceCoverage) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put("Code", mutualInsuranceCoverage.getCode());
+        values.put("MutualInsuranceCoverage", mutualInsuranceCoverage.getName());
+        values.put("AltLanguage", mutualInsuranceCoverage.getAltLanguage());
+        values.put("SortOrder", mutualInsuranceCoverage.getId()); // Using Id as SortOrder for compatibility
+        db.insert(tblMutualInsuranceCoverage, null, values);
+        db.close();
+    }
+
+    public JSONArray getMutualInsuranceCoverages() {
+        try {
+            openDatabase();
+            // Check if table exists, create it if it doesn't
+            if (!tableExists(mDatabase, tblMutualInsuranceCoverage)) {
+                android.util.Log.d("SQLHandler", "Table " + tblMutualInsuranceCoverage + " doesn't exist, creating it");
+                mDatabase.execSQL(
+                    "CREATE TABLE " + tblMutualInsuranceCoverage + "("
+                            + "Code INTEGER PRIMARY KEY,"
+                            + "MutualInsuranceCoverage VARCHAR(150),"
+                            + "AltLanguage VARCHAR(150),"
+                            + "SortOrder INTEGER" +")"
+                );
+                android.util.Log.d("SQLHandler", "Table " + tblMutualInsuranceCoverage + " created successfully");
+            }
+            closeDatabase();
+            
+            JSONArray result = getResult(tblMutualInsuranceCoverage, null, null, "SortOrder ASC");
+            android.util.Log.d("SQLHandler", "Found " + result.length() + " MutualInsuranceCoverages in database");
+            return result;
+        } catch (Exception e) {
+            android.util.Log.e("SQLHandler", "Error getting MutualInsuranceCoverages: " + e.getMessage());
+            e.printStackTrace();
+            return new JSONArray();
+        }
+    }
+
+
+
+    // ==================== HousingType Methods ====================
+    public void insertHousingType(HousingType housingType) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put("Code", housingType.getCode());
+        values.put("HousingType", housingType.getName());
+        values.put("AltLanguage", housingType.getAltLanguage());
+        values.put("SortOrder", housingType.getId()); // Using Id as SortOrder for compatibility
+        db.insert(tblHousingType, null, values);
+        db.close();
+    }
+
+    public JSONArray getHousingTypes() {
+        try {
+            openDatabase();
+            // Check if table exists, create it if it doesn't
+            if (!tableExists(mDatabase, tblHousingType)) {
+                android.util.Log.d("SQLHandler", "Table " + tblHousingType + " doesn't exist, creating it");
+                mDatabase.execSQL(
+                    "CREATE TABLE " + tblHousingType + "("
+                            + "Code INTEGER PRIMARY KEY,"
+                            + "HousingType VARCHAR(150),"
+                            + "AltLanguage VARCHAR(150),"
+                            + "SortOrder INTEGER" +")"
+                );
+                android.util.Log.d("SQLHandler", "Table " + tblHousingType + " created successfully");
+            }
+            closeDatabase();
+            
+            JSONArray result = getResult(tblHousingType, null, null, "SortOrder ASC");
+            android.util.Log.d("SQLHandler", "Found " + result.length() + " HousingTypes in database");
+            return result;
+        } catch (Exception e) {
+            android.util.Log.e("SQLHandler", "Error getting HousingTypes: " + e.getMessage());
+            e.printStackTrace();
+            return new JSONArray();
+        }
+    }
+
+
+
+    // ==================== Column Management Methods ====================
+    
+    /**
+     * Ensure tblInsuree table has all required columns for the new fields
+     */
+    private void ensureInsureeTableHasNewColumns() {
+        try {
+            openDatabase();
+            
+            // Check and add NoDisability column
+            if (!columnExists(mDatabase, "tblInsuree", "NoDisability")) {
+                mDatabase.execSQL("ALTER TABLE tblInsuree ADD COLUMN NoDisability NUMERIC");
+                android.util.Log.d("SQLHandler", "Added NoDisability column to tblInsuree");
+            }
+            
+            // Check and add NonDisablingDisease column
+            if (!columnExists(mDatabase, "tblInsuree", "NonDisablingDisease")) {
+                mDatabase.execSQL("ALTER TABLE tblInsuree ADD COLUMN NonDisablingDisease NUMERIC");
+                android.util.Log.d("SQLHandler", "Added NonDisablingDisease column to tblInsuree");
+            }
+            
+            // Check and add MutualInsuranceCoverage column
+            if (!columnExists(mDatabase, "tblInsuree", "MutualInsuranceCoverage")) {
+                mDatabase.execSQL("ALTER TABLE tblInsuree ADD COLUMN MutualInsuranceCoverage NUMERIC");
+                android.util.Log.d("SQLHandler", "Added MutualInsuranceCoverage column to tblInsuree");
+            }
+            
+            // Check and add HousingType column
+            if (!columnExists(mDatabase, "tblInsuree", "HousingType")) {
+                mDatabase.execSQL("ALTER TABLE tblInsuree ADD COLUMN HousingType NUMERIC");
+                android.util.Log.d("SQLHandler", "Added HousingType column to tblInsuree");
+            }
+            
+        } catch (Exception e) {
+            android.util.Log.e("SQLHandler", "Error ensuring new columns in tblInsuree: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
+    /**
+     * Verify and log the content of the 4 new tables to ensure they are properly populated
+     */
+    public void verifyNewTablesContent() {
+        android.util.Log.d("SQLHandler", "🔍 Starting verification of new tables content...");
+        
+        // Verify IncomeLevel table
+        try {
+            JSONArray incomeLevels = getIncomeLevels();
+            android.util.Log.d("SQLHandler", "📊 " + tblIncomeLevel + " contains " + incomeLevels.length() + " records:");
+            for (int i = 0; i < Math.min(incomeLevels.length(), 5); i++) { // Show first 5 records
+                JSONObject item = incomeLevels.getJSONObject(i);
+                android.util.Log.d("SQLHandler", "  [" + (i+1) + "] Code=" + item.optInt("Code") + ", IncomeLevel='" + item.optString("IncomeLevel") + "', SortOrder=" + item.optInt("SortOrder"));
+            }
+            if (incomeLevels.length() > 5) {
+                android.util.Log.d("SQLHandler", "  ... and " + (incomeLevels.length() - 5) + " more records");
+            }
+        } catch (Exception e) {
+            android.util.Log.e("SQLHandler", "❌ Error verifying " + tblIncomeLevel + ": " + e.getMessage());
+        }
+        
+        // Verify NoDisability table
+        try {
+            JSONArray noDisabilities = getNoDisabilities();
+            android.util.Log.d("SQLHandler", "📊 " + tblNoDisability + " contains " + noDisabilities.length() + " records:");
+            for (int i = 0; i < Math.min(noDisabilities.length(), 5); i++) {
+                JSONObject item = noDisabilities.getJSONObject(i);
+                android.util.Log.d("SQLHandler", "  [" + (i+1) + "] Code=" + item.optInt("Code") + ", NoDisabilityLabel='" + item.optString("NoDisabilityLabel") + "', SortOrder=" + item.optInt("SortOrder"));
+            }
+            if (noDisabilities.length() > 5) {
+                android.util.Log.d("SQLHandler", "  ... and " + (noDisabilities.length() - 5) + " more records");
+            }
+        } catch (Exception e) {
+            android.util.Log.e("SQLHandler", "❌ Error verifying " + tblNoDisability + ": " + e.getMessage());
+        }
+        
+        // Verify NonDisablingDisease table
+        try {
+            JSONArray nonDisablingDiseases = getNonDisablingDiseases();
+            android.util.Log.d("SQLHandler", "📊 " + tblNonDisablingDisease + " contains " + nonDisablingDiseases.length() + " records:");
+            for (int i = 0; i < Math.min(nonDisablingDiseases.length(), 5); i++) {
+                JSONObject item = nonDisablingDiseases.getJSONObject(i);
+                android.util.Log.d("SQLHandler", "  [" + (i+1) + "] Code=" + item.optInt("Code") + ", NonDisablingDisease='" + item.optString("NonDisablingDisease") + "', SortOrder=" + item.optInt("SortOrder"));
+            }
+            if (nonDisablingDiseases.length() > 5) {
+                android.util.Log.d("SQLHandler", "  ... and " + (nonDisablingDiseases.length() - 5) + " more records");
+            }
+        } catch (Exception e) {
+            android.util.Log.e("SQLHandler", "❌ Error verifying " + tblNonDisablingDisease + ": " + e.getMessage());
+        }
+        
+        // Verify MutualInsuranceCoverage table
+        try {
+            JSONArray mutualInsuranceCoverages = getMutualInsuranceCoverages();
+            android.util.Log.d("SQLHandler", "📊 " + tblMutualInsuranceCoverage + " contains " + mutualInsuranceCoverages.length() + " records:");
+            for (int i = 0; i < Math.min(mutualInsuranceCoverages.length(), 5); i++) {
+                JSONObject item = mutualInsuranceCoverages.getJSONObject(i);
+                android.util.Log.d("SQLHandler", "  [" + (i+1) + "] Code=" + item.optInt("Code") + ", MutualInsuranceCoverage='" + item.optString("MutualInsuranceCoverage") + "', SortOrder=" + item.optInt("SortOrder"));
+            }
+            if (mutualInsuranceCoverages.length() > 5) {
+                android.util.Log.d("SQLHandler", "  ... and " + (mutualInsuranceCoverages.length() - 5) + " more records");
+            }
+        } catch (Exception e) {
+            android.util.Log.e("SQLHandler", "❌ Error verifying " + tblMutualInsuranceCoverage + ": " + e.getMessage());
+        }
+        
+        // Verify HousingType table
+        try {
+            JSONArray housingTypes = getHousingTypes();
+            android.util.Log.d("SQLHandler", "📊 " + tblHousingType + " contains " + housingTypes.length() + " records:");
+            for (int i = 0; i < Math.min(housingTypes.length(), 5); i++) {
+                JSONObject item = housingTypes.getJSONObject(i);
+                android.util.Log.d("SQLHandler", "  [" + (i+1) + "] Code=" + item.optInt("Code") + ", HousingType='" + item.optString("HousingType") + "', SortOrder=" + item.optInt("SortOrder"));
+            }
+            if (housingTypes.length() > 5) {
+                android.util.Log.d("SQLHandler", "  ... and " + (housingTypes.length() - 5) + " more records");
+            }
+        } catch (Exception e) {
+            android.util.Log.e("SQLHandler", "❌ Error verifying " + tblHousingType + ": " + e.getMessage());
+        }
+        
+        android.util.Log.d("SQLHandler", "✅ Verification of new tables completed!");
+    }
+    
+    /**
+     * Insert NoDisabilities data from server (batch insertion)
+     * @param jsonArray JSONArray containing NoDisabilities data from server
+     */
+    public void insertNoDisabilities(JSONArray jsonArray) {
+        try {
+            openDatabase();
+            
+            // Create table if it doesn't exist
+            if (!tableExists(mDatabase, tblNoDisability)) {
+                String createTableQuery = "CREATE TABLE " + tblNoDisability + " (" +
+                        "Code INTEGER PRIMARY KEY, " +
+                        "NoDisabilityLabel VARCHAR(100), " +
+                        "AltLanguage VARCHAR(100), " +
+                        "SortOrder INTEGER)";
+                mDatabase.execSQL(createTableQuery);
+            }
+            
+            // Clear existing data
+            mDatabase.execSQL("DELETE FROM " + tblNoDisability);
+            
+            // Insert new data
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject item = jsonArray.getJSONObject(i);
+                int code = item.optInt("Code", item.optInt("code", item.optInt("id", i + 1)));
+                String noDisabilityLabel = item.optString("NoDisability", item.optString("name", item.optString("noDisabilityLabel", "")));
+                String altLanguage = item.optString("AltLanguage", item.optString("altLanguage", ""));
+                int sortOrder = item.optInt("SortOrder", item.optInt("sortOrder", item.optInt("id", i + 1)));
+                
+                ContentValues values = new ContentValues();
+                values.put("Code", code);
+                values.put("NoDisabilityLabel", noDisabilityLabel);
+                values.put("AltLanguage", altLanguage);
+                values.put("SortOrder", sortOrder);
+                mDatabase.insertWithOnConflict(tblNoDisability, null, values, SQLiteDatabase.CONFLICT_REPLACE);
+            }
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            closeDatabase();
+        }
+    }
+    
+    /**
+     * Insert NonDisablingDiseases data from server (batch insertion)
+     * @param jsonArray JSONArray containing NonDisablingDiseases data from server
+     */
+    public void insertNonDisablingDiseases(JSONArray jsonArray) {
+        try {
+            openDatabase();
+            
+            // Create table if it doesn't exist
+            if (!tableExists(mDatabase, tblNonDisablingDisease)) {
+                String createTableQuery = "CREATE TABLE " + tblNonDisablingDisease + " (" +
+                        "Code INTEGER PRIMARY KEY, " +
+                        "NonDisablingDisease VARCHAR(100), " +
+                        "AltLanguage VARCHAR(100), " +
+                        "SortOrder INTEGER)";
+                mDatabase.execSQL(createTableQuery);
+            }
+            
+            // Clear existing data
+            mDatabase.execSQL("DELETE FROM " + tblNonDisablingDisease);
+            
+            // Insert new data
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject item = jsonArray.getJSONObject(i);
+                int code = item.optInt("Code", item.optInt("code", item.optInt("id", i + 1)));
+                String nonDisablingDisease = item.optString("NonDisablingDisease", item.optString("name", item.optString("nonDisablingDisease", "")));
+                String altLanguage = item.optString("AltLanguage", item.optString("altLanguage", ""));
+                int sortOrder = item.optInt("SortOrder", item.optInt("sortOrder", item.optInt("id", i + 1)));
+                
+                ContentValues values = new ContentValues();
+                values.put("Code", code);
+                values.put("NonDisablingDisease", nonDisablingDisease);
+                values.put("AltLanguage", altLanguage);
+                values.put("SortOrder", sortOrder);
+                mDatabase.insertWithOnConflict(tblNonDisablingDisease, null, values, SQLiteDatabase.CONFLICT_REPLACE);
+            }
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            closeDatabase();
+        }
+    }
+    
+    /**
+     * Insert MutualInsuranceCoverages data from server (batch insertion)
+     * @param jsonArray JSONArray containing MutualInsuranceCoverages data from server
+     */
+    public void insertMutualInsuranceCoverages(JSONArray jsonArray) {
+        try {
+            openDatabase();
+            
+            // Create table if it doesn't exist
+            if (!tableExists(mDatabase, tblMutualInsuranceCoverage)) {
+                String createTableQuery = "CREATE TABLE " + tblMutualInsuranceCoverage + " (" +
+                        "Code INTEGER PRIMARY KEY, " +
+                        "MutualInsuranceCoverage VARCHAR(150), " +
+                        "AltLanguage VARCHAR(150), " +
+                        "SortOrder INTEGER)";
+                mDatabase.execSQL(createTableQuery);
+            }
+            
+            // Clear existing data
+            mDatabase.execSQL("DELETE FROM " + tblMutualInsuranceCoverage);
+            
+            // Insert new data
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject item = jsonArray.getJSONObject(i);
+                int code = item.optInt("Code", item.optInt("code", item.optInt("id", i + 1)));
+                String mutualInsuranceCoverage = item.optString("MutualInsuranceCoverage", item.optString("name", item.optString("mutualInsuranceCoverage", "")));
+                String altLanguage = item.optString("AltLanguage", item.optString("altLanguage", ""));
+                int sortOrder = item.optInt("SortOrder", item.optInt("sortOrder", item.optInt("id", i + 1)));
+                
+                ContentValues values = new ContentValues();
+                values.put("Code", code);
+                values.put("MutualInsuranceCoverage", mutualInsuranceCoverage);
+                values.put("AltLanguage", altLanguage);
+                values.put("SortOrder", sortOrder);
+                mDatabase.insertWithOnConflict(tblMutualInsuranceCoverage, null, values, SQLiteDatabase.CONFLICT_REPLACE);
+            }
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            closeDatabase();
+        }
+    }
+    
+    /**
+     * Insert HousingTypes data from server (batch insertion)
+     * @param jsonArray JSONArray containing HousingTypes data from server
+     */
+    public void insertHousingTypes(JSONArray jsonArray) {
+        try {
+            openDatabase();
+            
+            // Create table if it doesn't exist
+            if (!tableExists(mDatabase, tblHousingType)) {
+                String createTableQuery = "CREATE TABLE " + tblHousingType + " (" +
+                        "Code INTEGER PRIMARY KEY, " +
+                        "HousingType VARCHAR(150), " +
+                        "AltLanguage VARCHAR(150), " +
+                        "SortOrder INTEGER)";
+                mDatabase.execSQL(createTableQuery);
+            }
+            
+            // Clear existing data
+            mDatabase.execSQL("DELETE FROM " + tblHousingType);
+            
+            // Insert new data
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject item = jsonArray.getJSONObject(i);
+                int code = item.optInt("Code", item.optInt("code", item.optInt("id", i + 1)));
+                String housingType = item.optString("HousingType", item.optString("name", item.optString("housingType", "")));
+                String altLanguage = item.optString("AltLanguage", item.optString("altLanguage", ""));
+                int sortOrder = item.optInt("SortOrder", item.optInt("sortOrder", item.optInt("id", i + 1)));
+                
+                ContentValues values = new ContentValues();
+                values.put("Code", code);
+                values.put("HousingType", housingType);
+                values.put("AltLanguage", altLanguage);
+                values.put("SortOrder", sortOrder);
+                mDatabase.insertWithOnConflict(tblHousingType, null, values, SQLiteDatabase.CONFLICT_REPLACE);
+            }
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            closeDatabase();
+        }
+    }
+    
+    /**
+     * Initialize database with new columns if needed
+     * Call this method before performing any Insuree operations
+     */
+    public void initializeNewColumns() {
+        ensureInsureeTableHasNewColumns();
     }
 }
