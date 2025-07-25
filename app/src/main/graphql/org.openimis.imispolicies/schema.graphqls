@@ -8588,6 +8588,98 @@ type CreatePremiumMutationPayload {
   internalId: String
 }
 
+# Types d'input étendus pour inclure les nouveaux champs obligatoires
+input CreateInsureeMutationInput {
+  clientMutationId: String
+  familyId: Int
+  head: Boolean
+  lastName: String
+  otherNames: String
+  dob: Date
+  genderId: String
+  passport: String
+  typeOfIdId: Int
+  marital: String
+  phone: String
+  email: String
+  cardIssued: Boolean
+  relationshipId: Int
+  professionId: Int
+  educationId: Int
+  healthFacilityId: Int
+  currentAddress: String
+  currentVillageId: Int
+  geolocation: String
+  professionalSituation: String
+  residenceEnvironmentId: Int!
+  housingTypeId: Int!
+  mutualInsuranceCoverageId: Int!
+  noDisabilityId: Int!
+  nonDisablingDiseaseId: Int!
+  photo: PhotoInputType
+}
+
+input UpdateInsureeMutationInput {
+  clientMutationId: String
+  uuid: String
+  chfId: String
+  familyId: Int
+  head: Boolean
+  passport: String
+  typeOfIdId: Int
+  lastName: String
+  otherNames: String
+  dob: Date
+  genderId: String
+  marital: String
+  phone: String
+  email: String
+  cardIssued: Boolean
+  relationshipId: Int
+  professionId: Int
+  educationId: Int
+  healthFacilityId: Int
+  currentAddress: String
+  currentVillageId: Int
+  geolocation: String
+  professionalSituation: String
+  residenceEnvironmentId: Int!
+  housingTypeId: Int!
+  mutualInsuranceCoverageId: Int!
+  noDisabilityId: Int!
+  nonDisablingDiseaseId: Int!
+  photo: PhotoInputType
+}
+
+input FamilyHeadInsureeInputType {
+  id: Int
+  uuid: String
+  chfId: String
+  lastName: String
+  otherNames: String
+  genderId: String
+  dob: Date
+  passport: String
+  cardIssued: Boolean
+  typeOfIdId: String
+  marital: String
+  phone: String
+  email: String
+  professionId: Int
+  educationId: Int
+  professionalSituation: String
+  residenceEnvironmentId: Int!
+  housingTypeId: Int!
+  mutualInsuranceCoverageId: Int!
+  noDisabilityId: Int!
+  nonDisablingDiseaseId: Int!
+  incomeLevelId: Int
+  preferredPaymentMethod: String
+  coordinates: String
+  bankCoordinates: String
+  photo: PhotoInputType
+}
+
 schema {
   query: Query
   mutation: Mutation

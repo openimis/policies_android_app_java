@@ -99,6 +99,10 @@ public class FetchSubFamilies {
                 /* payment method = */ member.preferredPaymentMethod(),
                 /* other household = */ member.coordinates() != null ? member.coordinates() : "",
                 /* account details = */ member.bankCoordinates() != null ? member.bankCoordinates() : "",
+                /* noDisability = */ null, // TODO: Add field when available in GraphQL
+                /* nonDisablingDisease = */ null, // TODO: Add field when available in GraphQL
+                /* mutualInsuranceCoverage = */ null, // TODO: Add field when available in GraphQL
+                /* housingType = */ null, // TODO: Add field when available in GraphQL
                 /* photoPath = */ downloadPhoto(member.photo()),
                 /* photoBytes = */ null, // We already saved them on disk, no need to pass them here.
                 /* isOffline = */ member.offline() != null ? Objects.requireNonNull(member.offline()) : false

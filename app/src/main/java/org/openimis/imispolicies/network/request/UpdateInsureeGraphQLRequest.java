@@ -27,14 +27,13 @@ public class UpdateInsureeGraphQLRequest extends BaseGraphQLRequest {
         java.sql.Date date = new java.sql.Date(System.currentTimeMillis());
         Response<UpdateInsureeMutation.Data> response = makeSynchronous(new UpdateInsureeMutation(
                 UpdateInsureeMutationInput.builder()
-                        .clientMutationId(UUID.randomUUID().toString())
                         .clientMutationId("Update insuree '" + member.getChfId() + "'")
                         .uuid(member.getUuid())
                         .chfId(member.getChfId())
                         .familyId(member.getFamilyId())
                         .head(member.isHead())
                         .passport(member.getIdentificationNumber())
-                        .typeOfIdId(member.getTypeOfId())
+                        .typeOfIdId(member.getTypeOfId() != null ? Integer.parseInt(member.getTypeOfId()) : null)
                         .lastName(member.getLastName())
                         .otherNames(member.getOtherNames())
                         .dob(member.getDateOfBirth())
@@ -50,12 +49,13 @@ public class UpdateInsureeGraphQLRequest extends BaseGraphQLRequest {
                         .currentAddress(member.getCurrentAddress())
                         .currentVillageId(member.getCurrentVillage() != null && member.getCurrentVillage() != 0 ? member.getCurrentVillage() : null)
                         .geolocation(member.getGeolocation())
-                        .residenceEnvironmentId(member.getResidenceEnvironment() == 0 ? null : member.getResidenceEnvironment()) // Now supported in mobile GraphQL schema
-                        .incomeLevelId(member.getIncomeLevel())
-                        .preferredPaymentMethod(member.getPaymentMethod())
-                        // .coordinates(member.getOtherHousehold()) // Not supported in UpdateInsureeGraphQLRequest
-                        // .bankCoordinates(member.getAccountDetails()) // Not supported in UpdateInsureeGraphQLRequest
+                        // Champs existants dans le schéma
+                        .residenceEnvironmentId(member.getResidenceEnvironment() != null ? member.getResidenceEnvironment() : 1)
                         .professionalSituation(member.getProfessionalSituation())
+                        .housingTypeId(member.getHousingType() != null ? Integer.parseInt(member.getHousingType()) : 1)
+                        .mutualInsuranceCoverageId(member.getMutualInsuranceCoverage() != null && member.getMutualInsuranceCoverage() ? 1 : 1)
+                        .noDisabilityId(member.getNoDisability() != null && member.getNoDisability() ? 1 : 1)
+                        .nonDisablingDiseaseId(member.getNonDisablingDisease() != null ? Integer.parseInt(member.getNonDisablingDisease()) : 1)
                         .photo(
                                 PhotoInputType.builder()
                                         .filename(member.getPhotoPath())
