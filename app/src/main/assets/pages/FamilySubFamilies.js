@@ -9,6 +9,16 @@ $(document).ready(function () {
     var LocationId = parseInt(queryString("l"));
     var RegionId = parseInt(queryString("r"));
     var DistrictId = parseInt(queryString("d"));
+    var options = [
+        Android.getString('Edit'),
+        Android.getString('Detach'),
+        Android.getString('Attachment'),
+        Android.getString('Delete')
+    ];
+
+    if(Android.CanAttach(FamilyId)){
+        options.push(Android.getString('IncludeHOF'));
+    }
 
     var url = 'FamilyPolygamy.html?f=' + FamilyId;
     Android.SetUrl(url);
@@ -31,7 +41,7 @@ $(document).ready(function () {
 
     AssignDotClass();
 
-    contextMenu.createContextMenu([Android.getString('Edit'), Android.getString('Detach'), Android.getString('Attachment'), Android.getString('Delete')], function () {
+    contextMenu.createContextMenu(options, function () {
         var clicked = $(this).text();
         if (clicked == Android.getString('Edit')) {
             var url = 'FamilySubFamilies.html?f=' + FamilyId + '&l=' + LocationId + '&r=' + RegionId + '&d=' + DistrictId;
@@ -128,7 +138,31 @@ $(document).ready(function () {
                     }
                 ]
             });
-        };
+        }
+        else if(clicked == Android.getString('IncludeHOF')) {
+            $('#msgAlert').text(Android.getString('ConfirmIncludeHOF'));
+            var includeSuccess = 0;
+            $("#dialog-confirm").dialog({
+                resizable: false,
+                height: "auto",
+                width: 350,
+                modal: true,
+                buttons: [
+                    {
+                        text: Android.getString("Yes"),
+                        click: function () {
+                            $(this).dialog("close");
+                        }
+                    },
+                    {
+                        text: Android.getString("No"),
+                        click: function () {
+                            $(this).dialog("close");
+                        }
+                    }
+                ]
+            });
+        }
     })
 });
 

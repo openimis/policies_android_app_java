@@ -509,4 +509,6 @@
     <string name="FamilyAndAttachment">Families attachments</string>
     <string name="invalidPeriodicity">For this contribution plan the periodicity must be greater than or equal to</string>
     <string name="CannotAddAttachment">We cannot add attachment for polygamous family</string>
+    <string name="IncludeHOF">Include Head of family</string>
+    <string name="ConfirmIncludeHOF">Confirm include head of family in sub-family</string>
 </resources>

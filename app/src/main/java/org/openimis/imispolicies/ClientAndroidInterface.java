@@ -6201,5 +6201,15 @@ public class ClientAndroidInterface {
         return defaultAge;
 
     }
+
+    @JavascriptInterface
+    public boolean CanAttach (String familyId) {
+        @Language("SQL")
+        String Query = "SELECT InsureeId FROM tblInsuree WHERE FamilyId=?";
+        String[] arg = {familyId};
+        JSONArray insurees = sqlHandler.getResult(Query, arg);
+
+        return insurees.length() > 0;
+    }
 }
 
