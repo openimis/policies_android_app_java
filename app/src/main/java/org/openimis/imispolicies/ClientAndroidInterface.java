@@ -3681,6 +3681,10 @@ public class ClientAndroidInterface {
                 /* payment method */ JsonUtils.getStringOrDefault(object, "PaymentMethod"),
                 /* otherhousehold */ JsonUtils.getStringOrDefault(object, "OtherHousehold"),
                 /* account details */ JsonUtils.getStringOrDefault(object, "AccountDetails"),
+                /* noDisability = */ JsonUtils.getBooleanOrDefault(object, "NoDisability", null),
+                /* nonDisablingDisease = */ JsonUtils.getStringOrDefault(object, "NonDisablingDisease"),
+                /* mutualInsuranceCoverage = */ JsonUtils.getBooleanOrDefault(object, "MutualInsuranceCoverage", null),
+                /* housingType = */ JsonUtils.getStringOrDefault(object, "HousingType"),
                 /* photoPath = */ image != null ? image.first : null,
                 /* photoBytes = */ image != null ? image.second : null,
                 /* isOffline = */ JsonUtils.getBooleanOrDefault(object, "isOffline", false)

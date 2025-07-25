@@ -26,43 +26,49 @@ public class CreateInsureeGraphQLRequest extends BaseGraphQLRequest {
         java.sql.Date date = new java.sql.Date(System.currentTimeMillis());
         Response<CreateInsureeMutation.Data> response = makeSynchronous(new CreateInsureeMutation(
                 CreateInsureeMutationInput.builder()
-                        .clientMutationId(UUID.randomUUID().toString())
                         .clientMutationId("Create insuree '" + member.getChfId() + "'")
                         .familyId(familyId)
                         .head(member.isHead())
-                        .passport(member.getIdentificationNumber())
-                        .typeOfIdId(member.getTypeOfId())
                         .lastName(member.getLastName())
                         .otherNames(member.getOtherNames())
                         .dob(member.getDateOfBirth())
                         .genderId(member.getGender())
-                        .marital(member.getMarital())
-                        .phone(member.getPhone())
-                        .email(member.getEmail())
-                        .cardIssued(member.isCardIssued())
-                        .relationshipId(member.getRelationship() == 0 ? null : member.getRelationship())
-                        .professionId(member.getProfession())
-                        .educationId(member.getEducation() == 0 ? null : member.getEducation())
-                        .healthFacilityId(member.getHealthFacilityId() == 0 ? null : member.getHealthFacilityId())
+                        // MINIMAL TEST - Only essential fields
+                        // .passport(member.getIdentificationNumber())
+                        // .typeOfIdId(member.getTypeOfId())
+                        // .marital(member.getMarital())
+                        // .phone(member.getPhone())
+                        // .email(member.getEmail())
+                        // .cardIssued(member.isCardIssued())
+                        // .relationshipId(member.getRelationship() != null && member.getRelationship() != 0 ? member.getRelationship() : null)
+                        // .professionId(member.getProfession() != null && member.getProfession() != 0 ? member.getProfession() : null)
+                        // .educationId(member.getEducation() != null && member.getEducation() != 0 ? member.getEducation() : null)
+                        // .healthFacilityId(member.getHealthFacilityId() != null && member.getHealthFacilityId() != 0 ? member.getHealthFacilityId() : null)
+                        // Champs existants dans le schéma
                         .professionalSituation(member.getProfessionalSituation())
-                        // Testing newly supported fields - uncomment one by one
-                        .residenceEnvironmentId(member.getResidenceEnvironment() == 0 ? null : member.getResidenceEnvironment()) // Now supported in mobile GraphQL schema
-                        .incomeLevelId(member.getIncomeLevel() == 0 ? null : member.getIncomeLevel())
-                        .preferredPaymentMethod(member.getPaymentMethod() == null || member.getPaymentMethod().isEmpty() ? null : member.getPaymentMethod())
-                        .coordinates(member.getOtherHousehold() == null || member.getOtherHousehold().isEmpty() ? null : member.getOtherHousehold())
-                        .bankCoordinates(member.getAccountDetails() == null || member.getAccountDetails().isEmpty() ? null : member.getAccountDetails())
-                        .photo(
-                                PhotoInputType.builder()
-                                        .filename(member.getPhotoPath())
-                                        .photo(
-                                                member.getPhotoBytes() != null ?
-                                                        Base64.encodeToString(member.getPhotoBytes(), Base64.DEFAULT) :
-                                                        null
-                                        )
-                                        .date(date)
-                                        .officerId(officerId)
-                                        .build()
-                        )
+                        .residenceEnvironmentId(member.getResidenceEnvironment() != null ? member.getResidenceEnvironment() : 1)
+                        .housingTypeId(member.getHousingType() != null ? Integer.parseInt(member.getHousingType()) : 1)
+                        .mutualInsuranceCoverageId(member.getMutualInsuranceCoverage() != null && member.getMutualInsuranceCoverage() ? 1 : 1)
+                        .noDisabilityId(member.getNoDisability() != null && member.getNoDisability() ? 1 : 1)
+                        .nonDisablingDiseaseId(member.getNonDisablingDisease() != null ? Integer.parseInt(member.getNonDisablingDisease()) : 1)
+                        // Photo temporairement commentée pour debug
+                        // .photo(photoObject)
+                        // .nonDisablingDisease(member.getNonDisablingDisease())
+                        // .mutualInsuranceCoverage(member.getMutualInsuranceCoverage())
+                        // .housingType(member.getHousingType())
+                        // TEMPORARILY COMMENTED - PHOTO MIGHT CAUSE ISSUES
+                        // .photo(
+                        //         PhotoInputType.builder()
+                        //                 .filename(member.getPhotoPath())
+                        //                 .photo(
+                        //                         member.getPhotoBytes() != null ?
+                        //                                 Base64.encodeToString(member.getPhotoBytes(), Base64.DEFAULT) :
+                        //                                 null
+                        //                 )
+                        //                 .date(date)
+                        //                 .officerId(officerId)
+                        //                 .build()
+                        // )
                         .build()
         ));
         return Objects.requireNonNull(
