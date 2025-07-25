@@ -353,6 +353,9 @@ public class Family implements Parcelable {
         private final Integer incomeLevel;
 
         @Nullable
+        private final Integer residenceEnvironment;
+
+        @Nullable
         private final String paymentMethod;
 
         @Nullable
@@ -393,6 +396,7 @@ public class Family implements Parcelable {
                 @Nullable String geolocation,
                 @Nullable String professionalSituation,
                 @Nullable Integer incomeLevel,
+                @Nullable Integer residenceEnvironment,
                 @Nullable String paymentMethod,
                 @Nullable String otherHousehold,
                 @Nullable String accountDetails,
@@ -425,6 +429,7 @@ public class Family implements Parcelable {
             this.geolocation = geolocation;
             this.professionalSituation = professionalSituation;
             this.incomeLevel = incomeLevel;
+            this.residenceEnvironment = residenceEnvironment;
             this.paymentMethod = paymentMethod;
             this.otherHousehold = otherHousehold;
             this.accountDetails = accountDetails;
@@ -473,6 +478,7 @@ public class Family implements Parcelable {
             geolocation = in.readString();
             professionalSituation = in.readString();
             incomeLevel = in.readInt();
+            residenceEnvironment = in.readInt();
             paymentMethod = in.readString();
             otherHousehold = in.readString();
             accountDetails = in.readString();
@@ -529,6 +535,7 @@ public class Family implements Parcelable {
             dest.writeString(geolocation);
             dest.writeString(professionalSituation);
             dest.writeInt(incomeLevel);
+            dest.writeInt(residenceEnvironment);
             dest.writeString(paymentMethod);
             dest.writeString(otherHousehold);
             dest.writeString(accountDetails);
@@ -663,6 +670,9 @@ public class Family implements Parcelable {
 
         @Nullable
         public Integer getIncomeLevel(){ return incomeLevel;}
+
+        @Nullable
+        public Integer getResidenceEnvironment(){ return residenceEnvironment;}
 
         @Nullable
         public String getPaymentMethod(){ return paymentMethod;}

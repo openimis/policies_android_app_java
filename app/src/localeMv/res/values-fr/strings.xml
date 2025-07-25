@@ -490,6 +490,8 @@
     <string name="OtherHousehold">Autre Ménage</string>
     <string name="SelectIncomeLevel">Choisir le niveau de revenu</string>
     <string name="IncomeLevel">Niveau de revenu</string>
+    <string name="SelectResidenceEnvironment">Choisir l\'environnement de residence</string>
+    <string name="ResidenceEnvironment">Environnement de residence</string>
     <string name="FamilyAndSubFamilies">Famille et sous-familles</string>
     <string name="AddNewSubFamily">Ajouter une sous-famille</string>
     <string name="Detach">Détacher</string>
@@ -523,4 +525,10 @@
     <string name="FamilyAndAttachment">Pièces jointes famille</string>
     <string name="invalidPeriodicity">Pour ce régime de cotisation la périodicité doit être supérieure ou égale à</string>
     <string name="CannotAddAttachment">Impossible d\'attribuer une pièce jointe à une famille polygame</string>
+    
+    <!-- New dropdown selection strings -->
+    <string name="SelectNoDisability">Sélectionner incapacité</string>
+    <string name="SelectNonDisablingDisease">Sélectionner maladie</string>
+    <string name="SelectMutualInsuranceCoverage">Sélectionner couverture</string>
+    <string name="SelectHousingType">Sélectionner logement</string>
 </resources>

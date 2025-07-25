@@ -27,7 +27,7 @@ public class CreateInsureeGraphQLRequest extends BaseGraphQLRequest {
         Response<CreateInsureeMutation.Data> response = makeSynchronous(new CreateInsureeMutation(
                 CreateInsureeMutationInput.builder()
                         .clientMutationId(UUID.randomUUID().toString())
-                        .clientMutationLabel("Create insuree '" + member.getChfId() + "'")
+                        .clientMutationId("Create insuree '" + member.getChfId() + "'")
                         .familyId(familyId)
                         .head(member.isHead())
                         .passport(member.getIdentificationNumber())
@@ -45,10 +45,12 @@ public class CreateInsureeGraphQLRequest extends BaseGraphQLRequest {
                         .educationId(member.getEducation() == 0 ? null : member.getEducation())
                         .healthFacilityId(member.getHealthFacilityId() == 0 ? null : member.getHealthFacilityId())
                         .professionalSituation(member.getProfessionalSituation())
-                        .incomeLevelId(member.getIncomeLevel())
-                        .preferredPaymentMethod(member.getPaymentMethod())
-                        .coordinates(member.getOtherHousehold())
-                        .bankCoordinates(member.getAccountDetails())
+                        // Testing newly supported fields - uncomment one by one
+                        .residenceEnvironmentId(member.getResidenceEnvironment() == 0 ? null : member.getResidenceEnvironment()) // Now supported in mobile GraphQL schema
+                        .incomeLevelId(member.getIncomeLevel() == 0 ? null : member.getIncomeLevel())
+                        .preferredPaymentMethod(member.getPaymentMethod() == null || member.getPaymentMethod().isEmpty() ? null : member.getPaymentMethod())
+                        .coordinates(member.getOtherHousehold() == null || member.getOtherHousehold().isEmpty() ? null : member.getOtherHousehold())
+                        .bankCoordinates(member.getAccountDetails() == null || member.getAccountDetails().isEmpty() ? null : member.getAccountDetails())
                         .photo(
                                 PhotoInputType.builder()
                                         .filename(member.getPhotoPath())
