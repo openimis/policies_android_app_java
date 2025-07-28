@@ -1120,6 +1120,22 @@ public class ClientAndroidInterface {
             if (!TextUtils.isEmpty(data.get("ddlPaymentMethod")) && !data.get("ddlPaymentMethod").equals("0"))
                 PaymentMethod = data.get("ddlPaymentMethod");
 
+            Integer NoDisability = null;
+            if (!TextUtils.isEmpty(data.get("ddlNoDisability")) && !data.get("ddlNoDisability").equals("0"))
+                NoDisability = Integer.valueOf(data.get("ddlNoDisability"));
+
+            Integer NonDisablingDisease = null;
+            if (!TextUtils.isEmpty(data.get("ddlNonDisablingDisease")) && !data.get("ddlNonDisablingDisease").equals("0"))
+                NonDisablingDisease = Integer.valueOf(data.get("ddlNonDisablingDisease"));
+
+            Integer MutualInsuranceCoverage = null;
+            if (!TextUtils.isEmpty(data.get("ddlMutualInsuranceCoverage")) && !data.get("ddlMutualInsuranceCoverage").equals("0"))
+                MutualInsuranceCoverage = Integer.valueOf(data.get("ddlMutualInsuranceCoverage"));
+
+            Integer HousingType = null;
+            if (!TextUtils.isEmpty(data.get("ddlHousingType")) && !data.get("ddlHousingType").equals("0"))
+                HousingType = Integer.valueOf(data.get("ddlHousingType"));
+
             String IdentificationType = "null";
             if (!TextUtils.isEmpty(data.get("ddlIdentificationType")) && !data.get("ddlIdentificationType").equals(""))
                 IdentificationType = (data.get("ddlIdentificationType"));
@@ -1167,6 +1183,10 @@ public class ClientAndroidInterface {
             values.put("PaymentMethod", PaymentMethod);
             values.put("OtherHousehold", data.get("txtOtherHousehold"));
             values.put("AccountDetails", data.get("txtAccountDetails"));
+            values.put("NoDisability", NoDisability);
+            values.put("NonDisablingDisease", NonDisablingDisease);
+            values.put("MutualInsuranceCoverage", MutualInsuranceCoverage);
+            values.put("HousingType", HousingType);
 
             if (data.get("ddlVulnerability") != null && !data.get("ddlVulnerability").equals("")) {
                 values.put("Vulnerability", data.get("ddlVulnerability"));
