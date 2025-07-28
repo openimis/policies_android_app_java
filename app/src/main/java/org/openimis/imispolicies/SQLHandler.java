@@ -552,6 +552,10 @@ public class SQLHandler extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + tblRenewals);
         db.execSQL("DROP TABLE IF EXISTS " + tblIncomeLevel);
         db.execSQL("DROP TABLE IF EXISTS " + tblResidenceEnvironment);
+        db.execSQL("DROP TABLE IF EXISTS " + tblNoDisability);
+        db.execSQL("DROP TABLE IF EXISTS " + tblNonDisablingDisease);
+        db.execSQL("DROP TABLE IF EXISTS " + tblMutualInsuranceCoverage);
+        db.execSQL("DROP TABLE IF EXISTS " + tblHousingType);
         db.execSQL("DROP TABLE IF EXISTS " + tblInsureeAttachments);
         db.execSQL("DROP TABLE IF EXISTS " + tblBulkControlNumbers);
         db.execSQL("DROP TABLE IF EXISTS " + tblFamilySMS);
@@ -620,35 +624,42 @@ public class SQLHandler extends SQLiteOpenHelper {
             
             // Check and add ResidenceEnvironment column if missing
             if (!columnExists(mDatabase, "tblInsuree", "ResidenceEnvironment")) {
-                android.util.Log.d("SQLHandler", "Adding missing ResidenceEnvironment column to tblInsuree");
                 mDatabase.execSQL("ALTER TABLE tblInsuree ADD COLUMN ResidenceEnvironment NUMERIC");
-                android.util.Log.d("SQLHandler", "ResidenceEnvironment column added successfully");
             }
             
             // Check and add IncomeLevel column if missing
             if (!columnExists(mDatabase, "tblInsuree", "IncomeLevel")) {
-                android.util.Log.d("SQLHandler", "Adding missing IncomeLevel column to tblInsuree");
                 mDatabase.execSQL("ALTER TABLE tblInsuree ADD COLUMN IncomeLevel NUMERIC");
-                android.util.Log.d("SQLHandler", "IncomeLevel column added successfully");
             }
             
             // Check and add other potentially missing columns
             if (!columnExists(mDatabase, "tblInsuree", "PaymentMethod")) {
-                android.util.Log.d("SQLHandler", "Adding missing PaymentMethod column to tblInsuree");
                 mDatabase.execSQL("ALTER TABLE tblInsuree ADD COLUMN PaymentMethod TEXT");
-                android.util.Log.d("SQLHandler", "PaymentMethod column added successfully");
             }
             
             if (!columnExists(mDatabase, "tblInsuree", "OtherHousehold")) {
-                android.util.Log.d("SQLHandler", "Adding missing OtherHousehold column to tblInsuree");
                 mDatabase.execSQL("ALTER TABLE tblInsuree ADD COLUMN OtherHousehold TEXT");
-                android.util.Log.d("SQLHandler", "OtherHousehold column added successfully");
             }
             
             if (!columnExists(mDatabase, "tblInsuree", "AccountDetails")) {
-                android.util.Log.d("SQLHandler", "Adding missing AccountDetails column to tblInsuree");
                 mDatabase.execSQL("ALTER TABLE tblInsuree ADD COLUMN AccountDetails TEXT");
-                android.util.Log.d("SQLHandler", "AccountDetails column added successfully");
+            }
+            
+            // Check and add new columns for the 4 new fields
+            if (!columnExists(mDatabase, "tblInsuree", "NoDisability")) {
+                mDatabase.execSQL("ALTER TABLE tblInsuree ADD COLUMN NoDisability NUMERIC");
+            }
+            
+            if (!columnExists(mDatabase, "tblInsuree", "NonDisablingDisease")) {
+                mDatabase.execSQL("ALTER TABLE tblInsuree ADD COLUMN NonDisablingDisease NUMERIC");
+            }
+            
+            if (!columnExists(mDatabase, "tblInsuree", "MutualInsuranceCoverage")) {
+                mDatabase.execSQL("ALTER TABLE tblInsuree ADD COLUMN MutualInsuranceCoverage NUMERIC");
+            }
+            
+            if (!columnExists(mDatabase, "tblInsuree", "HousingType")) {
+                mDatabase.execSQL("ALTER TABLE tblInsuree ADD COLUMN HousingType NUMERIC");
             }
             
         } catch (Exception e) {

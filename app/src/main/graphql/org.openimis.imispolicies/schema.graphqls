@@ -6820,6 +6820,12 @@ input FamilyHeadInsureeInputType {
   preferredPaymentMethod: String
   bankCoordinates: String
   coordinates: String
+  # NEW REQUIRED FIELDS - Server now requires these as Int!
+  residenceEnvironmentId: Int!
+  housingTypeId: Int!
+  mutualInsuranceCoverageId: Int!
+  noDisabilityId: Int!
+  nonDisablingDiseaseId: Int!
 }
 
 input PhotoInputType {
@@ -8307,12 +8313,55 @@ input FamilyHeadInsureeInputType {
   educationId: Int
   typeOfIdId: String
   identificationNumber: String
-  residenceEnvironmentId: Int
+  residenceEnvironmentId: Int!
   incomeLevelId: Int
   preferredPaymentMethod: String
   coordinates: String
   bankCoordinates: String
   professionalSituation: String
+  # NEW REQUIRED FIELDS - Server now requires these as Int!
+  housingTypeId: Int!
+  mutualInsuranceCoverageId: Int!
+  noDisabilityId: Int!
+  nonDisablingDiseaseId: Int!
+  photo: PhotoInputType
+}
+
+# Create Insuree Mutation Input Type
+input CreateInsureeMutationInput {
+  clientMutationLabel: String
+  clientMutationDetails: [String]
+  mutationExtensions: ParsedJSONString
+  clientMutationId: String
+  familyId: Int!
+  head: Boolean
+  passport: String
+  typeOfIdId: String
+  lastName: String!
+  otherNames: String!
+  dob: Date!
+  genderId: String!
+  marital: String
+  phone: String
+  email: String
+  cardIssued: Boolean
+  relationshipId: Int
+  professionId: Int
+  educationId: Int
+  healthFacilityId: Int
+  professionalSituation: String
+  currentAddress: String
+  geolocation: String
+  currentVillageId: Int
+  residenceEnvironmentId: Int!
+  housingTypeId: Int!
+  mutualInsuranceCoverageId: Int!
+  noDisabilityId: Int!
+  nonDisablingDiseaseId: Int!
+  incomeLevelId: Int
+  preferredPaymentMethod: String
+  coordinates: String
+  bankCoordinates: String
   photo: PhotoInputType
 }
 
@@ -8586,98 +8635,6 @@ type CreatePremiumMutationPayload {
   clientMutationId: String
   premium: PremiumGQLType
   internalId: String
-}
-
-# Types d'input étendus pour inclure les nouveaux champs obligatoires
-input CreateInsureeMutationInput {
-  clientMutationId: String
-  familyId: Int
-  head: Boolean
-  lastName: String
-  otherNames: String
-  dob: Date
-  genderId: String
-  passport: String
-  typeOfIdId: Int
-  marital: String
-  phone: String
-  email: String
-  cardIssued: Boolean
-  relationshipId: Int
-  professionId: Int
-  educationId: Int
-  healthFacilityId: Int
-  currentAddress: String
-  currentVillageId: Int
-  geolocation: String
-  professionalSituation: String
-  residenceEnvironmentId: Int!
-  housingTypeId: Int!
-  mutualInsuranceCoverageId: Int!
-  noDisabilityId: Int!
-  nonDisablingDiseaseId: Int!
-  photo: PhotoInputType
-}
-
-input UpdateInsureeMutationInput {
-  clientMutationId: String
-  uuid: String
-  chfId: String
-  familyId: Int
-  head: Boolean
-  passport: String
-  typeOfIdId: Int
-  lastName: String
-  otherNames: String
-  dob: Date
-  genderId: String
-  marital: String
-  phone: String
-  email: String
-  cardIssued: Boolean
-  relationshipId: Int
-  professionId: Int
-  educationId: Int
-  healthFacilityId: Int
-  currentAddress: String
-  currentVillageId: Int
-  geolocation: String
-  professionalSituation: String
-  residenceEnvironmentId: Int!
-  housingTypeId: Int!
-  mutualInsuranceCoverageId: Int!
-  noDisabilityId: Int!
-  nonDisablingDiseaseId: Int!
-  photo: PhotoInputType
-}
-
-input FamilyHeadInsureeInputType {
-  id: Int
-  uuid: String
-  chfId: String
-  lastName: String
-  otherNames: String
-  genderId: String
-  dob: Date
-  passport: String
-  cardIssued: Boolean
-  typeOfIdId: String
-  marital: String
-  phone: String
-  email: String
-  professionId: Int
-  educationId: Int
-  professionalSituation: String
-  residenceEnvironmentId: Int!
-  housingTypeId: Int!
-  mutualInsuranceCoverageId: Int!
-  noDisabilityId: Int!
-  nonDisablingDiseaseId: Int!
-  incomeLevelId: Int
-  preferredPaymentMethod: String
-  coordinates: String
-  bankCoordinates: String
-  photo: PhotoInputType
 }
 
 schema {
