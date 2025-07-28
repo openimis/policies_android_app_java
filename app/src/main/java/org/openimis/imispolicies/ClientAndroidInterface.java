@@ -1400,9 +1400,6 @@ public class ClientAndroidInterface {
     @JavascriptInterface
     @SuppressWarnings("unused")
     public String getInsuree(int InsureeId) {
-        // Ensure all new columns exist in tblInsuree before querying
-        sqlHandler.initializeNewColumns();
-        
         @Language("SQL")
         String Query = "SELECT InsureeId, FamilyId, CHFID, LastName, OtherNames, DOB, Gender, Marital, isHead, IdentificationNumber, Phone, isOffline , PhotoPath, CardIssued, Relationship, Profession, Education, Email, TypeOfId, I.HFID, CurrentAddress,R.LocationId CurRegion, D.LocationId CurDistrict, W.LocationId CurWard,  I.CurVillage, HFR.LocationId FSPRegion, HFD.LocationId FSPDistrict, HF.HFLevel FSPCategory, I.Vulnerability, ProfessionalSituation, IncomeLevel, ResidenceEnvironment, PaymentMethod, OtherHousehold, AccountDetails, NoDisability, NonDisablingDisease, MutualInsuranceCoverage, HousingType\n" +
                 "FROM tblInsuree I\n" +
