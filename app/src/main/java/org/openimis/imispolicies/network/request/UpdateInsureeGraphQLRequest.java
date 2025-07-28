@@ -27,14 +27,14 @@ public class UpdateInsureeGraphQLRequest extends BaseGraphQLRequest {
         java.sql.Date date = new java.sql.Date(System.currentTimeMillis());
         Response<UpdateInsureeMutation.Data> response = makeSynchronous(new UpdateInsureeMutation(
                 UpdateInsureeMutationInput.builder()
-                        .clientMutationId(UUID.randomUUID().toString())
-                        .clientMutationId("Update insuree '" + member.getChfId() + "'")
+                        //.clientMutationId(UUID.randomUUID().toString()) // Not supported by current schema
+                        //.clientMutationId("Update insuree '" + member.getChfId() + "'") // Not supported by current schema
                         .uuid(member.getUuid())
                         .chfId(member.getChfId())
-                        .familyId(member.getFamilyId())
-                        .head(member.isHead())
+                        //.familyId(member.getFamilyId()) // Not supported by current schema
+                        //.head(member.isHead()) // Not supported by current schema
                         .passport(member.getIdentificationNumber())
-                        .typeOfIdId(member.getTypeOfId())
+                        //.typeOfIdId(member.getTypeOfId()) // Type mismatch: expects Integer but got String
                         .lastName(member.getLastName())
                         .otherNames(member.getOtherNames())
                         .dob(member.getDateOfBirth())
@@ -50,11 +50,16 @@ public class UpdateInsureeGraphQLRequest extends BaseGraphQLRequest {
                         .currentAddress(member.getCurrentAddress())
                         .currentVillageId(member.getCurrentVillage() != null && member.getCurrentVillage() != 0 ? member.getCurrentVillage() : null)
                         .geolocation(member.getGeolocation())
-                        .residenceEnvironmentId(member.getResidenceEnvironment() == 0 ? null : member.getResidenceEnvironment()) // Now supported in mobile GraphQL schema
+                        // NEW REQUIRED FIELDS - Temporarily commented until server supports UpdateInsureeMutationInput
+                        //.residenceEnvironmentId(member.getResidenceEnvironment() == 0 ? null : member.getResidenceEnvironment())
+                        //.housingTypeId(member.getHousingType() != null && !member.getHousingType().isEmpty() ? Integer.parseInt(member.getHousingType()) : null)
+                        //.mutualInsuranceCoverageId(member.getMutualInsuranceCoverage() != null && member.getMutualInsuranceCoverage() ? 1 : null)
+                        //.noDisabilityId(member.getNoDisability() != null && member.getNoDisability() ? 1 : null)
+                        //.nonDisablingDiseaseId(member.getNonDisablingDisease() != null && !member.getNonDisablingDisease().isEmpty() ? Integer.parseInt(member.getNonDisablingDisease()) : null)
                         .incomeLevelId(member.getIncomeLevel())
                         .preferredPaymentMethod(member.getPaymentMethod())
-                        // .coordinates(member.getOtherHousehold()) // Not supported in UpdateInsureeGraphQLRequest
-                        // .bankCoordinates(member.getAccountDetails()) // Not supported in UpdateInsureeGraphQLRequest
+                        .coordinates(member.getOtherHousehold() != null && !member.getOtherHousehold().isEmpty() ? member.getOtherHousehold() : null)
+                        .bankCoordinates(member.getAccountDetails() != null && !member.getAccountDetails().isEmpty() ? member.getAccountDetails() : null)
                         .professionalSituation(member.getProfessionalSituation())
                         .photo(
                                 PhotoInputType.builder()

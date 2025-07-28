@@ -74,11 +74,11 @@ public class CreateInsureeGraphQLRequest extends BaseGraphQLRequest {
         try {
             Response<CreateInsureeMutation.Data> response = makeSynchronous(new CreateInsureeMutation(
                     CreateInsureeMutationInput.builder()
-                            .clientMutationId("Create insuree '" + member.getChfId() + "'")
+                            //.clientMutationId("Create insuree '" + member.getChfId() + "'") // Not supported by current schema
                             .familyId(familyId)
-                            .head(member.isHead())
+                            //.head(member.isHead()) // Not supported by current schema
                             .passport(member.getIdentificationNumber())
-                            .typeOfIdId(validatedTypeOfId)
+                            //.typeOfIdId(validatedTypeOfId) // Type mismatch: expects Integer but got String
                             .lastName(member.getLastName())
                             .otherNames(member.getOtherNames())
                             .dob(member.getDateOfBirth())
@@ -92,23 +92,20 @@ public class CreateInsureeGraphQLRequest extends BaseGraphQLRequest {
                             .educationId(validatedEducation)
                             .healthFacilityId(member.getHealthFacilityId() == 0 ? null : member.getHealthFacilityId())
                             .professionalSituation(member.getProfessionalSituation())
-                            // MISSING IMPORTANT FIELDS - Temporarily commented until Apollo generates classes
-                            //.currentAddress(member.getCurrentAddress()) // TODO: Apollo needs to regenerate classes
-                            //.geolocation(member.getGeolocation()) // TODO: Apollo needs to regenerate classes
-                            //.currentVillageId(member.getCurrentVillage() != null && member.getCurrentVillage() != 0 ? member.getCurrentVillage() : null) // TODO: Apollo needs to regenerate classes
-                            
-                            // NEW REQUIRED FIELDS - Temporarily commented until Apollo generates classes
-                            //.residenceEnvironmentId(member.getResidenceEnvironment() != null && member.getResidenceEnvironment() != 0 ? member.getResidenceEnvironment() : 3) // TODO: Apollo needs to regenerate classes
-                            //.housingTypeId(member.getHousingType() != null && !member.getHousingType().isEmpty() ? Integer.parseInt(member.getHousingType()) : 2) // TODO: Apollo needs to regenerate classes
-                            //.mutualInsuranceCoverageId(member.getMutualInsuranceCoverage() != null && member.getMutualInsuranceCoverage() ? 1 : 3) // TODO: Apollo needs to regenerate classes
-                            //.noDisabilityId(member.getNoDisability() != null && member.getNoDisability() ? 1 : 3) // TODO: Apollo needs to regenerate classes
-                            //.nonDisablingDiseaseId(member.getNonDisablingDisease() != null && !member.getNonDisablingDisease().isEmpty() ? Integer.parseInt(member.getNonDisablingDisease()) : 2) // TODO: Apollo needs to regenerate classes
-                            
-                            // Fields not yet supported by server GraphQL schema - commented to prevent HTTP 400
-                            .incomeLevelId(member.getIncomeLevel() == 0 ? null : member.getIncomeLevel()) // Server GraphQL schema not yet updated
-                            .preferredPaymentMethod(member.getPaymentMethod() == null || member.getPaymentMethod().isEmpty() ? null : member.getPaymentMethod()) // Server GraphQL schema not yet updated
-                            .coordinates(member.getOtherHousehold() == null || member.getOtherHousehold().isEmpty() ? null : member.getOtherHousehold()) // Server GraphQL schema not yet updated
-                            .bankCoordinates(member.getAccountDetails() == null || member.getAccountDetails().isEmpty() ? null : member.getAccountDetails()) // Server GraphQL schema not yet updated
+                            .currentAddress(member.getCurrentAddress())
+                            .geolocation(member.getGeolocation())
+                            .currentVillageId(member.getCurrentVillage() != null && member.getCurrentVillage() != 0 ? member.getCurrentVillage() : null)
+                            // NEW REQUIRED FIELDS - Temporarily commented until server supports CreateInsureeMutationInput
+                            //.residenceEnvironmentId(member.getResidenceEnvironment() != null && member.getResidenceEnvironment() != 0 ? member.getResidenceEnvironment() : 3)
+                            //.housingTypeId(member.getHousingType() != null && !member.getHousingType().isEmpty() ? Integer.parseInt(member.getHousingType()) : 2)
+                            //.mutualInsuranceCoverageId(member.getMutualInsuranceCoverage() != null && member.getMutualInsuranceCoverage() ? 1 : 3)
+                            //.noDisabilityId(member.getNoDisability() != null && member.getNoDisability() ? 1 : 3)
+                            //.nonDisablingDiseaseId(member.getNonDisablingDisease() != null && !member.getNonDisablingDisease().isEmpty() ? Integer.parseInt(member.getNonDisablingDisease()) : 2)
+                            // Fields now supported by server GraphQL schema - activated for data transmission
+                            .incomeLevelId(member.getIncomeLevel() != null && member.getIncomeLevel() != 0 ? member.getIncomeLevel() : null)
+                            .preferredPaymentMethod(member.getPaymentMethod() != null && !member.getPaymentMethod().isEmpty() ? member.getPaymentMethod() : null)
+                            .coordinates(member.getOtherHousehold() != null && !member.getOtherHousehold().isEmpty() ? member.getOtherHousehold() : null)
+                            .bankCoordinates(member.getAccountDetails() != null && !member.getAccountDetails().isEmpty() ? member.getAccountDetails() : null)
                             .photo(
                                     PhotoInputType.builder()
                                             .filename(member.getPhotoPath())

@@ -37,10 +37,7 @@ import android.text.TextUtils;
 
 import org.intellij.lang.annotations.Language;
 import org.openimis.imispolicies.tools.Log;
-import org.openimis.imispolicies.domain.entity.NoDisability;
-import org.openimis.imispolicies.domain.entity.NonDisablingDisease;
-import org.openimis.imispolicies.domain.entity.MutualInsuranceCoverage;
-import org.openimis.imispolicies.domain.entity.HousingType;
+
 import android.util.Xml;
 
 import org.json.JSONArray;
@@ -1663,13 +1660,13 @@ public class SQLHandler extends SQLiteOpenHelper {
     }
 
     // ==================== NoDisability Methods ====================
-    public void insertNoDisability(NoDisability noDisability) {
+    public void insertNoDisability(int code, String name, String altLanguage, int sortOrder) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put("Code", noDisability.getCode());
-        values.put("NoDisabilityLabel", noDisability.getName());
-        values.put("AltLanguage", noDisability.getAltLanguage());
-        values.put("SortOrder", noDisability.getId()); // Using Id as SortOrder for compatibility
+        values.put("Code", code);
+        values.put("NoDisabilityLabel", name);
+        values.put("AltLanguage", altLanguage);
+        values.put("SortOrder", sortOrder);
         db.insert(tblNoDisability, null, values);
         db.close();
     }
@@ -1704,13 +1701,13 @@ public class SQLHandler extends SQLiteOpenHelper {
 
 
     // ==================== NonDisablingDisease Methods ====================
-    public void insertNonDisablingDisease(NonDisablingDisease nonDisablingDisease) {
+    public void insertNonDisablingDisease(int code, String name, String altLanguage, int sortOrder) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put("Code", nonDisablingDisease.getCode());
-        values.put("NonDisablingDisease", nonDisablingDisease.getName());
-        values.put("AltLanguage", nonDisablingDisease.getAltLanguage());
-        values.put("SortOrder", nonDisablingDisease.getId()); // Using Id as SortOrder for compatibility
+        values.put("Code", code);
+        values.put("NonDisablingDisease", name);
+        values.put("AltLanguage", altLanguage);
+        values.put("SortOrder", sortOrder);
         db.insert(tblNonDisablingDisease, null, values);
         db.close();
     }
@@ -1745,13 +1742,13 @@ public class SQLHandler extends SQLiteOpenHelper {
 
 
     // ==================== MutualInsuranceCoverage Methods ====================
-    public void insertMutualInsuranceCoverage(MutualInsuranceCoverage mutualInsuranceCoverage) {
+    public void insertMutualInsuranceCoverage(int code, String name, String altLanguage, int sortOrder) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put("Code", mutualInsuranceCoverage.getCode());
-        values.put("MutualInsuranceCoverage", mutualInsuranceCoverage.getName());
-        values.put("AltLanguage", mutualInsuranceCoverage.getAltLanguage());
-        values.put("SortOrder", mutualInsuranceCoverage.getId()); // Using Id as SortOrder for compatibility
+        values.put("Code", code);
+        values.put("MutualInsuranceCoverage", name);
+        values.put("AltLanguage", altLanguage);
+        values.put("SortOrder", sortOrder);
         db.insert(tblMutualInsuranceCoverage, null, values);
         db.close();
     }
@@ -1786,13 +1783,13 @@ public class SQLHandler extends SQLiteOpenHelper {
 
 
     // ==================== HousingType Methods ====================
-    public void insertHousingType(HousingType housingType) {
+    public void insertHousingType(int code, String name, String altLanguage, int sortOrder) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put("Code", housingType.getCode());
-        values.put("HousingType", housingType.getName());
-        values.put("AltLanguage", housingType.getAltLanguage());
-        values.put("SortOrder", housingType.getId()); // Using Id as SortOrder for compatibility
+        values.put("Code", code);
+        values.put("HousingType", name);
+        values.put("AltLanguage", altLanguage);
+        values.put("SortOrder", sortOrder);
         db.insert(tblHousingType, null, values);
         db.close();
     }
