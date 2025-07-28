@@ -525,4 +525,5 @@
     <string name="CannotAddAttachment">Impossible d\'attribuer une pièce jointe à une famille polygame</string>
     <string name="IncludeHOF">Inclure le chef de ménage</string>
     <string name="ConfirmIncludeHOF">Êtes-vous sûre de vouloir rattacher le chef de ménage à la sous-famille?</string>
+    <string name="HOFAttached">Le chef de ménage a été attaché avec succès</string>
 </resources>

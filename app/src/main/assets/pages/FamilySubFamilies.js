@@ -151,6 +151,12 @@ $(document).ready(function () {
                     {
                         text: Android.getString("Yes"),
                         click: function () {
+                            var resul = Android.AttachHeadOfFamily(parseInt(FamilyId),parseInt(SubFamilyId));
+                            if (resul == 1) {
+                                window.open('FamilySubFamilies.html?f=' + FamilyId, '_self');
+                                Android.ShowDialog(Android.getString('HOFAttached'));
+                                //Android.informUser();
+                            }
                             $(this).dialog("close");
                         }
                     },

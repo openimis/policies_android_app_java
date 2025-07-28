@@ -3350,7 +3350,6 @@ public class ClientAndroidInterface {
                 }
 
                 queryAT = query.toString();
-                Log.e("query", queryAT);
                 JSONArray attachmentsArray = sqlHandler.getResult(queryAT, null);
 
                 if (CallerId != 2) {
@@ -3487,6 +3486,7 @@ public class ClientAndroidInterface {
             @NonNull JSONArray attachmentsArray
     ) throws JSONException {
         JSONObject familyObj = familyArray.getJSONObject(0);
+        Log.e("family", familyObj.toString());
         JSONObject insureeObj = new JSONObject();
         for (int i=0; i < insureesArray.length(); i++){
             if(familyObj.getString("HOFCHFID").equals(insureesArray.getJSONObject(i).getString("CHFID"))){
@@ -6210,6 +6210,17 @@ public class ClientAndroidInterface {
         JSONArray insurees = sqlHandler.getResult(Query, arg);
 
         return insurees.length() > 0;
+    }
+
+    @JavascriptInterface
+    @SuppressWarnings("unused")
+    public int AttachHeadOfFamily(int FamilyId, int SubFamilyId) throws UserException {
+
+        ContentValues values = new ContentValues();
+        values.put("FamilyId", SubFamilyId);
+        sqlHandler.updateData("tblInsuree", values, "FamilyId = ?",
+                new String[]{String.valueOf(FamilyId)});
+        return 1;
     }
 }
 
