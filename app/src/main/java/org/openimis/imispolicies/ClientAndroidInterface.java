@@ -1194,11 +1194,26 @@ public class ClientAndroidInterface {
                 values.put("Vulnerability", data.get("0"));
             }
 
-            if (data.get("ddlFSP") != null)
+            // FSP fields
+            if (data.get("ddlFSPRegion") != null && !data.get("ddlFSPRegion").equals("") && !data.get("ddlFSPRegion").equals("0"))
+                values.put("FSPRegion", Integer.valueOf(data.get("ddlFSPRegion")));
+            if (data.get("ddlFSPDistrict") != null && !data.get("ddlFSPDistrict").equals("") && !data.get("ddlFSPDistrict").equals("0"))
+                values.put("FSPDistrict", Integer.valueOf(data.get("ddlFSPDistrict")));
+            if (data.get("ddlFSPCategory") != null && !data.get("ddlFSPCategory").equals("") && !data.get("ddlFSPCategory").equals("0"))
+                values.put("FSPCategory", Integer.valueOf(data.get("ddlFSPCategory")));
+            if (data.get("ddlFSP") != null && !data.get("ddlFSP").equals("") && !data.get("ddlFSP").equals("0"))
                 values.put("HFID", Integer.valueOf(data.get("ddlFSP")));
             values.put("CurrentAddress", data.get("txtCurrentAddress"));
             values.put("GeoLocation", "");
-            if (data.get("ddlCurrentVillage") != null)
+            
+            // Location fields
+            if (data.get("ddlCurrentRegion") != null && !data.get("ddlCurrentRegion").equals("") && !data.get("ddlCurrentRegion").equals("0"))
+                values.put("CurRegion", Integer.valueOf(data.get("ddlCurrentRegion")));
+            if (data.get("ddlCurrentDistrict") != null && !data.get("ddlCurrentDistrict").equals("") && !data.get("ddlCurrentDistrict").equals("0"))
+                values.put("CurDistrict", Integer.valueOf(data.get("ddlCurrentDistrict")));
+            if (data.get("ddlCurrentMunicipality") != null && !data.get("ddlCurrentMunicipality").equals("") && !data.get("ddlCurrentMunicipality").equals("0"))
+                values.put("CurWard", Integer.valueOf(data.get("ddlCurrentMunicipality")));
+            if (data.get("ddlCurrentVillage") != null && !data.get("ddlCurrentVillage").equals("") && !data.get("ddlCurrentVillage").equals("0"))
                 values.put("CurVillage", Integer.valueOf(data.get("ddlCurrentVillage")));
 //            if(isOffline == 1 || isOffline)
 
