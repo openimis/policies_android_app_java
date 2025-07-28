@@ -52,10 +52,10 @@ public class UpdateInsureeGraphQLRequest extends BaseGraphQLRequest {
                         // Champs existants dans le schéma
                         .residenceEnvironmentId(member.getResidenceEnvironment() != null ? member.getResidenceEnvironment() : 1)
                         .professionalSituation(member.getProfessionalSituation())
-                        .housingTypeId(member.getHousingType() != null ? Integer.parseInt(member.getHousingType()) : 1)
-                        .mutualInsuranceCoverageId(member.getMutualInsuranceCoverage() != null && member.getMutualInsuranceCoverage() ? 1 : 1)
-                        .noDisabilityId(member.getNoDisability() != null && member.getNoDisability() ? 1 : 1)
-                        .nonDisablingDiseaseId(member.getNonDisablingDisease() != null ? Integer.parseInt(member.getNonDisablingDisease()) : 1)
+                        .housingTypeId(member.getHousingType() != null && !member.getHousingType().isEmpty() ? Integer.parseInt(member.getHousingType()) : 1)
+                        .mutualInsuranceCoverageId(member.getMutualInsuranceCoverage() != null && member.getMutualInsuranceCoverage() ? 1 : 2)
+                        .noDisabilityId(member.getNoDisability() != null && member.getNoDisability() ? 1 : 2)
+                        .nonDisablingDiseaseId(member.getNonDisablingDisease() != null && !member.getNonDisablingDisease().isEmpty() ? Integer.parseInt(member.getNonDisablingDisease()) : 1)
                         .photo(
                                 PhotoInputType.builder()
                                         .filename(member.getPhotoPath())
