@@ -31,7 +31,7 @@ public class CreateFamilyGraphQLRequest extends BaseGraphQLRequest {
         java.sql.Date date = new java.sql.Date(System.currentTimeMillis());
         Response<CreateFamilyMutation.Data> response = makeSynchronous(new CreateFamilyMutation(
                 CreateFamilyMutationInput.builder()
-                        .clientMutationId(UUID.randomUUID().toString())
+                        .clientMutationId("Create family '" + family.getHeadChfId() + "'")
                         .locationId(family.getLocationId())
                         .poverty(family.isPoor())
                         .familyTypeId(family.getType() != null ? family.getType() : "H")
