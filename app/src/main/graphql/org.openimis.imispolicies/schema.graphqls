@@ -6820,6 +6820,12 @@ input FamilyHeadInsureeInputType {
   preferredPaymentMethod: String
   bankCoordinates: String
   coordinates: String
+  # NEW REQUIRED FIELDS - Server now requires these as Int!
+  residenceEnvironmentId: Int!
+  housingTypeId: Int!
+  mutualInsuranceCoverageId: Int!
+  noDisabilityId: Int!
+  nonDisablingDiseaseId: Int!
 }
 
 input PhotoInputType {
@@ -6950,6 +6956,12 @@ input CreateInsureeMutationInput {
   preferredPaymentMethod: String
   bankCoordinates: String
   coordinates: String
+  # NEW REQUIRED FIELDS - Server now requires these as Int!
+  residenceEnvironmentId: Int!
+  housingTypeId: Int!
+  mutualInsuranceCoverageId: Int!
+  noDisabilityId: Int!
+  nonDisablingDiseaseId: Int!
   clientMutationId: String
 }
 
@@ -7017,6 +7029,12 @@ input UpdateInsureeMutationInput {
   residentialProvince: String
   houseNumber: String
   bankCoordinates: String
+  # NEW REQUIRED FIELDS - Server now requires these as Int!
+  residenceEnvironmentId: Int!
+  housingTypeId: Int!
+  mutualInsuranceCoverageId: Int!
+  noDisabilityId: Int!
+  nonDisablingDiseaseId: Int!
   clientMutationId: String
 }
 

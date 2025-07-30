@@ -55,6 +55,9 @@ public class Family implements Parcelable {
     @Nullable
     private Member head = null;
 
+    @Nullable
+    private String hofUuid;
+
     public Family(
             @Nullable String headChfId,
             int id,
@@ -72,7 +75,8 @@ public class Family implements Parcelable {
             @Nullable String parentUuid,
             @NonNull List<Member> members,
             @Nullable List<Attachment> attachments,
-            @Nullable List<Policy> policies
+            @Nullable List<Policy> policies,
+            @Nullable String hofUuid
     ) {
         this.headChfId = headChfId;
         this.id = id;
@@ -91,6 +95,7 @@ public class Family implements Parcelable {
         this.members = members;
         this.attachments = attachments;
         this.policies = policies;
+        this.hofUuid = hofUuid;
     }
 
     protected Family(Parcel in) {
@@ -117,6 +122,7 @@ public class Family implements Parcelable {
         members = Objects.requireNonNull(in.createTypedArrayList(Member.CREATOR));
         attachments = in.createTypedArrayList(Attachment.CREATOR);
         policies = in.createTypedArrayList(Policy.CREATOR);
+        hofUuid = in.readString();
     }
 
     @Override
@@ -138,6 +144,7 @@ public class Family implements Parcelable {
         dest.writeTypedList(members);
         dest.writeTypedList(attachments);
         dest.writeTypedList(policies);
+        dest.writeString(hofUuid);
     }
 
     @Override
@@ -235,6 +242,9 @@ public class Family implements Parcelable {
 
     @Nullable
     public List<Policy> getPolicies (){ return policies; }
+
+    @Nullable
+    public String getHofUuid(){ return hofUuid; }
 
     public static final Creator<Family> CREATOR = new Creator<>() {
         @Override

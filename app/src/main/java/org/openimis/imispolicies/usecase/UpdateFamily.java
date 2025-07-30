@@ -31,8 +31,6 @@ public class UpdateFamily {
     @NonNull
     private final UpdateInsureeGraphQLRequest updateInsureeGraphQLRequest;
     @NonNull
-    private final CreateSubFamilyGraphQLRequest createSubFamilyGraphQLRequest;
-    @NonNull
     private final FetchInsureeInquire fetchInsureeInquire;
     @NonNull
     private final FetchFamily fetchFamily;
@@ -82,7 +80,6 @@ public class UpdateFamily {
         this.updateFamilyGraphQLRequest = updateFamilyGraphQLRequest;
         this.createInsureeGraphQLRequest = createInsureeGraphQLRequest;
         this.updateInsureeGraphQLRequest = updateInsureeGraphQLRequest;
-        this.createSubFamilyGraphQLRequest = createSubFamilyGraphQLRequest;
         this.fetchInsureeInquire = fetchInsureeInquire;
         this.fetchFamily = fetchFamily;
         this.fetchFamilyId = fetchFamilyId;

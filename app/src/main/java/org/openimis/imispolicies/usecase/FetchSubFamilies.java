@@ -62,7 +62,8 @@ public class FetchSubFamilies {
                 /* parentUuid = */ node.parent() != null ? Objects.requireNonNull(node.parent()).uuid()  : null,
                 /* insurees = */ Mapper.map(node.members().edges(), (insuree) -> toMember(insuree, node)),
                 /* attachments = */ node.attachments() != null ? Objects.requireNonNull(Mapper.map(node.attachments(), (attachment) -> toAttachment(attachment)))  : null,
-                null
+                null,
+                /* hofUuid = */ node.headInsuree().uuid()
         );
     }
 
