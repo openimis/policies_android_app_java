@@ -6250,23 +6250,31 @@ public class ClientAndroidInterface {
     }
 
     @JavascriptInterface
-    public boolean CanAttach (String familyId) {
+    public boolean CanAttach (int FamilyId, int subFamilyId) throws Exception {
         @Language("SQL")
-        String Query = "SELECT InsureeId FROM tblInsuree WHERE FamilyId=?";
-        String[] arg = {familyId};
-        JSONArray insurees = sqlHandler.getResult(Query, arg);
-
-        return insurees.length() > 0;
+        String Query = "SELECT I.FamilyId, I.CHFID FROM tblInsuree I \n"+
+        "INNER JOIN tblFamilies F ON F.InsureeChfId = I.CHFID WHERE F.FamilyId = " + FamilyId;
+        JSONArray results = sqlHandler.getResult(Query, null);
+        if(results.length() > 0){
+            int familyId = results.getJSONObject(0).getInt("FamilyId");
+            return familyId != subFamilyId;
+        }
+        return false;
     }
 
     @JavascriptInterface
     @SuppressWarnings("unused")
-    public int AttachHeadOfFamily(int FamilyId, int SubFamilyId) throws UserException {
+    public int AttachHeadOfFamily(int FamilyId, int SubFamilyId) throws Exception {
+
+        @Language("SQL")
+        String Query = "SELECT InsureeChfId FROM tblFamilies WHERE FamilyId = "+ FamilyId;
+        JSONArray results = sqlHandler.getResult(Query, null);
+        String HOFCHFID = results.getJSONObject(0).getString("InsureeChfId");
 
         ContentValues values = new ContentValues();
         values.put("FamilyId", SubFamilyId);
-        sqlHandler.updateData("tblInsuree", values, "FamilyId = ?",
-                new String[]{String.valueOf(FamilyId)});
+        sqlHandler.updateData("tblInsuree", values, "CHFID = ?",
+                new String[]{HOFCHFID});
         return 1;
     }
 }

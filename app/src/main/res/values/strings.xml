@@ -512,4 +512,5 @@
     <string name="IncludeHOF">Include Head of family</string>
     <string name="ConfirmIncludeHOF">Confirm include head of family in sub-family</string>
     <string name="HOFAttached">Head of Family attached</string>
+    <string name="HeadAlreadyAttach">Head of Family already attached</string>
 </resources>

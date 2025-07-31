@@ -13,12 +13,9 @@ $(document).ready(function () {
         Android.getString('Edit'),
         Android.getString('Detach'),
         Android.getString('Attachment'),
-        Android.getString('Delete')
+        Android.getString('Delete'),
+        Android.getString('IncludeHOF')
     ];
-
-    if(Android.CanAttach(FamilyId)){
-        options.push(Android.getString('IncludeHOF'));
-    }
 
     var url = 'FamilyPolygamy.html?f=' + FamilyId;
     Android.SetUrl(url);
@@ -140,34 +137,39 @@ $(document).ready(function () {
             });
         }
         else if(clicked == Android.getString('IncludeHOF')) {
-            $('#msgAlert').text(Android.getString('ConfirmIncludeHOF'));
-            var includeSuccess = 0;
-            $("#dialog-confirm").dialog({
-                resizable: false,
-                height: "auto",
-                width: 350,
-                modal: true,
-                buttons: [
-                    {
-                        text: Android.getString("Yes"),
-                        click: function () {
-                            var resul = Android.AttachHeadOfFamily(parseInt(FamilyId),parseInt(SubFamilyId));
-                            if (resul == 1) {
-                                window.open('FamilySubFamilies.html?f=' + FamilyId, '_self');
-                                Android.ShowDialog(Android.getString('HOFAttached'));
-                                //Android.informUser();
+
+            if(Android.CanAttach(parseInt(FamilyId), parseInt(SubFamilyId))){
+                $('#msgAlert').text(Android.getString('ConfirmIncludeHOF'));
+                var includeSuccess = 0;
+                $("#dialog-confirm").dialog({
+                    resizable: false,
+                    height: "auto",
+                    width: 350,
+                    modal: true,
+                    buttons: [
+                        {
+                            text: Android.getString("Yes"),
+                            click: function () {
+                                var resul = Android.AttachHeadOfFamily(parseInt(FamilyId),parseInt(SubFamilyId));
+                                if (resul == 1) {
+                                    window.open('FamilySubFamilies.html?f=' + FamilyId, '_self');
+                                    Android.ShowDialog(Android.getString('HOFAttached'));
+                                    //Android.informUser();
+                                }
+                                $(this).dialog("close");
                             }
-                            $(this).dialog("close");
+                        },
+                        {
+                            text: Android.getString("No"),
+                            click: function () {
+                                $(this).dialog("close");
+                            }
                         }
-                    },
-                    {
-                        text: Android.getString("No"),
-                        click: function () {
-                            $(this).dialog("close");
-                        }
-                    }
-                ]
-            });
+                    ]
+                });
+            } else {
+                Android.ShowToast(Android.getString('HeadAlreadyAttach'))
+            }
         }
     })
 });
