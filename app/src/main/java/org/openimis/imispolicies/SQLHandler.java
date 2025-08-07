@@ -441,11 +441,10 @@ public class SQLHandler extends SQLiteOpenHelper {
                             "PolicyId INTEGER" + ")"
             );
             sqLiteDatabase.execSQL(
-                    "CREATE TABLE " + tblIncomeLevel + "("
-                            + "Code INTEGER PRIMARY KEY,"
-                            + "IncomeLevel VARCHAR(100),"
-                            + "AltLanguage VARCHAR(100),"
-                            + "SortOrder INTEGER" +")"
+                    "CREATE TABLE " + tblIncomeLevel + "(" +
+                            "Id INTEGER," +
+                            "FirstLanguage TEXT," +
+                            "SecondLanguage TEXT" +")"
             );
             sqLiteDatabase.execSQL(
                     "CREATE TABLE " + tblResidenceEnvironment + "("
