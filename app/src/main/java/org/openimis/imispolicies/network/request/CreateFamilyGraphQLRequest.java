@@ -41,28 +41,14 @@ public class CreateFamilyGraphQLRequest extends BaseGraphQLRequest {
     @WorkerThread
     @NonNull
     public String create(@NonNull Family family, int officerId) throws Exception {
-        Log.d("GRAPHQL_DEBUG", "Début de la création de la famille - CreateFamilyGraphQLRequest.create()");
+
         try {
             Family.Member head = family.getHead();
             if (head == null) {
                 throw new IllegalArgumentException("Family must have a head member");
             }
 
-            // Log des valeurs actuelles
-            Log.d("GRAPHQL_DEBUG", "Résidence: " + head.getResidenceEnvironment());
-            Log.d("GRAPHQL_DEBUG", "Type de logement: " + head.getHousingType());
-            Log.d("GRAPHQL_DEBUG", "Couverture mutuelle: " + head.getMutualInsuranceCoverage());
-            Log.d("GRAPHQL_DEBUG", "Pas de handicap: " + head.getNoDisability());
-            Log.d("GRAPHQL_DEBUG", "Maladie non invalidante: " + head.getNonDisablingDisease());
-            
-            // Log indiquant qu'aucune valeur par défaut ne sera utilisée
-            Log.d("GRAPHQL_DEBUG", "Aucune valeur par défaut ne sera utilisée. Seules les valeurs saisies par l'utilisateur seront envoyées.");
-            
-            // Log des valeurs du chef de famille
-            Log.d("GRAPHQL_DEBUG", "Détails du chef de famille:");
-            Log.d("GRAPHQL_DEBUG", "- CHF ID: " + head.getChfId());
-            Log.d("GRAPHQL_DEBUG", "- Date de naissance: " + head.getDateOfBirth());
-            Log.d("GRAPHQL_DEBUG", "- Genre: " + head.getGender());
+
 
             PhotoInputType photoInput = null;
             if (head.getPhotoBytes() != null) {
@@ -119,45 +105,9 @@ public class CreateFamilyGraphQLRequest extends BaseGraphQLRequest {
                     .build()
             );
             
-            Log.d("GRAPHQL_REQUEST", "Mutation: " + mutation.toString());
-            // Afficher la requête GraphQL complète
-            // Afficher les détails de la mutation
-            Log.d("GRAPHQL_DEBUG", "=== Détails de la mutation ===");
-            Log.d("GRAPHQL_DEBUG", "- Location ID: " + family.getLocationId());
-            Log.d("GRAPHQL_DEBUG", "- Pauvre: " + family.isPoor());
-            Log.d("GRAPHQL_DEBUG", "- Type de famille: " + (family.getType() != null ? family.getType() : "H"));
-            Log.d("GRAPHQL_DEBUG", "- Adresse: " + family.getAddress());
-            Log.d("GRAPHQL_DEBUG", "- Ethnicité: " + family.getEthnicity());
-            Log.d("GRAPHQL_DEBUG", "- Numéro de confirmation: " + family.getConfirmationNumber());
-            Log.d("GRAPHQL_DEBUG", "- Type de confirmation: " + family.getConfirmationType());
-            Log.d("GRAPHQL_DEBUG", "- Hors ligne: " + family.isOffline());
-            
-            // Afficher les pièces jointes
-            if (family.getAttachments() != null) {
-                Log.d("GRAPHQL_DEBUG", "- Nombre de pièces jointes: " + family.getAttachments().size());
-            } else {
-                Log.d("GRAPHQL_DEBUG", "- Aucune pièce jointe");
-            }
-            
-            // Afficher la requête GraphQL
-            String queryString = mutation.queryDocument().toString();
-            Log.d("GRAPHQL_DEBUG", "=== Requête GraphQL ===\n" + queryString);
-            
-            Log.d("GRAPHQL_DEBUG", "=== Exécution de la mutation ===");
+
             Response<CreateFamilyMutation.Data> response = makeSynchronous(mutation);
-            if (response != null) {
-                Log.d("GRAPHQL_RESPONSE", "Code de statut: " + (response.getData() != null ? "200" : "N/A"));
-                if (response.hasErrors()) {
-                    for (com.apollographql.apollo.api.Error error : response.errors()) {
-                        Log.e("GRAPHQL_RESPONSE", "Erreur: " + error.message());
-                    }
-                }
-                if (response.getData() != null && response.getData().createFamily() != null) {
-                    Log.d("GRAPHQL_RESPONSE", "Réponse: " + response.getData().createFamily().toString());
-                }
-            } else {
-                Log.e("GRAPHQL_RESPONSE", "Réponse nulle");
-            }
+
             
             if (response != null && response.hasErrors() && response.errors() != null) {
                 String errorMessage = "Erreur GraphQL: ";
@@ -179,7 +129,6 @@ public class CreateFamilyGraphQLRequest extends BaseGraphQLRequest {
             );
             
         } catch (Exception e) {
-            Log.e("GRAPHQL_EXCEPTION", "Erreur lors de la création de la famille", e);
             throw e;
         }
     }
@@ -275,14 +224,14 @@ public class CreateFamilyGraphQLRequest extends BaseGraphQLRequest {
         try {
             // Vérifier d'abord si la valeur est null - retourner null si pas défini
             if (head.getMutualInsuranceCoverage() == null) {
-                Log.d("GRAPHQL_DEBUG", "MutualInsuranceCoverage: null (optionnel)");
+
                 return null;
             }
             
             // Convertir en String puis en int
             String value = String.valueOf(head.getMutualInsuranceCoverage());
             if (TextUtils.isEmpty(value)) {
-                Log.d("GRAPHQL_DEBUG", "MutualInsuranceCoverage: null (valeur vide)");
+
                 return null;
             }
             
@@ -294,17 +243,17 @@ public class CreateFamilyGraphQLRequest extends BaseGraphQLRequest {
                     new String[]{value});
             
             if (result == null || result.length() == 0) {
-                Log.w("GRAPHQL_DEBUG", "Code de couverture d'assurance mutuelle invalide: " + value + ", retour null");
+
                 return null;
             }
             
-            Log.d("GRAPHQL_DEBUG", "MutualInsuranceCoverage: " + intValue);
+
             return intValue;
         } catch (NumberFormatException e) {
-            Log.e("GRAPHQL_DEBUG", "Format de couverture d'assurance mutuelle invalide", e);
+
             return null;
         } catch (Exception e) {
-            Log.e("GRAPHQL_DEBUG", "Erreur lors de la validation de la couverture d'assurance mutuelle", e);
+
             return null;
         }
     }
@@ -320,7 +269,7 @@ public class CreateFamilyGraphQLRequest extends BaseGraphQLRequest {
             // Convertir en String puis en int
             String value = String.valueOf(head.getHousingType());
             if (TextUtils.isEmpty(value)) {
-                Log.d("GRAPHQL_DEBUG", "HousingType: null (valeur vide)");
+
                 return null;
             }
             
@@ -332,17 +281,17 @@ public class CreateFamilyGraphQLRequest extends BaseGraphQLRequest {
                     new String[]{value});
             
             if (result == null || result.length() == 0) {
-                Log.w("GRAPHQL_DEBUG", "Code de type de logement invalide: " + value + ", retour null");
+
                 return null;
             }
             
-            Log.d("GRAPHQL_DEBUG", "HousingType: " + intValue);
+
             return intValue;
         } catch (NumberFormatException e) {
-            Log.e("GRAPHQL_DEBUG", "Format de type de logement invalide", e);
+
             return null;
         } catch (Exception e) {
-            Log.e("GRAPHQL_DEBUG", "Erreur lors de la validation du type de logement", e);
+
             return null;
         }
     }
@@ -351,14 +300,14 @@ public class CreateFamilyGraphQLRequest extends BaseGraphQLRequest {
         try {
             // Vérifier d'abord si la valeur est null - retourner null si pas défini
             if (head.getNonDisablingDisease() == null) {
-                Log.d("GRAPHQL_DEBUG", "NonDisablingDisease: null (optionnel)");
+
                 return null;
             }
             
             // Convertir en String puis en int
             String value = String.valueOf(head.getNonDisablingDisease());
             if (TextUtils.isEmpty(value)) {
-                Log.d("GRAPHQL_DEBUG", "NonDisablingDisease: null (valeur vide)");
+
                 return null;
             }
             

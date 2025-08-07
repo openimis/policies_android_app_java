@@ -1221,21 +1221,7 @@ public class ClientAndroidInterface {
             if (rtInsureeId == 0) {//New Insuree
                 values.put("isOffline", 1);
                 
-                // Log des valeurs avant insertion
-                Log.d("INSERT_INSUREE", "=== VALEURS POUR INSERTION DANS tblInsuree ===");
-                Log.d("INSERT_INSUREE", "CHFID: " + values.get("CHFID"));
-                Log.d("INSERT_INSUREE", "LastName: " + values.get("LastName"));
-                Log.d("INSERT_INSUREE", "OtherNames: " + values.get("OtherNames"));
-                Log.d("INSERT_INSUREE", "ResidenceEnvironment: " + values.get("ResidenceEnvironment"));
-                Log.d("INSERT_INSUREE", "HousingType: " + values.get("HousingType"));
-                Log.d("INSERT_INSUREE", "MutualInsuranceCoverage: " + values.get("MutualInsuranceCoverage"));
-                Log.d("INSERT_INSUREE", "NoDisability: " + values.get("NoDisability"));
-                Log.d("INSERT_INSUREE", "NonDisablingDisease: " + values.get("NonDisablingDisease"));
-                Log.d("INSERT_INSUREE", "IncomeLevel: " + values.get("IncomeLevel"));
-                Log.d("INSERT_INSUREE", "PaymentMethod: " + values.get("PaymentMethod"));
-                Log.d("INSERT_INSUREE", "OtherHousehold: " + values.get("OtherHousehold"));
-                Log.d("INSERT_INSUREE", "AccountDetails: " + values.get("AccountDetails"));
-                Log.d("INSERT_INSUREE", "isOffline: " + values.get("isOffline"));
+
                 
                 if (isOffline == 0 || isOffline == 2) {
                     if (isOffline == 2) isOffline = 0;
@@ -1245,9 +1231,7 @@ public class ClientAndroidInterface {
                         //}
                         values.put("InsureeId", MaxInsureeId);
                         
-                        Log.d("INSERT_INSUREE", "Tentative d'insertion en ligne avec InsureeId: " + MaxInsureeId);
                         sqlHandler.insertData("tblInsuree", values);
-                        Log.d("INSERT_INSUREE", "Insertion réussie");
                         
                         if (PolicyId > 0 && isHead == 0) {
                             getFamilyPolicies(FamilyId);
@@ -1262,9 +1246,7 @@ public class ClientAndroidInterface {
                             SaveInsureePolicy(InsId, FamilyId, true, isOffline);
                         }
                     } else {
-                        Log.d("INSERT_INSUREE", "Tentative d'insertion hors ligne avec InsureeId: " + MaxInsureeId);
                         sqlHandler.insertData("tblInsuree", values);
-                        Log.d("INSERT_INSUREE", "Insertion hors ligne réussie");
                         
                         if (PolicyId > 0 && isHead == 0) {
                             getFamilyPolicies(FamilyId);
@@ -1277,9 +1259,7 @@ public class ClientAndroidInterface {
                     }
                 } else {//New Family
                     values.put("InsureeId", MaxInsureeId);
-                    Log.d("INSERT_INSUREE", "Tentative d'insertion nouvelle famille avec InsureeId: " + MaxInsureeId);
                     sqlHandler.insertData("tblInsuree", values);
-                    Log.d("INSERT_INSUREE", "Insertion nouvelle famille réussie");
                     
                     if (PolicyId > 0 && isHead == 0) {
                         getFamilyPolicies(FamilyId);
@@ -1293,22 +1273,13 @@ public class ClientAndroidInterface {
 
             } else {//Existing Insuree
                 values.put("isOffline", insureeIsOffline);
-                // Log des valeurs avant mise à jour
-                Log.d("UPDATE_INSUREE", "=== MISE À JOUR DE L'INSCRIT EXISTANT ===");
-                Log.d("UPDATE_INSUREE", "InsureeId: " + InsureeId);
-                Log.d("UPDATE_INSUREE", "ResidenceEnvironment: " + values.get("ResidenceEnvironment"));
-                Log.d("UPDATE_INSUREE", "HousingType: " + values.get("HousingType"));
-                Log.d("UPDATE_INSUREE", "MutualInsuranceCoverage: " + values.get("MutualInsuranceCoverage"));
-                Log.d("UPDATE_INSUREE", "NoDisability: " + values.get("NoDisability"));
-                Log.d("UPDATE_INSUREE", "NonDisablingDisease: " + values.get("NonDisablingDisease"));
-                Log.d("UPDATE_INSUREE", "isOffline: " + values.get("isOffline"));
+
                 
                 sqlHandler.updateData("tblInsuree", values, 
                     "InsureeId = ? AND (isOffline = ? OR isOffline = ?)",
                     new String[]{String.valueOf(InsureeId), String.valueOf(insureeIsOffline), 
                                 insureeIsOffline == 1 ? "true" : "false"});
-                                
-                Log.d("UPDATE_INSUREE", "Mise à jour effectuée");
+
             }
         } catch (NumberFormatException | UserException e) {
             e.printStackTrace();
@@ -3580,13 +3551,7 @@ public class ClientAndroidInterface {
         try {
             Family family = familyFromJSONObject(familyObj, insureesArray, insureeImages, attachmentsArray, policiesArray, premiumsArray);
             
-            // Log family data being uploaded
-            Log.d("UploadEnrols", "Starting family upload for CHFID: " + chfId);
-            Log.d("UploadEnrols", "Family data - ID: " + family.getId() + ", UUID: " + family.getUuid() + ", Members: " + family.getMembers().size() + ", Policies: " + (family.getPolicies() != null ? family.getPolicies().size() : 0));
-            Log.d("UploadEnrols", "Family location: " + family.getLocationId() + ", Head CHFID: " + family.getHeadChfId());
-            
             new UpdateFamily(activity).execute(family, chfId, global.getOfficerId());
-            Log.d("UploadEnrols", "Family upload completed successfully");
         } catch (Exception e) {
             Log.e("UploadEnrols", "Upload failed with error: " + e.getClass().getSimpleName() + ": " + e.getMessage(), e);
             
@@ -3658,8 +3623,7 @@ public class ClientAndroidInterface {
             throw new JSONException("Invalid number format - FamilyId: " + familyIdStr + ", LocationId: " + locationIdStr);
         }
         
-        Log.d("FamilyValidation", "Creating family object for HOFCHFID: " + hofChfId + ", FamilyId: " + familyIdStr + ", LocationId: " + locationIdStr);
-        Log.d("FamilyValidation", "Family validation passed - all required fields present and valid");
+
         
         List<Family.Member> members = new ArrayList<>();
         List<Family.Policy> policies = new ArrayList<>();
@@ -3724,7 +3688,7 @@ public class ClientAndroidInterface {
             throw new JSONException("Member Gender is required and cannot be empty");
         }
         
-        Log.d("MemberValidation", "Creating member object for CHFID: " + chfId + ", Name: " + lastName + " " + otherNames);
+
         
         return new Family.Member(
                 /* chfId = */ object.getString("CHFID"),

@@ -899,7 +899,6 @@ public class SQLHandler extends SQLiteOpenHelper {
 
             serializer.endTag(null, "LanguageOfSMS");
         } catch (Exception e) {
-            Log.d("CreateEnrolmentXML", "Failed to create FamilySMS tag in enrolment");
             e.printStackTrace();
         }
         serializer.endTag(null, "FamilySMS");
