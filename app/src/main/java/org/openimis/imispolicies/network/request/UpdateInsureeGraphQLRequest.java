@@ -50,16 +50,15 @@ public class UpdateInsureeGraphQLRequest extends BaseGraphQLRequest {
                         .currentAddress(member.getCurrentAddress())
                         .currentVillageId(member.getCurrentVillage() != null && member.getCurrentVillage() != 0 ? member.getCurrentVillage() : null)
                         .geolocation(member.getGeolocation())
-                        // NEW REQUIRED FIELDS - Temporarily commented until server supports UpdateInsureeMutationInput
-                        //.residenceEnvironmentId(member.getResidenceEnvironment() == 0 ? null : member.getResidenceEnvironment())
-                        //.housingTypeId(member.getHousingType() != null && !member.getHousingType().isEmpty() ? Integer.parseInt(member.getHousingType()) : null)
-                        //.mutualInsuranceCoverageId(member.getMutualInsuranceCoverage() != null && member.getMutualInsuranceCoverage() ? 1 : null)
-                        //.noDisabilityId(member.getNoDisability() != null && member.getNoDisability() ? 1 : null)
-                        //.nonDisablingDiseaseId(member.getNonDisablingDisease() != null && !member.getNonDisablingDisease().isEmpty() ? Integer.parseInt(member.getNonDisablingDisease()) : null)
-                        .incomeLevelId(member.getIncomeLevel())
+                        .residenceEnvironmentId(member.getResidenceEnvironment() != null && member.getResidenceEnvironment() != 0 ? member.getResidenceEnvironment() : null)
+                        .housingTypeId(member.getHousingType() != null && !member.getHousingType().equals("0") && !member.getHousingType().isEmpty() ? Integer.parseInt(member.getHousingType()) : null)
+                        .mutualInsuranceCoverageId(member.getMutualInsuranceCoverage() != null ? (member.getMutualInsuranceCoverage() ? 1 : 0) : null)
+                        .noDisabilityId(member.getNoDisability() != null ? (member.getNoDisability() ? 1 : 0) : null)
+                        .nonDisablingDiseaseId(member.getNonDisablingDisease() != null && !member.getNonDisablingDisease().equals("0") && !member.getNonDisablingDisease().isEmpty() ? Integer.parseInt(member.getNonDisablingDisease()) : null)
+                        .incomeLevelId(member.getIncomeLevel() != null && member.getIncomeLevel() != 0 ? member.getIncomeLevel() : null)
                         .preferredPaymentMethod(member.getPaymentMethod())
-                        .coordinates(member.getOtherHousehold() != null && !member.getOtherHousehold().isEmpty() ? member.getOtherHousehold() : null)
-                        .bankCoordinates(member.getAccountDetails() != null && !member.getAccountDetails().isEmpty() ? member.getAccountDetails() : null)
+                        .coordinates(member.getOtherHousehold())
+                        .bankCoordinates(member.getAccountDetails())
                         .professionalSituation(member.getProfessionalSituation())
                         .photo(
                                 PhotoInputType.builder()
@@ -80,5 +79,22 @@ public class UpdateInsureeGraphQLRequest extends BaseGraphQLRequest {
                                 Objects.requireNonNull(response.getData(), "data is null")
                                         .updateInsuree(), "update insuree is null")
                         .clientMutationId(), "clientMutationId is null");
+    }
+    
+    /**
+     * Convertit une chaîne en entier de manière sécurisée
+     * @param value La valeur à convertir
+     * @param defaultValue La valeur par défaut à retourner en cas d'erreur ou si la valeur est nulle/vide
+     * @return L'entier converti ou la valeur par défaut
+     */
+    private Integer parseIntSafe(String value, Integer defaultValue) {
+        if (value == null || value.isEmpty() || "null".equalsIgnoreCase(value)) {
+            return defaultValue;
+        }
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
     }
 }
