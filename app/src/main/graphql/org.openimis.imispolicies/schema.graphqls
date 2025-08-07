@@ -442,10 +442,35 @@ type InsureeGQLType implements Node {
   preferredPaymentMethod: String
   bankCoordinates: String
   coordinates: String
+  residenceEnvironment: ResidenceEnvironmentGQLType
+  noDisability: NoDisabilityGQLType
+  nonDisablingDisease: NonDisablingDiseaseGQLType
+  mutualInsuranceCoverage: MutualInsuranceCoverageGQLType
+  housingType: HousingTypeGQLType
   clientMutationId: String
 }
 
 type IncomeLevelGQLType {
+  id: String!
+}
+
+type ResidenceEnvironmentGQLType {
+  id: String!
+}
+
+type NoDisabilityGQLType {
+  id: String!
+}
+
+type NonDisablingDiseaseGQLType {
+  id: String!
+}
+
+type MutualInsuranceCoverageGQLType {
+  id: String!
+}
+
+type HousingTypeGQLType {
   id: String!
 }
 

@@ -55,7 +55,7 @@ public class CreateSubFamilyGraphQLRequest extends BaseGraphQLRequest {
                                         .professionId(head.getProfession())
                                         .educationId(head.getEducation() == 0 ? null:head.getEducation())
                                         .professionalSituation(head.getProfessionalSituation())
-                                        .incomeLevelId(head.getIncomeLevel())
+                                        .incomeLevelId(head.getIncomeLevel() != null && head.getIncomeLevel() != 0 ? head.getIncomeLevel() : null)
                                         .preferredPaymentMethod(head.getPaymentMethod())
                                         .coordinates(head.getOtherHousehold())
                                         .bankCoordinates(head.getAccountDetails())

@@ -78,6 +78,21 @@ query GetSubFamilies($familyUuid: String) {
                             incomeLevel {
                                 id
                             }
+                            residenceEnvironment {
+                                id
+                            }
+                            noDisability {
+                                id
+                            }
+                            nonDisablingDisease {
+                                id
+                            }
+                            mutualInsuranceCoverage {
+                                id
+                            }
+                            housingType {
+                                id
+                            }
                             professionalSituation
                             preferredPaymentMethod
                             bankCoordinates
