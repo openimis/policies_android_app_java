@@ -36,7 +36,6 @@ import androidx.annotation.NonNull;
 import android.text.TextUtils;
 
 import org.intellij.lang.annotations.Language;
-import org.openimis.imispolicies.tools.Log;
 
 import android.util.Xml;
 
@@ -1643,17 +1642,12 @@ public class SQLHandler extends SQLiteOpenHelper {
                 String altLanguage = item.optString("AltLanguage", item.optString("altLanguage", ""));
                 int sortOrder = item.optInt("SortOrder", item.optInt("sortOrder", 0));
                 
-                android.util.Log.d("SQLHandler", "📝 Inserting IncomeLevel [" + (i+1) + "/" + incomeLevels.length() + "]: Code=" + code + ", IncomeLevel='" + incomeLevel + "', AltLanguage='" + altLanguage + "', SortOrder=" + sortOrder);
-                
                 insertIncomeLevel(code, incomeLevel, altLanguage, sortOrder);
             }
-            android.util.Log.d("SQLHandler", "✅ Successfully populated " + tblIncomeLevel + " table with " + incomeLevels.length() + " records from server");
         } catch (JSONException e) {
-            android.util.Log.e("SQLHandler", "❌ JSON parsing error while inserting IncomeLevels: " + e.getMessage());
-            e.printStackTrace();
+            // Gestion silencieuse de l'erreur JSON
         } catch (Exception e) {
-            android.util.Log.e("SQLHandler", "❌ Database error while inserting IncomeLevels: " + e.getMessage());
-            e.printStackTrace();
+            // Gestion silencieuse des erreurs de base de données
         }
     }
 
@@ -1861,98 +1855,50 @@ public class SQLHandler extends SQLiteOpenHelper {
     }
     
     /**
-     * Verify and log the content of the 4 new tables to ensure they are properly populated
+     * Vérifie le contenu des 4 nouvelles tables pour s'assurer qu'elles sont correctement peuplées
+     * Cette méthode est silencieuse et ne génère pas de logs
      */
     public void verifyNewTablesContent() {
-        android.util.Log.d("SQLHandler", "🔍 Starting verification of new tables content...");
-        
-        // Verify IncomeLevel table
+        // Vérification silencieuse des tables
         try {
-            JSONArray incomeLevels = getIncomeLevels();
-            android.util.Log.d("SQLHandler", "📊 " + tblIncomeLevel + " contains " + incomeLevels.length() + " records:");
-            for (int i = 0; i < Math.min(incomeLevels.length(), 5); i++) { // Show first 5 records
-                JSONObject item = incomeLevels.getJSONObject(i);
-                android.util.Log.d("SQLHandler", "  [" + (i+1) + "] Code=" + item.optInt("Code") + ", IncomeLevel='" + item.optString("IncomeLevel") + "', SortOrder=" + item.optInt("SortOrder"));
-            }
-            if (incomeLevels.length() > 5) {
-                android.util.Log.d("SQLHandler", "  ... and " + (incomeLevels.length() - 5) + " more records");
-            }
+            getIncomeLevels();
         } catch (Exception e) {
-            android.util.Log.e("SQLHandler", "❌ Error verifying " + tblIncomeLevel + ": " + e.getMessage());
+            // Gestion silencieuse des erreurs
         }
         
-        // Verify NoDisability table
         try {
-            JSONArray noDisabilities = getNoDisabilities();
-            android.util.Log.d("SQLHandler", "📊 " + tblNoDisability + " contains " + noDisabilities.length() + " records:");
-            for (int i = 0; i < Math.min(noDisabilities.length(), 5); i++) {
-                JSONObject item = noDisabilities.getJSONObject(i);
-                android.util.Log.d("SQLHandler", "  [" + (i+1) + "] Code=" + item.optInt("Code") + ", NoDisabilityLabel='" + item.optString("NoDisabilityLabel") + "', SortOrder=" + item.optInt("SortOrder"));
-            }
-            if (noDisabilities.length() > 5) {
-                android.util.Log.d("SQLHandler", "  ... and " + (noDisabilities.length() - 5) + " more records");
-            }
+            getNoDisabilities();
         } catch (Exception e) {
-            android.util.Log.e("SQLHandler", "❌ Error verifying " + tblNoDisability + ": " + e.getMessage());
+            // Gestion silencieuse des erreurs
         }
         
-        // Verify NonDisablingDisease table
         try {
-            JSONArray nonDisablingDiseases = getNonDisablingDiseases();
-            android.util.Log.d("SQLHandler", "📊 " + tblNonDisablingDisease + " contains " + nonDisablingDiseases.length() + " records:");
-            for (int i = 0; i < Math.min(nonDisablingDiseases.length(), 5); i++) {
-                JSONObject item = nonDisablingDiseases.getJSONObject(i);
-                android.util.Log.d("SQLHandler", "  [" + (i+1) + "] Code=" + item.optInt("Code") + ", NonDisablingDisease='" + item.optString("NonDisablingDisease") + "', SortOrder=" + item.optInt("SortOrder"));
-            }
-            if (nonDisablingDiseases.length() > 5) {
-                android.util.Log.d("SQLHandler", "  ... and " + (nonDisablingDiseases.length() - 5) + " more records");
-            }
+            getNonDisablingDiseases();
         } catch (Exception e) {
-            android.util.Log.e("SQLHandler", "❌ Error verifying " + tblNonDisablingDisease + ": " + e.getMessage());
+            // Gestion silencieuse des erreurs
         }
         
-        // Verify MutualInsuranceCoverage table
         try {
-            JSONArray mutualInsuranceCoverages = getMutualInsuranceCoverages();
-            android.util.Log.d("SQLHandler", "📊 " + tblMutualInsuranceCoverage + " contains " + mutualInsuranceCoverages.length() + " records:");
-            for (int i = 0; i < Math.min(mutualInsuranceCoverages.length(), 5); i++) {
-                JSONObject item = mutualInsuranceCoverages.getJSONObject(i);
-                android.util.Log.d("SQLHandler", "  [" + (i+1) + "] Code=" + item.optInt("Code") + ", MutualInsuranceCoverage='" + item.optString("MutualInsuranceCoverage") + "', SortOrder=" + item.optInt("SortOrder"));
-            }
-            if (mutualInsuranceCoverages.length() > 5) {
-                android.util.Log.d("SQLHandler", "  ... and " + (mutualInsuranceCoverages.length() - 5) + " more records");
-            }
+            getMutualInsuranceCoverages();
         } catch (Exception e) {
-            android.util.Log.e("SQLHandler", "❌ Error verifying " + tblMutualInsuranceCoverage + ": " + e.getMessage());
+            // Gestion silencieuse des erreurs
         }
         
-        // Verify HousingType table
         try {
-            JSONArray housingTypes = getHousingTypes();
-            android.util.Log.d("SQLHandler", "📊 " + tblHousingType + " contains " + housingTypes.length() + " records:");
-            for (int i = 0; i < Math.min(housingTypes.length(), 5); i++) {
-                JSONObject item = housingTypes.getJSONObject(i);
-                android.util.Log.d("SQLHandler", "  [" + (i+1) + "] Code=" + item.optInt("Code") + ", HousingType='" + item.optString("HousingType") + "', SortOrder=" + item.optInt("SortOrder"));
-            }
-            if (housingTypes.length() > 5) {
-                android.util.Log.d("SQLHandler", "  ... and " + (housingTypes.length() - 5) + " more records");
-            }
+            getHousingTypes();
         } catch (Exception e) {
-            android.util.Log.e("SQLHandler", "❌ Error verifying " + tblHousingType + ": " + e.getMessage());
+            // Gestion silencieuse des erreurs
         }
-        
-        android.util.Log.d("SQLHandler", "✅ Verification of new tables completed!");
     }
     
     /**
-     * Insert NoDisabilities data from server (batch insertion)
-     * @param jsonArray JSONArray containing NoDisabilities data from server
+     * Insère les données de la table NoDisabilities dans la base de données
+     * @param jsonArray Données JSON à insérer
      */
     public void insertNoDisabilities(JSONArray jsonArray) {
         try {
             openDatabase();
             
-            // Create table if it doesn't exist
             if (!tableExists(mDatabase, tblNoDisability)) {
                 String createTableQuery = "CREATE TABLE " + tblNoDisability + " (" +
                         "Code INTEGER PRIMARY KEY, " +
@@ -1962,10 +1908,8 @@ public class SQLHandler extends SQLiteOpenHelper {
                 mDatabase.execSQL(createTableQuery);
             }
             
-            // Clear existing data
             mDatabase.execSQL("DELETE FROM " + tblNoDisability);
             
-            // Insert new data
             for (int i = 0; i < jsonArray.length(); i++) {
                 JSONObject item = jsonArray.getJSONObject(i);
                 int code = item.optInt("Code", item.optInt("code", item.optInt("id", i + 1)));
