@@ -27,14 +27,14 @@ public class UpdateInsureeGraphQLRequest extends BaseGraphQLRequest {
         java.sql.Date date = new java.sql.Date(System.currentTimeMillis());
         Response<UpdateInsureeMutation.Data> response = makeSynchronous(new UpdateInsureeMutation(
                 UpdateInsureeMutationInput.builder()
-                        //.clientMutationId(UUID.randomUUID().toString()) // Not supported by current schema
-                        //.clientMutationId("Update insuree '" + member.getChfId() + "'") // Not supported by current schema
+                        .clientMutationId(UUID.randomUUID().toString()) 
+                        .clientMutationId("Update insuree '" + member.getChfId() + "'") 
                         .uuid(member.getUuid())
                         .chfId(member.getChfId())
-                        //.familyId(member.getFamilyId()) // Not supported by current schema
-                        //.head(member.isHead()) // Not supported by current schema
+                        .familyId(member.getFamilyId()) 
+                        .head(member.isHead()) 
                         .passport(member.getIdentificationNumber())
-                        //.typeOfIdId(member.getTypeOfId()) // Type mismatch: expects Integer but got String
+                        .typeOfIdId(member.getTypeOfId()) 
                         .lastName(member.getLastName())
                         .otherNames(member.getOtherNames())
                         .dob(member.getDateOfBirth())

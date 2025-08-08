@@ -4601,17 +4601,11 @@ public class ClientAndroidInterface {
             insertRelations(Relations);
             insertPhoneDefaults(PhoneDefaults);
             insertGenders(Genders);
-            android.util.Log.d("ClientAndroidInterface", "Calling insertResidenceEnvironment with " + ResidenceEnvironments.length() + " items");
             insertResidenceEnvironment(ResidenceEnvironments);
-            android.util.Log.d("ClientAndroidInterface", "Calling insertIncomeLevel with " + IncomeLevels.length() + " items");
             insertIncomeLevel(IncomeLevels);
-            android.util.Log.d("ClientAndroidInterface", "Calling insertNoDisabilities with " + NoDisabilities.length() + " items");
             insertNoDisabilities(NoDisabilities);
-            android.util.Log.d("ClientAndroidInterface", "Calling insertNonDisablingDiseases with " + NonDisablingDiseases.length() + " items");
             insertNonDisablingDiseases(NonDisablingDiseases);
-            android.util.Log.d("ClientAndroidInterface", "Calling insertMutualInsuranceCoverages with " + MutualInsuranceCoverages.length() + " items");
             insertMutualInsuranceCoverages(MutualInsuranceCoverages);
-            android.util.Log.d("ClientAndroidInterface", "Calling insertHousingTypes with " + HousingTypes.length() + " items");
             insertHousingTypes(HousingTypes);
 
 
@@ -4640,27 +4634,21 @@ public class ClientAndroidInterface {
             insertPhoneDefaults((JSONArray) masterData.get("phoneDefaults"));
             insertGenders((JSONArray) masterData.get("genders"));
             JSONArray incomeLevels = (JSONArray) masterData.get("IncomeLevels");
-            android.util.Log.d("ClientAndroidInterface", "Found IncomeLevels in new format: " + incomeLevels.length() + " items");
             insertIncomeLevel(incomeLevels);
             JSONArray residenceEnvs = (JSONArray) masterData.get("ResidenceEnvironments");
-            android.util.Log.d("ClientAndroidInterface", "Found ResidenceEnvironments in new format: " + residenceEnvs.length() + " items");
             insertResidenceEnvironment(residenceEnvs);
             
             // Insert the 4 new reference tables
             JSONArray noDisabilities = (JSONArray) masterData.get("NoDisabilities");
-            android.util.Log.d("ClientAndroidInterface", "Found NoDisabilities in new format: " + noDisabilities.length() + " items");
             insertNoDisabilities(noDisabilities);
             
             JSONArray nonDisablingDiseases = (JSONArray) masterData.get("NonDisablingDiseases");
-            android.util.Log.d("ClientAndroidInterface", "Found NonDisablingDiseases in new format: " + nonDisablingDiseases.length() + " items");
             insertNonDisablingDiseases(nonDisablingDiseases);
             
             JSONArray mutualInsuranceCoverages = (JSONArray) masterData.get("MutualInsuranceCoverages");
-            android.util.Log.d("ClientAndroidInterface", "Found MutualInsuranceCoverages in new format: " + mutualInsuranceCoverages.length() + " items");
             insertMutualInsuranceCoverages(mutualInsuranceCoverages);
             
             JSONArray housingTypes = (JSONArray) masterData.get("HousingTypes");
-            android.util.Log.d("ClientAndroidInterface", "Found HousingTypes in new format: " + housingTypes.length() + " items");
             insertHousingTypes(housingTypes);
 
             JSONArray ContributionPlans = new JSONArray();
