@@ -113,7 +113,6 @@ public UpdateFamily(
             );
             familyId = family.getId();
         } catch (HttpException e) {
-            Log.d("UpdateFamily", "HttpException caught: " + e.getCode() + " - " + e.getMessage());
             if (e.getCode() == HttpURLConnection.HTTP_NOT_FOUND) {
 
                 checkMutation.execute(
@@ -125,10 +124,9 @@ public UpdateFamily(
                     familyId = existingFamily.getId();
                 } catch (Exception e2) {
 
-                    e2.printStackTrace();
+
                 }
             } else {
-                Log.e("UpdateFamily", "Unexpected HttpException: " + e.getCode(), e);
                 throw e;
             }
         }

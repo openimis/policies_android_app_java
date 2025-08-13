@@ -134,11 +134,13 @@ public class CreateFamilyGraphQLRequest extends BaseGraphQLRequest {
     }
 
     private FamilyAttachmentInputType toAttachment(
-            @NonNull Family.Attachment dto, int officerId
+            @NonNull Family.Attachment dto
     ){
         java.sql.Date date = new java.sql.Date(System.currentTimeMillis());
         return FamilyAttachmentInputType.builder()
                 .title(dto.getTitle())
+                .mime(dto.getMime())
+                .date(date)
                 .filename(dto.getFilename())
                 .document(dto.getContent())
                 .build();

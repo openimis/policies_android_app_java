@@ -168,7 +168,6 @@ public class ClientAndroidInterface {
 
 
     ClientAndroidInterface(@NonNull Activity activity) {
-        android.util.Log.d("ClientAndroidInterface", "ClientAndroidInterface initialized");
         this.activity = activity;
         global = (Global) activity.getApplicationContext();
         sqlHandler = new SQLHandler(activity);
@@ -177,9 +176,8 @@ public class ClientAndroidInterface {
         filePath = database.getPath();
         storageManager = StorageManager.of(activity);
         picassoInstance = new Picasso.Builder(activity)
-                .listener((picasso, path, exception) ->
-                        Log.e("Images", String.format("Image load failed: %s", path.toString()), exception))
-                .loggingEnabled(BuildConfig.LOGGING_ENABLED)
+                .listener((picasso, path, exception) -> {})
+                .loggingEnabled(false)
                 .build();
     }
 
@@ -214,7 +212,7 @@ public class ClientAndroidInterface {
                 String Adjustibility = object.getString("Adjustibility");
                 controls.put(FieldName, Adjustibility);
             } catch (JSONException e) {
-                e.printStackTrace();
+
             }
         }
     }
@@ -235,7 +233,7 @@ public class ClientAndroidInterface {
                 controls.put(FieldName, Adjustibility);
 
             } catch (JSONException e) {
-                e.printStackTrace();
+
             }
         }
         return Adjustibility;
@@ -258,7 +256,7 @@ public class ClientAndroidInterface {
                 controls.put(FieldName, Adjustibility);
 
             } catch (JSONException e) {
-                e.printStackTrace();
+
             }
         }
         return Adjustibility;
@@ -302,7 +300,7 @@ public class ClientAndroidInterface {
                     try {
                         getFamilyPolicies(FamilyId);
                     } catch (ParseException e) {
-                        e.printStackTrace();
+        
                     }
                 })
                 .setPositiveButton(R.string.Yes, (dialogInterface, i) -> {
@@ -310,7 +308,7 @@ public class ClientAndroidInterface {
                     try {
                         getFamilyPolicies(FamilyId);
                     } catch (ParseException e) {
-                        e.printStackTrace();
+        
                     }
                 }).show();
     }
@@ -322,9 +320,8 @@ public class ClientAndroidInterface {
         try {
             Resources resources = activity.getResources();
             return resources.getString(resources.getIdentifier(str, "string", activity.getPackageName()));
-        } catch (Resources.NotFoundException e) {
-            Log.e("RESOURCES", String.format("Resource \"%s\" not found", str), e);
-        }
+        } catch (Resources.NotFoundException e)
+        
         return "";
     }
 
@@ -335,8 +332,7 @@ public class ClientAndroidInterface {
         try {
             Resources resources = activity.getResources();
             return resources.getString(resources.getIdentifier(str, "string", activity.getPackageName()), arg);
-        } catch (Resources.NotFoundException e) {
-            Log.e("RESOURCES", String.format("Resource \"%s\" not found", str), e);
+        } catch (Resources.NotFoundException e)
         }
         return "";
     }
@@ -397,7 +393,7 @@ public class ClientAndroidInterface {
             }
             return JsonUtils.getIntegerOrDefault(object,"LocationId");
         } catch (JSONException e) {
-            e.printStackTrace();
+
             return null;
         }
     }
@@ -469,7 +465,7 @@ public class ClientAndroidInterface {
             object.put("value", 2);
             YesNo.put(object);
         } catch (JSONException e) {
-            e.printStackTrace();
+
         }
         return YesNo.toString();
     }
@@ -525,7 +521,7 @@ public class ClientAndroidInterface {
             object.put("value", 0);
             selectJsonArray.put(object);
         } catch (JSONException e) {
-            e.printStackTrace();
+
         }
         return selectJsonArray.toString();
     }
@@ -545,7 +541,7 @@ public class ClientAndroidInterface {
             object.put("value", 0);
             selectJsonArray.put(object);
         } catch (JSONException e) {
-            e.printStackTrace();
+
         }
         return selectJsonArray.toString();
     }
@@ -602,7 +598,7 @@ public class ClientAndroidInterface {
 
 
         } catch (JSONException e) {
-            e.printStackTrace();
+
         }
 
         return maritalStatus.toString();
@@ -634,7 +630,7 @@ public class ClientAndroidInterface {
             object.put("Method", activity.getResources().getString(R.string.TiersPay));
             paymentMethods.put(object);
         } catch (JSONException e) {
-            e.printStackTrace();
+
         }
 
         return paymentMethods.toString();
@@ -710,7 +706,7 @@ public class ClientAndroidInterface {
                 jsonHFLevels.put(jsonObject);
             }
         } catch (JSONException e) {
-            e.printStackTrace();
+
         }
 
         return jsonHFLevels.toString();
@@ -753,7 +749,7 @@ public class ClientAndroidInterface {
                 data.put(ControlName, ControlValue);
             }
         } catch (JSONException e) {
-            e.printStackTrace();
+
         }
 
         return data;
@@ -850,7 +846,7 @@ public class ClientAndroidInterface {
             return FamilyId;
 
         } catch (UserException e) {
-            e.printStackTrace();
+
             if (InsureeId != 0)
                 sqlHandler.deleteData("tblInsuree", "InsureeId = ?", new String[]{String.valueOf(InsureeId)});
             if (FamilyId > 0 && InsureeData.length() > 0)
@@ -859,7 +855,7 @@ public class ClientAndroidInterface {
             ShowDialog(activity.getResources().getString(R.string.ErrorOccurred));
 
         } catch (Exception e) {
-            e.printStackTrace();
+
 
             if (InsureeId != 0)
                 sqlHandler.deleteData("tblInsuree", "InsureeId = ?", new String[]{String.valueOf(InsureeId)});
@@ -964,7 +960,7 @@ public class ClientAndroidInterface {
             return SubFamilyId;
 
         } catch (UserException e) {
-            e.printStackTrace();
+
             if (InsureeId != 0)
                 sqlHandler.deleteData("tblInsuree", "InsureeId = ?", new String[]{String.valueOf(InsureeId)});
             if (FamilyId > 0 && InsureeData.length() > 0)
@@ -973,7 +969,7 @@ public class ClientAndroidInterface {
             ShowDialog(activity.getResources().getString(R.string.ErrorOccurred));
 
         } catch (Exception e) {
-            e.printStackTrace();
+
 
             if (InsureeId != 0)
                 sqlHandler.deleteData("tblInsuree", "InsureeId = ?", new String[]{String.valueOf(InsureeId)});
@@ -1001,7 +997,7 @@ public class ClientAndroidInterface {
             }
             return result;
         } catch (JSONException e) {
-            e.printStackTrace();
+
             return null;
         }
     }
@@ -1282,7 +1278,7 @@ public class ClientAndroidInterface {
 
             }
         } catch (NumberFormatException | UserException e) {
-            e.printStackTrace();
+
             throw new Exception(e.getMessage());
         }
 
@@ -1320,7 +1316,7 @@ public class ClientAndroidInterface {
             }
             result = outputFileName;
         } catch (IOException e) {
-            e.printStackTrace();
+
         }
 
         return result;
@@ -1477,7 +1473,7 @@ public class ClientAndroidInterface {
                 Family.getJSONObject(0).put("LanguageOfSMS", sms.get("LanguageOfSMS"));
             }
         } catch (JSONException e) {
-            e.printStackTrace();
+
         }
         return Family.toString();
     }
@@ -1741,7 +1737,7 @@ public class ClientAndroidInterface {
             try {
                 prvDate = format.parse(PEDObject.getString("ExpiryDate"));
             } catch (ParseException e) {
-                e.printStackTrace();
+
             }
             PreviousExpiryDate = addDay(prvDate, 1);
         }
@@ -1754,7 +1750,7 @@ public class ClientAndroidInterface {
             if (PolicyId > 0) ExpiryDate = format.parse(expiryDate);
             StartDate = format.parse(startDate);
         } catch (ParseException e) {
-            e.printStackTrace();
+
         }
         double PolicyValue = 0;
         int ExtraAdult = 0;
@@ -1804,14 +1800,14 @@ public class ClientAndroidInterface {
         try {
             PolicyPeriod = getPolicyPeriod(ProductId, enrollDate, null);
         } catch (ParseException e) {
-            e.printStackTrace();
+
         }
         JSONArray jsonArray = new JSONArray(PolicyPeriod);
         JSONObject jsnobject = jsonArray.getJSONObject(0);
         try {
             StartDate = format.parse(jsnobject.getString("StartDate"));
         } catch (ParseException e) {
-            e.printStackTrace();
+
         }
         if (PolicyStage.equalsIgnoreCase("N")) {
             MinDiscountDateN = addMonth(StartDate, DiscountPeriodN);
@@ -1902,7 +1898,7 @@ public class ClientAndroidInterface {
             Products = sqlHandler.getResult(ProductQuery, null);
 
         } catch (JSONException e) {
-            e.printStackTrace();
+
         }
         return Products != null ? Products.toString() : null;
     }
@@ -1998,9 +1994,9 @@ public class ClientAndroidInterface {
             }
             inProgress = false;
         } catch (NumberFormatException e) {
-            e.printStackTrace();
+
         } catch (UserException e) {
-            e.printStackTrace();
+
             throw new Exception(e.getMessage());
         }
         while (inProgress) {
@@ -2072,12 +2068,12 @@ public class ClientAndroidInterface {
                     try {//Update to new policy value
                         sqlHandler.updateData("tblPolicy", values, "PolicyId = ?", new String[]{String.valueOf(PolicyId)});
                     } catch (UserException e) {
-                        e.printStackTrace();
+        
                     }
                 }*/
 
             } catch (JSONException e) {
-                e.printStackTrace();
+
             }
         }
 
@@ -2139,7 +2135,7 @@ public class ClientAndroidInterface {
             JSONObject JmaxPolicyOb = Policies.getJSONObject(0);
             policyval = JmaxPolicyOb.getInt("PolicyValue");
         } catch (JSONException e) {
-            e.printStackTrace();
+
         }
         return policyval;
     }
@@ -2156,7 +2152,7 @@ public class ClientAndroidInterface {
             JSONObject JmaxPolicyOb = Policies.getJSONObject(0);
             totalPremium = JmaxPolicyOb.getInt("SUM(Amount)");
         } catch (JSONException e) {
-            e.printStackTrace();
+
         }
         return totalPremium;
     }
@@ -2197,9 +2193,9 @@ public class ClientAndroidInterface {
             }
             inProgress = false;
         } catch (NumberFormatException e) {
-            e.printStackTrace();
+
         } catch (UserException e) {
-            e.printStackTrace();
+
             throw new Exception(e.getMessage());
         }
         while (inProgress) {
@@ -2334,7 +2330,7 @@ public class ClientAndroidInterface {
             JSONObject JmaxIdOb = RecordedPolicies.getJSONObject(0);
             code = JmaxIdOb.getString("Id");
         } catch (JSONException e) {
-            e.printStackTrace();
+
         }
         return code;
     }
@@ -2355,7 +2351,7 @@ public class ClientAndroidInterface {
             CHFID = JsonCHFIDJSONObject.getString("CHFID");
             isOffline = JsonCHFIDJSONObject.getInt("isOffline");
         } catch (JSONException e) {
-            e.printStackTrace();
+
         }
 
 /*        String Query = "SELECT PremiumId, PayerId, Amount, Receipt , PayDate, PayType,IsOffline,isPhotoFee \n" +
@@ -2433,7 +2429,7 @@ public class ClientAndroidInterface {
             sumpremiums = JmaxPremiumOb.getInt("SUM(Amount)");
             //  CHFID = JsonCHFIDJSONObject.getString("CHFID");
         } catch (JSONException e) {
-            e.printStackTrace();
+
         }
         return sumpremiums;
     }
@@ -2448,7 +2444,7 @@ public class ClientAndroidInterface {
             JSONObject JmaxPremiumOb = policyvalue.getJSONObject(0);
             polv = JmaxPremiumOb.getInt("PolicyValue");
         } catch (JSONException e) {
-            e.printStackTrace();
+
         }
         return polv;
     }
@@ -2459,7 +2455,7 @@ public class ClientAndroidInterface {
         try {//Update to new policy value
             sqlHandler.updateData("tblPolicy", values, "PolicyId = ?", new String[]{String.valueOf(PolicyId)});
         } catch (UserException e) {
-            e.printStackTrace();
+
         }
     }
 
@@ -2506,7 +2502,7 @@ public class ClientAndroidInterface {
                 res = 1;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+
         }
         return res;
     }
@@ -2610,7 +2606,7 @@ public class ClientAndroidInterface {
         try {
             sqlHandler.insertData(TableName, Columns, result, "");
         } catch (JSONException e) {
-            e.printStackTrace();
+
         }
     }
 
@@ -2623,7 +2619,7 @@ public class ClientAndroidInterface {
         try {
             sqlHandler.insertData(TableName, Columns, Result, "");
         } catch (JSONException e) {
-            e.printStackTrace();
+
             return;
         }
     }
@@ -2733,7 +2729,7 @@ public class ClientAndroidInterface {
         try {
             return sqlHandler.getResult(Query, arg);
         } catch (Exception e) {
-            e.printStackTrace();
+
         }
 
         return null;
@@ -2748,7 +2744,7 @@ public class ClientAndroidInterface {
         try {
             sqlHandler.updateData("tblRecordedPolicies", values, "PolicyId = ?", new String[]{String.valueOf(PolicyId)});
         } catch (UserException e) {
-            e.printStackTrace();
+
         }
     }
 
@@ -2765,7 +2761,7 @@ public class ClientAndroidInterface {
         try {
             sqlHandler.updateData("tblRenewals", values, "RenewalId = ?", new String[]{String.valueOf(RenewalId)});
         } catch (UserException e) {
-            e.printStackTrace();
+
         }
     }
 
@@ -2782,7 +2778,7 @@ public class ClientAndroidInterface {
         try {
             return InsertFeedbacks(toJSONArray(feedbacks));
         } catch (JSONException e) {
-            e.printStackTrace();
+
             return false;
         }
     }
@@ -2796,7 +2792,7 @@ public class ClientAndroidInterface {
         try {
             sqlHandler.insertData(TableName, Columns, Result, "");
         } catch (JSONException e) {
-            e.printStackTrace();
+
             return false;
         }
         return true;
@@ -2839,7 +2835,7 @@ public class ClientAndroidInterface {
         try {
             sqlHandler.updateData("tblFeedbacks", values, "ClaimUUID = ?", new String[]{ClaimUUID});
         } catch (UserException e) {
-            e.printStackTrace();
+
         }
     }
 
@@ -2869,7 +2865,7 @@ public class ClientAndroidInterface {
             O = Policy.getJSONObject(0);
             StartDate = O.getString("StartDate");
         } catch (JSONException e) {
-            e.printStackTrace();
+
         }
         Date Paydate = format.parse(PayDate);
         Date Startdate = format.parse(StartDate);
@@ -2887,7 +2883,7 @@ public class ClientAndroidInterface {
         try {
             sqlHandler.updateData("tblPolicy", values, "PolicyId = ?", new String[]{String.valueOf(PolicyId)});
         } catch (UserException e) {
-            e.printStackTrace();
+
         }
         return 1;//Update Success
     }
@@ -2905,7 +2901,7 @@ public class ClientAndroidInterface {
                     enrol_result = Enrol(1);
                 } catch (UserException | JSONException | IOException | NumberFormatException e) {
                     finalPd.dismiss();
-                    e.printStackTrace();
+    
                 }
                 finalPd.dismiss();
                 if (myList.isEmpty()) {
@@ -2936,7 +2932,7 @@ public class ClientAndroidInterface {
             if (finalPd.isShowing()) {
                 finalPd.dismiss();
             }
-            e.printStackTrace();
+
             throw new Exception(e.getMessage());
         }
     }
@@ -3050,7 +3046,7 @@ public class ClientAndroidInterface {
                 try {
                     object = familiesToUpload.getJSONObject(i);
                 } catch (JSONException e) {
-                    e.printStackTrace();
+    
                     continue;
                 }
 
@@ -3182,7 +3178,7 @@ public class ClientAndroidInterface {
             try {
                 object = familiesToUpload.getJSONObject(i);
             } catch (JSONException e) {
-                e.printStackTrace();
+
             }
             if (object == null) {
                 continue;
@@ -3426,7 +3422,7 @@ public class ClientAndroidInterface {
                                     throw e;
                                 }
                             } catch (Exception e) {
-                                e.printStackTrace();
+                
                             }
                         }
                     } else {
@@ -3577,7 +3573,7 @@ public class ClientAndroidInterface {
             
             // Add detailed error to messages
             enrolMessages.add("[" + chfId + "] " + errorDetail);
-            e.printStackTrace();
+
             return -400;
         }
 
@@ -3848,7 +3844,7 @@ public class ClientAndroidInterface {
                                 images[j] = new Pair<>(files[0].getName(), imgContent);
                             }
                         } catch (IOException e) {
-                            e.printStackTrace();
+            
                         }
                     } else if (CallerId != 2) {
                         images[j] = new Pair<>("", new byte[0]);
@@ -3872,7 +3868,7 @@ public class ClientAndroidInterface {
                     }
                 }
             } catch (JSONException e) {
-                e.printStackTrace();
+
             }
         }
         return images;
@@ -3961,7 +3957,7 @@ public class ClientAndroidInterface {
                 password = decryptRarPwd(trimEncryptedPassword, trimSalt);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+
         }
 
         return password;
@@ -4000,7 +3996,7 @@ public class ClientAndroidInterface {
                     }
                 }
             } catch (JSONException e) {
-                e.printStackTrace();
+
             }
         }
     }
@@ -4089,7 +4085,6 @@ public class ClientAndroidInterface {
                         new Login().execute(username, password);
                         return true;
                     } catch (Exception e) {
-                        Log.d("ClientAndroidInterface", "Login failed", e);
                         return false;
                     }
                 }
@@ -4101,7 +4096,7 @@ public class ClientAndroidInterface {
                 }
             }.execute().get();
         } catch (Exception e) {
-            e.printStackTrace();
+
             return false;
         }
     }
@@ -4199,7 +4194,6 @@ public class ClientAndroidInterface {
                     MoveFile(xmlFiles[i], 1);
                     MoveFile(jsonFiles[i], 1);
                 } catch (Exception e) {
-                    e.printStackTrace();
                     if (
                             e instanceof HttpException &&
                                     ((HttpException) e).getCode() >= 400 &&
@@ -4299,15 +4293,12 @@ public class ClientAndroidInterface {
                     uploadStatus = new DeletePolicyRenewal().execute(renewalId);
 
                 } catch (JSONException e) {
-                    Log.e(LOG_TAG_RENEWAL, "Invalid renewal json format", e);
                     messageBuilder.append(String.format(messageFormat, renewalInsureeNo, activity.getResources().getString(R.string.InvalidRenewalFile)));
                     continue;
                 } catch (IOException e) {
-                    Log.e(LOG_TAG_RENEWAL, "Error while sending renewal", e);
                     messageBuilder.append(String.format(messageFormat, renewalInsureeNo, activity.getResources().getString(R.string.SomethingWrongServer)));
                     continue;
                 } catch (HttpException e) {
-                    Log.e(LOG_TAG_RENEWAL, "Error while sending renewal", e);
                     if (e.getCode() == HttpsURLConnection.HTTP_NOT_FOUND) {
                         messageBuilder.append(String.format(messageFormat, renewalInsureeNo, activity.getResources().getString(R.string.NotFound)));
                         break;
@@ -4318,7 +4309,6 @@ public class ClientAndroidInterface {
                         throw e;
                     }
                 } catch (Exception e) {
-                    Log.e(LOG_TAG_RENEWAL, "Error while sending renewal", e);
                     messageBuilder.append(String.format(messageFormat, renewalInsureeNo, activity.getResources().getString(R.string.InvalidRenewalFile)));
                     continue;
                 }
@@ -4395,7 +4385,6 @@ public class ClientAndroidInterface {
         }
 
         if (!status) {
-            Log.w(Global.FILE_IO_LOG_TAG, "Moving file failed: " + file.getAbsolutePath());
         }
     }
 
@@ -4419,9 +4408,7 @@ public class ClientAndroidInterface {
                     ((MainActivity) activity).ShowEnrolmentOfficerDialog();
                 });
             } catch (JSONException e) {
-                Log.e("MASTERDATA", "Error while parsing master data", e);
             } catch (UserException e) {
-                Log.e("MASTERDATA", "Error while downloading master data", e);
                 activity.runOnUiThread(() ->
                         AndroidUtils.showDialog(activity,
                                 activity.getResources().getString(R.string.DataDownloadedFailed),
@@ -4558,27 +4545,21 @@ public class ClientAndroidInterface {
                         break;
                     case "residenceenvironments":
                         ResidenceEnvironments = (JSONArray) masterData.getJSONObject(i).get(keyName);
-                        android.util.Log.d("ClientAndroidInterface", "Found ResidenceEnvironments in old format: " + ResidenceEnvironments.length() + " items");
                         break;
                     case "incomelevels":
                         IncomeLevels = (JSONArray) masterData.getJSONObject(i).get(keyName);
-                        android.util.Log.d("ClientAndroidInterface", "Found IncomeLevels in old format: " + IncomeLevels.length() + " items");
                         break;
                     case "nodisabilities":
                         NoDisabilities = (JSONArray) masterData.getJSONObject(i).get(keyName);
-                        android.util.Log.d("ClientAndroidInterface", "Found NoDisabilities in old format: " + NoDisabilities.length() + " items");
                         break;
                     case "nondisablingdiseases":
                         NonDisablingDiseases = (JSONArray) masterData.getJSONObject(i).get(keyName);
-                        android.util.Log.d("ClientAndroidInterface", "Found NonDisablingDiseases in old format: " + NonDisablingDiseases.length() + " items");
                         break;
                     case "mutualinsurancecoverages":
                         MutualInsuranceCoverages = (JSONArray) masterData.getJSONObject(i).get(keyName);
-                        android.util.Log.d("ClientAndroidInterface", "Found MutualInsuranceCoverages in old format: " + MutualInsuranceCoverages.length() + " items");
                         break;
                     case "housingtypes":
                         HousingTypes = (JSONArray) masterData.getJSONObject(i).get(keyName);
-                        android.util.Log.d("ClientAndroidInterface", "Found HousingTypes in old format: " + HousingTypes.length() + " items");
                         break;
 /*                case "officersvillages":
                     OfficerVillages = (JSONArray) masterData.getJSONObject(i).get(keyName);
@@ -4610,7 +4591,7 @@ public class ClientAndroidInterface {
 
 
         } catch (JSONException e) {
-            e.printStackTrace();
+
             throw new UserException(activity.getResources().getString(R.string.DownloadMasterDataFailed), e);
         }
     }
@@ -4671,7 +4652,7 @@ public class ClientAndroidInterface {
             insertContributionPlan(ContributionPlans);
 
         } catch (JSONException e) {
-            e.printStackTrace();
+
             throw new UserException(activity.getResources().getString(R.string.DownloadMasterDataFailed), e);
         }
     }
@@ -4687,7 +4668,7 @@ public class ClientAndroidInterface {
                     columnsList.add(keys.next());
                 Columns = columnsList.toArray(new String[0]);
             } catch (JSONException e) {
-                e.printStackTrace();
+
             }
         }
         return Columns;
@@ -4700,7 +4681,7 @@ public class ClientAndroidInterface {
             String[] Columns = getColumnNames(jsonArray);
             sqlHandler.insertData("tblConfirmationTypes", Columns, jsonArray, "DELETE FROM tblConfirmationTypes");
         } catch (Exception e) {
-            e.printStackTrace();
+
         }
 
     }
@@ -4816,12 +4797,12 @@ public class ClientAndroidInterface {
         try {
             object = Families.getJSONObject(0);
         } catch (JSONException e) {
-            e.printStackTrace();
+
         }
         try {
             TotalFamilies = object != null ? Integer.parseInt(object.getString("Families")) : 0;
         } catch (JSONException e) {
-            e.printStackTrace();
+
         }
         return TotalFamilies;
     }
@@ -4837,12 +4818,12 @@ public class ClientAndroidInterface {
         try {
             object = Insuree.getJSONObject(0);
         } catch (JSONException e) {
-            e.printStackTrace();
+
         }
         try {
             TotalInsuree = object != null ? Integer.parseInt(object.getString("Insuree")) : 0;
         } catch (JSONException e) {
-            e.printStackTrace();
+
         }
         return TotalInsuree;
     }
@@ -4858,12 +4839,12 @@ public class ClientAndroidInterface {
         try {
             object = Policy.getJSONObject(0);
         } catch (JSONException e) {
-            e.printStackTrace();
+
         }
         try {
             TotalPolicies = object != null ? Integer.parseInt(object.getString("Policies")) : 0;
         } catch (JSONException e) {
-            e.printStackTrace();
+
         }
         return TotalPolicies;
     }
@@ -4879,12 +4860,12 @@ public class ClientAndroidInterface {
         try {
             object = Premium.getJSONObject(0);
         } catch (JSONException e) {
-            e.printStackTrace();
+
         }
         try {
             TotalPremiums = object != null ? Integer.parseInt(object.getString("Premiums")) : 0;
         } catch (JSONException e) {
-            e.printStackTrace();
+
         }
         return TotalPremiums;
     }
@@ -4909,7 +4890,7 @@ public class ClientAndroidInterface {
                 RegionId = Integer.parseInt(object.getString("RegionId"));
                 DistrictId = Integer.parseInt(object.getString("DistrictId"));
             } catch (JSONException e) {
-                e.printStackTrace();
+
             }
 
             @Language("SQL")
@@ -4942,7 +4923,6 @@ public class ClientAndroidInterface {
         try {
             activity.startActivityForResult(intent, RESULT_SCAN);
         } catch (Exception e) {
-            Log.e("ENROL", "Error while trying to initiate QR scan", e);
         }
     }
 
@@ -4989,7 +4969,7 @@ public class ClientAndroidInterface {
             String Query = "SELECT MaxInstallments from tblProduct where ProdId = " + ProdId + "";
             MaxInstallArray = sqlHandler.getResult(Query, null);
         } catch (Exception e) {
-            e.printStackTrace();
+
         }
 
         if (MaxInstallArray == null) {
@@ -5001,7 +4981,7 @@ public class ClientAndroidInterface {
                 JSONObject MaxObject = MaxInstallArray.getJSONObject(i);
                 MaxInstallments = MaxObject.getInt("MaxInstallments");
             } catch (JSONException e) {
-                e.printStackTrace();
+
             }
         }
         return MaxInstallments;
@@ -5019,7 +4999,7 @@ public class ClientAndroidInterface {
             String Query = "SELECT GracePeriod from tblProduct where ProdId = " + ProdId + "";
             GracePeriodArray = sqlHandler.getResult(Query, null);
         } catch (Exception e) {
-            e.printStackTrace();
+
         }
         if (GracePeriodArray == null) {
             return 0;
@@ -5031,7 +5011,7 @@ public class ClientAndroidInterface {
                 JSONObject MaxObject = GracePeriodArray.getJSONObject(i);
                 gracePeriod = MaxObject.getInt("GracePeriod");
             } catch (JSONException e) {
-                e.printStackTrace();
+
             }
         }
         return gracePeriod;
@@ -5048,7 +5028,7 @@ public class ClientAndroidInterface {
                 MaxObject = MaxInstallArray.getJSONObject(i);
                 ProdId = MaxObject.getInt("ProdId");
             } catch (JSONException e) {
-                e.printStackTrace();
+
             }
         }
         return ProdId;
@@ -5067,7 +5047,7 @@ public class ClientAndroidInterface {
                 MaxObject = MaxInstallArray.getJSONObject(i);
                 PolicyStatus = MaxObject.getInt("PolicyStatus");
             } catch (JSONException e) {
-                e.printStackTrace();
+
             }
         }
         return PolicyStatus;
@@ -5097,7 +5077,7 @@ public class ClientAndroidInterface {
             InsObject = InsArray.getJSONObject(0);
             TotalIns = Integer.parseInt(InsObject.getString("TotalIns"));
         } catch (JSONException e) {
-            e.printStackTrace();
+
         }
         @Language("SQL")
         String PolicyQuery = " SELECT PolicyId,PolicyValue,EffectiveDate,PolicyStage,ProdID,StartDate, EnrollDate,isOffline FROM tblPolicy WHERE FamilyID  =  " + FamilyId;
@@ -5113,7 +5093,7 @@ public class ClientAndroidInterface {
                 ProdID = Integer.parseInt(PolicyObject.getString("ProdId"));
                 EnrollmentDate = PolicyObject.getString("EnrollDate");
             } catch (JSONException e) {
-                e.printStackTrace();
+
             }
             @Language("SQL")
             String MemberCount = "SELECT MemberCount,StartCycle1 FROM tblProduct WHERE ProdId =" + ProdID;
@@ -5126,7 +5106,7 @@ public class ClientAndroidInterface {
                     HasCycle = true;
                 }
             } catch (JSONException e) {
-                e.printStackTrace();
+
             }
             if (MaxMember >= TotalIns) {
                 if (!Activate) EffectiveDate = null;
@@ -5138,7 +5118,7 @@ public class ClientAndroidInterface {
                     JSONObject JmaxOb = JsonA.getJSONObject(0);
                     MaxInsureePolicyId = JmaxOb.getInt("InsureePolicyId");
                 } catch (JSONException e) {
-                    e.printStackTrace();
+
                 }
 
 
@@ -5153,7 +5133,7 @@ public class ClientAndroidInterface {
                     ExpiryDate = PolicyObject2.getString("ExpiryDate");
                     EnrollDate = PolicyObject2.getString("EnrollDate");
                 } catch (JSONException e) {
-                    e.printStackTrace();
+
                 }
                 values.put("InsureePolicyId", MaxInsureePolicyId);
                 values.put("InsureeId", InsureId);
@@ -5182,7 +5162,7 @@ public class ClientAndroidInterface {
             JSONObject JmaxOb = JsonA.getJSONObject(0);
             MaxInsureePolicyId = JmaxOb.getInt("InsureePolicyId");
         } catch (JSONException e) {
-            e.printStackTrace();
+
         }
         @Language("SQL")
         String MemberCount = "SELECT MemberCount FROM tblProduct Prod  \n" +
@@ -5194,7 +5174,7 @@ public class ClientAndroidInterface {
             JSONObject MCObject = MCArray.getJSONObject(0);
             MaxMember = Integer.parseInt(MCObject.getString("MemberCount"));
         } catch (JSONException e) {
-            e.printStackTrace();
+
         }*/
         @Language("SQL")
         String SavePolicyInsuree = "INSERT INTO tblInsureePolicy(InsureePolicyId,InsureeId,PolicyId,EnrollmentDate,StartDate,EffectiveDate,ExpiryDate,isOffline)\n" +
@@ -5218,7 +5198,7 @@ public class ClientAndroidInterface {
             O = Policy.getJSONObject(0);
             EffectiveDate = O.getString("EffectiveDate");
         } catch (JSONException e) {
-            e.printStackTrace();
+
         }
 
         values.put("EffectiveDate", EffectiveDate);
@@ -5226,7 +5206,7 @@ public class ClientAndroidInterface {
         try {
             sqlHandler.updateData("tblInsureePolicy", values, "PolicyId = ?", new String[]{String.valueOf(PolicyId)});
         } catch (UserException e) {
-            e.printStackTrace();
+
         }
     }
 
@@ -5284,7 +5264,7 @@ public class ClientAndroidInterface {
             editor.putString("salt", trimSalt);
             editor.apply();
         } catch (Exception e) {
-            e.printStackTrace();
+
         }
     }
 
@@ -5303,7 +5283,7 @@ public class ClientAndroidInterface {
             editor.putString("salt", trimSalt);
             editor.apply();
         } catch (Exception e) {
-            e.printStackTrace();
+
         }
     }
 
@@ -5344,7 +5324,6 @@ public class ClientAndroidInterface {
 //                }
                 return 1;
             } catch (Exception e) {
-                Log.e("MODIFYFAMILY", "Error while downloading a family", e);
                 if (e instanceof HttpException && ((HttpException) e).getCode() == HttpURLConnection.HTTP_NOT_FOUND) {
                     ShowDialog(activity.getResources().getString(R.string.InsuranceNumberNotFound));
                 } else if(e.getMessage().contains("Failed to execute http call")){
@@ -5373,8 +5352,7 @@ public class ClientAndroidInterface {
                             family.getSms().getLanguage()
                     );
                 } catch (Exception e) {
-                    e.printStackTrace();
-                    Log.w("ModifyFamily", "No familySMS data in family payload");
+
                 }
             }
         }
@@ -5528,7 +5506,7 @@ public class ClientAndroidInterface {
                 TotalFamilies = object != null ? Integer.parseInt(object.getString("Families")) : 0;
             }
         } catch (JSONException e) {
-            e.printStackTrace();
+
         }
         return TotalFamilies;
     }
@@ -5544,7 +5522,7 @@ public class ClientAndroidInterface {
             JSONObject object = Insuree.getJSONObject(0);
             TotalInsuree = object != null ? Integer.parseInt(object.getString("Insuree")) : 0;
         } catch (JSONException e) {
-            e.printStackTrace();
+
         }
         return TotalInsuree;
     }
@@ -5560,7 +5538,7 @@ public class ClientAndroidInterface {
             JSONObject object = Policy.getJSONObject(0);
             TotalPolicies = object != null ? Integer.parseInt(object.getString("Policies")) : 0;
         } catch (JSONException e) {
-            e.printStackTrace();
+
         }
         return TotalPolicies;
     }
@@ -5576,7 +5554,7 @@ public class ClientAndroidInterface {
             JSONObject object = Premium.getJSONObject(0);
             TotalPremiums = object != null ? Integer.parseInt(object.getString("Premiums")) : 0;
         } catch (JSONException e) {
-            e.printStackTrace();
+
         }
         return TotalPremiums;
     }
@@ -5593,7 +5571,7 @@ public class ClientAndroidInterface {
             JSONObject object = Premium.getJSONObject(0);
             TotalPremiums = object != null ? Integer.parseInt(object.getString("Premiums")) : 0;
         } catch (JSONException e) {
-            e.printStackTrace();
+
         }
         return TotalPremiums;
     }
@@ -5628,7 +5606,7 @@ public class ClientAndroidInterface {
             }
 
         } catch (JSONException e) {
-            e.printStackTrace();
+
         }
         return TotalPremiums;
     }
@@ -5653,7 +5631,7 @@ public class ClientAndroidInterface {
                 O = Renews.getJSONObject(0);
                 locationId = Integer.parseInt(O.getString("LocationId"));
             } catch (JSONException | NumberFormatException e) {
-                e.printStackTrace();
+
             }
         }
 
@@ -5667,7 +5645,7 @@ public class ClientAndroidInterface {
         try {
             status = getFamilyStatus(FamilyId);
         } catch (JSONException e) {
-            e.printStackTrace();
+
         }
         return status;
     }
@@ -5712,7 +5690,7 @@ public class ClientAndroidInterface {
             if (DeleteInfo.equalsIgnoreCase("I")) DeleteInsuree(Id);//family and insuree page
             Toast.makeText(activity, activity.getResources().getString(R.string.dataDeleted), Toast.LENGTH_LONG).show();
         } catch (Exception e) {
-            e.printStackTrace();
+
         }
 
         return DataDeleted;
@@ -5730,9 +5708,9 @@ public class ClientAndroidInterface {
             String TableName = "tblInsureePolicy";
             String WhereClause = "PolicyId=" + PolicyId + " OR InsureeId=" + InsureeId + "";
             sqlHandler.deleteData(TableName, WhereClause, null);
-        } catch (Exception ex) {
-            ex.printStackTrace();
+        } catch (JSONException ignored) {
         }
+
     }
 
     @JavascriptInterface
@@ -5759,7 +5737,7 @@ public class ClientAndroidInterface {
                 rule = defaultValue;
             }
         } catch (JSONException e) {
-            e.printStackTrace();
+
         }
         return rule;
     }
@@ -5882,7 +5860,7 @@ public class ClientAndroidInterface {
                 return false;
             }
         } catch (JSONException e) {
-            e.printStackTrace();
+
         }
         return true;
     }
@@ -5923,7 +5901,7 @@ public class ClientAndroidInterface {
             JSONObject JmaxPolicyOb = JsonMaxPolicy.getJSONObject(0);
             return JmaxPolicyOb.getInt(idFieldName);
         } catch (JSONException e) {
-            e.printStackTrace();
+
             throw new SQLException(
                     "Couldn't get max id " + idFieldName +
                             " for table " + tableName);
@@ -6099,7 +6077,7 @@ public class ClientAndroidInterface {
             object.put("AltLanguage", "Annuelle");
             Periodicity.put(object);
         } catch (JSONException e) {
-            e.printStackTrace();
+
         }
         return Periodicity.toString();
     }
@@ -6149,7 +6127,7 @@ public class ClientAndroidInterface {
             TempAttachments = new JSONArray();
 
         } catch (JSONException e) {
-            e.printStackTrace();
+
         }
 
     }
@@ -6245,7 +6223,7 @@ public class ClientAndroidInterface {
             object.put("Default", false);
             PaymentDay.put(object);
         } catch (JSONException e) {
-            e.printStackTrace();
+
         }
         return PaymentDay.toString();
     }
@@ -6401,7 +6379,7 @@ public class ClientAndroidInterface {
                 defaultAge = ConfigObject.getInt("Usage");
             }
         } catch (JSONException e) {
-            e.printStackTrace();
+
         }
         return defaultAge;
     }
