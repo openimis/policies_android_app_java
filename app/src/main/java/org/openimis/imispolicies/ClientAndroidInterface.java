@@ -168,7 +168,6 @@ public class ClientAndroidInterface {
 
 
     ClientAndroidInterface(@NonNull Activity activity) {
-        android.util.Log.d("ClientAndroidInterface", "ClientAndroidInterface initialized");
         this.activity = activity;
         global = (Global) activity.getApplicationContext();
         sqlHandler = new SQLHandler(activity);
