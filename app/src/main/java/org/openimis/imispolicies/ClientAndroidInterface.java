@@ -168,7 +168,6 @@ public class ClientAndroidInterface {
 
 
     ClientAndroidInterface(@NonNull Activity activity) {
-        android.util.Log.d("ClientAndroidInterface", "ClientAndroidInterface initialized");
         this.activity = activity;
         global = (Global) activity.getApplicationContext();
         sqlHandler = new SQLHandler(activity);
@@ -1220,9 +1219,6 @@ public class ClientAndroidInterface {
 
             if (rtInsureeId == 0) {//New Insuree
                 values.put("isOffline", 1);
-                
-
-                
                 if (isOffline == 0 || isOffline == 2) {
                     if (isOffline == 2) isOffline = 0;
                     if (global.isNetworkAvailable()) {
@@ -1230,9 +1226,7 @@ public class ClientAndroidInterface {
                         MaxInsureeId = -MaxInsureeId;
                         //}
                         values.put("InsureeId", MaxInsureeId);
-                        
                         sqlHandler.insertData("tblInsuree", values);
-                        
                         if (PolicyId > 0 && isHead == 0) {
                             getFamilyPolicies(FamilyId);
                         }
@@ -1247,7 +1241,6 @@ public class ClientAndroidInterface {
                         }
                     } else {
                         sqlHandler.insertData("tblInsuree", values);
-                        
                         if (PolicyId > 0 && isHead == 0) {
                             getFamilyPolicies(FamilyId);
                         }
@@ -1273,8 +1266,6 @@ public class ClientAndroidInterface {
 
             } else {//Existing Insuree
                 values.put("isOffline", insureeIsOffline);
-
-                
                 sqlHandler.updateData("tblInsuree", values, 
                     "InsureeId = ? AND (isOffline = ? OR isOffline = ?)",
                     new String[]{String.valueOf(InsureeId), String.valueOf(insureeIsOffline), 
@@ -3553,7 +3544,6 @@ public class ClientAndroidInterface {
             
             new UpdateFamily(activity).execute(family, chfId, global.getOfficerId());
         } catch (Exception e) {
-            Log.e("UploadEnrols", "Upload failed with error: " + e.getClass().getSimpleName() + ": " + e.getMessage(), e);
             
             // Capture detailed error information
             String errorMessage = e.getMessage();
@@ -3574,13 +3564,12 @@ public class ClientAndroidInterface {
             } else {
                 errorDetail = "Unknown Error: " + (errorMessage != null ? errorMessage : "No error message");
             }
-            
             // Add detailed error to messages
             enrolMessages.add("[" + chfId + "] " + errorDetail);
             e.printStackTrace();
             return -400;
         }
-
+        
         return 0;
     }
     private Family familyFromJSONObject(
@@ -3596,12 +3585,10 @@ public class ClientAndroidInterface {
         if (hofChfId == null || hofChfId.trim().isEmpty()) {
             throw new JSONException("HOFCHFID is required and cannot be empty");
         }
-        
         String familyIdStr = json.getString("FamilyId");
         if (familyIdStr == null || familyIdStr.trim().isEmpty()) {
             throw new JSONException("FamilyId is required and cannot be empty");
         }
-        
         String locationIdStr = json.getString("LocationId");
         if (locationIdStr == null || locationIdStr.trim().isEmpty()) {
             throw new JSONException("LocationId is required and cannot be empty");
@@ -3622,9 +3609,6 @@ public class ClientAndroidInterface {
         } catch (NumberFormatException e) {
             throw new JSONException("Invalid number format - FamilyId: " + familyIdStr + ", LocationId: " + locationIdStr);
         }
-        
-
-        
         List<Family.Member> members = new ArrayList<>();
         List<Family.Policy> policies = new ArrayList<>();
         List<Family.Attachment> familyAttachments = new ArrayList<>();
@@ -3687,9 +3671,6 @@ public class ClientAndroidInterface {
         if (gender == null || gender.trim().isEmpty()) {
             throw new JSONException("Member Gender is required and cannot be empty");
         }
-        
-
-        
         return new Family.Member(
                 /* chfId = */ object.getString("CHFID"),
                 /* isHead = */ JsonUtils.getBooleanOrDefault(object, "isHead", false),
