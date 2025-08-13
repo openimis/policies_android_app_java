@@ -27,14 +27,14 @@ public class UpdateInsureeGraphQLRequest extends BaseGraphQLRequest {
         java.sql.Date date = new java.sql.Date(System.currentTimeMillis());
         Response<UpdateInsureeMutation.Data> response = makeSynchronous(new UpdateInsureeMutation(
                 UpdateInsureeMutationInput.builder()
-                        .clientMutationId(UUID.randomUUID().toString())
-                        .clientMutationLabel("Update insuree '" + member.getChfId() + "'")
+                        .clientMutationId(UUID.randomUUID().toString()) 
+                        .clientMutationId("Update insuree '" + member.getChfId() + "'") 
                         .uuid(member.getUuid())
                         .chfId(member.getChfId())
-                        .familyId(member.getFamilyId())
-                        .head(member.isHead())
+                        .familyId(member.getFamilyId()) 
+                        .head(member.isHead()) 
                         .passport(member.getIdentificationNumber())
-                        .typeOfIdId(member.getTypeOfId())
+                        .typeOfIdId(member.getTypeOfId()) 
                         .lastName(member.getLastName())
                         .otherNames(member.getOtherNames())
                         .dob(member.getDateOfBirth())
@@ -50,8 +50,15 @@ public class UpdateInsureeGraphQLRequest extends BaseGraphQLRequest {
                         .currentAddress(member.getCurrentAddress())
                         .currentVillageId(member.getCurrentVillage() != null && member.getCurrentVillage() != 0 ? member.getCurrentVillage() : null)
                         .geolocation(member.getGeolocation())
-                        .incomeLevelId(member.getIncomeLevel())
+                        .residenceEnvironmentId(member.getResidenceEnvironment() != null && member.getResidenceEnvironment() != 0 ? member.getResidenceEnvironment() : null)
+                        .housingTypeId(member.getHousingType() != null && !member.getHousingType().equals("0") && !member.getHousingType().isEmpty() ? Integer.parseInt(member.getHousingType()) : null)
+                        .mutualInsuranceCoverageId(member.getMutualInsuranceCoverage() != null ? (member.getMutualInsuranceCoverage() ? 1 : 0) : null)
+                        .noDisabilityId(member.getNoDisability() != null ? (member.getNoDisability() ? 1 : 0) : null)
+                        .nonDisablingDiseaseId(member.getNonDisablingDisease() != null && !member.getNonDisablingDisease().equals("0") && !member.getNonDisablingDisease().isEmpty() ? Integer.parseInt(member.getNonDisablingDisease()) : null)
+                        .incomeLevelId(member.getIncomeLevel() != null && member.getIncomeLevel() != 0 ? member.getIncomeLevel() : null)
                         .preferredPaymentMethod(member.getPaymentMethod())
+                        .coordinates(member.getOtherHousehold())
+                        .bankCoordinates(member.getAccountDetails())
                         .professionalSituation(member.getProfessionalSituation())
                         .photo(
                                 PhotoInputType.builder()
@@ -72,5 +79,22 @@ public class UpdateInsureeGraphQLRequest extends BaseGraphQLRequest {
                                 Objects.requireNonNull(response.getData(), "data is null")
                                         .updateInsuree(), "update insuree is null")
                         .clientMutationId(), "clientMutationId is null");
+    }
+    
+    /**
+     * Convertit une chaîne en entier de manière sécurisée
+     * @param value La valeur à convertir
+     * @param defaultValue La valeur par défaut à retourner en cas d'erreur ou si la valeur est nulle/vide
+     * @return L'entier converti ou la valeur par défaut
+     */
+    private Integer parseIntSafe(String value, Integer defaultValue) {
+        if (value == null || value.isEmpty() || "null".equalsIgnoreCase(value)) {
+            return defaultValue;
+        }
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
     }
 }

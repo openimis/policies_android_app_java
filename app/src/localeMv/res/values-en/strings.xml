@@ -481,4 +481,10 @@
     <string name="PaymentDay">Payment day</string>
     <string name="Periodicity">Periodicity</string>
     <string name="CheckUpdate">Check for updates</string>
+    
+    <!-- New dropdown selection strings -->
+    <string name="SelectNoDisability">Select disability</string>
+    <string name="SelectNonDisablingDisease">Select disease</string>
+    <string name="SelectMutualInsuranceCoverage">Select coverage</string>
+    <string name="SelectHousingType">Select housing</string>
 </resources>

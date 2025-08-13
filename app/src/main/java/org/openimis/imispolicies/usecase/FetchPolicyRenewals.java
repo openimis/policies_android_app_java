@@ -36,10 +36,10 @@ public class FetchPolicyRenewals {
     private PolicyRenewal toRenewal(@NonNull GetRenewalsQuery.Edge edge) {
         GetRenewalsQuery.Node node = Objects.requireNonNull(edge.node());
         return new PolicyRenewal(
-                /* id = */ IdUtils.getIdFromGraphQLString(node.id()),
+                /* id = */ node.id() != null ? IdUtils.getIdFromGraphQLString(node.id()) : 0,
                 /* uuid = */ node.uuid(),
-                /* policyId = */ IdUtils.getIdFromGraphQLString(node.policy().id()),
-                /* officerId = */ IdUtils.getIdFromGraphQLString(node.policy().officer().id()),
+                /* policyId = */ node.policy() != null && node.policy().id() != null ? IdUtils.getIdFromGraphQLString(node.policy().id()) : 0,
+                /* officerId = */ node.policy() != null && node.policy().officer() != null && node.policy().officer().id() != null ? IdUtils.getIdFromGraphQLString(node.policy().officer().id()) : 0,
                 /* officerCode = */ node.policy().officer().code(),
                 /* chfId = */ node.insuree().chfId(),
                 /* lastName = */ node.insuree().lastName(),

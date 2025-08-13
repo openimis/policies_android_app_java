@@ -53,7 +53,9 @@ public class CheckMutation {
         } while (status == null || status == STATUS_RECEIVED);
 
         if (status == STATUS_ERROR) {
-            throw new IllegalStateException(message + ":\n" + getErrorDetail(node.error()));
+            String errorDetail = getErrorDetail(node.error());
+            android.util.Log.e("CheckMutation", "Mutation failed with status ERROR. UUID: " + uuid + ", Error: " + errorDetail);
+            throw new IllegalStateException(message + ":\n" + errorDetail);
         }
     }
 

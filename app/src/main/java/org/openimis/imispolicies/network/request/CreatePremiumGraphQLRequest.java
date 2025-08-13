@@ -22,7 +22,7 @@ public class CreatePremiumGraphQLRequest extends BaseGraphQLRequest {
         Response<CreatePremiumMutation.Data> response = makeSynchronous(new CreatePremiumMutation(
                 CreatePremiumMutationInput.builder()
                         .clientMutationId(UUID.randomUUID().toString())
-                        .clientMutationLabel("Create contribution '" + premium.getPolicyUuid() + "'")
+                        .clientMutationId("Create contribution '" + premium.getPolicyUuid() + "'")
                         .policyUuid(premium.getPolicyUuid())
                         .amount(premium.getAmount())
                         .receipt(premium.getReceipt())

@@ -1111,9 +1111,29 @@ public class ClientAndroidInterface {
             if (!TextUtils.isEmpty(data.get("ddlIncomeLevel")) && !data.get("ddlIncomeLevel").equals("0"))
                 IncomeLevel = Integer.valueOf(data.get("ddlIncomeLevel"));
 
+            Integer ResidenceEnvironment = null;
+            if (!TextUtils.isEmpty(data.get("ddlResidenceEnvironment")) && !data.get("ddlResidenceEnvironment").equals("0"))
+                ResidenceEnvironment = Integer.valueOf(data.get("ddlResidenceEnvironment"));
+
             String PaymentMethod = "null";
             if (!TextUtils.isEmpty(data.get("ddlPaymentMethod")) && !data.get("ddlPaymentMethod").equals("0"))
                 PaymentMethod = data.get("ddlPaymentMethod");
+
+            Integer NoDisability = null;
+            if (!TextUtils.isEmpty(data.get("ddlNoDisability")) && !data.get("ddlNoDisability").equals("0"))
+                NoDisability = Integer.valueOf(data.get("ddlNoDisability"));
+
+            Integer NonDisablingDisease = null;
+            if (!TextUtils.isEmpty(data.get("ddlNonDisablingDisease")) && !data.get("ddlNonDisablingDisease").equals("0"))
+                NonDisablingDisease = Integer.valueOf(data.get("ddlNonDisablingDisease"));
+
+            Integer MutualInsuranceCoverage = null;
+            if (!TextUtils.isEmpty(data.get("ddlMutualInsuranceCoverage")) && !data.get("ddlMutualInsuranceCoverage").equals("0"))
+                MutualInsuranceCoverage = Integer.valueOf(data.get("ddlMutualInsuranceCoverage"));
+
+            Integer HousingType = null;
+            if (!TextUtils.isEmpty(data.get("ddlHousingType")) && !data.get("ddlHousingType").equals("0"))
+                HousingType = Integer.valueOf(data.get("ddlHousingType"));
 
             String IdentificationType = "null";
             if (!TextUtils.isEmpty(data.get("ddlIdentificationType")) && !data.get("ddlIdentificationType").equals(""))
@@ -1158,9 +1178,14 @@ public class ClientAndroidInterface {
             values.put("Email", data.get("txtEmail"));
             values.put("TypeOfId", IdentificationType);
             values.put("IncomeLevel", IncomeLevel);
+            values.put("ResidenceEnvironment", ResidenceEnvironment);
             values.put("PaymentMethod", PaymentMethod);
             values.put("OtherHousehold", data.get("txtOtherHousehold"));
             values.put("AccountDetails", data.get("txtAccountDetails"));
+            values.put("NoDisability", NoDisability);
+            values.put("NonDisablingDisease", NonDisablingDisease);
+            values.put("MutualInsuranceCoverage", MutualInsuranceCoverage);
+            values.put("HousingType", HousingType);
 
             if (data.get("ddlVulnerability") != null && !data.get("ddlVulnerability").equals("")) {
                 values.put("Vulnerability", data.get("ddlVulnerability"));
@@ -1168,17 +1193,35 @@ public class ClientAndroidInterface {
                 values.put("Vulnerability", data.get("0"));
             }
 
-            if (data.get("ddlFSP") != null)
+            // FSP fields
+            if (data.get("ddlFSPRegion") != null && !data.get("ddlFSPRegion").equals("") && !data.get("ddlFSPRegion").equals("0"))
+                values.put("FSPRegion", Integer.valueOf(data.get("ddlFSPRegion")));
+            if (data.get("ddlFSPDistrict") != null && !data.get("ddlFSPDistrict").equals("") && !data.get("ddlFSPDistrict").equals("0"))
+                values.put("FSPDistrict", Integer.valueOf(data.get("ddlFSPDistrict")));
+            if (data.get("ddlFSPCategory") != null && !data.get("ddlFSPCategory").equals("") && !data.get("ddlFSPCategory").equals("0"))
+                values.put("FSPCategory", Integer.valueOf(data.get("ddlFSPCategory")));
+            if (data.get("ddlFSP") != null && !data.get("ddlFSP").equals("") && !data.get("ddlFSP").equals("0"))
                 values.put("HFID", Integer.valueOf(data.get("ddlFSP")));
             values.put("CurrentAddress", data.get("txtCurrentAddress"));
             values.put("GeoLocation", "");
-            if (data.get("ddlCurrentVillage") != null)
+            
+            // Location fields
+            if (data.get("ddlCurrentRegion") != null && !data.get("ddlCurrentRegion").equals("") && !data.get("ddlCurrentRegion").equals("0"))
+                values.put("CurRegion", Integer.valueOf(data.get("ddlCurrentRegion")));
+            if (data.get("ddlCurrentDistrict") != null && !data.get("ddlCurrentDistrict").equals("") && !data.get("ddlCurrentDistrict").equals("0"))
+                values.put("CurDistrict", Integer.valueOf(data.get("ddlCurrentDistrict")));
+            if (data.get("ddlCurrentMunicipality") != null && !data.get("ddlCurrentMunicipality").equals("") && !data.get("ddlCurrentMunicipality").equals("0"))
+                values.put("CurWard", Integer.valueOf(data.get("ddlCurrentMunicipality")));
+            if (data.get("ddlCurrentVillage") != null && !data.get("ddlCurrentVillage").equals("") && !data.get("ddlCurrentVillage").equals("0"))
                 values.put("CurVillage", Integer.valueOf(data.get("ddlCurrentVillage")));
 //            if(isOffline == 1 || isOffline)
 
 
             if (rtInsureeId == 0) {//New Insuree
                 values.put("isOffline", 1);
+                
+
+                
                 if (isOffline == 0 || isOffline == 2) {
                     if (isOffline == 2) isOffline = 0;
                     if (global.isNetworkAvailable()) {
@@ -1186,8 +1229,9 @@ public class ClientAndroidInterface {
                         MaxInsureeId = -MaxInsureeId;
                         //}
                         values.put("InsureeId", MaxInsureeId);
-
+                        
                         sqlHandler.insertData("tblInsuree", values);
+                        
                         if (PolicyId > 0 && isHead == 0) {
                             getFamilyPolicies(FamilyId);
                         }
@@ -1202,6 +1246,7 @@ public class ClientAndroidInterface {
                         }
                     } else {
                         sqlHandler.insertData("tblInsuree", values);
+                        
                         if (PolicyId > 0 && isHead == 0) {
                             getFamilyPolicies(FamilyId);
                         }
@@ -1214,6 +1259,7 @@ public class ClientAndroidInterface {
                 } else {//New Family
                     values.put("InsureeId", MaxInsureeId);
                     sqlHandler.insertData("tblInsuree", values);
+                    
                     if (PolicyId > 0 && isHead == 0) {
                         getFamilyPolicies(FamilyId);
                     }
@@ -1226,8 +1272,13 @@ public class ClientAndroidInterface {
 
             } else {//Existing Insuree
                 values.put("isOffline", insureeIsOffline);
-                sqlHandler.updateData("tblInsuree", values, "InsureeId = ? AND (isOffline = ? OR isOffline = ?)",
-                        new String[]{String.valueOf(InsureeId), String.valueOf(insureeIsOffline), insureeIsOffline == 1 ? "true" : "false"});
+
+                
+                sqlHandler.updateData("tblInsuree", values, 
+                    "InsureeId = ? AND (isOffline = ? OR isOffline = ?)",
+                    new String[]{String.valueOf(InsureeId), String.valueOf(insureeIsOffline), 
+                                insureeIsOffline == 1 ? "true" : "false"});
+
             }
         } catch (NumberFormatException | UserException e) {
             e.printStackTrace();
@@ -1360,7 +1411,7 @@ public class ClientAndroidInterface {
     @SuppressWarnings("unused")
     public String getInsuree(int InsureeId) {
         @Language("SQL")
-        String Query = "SELECT InsureeId, FamilyId, CHFID, LastName, OtherNames, DOB, Gender, Marital, isHead, IdentificationNumber, Phone, isOffline , PhotoPath, CardIssued, Relationship, Profession, Education, Email, TypeOfId, I.HFID, CurrentAddress,R.LocationId CurRegion, D.LocationId CurDistrict, W.LocationId CurWard,  I.CurVillage, HFR.LocationId FSPRegion, HFD.LocationId FSPDistrict, HF.HFLevel FSPCategory, I.Vulnerability, ProfessionalSituation, IncomeLevel, PaymentMethod, OtherHousehold, AccountDetails\n" +
+        String Query = "SELECT InsureeId, FamilyId, CHFID, LastName, OtherNames, DOB, Gender, Marital, isHead, IdentificationNumber, Phone, isOffline , PhotoPath, CardIssued, Relationship, Profession, Education, Email, TypeOfId, I.HFID, CurrentAddress,R.LocationId CurRegion, D.LocationId CurDistrict, W.LocationId CurWard,  I.CurVillage, HFR.LocationId FSPRegion, HFD.LocationId FSPDistrict, HF.HFLevel FSPCategory, I.Vulnerability, ProfessionalSituation, IncomeLevel, ResidenceEnvironment, PaymentMethod, OtherHousehold, AccountDetails, NoDisability, NonDisablingDisease, MutualInsuranceCoverage, HousingType\n" +
                 "FROM tblInsuree I\n" +
                 "LEFT OUTER JOIN tblLocations V ON V.LocationId = I.CurVillage\n" +
                 "LEFT OUTER JOIN tblLocations W ON W.LocationId = V.ParentLocationId\n" +
@@ -3205,7 +3256,8 @@ public class ClientAndroidInterface {
 
             //get Insureesf
             query = new StringBuilder(
-                    "SELECT I.InsureeUUID AS InsureeUUID, I.InsureeId AS InsureeId, I.FamilyId AS FamilyId, I.CHFID, I.LastName, I.OtherNames, I.DOB, I.Gender, NULLIF(I.Marital,'') Marital, I.isHead, NULLIF(I.IdentificationNumber,'null') IdentificationNumber, NULLIF(I.Phone,'null') Phone, REPLACE(I.PhotoPath, RTRIM(PhotoPath, REPLACE(PhotoPath, '/', '')), '') PhotoPath, NULLIF(I.CardIssued,'null') CardIssued, NULLIF(I.Relationship,'null') Relationship, NULLIF(I.Profession,'null') Profession, NULLIF(I.Education,'null') Education, NULLIF(I.Email,'null') Email, CASE WHEN I.TypeOfId='null' THEN null ELSE I.TypeOfId END TypeOfId, NULLIF(I.HFID,'null') HFID, NULLIF(I.CurrentAddress,'null') CurrentAddress, NULLIF(I.GeoLocation,'null') GeoLocation, NULLIF(I.CurVillage,'null') CurVillage,I.isOffline, I.Vulnerability, I.ProfessionalSituation, I.IncomeLevel, I.PaymentMethod, I.OtherHousehold, I.AccountDetails FROM tblInsuree I WHERE "
+                    "SELECT I.InsureeUUID AS InsureeUUID, I.InsureeId AS InsureeId, I.FamilyId AS FamilyId, I.CHFID, I.LastName, I.OtherNames, I.DOB, I.Gender, NULLIF(I.Marital,'') Marital, I.isHead, NULLIF(I.IdentificationNumber,'null') IdentificationNumber, NULLIF(I.Phone,'null') Phone, REPLACE(I.PhotoPath, RTRIM(PhotoPath, REPLACE(PhotoPath, '/', '')), '') PhotoPath, NULLIF(I.CardIssued,'null') CardIssued, NULLIF(I.Relationship,'null') Relationship, NULLIF(I.Profession,'null') Profession, NULLIF(I.Education,'null') Education, NULLIF(I.Email,'null') Email, CASE WHEN I.TypeOfId='null' THEN null ELSE I.TypeOfId END TypeOfId, NULLIF(I.HFID,'null') HFID, NULLIF(I.CurrentAddress,'null') CurrentAddress, NULLIF(I.GeoLocation,'null') GeoLocation, NULLIF(I.CurVillage,'null') CurVillage, I.isOffline, I.Vulnerability, I.ProfessionalSituation, I.IncomeLevel, I.PaymentMethod, I.OtherHousehold, I.AccountDetails, " +
+                    "I.ResidenceEnvironment, I.HousingType, I.MutualInsuranceCoverage, I.NoDisability, I.NonDisablingDisease FROM tblInsuree I WHERE "
             );
             if (CallerId != 2) {
                 query.append(" I.FamilyId = ").append(FamilyId).append(" \n");
@@ -3494,23 +3546,42 @@ public class ClientAndroidInterface {
             }
         }
 
+        String chfId = insureeObj.getString("CHFID");
+        
         try {
             Family family = familyFromJSONObject(familyObj, insureesArray, insureeImages, attachmentsArray, policiesArray, premiumsArray);
-            new UpdateFamily().execute(family, insureeObj.getString("CHFID"), global.getOfficerId());
+            
+            new UpdateFamily(activity).execute(family, chfId, global.getOfficerId());
         } catch (Exception e) {
-            if(e.getMessage().contains("Failed to execute http call")){
+           
+            // Capture detailed error information
+            String errorMessage = e.getMessage();
+            String errorDetail = "";
+            
+            if (e instanceof IllegalStateException) {
+                // This is likely from CheckMutation - contains GraphQL error details
+                errorDetail = "GraphQL Error: " + errorMessage;
+                Log.e("UploadEnrols", "GraphQL mutation failed: " + errorMessage);
+            } else if (errorMessage != null && errorMessage.contains("HTTP")) {
+                // HTTP error from server
+                errorDetail = "HTTP Error: " + errorMessage;
+                Log.e("UploadEnrols", "HTTP error during upload: " + errorMessage);
+            } else if (errorMessage != null && errorMessage.contains("Failed to execute http call")) {
+                errorDetail = "Connection Error: " + errorMessage;
                 enrolMessages.add(activity.getResources().getString(R.string.ConnectionReset));
+                return -400;
             } else {
-                e.printStackTrace();
-                enrolMessages.add(e.getMessage());
+                errorDetail = "Unknown Error: " + (errorMessage != null ? errorMessage : "No error message");
             }
+            
+            // Add detailed error to messages
+            enrolMessages.add("[" + chfId + "] " + errorDetail);
+            e.printStackTrace();
             return -400;
         }
 
         return 0;
     }
-
-    @NonNull
     private Family familyFromJSONObject(
             @NonNull JSONObject json,
             @NonNull JSONArray insurees,
@@ -3519,6 +3590,40 @@ public class ClientAndroidInterface {
             @NonNull JSONArray policiesArray,
             @NonNull JSONArray premiumsArray
     ) throws JSONException {
+        // Validate required fields
+        String hofChfId = json.getString("HOFCHFID");
+        if (hofChfId == null || hofChfId.trim().isEmpty()) {
+            throw new JSONException("HOFCHFID is required and cannot be empty");
+        }
+        
+        String familyIdStr = json.getString("FamilyId");
+        if (familyIdStr == null || familyIdStr.trim().isEmpty()) {
+            throw new JSONException("FamilyId is required and cannot be empty");
+        }
+        
+        String locationIdStr = json.getString("LocationId");
+        if (locationIdStr == null || locationIdStr.trim().isEmpty()) {
+            throw new JSONException("LocationId is required and cannot be empty");
+        }
+        
+        // Additional validation for openIMIS specific constraints
+        try {
+            int familyId = Integer.parseInt(familyIdStr);
+            int locationId = Integer.parseInt(locationIdStr);
+            
+            if (familyId <= 0) {
+                throw new JSONException("FamilyId must be a positive integer, got: " + familyId);
+            }
+            
+            if (locationId <= 0) {
+                throw new JSONException("LocationId must be a positive integer, got: " + locationId);
+            }
+        } catch (NumberFormatException e) {
+            throw new JSONException("Invalid number format - FamilyId: " + familyIdStr + ", LocationId: " + locationIdStr);
+        }
+        
+
+        
         List<Family.Member> members = new ArrayList<>();
         List<Family.Policy> policies = new ArrayList<>();
         List<Family.Attachment> familyAttachments = new ArrayList<>();
@@ -3561,6 +3666,29 @@ public class ClientAndroidInterface {
             @NonNull JSONObject object,
             @Nullable Pair<String, byte[]> image
     ) throws JSONException {
+        // Validate required member fields
+        String chfId = object.getString("CHFID");
+        if (chfId == null || chfId.trim().isEmpty()) {
+            throw new JSONException("Member CHFID is required and cannot be empty");
+        }
+        
+        String lastName = object.getString("LastName");
+        if (lastName == null || lastName.trim().isEmpty()) {
+            throw new JSONException("Member LastName is required and cannot be empty");
+        }
+        
+        String otherNames = object.getString("OtherNames");
+        if (otherNames == null || otherNames.trim().isEmpty()) {
+            throw new JSONException("Member OtherNames is required and cannot be empty");
+        }
+        
+        String gender = object.getString("Gender");
+        if (gender == null || gender.trim().isEmpty()) {
+            throw new JSONException("Member Gender is required and cannot be empty");
+        }
+        
+
+        
         return new Family.Member(
                 /* chfId = */ object.getString("CHFID"),
                 /* isHead = */ JsonUtils.getBooleanOrDefault(object, "isHead", false),
@@ -3587,9 +3715,14 @@ public class ClientAndroidInterface {
                 /* geolocation = */ JsonUtils.getStringOrDefault(object, "GeoLocation"),
                 /* professionnal situation  = */ JsonUtils.getStringOrDefault(object, "ProfessionalSituation"),
                 /* income level = */ JsonUtils.getIntegerOrDefault(object, "IncomeLevel"),
+                /* residence environment = */ JsonUtils.getIntegerOrDefault(object, "ResidenceEnvironment"),
                 /* payment method */ JsonUtils.getStringOrDefault(object, "PaymentMethod"),
                 /* otherhousehold */ JsonUtils.getStringOrDefault(object, "OtherHousehold"),
                 /* account details */ JsonUtils.getStringOrDefault(object, "AccountDetails"),
+                /* noDisability = */ JsonUtils.getBooleanOrDefault(object, "NoDisability", null),
+                /* nonDisablingDisease = */ JsonUtils.getStringOrDefault(object, "NonDisablingDisease"),
+                /* mutualInsuranceCoverage = */ JsonUtils.getBooleanOrDefault(object, "MutualInsuranceCoverage", null),
+                /* housingType = */ JsonUtils.getStringOrDefault(object, "HousingType"),
                 /* photoPath = */ image != null ? image.first : null,
                 /* photoBytes = */ image != null ? image.second : null,
                 /* isOffline = */ JsonUtils.getBooleanOrDefault(object, "isOffline", false)
@@ -4365,6 +4498,12 @@ public class ClientAndroidInterface {
         JSONArray Relations = new JSONArray();
         JSONArray PhoneDefaults = new JSONArray();
         JSONArray Genders = new JSONArray();
+        JSONArray ResidenceEnvironments = new JSONArray();
+        JSONArray IncomeLevels = new JSONArray();
+        JSONArray NoDisabilities = new JSONArray();
+        JSONArray NonDisablingDiseases = new JSONArray();
+        JSONArray MutualInsuranceCoverages = new JSONArray();
+        JSONArray HousingTypes = new JSONArray();
         //JSONArray OfficerVillages = new JSONArray();
 
         try {
@@ -4416,6 +4555,30 @@ public class ClientAndroidInterface {
                     case "genders":
                         Genders = (JSONArray) masterData.getJSONObject(i).get(keyName);
                         break;
+                    case "residenceenvironments":
+                        ResidenceEnvironments = (JSONArray) masterData.getJSONObject(i).get(keyName);
+                        android.util.Log.d("ClientAndroidInterface", "Found ResidenceEnvironments in old format: " + ResidenceEnvironments.length() + " items");
+                        break;
+                    case "incomelevels":
+                        IncomeLevels = (JSONArray) masterData.getJSONObject(i).get(keyName);
+                        android.util.Log.d("ClientAndroidInterface", "Found IncomeLevels in old format: " + IncomeLevels.length() + " items");
+                        break;
+                    case "nodisabilities":
+                        NoDisabilities = (JSONArray) masterData.getJSONObject(i).get(keyName);
+                        android.util.Log.d("ClientAndroidInterface", "Found NoDisabilities in old format: " + NoDisabilities.length() + " items");
+                        break;
+                    case "nondisablingdiseases":
+                        NonDisablingDiseases = (JSONArray) masterData.getJSONObject(i).get(keyName);
+                        android.util.Log.d("ClientAndroidInterface", "Found NonDisablingDiseases in old format: " + NonDisablingDiseases.length() + " items");
+                        break;
+                    case "mutualinsurancecoverages":
+                        MutualInsuranceCoverages = (JSONArray) masterData.getJSONObject(i).get(keyName);
+                        android.util.Log.d("ClientAndroidInterface", "Found MutualInsuranceCoverages in old format: " + MutualInsuranceCoverages.length() + " items");
+                        break;
+                    case "housingtypes":
+                        HousingTypes = (JSONArray) masterData.getJSONObject(i).get(keyName);
+                        android.util.Log.d("ClientAndroidInterface", "Found HousingTypes in old format: " + HousingTypes.length() + " items");
+                        break;
 /*                case "officersvillages":
                     OfficerVillages = (JSONArray) masterData.getJSONObject(i).get(keyName);
                     break;*/
@@ -4437,6 +4600,12 @@ public class ClientAndroidInterface {
             insertRelations(Relations);
             insertPhoneDefaults(PhoneDefaults);
             insertGenders(Genders);
+            insertResidenceEnvironment(ResidenceEnvironments);
+            insertIncomeLevel(IncomeLevels);
+            insertNoDisabilities(NoDisabilities);
+            insertNonDisablingDiseases(NonDisablingDiseases);
+            insertMutualInsuranceCoverages(MutualInsuranceCoverages);
+            insertHousingTypes(HousingTypes);
 
 
         } catch (JSONException e) {
@@ -4463,7 +4632,23 @@ public class ClientAndroidInterface {
             insertRelations((JSONArray) masterData.get("relations"));
             insertPhoneDefaults((JSONArray) masterData.get("phoneDefaults"));
             insertGenders((JSONArray) masterData.get("genders"));
-            insertIncomeLevel((JSONArray) masterData.get("IncomeLevels"));
+            JSONArray incomeLevels = (JSONArray) masterData.get("IncomeLevels");
+            insertIncomeLevel(incomeLevels);
+            JSONArray residenceEnvs = (JSONArray) masterData.get("ResidenceEnvironments");
+            insertResidenceEnvironment(residenceEnvs);
+            
+            // Insert the 4 new reference tables
+            JSONArray noDisabilities = (JSONArray) masterData.get("NoDisabilities");
+            insertNoDisabilities(noDisabilities);
+            
+            JSONArray nonDisablingDiseases = (JSONArray) masterData.get("NonDisablingDiseases");
+            insertNonDisablingDiseases(nonDisablingDiseases);
+            
+            JSONArray mutualInsuranceCoverages = (JSONArray) masterData.get("MutualInsuranceCoverages");
+            insertMutualInsuranceCoverages(mutualInsuranceCoverages);
+            
+            JSONArray housingTypes = (JSONArray) masterData.get("HousingTypes");
+            insertHousingTypes(housingTypes);
 
             JSONArray ContributionPlans = new JSONArray();
             for(int i=0; i < masterData.getJSONArray("ContributionPlans").length(); i++){
@@ -5310,6 +5495,7 @@ public class ClientAndroidInterface {
         jsonObject.put("geoLocation", member.getGeolocation());
         jsonObject.put("curVillage", member.getCurrentVillage());
         jsonObject.put("incomeLevel", member.getIncomeLevel() != null ? member.getIncomeLevel() : "");
+        jsonObject.put("residenceEnvironment", member.getResidenceEnvironment() != null ? member.getResidenceEnvironment() : "");
         jsonObject.put("professionalSituation", member.getProfessionalSituation());
         jsonObject.put("paymentMethod", member.getPaymentMethod());
         jsonObject.put("accountDetails", member.getAccountDetails());
@@ -5775,6 +5961,15 @@ public class ClientAndroidInterface {
     }
 
     @WorkerThread
+    private void insertResidenceEnvironment(JSONArray jsonArray) throws JSONException {
+        android.util.Log.d("ClientAndroidInterface", "Inserting ResidenceEnvironment data: " + jsonArray.length() + " items");
+        if (jsonArray != null && jsonArray.length() > 0) {
+            sqlHandler.insertResidenceEnvironments(jsonArray);
+        }
+        android.util.Log.d("ClientAndroidInterface", "ResidenceEnvironment data inserted successfully");
+    }
+
+    @WorkerThread
     private void insertContributionPlan (JSONArray jsonArray) throws JSONException{
         String[] Columns = getColumnNames(jsonArray);
         sqlHandler.insertData("tblContributionPlan", Columns, jsonArray, "DELETE FROM tblContributionPlan;");
@@ -5789,6 +5984,15 @@ public class ClientAndroidInterface {
         JSONArray incomeLevels = sqlHandler.getResult(tableName, columns, null, null);
 
         return incomeLevels.toString();
+    }
+
+    @JavascriptInterface
+    @SuppressWarnings("unused")
+    public String getResidenceEnvironments() {
+        android.util.Log.d("ClientAndroidInterface", "JavaScript called getResidenceEnvironments()");
+        JSONArray residenceEnvironments = sqlHandler.getResidenceEnvironments();
+        android.util.Log.d("ClientAndroidInterface", "Returning ResidenceEnvironments to JavaScript: " + residenceEnvironments.toString());
+        return residenceEnvironments.toString();
     }
 
     @JavascriptInterface
@@ -6199,7 +6403,132 @@ public class ClientAndroidInterface {
             e.printStackTrace();
         }
         return defaultAge;
-
     }
+
+    @JavascriptInterface
+    public String getNoDisabilities() {
+        android.util.Log.d("ClientAndroidInterface", "JavaScript called getNoDisabilities()");
+        JSONArray noDisabilities = sqlHandler.getNoDisabilities();
+        android.util.Log.d("ClientAndroidInterface", "Returning NoDisabilities to JavaScript: " + noDisabilities.toString());
+        return noDisabilities.toString();
+    }
+
+    @JavascriptInterface
+    public String getNonDisablingDiseases() {
+        android.util.Log.d("ClientAndroidInterface", "JavaScript called getNonDisablingDiseases()");
+        JSONArray nonDisablingDiseases = sqlHandler.getNonDisablingDiseases();
+        android.util.Log.d("ClientAndroidInterface", "Returning NonDisablingDiseases to JavaScript: " + nonDisablingDiseases.toString());
+        return nonDisablingDiseases.toString();
+    }
+
+    @JavascriptInterface
+    public String getMutualInsuranceCoverages() {
+        android.util.Log.d("ClientAndroidInterface", "JavaScript called getMutualInsuranceCoverages()");
+        JSONArray mutualInsuranceCoverages = sqlHandler.getMutualInsuranceCoverages();
+        android.util.Log.d("ClientAndroidInterface", "Returning MutualInsuranceCoverages to JavaScript: " + mutualInsuranceCoverages.toString());
+        return mutualInsuranceCoverages.toString();
+    }
+
+    @JavascriptInterface
+    public String getHousingTypes() {
+        android.util.Log.d("ClientAndroidInterface", "JavaScript called getHousingTypes()");
+        JSONArray housingTypes = sqlHandler.getHousingTypes();
+        android.util.Log.d("ClientAndroidInterface", "Returning HousingTypes to JavaScript: " + housingTypes.toString());
+        return housingTypes.toString();
+    }
+
+    // Master data insertion methods for new reference tables
+    
+    /**
+     * Insert NoDisabilities data from server into local database
+     * @param jsonArray JSONArray containing NoDisabilities data from server
+     */
+    private void insertNoDisabilities(JSONArray jsonArray) {
+        if (jsonArray != null && jsonArray.length() > 0) {
+            android.util.Log.d("ClientAndroidInterface", "Inserting " + jsonArray.length() + " NoDisabilities records");
+            try {
+                if (isLoggingEnabled()) {
+                    android.util.Log.d("ClientAndroidInterface", "NoDisabilities data: " + jsonArray.toString());
+                }
+                sqlHandler.insertNoDisabilities(jsonArray);
+                android.util.Log.d("ClientAndroidInterface", "Successfully inserted NoDisabilities data");
+            } catch (Exception e) {
+                android.util.Log.e("ClientAndroidInterface", "Error inserting NoDisabilities data", e);
+                throw e;
+            }
+        } else {
+            android.util.Log.d("ClientAndroidInterface", "No NoDisabilities data to insert");
+        }
+    }
+    
+    /**
+     * Insert NonDisablingDiseases data from server into local database
+     * @param jsonArray JSONArray containing NonDisablingDiseases data from server
+     */
+    private void insertNonDisablingDiseases(JSONArray jsonArray) {
+        if (jsonArray != null && jsonArray.length() > 0) {
+            android.util.Log.d("ClientAndroidInterface", "Inserting " + jsonArray.length() + " NonDisablingDiseases records");
+            try {
+                if (isLoggingEnabled()) {
+                    android.util.Log.d("ClientAndroidInterface", "NonDisablingDiseases data: " + jsonArray.toString());
+                }
+                sqlHandler.insertNonDisablingDiseases(jsonArray);
+                android.util.Log.d("ClientAndroidInterface", "Successfully inserted NonDisablingDiseases data");
+            } catch (Exception e) {
+                android.util.Log.e("ClientAndroidInterface", "Error inserting NonDisablingDiseases data", e);
+                throw e;
+            }
+        } else {
+            android.util.Log.d("ClientAndroidInterface", "No NonDisablingDiseases data to insert");
+        }
+    }
+    
+    /**
+     * Insert MutualInsuranceCoverages data from server into local database
+     * @param jsonArray JSONArray containing MutualInsuranceCoverages data from server
+     */
+    private void insertMutualInsuranceCoverages(JSONArray jsonArray) {
+        if (jsonArray != null && jsonArray.length() > 0) {
+           
+            try {
+                if (isLoggingEnabled()) {
+                   
+                }
+                sqlHandler.insertMutualInsuranceCoverages(jsonArray);
+                android.util.Log.d("ClientAndroidInterface", "Successfully inserted MutualInsuranceCoverages data");
+            } catch (Exception e) {
+                android.util.Log.e("ClientAndroidInterface", "Error inserting MutualInsuranceCoverages data", e);
+                throw e;
+            }
+        } else {
+            android.util.Log.d("ClientAndroidInterface", "No MutualInsuranceCoverages data to insert");
+        }
+    }
+    
+    /**
+     * Insert HousingTypes data from server into local database
+     * @param jsonArray JSONArray containing HousingTypes data from server
+     */
+    private void insertHousingTypes(JSONArray jsonArray) {
+        if (jsonArray != null && jsonArray.length() > 0) {
+            android.util.Log.d("ClientAndroidInterface", "Inserting " + jsonArray.length() + " HousingTypes records");
+            try {
+                if (isLoggingEnabled()) {
+                    android.util.Log.d("ClientAndroidInterface", "HousingTypes data: " + jsonArray.toString());
+                }
+                sqlHandler.insertHousingTypes(jsonArray);
+                android.util.Log.d("ClientAndroidInterface", "Successfully inserted HousingTypes data");
+            } catch (Exception e) {
+                android.util.Log.e("ClientAndroidInterface", "Error inserting HousingTypes data", e);
+                throw e;
+            }
+        } else {
+            android.util.Log.d("ClientAndroidInterface", "No HousingTypes data to insert");
+        }
+    }
+    
+    // Note: Master data insertion methods added for new reference tables
+    
+
 }
 
