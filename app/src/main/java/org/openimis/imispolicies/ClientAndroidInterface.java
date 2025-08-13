@@ -3553,8 +3553,7 @@ public class ClientAndroidInterface {
             
             new UpdateFamily(activity).execute(family, chfId, global.getOfficerId());
         } catch (Exception e) {
-            Log.e("UploadEnrols", "Upload failed with error: " + e.getClass().getSimpleName() + ": " + e.getMessage(), e);
-            
+           
             // Capture detailed error information
             String errorMessage = e.getMessage();
             String errorDetail = "";
@@ -6490,10 +6489,10 @@ public class ClientAndroidInterface {
      */
     private void insertMutualInsuranceCoverages(JSONArray jsonArray) {
         if (jsonArray != null && jsonArray.length() > 0) {
-            android.util.Log.d("ClientAndroidInterface", "Inserting " + jsonArray.length() + " MutualInsuranceCoverages records");
+           
             try {
                 if (isLoggingEnabled()) {
-                    android.util.Log.d("ClientAndroidInterface", "MutualInsuranceCoverages data: " + jsonArray.toString());
+                   
                 }
                 sqlHandler.insertMutualInsuranceCoverages(jsonArray);
                 android.util.Log.d("ClientAndroidInterface", "Successfully inserted MutualInsuranceCoverages data");
