@@ -451,7 +451,7 @@ type InsureeGQLType implements Node {
 }
 
 type HousingTypeGQLType {
-    id: ID!
+
     code: Int!
     housingType: String
     altLanguage: String
@@ -459,7 +459,7 @@ type HousingTypeGQLType {
 }
 
 type NondisablingDiseaseGQLType {
-    id: ID!
+
     code: Int!
     nonDisablingDisease: String
     altLanguage: String
@@ -467,7 +467,7 @@ type NondisablingDiseaseGQLType {
 }
 
 type ResidenceEnvironmentGQLType {
-    id: ID!
+
     code: Int!
     residenceEnvironment: String
     altLanguage: String
@@ -475,7 +475,6 @@ type ResidenceEnvironmentGQLType {
 }
 
 type NoDisabilityGQLType {
-    id: ID!
     code: Int!
     noDisabilityLabel: String
     altLanguage: String
@@ -483,7 +482,6 @@ type NoDisabilityGQLType {
 }
 
 type MutualInsuranceCoverageGQLType {
-    id: ID!
     code: Int!
     mutualInsuranceCoverage: String
     altLanguage: String
@@ -6866,11 +6864,13 @@ input FamilyHeadInsureeInputType {
     bankCoordinates: String
     coordinates: String
     # NEW REQUIRED FIELDS - Server now requires these as Int!
-    residenceEnvironmentId: Int!
-    housingTypeId: Int!
-    mutualInsuranceCoverageId: Int!
-    noDisabilityId: Int!
-    nonDisablingDiseaseId: Int!
+
+    residenceEnvironment: Int!
+    housingType: Int!
+    mutualInsuranceCoverage: Int!
+    noDisability: Int!
+    nonDisablingDisease: Int!
+
 }
 
 input PhotoInputType {
@@ -7002,11 +7002,12 @@ input CreateInsureeMutationInput {
     bankCoordinates: String
     coordinates: String
     # NEW REQUIRED FIELDS - Server now requires these as Int!
-    residenceEnvironmentId: Int!
-    housingTypeId: Int!
-    mutualInsuranceCoverageId: Int!
-    noDisabilityId: Int!
-    nonDisablingDiseaseId: Int!
+
+    residenceEnvironment: Int!
+    housingType: Int!
+    mutualInsuranceCoverage: Int!
+    noDisability: Int!
+    nonDisablingDisease: Int!
     clientMutationId: String
 }
 
@@ -7076,11 +7077,13 @@ input UpdateInsureeMutationInput {
     bankCoordinates: String
     coordinates: String
     # NEW REQUIRED FIELDS - Server now requires these as Int!
-    residenceEnvironmentId: Int!
-    housingTypeId: Int!
-    mutualInsuranceCoverageId: Int!
-    noDisabilityId: Int!
-    nonDisablingDiseaseId: Int!
+
+    residenceEnvironment: Int!
+    housingType: Int!
+    mutualInsuranceCoverage: Int!
+    noDisability: Int!
+    nonDisablingDisease: Int!
+
     clientMutationId: String
 }
 
