@@ -451,7 +451,7 @@ type InsureeGQLType implements Node {
 }
 
 type HousingTypeGQLType {
-   
+
     code: Int!
     housingType: String
     altLanguage: String
@@ -459,7 +459,7 @@ type HousingTypeGQLType {
 }
 
 type NondisablingDiseaseGQLType {
-    
+
     code: Int!
     nonDisablingDisease: String
     altLanguage: String
@@ -467,7 +467,7 @@ type NondisablingDiseaseGQLType {
 }
 
 type ResidenceEnvironmentGQLType {
-   
+
     code: Int!
     residenceEnvironment: String
     altLanguage: String
@@ -475,15 +475,13 @@ type ResidenceEnvironmentGQLType {
 }
 
 type NoDisabilityGQLType {
-    
     code: Int!
-    noDisability: String
+    noDisabilityLabel: String
     altLanguage: String
     sortOrder: Int
 }
 
 type MutualInsuranceCoverageGQLType {
-   
     code: Int!
     mutualInsuranceCoverage: String
     altLanguage: String
@@ -6866,11 +6864,13 @@ input FamilyHeadInsureeInputType {
     bankCoordinates: String
     coordinates: String
     # NEW REQUIRED FIELDS - Server now requires these as Int!
+
     residenceEnvironment: Int!
     housingType: Int!
     mutualInsuranceCoverage: Int!
     noDisability: Int!
     nonDisablingDisease: Int!
+
 }
 
 input PhotoInputType {
@@ -7002,6 +7002,7 @@ input CreateInsureeMutationInput {
     bankCoordinates: String
     coordinates: String
     # NEW REQUIRED FIELDS - Server now requires these as Int!
+
     residenceEnvironment: Int!
     housingType: Int!
     mutualInsuranceCoverage: Int!
@@ -7076,11 +7077,13 @@ input UpdateInsureeMutationInput {
     bankCoordinates: String
     coordinates: String
     # NEW REQUIRED FIELDS - Server now requires these as Int!
+
     residenceEnvironment: Int!
     housingType: Int!
     mutualInsuranceCoverage: Int!
     noDisability: Int!
     nonDisablingDisease: Int!
+
     clientMutationId: String
 }
 

@@ -42,6 +42,7 @@ import android.util.Xml;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.openimis.imispolicies.tools.Log;
 import org.xmlpull.v1.XmlSerializer;
 
 import java.io.File;
