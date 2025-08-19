@@ -79,19 +79,19 @@ query GetFamily($headChfId: String, $parentUuid: String) {
                                 id
                             }
                             residenceEnvironment {
-                                id
+                                code
                             }
                             noDisability {
-                                id
+                                code
                             }
                             nonDisablingDisease {
-                                id
+                                code
                             }
                             mutualInsuranceCoverage {
-                                id
+                                code
                             }
                             housingType {
-                                id
+                                code
                             }
                             professionalSituation
                             preferredPaymentMethod
