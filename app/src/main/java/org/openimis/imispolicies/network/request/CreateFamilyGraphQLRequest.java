@@ -72,7 +72,7 @@ public class CreateFamilyGraphQLRequest extends BaseGraphQLRequest {
                     .confirmationTypeId(family.getConfirmationType())
                     .isOffline(family.isOffline())
                     .attachments(
-                            family.getAttachments() != null ? Mapper.map(family.getAttachments(), dto -> toAttachment(dto, officerId)) : new ArrayList<>()
+                            family.getAttachments() != null ? Mapper.map(family.getAttachments(), dto -> toAttachment(dto)) : new ArrayList<>()
                     )
                     .parentId(family.getParentId() != null && family.getParentId() != 0 ? family.getParentId() : null)
                     .headInsuree(

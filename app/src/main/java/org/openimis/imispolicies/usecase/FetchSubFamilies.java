@@ -94,15 +94,15 @@ public class FetchSubFamilies {
                 /* currentVillage = */ member.currentVillage() != null && member.currentVillage().id() != null ? IdUtils.getIdFromGraphQLString(Objects.requireNonNull(member.currentVillage()).id()) : null,
                 /* geolocation = */ member.geolocation(),
                 /* professional situation = */ member.professionalSituation(),
-                /* incomeLevel = */ member.incomeLevel() != null && member.incomeLevel().id() != null ? IdUtils.getIdFromGraphQLString(Objects.requireNonNull(member.incomeLevel()).id()) : null,
-               /* residenceEnvironment = */ member.residenceEnvironment() != null && member.residenceEnvironment().code() != null ? IdUtils.getIdFromGraphQLString(Objects.requireNonNull(member.residenceEnvironment()).code()) : null,
+                /* incomeLevel = */ getIncomeLevelValue(member),
+                /* residenceEnvironment = */ getResidenceEnvironmentValue(member),
                 /* payment method = */ member.preferredPaymentMethod(),
                 /* other household = */ member.coordinates() != null ? member.coordinates() : "",
                 /* account details = */ member.bankCoordinates() != null ? member.bankCoordinates() : "",
-                /* noDisability = */ member.noDisability() != null && member.noDisability().code() != null ? IdUtils.getIdFromGraphQLString(Objects.requireNonNull(member.noDisability()).code() : null,
-                /* nonDisablingDisease = */ member.nonDisablingDisease() != null && member.nonDisablingDisease().code() != null ? String.valueOf(IdUtils.getIdFromGraphQLString(Objects.requireNonNull(member.nonDisablingDisease()).code() : null,
-                /* mutualInsuranceCoverage = */ member.mutualInsuranceCoverage() != null && member.mutualInsuranceCoverage().code() != null ? IdUtils.getIdFromGraphQLString(Objects.requireNonNull(member.mutualInsuranceCoverage()).code() : null,
-                /* housingType = */ member.housingType() != null && member.housingType().code() != null ? String.valueOf(IdUtils.getIdFromGraphQLString(Objects.requireNonNull(member.housingType()).code() : null,
+                /* noDisability = */ getNoDisabilityValue(member),
+                /* nonDisablingDisease = */ getNonDisablingDiseaseValue(member),
+                /* mutualInsuranceCoverage = */ getMutualInsuranceCoverageValue(member),
+                /* housingType = */ getHousingTypeValue(member),
                 /* photoPath = */ downloadPhoto(member.photo()),
                 /* photoBytes = */ null, // We already saved them on disk, no need to pass them here.
                 /* isOffline = */ member.offline() != null ? Objects.requireNonNull(member.offline()) : false
@@ -164,5 +164,47 @@ public class FetchSubFamilies {
                 /* filename */ attachment.filename(),
                 /* content */ attachment.document()
         );
+    }
+
+    private Integer getNoDisabilityValue(GetSubFamiliesQuery.Node1 member) {
+        if (member.noDisability() != null) {
+            return member.noDisability().code();
+        }
+        return null;
+    }
+
+    private String getNonDisablingDiseaseValue(GetSubFamiliesQuery.Node1 member) {
+        if (member.nonDisablingDisease() != null) {
+            return String.valueOf(member.nonDisablingDisease().code());
+        }
+        return null;
+    }
+
+    private Integer getMutualInsuranceCoverageValue(GetSubFamiliesQuery.Node1 member) {
+        if (member.mutualInsuranceCoverage() != null) {
+            return member.mutualInsuranceCoverage().code();
+        }
+        return null;
+    }
+
+    private String getHousingTypeValue(GetSubFamiliesQuery.Node1 member) {
+        if (member.housingType() != null) {
+            return String.valueOf(member.housingType().code());
+        }
+        return null;
+    }
+
+    private Integer getIncomeLevelValue(GetSubFamiliesQuery.Node1 member) {
+        if (member.incomeLevel() != null && member.incomeLevel().id() != null) {
+            return Integer.valueOf(IdUtils.getIdFromGraphQLString(Objects.requireNonNull(member.incomeLevel()).id()));
+        }
+        return null;
+    }
+
+    private Integer getResidenceEnvironmentValue(GetSubFamiliesQuery.Node1 member) {
+        if (member.residenceEnvironment() != null) {
+            return member.residenceEnvironment().code();
+        }
+        return null;
     }
 }

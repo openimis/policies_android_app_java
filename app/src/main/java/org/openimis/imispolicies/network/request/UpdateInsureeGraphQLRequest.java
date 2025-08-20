@@ -15,6 +15,7 @@ import org.openimis.imispolicies.type.UpdateInsureeMutationInput;
 
 import java.util.Objects;
 import java.util.UUID;
+import android.util.Log;
 
 public class UpdateInsureeGraphQLRequest extends BaseGraphQLRequest {
 
@@ -25,6 +26,10 @@ public class UpdateInsureeGraphQLRequest extends BaseGraphQLRequest {
             int officerId
         ) throws Exception {
         java.sql.Date date = new java.sql.Date(System.currentTimeMillis());
+        
+        // Logs de contrôle pour confirmer les types Integer
+        Log.d("UPLOAD", "NoDisability (int) = " + member.getNoDisability());
+        Log.d("UPLOAD", "MutualInsuranceCoverage (int) = " + member.getMutualInsuranceCoverage());
         Response<UpdateInsureeMutation.Data> response = makeSynchronous(new UpdateInsureeMutation(
                 UpdateInsureeMutationInput.builder()
                         .clientMutationId(UUID.randomUUID().toString()) 
@@ -50,11 +55,11 @@ public class UpdateInsureeGraphQLRequest extends BaseGraphQLRequest {
                         .currentAddress(member.getCurrentAddress())
                         .currentVillageId(member.getCurrentVillage() != null && member.getCurrentVillage() != 0 ? member.getCurrentVillage() : null)
                         .geolocation(member.getGeolocation())
-                        .residenceEnvironmentId(member.getResidenceEnvironment() != null && member.getResidenceEnvironment() != 0 ? member.getResidenceEnvironment() : null)
-                        .housingTypeId(member.getHousingType() != null && !member.getHousingType().equals("0") && !member.getHousingType().isEmpty() ? Integer.parseInt(member.getHousingType()) : null)
-                        .mutualInsuranceCoverageId(member.getMutualInsuranceCoverage() != null ? (member.getMutualInsuranceCoverage() ? 1 : 0) : null)
-                        .noDisabilityId(member.getNoDisability() != null ? (member.getNoDisability() ? 1 : 0) : null)
-                        .nonDisablingDiseaseId(member.getNonDisablingDisease() != null && !member.getNonDisablingDisease().equals("0") && !member.getNonDisablingDisease().isEmpty() ? Integer.parseInt(member.getNonDisablingDisease()) : null)
+                        .residenceEnvironment(member.getResidenceEnvironment() != null && member.getResidenceEnvironment() != 0 ? member.getResidenceEnvironment() : null)
+                        .housingType(parseIntegerSafely(member.getHousingType(), "HousingType", member.getChfId()))
+                        .mutualInsuranceCoverage(member.getMutualInsuranceCoverage() != null && member.getMutualInsuranceCoverage() != 0 ? member.getMutualInsuranceCoverage() : null)
+                        .noDisability(member.getNoDisability() != null && member.getNoDisability() != 0 ? member.getNoDisability() : null)
+                        .nonDisablingDisease(parseIntegerSafely(member.getNonDisablingDisease(), "NonDisablingDisease", member.getChfId()))
                         .incomeLevelId(member.getIncomeLevel() != null && member.getIncomeLevel() != 0 ? member.getIncomeLevel() : null)
                         .preferredPaymentMethod(member.getPaymentMethod())
                         .coordinates(member.getOtherHousehold())
@@ -95,6 +100,35 @@ public class UpdateInsureeGraphQLRequest extends BaseGraphQLRequest {
             return Integer.parseInt(value);
         } catch (NumberFormatException e) {
             return defaultValue;
+        }
+    }
+    
+    /**
+     * Safely parse a string to Integer with detailed logging to prevent NullPointerException
+     * @param value The string value to parse
+     * @param fieldName The name of the field for logging
+     * @param chfId The CHFID for context in logging
+     * @return Integer value or null if parsing fails or value is null/empty
+     */
+    private Integer parseIntegerSafely(String value, String fieldName, String chfId) {
+        try {
+            if (value == null) {
+                Log.w("UpdateInsuree", "[GRAPHQL][" + chfId + "] " + fieldName + " is null, sending null to server");
+                return null;
+            }
+            
+            if (value.trim().isEmpty() || value.equals("0")) {
+                Log.w("UpdateInsuree", "[GRAPHQL][" + chfId + "] " + fieldName + " is empty or zero (" + value + "), sending null to server");
+                return null;
+            }
+            
+            Integer result = Integer.parseInt(value.trim());
+            Log.d("UpdateInsuree", "[GRAPHQL][" + chfId + "] " + fieldName + " = " + result);
+            return result;
+            
+        } catch (NumberFormatException e) {
+            Log.e("UpdateInsuree", "[GRAPHQL][" + chfId + "] Failed to parse " + fieldName + " value: '" + value + "' - sending null to server", e);
+            return null;
         }
     }
 }

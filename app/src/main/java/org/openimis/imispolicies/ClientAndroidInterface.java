@@ -1135,6 +1135,45 @@ public class ClientAndroidInterface {
             if (!TextUtils.isEmpty(data.get("ddlHousingType")) && !data.get("ddlHousingType").equals("0"))
                 HousingType = Integer.valueOf(data.get("ddlHousingType"));
 
+            // Validation obligatoire pour les nouveaux champs
+            Log.d("UPLOAD", "[UPLOAD][Insuree] ResidenceEnvironment = " + ResidenceEnvironment);
+            Log.d("UPLOAD", "[UPLOAD][Insuree] NoDisability = " + NoDisability);
+            Log.d("UPLOAD", "[UPLOAD][Insuree] NonDisablingDisease = " + NonDisablingDisease);
+            Log.d("UPLOAD", "[UPLOAD][Insuree] MutualInsuranceCoverage = " + MutualInsuranceCoverage);
+            Log.d("UPLOAD", "[UPLOAD][Insuree] HousingType = " + HousingType);
+
+            // Vérifications obligatoires
+            if (ResidenceEnvironment == null) {
+                Log.e("UPLOAD", "ResidenceEnvironment is NULL");
+                ShowDialog("Veuillez remplir le champ 'Environnement de résidence'");
+                inProgress = false;
+                return 7;
+            }
+            if (NoDisability == null) {
+                Log.e("UPLOAD", "NoDisability is NULL");
+                ShowDialog("Veuillez remplir le champ 'Aucun handicap'");
+                inProgress = false;
+                return 7;
+            }
+            if (NonDisablingDisease == null) {
+                Log.e("UPLOAD", "NonDisablingDisease is NULL");
+                ShowDialog("Veuillez remplir le champ 'Maladie non invalidante'");
+                inProgress = false;
+                return 7;
+            }
+            if (MutualInsuranceCoverage == null) {
+                Log.e("UPLOAD", "MutualInsuranceCoverage is NULL");
+                ShowDialog("Veuillez remplir le champ 'Couverture d'assurance mutuelle'");
+                inProgress = false;
+                return 7;
+            }
+            if (HousingType == null) {
+                Log.e("UPLOAD", "HousingType is NULL");
+                ShowDialog("Veuillez remplir le champ 'Type de logement'");
+                inProgress = false;
+                return 7;
+            }
+
             String IdentificationType = "null";
             if (!TextUtils.isEmpty(data.get("ddlIdentificationType")) && !data.get("ddlIdentificationType").equals(""))
                 IdentificationType = (data.get("ddlIdentificationType"));
@@ -3687,6 +3726,39 @@ public class ClientAndroidInterface {
             throw new JSONException("Member Gender is required and cannot be empty");
         }
         
+        // Log detailed values of mandatory fields before upload
+        Log.d("UPLOAD", "[UPLOAD][Insuree] CHFID = " + chfId);
+        
+        // Extract and log mandatory fields
+        Integer residenceEnvironment = JsonUtils.getIntegerOrDefault(object, "ResidenceEnvironment");
+        Integer noDisability = JsonUtils.getIntegerOrDefault(object, "NoDisability");
+        String nonDisablingDisease = JsonUtils.getStringOrDefault(object, "NonDisablingDisease");
+        Integer mutualInsuranceCoverage = JsonUtils.getIntegerOrDefault(object, "MutualInsuranceCoverage");
+        String housingType = JsonUtils.getStringOrDefault(object, "HousingType");
+        
+        Log.d("UPLOAD", "[UPLOAD][Insuree] ResidenceEnvironment = " + residenceEnvironment);
+        Log.d("UPLOAD", "[UPLOAD][Insuree] NoDisability = " + noDisability);
+        Log.d("UPLOAD", "[UPLOAD][Insuree] NonDisablingDisease = " + nonDisablingDisease);
+        Log.d("UPLOAD", "[UPLOAD][Insuree] MutualInsuranceCoverage = " + mutualInsuranceCoverage);
+        Log.d("UPLOAD", "[UPLOAD][Insuree] HousingType = " + housingType);
+        
+        // Check for null values in mandatory fields and log errors
+        if (residenceEnvironment == null) {
+            Log.e("UPLOAD", "[UPLOAD][Insuree] ResidenceEnvironment is NULL for CHFID: " + chfId);
+        }
+        if (noDisability == null) {
+            Log.e("UPLOAD", "[UPLOAD][Insuree] NoDisability is NULL for CHFID: " + chfId);
+        }
+        if (nonDisablingDisease == null || nonDisablingDisease.trim().isEmpty()) {
+            Log.e("UPLOAD", "[UPLOAD][Insuree] NonDisablingDisease is NULL or empty for CHFID: " + chfId);
+        }
+        if (mutualInsuranceCoverage == null) {
+            Log.e("UPLOAD", "[UPLOAD][Insuree] MutualInsuranceCoverage is NULL for CHFID: " + chfId);
+        }
+        if (housingType == null || housingType.trim().isEmpty()) {
+            Log.e("UPLOAD", "[UPLOAD][Insuree] HousingType is NULL or empty for CHFID: " + chfId);
+        }
+        
 
         
         return new Family.Member(
@@ -3719,9 +3791,9 @@ public class ClientAndroidInterface {
                 /* payment method */ JsonUtils.getStringOrDefault(object, "PaymentMethod"),
                 /* otherhousehold */ JsonUtils.getStringOrDefault(object, "OtherHousehold"),
                 /* account details */ JsonUtils.getStringOrDefault(object, "AccountDetails"),
-                /* noDisability = */ JsonUtils.getBooleanOrDefault(object, "NoDisability", null),
+                /* noDisability = */ JsonUtils.getIntegerOrDefault(object, "NoDisability"),
                 /* nonDisablingDisease = */ JsonUtils.getStringOrDefault(object, "NonDisablingDisease"),
-                /* mutualInsuranceCoverage = */ JsonUtils.getBooleanOrDefault(object, "MutualInsuranceCoverage", null),
+                /* mutualInsuranceCoverage = */ JsonUtils.getIntegerOrDefault(object, "MutualInsuranceCoverage"),
                 /* housingType = */ JsonUtils.getStringOrDefault(object, "HousingType"),
                 /* photoPath = */ image != null ? image.first : null,
                 /* photoBytes = */ image != null ? image.second : null,

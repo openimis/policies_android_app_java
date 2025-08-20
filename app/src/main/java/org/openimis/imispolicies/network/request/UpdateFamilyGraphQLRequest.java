@@ -31,7 +31,7 @@ public class UpdateFamilyGraphQLRequest extends BaseGraphQLRequest {
                         .clientMutationId(UUID.randomUUID().toString())
                         .uuid(family.getUuid())
                         .clientMutationId("Update family '" + family.getHeadChfId() + "'")
-                        .id(String.valueOf(family.getId()))
+                        .id(family.getId())
                         .locationId(family.getLocationId())
                         .poverty(family.isPoor())
                         .familyTypeId(family.getType())
