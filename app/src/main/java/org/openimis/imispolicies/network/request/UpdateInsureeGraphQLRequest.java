@@ -59,7 +59,7 @@ public class UpdateInsureeGraphQLRequest extends BaseGraphQLRequest {
                         .mutualInsuranceCoverageId(member.getMutualInsuranceCoverage() != null && member.getMutualInsuranceCoverage() != 0 ? member.getMutualInsuranceCoverage() : null)
                         .noDisabilityId(member.getNoDisability() != null && member.getNoDisability() != 0 ? member.getNoDisability() : null)
                         .nonDisablingDiseaseId(parseIntegerSafely(member.getNonDisablingDisease(), "NonDisablingDisease", member.getChfId()))
-                        .incomeLevelId(member.getIncomeLevel())
+                        .incomeLevelId(member.getIncomeLevel() != null && member.getIncomeLevel() != 0 ? member.getIncomeLevel() : null)
                         .preferredPaymentMethod(member.getPaymentMethod())
                         .coordinates(member.getOtherHousehold())
                         .bankCoordinates(member.getAccountDetails())
