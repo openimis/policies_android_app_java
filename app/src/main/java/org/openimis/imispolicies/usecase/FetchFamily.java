@@ -64,6 +64,29 @@ public class FetchFamily {
     @NonNull
     private Family.Member toMember(@NonNull GetFamilyQuery.Edge1 edge, @NonNull GetFamilyQuery.Node family) {
         GetFamilyQuery.Node1 member = Objects.requireNonNull(edge.node());
+        // Compute mapped values once for logging and reuse
+        Integer incomeLevelVal = getIncomeLevelValue(member);
+        Integer residenceEnvironmentVal = getResidenceEnvironmentValue(member);
+        Integer noDisabilityVal = getNoDisabilityValue(member);
+        String nonDisablingDiseaseVal = getNonDisablingDiseaseValue(member);
+        Integer mutualInsuranceCoverageVal = getMutualInsuranceCoverageValue(member);
+        String housingTypeVal = getHousingTypeValue(member);
+
+        // Debug log to trace values fetched from server for the 5 extended fields
+        try {
+            Log.d("FetchFamily",
+                    "[GetFamily] CHF=" + member.chfId() +
+                            " | incomeLevel=" + incomeLevelVal +
+                            " | residenceEnvironment=" + residenceEnvironmentVal +
+                            " | noDisability=" + noDisabilityVal +
+                            " | nonDisablingDisease=" + nonDisablingDiseaseVal +
+                            " | mutualInsuranceCoverage=" + mutualInsuranceCoverageVal +
+                            " | housingType=" + housingTypeVal
+            );
+        } catch (Exception e) {
+            // Ensure logging never breaks fetching
+            Log.e("FetchFamily", "Error while logging mapped insuree fields", e);
+        }
         return new Family.Member(
                 /* chfId = */ Objects.requireNonNull(member.chfId()),
                 /* isHead = */ member.head(),
@@ -89,15 +112,15 @@ public class FetchFamily {
                 /* currentVillage = */ member.currentVillage() != null && member.currentVillage().id() != null ? IdUtils.getIdFromGraphQLString(Objects.requireNonNull(member.currentVillage()).id()) : null,
                 /* geolocation = */ member.geolocation(),
                 /* professional situation = */ member.professionalSituation(),
-                /* incomeLevel = */ getIncomeLevelValue(member),
-                /* residenceEnvironment = */ getResidenceEnvironmentValue(member),
+                /* incomeLevel = */ incomeLevelVal,
+                /* residenceEnvironment = */ residenceEnvironmentVal,
                 /* payment method = */ member.preferredPaymentMethod(),
                 /* other household = */ member.coordinates() != null ? member.coordinates() : "",
                 /* account details = */ member.bankCoordinates() != null ? member.bankCoordinates() : "",
-                /* noDisability = */ getNoDisabilityValue(member),
-                /* nonDisablingDisease = */ getNonDisablingDiseaseValue(member),
-                /* mutualInsuranceCoverage = */ getMutualInsuranceCoverageValue(member),
-                /* housingType = */ getHousingTypeValue(member),
+                /* noDisability = */ noDisabilityVal,
+                /* nonDisablingDisease = */ nonDisablingDiseaseVal,
+                /* mutualInsuranceCoverage = */ mutualInsuranceCoverageVal,
+                /* housingType = */ housingTypeVal,
                 /* photoPath = */ downloadPhoto(member.photo()),
                 /* photoBytes = */ null, // We already saved them on disk, no need to pass them here.
                 /* isOffline = */ member.offline() != null ? Objects.requireNonNull(member.offline()) : false

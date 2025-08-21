@@ -218,6 +218,8 @@ $(document).ready(function () {
     if (parseInt(InsureeId) > 0 || parseInt(InsureeId) < 0) {
         var Insuree = Android.getInsuree(parseInt(InsureeId));
         bindDataFromDatafield(Insuree);
+        // Store for later re-apply after dropdowns are populated
+        try { window._loadedInsuree = $.parseJSON(Insuree)[0]; } catch(e) { console.log(e); }
         var PhotoPath = $.parseJSON(Insuree)[0]["PhotoPath"];
         var IsOffline = parseInt($.parseJSON(Insuree)[0]["isOffline"]);
         var marital = $.parseJSON(Insuree)[0]["Marital"];
@@ -271,6 +273,8 @@ $(document).ready(function () {
         }
 
         $('#ddlPaymentMethod').val($.parseJSON(Insuree)[0]["PaymentMethod"]);
+        // Apply selects once now (in case options already exist)
+        applyInsureeSelectValues();
 
         var Ins = $('#txtInsuranceNumber').val();
         if (PhotoPath.length == 0) {
@@ -340,6 +344,57 @@ function fillDropdowns() {
     fillNonDisablingDiseases();
     fillMutualInsuranceCoverages();
     fillHousingTypes();
+    // Re-apply after dropdowns are populated to avoid race condition
+    applyInsureeSelectValues();
+    // Additional retries to ensure options are in place on slower devices
+    setTimeout(applyInsureeSelectValues, 50);
+    setTimeout(applyInsureeSelectValues, 150);
+    setTimeout(applyInsureeSelectValues, 300);
+}
+
+// Helper to apply select values for insuree fields reliably
+function applyInsureeSelectValues() {
+    try {
+        var insureeObj = window._loadedInsuree;
+        if (!insureeObj) return;
+        var setSelectSafe = function(selector, value, keyName) {
+            if (value === null || value === undefined || value === "") return;
+            var $sel = $(selector);
+            var tried = [];
+            function trySet(v) {
+                tried.push(v);
+                $sel.val(v);
+                var matched = $sel.val() == v; // jQuery returns the set value if matched
+                if (matched) { $sel.trigger('change'); }
+                return matched;
+            }
+            var ok = false;
+            // Try as string
+            ok = ok || trySet(String(value));
+            // Try as int (if numeric)
+            if (!ok && /^\d+$/.test(String(value))) {
+                ok = ok || trySet(parseInt(value, 10));
+            }
+            // Try mapping boolean-like
+            if (!ok && (String(value).toLowerCase() === 'true' || String(value) === '1')) {
+                ok = ok || trySet('1');
+            }
+            if (!ok && (String(value).toLowerCase() === 'false' || String(value) === '0')) {
+                ok = ok || trySet('0');
+            }
+            // Log once if still not matched to help diagnose
+            if (!ok) {
+                try {
+                    console.log('Select not matched:', keyName, 'value=', value, 'options=', $sel.find('option').map(function(){return $(this).val();}).get());
+                } catch(e) {}
+            }
+        };
+        setSelectSafe('#ddlResidenceEnvironment', insureeObj["ResidenceEnvironment"], 'ResidenceEnvironment');
+        setSelectSafe('#ddlHousingType', insureeObj["HousingType"], 'HousingType');
+        setSelectSafe('#ddlMutualInsuranceCoverage', insureeObj["MutualInsuranceCoverage"], 'MutualInsuranceCoverage');
+        setSelectSafe('#ddlNoDisability', insureeObj["NoDisability"], 'NoDisability');
+        setSelectSafe('#ddlNonDisablingDisease', insureeObj["NonDisablingDisease"], 'NonDisablingDisease');
+    } catch (e) { console.log(e); }
 }
 
 // called from java after the image was selected by the user

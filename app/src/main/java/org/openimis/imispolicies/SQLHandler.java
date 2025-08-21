@@ -449,7 +449,7 @@ public class SQLHandler extends SQLiteOpenHelper {
             );
             sqLiteDatabase.execSQL(
                     "CREATE TABLE " + tblResidenceEnvironment + "("
-                            + "Code INTEGER PRIMARY KEY,"
+                            + "id INTEGER PRIMARY KEY,"
                             + "ResidenceEnvironment VARCHAR(100),"
                             + "AltLanguage VARCHAR(100),"
                             + "SortOrder INTEGER" + ")"
@@ -457,7 +457,7 @@ public class SQLHandler extends SQLiteOpenHelper {
             
             sqLiteDatabase.execSQL(
                     "CREATE TABLE " + tblNoDisability + "("
-                            + "Code INTEGER PRIMARY KEY,"
+                            + "id INTEGER PRIMARY KEY,"
                             + "NoDisabilityLabel VARCHAR(100),"
                             + "AltLanguage VARCHAR(100),"
                             + "SortOrder INTEGER" +")"
@@ -465,7 +465,7 @@ public class SQLHandler extends SQLiteOpenHelper {
             
             sqLiteDatabase.execSQL(
                     "CREATE TABLE " + tblNonDisablingDisease + "("
-                            + "Code INTEGER PRIMARY KEY,"
+                            + "id INTEGER PRIMARY KEY,"
                             + "NonDisablingDisease VARCHAR(100),"
                             + "AltLanguage VARCHAR(100),"
                             + "SortOrder INTEGER" +")"
@@ -473,7 +473,7 @@ public class SQLHandler extends SQLiteOpenHelper {
             
             sqLiteDatabase.execSQL(
                     "CREATE TABLE " + tblMutualInsuranceCoverage + "("
-                            + "Code INTEGER PRIMARY KEY,"
+                            + "id INTEGER PRIMARY KEY,"
                             + "MutualInsuranceCoverage VARCHAR(150),"
                             + "AltLanguage VARCHAR(150),"
                             + "SortOrder INTEGER" +")"
@@ -481,7 +481,7 @@ public class SQLHandler extends SQLiteOpenHelper {
             
             sqLiteDatabase.execSQL(
                     "CREATE TABLE " + tblHousingType + "("
-                            + "Code INTEGER PRIMARY KEY,"
+                            + "id INTEGER PRIMARY KEY,"
                             + "HousingType VARCHAR(150),"
                             + "AltLanguage VARCHAR(150),"
                             + "SortOrder INTEGER" +")"

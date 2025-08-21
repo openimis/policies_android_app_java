@@ -6865,12 +6865,12 @@ input FamilyHeadInsureeInputType {
     preferredPaymentMethod: String
     bankCoordinates: String
     coordinates: String
-    # NEW REQUIRED FIELDS - Server now requires these as Int!
-    residenceEnvironment: Int!
-    housingType: Int!
-    mutualInsuranceCoverage: Int!
-    noDisability: Int!
-    nonDisablingDisease: Int!
+    # NEW REQUIRED FIELDS - Server requires these as Int! with *_Id naming
+    residenceEnvironmentId: Int!
+    housingTypeId: Int!
+    mutualInsuranceCoverageId: Int!
+    noDisabilityId: Int!
+    nonDisablingDiseaseId: Int!
 }
 
 input PhotoInputType {
@@ -7001,12 +7001,12 @@ input CreateInsureeMutationInput {
     preferredPaymentMethod: String
     bankCoordinates: String
     coordinates: String
-    # NEW REQUIRED FIELDS - Server now requires these as Int!
-    residenceEnvironment: Int!
-    housingType: Int!
-    mutualInsuranceCoverage: Int!
-    noDisability: Int!
-    nonDisablingDisease: Int!
+    # NEW REQUIRED FIELDS - Server requires these as Int! with *_Id naming
+    residenceEnvironmentId: Int!
+    housingTypeId: Int!
+    mutualInsuranceCoverageId: Int!
+    noDisabilityId: Int!
+    nonDisablingDiseaseId: Int!
     clientMutationId: String
 }
 
@@ -7075,15 +7075,14 @@ input UpdateInsureeMutationInput {
     houseNumber: String
     bankCoordinates: String
     coordinates: String
-    # NEW REQUIRED FIELDS - Server now requires these as Int!
-    residenceEnvironment: Int!
-    housingType: Int!
-    mutualInsuranceCoverage: Int!
-    noDisability: Int!
-    nonDisablingDisease: Int!
+    # NEW REQUIRED FIELDS - Server requires these as Int! with *_Id naming
+    residenceEnvironmentId: Int!
+    housingTypeId: Int!
+    mutualInsuranceCoverageId: Int!
+    noDisabilityId: Int!
+    nonDisablingDiseaseId: Int!
     clientMutationId: String
 }
-
 """
 Delete one or several insurees.
 """
@@ -7095,9 +7094,7 @@ type DeleteInsureesMutationPayload {
 input DeleteInsureesMutationInput {
     clientMutationLabel: String
     clientMutationDetails: [String]
-    """
-    Extension data to be used by signals. Will not be pushed to mutation implementation.
-    """
+    # Extension data to be used by signals. Will not be pushed to mutation implementation.
     mutationExtensions: ParsedJSONString
     uuid: String
     uuids: [String]

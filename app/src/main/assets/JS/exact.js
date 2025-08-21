@@ -167,15 +167,22 @@ $(document).ready(function(){
 
     function bindDataFromDatafield(source){
         var dataSource = $.parseJSON(source);
-        var ctls = $("[dataField]");
+        var ctls = $("[dataField], [datafield]");
 
         $.each(ctls, function(){
-            var key = $(this).attr("dataField");
+            var key = $(this).attr("dataField") || $(this).attr("datafield");
+            var value = dataSource[0]['' + key + ''];
 
-            if($(this).is('input, select, textarea'))
-                $(this).val(dataSource[0][''+ key +'']);
-            else
-                $(this).text(dataSource[0][''+ key +'']);
+            if ($(this).is('input, select, textarea')) {
+                // For selects, coerce to string to match option values
+                if ($(this).is('select') && value !== null && value !== undefined) {
+                    $(this).val(String(value));
+                } else {
+                    $(this).val(value);
+                }
+            } else {
+                $(this).text(value);
+            }
         });
     }
 

@@ -94,12 +94,11 @@ public class CreateFamilyGraphQLRequest extends BaseGraphQLRequest {
                                     .preferredPaymentMethod(head.getPaymentMethod())
                                     .coordinates(head.getOtherHousehold())
                                     .bankCoordinates(head.getAccountDetails())
-                                    .residenceEnvironment(safeGetResidenceEnvironment(head))
-                                    .housingType(safeGetHousingType(head))
-                                    .mutualInsuranceCoverage(safeGetMutualInsuranceCoverage(head))
-                                    .noDisability(safeGetNoDisability(head))
-                                    .nonDisablingDisease(safeGetNonDisablingDisease(head))
-                                    .nonDisablingDisease(safeGetNonDisablingDisease(head))
+                                    .residenceEnvironmentId(safeGetResidenceEnvironment(head))
+                                    .housingTypeId(safeGetHousingType(head))
+                                    .mutualInsuranceCoverageId(safeGetMutualInsuranceCoverage(head))
+                                    .noDisabilityId(safeGetNoDisability(head))
+                                    .nonDisablingDiseaseId(safeGetNonDisablingDisease(head))
                                     .photo(photoInput)
                                     .build()
                     )
@@ -341,14 +340,14 @@ public class CreateFamilyGraphQLRequest extends BaseGraphQLRequest {
         try {
             // Vérifier d'abord si la valeur est null - retourner null si pas défini
             if (head.getIncomeLevel() == null) {
-                Log.d("GRAPHQL_DEBUG", "IncomeLevel: null (optionnel)");
+                // IncomeLevel non défini
                 return null;
             }
             
             // Convertir en String puis en int
             String value = String.valueOf(head.getIncomeLevel());
             if (TextUtils.isEmpty(value)) {
-                Log.d("GRAPHQL_DEBUG", "IncomeLevel: null (valeur vide)");
+                // Valeur vide
                 return null;
             }
             
@@ -356,21 +355,22 @@ public class CreateFamilyGraphQLRequest extends BaseGraphQLRequest {
             
             // Vérifier que le code existe dans la table de référence
             SQLHandler sqlHandler = new SQLHandler(context);
-            JSONArray result = sqlHandler.getResult("SELECT Code FROM " + SQLHandler.tblIncomeLevel + " WHERE Code = ?", 
+            // Le schéma local définit les colonnes: Id, FirstLanguage, SecondLanguage
+            // Utiliser Id pour la validation au lieu de Code
+            JSONArray result = sqlHandler.getResult("SELECT Id FROM " + SQLHandler.tblIncomeLevel + " WHERE Id = ?", 
                     new String[]{value});
             
             if (result == null || result.length() == 0) {
-                Log.w("GRAPHQL_DEBUG", "Code de niveau de revenu invalide: " + value + ", retour null");
+                // Id de niveau de revenu introuvable
                 return null;
             }
             
-            Log.d("GRAPHQL_DEBUG", "IncomeLevel: " + intValue);
             return intValue;
         } catch (NumberFormatException e) {
-            Log.e("GRAPHQL_DEBUG", "Format de niveau de revenu invalide", e);
+            // Format de niveau de revenu invalide
             return null;
         } catch (Exception e) {
-            Log.e("GRAPHQL_DEBUG", "Erreur lors de la validation du niveau de revenu", e);
+            // Erreur lors de la validation du niveau de revenu
             return null;
         }
     }

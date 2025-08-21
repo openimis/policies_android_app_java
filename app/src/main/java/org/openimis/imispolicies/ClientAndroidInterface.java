@@ -5484,7 +5484,7 @@ public class ClientAndroidInterface {
             }
         }
         String[] Columns = {"identificationNumber", "familyId", "insureeId", "insureeUUID", "familyUUID", "chfid", "lastName", "otherNames", "dob", "gender", "marital", "isHead", "phone", "photoPath", "cardIssued",
-                "isOffline", "relationship", "profession", "education", "email", "typeOfId", "hfid", "currentAddress", "geoLocation", "curVillage", "incomeLevel", "professionalSituation", "paymentMethod", "accountDetails", "otherHousehold"};
+                "isOffline", "relationship", "profession", "education", "email", "typeOfId", "hfid", "currentAddress", "geoLocation", "curVillage", "incomeLevel", "professionalSituation", "paymentMethod", "accountDetails", "noDisability", "otherHousehold", "residenceEnvironment", "nonDisablingDisease", "mutualInsuranceCoverage", "housingType"};
         sqlHandler.insertData("tblInsuree", Columns, array, "");
     }
 
@@ -5567,6 +5567,10 @@ public class ClientAndroidInterface {
         jsonObject.put("geoLocation", member.getGeolocation());
         jsonObject.put("curVillage", member.getCurrentVillage());
         jsonObject.put("incomeLevel", member.getIncomeLevel() != null ? member.getIncomeLevel() : "");
+        jsonObject.put("noDisability", member.getNoDisability() != null ? member.getNoDisability() : "");
+        jsonObject.put("nonDisablingDisease", member.getNonDisablingDisease() != null ? member.getNonDisablingDisease() : "");
+        jsonObject.put("mutualInsuranceCoverage", member.getMutualInsuranceCoverage() != null ? member.getMutualInsuranceCoverage() : "");
+        jsonObject.put("housingType", member.getHousingType() != null ? member.getHousingType() : "");
         jsonObject.put("residenceEnvironment", member.getResidenceEnvironment() != null ? member.getResidenceEnvironment() : "");
         jsonObject.put("professionalSituation", member.getProfessionalSituation());
         jsonObject.put("paymentMethod", member.getPaymentMethod());
@@ -6515,88 +6519,52 @@ public class ClientAndroidInterface {
      * Insert NoDisabilities data from server into local database
      * @param jsonArray JSONArray containing NoDisabilities data from server
      */
-    private void insertNoDisabilities(JSONArray jsonArray) {
+    @WorkerThread
+    private void insertNoDisabilities(JSONArray jsonArray) throws JSONException {
+        android.util.Log.d("ClientAndroidInterface", "Inserting NoDisabilities data: " + (jsonArray != null ? jsonArray.length() : 0) + " items");
         if (jsonArray != null && jsonArray.length() > 0) {
-            android.util.Log.d("ClientAndroidInterface", "Inserting " + jsonArray.length() + " NoDisabilities records");
-            try {
-                if (isLoggingEnabled()) {
-                    android.util.Log.d("ClientAndroidInterface", "NoDisabilities data: " + jsonArray.toString());
-                }
-                sqlHandler.insertNoDisabilities(jsonArray);
-                android.util.Log.d("ClientAndroidInterface", "Successfully inserted NoDisabilities data");
-            } catch (Exception e) {
-                android.util.Log.e("ClientAndroidInterface", "Error inserting NoDisabilities data", e);
-                throw e;
-            }
-        } else {
-            android.util.Log.d("ClientAndroidInterface", "No NoDisabilities data to insert");
+            sqlHandler.insertNoDisabilities(jsonArray);
         }
+        android.util.Log.d("ClientAndroidInterface", "NoDisabilities data inserted successfully");
     }
     
     /**
      * Insert NonDisablingDiseases data from server into local database
      * @param jsonArray JSONArray containing NonDisablingDiseases data from server
      */
-    private void insertNonDisablingDiseases(JSONArray jsonArray) {
+    @WorkerThread
+    private void insertNonDisablingDiseases(JSONArray jsonArray) throws JSONException {
+        android.util.Log.d("ClientAndroidInterface", "Inserting NonDisablingDiseases data: " + (jsonArray != null ? jsonArray.length() : 0) + " items");
         if (jsonArray != null && jsonArray.length() > 0) {
-            android.util.Log.d("ClientAndroidInterface", "Inserting " + jsonArray.length() + " NonDisablingDiseases records");
-            try {
-                if (isLoggingEnabled()) {
-                    android.util.Log.d("ClientAndroidInterface", "NonDisablingDiseases data: " + jsonArray.toString());
-                }
-                sqlHandler.insertNonDisablingDiseases(jsonArray);
-                android.util.Log.d("ClientAndroidInterface", "Successfully inserted NonDisablingDiseases data");
-            } catch (Exception e) {
-                android.util.Log.e("ClientAndroidInterface", "Error inserting NonDisablingDiseases data", e);
-                throw e;
-            }
-        } else {
-            android.util.Log.d("ClientAndroidInterface", "No NonDisablingDiseases data to insert");
+            sqlHandler.insertNonDisablingDiseases(jsonArray);
         }
+        android.util.Log.d("ClientAndroidInterface", "NonDisablingDiseases data inserted successfully");
     }
     
     /**
      * Insert MutualInsuranceCoverages data from server into local database
      * @param jsonArray JSONArray containing MutualInsuranceCoverages data from server
      */
-    private void insertMutualInsuranceCoverages(JSONArray jsonArray) {
+    @WorkerThread
+    private void insertMutualInsuranceCoverages(JSONArray jsonArray) throws JSONException {
+        android.util.Log.d("ClientAndroidInterface", "Inserting MutualInsuranceCoverages data: " + (jsonArray != null ? jsonArray.length() : 0) + " items");
         if (jsonArray != null && jsonArray.length() > 0) {
-           
-            try {
-                if (isLoggingEnabled()) {
-                   
-                }
-                sqlHandler.insertMutualInsuranceCoverages(jsonArray);
-                android.util.Log.d("ClientAndroidInterface", "Successfully inserted MutualInsuranceCoverages data");
-            } catch (Exception e) {
-                android.util.Log.e("ClientAndroidInterface", "Error inserting MutualInsuranceCoverages data", e);
-                throw e;
-            }
-        } else {
-            android.util.Log.d("ClientAndroidInterface", "No MutualInsuranceCoverages data to insert");
+            sqlHandler.insertMutualInsuranceCoverages(jsonArray);
         }
+        android.util.Log.d("ClientAndroidInterface", "MutualInsuranceCoverages data inserted successfully");
     }
     
     /**
      * Insert HousingTypes data from server into local database
      * @param jsonArray JSONArray containing HousingTypes data from server
      */
-    private void insertHousingTypes(JSONArray jsonArray) {
+    @WorkerThread
+    private void insertHousingTypes(JSONArray jsonArray) throws JSONException {
+        android.util.Log.d("ClientAndroidInterface", "Inserting HousingTypes data: " + (jsonArray != null ? jsonArray.length() : 0) + " items");
         if (jsonArray != null && jsonArray.length() > 0) {
-            android.util.Log.d("ClientAndroidInterface", "Inserting " + jsonArray.length() + " HousingTypes records");
-            try {
-                if (isLoggingEnabled()) {
-                    android.util.Log.d("ClientAndroidInterface", "HousingTypes data: " + jsonArray.toString());
-                }
-                sqlHandler.insertHousingTypes(jsonArray);
-                android.util.Log.d("ClientAndroidInterface", "Successfully inserted HousingTypes data");
-            } catch (Exception e) {
-                android.util.Log.e("ClientAndroidInterface", "Error inserting HousingTypes data", e);
-                throw e;
-            }
-        } else {
-            android.util.Log.d("ClientAndroidInterface", "No HousingTypes data to insert");
+            sqlHandler.insertHousingTypes(jsonArray);
         }
+        android.util.Log.d("ClientAndroidInterface", "HousingTypes data inserted successfully");
     }
     
     // Note: Master data insertion methods added for new reference tables
