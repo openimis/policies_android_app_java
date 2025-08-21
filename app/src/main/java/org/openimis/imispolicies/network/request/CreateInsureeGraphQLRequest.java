@@ -33,7 +33,7 @@ public class CreateInsureeGraphQLRequest extends BaseGraphQLRequest {
         try {
             CreateInsureeMutation mutation = new CreateInsureeMutation(
                     CreateInsureeMutationInput.builder()
-                            .clientMutationId("Create insuree '" + member.getChfId() + "'")
+                            .clientMutationId(UUID.randomUUID().toString())
                             .familyId(familyId)
                             .chfId(member.getChfId())
                             .passport(member.getIdentificationNumber())

@@ -47,9 +47,6 @@ public class CreateFamilyGraphQLRequest extends BaseGraphQLRequest {
             if (head == null) {
                 throw new IllegalArgumentException("Family must have a head member");
             }
-
-
-
             PhotoInputType photoInput = null;
             if (head.getPhotoBytes() != null) {
                 photoInput = PhotoInputType.builder()
@@ -59,10 +56,9 @@ public class CreateFamilyGraphQLRequest extends BaseGraphQLRequest {
                         .officerId(officerId)
                         .build();
             }
-
             CreateFamilyMutation mutation = new CreateFamilyMutation(
                 CreateFamilyMutationInput.builder()
-                    .clientMutationId("Create family '" + family.getHeadChfId() + "'")
+                    .clientMutationId(UUID.randomUUID().toString())
                     .locationId(family.getLocationId())
                     .poverty(family.isPoor())
                     .familyTypeId(family.getType() != null ? family.getType() : "H")
