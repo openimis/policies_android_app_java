@@ -90,12 +90,11 @@ public class CreateFamilyGraphQLRequest extends BaseGraphQLRequest {
                                     .preferredPaymentMethod(head.getPaymentMethod())
                                     .coordinates(head.getOtherHousehold())
                                     .bankCoordinates(head.getAccountDetails())
-                                    .residenceEnvironment(safeGetResidenceEnvironment(head))
-                                    .housingType(safeGetHousingType(head))
-                                    .mutualInsuranceCoverage(safeGetMutualInsuranceCoverage(head))
-                                    .noDisability(safeGetNoDisability(head))
-                                    .nonDisablingDisease(safeGetNonDisablingDisease(head))
-                                    .nonDisablingDisease(safeGetNonDisablingDisease(head))
+                                    .residenceEnvironmentId(safeGetResidenceEnvironment(head))
+                                    .housingTypeId(safeGetHousingType(head))
+                                    .mutualInsuranceCoverageId(safeGetMutualInsuranceCoverage(head))
+                                    .noDisabilityId(safeGetNoDisability(head))
+                                    .nonDisablingDiseaseId(safeGetNonDisablingDisease(head))
                                     .photo(photoInput)
                                     .build()
                     )
@@ -145,22 +144,22 @@ public class CreateFamilyGraphQLRequest extends BaseGraphQLRequest {
     
     private Integer safeGetResidenceEnvironment(Family.Member head) {
         try {
-            // Vérifier d'abord si la valeur est null - retourner null si pas défini
+            // First check if the value is null - return null if not defined
             if (head.getResidenceEnvironment() == null) {
-                Log.d("GRAPHQL_DEBUG", "ResidenceEnvironment: null (optionnel)");
+
                 return null;
             }
             
             // Convertir en String puis en int
             String value = String.valueOf(head.getResidenceEnvironment());
             if (TextUtils.isEmpty(value)) {
-                Log.d("GRAPHQL_DEBUG", "ResidenceEnvironment: null (valeur vide)");
+
                 return null;
             }
             
             int intValue = Integer.parseInt(value);
             
-            // Vérifier que le code existe dans la table de référence
+            // Verify that the code exists in the reference table
             SQLHandler sqlHandler = new SQLHandler(context);
             JSONArray result = sqlHandler.getResult("SELECT Code FROM " + SQLHandler.tblResidenceEnvironment + " WHERE Code = ?", 
                     new String[]{value});
@@ -170,7 +169,7 @@ public class CreateFamilyGraphQLRequest extends BaseGraphQLRequest {
                 return null;
             }
             
-            Log.d("GRAPHQL_DEBUG", "ResidenceEnvironment: " + intValue);
+
             return intValue;
         } catch (NumberFormatException e) {
             Log.e("GRAPHQL_DEBUG", "Format d'environnement de résidence invalide", e);
@@ -183,23 +182,23 @@ public class CreateFamilyGraphQLRequest extends BaseGraphQLRequest {
     
     private Integer safeGetNoDisability(Family.Member head) {
         try {
-            // Vérifier d'abord si la valeur est null - retourner null si pas défini
+            // First check if the value is null - return null if not defined
             if (head.getNoDisability() == null) {
-                Log.d("GRAPHQL_DEBUG", "NoDisability: null (optionnel)");
+
                 return null;
             }
             
             // Convertir en String puis en int
             String value = String.valueOf(head.getNoDisability());
             if (TextUtils.isEmpty(value)) {
-                Log.d("GRAPHQL_DEBUG", "NoDisability: null (valeur vide)");
+
                 return null;
             }
             
             int intValue = Integer.parseInt(value);
             
-            // Vérifier que le code existe dans la table de référence
-            SQLHandler sqlHandler = new SQLHandler(context);
+            // Verify that the code exists in the reference table
+             SQLHandler sqlHandler = new SQLHandler(context);
             JSONArray result = sqlHandler.getResult("SELECT Code FROM " + SQLHandler.tblNoDisability + " WHERE Code = ?", 
                     new String[]{value});
             
@@ -208,7 +207,7 @@ public class CreateFamilyGraphQLRequest extends BaseGraphQLRequest {
                 return null;
             }
             
-            Log.d("GRAPHQL_DEBUG", "NoDisability: " + intValue);
+
             return intValue;
         } catch (NumberFormatException e) {
             Log.e("GRAPHQL_DEBUG", "Format de type d'incapacité invalide", e);
@@ -221,7 +220,7 @@ public class CreateFamilyGraphQLRequest extends BaseGraphQLRequest {
     
     private Integer safeGetMutualInsuranceCoverage(Family.Member head) {
         try {
-            // Vérifier d'abord si la valeur est null - retourner null si pas défini
+            // First check if the value is null - return null if not defined
             if (head.getMutualInsuranceCoverage() == null) {
 
                 return null;
@@ -236,7 +235,7 @@ public class CreateFamilyGraphQLRequest extends BaseGraphQLRequest {
             
             int intValue = Integer.parseInt(value);
             
-            // Vérifier que le code existe dans la table de référence
+            // Verify that the code exists in the reference table
             SQLHandler sqlHandler = new SQLHandler(context);
             JSONArray result = sqlHandler.getResult("SELECT Code FROM " + SQLHandler.tblMutualInsuranceCoverage + " WHERE Code = ?", 
                     new String[]{value});
@@ -259,9 +258,9 @@ public class CreateFamilyGraphQLRequest extends BaseGraphQLRequest {
     
     private Integer safeGetHousingType(Family.Member head) {
         try {
-            // Vérifier d'abord si la valeur est null - retourner null si pas défini
+            // First check if the value is null - return null if not defined
             if (head.getHousingType() == null) {
-                Log.d("GRAPHQL_DEBUG", "HousingType: null (optionnel)");
+
                 return null;
             }
             
@@ -274,7 +273,7 @@ public class CreateFamilyGraphQLRequest extends BaseGraphQLRequest {
             
             int intValue = Integer.parseInt(value);
             
-            // Vérifier que le code existe dans la table de référence
+            // Verify that the code exists in the reference table
             SQLHandler sqlHandler = new SQLHandler(context);
             JSONArray result = sqlHandler.getResult("SELECT Code FROM " + SQLHandler.tblHousingType + " WHERE Code = ?", 
                     new String[]{value});
@@ -297,7 +296,7 @@ public class CreateFamilyGraphQLRequest extends BaseGraphQLRequest {
     
     private Integer safeGetNonDisablingDisease(Family.Member head) {
         try {
-            // Vérifier d'abord si la valeur est null - retourner null si pas défini
+            // First check if the value is null - return null if not defined
             if (head.getNonDisablingDisease() == null) {
 
                 return null;
@@ -312,7 +311,7 @@ public class CreateFamilyGraphQLRequest extends BaseGraphQLRequest {
             
             int intValue = Integer.parseInt(value);
             
-            // Vérifier que le code existe dans la table de référence
+            // Verify that the code exists in the reference table
             SQLHandler sqlHandler = new SQLHandler(context);
             JSONArray result = sqlHandler.getResult("SELECT Code FROM " + SQLHandler.tblNonDisablingDisease + " WHERE Code = ?", 
                     new String[]{value});
@@ -322,7 +321,7 @@ public class CreateFamilyGraphQLRequest extends BaseGraphQLRequest {
                 return null;
             }
             
-            Log.d("GRAPHQL_DEBUG", "NonDisablingDisease: " + intValue);
+
             return intValue;
         } catch (NumberFormatException e) {
             Log.e("GRAPHQL_DEBUG", "Format d'état de maladie invalide", e);
@@ -335,38 +334,39 @@ public class CreateFamilyGraphQLRequest extends BaseGraphQLRequest {
     
     private Integer safeGetIncomeLevel(Family.Member head) {
         try {
-            // Vérifier d'abord si la valeur est null - retourner null si pas défini
-            if (head.getIncomeLevel() == null) {
-                Log.d("GRAPHQL_DEBUG", "IncomeLevel: null (optionnel)");
+            // First check if the value is null - return null if not defined
+             if (head.getIncomeLevel() == null) {
+                // IncomeLevel not defined
                 return null;
             }
             
             // Convertir en String puis en int
             String value = String.valueOf(head.getIncomeLevel());
             if (TextUtils.isEmpty(value)) {
-                Log.d("GRAPHQL_DEBUG", "IncomeLevel: null (valeur vide)");
+                // Valeur vide
                 return null;
             }
             
             int intValue = Integer.parseInt(value);
             
-            // Vérifier que le code existe dans la table de référence
+            // Verify that the code exists in the reference table
             SQLHandler sqlHandler = new SQLHandler(context);
-            JSONArray result = sqlHandler.getResult("SELECT Code FROM " + SQLHandler.tblIncomeLevel + " WHERE Code = ?", 
+            // The local schema defines columns: Id, FirstLanguage, SecondLanguage
+            // Use Id for validation instead of Code
+            JSONArray result = sqlHandler.getResult("SELECT Id FROM " + SQLHandler.tblIncomeLevel + " WHERE Id = ?", 
                     new String[]{value});
             
             if (result == null || result.length() == 0) {
-                Log.w("GRAPHQL_DEBUG", "Code de niveau de revenu invalide: " + value + ", retour null");
+                // Id de niveau de revenu introuvable
                 return null;
             }
             
-            Log.d("GRAPHQL_DEBUG", "IncomeLevel: " + intValue);
             return intValue;
         } catch (NumberFormatException e) {
-            Log.e("GRAPHQL_DEBUG", "Format de niveau de revenu invalide", e);
+            // Format de niveau de revenu invalide
             return null;
         } catch (Exception e) {
-            Log.e("GRAPHQL_DEBUG", "Erreur lors de la validation du niveau de revenu", e);
+            // Erreur lors de la validation du niveau de revenu
             return null;
         }
     }

@@ -146,7 +146,7 @@ public class MainActivity extends AppCompatActivity
                     (data.getData() != null
                             && data.getAction() != null
                             && data.getAction().equals(MediaStore.ACTION_IMAGE_CAPTURE))) {
-                Log.d("Main", "RESULT_LOAD_IMG got a camera result, in the predefined location");
+
                 selectedImage = ClientAndroidInterface.tempPhotoUri;
             } else {
                 // File selection

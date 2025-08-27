@@ -18,6 +18,7 @@ import org.openimis.imispolicies.type.UpdateFamilyMutationInput;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.UUID;
+import android.util.Log;
 
 public class UpdateFamilyGraphQLRequest extends BaseGraphQLRequest {
 
@@ -28,8 +29,8 @@ public class UpdateFamilyGraphQLRequest extends BaseGraphQLRequest {
         java.sql.Date date = new java.sql.Date(System.currentTimeMillis());
         Response<UpdateFamilyMutation.Data> response = makeSynchronous(new UpdateFamilyMutation(
                 UpdateFamilyMutationInput.builder()
-                        .clientMutationId(UUID.randomUUID().toString())
                         .uuid(family.getUuid())
+                        .clientMutationId("Update family '" + family.getHeadChfId() + "'")
                         .id(family.getId())
                         .locationId(family.getLocationId())
                         .poverty(family.isPoor())
@@ -61,6 +62,12 @@ public class UpdateFamilyGraphQLRequest extends BaseGraphQLRequest {
                                         .professionId(head.getProfession() != null && head.getProfession() != 0 ? head.getProfession() : null)
                                         .educationId(head.getEducation() != null && head.getEducation() != 0 ? head.getEducation() : null)
                                         .professionalSituation(head.getProfessionalSituation())
+                                        // NEW categorical fields for head insuree
+                                        .residenceEnvironmentId(head.getResidenceEnvironment() != null && head.getResidenceEnvironment() != 0 ? head.getResidenceEnvironment() : null)
+                                        .housingTypeId(parseIntegerSafely(head.getHousingType(), "HousingType", head.getChfId()))
+                                        .mutualInsuranceCoverageId(head.getMutualInsuranceCoverage() != null && head.getMutualInsuranceCoverage() != 0 ? head.getMutualInsuranceCoverage() : null)
+                                        .noDisabilityId(head.getNoDisability() != null && head.getNoDisability() != 0 ? head.getNoDisability() : null)
+                                        .nonDisablingDiseaseId(parseIntegerSafely(head.getNonDisablingDisease(), "NonDisablingDisease", head.getChfId()))
                                         .incomeLevelId(head.getIncomeLevel() != null && head.getIncomeLevel() != 0 ? head.getIncomeLevel() : null)
                                         .preferredPaymentMethod(head.getPaymentMethod())
                                         .coordinates(head.getOtherHousehold())
@@ -97,5 +104,31 @@ public class UpdateFamilyGraphQLRequest extends BaseGraphQLRequest {
                 .mime(dto.getMime())
                 .document(dto.getContent())
                 .build();
+    }
+
+    /**
+     * Safely parse a string to Integer with detailed logging to prevent NullPointerException
+     * @param value The string value to parse
+     * @param fieldName The name of the field for logging
+     * @param chfId The CHFID for context in logging
+     * @return Integer value or null if parsing fails or value is null/empty/zero
+     */
+    private Integer parseIntegerSafely(String value, String fieldName, String chfId) {
+        try {
+            if (value == null) {
+                Log.w("UpdateFamily", "[GRAPHQL][" + chfId + "] " + fieldName + " is null, sending null to server");
+                return null;
+            }
+            if (value.trim().isEmpty() || value.equals("0")) {
+                Log.w("UpdateFamily", "[GRAPHQL][" + chfId + "] " + fieldName + " is empty or zero (" + value + "), sending null to server");
+                return null;
+            }
+            Integer result = Integer.parseInt(value.trim());
+
+            return result;
+        } catch (NumberFormatException e) {
+            Log.e("UpdateFamily", "[GRAPHQL][" + chfId + "] Failed to parse " + fieldName + " value: '" + value + "' - sending null to server", e);
+            return null;
+        }
     }
 }
