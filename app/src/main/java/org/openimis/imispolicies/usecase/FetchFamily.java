@@ -72,21 +72,7 @@ public class FetchFamily {
         Integer mutualInsuranceCoverageVal = getMutualInsuranceCoverageValue(member);
         String housingTypeVal = getHousingTypeValue(member);
 
-        // Debug log to trace values fetched from server for the 5 extended fields
-        try {
-            Log.d("FetchFamily",
-                    "[GetFamily] CHF=" + member.chfId() +
-                            " | incomeLevel=" + incomeLevelVal +
-                            " | residenceEnvironment=" + residenceEnvironmentVal +
-                            " | noDisability=" + noDisabilityVal +
-                            " | nonDisablingDisease=" + nonDisablingDiseaseVal +
-                            " | mutualInsuranceCoverage=" + mutualInsuranceCoverageVal +
-                            " | housingType=" + housingTypeVal
-            );
-        } catch (Exception e) {
-            // Ensure logging never breaks fetching
-            Log.e("FetchFamily", "Error while logging mapped insuree fields", e);
-        }
+
         return new Family.Member(
                 /* chfId = */ Objects.requireNonNull(member.chfId()),
                 /* isHead = */ member.head(),

@@ -27,9 +27,7 @@ public class UpdateInsureeGraphQLRequest extends BaseGraphQLRequest {
         ) throws Exception {
         java.sql.Date date = new java.sql.Date(System.currentTimeMillis());
         
-        // Logs de contrôle pour confirmer les types Integer
-        Log.d("UPLOAD", "NoDisability (int) = " + member.getNoDisability());
-        Log.d("UPLOAD", "MutualInsuranceCoverage (int) = " + member.getMutualInsuranceCoverage());
+
         Response<UpdateInsureeMutation.Data> response = makeSynchronous(new UpdateInsureeMutation(
                 UpdateInsureeMutationInput.builder()
                         .clientMutationId("Update insuree '" + member.getChfId() + "'") 
@@ -122,7 +120,7 @@ public class UpdateInsureeGraphQLRequest extends BaseGraphQLRequest {
             }
             
             Integer result = Integer.parseInt(value.trim());
-            Log.d("UpdateInsuree", "[GRAPHQL][" + chfId + "] " + fieldName + " = " + result);
+    
             return result;
             
         } catch (NumberFormatException e) {

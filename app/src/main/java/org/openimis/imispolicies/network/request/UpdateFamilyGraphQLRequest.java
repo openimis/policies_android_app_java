@@ -124,7 +124,7 @@ public class UpdateFamilyGraphQLRequest extends BaseGraphQLRequest {
                 return null;
             }
             Integer result = Integer.parseInt(value.trim());
-            Log.d("UpdateFamily", "[GRAPHQL][" + chfId + "] " + fieldName + " = " + result);
+
             return result;
         } catch (NumberFormatException e) {
             Log.e("UpdateFamily", "[GRAPHQL][" + chfId + "] Failed to parse " + fieldName + " value: '" + value + "' - sending null to server", e);

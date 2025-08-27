@@ -33,7 +33,6 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 import androidx.annotation.NonNull;
 import android.text.TextUtils;
 
@@ -562,7 +561,7 @@ public class SQLHandler extends SQLiteOpenHelper {
         // Recreate all tables with the current schema
         onCreate(db);
         
-        Log.d("Upgrade", "DB Version upgraded from " + oldVersion + " to " + newVersion);
+
     }
 
     @Override
@@ -684,7 +683,7 @@ public class SQLHandler extends SQLiteOpenHelper {
                     else
                         rowObject.put(cursor.getColumnName(i), nullOverride);
                 } catch (Exception e) {
-                    Log.d("Tag Name ", e.getMessage());
+        
                 }
             }
 
@@ -719,7 +718,7 @@ public class SQLHandler extends SQLiteOpenHelper {
                             rowObject.put(cursor.getColumnName(i), nullOverride);
                     } catch (JSONException e) {
                         e.printStackTrace();
-                        Log.d("Tag Name", e.getMessage());
+            
                     }
                 }
                 resultSet.put(rowObject);
@@ -1372,14 +1371,14 @@ public class SQLHandler extends SQLiteOpenHelper {
         return cpCode;
     }
 
-    // Méthodes pour gérer les données ResidenceEnvironment
+    // Methods to handle ResidenceEnvironment data
     public void insertResidenceEnvironment(int code, String residenceEnvironment, String altLanguage, int sortOrder) {
-        android.util.Log.d("SQLHandler", "Inserting ResidenceEnvironment: Code=" + code + ", Name=" + residenceEnvironment);
+
         openDatabase();
         try {
             // Check if table exists, create it if it doesn't
             if (!tableExists(mDatabase, tblResidenceEnvironment)) {
-                android.util.Log.d("SQLHandler", "Table " + tblResidenceEnvironment + " doesn't exist, creating it");
+
                 mDatabase.execSQL(
                     "CREATE TABLE " + tblResidenceEnvironment + "("
                             + "Code INTEGER PRIMARY KEY,"
@@ -1387,7 +1386,7 @@ public class SQLHandler extends SQLiteOpenHelper {
                             + "AltLanguage VARCHAR(100),"
                             + "SortOrder INTEGER" + ")"
                 );
-                android.util.Log.d("SQLHandler", "Table " + tblResidenceEnvironment + " created successfully");
+
             }
             
             ContentValues values = new ContentValues();
@@ -1396,7 +1395,7 @@ public class SQLHandler extends SQLiteOpenHelper {
             values.put("AltLanguage", altLanguage);
             values.put("SortOrder", sortOrder);
             mDatabase.insertWithOnConflict(tblResidenceEnvironment, null, values, SQLiteDatabase.CONFLICT_REPLACE);
-            android.util.Log.d("SQLHandler", "ResidenceEnvironment inserted successfully");
+
         } catch (Exception e) {
             android.util.Log.e("SQLHandler", "Error inserting ResidenceEnvironment: " + e.getMessage());
             e.printStackTrace();
@@ -1406,12 +1405,12 @@ public class SQLHandler extends SQLiteOpenHelper {
     }
 
     public JSONArray getResidenceEnvironments() {
-        android.util.Log.d("SQLHandler", "Getting ResidenceEnvironments from database");
+
         try {
             openDatabase();
             // Check if table exists, create it if it doesn't
             if (!tableExists(mDatabase, tblResidenceEnvironment)) {
-                android.util.Log.d("SQLHandler", "Table " + tblResidenceEnvironment + " doesn't exist, creating it");
+
                 mDatabase.execSQL(
                     "CREATE TABLE " + tblResidenceEnvironment + "("
                             + "Code INTEGER PRIMARY KEY,"
@@ -1419,12 +1418,12 @@ public class SQLHandler extends SQLiteOpenHelper {
                             + "AltLanguage VARCHAR(100),"
                             + "SortOrder INTEGER" + ")"
                 );
-                android.util.Log.d("SQLHandler", "Table " + tblResidenceEnvironment + " created successfully");
+
             }
             closeDatabase();
             
             JSONArray result = getResult(tblResidenceEnvironment, null, null, "SortOrder ASC");
-            android.util.Log.d("SQLHandler", "Found " + result.length() + " ResidenceEnvironments in database");
+
             return result;
         } catch (Exception e) {
             android.util.Log.e("SQLHandler", "Error getting ResidenceEnvironments: " + e.getMessage());
@@ -1439,7 +1438,7 @@ public class SQLHandler extends SQLiteOpenHelper {
         try {
             // Check if table exists, create it if it doesn't
             if (!tableExists(mDatabase, tblResidenceEnvironment)) {
-                android.util.Log.d("SQLHandler", "Table " + tblResidenceEnvironment + " doesn't exist, creating it");
+
                 mDatabase.execSQL(
                     "CREATE TABLE " + tblResidenceEnvironment + "("
                             + "Code INTEGER PRIMARY KEY,"
@@ -1447,7 +1446,7 @@ public class SQLHandler extends SQLiteOpenHelper {
                             + "AltLanguage VARCHAR(100),"
                             + "SortOrder INTEGER" + ")"
                 );
-                android.util.Log.d("SQLHandler", "Table " + tblResidenceEnvironment + " created successfully");
+
             }
             
             try (Cursor cursor = mDatabase.query(tblResidenceEnvironment,
@@ -1473,13 +1472,13 @@ public class SQLHandler extends SQLiteOpenHelper {
     }
 
     public void insertResidenceEnvironments(JSONArray residenceEnvironments) {
-        android.util.Log.d("SQLHandler", "Starting to insert " + residenceEnvironments.length() + " ResidenceEnvironments");
+
         try {
             openDatabase();
             
             // Check if table exists, create it if it doesn't
             if (!tableExists(mDatabase, tblResidenceEnvironment)) {
-                android.util.Log.d("SQLHandler", "Table " + tblResidenceEnvironment + " doesn't exist, creating it");
+
                 mDatabase.execSQL(
                     "CREATE TABLE " + tblResidenceEnvironment + "("
                             + "Code INTEGER PRIMARY KEY,"
@@ -1487,12 +1486,12 @@ public class SQLHandler extends SQLiteOpenHelper {
                             + "AltLanguage VARCHAR(100),"
                             + "SortOrder INTEGER" + ")"
                 );
-                android.util.Log.d("SQLHandler", "Table " + tblResidenceEnvironment + " created successfully");
+
             }
             
             // Clear existing data
             mDatabase.delete(tblResidenceEnvironment, null, null);
-            android.util.Log.d("SQLHandler", "Cleared existing ResidenceEnvironments from table");
+
             closeDatabase();
             
             // Insert new data
@@ -1515,12 +1514,12 @@ public class SQLHandler extends SQLiteOpenHelper {
 
     // ==================== IncomeLevel Methods ====================
     public void insertIncomeLevel(int code, String incomeLevel, String altLanguage, int sortOrder) {
-        android.util.Log.d("SQLHandler", "Inserting IncomeLevel: Code=" + code + ", Name=" + incomeLevel);
+
         openDatabase();
         try {
             // Check if table exists, create it if it doesn't
             if (!tableExists(mDatabase, tblIncomeLevel)) {
-                android.util.Log.d("SQLHandler", "Table " + tblIncomeLevel + " doesn't exist, creating it");
+
                 mDatabase.execSQL(
                     "CREATE TABLE " + tblIncomeLevel + "("
                             + "Code INTEGER PRIMARY KEY,"
@@ -1528,7 +1527,7 @@ public class SQLHandler extends SQLiteOpenHelper {
                             + "AltLanguage VARCHAR(100),"
                             + "SortOrder INTEGER" + ")"
                 );
-                android.util.Log.d("SQLHandler", "Table " + tblIncomeLevel + " created successfully");
+
             }
             
             ContentValues values = new ContentValues();
@@ -1537,7 +1536,7 @@ public class SQLHandler extends SQLiteOpenHelper {
             values.put("AltLanguage", altLanguage);
             values.put("SortOrder", sortOrder);
             mDatabase.insertWithOnConflict(tblIncomeLevel, null, values, SQLiteDatabase.CONFLICT_REPLACE);
-            android.util.Log.d("SQLHandler", "IncomeLevel inserted successfully");
+
         } catch (Exception e) {
             android.util.Log.e("SQLHandler", "Error inserting IncomeLevel: " + e.getMessage());
             e.printStackTrace();
@@ -1547,12 +1546,12 @@ public class SQLHandler extends SQLiteOpenHelper {
     }
 
     public JSONArray getIncomeLevels() {
-        android.util.Log.d("SQLHandler", "Getting IncomeLevels from database");
+
         try {
             openDatabase();
             // Check if table exists, create it if it doesn't
             if (!tableExists(mDatabase, tblIncomeLevel)) {
-                android.util.Log.d("SQLHandler", "Table " + tblIncomeLevel + " doesn't exist, creating it");
+
                 mDatabase.execSQL(
                     "CREATE TABLE " + tblIncomeLevel + "("
                             + "Code INTEGER PRIMARY KEY,"
@@ -1560,12 +1559,12 @@ public class SQLHandler extends SQLiteOpenHelper {
                             + "AltLanguage VARCHAR(100),"
                             + "SortOrder INTEGER" + ")"
                 );
-                android.util.Log.d("SQLHandler", "Table " + tblIncomeLevel + " created successfully");
+
             }
             closeDatabase();
             
             JSONArray result = getResult(tblIncomeLevel, null, null, "SortOrder ASC");
-            android.util.Log.d("SQLHandler", "Found " + result.length() + " IncomeLevels in database");
+
             return result;
         } catch (Exception e) {
             android.util.Log.e("SQLHandler", "Error getting IncomeLevels: " + e.getMessage());
@@ -1580,7 +1579,7 @@ public class SQLHandler extends SQLiteOpenHelper {
         try {
             // Check if table exists, create it if it doesn't
             if (!tableExists(mDatabase, tblIncomeLevel)) {
-                android.util.Log.d("SQLHandler", "Table " + tblIncomeLevel + " doesn't exist, creating it");
+
                 mDatabase.execSQL(
                     "CREATE TABLE " + tblIncomeLevel + "("
                             + "Code INTEGER PRIMARY KEY,"
@@ -1588,7 +1587,7 @@ public class SQLHandler extends SQLiteOpenHelper {
                             + "AltLanguage VARCHAR(100),"
                             + "SortOrder INTEGER" + ")"
                 );
-                android.util.Log.d("SQLHandler", "Table " + tblIncomeLevel + " created successfully");
+
             }
             
             try (Cursor cursor = mDatabase.query(tblIncomeLevel,
@@ -1614,14 +1613,14 @@ public class SQLHandler extends SQLiteOpenHelper {
     }
 
     public void insertIncomeLevels(JSONArray incomeLevels) {
-        android.util.Log.d("SQLHandler", "📥 SERVER DATA RECEIVED: Starting to insert " + incomeLevels.length() + " IncomeLevels from server response");
-        android.util.Log.d("SQLHandler", "📋 Raw JSON data: " + incomeLevels.toString());
+
+
         try {
             openDatabase();
             
             // Check if table exists, create it if it doesn't
             if (!tableExists(mDatabase, tblIncomeLevel)) {
-                android.util.Log.d("SQLHandler", "Table " + tblIncomeLevel + " doesn't exist, creating it");
+
                 mDatabase.execSQL(
                     "CREATE TABLE " + tblIncomeLevel + "("
                             + "Code INTEGER PRIMARY KEY,"
@@ -1629,12 +1628,12 @@ public class SQLHandler extends SQLiteOpenHelper {
                             + "AltLanguage VARCHAR(100),"
                             + "SortOrder INTEGER" + ")"
                 );
-                android.util.Log.d("SQLHandler", "Table " + tblIncomeLevel + " created successfully");
+
             }
             
             // Clear existing data
             mDatabase.delete(tblIncomeLevel, null, null);
-            android.util.Log.d("SQLHandler", "Cleared existing IncomeLevels from table");
+
             closeDatabase();
             
             // Insert new data
@@ -1650,7 +1649,7 @@ public class SQLHandler extends SQLiteOpenHelper {
         } catch (JSONException e) {
             // Gestion silencieuse de l'erreur JSON
         } catch (Exception e) {
-            // Gestion silencieuse des erreurs de base de données
+            // Silent handling of database errors
         }
     }
 
@@ -1671,7 +1670,7 @@ public class SQLHandler extends SQLiteOpenHelper {
             openDatabase();
             // Check if table exists, create it if it doesn't
             if (!tableExists(mDatabase, tblNoDisability)) {
-                android.util.Log.d("SQLHandler", "Table " + tblNoDisability + " doesn't exist, creating it");
+
                 mDatabase.execSQL(
                     "CREATE TABLE " + tblNoDisability + "("
                             + "Code INTEGER PRIMARY KEY,"
@@ -1679,12 +1678,12 @@ public class SQLHandler extends SQLiteOpenHelper {
                             + "AltLanguage VARCHAR(100),"
                             + "SortOrder INTEGER" +")"
                 );
-                android.util.Log.d("SQLHandler", "Table " + tblNoDisability + " created successfully");
+
             }
             closeDatabase();
             
             JSONArray result = getResult(tblNoDisability, null, null, "SortOrder ASC");
-            android.util.Log.d("SQLHandler", "Found " + result.length() + " NoDisabilities in database");
+
             return result;
         } catch (Exception e) {
             android.util.Log.e("SQLHandler", "Error getting NoDisabilities: " + e.getMessage());
@@ -1712,7 +1711,7 @@ public class SQLHandler extends SQLiteOpenHelper {
             openDatabase();
             // Check if table exists, create it if it doesn't
             if (!tableExists(mDatabase, tblNonDisablingDisease)) {
-                android.util.Log.d("SQLHandler", "Table " + tblNonDisablingDisease + " doesn't exist, creating it");
+
                 mDatabase.execSQL(
                     "CREATE TABLE " + tblNonDisablingDisease + "("
                             + "Code INTEGER PRIMARY KEY,"
@@ -1720,12 +1719,12 @@ public class SQLHandler extends SQLiteOpenHelper {
                             + "AltLanguage VARCHAR(100),"
                             + "SortOrder INTEGER" +")"
                 );
-                android.util.Log.d("SQLHandler", "Table " + tblNonDisablingDisease + " created successfully");
+
             }
             closeDatabase();
             
             JSONArray result = getResult(tblNonDisablingDisease, null, null, "SortOrder ASC");
-            android.util.Log.d("SQLHandler", "Found " + result.length() + " NonDisablingDiseases in database");
+
             return result;
         } catch (Exception e) {
             android.util.Log.e("SQLHandler", "Error getting NonDisablingDiseases: " + e.getMessage());
@@ -1753,7 +1752,7 @@ public class SQLHandler extends SQLiteOpenHelper {
             openDatabase();
             // Check if table exists, create it if it doesn't
             if (!tableExists(mDatabase, tblMutualInsuranceCoverage)) {
-                android.util.Log.d("SQLHandler", "Table " + tblMutualInsuranceCoverage + " doesn't exist, creating it");
+
                 mDatabase.execSQL(
                     "CREATE TABLE " + tblMutualInsuranceCoverage + "("
                             + "Code INTEGER PRIMARY KEY,"
@@ -1761,12 +1760,12 @@ public class SQLHandler extends SQLiteOpenHelper {
                             + "AltLanguage VARCHAR(150),"
                             + "SortOrder INTEGER" +")"
                 );
-                android.util.Log.d("SQLHandler", "Table " + tblMutualInsuranceCoverage + " created successfully");
+
             }
             closeDatabase();
             
             JSONArray result = getResult(tblMutualInsuranceCoverage, null, null, "SortOrder ASC");
-            android.util.Log.d("SQLHandler", "Found " + result.length() + " MutualInsuranceCoverages in database");
+
             return result;
         } catch (Exception e) {
             android.util.Log.e("SQLHandler", "Error getting MutualInsuranceCoverages: " + e.getMessage());
@@ -1794,7 +1793,7 @@ public class SQLHandler extends SQLiteOpenHelper {
             openDatabase();
             // Check if table exists, create it if it doesn't
             if (!tableExists(mDatabase, tblHousingType)) {
-                android.util.Log.d("SQLHandler", "Table " + tblHousingType + " doesn't exist, creating it");
+
                 mDatabase.execSQL(
                     "CREATE TABLE " + tblHousingType + "("
                             + "Code INTEGER PRIMARY KEY,"
@@ -1802,12 +1801,12 @@ public class SQLHandler extends SQLiteOpenHelper {
                             + "AltLanguage VARCHAR(150),"
                             + "SortOrder INTEGER" +")"
                 );
-                android.util.Log.d("SQLHandler", "Table " + tblHousingType + " created successfully");
+
             }
             closeDatabase();
             
             JSONArray result = getResult(tblHousingType, null, null, "SortOrder ASC");
-            android.util.Log.d("SQLHandler", "Found " + result.length() + " HousingTypes in database");
+
             return result;
         } catch (Exception e) {
             android.util.Log.e("SQLHandler", "Error getting HousingTypes: " + e.getMessage());
@@ -1830,25 +1829,25 @@ public class SQLHandler extends SQLiteOpenHelper {
             // Check and add NoDisability column
             if (!columnExists(mDatabase, "tblInsuree", "NoDisability")) {
                 mDatabase.execSQL("ALTER TABLE tblInsuree ADD COLUMN NoDisability NUMERIC");
-                android.util.Log.d("SQLHandler", "Added NoDisability column to tblInsuree");
+
             }
             
             // Check and add NonDisablingDisease column
             if (!columnExists(mDatabase, "tblInsuree", "NonDisablingDisease")) {
                 mDatabase.execSQL("ALTER TABLE tblInsuree ADD COLUMN NonDisablingDisease NUMERIC");
-                android.util.Log.d("SQLHandler", "Added NonDisablingDisease column to tblInsuree");
+
             }
             
             // Check and add MutualInsuranceCoverage column
             if (!columnExists(mDatabase, "tblInsuree", "MutualInsuranceCoverage")) {
                 mDatabase.execSQL("ALTER TABLE tblInsuree ADD COLUMN MutualInsuranceCoverage NUMERIC");
-                android.util.Log.d("SQLHandler", "Added MutualInsuranceCoverage column to tblInsuree");
+
             }
             
             // Check and add HousingType column
             if (!columnExists(mDatabase, "tblInsuree", "HousingType")) {
                 mDatabase.execSQL("ALTER TABLE tblInsuree ADD COLUMN HousingType NUMERIC");
-                android.util.Log.d("SQLHandler", "Added HousingType column to tblInsuree");
+
             }
             
         } catch (Exception e) {
@@ -1862,7 +1861,7 @@ public class SQLHandler extends SQLiteOpenHelper {
      * Cette méthode est silencieuse et ne génère pas de logs
      */
     public void verifyNewTablesContent() {
-        // Vérification silencieuse des tables
+        // Silent table verification
         try {
             getIncomeLevels();
         } catch (Exception e) {

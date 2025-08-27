@@ -24,11 +24,8 @@ public class CreateInsureeGraphQLRequest extends BaseGraphQLRequest {
     @WorkerThread
     @NonNull
     public String create(@NonNull Family.Member member, int familyId, int officerId) throws Exception {
-        java.sql.Date date = new java.sql.Date(System.currentTimeMillis());
-        
-        // Logs de contrôle pour confirmer les types Integer
-        Log.d("UPLOAD", "NoDisability (int) = " + member.getNoDisability());
-        Log.d("UPLOAD", "MutualInsuranceCoverage (int) = " + member.getMutualInsuranceCoverage());
+        java.sql.Date date = new java.sql.Date(System.currentTimeMillis());        
+
         
         try {
             CreateInsureeMutation mutation = new CreateInsureeMutation(
@@ -54,12 +51,12 @@ public class CreateInsureeGraphQLRequest extends BaseGraphQLRequest {
                             .currentAddress(member.getCurrentAddress())
                             .geolocation(member.getGeolocation())
                             .currentVillageId(member.getCurrentVillage() != null && member.getCurrentVillage() != 0 ? member.getCurrentVillage() : null)
-                            // Champs optionnels - envoyer les valeurs sélectionnées par l'utilisateur ou null
+                            // Optional fields - send user-selected values or null
                             .residenceEnvironmentId(member.getResidenceEnvironment() != null && member.getResidenceEnvironment() != 0 ? member.getResidenceEnvironment() : null)
-                            .housingTypeId(parseIntegerSafely(member.getHousingType(), "HousingType", member.getChfId()))
+                            .housingTypeId(parseIntegerSafely(member.getHousingType(), "HousingType", member.getHousingType()))
                             .mutualInsuranceCoverageId(member.getMutualInsuranceCoverage() != null && member.getMutualInsuranceCoverage() != 0 ? member.getMutualInsuranceCoverage() : null)
                             .noDisabilityId(member.getNoDisability() != null && member.getNoDisability() != 0 ? member.getNoDisability() : null)
-                            .nonDisablingDiseaseId(parseIntegerSafely(member.getNonDisablingDisease(), "NonDisablingDisease", member.getChfId()))
+                            .nonDisablingDiseaseId(parseIntegerSafely(member.getNonDisablingDisease(), "NonDisablingDisease", member.getNonDisablingDisease()))
                             .incomeLevelId(member.getIncomeLevel())
                             .preferredPaymentMethod(member.getPaymentMethod())
                             .coordinates(member.getOtherHousehold())
@@ -112,7 +109,7 @@ public class CreateInsureeGraphQLRequest extends BaseGraphQLRequest {
             }
             
             Integer result = Integer.parseInt(value.trim());
-            Log.d("CreateInsuree", "[GRAPHQL][" + chfId + "] " + fieldName + " = " + result);
+    
             return result;
             
         } catch (NumberFormatException e) {

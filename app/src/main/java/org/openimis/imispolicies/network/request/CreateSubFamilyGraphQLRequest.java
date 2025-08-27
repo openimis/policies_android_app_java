@@ -56,12 +56,12 @@ public class CreateSubFamilyGraphQLRequest extends BaseGraphQLRequest {
                                         .educationId(head.getEducation() == 0 ? null:head.getEducation())
                                         .professionalSituation(head.getProfessionalSituation())
                                         .incomeLevelId(head.getIncomeLevel() != null && head.getIncomeLevel() != 0 ? head.getIncomeLevel() : null)
-                                        // Required *_Id fields with safe defaults when missing
-                                        .residenceEnvironmentId(head.getResidenceEnvironment() != null && head.getResidenceEnvironment() != 0 ? head.getResidenceEnvironment() : 3)
-                                        .mutualInsuranceCoverageId(head.getMutualInsuranceCoverage() != null && head.getMutualInsuranceCoverage() != 0 ? head.getMutualInsuranceCoverage() : 3)
-                                        .housingTypeId(head.getHousingType() != null && !head.getHousingType().equals("0") && !head.getHousingType().isEmpty() ? Integer.parseInt(head.getHousingType()) : 2)
-                                        .noDisabilityId(head.getNoDisability() != null && head.getNoDisability() != 0 ? head.getNoDisability() : 3)
-                                        .nonDisablingDiseaseId(head.getNonDisablingDisease() != null && !head.getNonDisablingDisease().equals("0") && !head.getNonDisablingDisease().isEmpty() ? Integer.parseInt(head.getNonDisablingDisease()) : 2)
+                                        // Optional fields - send user-selected values or null
+                                        .residenceEnvironmentId(head.getResidenceEnvironment() != null && head.getResidenceEnvironment() != 0 ? head.getResidenceEnvironment() : null)
+                                        .mutualInsuranceCoverageId(head.getMutualInsuranceCoverage() != null && head.getMutualInsuranceCoverage() != 0 ? head.getMutualInsuranceCoverage() : null)
+                                        .housingTypeId(head.getHousingType() != null && !head.getHousingType().equals("0") && !head.getHousingType().isEmpty() ? Integer.parseInt(head.getHousingType()) : null)
+                                        .noDisabilityId(head.getNoDisability() != null && head.getNoDisability() != 0 ? head.getNoDisability() : null)
+                                        .nonDisablingDiseaseId(head.getNonDisablingDisease() != null && !head.getNonDisablingDisease().equals("0") && !head.getNonDisablingDisease().isEmpty() ? Integer.parseInt(head.getNonDisablingDisease()) : null)
                                         .preferredPaymentMethod(head.getPaymentMethod())
                                         .coordinates(head.getOtherHousehold())
                                         .bankCoordinates(head.getAccountDetails())

@@ -1135,14 +1135,9 @@ public class ClientAndroidInterface {
             if (!TextUtils.isEmpty(data.get("ddlHousingType")) && !data.get("ddlHousingType").equals("0"))
                 HousingType = Integer.valueOf(data.get("ddlHousingType"));
 
-            // Validation obligatoire pour les nouveaux champs
-            Log.d("UPLOAD", "[UPLOAD][Insuree] ResidenceEnvironment = " + ResidenceEnvironment);
-            Log.d("UPLOAD", "[UPLOAD][Insuree] NoDisability = " + NoDisability);
-            Log.d("UPLOAD", "[UPLOAD][Insuree] NonDisablingDisease = " + NonDisablingDisease);
-            Log.d("UPLOAD", "[UPLOAD][Insuree] MutualInsuranceCoverage = " + MutualInsuranceCoverage);
-            Log.d("UPLOAD", "[UPLOAD][Insuree] HousingType = " + HousingType);
+            // Mandatory validation for new fields
 
-            // Vérifications obligatoires
+            // Mandatory field validations
             if (ResidenceEnvironment == null) {
                 Log.e("UPLOAD", "ResidenceEnvironment is NULL");
                 ShowDialog("Veuillez remplir le champ 'Environnement de résidence'");
@@ -3727,7 +3722,7 @@ public class ClientAndroidInterface {
         }
         
         // Log detailed values of mandatory fields before upload
-        Log.d("UPLOAD", "[UPLOAD][Insuree] CHFID = " + chfId);
+
         
         // Extract and log mandatory fields
         Integer residenceEnvironment = JsonUtils.getIntegerOrDefault(object, "ResidenceEnvironment");
@@ -3736,11 +3731,7 @@ public class ClientAndroidInterface {
         Integer mutualInsuranceCoverage = JsonUtils.getIntegerOrDefault(object, "MutualInsuranceCoverage");
         String housingType = JsonUtils.getStringOrDefault(object, "HousingType");
         
-        Log.d("UPLOAD", "[UPLOAD][Insuree] ResidenceEnvironment = " + residenceEnvironment);
-        Log.d("UPLOAD", "[UPLOAD][Insuree] NoDisability = " + noDisability);
-        Log.d("UPLOAD", "[UPLOAD][Insuree] NonDisablingDisease = " + nonDisablingDisease);
-        Log.d("UPLOAD", "[UPLOAD][Insuree] MutualInsuranceCoverage = " + mutualInsuranceCoverage);
-        Log.d("UPLOAD", "[UPLOAD][Insuree] HousingType = " + housingType);
+
         
         // Check for null values in mandatory fields and log errors
         if (residenceEnvironment == null) {
@@ -4160,7 +4151,7 @@ public class ClientAndroidInterface {
                         new Login().execute(username, password);
                         return true;
                     } catch (Exception e) {
-                        Log.d("ClientAndroidInterface", "Login failed", e);
+            
                         return false;
                     }
                 }
@@ -4629,27 +4620,27 @@ public class ClientAndroidInterface {
                         break;
                     case "residenceenvironments":
                         ResidenceEnvironments = (JSONArray) masterData.getJSONObject(i).get(keyName);
-                        android.util.Log.d("ClientAndroidInterface", "Found ResidenceEnvironments in old format: " + ResidenceEnvironments.length() + " items");
+            
                         break;
                     case "incomelevels":
                         IncomeLevels = (JSONArray) masterData.getJSONObject(i).get(keyName);
-                        android.util.Log.d("ClientAndroidInterface", "Found IncomeLevels in old format: " + IncomeLevels.length() + " items");
+            
                         break;
                     case "nodisabilities":
                         NoDisabilities = (JSONArray) masterData.getJSONObject(i).get(keyName);
-                        android.util.Log.d("ClientAndroidInterface", "Found NoDisabilities in old format: " + NoDisabilities.length() + " items");
+            
                         break;
                     case "nondisablingdiseases":
                         NonDisablingDiseases = (JSONArray) masterData.getJSONObject(i).get(keyName);
-                        android.util.Log.d("ClientAndroidInterface", "Found NonDisablingDiseases in old format: " + NonDisablingDiseases.length() + " items");
+            
                         break;
                     case "mutualinsurancecoverages":
                         MutualInsuranceCoverages = (JSONArray) masterData.getJSONObject(i).get(keyName);
-                        android.util.Log.d("ClientAndroidInterface", "Found MutualInsuranceCoverages in old format: " + MutualInsuranceCoverages.length() + " items");
+            
                         break;
                     case "housingtypes":
                         HousingTypes = (JSONArray) masterData.getJSONObject(i).get(keyName);
-                        android.util.Log.d("ClientAndroidInterface", "Found HousingTypes in old format: " + HousingTypes.length() + " items");
+            
                         break;
 /*                case "officersvillages":
                     OfficerVillages = (JSONArray) masterData.getJSONObject(i).get(keyName);
@@ -6038,11 +6029,11 @@ public class ClientAndroidInterface {
 
     @WorkerThread
     private void insertResidenceEnvironment(JSONArray jsonArray) throws JSONException {
-        android.util.Log.d("ClientAndroidInterface", "Inserting ResidenceEnvironment data: " + jsonArray.length() + " items");
+
         if (jsonArray != null && jsonArray.length() > 0) {
             sqlHandler.insertResidenceEnvironments(jsonArray);
         }
-        android.util.Log.d("ClientAndroidInterface", "ResidenceEnvironment data inserted successfully");
+
     }
 
     @WorkerThread
@@ -6065,9 +6056,9 @@ public class ClientAndroidInterface {
     @JavascriptInterface
     @SuppressWarnings("unused")
     public String getResidenceEnvironments() {
-        android.util.Log.d("ClientAndroidInterface", "JavaScript called getResidenceEnvironments()");
+
         JSONArray residenceEnvironments = sqlHandler.getResidenceEnvironments();
-        android.util.Log.d("ClientAndroidInterface", "Returning ResidenceEnvironments to JavaScript: " + residenceEnvironments.toString());
+
         return residenceEnvironments.toString();
     }
 
@@ -6483,33 +6474,33 @@ public class ClientAndroidInterface {
 
     @JavascriptInterface
     public String getNoDisabilities() {
-        android.util.Log.d("ClientAndroidInterface", "JavaScript called getNoDisabilities()");
+
         JSONArray noDisabilities = sqlHandler.getNoDisabilities();
-        android.util.Log.d("ClientAndroidInterface", "Returning NoDisabilities to JavaScript: " + noDisabilities.toString());
+
         return noDisabilities.toString();
     }
 
     @JavascriptInterface
     public String getNonDisablingDiseases() {
-        android.util.Log.d("ClientAndroidInterface", "JavaScript called getNonDisablingDiseases()");
+
         JSONArray nonDisablingDiseases = sqlHandler.getNonDisablingDiseases();
-        android.util.Log.d("ClientAndroidInterface", "Returning NonDisablingDiseases to JavaScript: " + nonDisablingDiseases.toString());
+
         return nonDisablingDiseases.toString();
     }
 
     @JavascriptInterface
     public String getMutualInsuranceCoverages() {
-        android.util.Log.d("ClientAndroidInterface", "JavaScript called getMutualInsuranceCoverages()");
+
         JSONArray mutualInsuranceCoverages = sqlHandler.getMutualInsuranceCoverages();
-        android.util.Log.d("ClientAndroidInterface", "Returning MutualInsuranceCoverages to JavaScript: " + mutualInsuranceCoverages.toString());
+
         return mutualInsuranceCoverages.toString();
     }
 
     @JavascriptInterface
     public String getHousingTypes() {
-        android.util.Log.d("ClientAndroidInterface", "JavaScript called getHousingTypes()");
+
         JSONArray housingTypes = sqlHandler.getHousingTypes();
-        android.util.Log.d("ClientAndroidInterface", "Returning HousingTypes to JavaScript: " + housingTypes.toString());
+
         return housingTypes.toString();
     }
 
@@ -6521,11 +6512,11 @@ public class ClientAndroidInterface {
      */
     @WorkerThread
     private void insertNoDisabilities(JSONArray jsonArray) throws JSONException {
-        android.util.Log.d("ClientAndroidInterface", "Inserting NoDisabilities data: " + (jsonArray != null ? jsonArray.length() : 0) + " items");
+
         if (jsonArray != null && jsonArray.length() > 0) {
             sqlHandler.insertNoDisabilities(jsonArray);
         }
-        android.util.Log.d("ClientAndroidInterface", "NoDisabilities data inserted successfully");
+
     }
     
     /**
@@ -6534,11 +6525,11 @@ public class ClientAndroidInterface {
      */
     @WorkerThread
     private void insertNonDisablingDiseases(JSONArray jsonArray) throws JSONException {
-        android.util.Log.d("ClientAndroidInterface", "Inserting NonDisablingDiseases data: " + (jsonArray != null ? jsonArray.length() : 0) + " items");
+
         if (jsonArray != null && jsonArray.length() > 0) {
             sqlHandler.insertNonDisablingDiseases(jsonArray);
         }
-        android.util.Log.d("ClientAndroidInterface", "NonDisablingDiseases data inserted successfully");
+
     }
     
     /**
@@ -6547,11 +6538,11 @@ public class ClientAndroidInterface {
      */
     @WorkerThread
     private void insertMutualInsuranceCoverages(JSONArray jsonArray) throws JSONException {
-        android.util.Log.d("ClientAndroidInterface", "Inserting MutualInsuranceCoverages data: " + (jsonArray != null ? jsonArray.length() : 0) + " items");
+
         if (jsonArray != null && jsonArray.length() > 0) {
             sqlHandler.insertMutualInsuranceCoverages(jsonArray);
         }
-        android.util.Log.d("ClientAndroidInterface", "MutualInsuranceCoverages data inserted successfully");
+
     }
     
     /**
@@ -6560,11 +6551,11 @@ public class ClientAndroidInterface {
      */
     @WorkerThread
     private void insertHousingTypes(JSONArray jsonArray) throws JSONException {
-        android.util.Log.d("ClientAndroidInterface", "Inserting HousingTypes data: " + (jsonArray != null ? jsonArray.length() : 0) + " items");
+
         if (jsonArray != null && jsonArray.length() > 0) {
             sqlHandler.insertHousingTypes(jsonArray);
         }
-        android.util.Log.d("ClientAndroidInterface", "HousingTypes data inserted successfully");
+
     }
     
     // Note: Master data insertion methods added for new reference tables

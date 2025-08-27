@@ -364,7 +364,7 @@ public class Family implements Parcelable {
         @Nullable
         private final String accountDetails;
 
-        // Nouveaux champs ajoutés
+        // New fields added
         @Nullable
         private final Integer noDisability;
 

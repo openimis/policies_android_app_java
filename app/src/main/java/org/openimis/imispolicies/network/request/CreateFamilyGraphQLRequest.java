@@ -144,22 +144,22 @@ public class CreateFamilyGraphQLRequest extends BaseGraphQLRequest {
     
     private Integer safeGetResidenceEnvironment(Family.Member head) {
         try {
-            // Vérifier d'abord si la valeur est null - retourner null si pas défini
+            // First check if the value is null - return null if not defined
             if (head.getResidenceEnvironment() == null) {
-                Log.d("GRAPHQL_DEBUG", "ResidenceEnvironment: null (optionnel)");
+
                 return null;
             }
             
             // Convertir en String puis en int
             String value = String.valueOf(head.getResidenceEnvironment());
             if (TextUtils.isEmpty(value)) {
-                Log.d("GRAPHQL_DEBUG", "ResidenceEnvironment: null (valeur vide)");
+
                 return null;
             }
             
             int intValue = Integer.parseInt(value);
             
-            // Vérifier que le code existe dans la table de référence
+            // Verify that the code exists in the reference table
             SQLHandler sqlHandler = new SQLHandler(context);
             JSONArray result = sqlHandler.getResult("SELECT Code FROM " + SQLHandler.tblResidenceEnvironment + " WHERE Code = ?", 
                     new String[]{value});
@@ -169,7 +169,7 @@ public class CreateFamilyGraphQLRequest extends BaseGraphQLRequest {
                 return null;
             }
             
-            Log.d("GRAPHQL_DEBUG", "ResidenceEnvironment: " + intValue);
+
             return intValue;
         } catch (NumberFormatException e) {
             Log.e("GRAPHQL_DEBUG", "Format d'environnement de résidence invalide", e);
@@ -182,23 +182,23 @@ public class CreateFamilyGraphQLRequest extends BaseGraphQLRequest {
     
     private Integer safeGetNoDisability(Family.Member head) {
         try {
-            // Vérifier d'abord si la valeur est null - retourner null si pas défini
+            // First check if the value is null - return null if not defined
             if (head.getNoDisability() == null) {
-                Log.d("GRAPHQL_DEBUG", "NoDisability: null (optionnel)");
+
                 return null;
             }
             
             // Convertir en String puis en int
             String value = String.valueOf(head.getNoDisability());
             if (TextUtils.isEmpty(value)) {
-                Log.d("GRAPHQL_DEBUG", "NoDisability: null (valeur vide)");
+
                 return null;
             }
             
             int intValue = Integer.parseInt(value);
             
-            // Vérifier que le code existe dans la table de référence
-            SQLHandler sqlHandler = new SQLHandler(context);
+            // Verify that the code exists in the reference table
+             SQLHandler sqlHandler = new SQLHandler(context);
             JSONArray result = sqlHandler.getResult("SELECT Code FROM " + SQLHandler.tblNoDisability + " WHERE Code = ?", 
                     new String[]{value});
             
@@ -207,7 +207,7 @@ public class CreateFamilyGraphQLRequest extends BaseGraphQLRequest {
                 return null;
             }
             
-            Log.d("GRAPHQL_DEBUG", "NoDisability: " + intValue);
+
             return intValue;
         } catch (NumberFormatException e) {
             Log.e("GRAPHQL_DEBUG", "Format de type d'incapacité invalide", e);
@@ -220,7 +220,7 @@ public class CreateFamilyGraphQLRequest extends BaseGraphQLRequest {
     
     private Integer safeGetMutualInsuranceCoverage(Family.Member head) {
         try {
-            // Vérifier d'abord si la valeur est null - retourner null si pas défini
+            // First check if the value is null - return null if not defined
             if (head.getMutualInsuranceCoverage() == null) {
 
                 return null;
@@ -235,7 +235,7 @@ public class CreateFamilyGraphQLRequest extends BaseGraphQLRequest {
             
             int intValue = Integer.parseInt(value);
             
-            // Vérifier que le code existe dans la table de référence
+            // Verify that the code exists in the reference table
             SQLHandler sqlHandler = new SQLHandler(context);
             JSONArray result = sqlHandler.getResult("SELECT Code FROM " + SQLHandler.tblMutualInsuranceCoverage + " WHERE Code = ?", 
                     new String[]{value});
@@ -258,9 +258,9 @@ public class CreateFamilyGraphQLRequest extends BaseGraphQLRequest {
     
     private Integer safeGetHousingType(Family.Member head) {
         try {
-            // Vérifier d'abord si la valeur est null - retourner null si pas défini
+            // First check if the value is null - return null if not defined
             if (head.getHousingType() == null) {
-                Log.d("GRAPHQL_DEBUG", "HousingType: null (optionnel)");
+
                 return null;
             }
             
@@ -273,7 +273,7 @@ public class CreateFamilyGraphQLRequest extends BaseGraphQLRequest {
             
             int intValue = Integer.parseInt(value);
             
-            // Vérifier que le code existe dans la table de référence
+            // Verify that the code exists in the reference table
             SQLHandler sqlHandler = new SQLHandler(context);
             JSONArray result = sqlHandler.getResult("SELECT Code FROM " + SQLHandler.tblHousingType + " WHERE Code = ?", 
                     new String[]{value});
@@ -296,7 +296,7 @@ public class CreateFamilyGraphQLRequest extends BaseGraphQLRequest {
     
     private Integer safeGetNonDisablingDisease(Family.Member head) {
         try {
-            // Vérifier d'abord si la valeur est null - retourner null si pas défini
+            // First check if the value is null - return null if not defined
             if (head.getNonDisablingDisease() == null) {
 
                 return null;
@@ -311,7 +311,7 @@ public class CreateFamilyGraphQLRequest extends BaseGraphQLRequest {
             
             int intValue = Integer.parseInt(value);
             
-            // Vérifier que le code existe dans la table de référence
+            // Verify that the code exists in the reference table
             SQLHandler sqlHandler = new SQLHandler(context);
             JSONArray result = sqlHandler.getResult("SELECT Code FROM " + SQLHandler.tblNonDisablingDisease + " WHERE Code = ?", 
                     new String[]{value});
@@ -321,7 +321,7 @@ public class CreateFamilyGraphQLRequest extends BaseGraphQLRequest {
                 return null;
             }
             
-            Log.d("GRAPHQL_DEBUG", "NonDisablingDisease: " + intValue);
+
             return intValue;
         } catch (NumberFormatException e) {
             Log.e("GRAPHQL_DEBUG", "Format d'état de maladie invalide", e);
@@ -334,9 +334,9 @@ public class CreateFamilyGraphQLRequest extends BaseGraphQLRequest {
     
     private Integer safeGetIncomeLevel(Family.Member head) {
         try {
-            // Vérifier d'abord si la valeur est null - retourner null si pas défini
-            if (head.getIncomeLevel() == null) {
-                // IncomeLevel non défini
+            // First check if the value is null - return null if not defined
+             if (head.getIncomeLevel() == null) {
+                // IncomeLevel not defined
                 return null;
             }
             
@@ -349,10 +349,10 @@ public class CreateFamilyGraphQLRequest extends BaseGraphQLRequest {
             
             int intValue = Integer.parseInt(value);
             
-            // Vérifier que le code existe dans la table de référence
+            // Verify that the code exists in the reference table
             SQLHandler sqlHandler = new SQLHandler(context);
-            // Le schéma local définit les colonnes: Id, FirstLanguage, SecondLanguage
-            // Utiliser Id pour la validation au lieu de Code
+            // The local schema defines columns: Id, FirstLanguage, SecondLanguage
+            // Use Id for validation instead of Code
             JSONArray result = sqlHandler.getResult("SELECT Id FROM " + SQLHandler.tblIncomeLevel + " WHERE Id = ?", 
                     new String[]{value});
             
