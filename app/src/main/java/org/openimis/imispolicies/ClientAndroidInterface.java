@@ -1135,39 +1135,7 @@ public class ClientAndroidInterface {
             if (!TextUtils.isEmpty(data.get("ddlHousingType")) && !data.get("ddlHousingType").equals("0"))
                 HousingType = Integer.valueOf(data.get("ddlHousingType"));
 
-            // Mandatory validation for new fields
-
-            // Mandatory field validations
-            if (ResidenceEnvironment == null) {
-                Log.e("UPLOAD", "ResidenceEnvironment is NULL");
-                ShowDialog("Veuillez remplir le champ 'Environnement de résidence'");
-                inProgress = false;
-                return 7;
-            }
-            if (NoDisability == null) {
-                Log.e("UPLOAD", "NoDisability is NULL");
-                ShowDialog("Veuillez remplir le champ 'Aucun handicap'");
-                inProgress = false;
-                return 7;
-            }
-            if (NonDisablingDisease == null) {
-                Log.e("UPLOAD", "NonDisablingDisease is NULL");
-                ShowDialog("Veuillez remplir le champ 'Maladie non invalidante'");
-                inProgress = false;
-                return 7;
-            }
-            if (MutualInsuranceCoverage == null) {
-                Log.e("UPLOAD", "MutualInsuranceCoverage is NULL");
-                ShowDialog("Veuillez remplir le champ 'Couverture d'assurance mutuelle'");
-                inProgress = false;
-                return 7;
-            }
-            if (HousingType == null) {
-                Log.e("UPLOAD", "HousingType is NULL");
-                ShowDialog("Veuillez remplir le champ 'Type de logement'");
-                inProgress = false;
-                return 7;
-            }
+            // Optional field validations removed - these fields are not mandatory
 
             String IdentificationType = "null";
             if (!TextUtils.isEmpty(data.get("ddlIdentificationType")) && !data.get("ddlIdentificationType").equals(""))
@@ -3733,22 +3701,7 @@ public class ClientAndroidInterface {
         
 
         
-        // Check for null values in mandatory fields and log errors
-        if (residenceEnvironment == null) {
-            Log.e("UPLOAD", "[UPLOAD][Insuree] ResidenceEnvironment is NULL for CHFID: " + chfId);
-        }
-        if (noDisability == null) {
-            Log.e("UPLOAD", "[UPLOAD][Insuree] NoDisability is NULL for CHFID: " + chfId);
-        }
-        if (nonDisablingDisease == null || nonDisablingDisease.trim().isEmpty()) {
-            Log.e("UPLOAD", "[UPLOAD][Insuree] NonDisablingDisease is NULL or empty for CHFID: " + chfId);
-        }
-        if (mutualInsuranceCoverage == null) {
-            Log.e("UPLOAD", "[UPLOAD][Insuree] MutualInsuranceCoverage is NULL for CHFID: " + chfId);
-        }
-        if (housingType == null || housingType.trim().isEmpty()) {
-            Log.e("UPLOAD", "[UPLOAD][Insuree] HousingType is NULL or empty for CHFID: " + chfId);
-        }
+        // Optional field validation logs removed - these fields are not mandatory
         
 
         
