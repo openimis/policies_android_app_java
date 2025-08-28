@@ -389,6 +389,7 @@ function applyInsureeSelectValues() {
                 } catch(e) {}
             }
         };
+        setSelectSafe('#ddlIncomeLevel', insureeObj["IncomeLevel"], 'IncomeLevel');
         setSelectSafe('#ddlResidenceEnvironment', insureeObj["ResidenceEnvironment"], 'ResidenceEnvironment');
         setSelectSafe('#ddlHousingType', insureeObj["HousingType"], 'HousingType');
         setSelectSafe('#ddlMutualInsuranceCoverage', insureeObj["MutualInsuranceCoverage"], 'MutualInsuranceCoverage');

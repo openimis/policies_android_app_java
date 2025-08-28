@@ -150,6 +150,8 @@ $(document).ready(function () {
     if (parseInt(InsureeId) > 0 || parseInt(InsureeId) < 0) {
         var Insuree = Android.getInsuree(parseInt(InsureeId));
         bindDataFromDatafield(Insuree);
+        // Store for later re-apply after dropdowns are populated
+        try { window._loadedInsuree = $.parseJSON(Insuree)[0]; } catch(e) { console.log(e); }
         var PhotoPath = $.parseJSON(Insuree)[0]["PhotoPath"];
         var IsOffline = parseInt($.parseJSON(Insuree)[0]["isOffline"]);
         if ($.parseJSON(Insuree)[0]["isHead"] == "true" || $.parseJSON(Insuree)[0]["isHead"] == "false") {
@@ -233,6 +235,12 @@ function fillDropdowns() {
     fillNonDisablingDiseases();
     fillMutualInsuranceCoverages();
     fillHousingTypes();
+    // Re-apply after dropdowns are populated to avoid race condition
+    applyInsureeSelectValues();
+    // Additional retries to ensure options are in place on slower devices
+    setTimeout(applyInsureeSelectValues, 50);
+    setTimeout(applyInsureeSelectValues, 150);
+    setTimeout(applyInsureeSelectValues, 300);
 }
 
 // called from java after the image was selected by the user
@@ -443,4 +451,47 @@ function fillHousingTypes() {
     }
     var $HousingTypes = Android.getHousingTypes();
     bindDropdown('ddlHousingType', $HousingTypes, 'Code', $textLanguage, null, Android.getString('SelectHousingType'));
+}
+
+function applyInsureeSelectValues() {
+    if (!window._loadedInsuree) return;
+    
+    var insureeObj = window._loadedInsuree;
+    
+    // Apply select values with safe setting
+    setSelectSafe('#ddlResidenceEnvironment', insureeObj["ResidenceEnvironment"], 'ResidenceEnvironment');
+    setSelectSafe('#ddlHousingType', insureeObj["HousingType"], 'HousingType');
+    setSelectSafe('#ddlMutualInsuranceCoverage', insureeObj["MutualInsuranceCoverage"], 'MutualInsuranceCoverage');
+    setSelectSafe('#ddlNoDisability', insureeObj["NoDisability"], 'NoDisability');
+    setSelectSafe('#ddlNonDisablingDisease', insureeObj["NonDisablingDisease"], 'NonDisablingDisease');
+    setSelectSafe('#ddlIncomeLevel', insureeObj["IncomeLevel"], 'IncomeLevel');
+}
+
+function setSelectSafe(selector, value, fieldName) {
+    if (value === null || value === undefined) return;
+    
+    var $select = $(selector);
+    if ($select.length === 0) return;
+    
+    // Try setting as string first
+    $select.val(String(value));
+    if ($select.val() !== null) return;
+    
+    // Try setting as integer
+    if (!isNaN(value)) {
+        $select.val(parseInt(value));
+        if ($select.val() !== null) return;
+    }
+    
+    // Try setting as boolean-like value
+    if (value === true || value === 'true' || value === 1 || value === '1') {
+        $select.val('1');
+        if ($select.val() !== null) return;
+    }
+    if (value === false || value === 'false' || value === 0 || value === '0') {
+        $select.val('0');
+        if ($select.val() !== null) return;
+    }
+    
+    console.log('Could not set ' + fieldName + ' to value: ' + value);
 }

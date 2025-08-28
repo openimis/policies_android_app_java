@@ -82,6 +82,7 @@ function fillDropdowns() {
     getPovertyStatus();
     getConfirmationTypes();
     getFamilyTypes();
+    getIncomeLevels();
     getApprovalOfSMS();
     getLanguageOfSMS();
 }
@@ -163,4 +164,13 @@ function getLanguageOfSMS() {
     $textLanguage = "LanguageName";
     var $Languages = Android.getLanguagesOfSMS();
     bindDropdown('ddlLanguageOfSMS', $Languages, 'LanguageCode', $textLanguage, "", Android.getString('languageOfSMS'));
+}
+
+function getIncomeLevels() {
+    $textLanguage = "FirstLanguage";
+    if (Android.getSelectedLanguage() != "en") {
+        $textLanguage = "SecondLanguage";
+    }
+    var $IncomeLevels = Android.getIncomeLevels();
+    bindDropdown('ddlIncomeLevel', $IncomeLevels, 'Id', $textLanguage, null, Android.getString('SelectIncomeLevel'));
 }
