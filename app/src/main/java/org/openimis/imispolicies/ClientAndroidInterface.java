@@ -3295,9 +3295,6 @@ public class ClientAndroidInterface {
 
             queryI = query.toString();
             JSONArray insureesArray = sqlHandler.getResult(queryI, null);
-            Log.e("insuree array", insureesArray.toString());
-            Log.e("subFamilyLinkedId", subFamilyLinkedId);
-            Log.e("is included", String.valueOf(isHOFIncluded));
 
             if (insureesArray.length() > 0) {
                 JSONObject o = insureesArray.getJSONObject(0);
@@ -3319,7 +3316,6 @@ public class ClientAndroidInterface {
             } else {
                 //c'est une famille ou le head a été déplacé
                 isHOFIncluded = true;
-                Log.e("is included", String.valueOf(isHOFIncluded));
 
                 query = new StringBuilder(
                         "SELECT I.InsureeUUID AS InsureeUUID, I.InsureeId AS InsureeId, I.FamilyId AS FamilyId, I.CHFID, I.LastName, I.OtherNames, I.DOB, I.Gender, NULLIF(I.Marital,'') Marital, I.isHead, NULLIF(I.IdentificationNumber,'null') IdentificationNumber, NULLIF(I.Phone,'null') Phone, REPLACE(I.PhotoPath, RTRIM(PhotoPath, REPLACE(PhotoPath, '/', '')), '') PhotoPath, NULLIF(I.CardIssued,'null') CardIssued, NULLIF(I.Relationship,'null') Relationship, NULLIF(I.Profession,'null') Profession, NULLIF(I.Education,'null') Education, NULLIF(I.Email,'null') Email, CASE WHEN I.TypeOfId='null' THEN null ELSE I.TypeOfId END TypeOfId, NULLIF(I.HFID,'null') HFID, NULLIF(I.CurrentAddress,'null') CurrentAddress, NULLIF(I.GeoLocation,'null') GeoLocation, NULLIF(I.CurVillage,'null') CurVillage,I.isOffline, I.Vulnerability, I.ProfessionalSituation, I.IncomeLevel, I.PaymentMethod, I.OtherHousehold, I.AccountDetails FROM tblInsuree I WHERE "
@@ -3334,7 +3330,6 @@ public class ClientAndroidInterface {
 
                 //l'id de la sous-famille ou le head a été déplacé
                 subFamilyLinkedId = ob.getString("FamilyId");
-                Log.e("subFamilyLinkedId", subFamilyLinkedId);
             }
 
             //get Policies
@@ -3440,7 +3435,6 @@ public class ClientAndroidInterface {
                         EnrolResult = uploadEnrols(familyArray, insureesArray, policiesArray, premiumsArray, InsureeImages, attachmentsArray);
                         //if family is polygamic
                         if(EnrolResult >= 0){
-                            Log.e("subfamily linked id", subFamilyLinkedId);
                             if(isPolygamy){
                                 try {
                                     if(Offline.equals("1")){
@@ -3454,7 +3448,6 @@ public class ClientAndroidInterface {
 
                                         if(isHOFIncluded){
                                             insureeLinkedUuid = existingFamily.getHofUuid();
-                                            Log.e("insuree linked uuid", insureeLinkedUuid);
                                         }
                                     }
                                 } catch (HttpException e) {
@@ -3586,7 +3579,6 @@ public class ClientAndroidInterface {
             @NonNull JSONArray attachmentsArray
     ) throws JSONException {
         JSONObject familyObj = familyArray.getJSONObject(0);
-        Log.e("family", familyObj.toString());
         JSONObject insureeObj = new JSONObject();
         for (int i=0; i < insureesArray.length(); i++){
             if(familyObj.getString("HOFCHFID").equals(insureesArray.getJSONObject(i).getString("CHFID"))){

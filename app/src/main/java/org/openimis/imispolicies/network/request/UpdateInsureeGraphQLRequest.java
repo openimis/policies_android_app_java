@@ -62,11 +62,6 @@ public class UpdateInsureeGraphQLRequest extends BaseGraphQLRequest {
                         .coordinates(member.getOtherHousehold())
                         .bankCoordinates(member.getAccountDetails())
                         .professionalSituation(member.getProfessionalSituation())
-                        .residenceEnvironmentId(1)
-                        .housingTypeId(1)
-                        .mutualInsuranceCoverageId(2)
-                        .noDisabilityId(2)
-                        .nonDisablingDiseaseId(1)
                         .photo(
                                 PhotoInputType.builder()
                                         .filename(member.getPhotoPath())

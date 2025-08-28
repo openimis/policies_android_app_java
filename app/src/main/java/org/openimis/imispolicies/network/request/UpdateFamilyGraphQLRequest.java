@@ -73,11 +73,6 @@ public class UpdateFamilyGraphQLRequest extends BaseGraphQLRequest {
                                         .coordinates(head.getOtherHousehold())
                                         .bankCoordinates(head.getAccountDetails())
                                         .bankCoordinates(head.getAccountDetails())
-                                        .residenceEnvironmentId(1)
-                                        .housingTypeId(1)
-                                        .mutualInsuranceCoverageId(2)
-                                        .noDisabilityId(2)
-                                        .nonDisablingDiseaseId(1)
                                         .photo(
                                                 PhotoInputType.builder()
                                                         .filename(head.getPhotoPath())
