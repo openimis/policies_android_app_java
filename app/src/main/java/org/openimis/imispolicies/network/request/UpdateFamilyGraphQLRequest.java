@@ -72,7 +72,6 @@ public class UpdateFamilyGraphQLRequest extends BaseGraphQLRequest {
                                         .preferredPaymentMethod(head.getPaymentMethod())
                                         .coordinates(head.getOtherHousehold())
                                         .bankCoordinates(head.getAccountDetails())
-                                        .bankCoordinates(head.getAccountDetails())
                                         .photo(
                                                 PhotoInputType.builder()
                                                         .filename(head.getPhotoPath())
