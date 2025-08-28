@@ -16,6 +16,7 @@ import org.openimis.imispolicies.network.request.UpdateFamilyGraphQLRequest;
 import org.openimis.imispolicies.network.request.UpdateInsureeGraphQLRequest;
 import org.openimis.imispolicies.network.request.UpdatePolicyGraphQLRequest;
 import org.openimis.imispolicies.tools.Log;
+import android.content.Context;
 
 import java.net.HttpURLConnection;
 import java.util.Objects;
@@ -45,9 +46,11 @@ public class UpdateFamily {
     @NonNull
     private final CheckMutation checkMutation;
 
-    public UpdateFamily() {
+    private final Context context;
+
+    public UpdateFamily(Context context) {
         this(
-                new CreateFamilyGraphQLRequest(),
+                new CreateFamilyGraphQLRequest(context),
                 new UpdateFamilyGraphQLRequest(),
                 new CreateInsureeGraphQLRequest(),
                 new UpdateInsureeGraphQLRequest(),
@@ -58,11 +61,12 @@ public class UpdateFamily {
                 new CreatePolicyGraphQLRequest(),
                 new CreatePremiumGraphQLRequest(),
                 new UpdatePolicyGraphQLRequest(),
-                new CheckMutation()
+                new CheckMutation(),
+                context
         );
     }
 
-    public UpdateFamily(
+public UpdateFamily(
             @NonNull CreateFamilyGraphQLRequest createFamilyGraphQLRequest,
             @NonNull UpdateFamilyGraphQLRequest updateFamilyGraphQLRequest,
             @NonNull CreateInsureeGraphQLRequest createInsureeGraphQLRequest,
@@ -74,7 +78,8 @@ public class UpdateFamily {
             @NonNull CreatePolicyGraphQLRequest createPolicyGraphQLRequest,
             @NonNull CreatePremiumGraphQLRequest createPremiumGraphQLRequest,
             @NonNull UpdatePolicyGraphQLRequest updatePolicyGraphQLRequest,
-            @NonNull CheckMutation checkMutation
+            @NonNull CheckMutation checkMutation,
+            @NonNull Context context
     ) {
         this.createFamilyGraphQLRequest = createFamilyGraphQLRequest;
         this.updateFamilyGraphQLRequest = updateFamilyGraphQLRequest;
@@ -87,6 +92,7 @@ public class UpdateFamily {
         this.createPremiumGraphQLRequest = createPremiumGraphQLRequest;
         this.updatePolicyGraphQLRequest = updatePolicyGraphQLRequest;
         this.checkMutation = checkMutation;
+        this.context = context;
     }
 
     @WorkerThread
@@ -105,6 +111,7 @@ public class UpdateFamily {
             familyId = family.getId();
         } catch (HttpException e) {
             if (e.getCode() == HttpURLConnection.HTTP_NOT_FOUND) {
+
                 checkMutation.execute(
                         createFamilyGraphQLRequest.create(family, officerId),
                         "Érreur lors de la création de la famille '" + family.getHeadChfId() + "'"
@@ -113,7 +120,8 @@ public class UpdateFamily {
                     Family existingFamily = fetchFamilyId.execute();
                     familyId = existingFamily.getId();
                 } catch (Exception e2) {
-                    e2.printStackTrace();
+
+
                 }
             } else {
                 throw e;

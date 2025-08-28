@@ -228,6 +228,11 @@ function fillDropdowns() {
     fillVulnerability();
     fillPaymentMethods();
     fillIncomeLevels();
+    fillResidenceEnvironments();
+    fillNoDisabilities();
+    fillNonDisablingDiseases();
+    fillMutualInsuranceCoverages();
+    fillHousingTypes();
 }
 
 // called from java after the image was selected by the user
@@ -393,4 +398,49 @@ function fillAge(Birthday){
     }else{
         $("#Education").hide();
     }
+}
+
+function fillResidenceEnvironments() {
+    $textLanguage = "ResidenceEnvironment";
+    if (Android.getSelectedLanguage() != "en") {
+        $textLanguage = "AltLanguage";
+    }
+    var $ResidenceEnvironments = Android.getResidenceEnvironments();
+    bindDropdown('ddlResidenceEnvironment', $ResidenceEnvironments, 'Code', $textLanguage, null, Android.getString('SelectResidenceEnvironment'));
+}
+
+function fillNoDisabilities() {
+    $textLanguage = "NoDisabilityLabel";
+    if (Android.getSelectedLanguage() != "en") {
+        $textLanguage = "AltLanguage";
+    }
+    var $NoDisabilities = Android.getNoDisabilities();
+    bindDropdown('ddlNoDisability', $NoDisabilities, 'Code', $textLanguage, null, Android.getString('SelectNoDisability'));
+}
+
+function fillNonDisablingDiseases() {
+    $textLanguage = "NonDisablingDisease";
+    if (Android.getSelectedLanguage() != "en") {
+        $textLanguage = "AltLanguage";
+    }
+    var $NonDisablingDiseases = Android.getNonDisablingDiseases();
+    bindDropdown('ddlNonDisablingDisease', $NonDisablingDiseases, 'Code', $textLanguage, null, Android.getString('SelectNonDisablingDisease'));
+}
+
+function fillMutualInsuranceCoverages() {
+    $textLanguage = "MutualInsuranceCoverage";
+    if (Android.getSelectedLanguage() != "en") {
+        $textLanguage = "AltLanguage";
+    }
+    var $MutualInsuranceCoverages = Android.getMutualInsuranceCoverages();
+    bindDropdown('ddlMutualInsuranceCoverage', $MutualInsuranceCoverages, 'Code', $textLanguage, null, Android.getString('SelectMutualInsuranceCoverage'));
+}
+
+function fillHousingTypes() {
+    $textLanguage = "HousingType";
+    if (Android.getSelectedLanguage() != "en") {
+        $textLanguage = "AltLanguage";
+    }
+    var $HousingTypes = Android.getHousingTypes();
+    bindDropdown('ddlHousingType', $HousingTypes, 'Code', $textLanguage, null, Android.getString('SelectHousingType'));
 }

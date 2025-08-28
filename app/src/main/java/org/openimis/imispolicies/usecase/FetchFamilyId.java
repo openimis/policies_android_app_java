@@ -32,7 +32,7 @@ public class FetchFamilyId {
         GetFamilyIdQuery.Node node = getFamilyIdGraphQLRequest.get();
         return new Family(
                 /* chfid = */ node.headInsuree().chfId(),
-                /* id = */ IdUtils.getIdFromGraphQLString(node.id()),
+                /* id = */ node.id() != null ? IdUtils.getIdFromGraphQLString(node.id()) : 0,
                 /* uuid = */ node.uuid(),
                 null,
                 null,

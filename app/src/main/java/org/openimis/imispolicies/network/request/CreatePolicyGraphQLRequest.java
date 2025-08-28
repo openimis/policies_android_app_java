@@ -21,7 +21,7 @@ public class CreatePolicyGraphQLRequest extends BaseGraphQLRequest {
         Response<CreatePolicyMutation.Data> response = makeSynchronous(new CreatePolicyMutation(
                 CreatePolicyMutationInput.builder()
                         .clientMutationId(UUID.randomUUID().toString())
-                        .clientMutationLabel("Create policy '" + policy.getUuid() + "'")
+                        .clientMutationId("Create policy '" + policy.getUuid() + "'")
                         .familyId(familyId)
                         .enrollDate(policy.getEnrollDate())
                         .startDate(policy.getStartDate())

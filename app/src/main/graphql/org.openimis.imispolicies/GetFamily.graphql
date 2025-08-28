@@ -78,6 +78,21 @@ query GetFamily($headChfId: String, $parentUuid: String) {
                             incomeLevel {
                                 id
                             }
+                            residenceEnvironment {
+                                code
+                            }
+                            noDisability {
+                                code
+                            }
+                            nonDisablingDisease {
+                                code
+                            }
+                            mutualInsuranceCoverage {
+                                code
+                            }
+                            housingType {
+                                code
+                            }
                             professionalSituation
                             preferredPaymentMethod
                             bankCoordinates

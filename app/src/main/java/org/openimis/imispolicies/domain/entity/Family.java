@@ -363,6 +363,9 @@ public class Family implements Parcelable {
         private final Integer incomeLevel;
 
         @Nullable
+        private final Integer residenceEnvironment;
+
+        @Nullable
         private final String paymentMethod;
 
         @Nullable
@@ -370,6 +373,19 @@ public class Family implements Parcelable {
 
         @Nullable
         private final String accountDetails;
+
+        // New fields added
+        @Nullable
+        private final Integer noDisability;
+
+        @Nullable
+        private final String nonDisablingDisease;
+
+        @Nullable
+        private final Integer mutualInsuranceCoverage;
+
+        @Nullable
+        private final String housingType;
 
         @Nullable
         private final String photoPath;
@@ -403,9 +419,14 @@ public class Family implements Parcelable {
                 @Nullable String geolocation,
                 @Nullable String professionalSituation,
                 @Nullable Integer incomeLevel,
+                @Nullable Integer residenceEnvironment,
                 @Nullable String paymentMethod,
                 @Nullable String otherHousehold,
                 @Nullable String accountDetails,
+                @Nullable Integer noDisability,
+                @Nullable String nonDisablingDisease,
+                @Nullable Integer mutualInsuranceCoverage,
+                @Nullable String housingType,
                 @Nullable String photoPath,
                 @Nullable byte[] photoBytes,
                 boolean isOffline
@@ -435,9 +456,14 @@ public class Family implements Parcelable {
             this.geolocation = geolocation;
             this.professionalSituation = professionalSituation;
             this.incomeLevel = incomeLevel;
+            this.residenceEnvironment = residenceEnvironment;
             this.paymentMethod = paymentMethod;
             this.otherHousehold = otherHousehold;
             this.accountDetails = accountDetails;
+            this.noDisability = noDisability;
+            this.nonDisablingDisease = nonDisablingDisease;
+            this.mutualInsuranceCoverage = mutualInsuranceCoverage;
+            this.housingType = housingType;
             this.photoPath = photoPath;
             this.photoBytes = photoBytes;
             this.isOffline = isOffline;
@@ -483,9 +509,22 @@ public class Family implements Parcelable {
             geolocation = in.readString();
             professionalSituation = in.readString();
             incomeLevel = in.readInt();
+            residenceEnvironment = in.readInt();
             paymentMethod = in.readString();
             otherHousehold = in.readString();
             accountDetails = in.readString();
+            if (in.readByte() == 0) {
+                noDisability = null;
+            } else {
+                noDisability = in.readInt();
+            }
+            nonDisablingDisease = in.readString();
+            if (in.readByte() == 0) {
+                mutualInsuranceCoverage = null;
+            } else {
+                mutualInsuranceCoverage = in.readInt();
+            }
+            housingType = in.readString();
             photoPath = in.readString();
             int size = in.readInt();
             if (size >= 0) {
@@ -539,9 +578,20 @@ public class Family implements Parcelable {
             dest.writeString(geolocation);
             dest.writeString(professionalSituation);
             dest.writeInt(incomeLevel);
+            dest.writeInt(residenceEnvironment);
             dest.writeString(paymentMethod);
             dest.writeString(otherHousehold);
             dest.writeString(accountDetails);
+            dest.writeByte((byte) (noDisability != null ? 1 : 0));
+            if (noDisability != null) {
+                dest.writeInt(noDisability);
+            }
+            dest.writeString(nonDisablingDisease);
+            dest.writeByte((byte) (mutualInsuranceCoverage != null ? 1 : 0));
+            if (mutualInsuranceCoverage != null) {
+                dest.writeInt(mutualInsuranceCoverage);
+            }
+            dest.writeString(housingType);
             dest.writeString(photoPath);
             if (photoBytes != null) {
                 dest.writeInt(photoBytes.length);
@@ -675,6 +725,9 @@ public class Family implements Parcelable {
         public Integer getIncomeLevel(){ return incomeLevel;}
 
         @Nullable
+        public Integer getResidenceEnvironment(){ return residenceEnvironment;}
+
+        @Nullable
         public String getPaymentMethod(){ return paymentMethod;}
 
         @Nullable
@@ -682,6 +735,18 @@ public class Family implements Parcelable {
 
         @Nullable
         public String getAccountDetails(){ return accountDetails;}
+
+        @Nullable
+        public Integer getNoDisability(){ return noDisability;}
+
+        @Nullable
+        public String getNonDisablingDisease(){ return nonDisablingDisease;}
+
+        @Nullable
+        public Integer getMutualInsuranceCoverage(){ return mutualInsuranceCoverage;}
+
+        @Nullable
+        public String getHousingType(){ return housingType;}
 
         @Nullable
         public String getPhotoPath() {

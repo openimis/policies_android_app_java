@@ -490,6 +490,8 @@
     <string name="OtherHousehold">Autre Ménage</string>
     <string name="SelectIncomeLevel">Choisir le niveau de revenu</string>
     <string name="IncomeLevel">Niveau de revenu</string>
+    <string name="SelectResidenceEnvironment">Choisir l\'environnement de residence</string>
+    <string name="ResidenceEnvironment">Environnement de residence</string>
     <string name="FamilyAndSubFamilies">Famille et sous-familles</string>
     <string name="AddNewSubFamily">Ajouter une sous-famille</string>
     <string name="Detach">Détacher</string>
@@ -527,4 +529,10 @@
     <string name="ConfirmIncludeHOF">Êtes-vous sûre de vouloir rattacher le chef de ménage à la sous-famille?</string>
     <string name="HOFAttached">Le chef de ménage a été attaché avec succès</string>
     <string name="HeadAlreadyAttach">Le chef de ménage est déjà attaché à cette sous-famille</string>
+    
+    <!-- New dropdown selection strings -->
+    <string name="SelectNoDisability">Sélectionner incapacité</string>
+    <string name="SelectNonDisablingDisease">Sélectionner maladie</string>
+    <string name="SelectMutualInsuranceCoverage">Sélectionner couverture</string>
+    <string name="SelectHousingType">Sélectionner logement</string>
 </resources>

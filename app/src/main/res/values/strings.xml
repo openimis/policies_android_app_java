@@ -513,4 +513,15 @@
     <string name="ConfirmIncludeHOF">Confirm include head of family in sub-family</string>
     <string name="HOFAttached">Head of Family attached</string>
     <string name="HeadAlreadyAttach">Head of Family already attached</string>
+    <string name="release_tag">v1.0.0</string>
+    
+    <!-- New Fields for Insuree Form -->
+    <string name="NoDisability">No Disability</string>
+    <string name="SelectNoDisability">Select No Disability</string>
+    <string name="NonDisablingDisease">Non-Disabling Disease</string>
+    <string name="SelectNonDisablingDisease">Select Non-Disabling Disease</string>
+    <string name="MutualInsuranceCoverage">Mutual Insurance Coverage</string>
+    <string name="SelectMutualInsuranceCoverage">Select Mutual Insurance Coverage</string>
+    <string name="HousingType">Housing Type</string>
+    <string name="SelectHousingType">Select Housing Type</string>
 </resources>
