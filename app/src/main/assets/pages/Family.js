@@ -167,10 +167,10 @@ function getLanguageOfSMS() {
 }
 
 function getIncomeLevels() {
-    $textLanguage = "FirstLanguage";
+    $textLanguage = "IncomeLevel";
     if (Android.getSelectedLanguage() != "en") {
-        $textLanguage = "SecondLanguage";
+        $textLanguage = "AltLanguage";
     }
     var $IncomeLevels = Android.getIncomeLevels();
-    bindDropdown('ddlIncomeLevel', $IncomeLevels, 'Id', $textLanguage, null, Android.getString('SelectIncomeLevel'));
+    bindDropdown('ddlIncomeLevel', $IncomeLevels, 'Code', $textLanguage, null, Android.getString('SelectIncomeLevel'));
 }

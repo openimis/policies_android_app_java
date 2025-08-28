@@ -532,7 +532,6 @@ function fillIncomeLevels() {
     var $IncomeLevels = Android.getIncomeLevels();
     bindDropdown('ddlIncomeLevel', $IncomeLevels, 'IncomeLevelID', $textLanguage, null, Android.getString('SelectIncomeLevel'));
 }
-
 function fillResidenceEnvironments() {
     $textLanguage = "ResidenceEnvironment";
     if (Android.getSelectedLanguage() != "en") {
