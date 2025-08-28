@@ -561,7 +561,7 @@ public class SQLHandler extends SQLiteOpenHelper {
         // Recreate all tables with the current schema
         onCreate(db);
         
-
+        android.util.Log.d("Upgrade", "DB Version upgraded from " + oldVersion + " to " + newVersion);
     }
 
     @Override

@@ -333,41 +333,9 @@ public class CreateFamilyGraphQLRequest extends BaseGraphQLRequest {
     }
     
     private Integer safeGetIncomeLevel(Family.Member head) {
-        try {
-            // First check if the value is null - return null if not defined
-             if (head.getIncomeLevel() == null) {
-                // IncomeLevel not defined
-                return null;
-            }
-            
-            // Convertir en String puis en int
-            String value = String.valueOf(head.getIncomeLevel());
-            if (TextUtils.isEmpty(value)) {
-                // Valeur vide
-                return null;
-            }
-            
-            int intValue = Integer.parseInt(value);
-            
-            // Verify that the code exists in the reference table
-            SQLHandler sqlHandler = new SQLHandler(context);
-            // The local schema defines columns: Id, FirstLanguage, SecondLanguage
-            // Use Id for validation instead of Code
-            JSONArray result = sqlHandler.getResult("SELECT Id FROM " + SQLHandler.tblIncomeLevel + " WHERE Id = ?", 
-                    new String[]{value});
-            
-            if (result == null || result.length() == 0) {
-                // Id de niveau de revenu introuvable
-                return null;
-            }
-            
-            return intValue;
-        } catch (NumberFormatException e) {
-            // Format de niveau de revenu invalide
-            return null;
-        } catch (Exception e) {
-            // Erreur lors de la validation du niveau de revenu
+        if (head.getIncomeLevel() == null || head.getIncomeLevel() == 0) {
             return null;
         }
+        return head.getIncomeLevel();
     }
 }

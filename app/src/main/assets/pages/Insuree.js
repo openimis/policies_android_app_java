@@ -389,6 +389,7 @@ function applyInsureeSelectValues() {
                 } catch(e) {}
             }
         };
+        setSelectSafe('#ddlIncomeLevel', insureeObj["IncomeLevel"], 'IncomeLevel');
         setSelectSafe('#ddlResidenceEnvironment', insureeObj["ResidenceEnvironment"], 'ResidenceEnvironment');
         setSelectSafe('#ddlHousingType', insureeObj["HousingType"], 'HousingType');
         setSelectSafe('#ddlMutualInsuranceCoverage', insureeObj["MutualInsuranceCoverage"], 'MutualInsuranceCoverage');
@@ -531,7 +532,6 @@ function fillIncomeLevels() {
     var $IncomeLevels = Android.getIncomeLevels();
     bindDropdown('ddlIncomeLevel', $IncomeLevels, 'IncomeLevelID', $textLanguage, null, Android.getString('SelectIncomeLevel'));
 }
-
 function fillResidenceEnvironments() {
     $textLanguage = "ResidenceEnvironment";
     if (Android.getSelectedLanguage() != "en") {
