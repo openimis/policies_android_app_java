@@ -442,10 +442,10 @@ public class SQLHandler extends SQLiteOpenHelper {
                             "PolicyId INTEGER" + ")"
             );
             sqLiteDatabase.execSQL(
-                    "CREATE TABLE " + tblIncomeLevel + "("
-                            + "Id INTEGER,"
-                            + "FirstLanguage TEXT,"
-                            + "SecondLanguage TEXT" +")"
+                    "CREATE TABLE " + tblIncomeLevel + "(" +
+                            "Id INTEGER," +
+                            "FirstLanguage TEXT," +
+                            "SecondLanguage TEXT" +")"
             );
             sqLiteDatabase.execSQL(
                     "CREATE TABLE " + tblResidenceEnvironment + "("
@@ -561,7 +561,7 @@ public class SQLHandler extends SQLiteOpenHelper {
         // Recreate all tables with the current schema
         onCreate(db);
         
-
+        android.util.Log.d("Upgrade", "DB Version upgraded from " + oldVersion + " to " + newVersion);
     }
 
     @Override
