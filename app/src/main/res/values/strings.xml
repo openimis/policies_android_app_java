@@ -509,6 +509,10 @@
     <string name="FamilyAndAttachment">Families attachments</string>
     <string name="invalidPeriodicity">For this contribution plan the periodicity must be greater than or equal to</string>
     <string name="CannotAddAttachment">We cannot add attachment for polygamous family</string>
+    <string name="IncludeHOF">Include Head of family</string>
+    <string name="ConfirmIncludeHOF">Confirm include head of family in sub-family</string>
+    <string name="HOFAttached">Head of Family attached</string>
+    <string name="HeadAlreadyAttach">Head of Family already attached</string>
     <string name="release_tag">v1.0.0</string>
     
     <!-- New Fields for Insuree Form -->

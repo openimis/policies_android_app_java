@@ -47,7 +47,8 @@ public class FetchFamilyId {
                 null,
                 /* insurees = */ null,
                 null,
-                null
+                null,
+                /* hofUuid */ node.headInsuree().uuid()
                 );
     }
 }

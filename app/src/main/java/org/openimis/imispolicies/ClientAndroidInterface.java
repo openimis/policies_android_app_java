@@ -81,6 +81,7 @@ import org.openimis.imispolicies.network.exception.UserNotAuthenticatedException
 import org.openimis.imispolicies.tools.ImageManager;
 import org.openimis.imispolicies.tools.Log;
 import org.openimis.imispolicies.tools.StorageManager;
+import org.openimis.imispolicies.usecase.ChangeInsureeFamily;
 import org.openimis.imispolicies.usecase.CreatePolicy;
 import org.openimis.imispolicies.usecase.DeletePolicyRenewal;
 import org.openimis.imispolicies.usecase.FetchFamily;
@@ -3164,7 +3165,7 @@ public class ClientAndroidInterface {
             }
         }
         //Get all the families which are in offline state
-        JSONArray familiesToUpload = sqlHandler.getResult("SELECT FamilyId, isOffline FROM tblFamilies WHERE InsureeId != '' ORDER BY FamilyId", null);
+        JSONArray familiesToUpload = sqlHandler.getResult("SELECT FamilyId, InsureeChfId, isOffline FROM tblFamilies WHERE InsureeId != '' ORDER BY FamilyId", null);
         int length;
         if (CallerId == 2) {
             length = 1;
@@ -3174,12 +3175,16 @@ public class ClientAndroidInterface {
         if (length == 0) {
             return 999;
         }
+        String insureeLinkedUuid = "";
+        String subFamilyLinkedId = "";
         //Loop through each familyId and get Header, Insuree, Policy and Premium details
         for (int i = 0; i < length; i++) {
 
             String CHFNumber = null;
             JSONObject object = null;
             boolean isPolygamy = false;
+            String HOFCHFID = "";
+            boolean isHOFIncluded = false;
             try {
                 object = familiesToUpload.getJSONObject(i);
             } catch (JSONException e) {
@@ -3190,6 +3195,7 @@ public class ClientAndroidInterface {
             }
             // try {
             String FamilyId = object.getString("FamilyId");
+            HOFCHFID = object.getString("InsureeChfId");
             String offlineString = object.getString("isOffline");
             int IsOffline = offlineString.equals("1") || offlineString.equalsIgnoreCase("true") ? 1 : 0;
 
@@ -3222,7 +3228,7 @@ public class ClientAndroidInterface {
             JSONObject ob1 = null;
             for (int j = 0; j < familyArray.length(); j++) {
                 ob1 = familyArray.getJSONObject(j);
-                String typeofId = ob1.getString("FamilyType");
+                String familyType = ob1.getString("FamilyType");
                 String ConfirmationType = ob1.getString("ConfirmationType");
                 String FId = ob1.getString("FamilyId");
 
@@ -3236,10 +3242,10 @@ public class ClientAndroidInterface {
                     ob1.put("FamilyId", FId);
                     ob1.put("isOffline", 0);
                 }
-                if (typeofId.equals("0")) {
+                if (familyType.equals("0")) {
                     ob1.put("FamilyType", "");
                 }
-                if (typeofId.equals("P")) {
+                if (familyType.equals("P")) {
                     isPolygamy = true;
                 }
                 if (ConfirmationType.equals("0") || ConfirmationType.equals("null")) {
@@ -3307,6 +3313,23 @@ public class ClientAndroidInterface {
                 }
 
                 insureesArray = newInsureesArray;
+            } else {
+                //c'est une famille ou le head a été déplacé
+                isHOFIncluded = true;
+
+                query = new StringBuilder(
+                        "SELECT I.InsureeUUID AS InsureeUUID, I.InsureeId AS InsureeId, I.FamilyId AS FamilyId, I.CHFID, I.LastName, I.OtherNames, I.DOB, I.Gender, NULLIF(I.Marital,'') Marital, I.isHead, NULLIF(I.IdentificationNumber,'null') IdentificationNumber, NULLIF(I.Phone,'null') Phone, REPLACE(I.PhotoPath, RTRIM(PhotoPath, REPLACE(PhotoPath, '/', '')), '') PhotoPath, NULLIF(I.CardIssued,'null') CardIssued, NULLIF(I.Relationship,'null') Relationship, NULLIF(I.Profession,'null') Profession, NULLIF(I.Education,'null') Education, NULLIF(I.Email,'null') Email, CASE WHEN I.TypeOfId='null' THEN null ELSE I.TypeOfId END TypeOfId, NULLIF(I.HFID,'null') HFID, NULLIF(I.CurrentAddress,'null') CurrentAddress, NULLIF(I.GeoLocation,'null') GeoLocation, NULLIF(I.CurVillage,'null') CurVillage,I.isOffline, I.Vulnerability, I.ProfessionalSituation, I.IncomeLevel, I.PaymentMethod, I.OtherHousehold, I.AccountDetails FROM tblInsuree I WHERE "
+                );
+                query.append(" I.CHFID = ").append(HOFCHFID).append(" \n");
+                insureesArray = sqlHandler.getResult(query.toString(), null);
+                JSONObject ob = insureesArray.getJSONObject(0);
+                String typeofId = ob.getString("TypeOfId");
+                if (typeofId.equals("0")) {
+                    ob.put("TypeOfId", "");
+                }
+
+                //l'id de la sous-famille ou le head a été déplacé
+                subFamilyLinkedId = ob.getString("FamilyId");
             }
 
             //get Policies
@@ -3404,7 +3427,6 @@ public class ClientAndroidInterface {
                 }
 
                 queryAT = query.toString();
-                Log.e("query", queryAT);
                 JSONArray attachmentsArray = sqlHandler.getResult(queryAT, null);
 
                 if (CallerId != 2) {
@@ -3412,23 +3434,39 @@ public class ClientAndroidInterface {
                     if (myList.isEmpty()) {
                         EnrolResult = uploadEnrols(familyArray, insureesArray, policiesArray, premiumsArray, InsureeImages, attachmentsArray);
                         //if family is polygamic
-                        if(isPolygamy){
-                            try {
-                                if(Offline.equals("1")){
-                                    Family existingFamily = new FetchFamilyId().execute();
-                                    int Fid = existingFamily.getId();
-                                    ContentValues cv = new ContentValues();
-                                    cv.put("ParentId", Fid);
-                                    String[] queryArgs = {FamilyId};
-                                    sqlHandler.updateData("tblFamilies", cv,
-                                            "ParentId= ?", queryArgs);
+                        if(EnrolResult >= 0){
+                            if(isPolygamy){
+                                try {
+                                    if(Offline.equals("1")){
+                                        Family existingFamily = new FetchFamilyId().execute();
+                                        int Fid = existingFamily.getId();
+                                        ContentValues cv = new ContentValues();
+                                        cv.put("ParentId", Fid);
+                                        String[] queryArgs = {FamilyId};
+                                        sqlHandler.updateData("tblFamilies", cv,
+                                                "ParentId= ?", queryArgs);
+
+                                        if(isHOFIncluded){
+                                            insureeLinkedUuid = existingFamily.getHofUuid();
+                                        }
+                                    }
+                                } catch (HttpException e) {
+                                    if (e.getCode() != HttpURLConnection.HTTP_NOT_FOUND) {
+                                        throw e;
+                                    }
+                                } catch (Exception e) {
+                                    e.printStackTrace();
                                 }
-                            } catch (HttpException e) {
-                                if (e.getCode() != HttpURLConnection.HTTP_NOT_FOUND) {
-                                    throw e;
+                            }
+                            if(subFamilyLinkedId.equals(FamilyId)){
+                                try {
+                                    Family family = new FetchFamilyId().execute();
+                                    if(insureeLinkedUuid != null){
+                                        new ChangeInsureeFamily().execute(family.getUuid(), insureeLinkedUuid);
+                                    }
+                                } catch (Exception e) {
+                                    throw new RuntimeException(e);
                                 }
-                            } catch (Exception e) {
-                                e.printStackTrace();
                             }
                         }
                     } else {
@@ -3658,7 +3696,8 @@ public class ClientAndroidInterface {
                 /* parentUuid = */ json.has("ParentUuid") ? json.getString("ParentUuid") : null,
                 /* members = */ members,
                 /* attachments = */ familyAttachments,
-                /* policies = */ policies
+                /* policies = */ policies,
+                null
         );
     }
 
@@ -6471,6 +6510,35 @@ public class ClientAndroidInterface {
         }
 
     }
+
+    @JavascriptInterface
+    public boolean CanAttach (int FamilyId, int subFamilyId) throws Exception {
+        @Language("SQL")
+        String Query = "SELECT I.FamilyId, I.CHFID FROM tblInsuree I \n"+
+        "INNER JOIN tblFamilies F ON F.InsureeChfId = I.CHFID WHERE F.FamilyId = " + FamilyId;
+        JSONArray results = sqlHandler.getResult(Query, null);
+        if(results.length() > 0){
+            int familyId = results.getJSONObject(0).getInt("FamilyId");
+            return familyId != subFamilyId;
+        }
+        return false;
+    }
+
+    @JavascriptInterface
+    @SuppressWarnings("unused")
+    public int AttachHeadOfFamily(int FamilyId, int SubFamilyId) throws Exception {
+
+        @Language("SQL")
+        String Query = "SELECT InsureeChfId FROM tblFamilies WHERE FamilyId = "+ FamilyId;
+        JSONArray results = sqlHandler.getResult(Query, null);
+        String HOFCHFID = results.getJSONObject(0).getString("InsureeChfId");
+
+        ContentValues values = new ContentValues();
+        values.put("FamilyId", SubFamilyId);
+        sqlHandler.updateData("tblInsuree", values, "CHFID = ?",
+                new String[]{HOFCHFID});
+        return 1;
+    }
     
     /**
      * Insert NonDisablingDiseases data from server into local database
@@ -6512,7 +6580,5 @@ public class ClientAndroidInterface {
     }
     
     // Note: Master data insertion methods added for new reference tables
-    
-
 }
 
