@@ -487,4 +487,7 @@
     <string name="SelectNonDisablingDisease">Select disease</string>
     <string name="SelectMutualInsuranceCoverage">Select coverage</string>
     <string name="SelectHousingType">Select housing</string>
+
+    <string name="MonogamousFamilyMember">Members of the monogamous household</string>
+    <string name="PolygamousHead">Heads of polygamous sub-households</string>
 </resources>

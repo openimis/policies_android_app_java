@@ -535,4 +535,7 @@
     <string name="SelectNonDisablingDisease">Sélectionner maladie</string>
     <string name="SelectMutualInsuranceCoverage">Sélectionner couverture</string>
     <string name="SelectHousingType">Sélectionner logement</string>
+
+    <string name="MonogamousFamilyMember">Membres de la famille du ménage monogame</string>
+    <string name="PolygamousHead">Les chefs de ménages des sous-foyers polygamiques</string>
 </resources>

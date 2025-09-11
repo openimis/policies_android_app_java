@@ -524,4 +524,8 @@
     <string name="SelectMutualInsuranceCoverage">Select Mutual Insurance Coverage</string>
     <string name="HousingType">Housing Type</string>
     <string name="SelectHousingType">Select Housing Type</string>
+
+    <string name="MonogamousFamilyMember">Members of the monogamous household</string>
+    <string name="PolygamousHead">Heads of polygamous sub-households</string>
+
 </resources>

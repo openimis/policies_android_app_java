@@ -33,8 +33,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.Typeface;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -57,18 +62,23 @@ import com.squareup.picasso.Picasso;
 
 import org.json.JSONObject;
 import org.openimis.imispolicies.domain.entity.Insuree;
+import org.openimis.imispolicies.domain.entity.Family;
 import org.openimis.imispolicies.domain.entity.Policy;
 import org.openimis.imispolicies.network.exception.HttpException;
 import org.openimis.imispolicies.tools.Log;
 import org.openimis.imispolicies.usecase.FetchInsureeInquire;
+import org.openimis.imispolicies.usecase.FetchSubFamilies;
+import org.openimis.imispolicies.usecase.FetchFamily;
 import org.openimis.imispolicies.util.DateUtils;
 import org.openimis.imispolicies.util.TextViewUtils;
 
 import java.net.HttpURLConnection;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 public class Enquire extends ImisActivity {
@@ -152,8 +162,14 @@ public class Enquire extends ImisActivity {
             pd = ProgressDialog.show(Enquire.this, "", getResources().getString(R.string.GetingInsuuree));
             new Thread(() -> {
                 getInsureeInfo();
+            }).start();
+
+            new Thread(() -> {
+                getFamilyInfo(etCHFID.getText().toString(), btnGo);
                 pd.dismiss();
             }).start();
+
+            lv.setVisibility(View.VISIBLE);
         });
         btnScan.setOnClickListener(v -> {
             Intent intent = new Intent("com.google.zxing.client.android.SCAN");
@@ -202,6 +218,350 @@ public class Enquire extends ImisActivity {
         ll.setVisibility(View.INVISIBLE);
         PolicyList.clear();
         lv.setAdapter(null);
+    }
+
+    private void getFamilyInfo(String parentUuid, ImageButton btnGo) {
+
+        try {
+            Family family = new FetchFamily().execute(parentUuid, "");
+
+            if (family == null) {
+                runOnUiThread(() -> {
+                    LinearLayout mainContainer = findViewById(R.id.llListView);
+                    if (mainContainer != null) {
+                        mainContainer.removeAllViews();
+                        TextView noFamilyText = new TextView(this);
+                        noFamilyText.setText("Famille non trouvée");
+                        noFamilyText.setTextSize(16);
+                        noFamilyText.setPadding(16, 16, 16, 16);
+                        noFamilyText.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
+                        mainContainer.addView(noFamilyText);
+                        mainContainer.setVisibility(View.VISIBLE);
+                    }
+                });
+                return;
+            }
+
+            // Traitement des familles de type "H"
+            if (Objects.equals(family.getType(), "H")) {
+                if (family.getMembers() != null && !family.getMembers().isEmpty()) {
+
+                    runOnUiThread(() -> {
+                        try {
+                            LinearLayout mainContainer = findViewById(R.id.llListView);
+                            if (mainContainer == null) {
+                                Log.e(LOG_TAG, "llListView non trouvé dans le layout !");
+                                return;
+                            }
+
+                            mainContainer.removeAllViews();
+                            mainContainer.setVisibility(View.VISIBLE);
+
+                            TextView typeTextView = new TextView(this);
+                            typeTextView.setText(getResources().getString(R.string.MonogamousFamilyMember));
+                            typeTextView.setTypeface(null, Typeface.BOLD_ITALIC);
+                            typeTextView.setTextColor(Color.parseColor("#424242"));
+                            typeTextView.setTextSize(16);
+                            typeTextView.setPadding(16, 16, 16, 16);
+                            mainContainer.addView(typeTextView);
+
+                            for (int i = 0; i < family.getMembers().size(); i++) {
+                                Family.Member member = family.getMembers().get(i);
+                                if (member != null) {
+                                    if (member.getChfId() != null && member.getChfId().equals(parentUuid)) {
+                                        continue;
+                                    }
+
+                                    View memberView = createMemberView(member, i);
+                                    mainContainer.addView(memberView);
+                                }
+                            }
+
+                        } catch (Exception e) {
+                            showErrorMessage("Erreur lors de l'affichage des membres");
+                        }
+                    });
+                } else {
+                    showNoMembersMessage("Aucun membre trouvé dans cette famille");
+                }
+            }
+            // Traitement des familles de type "P" (Polygamous)
+            else if (Objects.equals(family.getType(), "P")) {
+                try {
+                    List<Family> polygamousFamilies = new FetchSubFamilies().execute(family.getUuid());
+
+                    if (polygamousFamilies != null && !polygamousFamilies.isEmpty()) {
+
+                        runOnUiThread(() -> {
+                            try {
+                                LinearLayout mainContainer = findViewById(R.id.llListView);
+                                if (mainContainer == null) {
+                                    Log.e(LOG_TAG, "llListView non trouvé dans le layout !");
+                                    return;
+                                }
+
+                                mainContainer.removeAllViews();
+                                mainContainer.setVisibility(View.VISIBLE);
+
+                                int memberIndex = 0;
+
+                                TextView typeTextView = new TextView(this);
+                                typeTextView.setText(getResources().getString(R.string.PolygamousHead));
+                                typeTextView.setTypeface(null, Typeface.BOLD_ITALIC);
+                                typeTextView.setTextColor(Color.parseColor("#424242"));
+                                typeTextView.setTextSize(16);
+                                typeTextView.setPadding(16, 16, 16, 16);
+                                mainContainer.addView(typeTextView);
+
+                                for (int familyIndex = 0; familyIndex < polygamousFamilies.size(); familyIndex++) {
+                                    Family currentFamily = polygamousFamilies.get(familyIndex);
+
+                                    if (currentFamily != null && currentFamily.getMembers() != null && !currentFamily.getMembers().isEmpty()) {
+
+                                        for (Family.Member member : currentFamily.getMembers()) {
+                                            if (member != null) {
+
+                                                View memberView = createMemberView(member, memberIndex);
+                                                memberView.setOnClickListener(v -> {
+                                                    ClearForm();
+                                                    ProgressDialog pd = ProgressDialog.show(Enquire.this, "", getResources().getString(R.string.GetingInsuuree));
+                                                    new Thread(() -> {
+                                                        try {
+                                                            runOnUiThread(() -> {
+                                                                etCHFID.setText(member.getChfId());
+                                                                btnGo.performClick();
+                                                            });
+                                                        } finally {
+                                                            pd.dismiss();
+                                                        }
+                                                    }).start();
+                                                });
+
+                                                mainContainer.addView(memberView);
+
+                                                memberIndex++;
+                                            }
+                                        }
+                                    } else {
+                                        Log.d(LOG_TAG, "Aucun membre dans la famille " + (familyIndex + 1));
+                                    }
+                                }
+                            } catch (Exception e) {
+                                showErrorMessage("Erreur lors de l'affichage des membres polygames");
+                            }
+                        });
+                    } else {
+                        showNoMembersMessage("Aucune famille polygame trouvée");
+                    }
+                } catch (Exception e) {
+                    showErrorMessage("Erreur lors du chargement des familles polygames");
+                }
+            } else {
+                showNoMembersMessage("Type de famille non pris en charge: " + family.getType());
+            }
+
+        } catch (Exception e) {
+            ca.ShowDialog(getResources().getString(R.string.UnknownError));
+            showErrorMessage("Erreur lors du chargement des données de la famille");
+        }
+    }
+
+    private void showErrorMessage(String message) {
+        runOnUiThread(() -> {
+            try {
+                LinearLayout mainContainer = findViewById(R.id.llListView);
+                if (mainContainer != null) {
+                    mainContainer.removeAllViews();
+                    TextView errorText = new TextView(this);
+                    errorText.setText(message);
+                    errorText.setTextSize(16);
+                    errorText.setPadding(16, 16, 16, 16);
+                    errorText.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
+                    mainContainer.addView(errorText);
+                    mainContainer.setVisibility(View.VISIBLE);
+                }
+            } catch (Exception e) {
+                Log.e(LOG_TAG, "Erreur lors de l'affichage du message d'erreur: " + e.getMessage(), e);
+            }
+        });
+    }
+
+    private void showNoMembersMessage(String message) {
+        runOnUiThread(() -> {
+            try {
+                LinearLayout mainContainer = findViewById(R.id.llListView);
+                if (mainContainer != null) {
+                    mainContainer.removeAllViews();
+                    TextView noMemberText = new TextView(this);
+                    noMemberText.setText(message);
+                    noMemberText.setTextSize(16);
+                    noMemberText.setPadding(16, 16, 16, 16);
+                    noMemberText.setTextColor(getResources().getColor(android.R.color.black));
+                    mainContainer.addView(noMemberText);
+                    mainContainer.setVisibility(View.VISIBLE);
+                }
+            } catch (Exception e) {
+                Log.e(LOG_TAG, "Erreur lors de l'affichage du message 'aucun membre': " + e.getMessage(), e);
+            }
+        });
+    }
+
+    @SuppressLint("ResourceType")
+    private View createMemberView(Family.Member member, int index) {
+        LinearLayout memberLayout = new LinearLayout(this);
+        memberLayout.setOrientation(LinearLayout.HORIZONTAL);
+        memberLayout.setLayoutParams(new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        ));
+        memberLayout.setPadding(20, 16, 20, 16);
+
+        GradientDrawable background = new GradientDrawable();
+        background.setColor(Color.WHITE);
+        background.setCornerRadius(12f);
+        background.setStroke(1, Color.parseColor("#E0E0E0"));
+        memberLayout.setBackground(background);
+
+        LinearLayout.LayoutParams marginParams = (LinearLayout.LayoutParams) memberLayout.getLayoutParams();
+        marginParams.setMargins(16, 12, 16, 12);
+        memberLayout.setLayoutParams(marginParams);
+
+        ImageView memberImageView = new ImageView(this);
+        LinearLayout.LayoutParams imageParams = new LinearLayout.LayoutParams(120, 120);
+        imageParams.gravity = Gravity.CENTER_VERTICAL;
+        imageParams.setMargins(0, 0, 20, 0);
+        memberImageView.setLayoutParams(imageParams);
+        memberImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        memberImageView.setContentDescription(member.getLastName());
+
+        GradientDrawable imageBackground = new GradientDrawable();
+        imageBackground.setShape(GradientDrawable.OVAL);
+        imageBackground.setStroke(3, Color.parseColor("#E3F2FD"));
+        memberImageView.setBackground(imageBackground);
+        memberImageView.setClipToOutline(true);
+
+        if (member.getPhotoPath() != null && !member.getPhotoPath().isEmpty()) {
+            loadMemberPhoto(memberImageView, member.getPhotoPath());
+        } else {
+            memberImageView.setImageResource(R.drawable.person);
+        }
+
+        LinearLayout textLayout = new LinearLayout(this);
+        textLayout.setOrientation(LinearLayout.VERTICAL);
+        textLayout.setLayoutParams(new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        ));
+        textLayout.setGravity(Gravity.CENTER_VERTICAL);
+
+        LinearLayout chfidContainer = new LinearLayout(this);
+        chfidContainer.setOrientation(LinearLayout.HORIZONTAL);
+        chfidContainer.setLayoutParams(new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        ));
+        chfidContainer.setPadding(12, 6, 12, 6);
+        chfidContainer.setGravity(Gravity.CENTER);
+
+        GradientDrawable chfidBackground = new GradientDrawable();
+        chfidBackground.setColor(Color.parseColor("#E3F2FD"));
+        chfidBackground.setCornerRadius(16f);
+        chfidContainer.setBackground(chfidBackground);
+
+        TextView nameTextView = new TextView(this);
+        String fullName = (member.getLastName() != null ? member.getLastName() : "") + " " +
+                (member.getOtherNames() != null ? member.getOtherNames() : "");
+        nameTextView.setText(fullName.trim());
+        nameTextView.setPadding(0, 12, 0, 8);
+        nameTextView.setTextColor(Color.parseColor("#212121"));
+        nameTextView.setTextSize(18);
+        nameTextView.setTypeface(null, Typeface.BOLD);
+
+        LinearLayout detailsContainer = new LinearLayout(this);
+        detailsContainer.setOrientation(LinearLayout.VERTICAL);
+        detailsContainer.setLayoutParams(new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        ));
+
+        LinearLayout genderRow = new LinearLayout(this);
+        genderRow.setOrientation(LinearLayout.HORIZONTAL);
+        genderRow.setGravity(Gravity.CENTER_VERTICAL);
+        genderRow.setPadding(0, 4, 0, 4);
+
+        TextView genderIcon = new TextView(this);
+        genderIcon.setText("👤");
+        genderIcon.setPadding(0, 0, 8, 0);
+        genderIcon.setTextSize(14);
+
+        TextView genderTextView = new TextView(this);
+
+        String genderText;
+        if ("M".equalsIgnoreCase(member.getGender())) {
+            genderText = getResources().getString(R.string.Male);
+        } else if ("F".equalsIgnoreCase(member.getGender())) {
+            genderText = getResources().getString(R.string.Female);
+        } else {
+            genderText = "N/A";
+        }
+
+        genderTextView.setText(genderText);
+        genderTextView.setTextColor(Color.parseColor("#616161"));
+        genderTextView.setTextSize(14);
+
+        genderRow.addView(genderIcon);
+        genderRow.addView(genderTextView);
+
+        LinearLayout dobRow = new LinearLayout(this);
+        dobRow.setOrientation(LinearLayout.HORIZONTAL);
+        dobRow.setGravity(Gravity.CENTER_VERTICAL);
+        dobRow.setPadding(0, 4, 0, 0);
+
+        TextView dobTextView = new TextView(this);
+        if (member.getDateOfBirth() != null) {
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+            String formattedDate = sdf.format(member.getDateOfBirth());
+            dobTextView.setText(formattedDate);
+        } else {
+            dobTextView.setText("Date non disponible");
+        }
+        dobTextView.setTextColor(Color.parseColor("#616161"));
+        dobTextView.setTextSize(14);
+
+        dobRow.addView(dobTextView);
+
+        detailsContainer.addView(genderRow);
+        detailsContainer.addView(dobRow);
+
+        textLayout.addView(chfidContainer);
+        textLayout.addView(nameTextView);
+        textLayout.addView(detailsContainer);
+
+        memberLayout.addView(memberImageView);
+        memberLayout.addView(textLayout);
+
+        memberLayout.setAlpha(0f);
+        memberLayout.animate()
+                .alpha(1f)
+                .setDuration(300)
+                .setStartDelay(index * 50)
+                .start();
+
+        return memberLayout;
+    }
+
+    private void loadMemberPhoto(ImageView imageView, String photoPath) {
+        try {
+            Bitmap bitmap = BitmapFactory.decodeFile(photoPath);
+            if (bitmap != null) {
+                imageView.setImageBitmap(bitmap);
+            } else {
+                imageView.setImageResource(R.drawable.person);
+            }
+        } catch (Exception e) {
+            imageView.setImageResource(R.drawable.person);
+            Log.e(LOG_TAG, "Error loading member photo", e);
+        }
     }
 
     private void getInsureeInfo() {
@@ -366,6 +726,9 @@ public class Enquire extends ImisActivity {
                     new String[]{"Heading", "Heading1", "SubItem1", "SubItem2", "SubItem3", "SubItem4", "SubItem5", "SubItem6", "SubItem7", "SubItem8", "SubItem9", "SubItem10", "SubItem11", "SubItem12", "SubItem13", "SubItem14"},
                     new int[]{R.id.tvHeading, R.id.tvHeading1, R.id.tvSubItem1, R.id.tvSubItem2, R.id.tvSubItem3, R.id.tvSubItem4, R.id.tvSubItem5, R.id.tvSubItem6, R.id.tvSubItem7, R.id.tvSubItem8, R.id.tvSubItem9, R.id.tvSubItem10, R.id.tvSubItem11, R.id.tvSubItem12, R.id.tvSubItem13, R.id.tvSubItem14}
             );
+
+
+            Log.d("Enquire", "Adapter created with count: " + adapter.getCount());
 
             lv.setAdapter(adapter);
         });
