@@ -159,6 +159,8 @@ public class Enquire extends ImisActivity {
                 return;
             }
 
+            lv.setVisibility(View.VISIBLE);
+
             pd = ProgressDialog.show(Enquire.this, "", getResources().getString(R.string.GetingInsuuree));
             new Thread(() -> {
                 getInsureeInfo();
@@ -169,7 +171,6 @@ public class Enquire extends ImisActivity {
                 pd.dismiss();
             }).start();
 
-            lv.setVisibility(View.VISIBLE);
         });
         btnScan.setOnClickListener(v -> {
             Intent intent = new Intent("com.google.zxing.client.android.SCAN");
@@ -224,7 +225,6 @@ public class Enquire extends ImisActivity {
 
         try {
             Family family = new FetchFamily().execute(parentUuid, "");
-
             if (family == null) {
                 runOnUiThread(() -> {
                     LinearLayout mainContainer = findViewById(R.id.llListView);
@@ -319,7 +319,7 @@ public class Enquire extends ImisActivity {
                                     if (currentFamily != null && currentFamily.getMembers() != null && !currentFamily.getMembers().isEmpty()) {
 
                                         for (Family.Member member : currentFamily.getMembers()) {
-                                            if (member != null) {
+                                            if (member != null && !member.getChfId().equals(parentUuid) && member.isHead()) {
 
                                                 View memberView = createMemberView(member, memberIndex);
                                                 memberView.setOnClickListener(v -> {
@@ -361,8 +361,7 @@ public class Enquire extends ImisActivity {
             }
 
         } catch (Exception e) {
-            ca.ShowDialog(getResources().getString(R.string.UnknownError));
-            showErrorMessage("Erreur lors du chargement des données de la famille");
+            Log.d("WARNING", String.valueOf(e));
         }
     }
 
