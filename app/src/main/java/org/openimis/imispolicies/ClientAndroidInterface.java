@@ -4804,10 +4804,11 @@ public class ClientAndroidInterface {
                 array.put(toPolicyJSONObject(policy));
             }
         }
-        Log.e("policies", array.toString());
         String[] Columns = {"PolicyId", "FamilyId", "EnrollDate", "StartDate", "EffectiveDate", "ExpiryDate", "PolicyStatus",
                 "PolicyValue", "ProdId", "OfficerId", "IsOffline"};
-        sqlHandler.insertData("tblPolicy", Columns, array, "");
+        final String[] policyColumns;
+        policyColumns = Columns;
+        sqlHandler.insertData("tblPolicy", policyColumns, array, "");
     }
 
     @NonNull
@@ -4847,9 +4848,9 @@ public class ClientAndroidInterface {
         policyObject.put("PolicyId",policy.getId());
         policyObject.put("FamilyId",policy.getFamilyId());
         policyObject.put("EnrollDate",policy.getEnrollDate());
-        policyObject.put("StartDate",policy.getStartDate());
-        policyObject.put("EffectiveDate", policy.getEffectiveDate() != null ? DateUtils.toDateString(Objects.requireNonNull(policy.getEffectiveDate())): null);
-        policyObject.put("ExpiryDate", policy.getExpiryDate());
+        policyObject.put("StartDate",DateUtils.toDateString(Objects.requireNonNull(policy.getStartDate())));
+        policyObject.put("EffectiveDate",  DateUtils.toDateString(Objects.requireNonNull(policy.getEffectiveDate())));
+        policyObject.put("ExpiryDate", DateUtils.toDateString(Objects.requireNonNull(policy.getExpiryDate())));
         policyObject.put("PolicyStatus",policy.getStatus());
         policyObject.put("PolicyValue",policy.getValue());
         policyObject.put("ProdId",policy.getProductId());

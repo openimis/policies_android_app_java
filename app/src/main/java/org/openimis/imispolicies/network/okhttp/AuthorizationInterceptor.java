@@ -14,7 +14,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 public class AuthorizationInterceptor implements Interceptor {
-    private static final String USER_AGENT = "mobile_app";
+    private static final String USER_AGENT = "openimis/policies app";
 
     @NonNull
     private final LoginRepository repository;
