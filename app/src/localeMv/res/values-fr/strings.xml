@@ -530,13 +530,13 @@
     <string name="HOFAttached">Le chef de ménage a été attaché avec succès</string>
     <string name="HeadAlreadyAttach">Le chef de ménage est déjà attaché à cette sous-famille</string>
     <string name="NoDisability">Aucun handicap</string>
-    <string name="SelectNoDisability">Sélectionner "Aucun handicap"</string>
+    <string name="SelectNoDisability">Sélectionner incapacité"</string>
    <string name="NonDisablingDisease">Maladie non invalidante</string>
-   <string name="SelectNonDisablingDisease">Sélectionner "Maladie non invalidante"</string>
+   <string name="SelectNonDisablingDisease">Sélectionner maladie"</string>
    <string name="MutualInsuranceCoverage">Couverture d'assurance mutuelle</string>
-   <string name="SelectMutualInsuranceCoverage">Sélectionner "Couverture d'assurance mutuelle"</string>
+   <string name="SelectMutualInsuranceCoverage">Sélectionner couverture</string>
    <string name="HousingType">Type de logement</string>
-    <string name="SelectHousingType">Sélectionner un type de logement</string>
+    <string name="SelectHousingType">Sélectionner logement</string>
     <string name="MonogamousFamilyMember">Membres de la famille du ménage monogame</string>
     <string name="PolygamousHead">Les chefs de ménages des sous-foyers polygamiques</string>
 </resources>
