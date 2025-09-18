@@ -3173,7 +3173,8 @@ public class ClientAndroidInterface {
                 /* confirmationNumber = */ JsonUtils.getStringOrDefault(json, "ConfirmationNo"),
                 /* confirmationType = */ JsonUtils.getStringOrDefault(json, "ConfirmationType"),
                 /* isOffline = */ JsonUtils.getBooleanOrDefault(json, "isOffline", false),
-                /* members = */ members
+                /* members = */ members,
+                null
         );
     }
 
@@ -4722,6 +4723,7 @@ public class ClientAndroidInterface {
                 Family family = new FetchFamily().execute(insuranceNumber);
                 InsertFamilyDataFromOnline(family);
                 InsertInsureeDataFromOnline(family.getMembers());
+                InsertPolicyDataFromOnline(family.getPolicies());
                 return 1;
             } catch (Exception e) {
                 Log.e("MODIFYFAMILY", "Error while downloading a family", e);
@@ -4793,6 +4795,22 @@ public class ClientAndroidInterface {
         sqlHandler.insertData("tblInsuree", Columns, array, "");
     }
 
+    private void InsertPolicyDataFromOnline(@NonNull List<Family.Policy> policies) throws JSONException {
+        JSONArray array = new JSONArray();
+        for (Family.Policy policy: policies) {
+            @Language("SQL")
+            String QueryCheck = "SELECT PolicyId FROM tblPolicy WHERE PolicyId = " + policy.getId();
+            if (sqlHandler.getResult(QueryCheck, null).length() == 0) {
+                array.put(toPolicyJSONObject(policy));
+            }
+        }
+        String[] Columns = {"PolicyId", "FamilyId", "EnrollDate", "StartDate", "EffectiveDate", "ExpiryDate", "PolicyStatus",
+                "PolicyValue", "ProdId", "OfficerId", "IsOffline"};
+        final String[] policyColumns;
+        policyColumns = Columns;
+        sqlHandler.insertData("tblPolicy", policyColumns, array, "");
+    }
+
     @NonNull
     private JSONObject toJSONObject(@NonNull Family.Member member) throws JSONException {
         JSONObject jsonObject = new JSONObject();
@@ -4822,6 +4840,23 @@ public class ClientAndroidInterface {
         jsonObject.put("geoLocation", member.getGeolocation());
         jsonObject.put("curVillage", member.getCurrentVillage());
         return jsonObject;
+    }
+
+    @NonNull
+    private JSONObject toPolicyJSONObject (Family.Policy policy) throws JSONException {
+        JSONObject policyObject = new JSONObject();
+        policyObject.put("PolicyId",policy.getId());
+        policyObject.put("FamilyId",policy.getFamilyId());
+        policyObject.put("EnrollDate",policy.getEnrollDate());
+        policyObject.put("StartDate",DateUtils.toDateString(Objects.requireNonNull(policy.getStartDate())));
+        policyObject.put("EffectiveDate",  DateUtils.toDateString(Objects.requireNonNull(policy.getEffectiveDate())));
+        policyObject.put("ExpiryDate", DateUtils.toDateString(Objects.requireNonNull(policy.getExpiryDate())));
+        policyObject.put("PolicyStatus",policy.getStatus());
+        policyObject.put("PolicyValue",policy.getValue());
+        policyObject.put("ProdId",policy.getProductId());
+        policyObject.put("OfficerId",policy.getOfficerId());
+        policyObject.put("IsOffline",false);
+        return policyObject;
     }
 
     //****************************Online Statistics ******************************//

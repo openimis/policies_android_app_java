@@ -20,6 +20,7 @@ import org.openimis.imispolicies.util.StringUtils;
 
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Objects;
 
 public class FetchFamily {
@@ -52,7 +53,8 @@ public class FetchFamily {
                 /* confirmationNumber = */ node.confirmationNo(),
                 /* confirmationType = */ node.confirmationType() != null ? Objects.requireNonNull(node.confirmationType()).code() : null,
                 /* isOffline = */ node.isOffline() != null ? Objects.requireNonNull(node.isOffline()) : false,
-                /* insurees = */ Mapper.map(node.members().edges(), (edge) -> toMember(edge, node))
+                /* insurees = */ Mapper.map(node.members().edges(), (edge) -> toMember(edge, node)),
+                /* policies = */ Mapper.map(node.policies().edges(), (edge) -> toPolicy(edge, node))
         );
     }
 
@@ -86,6 +88,29 @@ public class FetchFamily {
                 /* photoPath = */ downloadPhoto(member.photo()),
                 /* photoBytes = */ null, // We already saved them on disk, no need to pass them here.
                 /* isOffline = */ member.offline() != null ? Objects.requireNonNull(member.offline()) : false
+        );
+    }
+
+    @NonNull
+    private Family.Policy toPolicy(@NonNull GetFamilyQuery.Edge2 edge, @NonNull GetFamilyQuery.Node family){
+        GetFamilyQuery.Node2 policy = Objects.requireNonNull(edge.node());
+        return new Family.Policy(
+                /* id = */IdUtils.getIdFromGraphQLString(policy.id()),
+                /* uuid = */ policy.uuid(),
+                /* familyId = */ IdUtils.getIdFromGraphQLString(family.id()),
+                /* familyUuid = */ family.uuid(),
+                /* enrollDate = */ policy.enrollDate(),
+                /* startDate = */ policy.startDate(),
+                /* effectiveDate = */ policy.effectiveDate(),
+                /* expiryDate = */ Objects.requireNonNull(policy.expiryDate()),
+                /* status = */ String.valueOf(policy.status()),
+                /* value = */ policy.value(),
+                /* productId = */ IdUtils.getIdFromGraphQLString(policy.product().id()),
+                /* officerId = */ IdUtils.getIdFromGraphQLString(policy.officer().id()),
+                null,
+                true,
+                null,
+                new ArrayList<>()
         );
     }
 
