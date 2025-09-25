@@ -54,6 +54,7 @@ query GetInsureeInquire($chfId: String) {
                                 expiryDate
                                 status
                                 value
+                                validityTo
                             }
                         }
                     }

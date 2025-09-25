@@ -11,6 +11,7 @@ import org.openimis.imispolicies.domain.utils.PhotoUtils;
 import org.openimis.imispolicies.network.request.GetInsureeInquireGraphQLRequest;
 import org.openimis.imispolicies.network.util.Mapper;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -31,6 +32,12 @@ public class FetchInsureeInquire {
     @WorkerThread
     public Insuree execute(@NonNull String chfId) throws Exception {
         GetInsureeInquireQuery.Node node = request.get(chfId);
+        List<GetInsureeInquireQuery.Edge1> policies = new ArrayList<>();
+        for (GetInsureeInquireQuery.Edge1 policy : node.insureePolicies().edges()){
+            if(policy.node().policy().validityTo() == null){
+                policies.add(policy);
+            }
+        }
         return new Insuree(
                 /* chfId = */ Objects.requireNonNull(node.chfId()),
                 /* name = */ node.lastName() + " " + node.otherNames(),
@@ -38,7 +45,7 @@ public class FetchInsureeInquire {
                 /* gender = */ node.gender() != null ? Objects.requireNonNull(node.gender()).gender() : null,
                 /* photoPath = */ getPhotoPath(node.photos()),
                 /* photo = */ getPhotoBytes(node.photos()),
-                /* policies = */ Mapper.map(node.insureePolicies().edges(), this::toPolicy)
+                /* policies = */ Mapper.map(policies, this::toPolicy)
         );
     }
 
