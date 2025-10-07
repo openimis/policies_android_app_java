@@ -63,7 +63,7 @@
                 android:resource="@xml/paths" />
         </provider>
 
-        <meta-data android:name="io.sentry.dsn" android:value="@string/glitchip_dsn" />
+        <meta-data android:name="io.sentry.dsn" android:value="@string/sentry_dsn" />
 
         <activity
             android:name=".MainActivity"
