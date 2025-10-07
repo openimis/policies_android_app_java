@@ -207,7 +207,7 @@ public class Family implements Parcelable {
     @Nullable
     public List<Policy> getPolicies (){ return policies; }
 
-    public static final Creator<Family> CREATOR = new Creator<>() {
+    public static final Creator<Family> CREATOR = new Creator<Family>() {
         @Override
         public Family createFromParcel(Parcel in) {
             return new Family(in);
@@ -259,7 +259,7 @@ public class Family implements Parcelable {
             return language;
         }
 
-        public static final Creator<SMS> CREATOR = new Creator<>() {
+        public static final Creator<SMS> CREATOR = new Creator<SMS>() {
             @Override
             public SMS createFromParcel(Parcel in) {
                 return new SMS(in);
@@ -634,7 +634,7 @@ public class Family implements Parcelable {
             return getLastName() + " " + getOtherNames() + " [" + getChfId() + "]";
         }
 
-        public static final Creator<Member> CREATOR = new Creator<>() {
+        public static final Creator<Member> CREATOR = new Creator<Member>() {
             @Override
             public Member createFromParcel(Parcel in) {
                 return new Member(in);
@@ -855,7 +855,7 @@ public class Family implements Parcelable {
             return premiums;
         }
 
-        public static final Creator<Policy> CREATOR = new Creator<>() {
+        public static final Creator<Policy> CREATOR = new Creator<Policy>() {
             @Override
             public Policy createFromParcel(Parcel in) {
                 return new Policy(in);
@@ -1006,7 +1006,7 @@ public class Family implements Parcelable {
                 return isOffline;
             }
 
-            public static final Creator<Premium> CREATOR = new Creator<>() {
+            public static final Creator<Premium> CREATOR = new Creator<Premium>() {
                 @Override
                 public Premium createFromParcel(Parcel in) {
                     return new Premium(in);

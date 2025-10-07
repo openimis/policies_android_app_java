@@ -52,6 +52,7 @@ android {
         buildConfigField "boolean", "IS_PAYMENT_ENABLED", 'false'
         resValue "string", "app_name_policies", "Policies"
         resValue "string", "ReleaseDateValue", getDate()
+        resValue "string", "glitchip_dsn", "https://3afee255dd9f4b96b0d1b207b1bb5f1b@glitchtip.s2.openimis.org/3"
     }
     buildTypes {
         release {
@@ -192,8 +193,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_11
-        targetCompatibility JavaVersion.VERSION_11
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 
     packagingOptions {
@@ -245,4 +246,5 @@ dependencies {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
     testImplementation 'junit:junit:4.13.2'
+    implementation 'io.sentry:sentry-android:4.2.0'
 }

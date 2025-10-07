@@ -142,7 +142,7 @@ public class PolicyRenewalRequest implements Parcelable {
         return 0;
     }
 
-    public static final Creator<PolicyRenewalRequest> CREATOR = new Creator<>() {
+    public static final Creator<PolicyRenewalRequest> CREATOR = new Creator<PolicyRenewalRequest>() {
         @Override
         public PolicyRenewalRequest createFromParcel(Parcel in) {
             return new PolicyRenewalRequest(in);

@@ -105,7 +105,7 @@ public class Insuree implements Parcelable {
         return policies;
     }
 
-    public static final Creator<Insuree> CREATOR = new Creator<>() {
+    public static final Creator<Insuree> CREATOR = new Creator<Insuree>() {
         @Override
         public Insuree createFromParcel(Parcel in) {
             return new Insuree(in);
