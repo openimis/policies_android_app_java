@@ -53,6 +53,8 @@ public class Policy implements Parcelable {
     private final Integer totalSurgeriesLeft;
     @Nullable
     private final Integer totalVisitsLeft;
+    @Nullable
+    private final Date validityTo;
 
     public Policy(
             @NonNull String code,
@@ -75,7 +77,8 @@ public class Policy implements Parcelable {
             @Nullable Integer totalConsultationsLeft,
             @Nullable Integer totalDeliveriesLeft,
             @Nullable Integer totalSurgeriesLeft,
-            @Nullable Integer totalVisitsLeft
+            @Nullable Integer totalVisitsLeft,
+            @Nullable Date validityTo
     ) {
         this.code = code;
         this.name = name;
@@ -98,6 +101,7 @@ public class Policy implements Parcelable {
         this.totalDeliveriesLeft = totalDeliveriesLeft;
         this.totalSurgeriesLeft = totalSurgeriesLeft;
         this.totalVisitsLeft = totalVisitsLeft;
+        this.validityTo = validityTo;
     }
 
     protected Policy(Parcel in) {
@@ -193,6 +197,11 @@ public class Policy implements Parcelable {
             totalVisitsLeft = null;
         } else {
             totalVisitsLeft = in.readInt();
+        }
+        if (in.readByte() == 0) {
+            validityTo = null;
+        } else {
+            validityTo = new Date(in.readLong());
         }
     }
 
@@ -309,6 +318,12 @@ public class Policy implements Parcelable {
             dest.writeByte((byte) 1);
             dest.writeInt(totalVisitsLeft);
         }
+        if (validityTo == null) {
+            dest.writeByte((byte) 0);
+        } else {
+            dest.writeByte((byte) 1);
+            dest.writeLong(validityTo.getTime());
+        }
     }
 
     @Override
@@ -420,6 +435,9 @@ public class Policy implements Parcelable {
     public Integer getTotalVisitsLeft() {
         return totalVisitsLeft;
     }
+
+    @Nullable
+    public Date getValidityTo() { return validityTo; }
 
     public enum Status {
         IDLE, ACTIVE, SUSPENDED, EXPIRED, READY
