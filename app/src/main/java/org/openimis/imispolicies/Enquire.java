@@ -52,6 +52,7 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
+import android.widget.Button;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
@@ -102,6 +103,9 @@ public class Enquire extends ImisActivity {
     private boolean ZoomOut = false;
     private int orgHeight, orgWidth;
 
+    private boolean isClicked = false;
+
+    private String chfidValue;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -159,16 +163,17 @@ public class Enquire extends ImisActivity {
                 return;
             }
 
-            lv.setVisibility(View.VISIBLE);
-
             pd = ProgressDialog.show(Enquire.this, "", getResources().getString(R.string.GetingInsuuree));
             new Thread(() -> {
                 getInsureeInfo();
             }).start();
 
             new Thread(() -> {
-                getFamilyInfo(etCHFID.getText().toString(), btnGo);
-                pd.dismiss();
+                boolean isMonogamous = getFamilyInfo(etCHFID.getText().toString(), btnGo);
+
+                runOnUiThread(() -> {
+                    pd.dismiss();
+                });
             }).start();
 
         });
@@ -216,13 +221,13 @@ public class Enquire extends ImisActivity {
         tvPolicyStatus.setText(getResources().getString(R.string.EnquirePolicyLabel));
         tvGender.setText(getResources().getString(R.string.Gender));
         iv.setImageResource(R.drawable.person);
-        ll.setVisibility(View.INVISIBLE);
         PolicyList.clear();
+        ll.setVisibility(View.INVISIBLE);
+        lv.setVisibility(View.INVISIBLE);
         lv.setAdapter(null);
     }
 
-    private void getFamilyInfo(String parentUuid, ImageButton btnGo) {
-
+    private boolean getFamilyInfo(String parentUuid, ImageButton btnGo) {
         try {
             Family family = new FetchFamily().execute(parentUuid, "");
             if (family == null) {
@@ -239,13 +244,12 @@ public class Enquire extends ImisActivity {
                         mainContainer.setVisibility(View.VISIBLE);
                     }
                 });
-                return;
+                return false;
             }
 
-            // Traitement des familles de type "H"
+            // Traitement des familles de type "H" (Monogame)
             if (Objects.equals(family.getType(), "H")) {
                 if (family.getMembers() != null && !family.getMembers().isEmpty()) {
-
                     runOnUiThread(() -> {
                         try {
                             LinearLayout mainContainer = findViewById(R.id.llListView);
@@ -253,6 +257,8 @@ public class Enquire extends ImisActivity {
                                 Log.e(LOG_TAG, "llListView non trouvé dans le layout !");
                                 return;
                             }
+
+                            lv.setVisibility(View.VISIBLE);
 
                             mainContainer.removeAllViews();
                             mainContainer.setVisibility(View.VISIBLE);
@@ -265,18 +271,18 @@ public class Enquire extends ImisActivity {
                             typeTextView.setPadding(16, 16, 16, 16);
                             mainContainer.addView(typeTextView);
 
+                            if (this.isClicked){
+                                mainContainer.addView(createReturnButton(mainContainer));
+                            }
+
                             for (int i = 0; i < family.getMembers().size(); i++) {
                                 Family.Member member = family.getMembers().get(i);
                                 if (member != null) {
-                                    if (member.getChfId() != null && member.getChfId().equals(parentUuid)) {
-                                        continue;
-                                    }
 
                                     View memberView = createMemberView(member, i);
                                     mainContainer.addView(memberView);
                                 }
                             }
-
                         } catch (Exception e) {
                             showErrorMessage("Erreur lors de l'affichage des membres");
                         }
@@ -284,14 +290,14 @@ public class Enquire extends ImisActivity {
                 } else {
                     showNoMembersMessage("Aucun membre trouvé dans cette famille");
                 }
+                return true; // Monogame
             }
-            // Traitement des familles de type "P" (Polygamous)
+            // Traitement des familles de type "P" (Polygame)
             else if (Objects.equals(family.getType(), "P")) {
                 try {
                     List<Family> polygamousFamilies = new FetchSubFamilies().execute(family.getUuid());
 
                     if (polygamousFamilies != null && !polygamousFamilies.isEmpty()) {
-
                         runOnUiThread(() -> {
                             try {
                                 LinearLayout mainContainer = findViewById(R.id.llListView);
@@ -317,18 +323,18 @@ public class Enquire extends ImisActivity {
                                     Family currentFamily = polygamousFamilies.get(familyIndex);
 
                                     if (currentFamily != null && currentFamily.getMembers() != null && !currentFamily.getMembers().isEmpty()) {
-
                                         for (Family.Member member : currentFamily.getMembers()) {
                                             if (member != null && !member.getChfId().equals(parentUuid) && member.isHead()) {
-
                                                 View memberView = createMemberView(member, memberIndex);
                                                 memberView.setOnClickListener(v -> {
                                                     ClearForm();
+                                                    this.isClicked = true;
                                                     ProgressDialog pd = ProgressDialog.show(Enquire.this, "", getResources().getString(R.string.GetingInsuuree));
                                                     new Thread(() -> {
                                                         try {
                                                             runOnUiThread(() -> {
                                                                 etCHFID.setText(member.getChfId());
+                                                                this.chfidValue = parentUuid;
                                                                 btnGo.performClick();
                                                             });
                                                         } finally {
@@ -338,7 +344,6 @@ public class Enquire extends ImisActivity {
                                                 });
 
                                                 mainContainer.addView(memberView);
-
                                                 memberIndex++;
                                             }
                                         }
@@ -351,17 +356,19 @@ public class Enquire extends ImisActivity {
                             }
                         });
                     } else {
-                        showNoMembersMessage("Aucune famille polygame trouvée");
                     }
                 } catch (Exception e) {
                     showErrorMessage("Erreur lors du chargement des familles polygames");
                 }
+                return false; // Polygame
             } else {
                 showNoMembersMessage("Type de famille non pris en charge: " + family.getType());
+                return false; // Type inconnu
             }
 
         } catch (Exception e) {
             Log.d("WARNING", String.valueOf(e));
+            return false;
         }
     }
 
@@ -383,6 +390,46 @@ public class Enquire extends ImisActivity {
                 Log.e(LOG_TAG, "Erreur lors de l'affichage du message d'erreur: " + e.getMessage(), e);
             }
         });
+    }
+
+    private Button createReturnButton(LinearLayout mainContainer) {
+        Button btnRetour = new Button(this);
+        btnRetour.setText("← Retour");
+        btnRetour.setTextColor(Color.WHITE);
+        btnRetour.setTextSize(16);
+        btnRetour.setTypeface(null, Typeface.BOLD);
+
+        LinearLayout.LayoutParams btnParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        btnParams.setMargins(16, 8, 16, 16);
+        btnRetour.setLayoutParams(btnParams);
+
+        GradientDrawable btnBackground = new GradientDrawable();
+        btnBackground.setColor(Color.parseColor("#1976D2"));
+        btnBackground.setCornerRadius(8f);
+        btnRetour.setBackground(btnBackground);
+        btnRetour.setPadding(40, 20, 40, 20);
+
+        btnRetour.setOnClickListener(v -> {
+            // Réinitialiser isClicked
+            this.isClicked = false;
+            etCHFID.setText(this.chfidValue);
+
+            // Cacher le container
+            ClearForm();
+            mainContainer.removeAllViews();
+            mainContainer.setVisibility(View.INVISIBLE);
+
+            // Re-cliquer sur le bouton Go pour recharger la famille originale
+            ImageButton btnGo = findViewById(R.id.btnGo);
+            if (btnGo != null) {
+                btnGo.performClick();
+            }
+        });
+
+        return btnRetour;
     }
 
     private void showNoMembersMessage(String message) {
