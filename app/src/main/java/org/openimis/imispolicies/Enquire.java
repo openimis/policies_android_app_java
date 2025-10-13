@@ -394,7 +394,7 @@ public class Enquire extends ImisActivity {
 
     private Button createReturnButton(LinearLayout mainContainer) {
         Button btnRetour = new Button(this);
-        btnRetour.setText("← Retour");
+        btnRetour.setText("Revenir à la famille de base");
         btnRetour.setTextColor(Color.WHITE);
         btnRetour.setTextSize(16);
         btnRetour.setTypeface(null, Typeface.BOLD);
