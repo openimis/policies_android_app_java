@@ -6431,12 +6431,7 @@ public class ClientAndroidInterface {
     @JavascriptInterface
     @SuppressWarnings("unused")
     public boolean isValidPeriodicity(String CpCode, String Periodicity) {
-        if(CpCode.equals("AMOS1") || CpCode.equals("AMOS2") || CpCode.equals("AMOS3") || CpCode.equals("AMOS4")){
-            if(Periodicity.equals("M")){
-                ShowDialog(activity.getResources().getString(R.string.invalidPeriodicity) + " Trimestrielle");
-                return false;
-            }
-        } else if(CpCode.equals("AMS")){
+        if(CpCode.equals("AMS")){
             if(!Periodicity.equals("Y")){
                 ShowDialog(activity.getResources().getString(R.string.invalidPeriodicity) + " Annuelle");
                 return false;

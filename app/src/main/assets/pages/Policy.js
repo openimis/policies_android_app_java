@@ -99,12 +99,10 @@ $(document).ready(function () {
 
     $('#ddlContributionPlan').change(function() {
         var ContributionPlanCode = Android.getCPCode($('#ddlContributionPlan').val());
-        if(ContributionPlanCode == "AMOG" || ContributionPlanCode == "AMOE" || ContributionPlanCode == "AMOS"){
-            $('#ddlPeriodicity').val("M")
-        } else if(ContributionPlanCode == "AMOS1" || ContributionPlanCode == "AMOS2" || ContributionPlanCode == "AMOS3" || ContributionPlanCode == "AMOS4"){
-            $('#ddlPeriodicity').val("Q")
-        } else if(ContributionPlanCode == "AMS"){
+        if(ContributionPlanCode == "AMS"){
             $('#ddlPeriodicity').val("Y")
+        } else {
+            $('#ddlPeriodicity').val("M")
         }
     });
 
