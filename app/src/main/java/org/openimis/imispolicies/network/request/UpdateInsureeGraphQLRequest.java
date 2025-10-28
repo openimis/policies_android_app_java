@@ -27,7 +27,25 @@ public class UpdateInsureeGraphQLRequest extends BaseGraphQLRequest {
         ) throws Exception {
         java.sql.Date date = new java.sql.Date(System.currentTimeMillis());
         
-
+        // Log des informations de l'assuré avant la mise à jour
+        Log.d("UpdateInsuree", "Mise à jour de l'assuré - CHID: " + member.getChfId());
+        Log.d("UpdateInsuree", "Nom: " + member.getLastName() + ", Prénoms: " + member.getOtherNames());
+        Log.d("UpdateInsuree", "Date de naissance: " + member.getDateOfBirth() + ", Genre: " + member.getGender());
+        Log.d("UpdateInsuree", "Téléphone: " + member.getPhone() + ", Email: " + member.getEmail());
+        Log.d(
+            "UpdateInsuree", 
+            "Type d'ID: " + member.getTypeOfId() + ", N° d'identification: " + member.getIdentificationNumber()
+        );
+        Log.d(
+            "UpdateInsuree", 
+            "Membre chef de famille: " + member.isHead() + ", Carte émise: " + member.isCardIssued()
+        );
+        Log.d(
+            "UpdateInsuree", 
+            "Profession: " + member.getProfession() + ", Éducation: " + member.getEducation()
+        );
+        
+        try {
         Response<UpdateInsureeMutation.Data> response = makeSynchronous(new UpdateInsureeMutation(
                 UpdateInsureeMutationInput.builder()
                         .clientMutationId("Update insuree '" + member.getChfId() + "'") 
@@ -76,11 +94,14 @@ public class UpdateInsureeGraphQLRequest extends BaseGraphQLRequest {
                         )
                         .build()
         ));
-        return Objects.requireNonNull(
-                Objects.requireNonNull(
-                                Objects.requireNonNull(response.getData(), "data is null")
-                                        .updateInsuree(), "update insuree is null")
-                        .clientMutationId(), "clientMutationId is null");
+        String mutationId = response.getData().updateInsuree().clientMutationId();
+        Log.d("UpdateInsuree", "Mise à jour réussie - ID de mutation: " + mutationId);
+        return mutationId;
+        } catch (Exception e) {
+            Log.e("UpdateInsuree", "Erreur lors de la mise à jour de l'assuré " + 
+                (member != null ? member.getChfId() : "inconnu"), e);
+            throw e;
+        }
     }
     
     /**
@@ -110,21 +131,19 @@ public class UpdateInsureeGraphQLRequest extends BaseGraphQLRequest {
     private Integer parseIntegerSafely(String value, String fieldName, String chfId) {
         try {
             if (value == null) {
-                Log.w("UpdateInsuree", "[GRAPHQL][" + chfId + "] " + fieldName + " is null, sending null to server");
+                Log.w("UpdateInsuree", "[" + chfId + "] " + fieldName + " is null, sending null to server");
                 return null;
             }
             
             if (value.trim().isEmpty() || value.equals("0")) {
-                Log.w("UpdateInsuree", "[GRAPHQL][" + chfId + "] " + fieldName + " is empty or zero (" + value + "), sending null to server");
+                Log.w("UpdateInsuree", "[" + chfId + "] " + fieldName + " is empty or zero (" + value + "), sending null to server");
                 return null;
             }
             
-            Integer result = Integer.parseInt(value.trim());
-    
-            return result;
+            return Integer.parseInt(value.trim());
             
         } catch (NumberFormatException e) {
-            Log.e("UpdateInsuree", "[GRAPHQL][" + chfId + "] Failed to parse " + fieldName + " value: '" + value + "' - sending null to server", e);
+            Log.e("UpdateInsuree", "[" + chfId + "] Failed to parse " + fieldName + " value: '" + value + "' - sending null to server", e);
             return null;
         }
     }
