@@ -647,6 +647,22 @@ public class SQLHandler extends SQLiteOpenHelper {
                 mDatabase.execSQL("ALTER TABLE tblInsuree ADD COLUMN NoDisability NUMERIC");
             }
             
+            // Add missing location columns
+            if (!columnExists(mDatabase, "tblInsuree", "CurDistrict")) {
+                mDatabase.execSQL("ALTER TABLE tblInsuree ADD COLUMN CurDistrict NUMERIC");
+                Log.d("Database", "Added missing column: CurDistrict to tblInsuree");
+            }
+            
+            if (!columnExists(mDatabase, "tblInsuree", "CurWard")) {
+                mDatabase.execSQL("ALTER TABLE tblInsuree ADD COLUMN CurWard NUMERIC");
+                Log.d("Database", "Added missing column: CurWard to tblInsuree");
+            }
+            
+            if (!columnExists(mDatabase, "tblInsuree", "CurRegion")) {
+                mDatabase.execSQL("ALTER TABLE tblInsuree ADD COLUMN CurRegion NUMERIC");
+                Log.d("Database", "Added missing column: CurRegion to tblInsuree");
+            }
+            
             if (!columnExists(mDatabase, "tblInsuree", "NonDisablingDisease")) {
                 mDatabase.execSQL("ALTER TABLE tblInsuree ADD COLUMN NonDisablingDisease NUMERIC");
             }
@@ -975,6 +991,10 @@ public class SQLHandler extends SQLiteOpenHelper {
         openDatabase();
         int rowsUpdated = 0;
         try {
+            // Ensure tblInsuree has required columns before updating
+            if ("tblInsuree".equals(tableName)) {
+                ensureInsureeTableHasRequiredColumns();
+            }
             openDatabase();
             rowsUpdated = mDatabase.update(tableName, contentValues, whereClause, whereArgs);
             if (throwOnNoRowsUpdated && rowsUpdated <= 0) {
