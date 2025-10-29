@@ -74,13 +74,16 @@ jobs:
         run: |
           gradle --version
 
-      - name: Edit GitHub Release
-        uses: ncipollo/release-action@v1
+      - name: Edit existing comores release
+        uses: softprops/action-gh-release@v1
         with:
-          token: ${{ secrets.GITHUB_TOKEN }} # Uses the default GitHub token for authentication
-          tag: ${{ github.event.inputs.release_tag }} # Sets the release tag to the pushed tag name (e.g., v1.0.0)
+          tag_name: ${{ github.event.inputs.release_tag }} # Sets the release tag to the pushed tag name (e.g., v1.0.0)
           name: ${{ github.event.inputs.app_version }} # Sets the release name to the pushed tag name (e.g., Release v1.0.0)
-          body: ${{ github.event.inputs.release_note }}
+          body: ${{ github.event.inputs.release_notes }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: actions/upload-artifact@v4
         with:
