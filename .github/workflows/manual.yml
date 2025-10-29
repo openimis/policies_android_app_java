@@ -87,7 +87,7 @@ jobs:
           name: ${{ github.event.inputs.app_version }} # Sets the release name to the pushed tag name (e.g., Release v1.0.0)
           body: |
             ${{ github.event.inputs.release_notes }}
-          artifacts: ./app/build/outputs/**/*.apk
+          files: ./app/build/outputs/**/*.apk
           draft: false
           prerelease: false
         env:
