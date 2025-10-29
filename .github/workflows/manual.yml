@@ -65,9 +65,9 @@ jobs:
         run: |
           ./gradlew assembleComoresDevDebug --stacktrace
         env:
-          API_BASE_URL: "${{ github.event.inputs.api_base_url }}"
-          app_name_policies: "${{ github.event.inputs.app_name }}"
-          release_tag: "${{ github.event.inputs.release_tag }}"
+          API_BASE_URL: ${{ github.event.inputs.api_base_url }}
+          app_name_policies: ${{ github.event.inputs.app_name }}
+          release_tag: ${{ github.event.inputs.release_tag }}
 
       - name: Environment info
         run: |
