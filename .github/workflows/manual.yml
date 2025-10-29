@@ -22,7 +22,7 @@ on:
       release_notes:
         description: Release notes
         required: true
-        default: Release notes
+        default: Correction des bugs et amélioration des performances
 # Branch is chosen by default in github manual actions
 
 jobs:
@@ -57,6 +57,9 @@ jobs:
           gradle --version
           echo url ${{ github.event.inputs.api_base_url }}
           echo app name ${{ github.event.inputs.app_name }}
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
 
       - name: build
         run: |
