@@ -74,21 +74,24 @@ jobs:
         run: |
           gradle --version
 
+      - uses: actions/upload-artifact@v4
+        with:
+          name: app-comoresDev-debug.apk
+          path: ./app/build/outputs/**/*.apk
+          overwrite: true
+
       - name: Edit existing comores release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ github.event.inputs.release_tag }} # Sets the release tag to the pushed tag name (e.g., v1.0.0)
           name: ${{ github.event.inputs.app_version }} # Sets the release name to the pushed tag name (e.g., Release v1.0.0)
-          body: ${{ github.event.inputs.release_notes }}
+          body: |
+            ${{ github.event.inputs.release_notes }}
+          artifacts: ./app/build/outputs/**/*.apk
           draft: false
           prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: app-comoresDev-debug.apk
-          path: ./releases/download/${{ github.event.inputs.release_tag }}/*.apk
 
 #      - name: build
 #        run: |
