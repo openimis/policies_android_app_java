@@ -6,22 +6,22 @@ on:
       api_base_url:
         description: URL of the REST API
         required: true
-        default: https://test.amg.km/rest/
+        default: ${env.API_BASE_URL}
       app_name:
-        description: Name of the application
+        description: Application name
         required: true
-        default: Policies Comores Test
+        default: ${env.APP_NAME}
       app_version:
         description: Version of the application
         required: true
-        default: 1.0.0
+        default: ${env.VERSION_NAME}
       release_tag:
         description: Tag for application update
         required: true
-        default: comores-test
+        default: ${env.RELEASE_TAG}
       release_notes:
         description: Release notes
-        required: true
+        required: false
         default: Correction des bugs et amélioration des performances
 # Branch is chosen by default in github manual actions
 
@@ -87,7 +87,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: app-comoresDev-debug
+          name: app-comoresDev-debug.apk
           path: ./releases/download/${{ github.event.inputs.release_tag }}/*.apk
 
 #      - name: build
