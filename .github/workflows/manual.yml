@@ -68,19 +68,19 @@ jobs:
           API_BASE_URL: "${{ github.event.inputs.api_base_url }}"
           app_name_policies: "${{ github.event.inputs.app_name }}"
           release_tag: "${{ github.event.inputs.release_tag }}"
-          versionName: "${{ github.event.inputs.app_version }}"
 
       - name: Environment info
         run: |
           gradle --version
 
-      - uses: actions/upload-artifact@v4
+      - name: Generate apk
+        uses: actions/upload-artifact@v4
         with:
           name: app-comoresDev-debug.apk
           path: ./app/build/outputs/**/*.apk
           overwrite: true
 
-      - name: Edit existing comores release
+      - name: Copy app to the release ${{ github.event.inputs.release_tag }}
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ github.event.inputs.release_tag }} # Sets the release tag to the pushed tag name (e.g., v1.0.0)
