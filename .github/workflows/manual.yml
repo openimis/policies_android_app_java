@@ -6,19 +6,19 @@ on:
       api_base_url:
         description: URL of the REST API
         required: true
-        default: ${API_BASE_URL}
+        default: https://dev.amg.km/
       app_name:
         description: Application name
         required: true
-        default: ${app_name_policies}
+        default: Policies Comores Dev
       app_version:
         description: Version of the application
         required: true
-        default: ${versionName}
+        default: 1.0.0
       release_tag:
         description: Tag for application update
         required: true
-        default: ${release_tag}
+        default: comores-dev
       release_notes:
         description: Release notes
         required: false
