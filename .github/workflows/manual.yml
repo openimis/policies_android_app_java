@@ -66,7 +66,7 @@ jobs:
         run: chmod +x ./gradlew
 
       # Create APK Debug
-      - name: Build Comores debug project
+      - name: Build project
         run: ./gradlew assembleComoresDevDebug
         env:
           API_BASE_URL: ${{ github.event.inputs.api_base_url }}
@@ -78,21 +78,21 @@ jobs:
 #          gradle --version
 
       # Upload Artifact Build
-      - name: Upload APK Debug - ${{ env.comoresDevDebug }}
+      - name: Upload APK file
         uses: actions/upload-artifact@v4
         with:
           name: app-comoresDev-debug
-          path: ./app/build/outputs/apk/*.apk
+          path: ./app/build/outputs/**/*.apk
           overwrite: true
 
-      - name: Copy app to the release ${{ github.event.inputs.release_tag }}
+      - name: Edit release ${{ github.event.inputs.release_tag }}
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ github.event.inputs.release_tag }} # Sets the release tag to the pushed tag name (e.g., v1.0.0)
           name: ${{ github.event.inputs.app_version }} # Sets the release name to the pushed tag name (e.g., Release v1.0.0)
           body: |
             ${{ github.event.inputs.release_notes }}
-          files: ./app/build/outputs/apk/*.apk
+          files: ./app/build/outputs/**/*.apk
           draft: false
           prerelease: false
         env:
