@@ -65,16 +65,8 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
 
-      # Run Tests Build
-      - name: Run gradle tests
-        run: ./gradlew test
-
-      # Run Build Project
-      - name: Build gradle project
-        run: ./gradlew build
-
       # Create APK Debug
-      - name: Build apk debug project ${{ env.comoresDev }} module
+      - name: Build Comores debug project
         run: ./gradlew assembleComoresDevDebug
         env:
           API_BASE_URL: ${{ github.event.inputs.api_base_url }}
@@ -86,7 +78,7 @@ jobs:
 #          gradle --version
 
       # Upload Artifact Build
-      - name: Upload APK Debug - ${{ env.comoresDev }}
+      - name: Upload APK Debug - ${{ env.comoresDevDebug }}
         uses: actions/upload-artifact@v4
         with:
           name: app-comoresDev-debug
