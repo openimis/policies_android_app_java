@@ -7,6 +7,22 @@ on:
         description: URL of the REST API
         required: true
         default: https://test.amg.km/rest/
+      app_name:
+        description: Name of the application
+        required: true
+        default: Policies Comores Test
+      app_version:
+        description: Version of the application
+        required: true
+        default: 1.0.0
+      release_tag:
+        description: Tag for application update
+        required: true
+        default: comores-test
+      release_notes:
+        description: Release notes
+        required: true
+        default: Release notes
 # Branch is chosen by default in github manual actions
 
 jobs:
@@ -47,15 +63,26 @@ jobs:
           ./gradlew assembleComoresDevDebug --stacktrace
         env:
           API_BASE_URL: "${{ github.event.inputs.api_base_url }}"
+          app_name_policies: "${{ github.event.inputs.app_name }}"
+          release_tag: "${{ github.event.inputs.release_tag }}"
+          versionName: "${{ github.event.inputs.app_version }}"
 
       - name: Environment info
         run: |
           gradle --version
 
+      - name: Edit GitHub Release
+        uses: ncipollo/release-action@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }} # Uses the default GitHub token for authentication
+          tag: ${{ github.event.inputs.release_tag }} # Sets the release tag to the pushed tag name (e.g., v1.0.0)
+          name: ${{ github.event.inputs.app_version }} # Sets the release name to the pushed tag name (e.g., Release v1.0.0)
+          body: ${{ github.event.inputs.release_note }}
+
       - uses: actions/upload-artifact@v4
         with:
-          name: policies-comores-apk-${{github.run_number}}.apk
-          path: ./app/build/outputs/**/*.apk
+          name: app-comoresDev-debug
+          path: ./releases/download/${{ github.event.inputs.release_tag }}/*.apk
 
 #      - name: build
 #        run: |
