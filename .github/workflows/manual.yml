@@ -6,7 +6,7 @@ on:
       api_base_url:
         description: URL of the REST API
         required: true
-        default: ${env.API_BASE_URL}
+        default: ${{ env.API_BASE_URL }}
       app_name:
         description: Application name
         required: true
