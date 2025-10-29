@@ -6,19 +6,19 @@ on:
       api_base_url:
         description: URL of the REST API
         required: true
-        default: ${{ env.API_BASE_URL }}
+        default: ${API_BASE_URL}
       app_name:
         description: Application name
         required: true
-        default: ${env.APP_NAME}
+        default: ${app_name_policies}
       app_version:
         description: Version of the application
         required: true
-        default: ${env.VERSION_NAME}
+        default: ${versionName}
       release_tag:
         description: Tag for application update
         required: true
-        default: ${env.RELEASE_TAG}
+        default: ${release_tag}
       release_notes:
         description: Release notes
         required: false
