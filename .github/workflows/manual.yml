@@ -6,8 +6,7 @@ on:
       api_base_url:
         description: URL of the REST API
         required: true
-        default: BuildConfig.API_BASE_URL
-      application_id:
+        default: ${{ secrets.API_BASE_URL }}
       app_name:
         description: Application name
         required: true
