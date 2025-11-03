@@ -94,7 +94,7 @@ jobs:
 
       # Run Tests Build
       - name: Run gradle tests
-        run: ./gradlew cliDebugUnitTest
+        run: ./gradlew testCliDebugUnitTest
 
       - uses: actions/upload-artifact@v4
         with:

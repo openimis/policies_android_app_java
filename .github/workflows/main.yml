@@ -34,7 +34,7 @@ jobs:
           ./gradlew assembleDemoProdDebug --stacktrace
 
       - name: Run gradle tests
-        run: ./gradlew demoProdDebugUnitTest
+        run: ./gradlew testDemoProdDebugUnitTest
 
       - name: Environment info
         run: |
