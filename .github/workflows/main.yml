@@ -12,10 +12,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Setup JDK 17
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
           java-version: '17'
@@ -31,7 +31,10 @@ jobs:
 
       - name: build
         run: |
-          ./gradlew assembleDebug --stacktrace
+          ./gradlew assembleDemoProdDebug --stacktrace
+
+      - name: Run gradle tests
+        run: ./gradlew testDemoProdDebugUnitTest
 
       - name: Environment info
         run: |
@@ -44,7 +47,7 @@ jobs:
 
       - name: build
         run: |
-          ./gradlew bundleDebug --stacktrace
+          ./gradlew bundleDemoProdDebug --stacktrace
 
       - name: Environment info
         run: |
