@@ -53,7 +53,10 @@ public class Login {
 
     @WorkerThread
     public void execute(@NonNull String username, @NonNull String password) throws Exception {
-        String officerCode = Global.getGlobal().getOfficerCode();
+        String officerCode = (Global.getGlobal().getOfficerCode() != null)
+                ? Global.getGlobal().getOfficerCode()
+                : username;
+
         if (officerCode == null) {
             throw new IllegalStateException("OfficerCode should not be null on login");
         }
