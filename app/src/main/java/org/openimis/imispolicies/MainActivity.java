@@ -307,7 +307,14 @@ public class MainActivity extends AppCompatActivity
         OfficerName = headerview.findViewById(R.id.tvOfficerName);
 
         Login.setOnClickListener(v -> {
-            wv.loadUrl("file:///android_asset/pages/Login.html?s=3");
+            if(ca.isLoggedIn()) {
+                global.setOfficerCode("");
+                global.setOfficerName("");
+                ca.Logout();
+            }
+            Intent intent = new Intent(this, Signing.class);
+            intent.putExtra("page", 3);
+            startActivity(intent);
             drawer.closeDrawer(GravityCompat.START);
             SetLoggedIn();
         });
@@ -742,7 +749,10 @@ public class MainActivity extends AppCompatActivity
                 Intent intent = new Intent(this, Enquire.class);
                 startActivity(intent);
             } else {
-                wv.loadUrl("file:///android_asset/pages/Login.html?s=5");
+                Intent intent = new Intent(this, Signing.class);
+                intent.putExtra("page", 5);
+                startActivity(intent);
+                //wv.loadUrl("file:///android_asset/pages/Login.html?s=5");
             }
         } else if (id == R.id.nav_payment) {
             ClientAndroidInterface ca = new ClientAndroidInterface(this);

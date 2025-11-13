@@ -482,4 +482,6 @@
     <string name="pay_type_cash">Cash</string>
     <string name="pay_type_mobile_phone">Téléphone portable</string>
     <string name="pay_type_bank_transfer">Virement banquaire</string>
+    <string name="fieldRequired">Champs requis</string>
+    <string name="connecting">Connexion</string>
 </resources>

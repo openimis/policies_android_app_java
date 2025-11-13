@@ -49,6 +49,10 @@
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning"
         tools:replace="android:icon,android:label">
+        <activity
+            android:name=".Signing"
+            android:exported="false" />
+
         <service
             android:name=".ControlNumberService"
             android:exported="false" />
