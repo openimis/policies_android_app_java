@@ -4852,9 +4852,12 @@ public class ClientAndroidInterface {
         policyObject.put("PolicyId",policy.getId());
         policyObject.put("FamilyId",policy.getFamilyId());
         policyObject.put("EnrollDate",policy.getEnrollDate());
-        policyObject.put("StartDate",DateUtils.toDateString(Objects.requireNonNull(policy.getStartDate())));
-        policyObject.put("EffectiveDate",  DateUtils.toDateString(Objects.requireNonNull(policy.getEffectiveDate())));
-        policyObject.put("ExpiryDate", DateUtils.toDateString(Objects.requireNonNull(policy.getExpiryDate())));
+        policyObject.put("StartDate",
+            policy.getStartDate() != null ? DateUtils.toDateString(policy.getStartDate()) : JSONObject.NULL);
+        policyObject.put("EffectiveDate",
+            policy.getEffectiveDate() != null ? DateUtils.toDateString(policy.getEffectiveDate()) : JSONObject.NULL);
+        policyObject.put("ExpiryDate",
+            policy.getExpiryDate() != null ? DateUtils.toDateString(policy.getExpiryDate()) : JSONObject.NULL);
         policyObject.put("PolicyStatus",policy.getStatus());
         policyObject.put("PolicyValue",policy.getValue());
         policyObject.put("ProdId",policy.getProductId());
