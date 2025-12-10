@@ -218,6 +218,14 @@ apollo {
     ]
 }
 
+tasks.withType(Test).configureEach {
+    testLogging {
+        events "passed", "skipped", "failed"
+        exceptionFormat "full"
+        showStandardStreams = false
+    }
+}
+
 dependencies {
     implementation fileTree(include: ['*.jar', '*.aar'], dir: 'libs')
     implementation 'com.squareup.okhttp3:okhttp:4.11.0'
