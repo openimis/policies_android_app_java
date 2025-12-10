@@ -233,6 +233,7 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'com.google.android.material:material:1.10.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    //noinspection GradleDependency
     implementation 'com.squareup.picasso:picasso:2.8'
     implementation 'commons-io:commons-io:2.11.0'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
@@ -244,7 +245,7 @@ dependencies {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
 
-    // Tests unitaires
+    // unit tests
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.mockito:mockito-core:5.5.0'
     testImplementation 'org.robolectric:robolectric:4.11.1'
