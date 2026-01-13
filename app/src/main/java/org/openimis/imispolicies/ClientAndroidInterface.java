@@ -2546,10 +2546,14 @@ public class ClientAndroidInterface {
         return 1;//Update Success
     }
 
+    protected ProgressDialog createProgressDialog(String title, String message) {
+        return ProgressDialog.show(activity, title, message);
+    }
+
     @JavascriptInterface
     @SuppressWarnings("unused")
     public void uploadEnrolment() throws Exception {
-        final ProgressDialog finalPd = ProgressDialog.show(activity, activity.getResources().getString(R.string.Sync), activity.getResources().getString(R.string.SyncProcessing));
+        final ProgressDialog finalPd = createProgressDialog(activity.getResources().getString(R.string.Sync), activity.getResources().getString(R.string.SyncProcessing));
         activity.runOnUiThread(() -> {
             activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         });
@@ -2798,7 +2802,7 @@ public class ClientAndroidInterface {
         return result;
     }
 
-    private int Enrol(int CallerId) throws UserException, JSONException, IOException {
+    protected int Enrol(int CallerId) throws UserException, JSONException, IOException {
         ArrayList<String> verifiedId = new ArrayList<>();
         myList.clear();
         int rtEnrolledId = 0;
@@ -3129,7 +3133,7 @@ public class ClientAndroidInterface {
         return EnrolResult;
     }
 
-    private int uploadEnrols(
+    protected int uploadEnrols(
             @NonNull JSONArray familyArray,
             @NonNull JSONArray insureesArray,
             @NonNull JSONArray policiesArray,
@@ -3578,7 +3582,7 @@ public class ClientAndroidInterface {
         }
     }
 
-    private void DeleteUploadedData(final int FamilyId, ArrayList<String> FamilyIDs, int CallerId) {
+    protected void DeleteUploadedData(final int FamilyId, ArrayList<String> FamilyIDs, int CallerId) {
         if (FamilyIDs.size() == 0) {
             FamilyIDs = new ArrayList<>() {{
                 add(String.valueOf(FamilyId));
