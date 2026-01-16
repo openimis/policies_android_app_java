@@ -5,7 +5,10 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import org.openimis.imispolicies.tools.StorageManager;
+import org.openimis.imispolicies.domain.entity.Family;
+import org.openimis.imispolicies.domain.entity.Policy;
 import org.robolectric.RobolectricTestRunner;
+import org.openimis.imispolicies.network.exception.HttpException;
 
 import android.app.Activity;
 import android.content.res.Resources;
@@ -27,10 +30,14 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.shadows.ShadowLooper;
 
 import android.app.ProgressDialog;
+import android.app.AlertDialog;
 import android.view.WindowManager;
 
 import java.util.HashMap;
 import java.util.ArrayList;
+import java.net.HttpURLConnection;
+import java.util.List;
+import java.util.Date;
 
 
 @RunWith(RobolectricTestRunner.class)
@@ -42,6 +49,7 @@ public class ClientAndroidInterfaceTest {
     @Mock Resources resources;
     @Mock StorageManager storageManager;
     @Mock ProgressDialog progressDialog;
+    @Mock AlertDialog alertDialog;
 
     ClientAndroidInterface client;
 
@@ -438,4 +446,167 @@ public class ClientAndroidInterfaceTest {
 
         return map;
     }
+
+    @Test
+    public void testModifyFamily_ShouldImportFamilyInsureesAndPolicies() throws Exception {
+
+        ClientAndroidInterface spyClient = spy(client);
+
+        String chfId = "CHF123456";
+
+        when(sqlHandler.getCount(
+                eq("tblInsuree"),
+                eq("Trim(CHFID) = ?"),
+                eq(new String[]{chfId})
+        )).thenReturn(0);
+
+        // Mock Family
+        Family mockFamily = mock(Family.class);
+        when(mockFamily.getUuid()).thenReturn("uuid-family");
+        when(mockFamily.getId()).thenReturn(1);
+        when(mockFamily.getLocationId()).thenReturn(1);
+        when(mockFamily.isPoor()).thenReturn(false);
+        when(mockFamily.isOffline()).thenReturn(false);
+        when(mockFamily.getType()).thenReturn("N");
+        when(mockFamily.getAddress()).thenReturn("ADDR");
+        when(mockFamily.getEthnicity()).thenReturn("ETH");
+        when(mockFamily.getConfirmationNumber()).thenReturn("CONF");
+        when(mockFamily.getConfirmationType()).thenReturn("TYPE");
+        when(mockFamily.getSms()).thenReturn(new Family.SMS(false, "EN"));
+
+        Family.Member head = mock(Family.Member.class);
+        when(head.getId()).thenReturn(1);
+        when(head.getUuid()).thenReturn("uuid-insuree");
+        when(mockFamily.getHead()).thenReturn(head);
+
+        // Membres
+        List<Family.Member> members = new ArrayList<>();
+        Family.Member member = mock(Family.Member.class);
+        when(member.getChfId()).thenReturn(chfId);
+        when(member.getId()).thenReturn(1);
+        when(member.getUuid()).thenReturn("uuid-member");
+        when(member.getFamilyId()).thenReturn(1);
+        when(member.getFamilyUuid()).thenReturn("uuid-family");
+        when(member.getIdentificationNumber()).thenReturn("12345");
+        when(member.getLastName()).thenReturn("Doe");
+        when(member.getOtherNames()).thenReturn("John");
+        when(member.getDateOfBirth()).thenReturn(new java.util.Date());
+        when(member.getGender()).thenReturn("M");
+        when(member.getMarital()).thenReturn("M");
+        when(member.isHead()).thenReturn(true);
+        when(member.getPhone()).thenReturn("690000000");
+        when(member.getPhotoPath()).thenReturn("/storage/emulated/0/DCIM/test.jpg");
+        when(member.isCardIssued()).thenReturn(true);
+        when(member.isOffline()).thenReturn(false);
+        when(member.getRelationship()).thenReturn(1);
+        when(member.getProfession()).thenReturn(1);
+        when(member.getEducation()).thenReturn(1);
+        when(member.getEmail()).thenReturn("email");
+        when(member.getTypeOfId()).thenReturn("type");
+        when(member.getHealthFacilityId()).thenReturn(1);
+        when(member.getCurrentAddress()).thenReturn("addr");
+        when(member.getGeolocation()).thenReturn("geo");
+        when(member.getCurrentVillage()).thenReturn(1);
+        members.add(member);
+        when(mockFamily.getMembers()).thenReturn(members);
+
+        // Polices
+        List<Family.Policy> policies = new ArrayList<>();
+        Family.Policy policy = mock(Family.Policy.class);
+        when(policy.getId()).thenReturn(1);
+        when(policy.getFamilyId()).thenReturn(1);
+        when(policy.getStatus()).thenReturn("ACTIVE");
+        when(policy.getValue()).thenReturn(100.0);
+        when(policy.getProductId()).thenReturn(1);
+        when(policy.getOfficerId()).thenReturn(1);
+        when(policy.getStartDate()).thenReturn(new java.util.Date());
+        when(policy.getEffectiveDate()).thenReturn(new java.util.Date());
+        when(policy.getExpiryDate()).thenReturn(new java.util.Date());
+        when(policy.getEnrollDate()).thenReturn(new java.util.Date());
+        when(policy.isOffline()).thenReturn(false);
+        policies.add(policy);
+        when(mockFamily.getPolicies()).thenReturn(policies);
+
+        when(sqlHandler.getResult(anyString(), any())).thenReturn(new JSONArray());
+
+        doNothing().when(spyClient).ShowDialog(anyString());
+
+        // Mock FetchFamily
+        doReturn(mockFamily)
+                .when(spyClient)
+                .newFetchFamilyExecute(chfId);
+
+        int result = spyClient.ModifyFamily(chfId);
+
+        assertEquals(1, result);
+
+        verify(sqlHandler).insertData(eq("tblFamilies"), any(), any(JSONArray.class), anyString());
+        verify(sqlHandler).insertData(eq("tblInsuree"), any(), any(JSONArray.class), anyString());
+        verify(sqlHandler).insertData(eq("tblPolicy"), any(), any(JSONArray.class), anyString());
+    }
+
+    @Test
+    public void testModifyFamily_ShouldNotImportIfInsureeExists() {
+
+        ClientAndroidInterface spyClient = spy(client);
+
+        when(sqlHandler.getCount(
+                eq("tblInsuree"),
+                eq("Trim(CHFID) = ?"),
+                any(String[].class)
+        )).thenReturn(1);
+
+        doNothing().when(spyClient).ShowDialog(anyString());
+
+        int result = spyClient.ModifyFamily("CHF_EXIST");
+
+        assertEquals(0, result);
+        verify(spyClient).ShowDialog(anyString());
+    }
+
+    @Test
+    public void testModifyFamily_ShouldHandleFamilyNotFound() throws Exception {
+
+        ClientAndroidInterface spyClient = spy(client);
+
+        when(sqlHandler.getCount(anyString(), anyString(), any()))
+                .thenReturn(0);
+
+
+        doThrow(new HttpException(
+                HttpURLConnection.HTTP_NOT_FOUND,
+                "Not Found",
+                null,
+                null
+        )).when(spyClient).newFetchFamilyExecute(anyString());
+
+        doNothing().when(spyClient).ShowDialog(anyString());
+
+        int result = spyClient.ModifyFamily("CHF_UNKNOWN");
+
+        assertEquals(0, result);
+        verify(spyClient).ShowDialog(anyString());
+    }
+
+    @Test
+    public void testModifyFamily_ShouldHandleServerError() throws Exception {
+
+        ClientAndroidInterface spyClient = spy(client);
+
+        when(sqlHandler.getCount(anyString(), anyString(), any()))
+                .thenReturn(0);
+
+        doThrow(new RuntimeException("Server down"))
+                .when(spyClient)
+                .newFetchFamilyExecute(anyString());
+
+        doNothing().when(spyClient).ShowDialog(anyString());
+
+        int result = spyClient.ModifyFamily("CHF_ERR");
+
+        assertEquals(0, result);
+        verify(spyClient).ShowDialog(anyString());
+    }
+
+
 }

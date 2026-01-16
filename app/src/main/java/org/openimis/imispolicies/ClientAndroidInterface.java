@@ -4725,6 +4725,10 @@ public class ClientAndroidInterface {
         }
     }
 
+    protected Family newFetchFamilyExecute(String insuranceNumber) throws Exception {
+        return new FetchFamily().execute(insuranceNumber);
+    }
+
     @JavascriptInterface
     @SuppressWarnings("unused")
     public int ModifyFamily(final String insuranceNumber) {
@@ -4736,7 +4740,7 @@ public class ClientAndroidInterface {
             return 0;
         } else {
             try {
-                Family family = new FetchFamily().execute(insuranceNumber);
+                Family family = newFetchFamilyExecute(insuranceNumber);
                 InsertFamilyDataFromOnline(family);
                 InsertInsureeDataFromOnline(family.getMembers());
                 InsertPolicyDataFromOnline(family.getPolicies());
@@ -4764,6 +4768,7 @@ public class ClientAndroidInterface {
 
             if (family.getSms() != null) {
                 try {
+                    System.out.println("Family SMS: " + family.getSms().isApproval() + ", " + family.getSms().getLanguage());
                     addOrUpdateFamilySms(family.getId(),
                             family.getSms().isApproval(),
                             family.getSms().getLanguage()
@@ -4771,6 +4776,7 @@ public class ClientAndroidInterface {
                 } catch (Exception e) {
                     e.printStackTrace();
                     Log.w("ModifyFamily", "No familySMS data in family payload");
+                    System.out.println("problem in try block, handling in catch block");
                 }
             }
         }
