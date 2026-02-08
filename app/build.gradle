@@ -50,6 +50,7 @@ android {
         buildConfigField "String", "API_VERSION", '"3"'
         buildConfigField "String", "DEFAULT_LANGUAGE_CODE", '"en"'
         buildConfigField "boolean", "IS_PAYMENT_ENABLED", 'false'
+        buildConfigField "boolean", "DISABLE_FAMILY_MODIFICATION", 'false'
         resValue "string", "app_name_policies", "Policies"
         resValue "string", "ReleaseDateValue", getDate()
     }
@@ -150,6 +151,13 @@ android {
             resValue "string", "app_name_policies", "Policies CNASS TRAIN"
             dimension = 'std'
         }
+        gambia {
+            applicationId "org.openimis.imispolicies.gambia"
+            buildConfigField "String", "API_BASE_URL", '"https://gambiatest.bluesquare.org/"'
+            buildConfigField "boolean", "DISABLE_FAMILY_MODIFICATION", 'true'
+            resValue "string", "app_name_policies", System.getenv("CLI_APP_NAME") ?: "Policies Gambia"
+            dimension = 'std'
+        }
     }
     sourceSets {
         chfDev.java.srcDir 'src/chf/java'
@@ -184,6 +192,9 @@ android {
         }
 
         mauritaniaTrain.java.srcDir 'src/master/java'
+
+        gambia.java.srcDir 'src/master/java'
+        gambia.res.srcDirs = ['src/master/res', 'src/localeMv/res']
     }
 
     // Apply custom flavours

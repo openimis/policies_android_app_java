@@ -215,6 +215,12 @@ public class ClientAndroidInterface {
 
     @JavascriptInterface
     @SuppressWarnings("unused")
+    public boolean isFamilyModificationDisabled() {
+        return BuildConfig.DISABLE_FAMILY_MODIFICATION;
+    }
+
+    @JavascriptInterface
+    @SuppressWarnings("unused")
     public String getSpecificControlHtml(String FieldName) {
         String tableName = "tblControls";
         String[] columns = {"Adjustibility"};
@@ -2358,7 +2364,7 @@ public class ClientAndroidInterface {
     private JSONArray getOtherNames(String familyId) {
         @Language("SQL")
         String Query = "SELECT OtherNames " +
-                "FROM  tblInsuree WHERE FamilyId = ? AND isHead = 1 ";
+                "FROM  tblInsuree WHERE FamilyId = ? AND (isHead = 1 OR isHead = 'true')";
         String[] arg = {familyId};
         return sqlHandler.getResult(Query, arg);
     }
@@ -2366,7 +2372,7 @@ public class ClientAndroidInterface {
     private JSONArray getLastName(String familyId) {
         @Language("SQL")
         String Query = "SELECT LastName " +
-                "FROM  tblInsuree WHERE FamilyId = ? AND isHead = 1 ";
+                "FROM  tblInsuree WHERE FamilyId = ? AND (isHead = 1 OR isHead = 'true')";
         String[] arg = {familyId};
         return sqlHandler.getResult(Query, arg);
     }
@@ -2374,7 +2380,7 @@ public class ClientAndroidInterface {
     private JSONArray getInsuranceNumber(String familyId) {
         @Language("SQL")
         String Query = "SELECT CHFID " +
-                "FROM  tblInsuree WHERE FamilyId = ? AND isHead  = 1";
+                "FROM  tblInsuree WHERE FamilyId = ? AND (isHead = 1 OR isHead = 'true')";
         String[] arg = {familyId};
         try {
             return sqlHandler.getResult(Query, arg);

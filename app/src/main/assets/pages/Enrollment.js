@@ -4,11 +4,15 @@ $(document).ready(function () {
     LoadFamilies();
 
     var FamilyId = 0;
-    $('#btnAddNew').click(function () {
-        var url = 'Enrollment.html?f=' + FamilyId;
-        Android.SetUrl(url);
-        window.open("Family.html?f=0", "_self");
-    });
+    if (Android.isFamilyModificationDisabled()) {
+        $('#addNewPanel').hide();
+    } else {
+        $('#btnAddNew').click(function () {
+            var url = 'Enrollment.html?f=' + FamilyId;
+            Android.SetUrl(url);
+            window.open("Family.html?f=0", "_self");
+        });
+    }
 
 
     $('.ulList li').click(function () {
@@ -18,7 +22,13 @@ $(document).ready(function () {
     });
 
     AssignDotClass();
-    contextMenu.createContextMenu([Android.getString('Edit'), Android.getString('Delete')], function () {
+    var menu;
+    if (Android.isFamilyModificationDisabled()) {
+        menu = [Android.getString('Edit')];
+    } else {
+        menu = [Android.getString('Edit'), Android.getString('Delete')];
+    }
+    contextMenu.createContextMenu(menu, function () {
         var clicked = $(this).text();
         if (clicked == Android.getString('Edit')) {
             var url = 'Enrollment.html?f=' + FamilyId;

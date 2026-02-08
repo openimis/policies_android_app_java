@@ -267,6 +267,10 @@ public class MainActivity extends AppCompatActivity
         toggle.syncState();
 
         navigationView = findViewById(R.id.nav_view);
+        if (BuildConfig.DISABLE_FAMILY_MODIFICATION) {
+            navigationView.getMenu().findItem(R.id.nav_enquire).setVisible(false);
+            navigationView.getMenu().findItem(R.id.nav_acquire).setVisible(false);
+        }
 
         navigationView.setNavigationItemSelectedListener(this);
         wv = findViewById(R.id.webview);

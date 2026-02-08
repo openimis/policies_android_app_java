@@ -21,11 +21,15 @@ $(document).ready(function () {
         window.open('Family.html?f=' + FamilyId);
     });
 
-    $('#btnNewInsuree').click(function () {
-        var url = 'FamilyAndInsurees.html?f=' + FamilyId;
-        Android.SetUrl(url);
-        window.open('Insuree.html?f=' + FamilyId, '_self');
-    });
+    if (Android.isFamilyModificationDisabled()) {
+        $('#btnNewInsuree').hide();
+    } else {
+        $('#btnNewInsuree').click(function () {
+            var url = 'FamilyAndInsurees.html?f=' + FamilyId;
+            Android.SetUrl(url);
+            window.open('Insuree.html?f=' + FamilyId, '_self');
+        });
+    }
 
 
     $('.ulList li').click(function () {
@@ -42,54 +46,54 @@ $(document).ready(function () {
         window.open('FamilyPolicies.html?f=' + FamilyId + '&l=' + LocationId + '&r=' + RegionId + '&d=' + DistrictId, '_self');
     });
 
+    if (!Android.isFamilyModificationDisabled()) {
+        AssignDotClass();
+        contextMenu.createContextMenu([Android.getString('Edit'), Android.getString('Delete')], function () {
+            var clicked = $(this).text();
+            if (clicked == Android.getString('Edit')) {
+                var url = 'FamilyAndInsurees.html?f=' + FamilyId;
+                Android.SetUrl(url);
+                window.open("Insuree.html?i=" + InsureeId + "&f=" + FamilyId, "_self");
+            }
+            else if (clicked == Android.getString('Delete')) {
+                //$("#divProgress").show();
+                var isOffline = $('#hfIsOffline').val();
+                var deletedSuccess = null;
+                $('#spPleaseWait').text(Android.getString('Deleting'));
+                if (isOffline == 0 || isOffline == 2) {
 
-    AssignDotClass();
-    contextMenu.createContextMenu([Android.getString('Edit'), Android.getString('Delete')], function () {
-        var clicked = $(this).text();
-        if (clicked == Android.getString('Edit')) {
-            var url = 'FamilyAndInsurees.html?f=' + FamilyId;
-            Android.SetUrl(url);
-            window.open("Insuree.html?i=" + InsureeId + "&f=" + FamilyId, "_self");
-        }
-        else if (clicked == Android.getString('Delete')) {
-            //$("#divProgress").show();
-            var isOffline = $('#hfIsOffline').val();
-            var deletedSuccess = null;
-            $('#spPleaseWait').text(Android.getString('Deleting'));
-            if (isOffline == 0 || isOffline == 2) {
+                    $("#divProgress").show();
 
-                $("#divProgress").show();
+                    deletedSuccess = parseInt(Android.DeleteOnlineData(InsureeId, 'I'));
 
-                deletedSuccess = parseInt(Android.DeleteOnlineData(InsureeId, 'I'));
 
+                }
+                else {
+
+                    deletedSuccess = Android.DeleteInsuree(InsureeId);
+                }
+
+                if (deletedSuccess == 1) {
+
+                    $("#divProgress").hide();
+                    //Android.ShowDialog(Android.getString('InsureeDeleted'));
+                    window.open('FamilyAndInsurees.html?f=' + FamilyId + '&l=' + LocationId + '&r=' + RegionId + '&d=' + DistrictId, '_self');
+                }
+                else if (deletedSuccess == 2) {
+                    $("#divProgress").hide();
+                    Android.ShowDialog(Android.getString('IsHeadDelete'));
+                } else if (deletedSuccess == -1) {
+                    $("#divProgress").hide();
+                    Android.ShowDialog(Android.getString('LoginToDeleteOnlineData'));
+                } else {
+                    $("#divProgress").hide();
+
+                    Android.ShowDialog(Android.getString('InsureeNotDeleted'));
+                }
 
             }
-            else {
-
-                deletedSuccess = Android.DeleteInsuree(InsureeId);
-            }
-
-            if (deletedSuccess == 1) {
-
-                $("#divProgress").hide();
-                //Android.ShowDialog(Android.getString('InsureeDeleted'));
-                window.open('FamilyAndInsurees.html?f=' + FamilyId + '&l=' + LocationId + '&r=' + RegionId + '&d=' + DistrictId, '_self');
-            }
-            else if (deletedSuccess == 2) {
-                $("#divProgress").hide();
-                Android.ShowDialog(Android.getString('IsHeadDelete'));
-            } else if (deletedSuccess == -1) {
-                $("#divProgress").hide();
-                Android.ShowDialog(Android.getString('LoginToDeleteOnlineData'));
-            } else {
-                $("#divProgress").hide();
-
-                Android.ShowDialog(Android.getString('InsureeNotDeleted'));
-            }
-
-        }
-    });
-
+        });
+    }
 });
 
 function LoadInsurees(FamilyId) {
