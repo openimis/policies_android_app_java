@@ -25,7 +25,7 @@ select, input, button{
 button, input[type=submit]{
     min-width:150px;
     font-size:1em;
-    color:brown;
+    color:#006273;
     font-weight:bold;
     font-family:arial;
 }
@@ -72,7 +72,7 @@ button, input[type=submit]{
 
 .ulList li h3{
     margin:4px 0;
-    color:#d25151;
+    color:#256273;
     letter-spacing:4px;
 }
 .ulList li h4{
