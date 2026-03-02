@@ -5149,7 +5149,7 @@ public class ClientAndroidInterface {
                 .setPositiveButton(
                         R.string.Ok,
                         (dialog, id) -> {
-                            if (!username.getText().toString().equals("") || !password.getText().toString().equals("")) {
+                            if (!username.getText().toString().isEmpty() || !password.getText().toString().isEmpty()) {
                                 boolean isUserLogged = LoginToken(username.getText().toString(), password.getText().toString());
                                 if (isUserLogged) {
                                     if (onSuccess != null) {
