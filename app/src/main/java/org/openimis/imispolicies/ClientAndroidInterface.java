@@ -50,6 +50,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.webkit.JavascriptInterface;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -5146,32 +5147,44 @@ public class ClientAndroidInterface {
         alertDialogBuilder.setView(promptsView);
         alertDialogBuilder
                 .setCancelable(false)
-                .setPositiveButton(
-                        R.string.Ok,
-                        (dialog, id) -> {
-                            if (!username.getText().toString().isEmpty() || !password.getText().toString().isEmpty()) {
-                                boolean isUserLogged = LoginToken(username.getText().toString(), password.getText().toString());
-                                if (isUserLogged) {
-                                    if (onSuccess != null) {
-                                        onSuccess.run();
-                                    }
-                                } else {
-                                    AndroidUtils.showConfirmDialog(
-                                            activity, R.string.LoginFail,
-                                            (d, w) -> {
-                                                if (onError != null) {
-                                                    onError.run();
-                                                }
-                                            }
-                                    );
-                                }
-                            } else {
-                                Toast.makeText(activity, "Please enter user name and password", Toast.LENGTH_LONG).show();
-                            }
-                        });
+                .setPositiveButton(R.string.Ok,null)
+                .setNegativeButton(R.string.Close, (d, which) -> {
+                    activity.finish();
+                });
 
         // create alert dialog
         AlertDialog alertDialog = alertDialogBuilder.create();
+        alertDialog.setOnShowListener(d -> {
+            Button okButton = alertDialog.getButton(AlertDialog.BUTTON_POSITIVE);
+            okButton.setOnClickListener(v -> {
+                String user = username.getText().toString().trim();
+                String pass = password.getText().toString().trim();
+                if (user.isEmpty() || pass.isEmpty()) {
+                    Toast.makeText(activity,
+                            "Please enter user name and password",
+                            Toast.LENGTH_LONG).show();
+                    return;
+                }
+
+                boolean isUserLogged = LoginToken(user, pass);
+                if (isUserLogged) {
+                    alertDialog.dismiss();
+                    if (onSuccess != null) {
+                        onSuccess.run();
+                    }
+                } else {
+                    AndroidUtils.showConfirmDialog(
+                            activity,
+                            R.string.LoginFail,
+                            (d2, w) -> {
+                                if (onError != null) {
+                                    onError.run();
+                                }
+                            }
+                    );
+                }
+            });
+        });
 
         // show it
         alertDialog.show();
