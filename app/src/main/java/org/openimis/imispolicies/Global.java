@@ -90,7 +90,7 @@ public class Global extends Application {
     public static final String PREF_LOG_TAG = "PREFS";
     public static final String FILE_IO_LOG_TAG = "FILEIO";
 
-    private String OfficerCode;
+    protected String OfficerCode;
     private String OfficerName;
     private int OfficerId;
 
@@ -114,6 +114,15 @@ public class Global extends Application {
         GlobalContext = this;
         SubDirectories = new HashMap<>();
         initSharedPrefsInts();
+    }
+
+    protected boolean isRunningTest() {
+        try {
+            Class.forName("org.robolectric.RobolectricTestRunner");
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
     }
 
     private void initSharedPrefsInts() {
