@@ -97,9 +97,12 @@ public class SQLHandler extends SQLiteOpenHelper {
         global = (Global) this.context.getApplicationContext();
     }
 
-
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
+        createSchema(sqLiteDatabase);
+    }
+
+    private void createSchema(SQLiteDatabase sqLiteDatabase) {
         try {
             sqLiteDatabase.execSQL(
                     "CREATE TABLE " + tblConfirmationTypes + "("
@@ -465,6 +468,11 @@ public class SQLHandler extends SQLiteOpenHelper {
     }
 
     private void openDatabase() {
+        if (isRunningTest()) {
+            mDatabase = SQLiteDatabase.create(null);
+            createSchema(mDatabase);
+            return;
+        }
         String dbPath = context.getDatabasePath(DBNAME).getPath();
         String dbOfflinePath = global.getAppDirectory() + File.separator + OFFLINEDBNAME;
         if (mDatabase != null && mDatabase.isOpen()) {
@@ -475,6 +483,15 @@ public class SQLHandler extends SQLiteOpenHelper {
         else
             mDatabase = SQLiteDatabase.openDatabase(dbOfflinePath, null, SQLiteDatabase.OPEN_READWRITE);
 
+    }
+
+    public boolean isRunningTest() {
+        try {
+            Class.forName("org.robolectric.RobolectricTestRunner");
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
     }
 
     public void closeDatabase() {

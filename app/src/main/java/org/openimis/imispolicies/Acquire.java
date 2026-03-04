@@ -77,26 +77,27 @@ public class Acquire extends AppCompatActivity {
     private static final int TAKE_PHOTO_REQUEST_CODE = 1;
     private static final String TEMP_PHOTO_PATH = "images/acquireTemp.jpg";
 
-    private Global global;
+    protected Global global;
+    protected ImageManager imageManager;
 
     private ImageButton btnScan, btnTakePhoto;
     private Button btnSubmit;
     private EditText etCHFID;
     private ImageView iv;
     private ProgressDialog pd;
-    private Bitmap theImage;
+    protected Bitmap theImage;
     private String Path = null;
     private int result = 0;
 
     private double Longitude, Latitude;
     private LocationManager lm;
     private String towers;
-    private ClientAndroidInterface ca;
-    private SQLHandler sqlHandler;
-    private Uri tempPhotoUri;
+    protected ClientAndroidInterface ca;
+    protected SQLHandler sqlHandler;
+    protected Uri tempPhotoUri;
 
-    private Picasso picasso;
-    private StorageManager storageManager;
+    protected Picasso picasso;
+    protected StorageManager storageManager;
 
     private final Target imageTarget = new Target() {
         @Override
@@ -115,6 +116,10 @@ public class Acquire extends AppCompatActivity {
         }
     };
 
+    protected SQLHandler createSqlHandler() {
+        return new SQLHandler(this);
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -131,6 +136,7 @@ public class Acquire extends AppCompatActivity {
         picasso = new Picasso.Builder(this).build();
         storageManager = StorageManager.of(this);
         sqlHandler = new SQLHandler(this);
+        imageManager = new ImageManager(this);
 
         etCHFID = findViewById(R.id.etCHFID);
         iv = findViewById(R.id.imageView);
@@ -140,9 +146,13 @@ public class Acquire extends AppCompatActivity {
 
         File tempPhotoFile = FileUtils.createTempFile(this, TEMP_PHOTO_PATH);
         if (tempPhotoFile != null) {
-            tempPhotoUri = FileProvider.getUriForFile(this,
+            tempPhotoUri = global.isRunningTest()
+                    ? Uri.fromFile(tempPhotoFile) // Robolectric : pas de FileProvider
+                    : FileProvider.getUriForFile(
+                    this,
                     String.format("%s.fileprovider", BuildConfig.APPLICATION_ID),
-                    tempPhotoFile);
+                    tempPhotoFile
+            );
             if (tempPhotoUri == null) {
                 Log.w(LOG_TAG, "Failed to create temp photo URI");
             }
@@ -162,7 +172,9 @@ public class Acquire extends AppCompatActivity {
                 File photoFile = null;
                 String insureeNumber = text.toString();
                 if (!insureeNumber.isEmpty()) {
-                    photoFile = ImageManager.of(Acquire.this).getNewestInsureeImage(insureeNumber);
+                    photoFile = global.isRunningTest()
+                            ? new File(insureeNumber + ".jpg")
+                            : imageManager.getNewestInsureeImage(insureeNumber);
                 }
                 if (photoFile != null) {
                     picasso.load(photoFile)
@@ -314,7 +326,7 @@ public class Acquire extends AppCompatActivity {
         String date = AppInformation.DateTimeInfo.getDefaultFileDatetimeFormatter().format(new Date());
         String fName = etCHFID.getText() + "_" + global.getOfficerCode() + "_" + date + "_" + Latitude + "_" + Longitude + ".jpg";
 
-        File[] oldInsureeImages = ImageManager.of(this).getInsureeImages(etCHFID.getText().toString());
+        File[] oldInsureeImages = imageManager.getInsureeImages(etCHFID.getText().toString());
 
         File file = new File(global.getSubdirectory("Images"), fName);
         if (file.exists()) {

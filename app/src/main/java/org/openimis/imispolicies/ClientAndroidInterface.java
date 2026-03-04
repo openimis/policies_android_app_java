@@ -136,7 +136,7 @@ public class ClientAndroidInterface {
     @NonNull
     private final Activity activity;
     @NonNull
-    private final SQLHandler sqlHandler;
+    protected final SQLHandler sqlHandler;
     @NonNull
     private final HashMap<String, String> controls = new HashMap<>();
     @NonNull
@@ -144,7 +144,7 @@ public class ClientAndroidInterface {
     @NonNull
     private final ArrayList<String> enrolMessages = new ArrayList<>();
     @NonNull
-    private final Global global;
+    protected final Global global;
     @NonNull
     private final StorageManager storageManager;
     @NonNull
@@ -165,6 +165,14 @@ public class ClientAndroidInterface {
                         Log.e("Images", String.format("Image load failed: %s", path.toString()), exception))
                 .loggingEnabled(BuildConfig.LOGGING_ENABLED)
                 .build();
+    }
+
+    public ClientAndroidInterface(Activity activity, SQLHandler sqlHandler, Global global, Picasso picasso, StorageManager storageManager) {
+        this.activity = activity;
+        this.sqlHandler = sqlHandler;
+        this.global = global;
+        this.storageManager = storageManager;
+        this.picassoInstance = picasso;
     }
 
     @JavascriptInterface
@@ -666,7 +674,7 @@ public class ClientAndroidInterface {
         return HFs.toString();
     }
 
-    private HashMap<String, String> jsonToTable(String jsonString) {
+    protected HashMap<String, String> jsonToTable(String jsonString) {
         HashMap<String, String> data = new HashMap<>();
         try {
             JSONArray array = new JSONArray(jsonString);
@@ -849,7 +857,7 @@ public class ClientAndroidInterface {
         }
     }
 
-    private int isValidInsureeData(HashMap<String, String> data) {
+    protected int isValidInsureeData(HashMap<String, String> data) {
         int Result;
 
         String InsuranceNumber = data.get("txtInsuranceNumber");
@@ -1044,7 +1052,7 @@ public class ClientAndroidInterface {
         return rtInsureeId;
     }
 
-    private String copyImageFromGalleryToApplication(String selectedPath, String InsuranceNumber) {
+    protected String copyImageFromGalleryToApplication(String selectedPath, String InsuranceNumber) {
         String result = "";
 
         try {
@@ -2538,10 +2546,14 @@ public class ClientAndroidInterface {
         return 1;//Update Success
     }
 
+    protected ProgressDialog createProgressDialog(String title, String message) {
+        return ProgressDialog.show(activity, title, message);
+    }
+
     @JavascriptInterface
     @SuppressWarnings("unused")
     public void uploadEnrolment() throws Exception {
-        final ProgressDialog finalPd = ProgressDialog.show(activity, activity.getResources().getString(R.string.Sync), activity.getResources().getString(R.string.SyncProcessing));
+        final ProgressDialog finalPd = createProgressDialog(activity.getResources().getString(R.string.Sync), activity.getResources().getString(R.string.SyncProcessing));
         activity.runOnUiThread(() -> {
             activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         });
@@ -2790,7 +2802,7 @@ public class ClientAndroidInterface {
         return result;
     }
 
-    private int Enrol(int CallerId) throws UserException, JSONException, IOException {
+    protected int Enrol(int CallerId) throws UserException, JSONException, IOException {
         ArrayList<String> verifiedId = new ArrayList<>();
         myList.clear();
         int rtEnrolledId = 0;
@@ -3121,7 +3133,7 @@ public class ClientAndroidInterface {
         return EnrolResult;
     }
 
-    private int uploadEnrols(
+    protected int uploadEnrols(
             @NonNull JSONArray familyArray,
             @NonNull JSONArray insureesArray,
             @NonNull JSONArray policiesArray,
@@ -3570,7 +3582,7 @@ public class ClientAndroidInterface {
         }
     }
 
-    private void DeleteUploadedData(final int FamilyId, ArrayList<String> FamilyIDs, int CallerId) {
+    protected void DeleteUploadedData(final int FamilyId, ArrayList<String> FamilyIDs, int CallerId) {
         if (FamilyIDs.size() == 0) {
             FamilyIDs = new ArrayList<>() {{
                 add(String.valueOf(FamilyId));
@@ -4713,6 +4725,10 @@ public class ClientAndroidInterface {
         }
     }
 
+    protected Family newFetchFamilyExecute(String insuranceNumber) throws Exception {
+        return new FetchFamily().execute(insuranceNumber);
+    }
+
     @JavascriptInterface
     @SuppressWarnings("unused")
     public int ModifyFamily(final String insuranceNumber) {
@@ -4724,7 +4740,7 @@ public class ClientAndroidInterface {
             return 0;
         } else {
             try {
-                Family family = new FetchFamily().execute(insuranceNumber);
+                Family family = newFetchFamilyExecute(insuranceNumber);
                 InsertFamilyDataFromOnline(family);
                 InsertInsureeDataFromOnline(family.getMembers());
                 InsertPolicyDataFromOnline(family.getPolicies());
@@ -4752,6 +4768,7 @@ public class ClientAndroidInterface {
 
             if (family.getSms() != null) {
                 try {
+                    System.out.println("Family SMS: " + family.getSms().isApproval() + ", " + family.getSms().getLanguage());
                     addOrUpdateFamilySms(family.getId(),
                             family.getSms().isApproval(),
                             family.getSms().getLanguage()
@@ -4759,6 +4776,7 @@ public class ClientAndroidInterface {
                 } catch (Exception e) {
                     e.printStackTrace();
                     Log.w("ModifyFamily", "No familySMS data in family payload");
+                    System.out.println("problem in try block, handling in catch block");
                 }
             }
         }
@@ -5021,7 +5039,7 @@ public class ClientAndroidInterface {
         return status;
     }
 
-    private int getFamilyStatus(int FamilyId) throws JSONException {
+    protected int getFamilyStatus(int FamilyId) throws JSONException {
         if (FamilyId < 0) return 0;
         @Language("SQL")
         String Query = "SELECT isOffline FROM tblFamilies WHERE FamilyId = " + FamilyId;
@@ -5034,7 +5052,7 @@ public class ClientAndroidInterface {
         else return 0;
     }
 
-    private int getInsureeStatus(int InsureeId) throws JSONException {//herman
+    protected int getInsureeStatus(int InsureeId) throws JSONException {//herman
         if (InsureeId == 0) return 1;
         @Language("SQL")
         String Query = "SELECT isOffline FROM tblInsuree WHERE InsureeId = " + InsureeId;
@@ -5252,7 +5270,7 @@ public class ClientAndroidInterface {
         return getMaxIdFromTable("PolicyId", "tblPolicy");
     }
 
-    private int getNextAvailableInsureeId() {
+    protected int getNextAvailableInsureeId() {
         return getMaxIdFromTable("InsureeId", "tblInsuree");
     }
 

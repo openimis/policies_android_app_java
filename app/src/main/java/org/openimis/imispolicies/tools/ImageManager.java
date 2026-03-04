@@ -18,7 +18,7 @@ public class ImageManager {
         return new ImageManager(context);
     }
 
-    protected ImageManager(Context context) {
+    public ImageManager(Context context) {
         this.context = context;
         this.contentResolver = this.context.getContentResolver();
     }
