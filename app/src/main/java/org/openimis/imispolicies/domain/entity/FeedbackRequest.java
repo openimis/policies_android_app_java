@@ -177,7 +177,7 @@ public class FeedbackRequest implements Parcelable {
         return Objects.requireNonNullElse(phone, "");
     }
 
-    public static final Creator<FeedbackRequest> CREATOR = new Creator<FeedbackRequest>() {
+    public static final Creator<FeedbackRequest> CREATOR = new Creator<>() {
         @Override
         public FeedbackRequest createFromParcel(Parcel in) {
             return new FeedbackRequest(in);

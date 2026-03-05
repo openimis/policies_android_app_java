@@ -193,8 +193,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
 
     packagingOptions {
@@ -264,7 +264,7 @@ dependencies {
 
     // unit tests
     testImplementation 'junit:junit:4.13.2'
-    implementation 'io.sentry:sentry-android:4.2.0'
+    implementation 'io.sentry:sentry-android:8.25.0'
     testImplementation 'org.mockito:mockito-core:5.5.0'
     testImplementation 'org.robolectric:robolectric:4.11.1'
 }

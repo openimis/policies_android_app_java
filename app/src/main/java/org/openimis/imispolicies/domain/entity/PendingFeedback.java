@@ -93,7 +93,7 @@ public class PendingFeedback implements Parcelable {
         return assessment;
     }
 
-    public static final Creator<PendingFeedback> CREATOR = new Creator<PendingFeedback>() {
+    public static final Creator<PendingFeedback> CREATOR = new Creator<>() {
         @Override
         public PendingFeedback createFromParcel(Parcel in) {
             return new PendingFeedback(in);

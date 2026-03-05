@@ -425,7 +425,7 @@ public class Policy implements Parcelable {
         IDLE, ACTIVE, SUSPENDED, EXPIRED, READY
     }
 
-    public static final Creator<Policy> CREATOR = new Creator<Policy>() {
+    public static final Creator<Policy> CREATOR = new Creator<>() {
         @Override
         public Policy createFromParcel(Parcel in) {
             return new Policy(in);

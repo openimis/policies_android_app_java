@@ -164,7 +164,7 @@ public class PolicyRenewal implements Parcelable {
         return phone;
     }
 
-    public static final Creator<PolicyRenewal> CREATOR = new Creator<PolicyRenewal>() {
+    public static final Creator<PolicyRenewal> CREATOR = new Creator<>() {
         @Override
         public PolicyRenewal createFromParcel(Parcel in) {
             return new PolicyRenewal(in);
