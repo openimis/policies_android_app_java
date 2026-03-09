@@ -205,10 +205,10 @@
     <string name="Version">Version</string>
     <string name="Name">Name</string>
     <string name="ReleaseDate">Release Date</string>
-    <string name="TotalFamily">Total Households</string>
-    <string name="TotalInsuree">Total Adherents</string>
-    <string name="TotalPolicy">Total Policies</string>
-    <string name="TotalPremium">Total Contributions</string>
+    <string name="TotalFamily">Total Households:</string>
+    <string name="TotalInsuree">Total Adherents:</string>
+    <string name="TotalPolicy">Total Policies:</string>
+    <string name="TotalPremium">Total Contributions:</string>
     <string name="UploadEnrollment">Upload Enrolments</string>
     <string name="EnrollmentXML">Create Enrolments XML</string>
     <string name="UploadRenewals">Upload Renewals</string>
@@ -259,9 +259,9 @@
     <string name="Search">Search </string>
     <string name="ModifyFamily">Modify household</string>
     <string name="DownloadFamily">Downloading household</string>
-    <string name="TotalFamilyOnline">Edited Households </string>
-    <string name="TotalInsureeOnline">Edited Adherents</string>
-    <string name="TotalPolicyOnline">Edited Policies</string>
+    <string name="TotalFamilyOnline">Edited Households: </string>
+    <string name="TotalInsureeOnline">Edited Adherents:</string>
+    <string name="TotalPolicyOnline">Edited Policies:</string>
     <string name="TotalPremiumOnline">Edited Contributions</string>
     <string name="InsuranceNumberNotFound">Adherent number not found</string>
     <string name="InsuranceNumberRequired">Adherent number required</string>

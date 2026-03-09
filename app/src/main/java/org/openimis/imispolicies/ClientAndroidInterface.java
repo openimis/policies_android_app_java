@@ -4947,7 +4947,7 @@ public class ClientAndroidInterface {
         return TotalPremiums;
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
+    //@RequiresApi(api = Build.VERSION_CODES.N)
     @JavascriptInterface
     @SuppressWarnings("unused")
     public String getSumPremium() {

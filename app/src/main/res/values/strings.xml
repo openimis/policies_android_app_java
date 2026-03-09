@@ -483,4 +483,5 @@
     <string name="pay_type_cash">Cash</string>
     <string name="pay_type_mobile_phone">Mobile Phone</string>
     <string name="pay_type_bank_transfer">Bank Transfer</string>
+    <string name="Empty">Empty</string>
 </resources>

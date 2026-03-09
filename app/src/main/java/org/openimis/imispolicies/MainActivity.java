@@ -117,7 +117,8 @@ public class MainActivity extends AppCompatActivity
     private String selectedLanguage;
     public String ImagePath;
     public String InsureeNumber;
-    TextView Login;
+    TextView Login, tvTotalFamily, tvTotalInsuree, tvTotalPolicies, tvTotalPremium, tvTotalFamilyOnline, tvTotalInsureeOnline,
+            tvSumPremium;
     TextView OfficerName;
     ClientAndroidInterface ca;
     String aBuffer = "";
@@ -267,40 +268,67 @@ public class MainActivity extends AppCompatActivity
         toggle.syncState();
 
         navigationView = findViewById(R.id.nav_view);
+        tvTotalFamily = findViewById(R.id.TotalFamily);
+        tvTotalFamilyOnline = findViewById(R.id.TotalFamilyOnline);
+        tvTotalInsuree = findViewById(R.id.TotalInsuree);
+        tvTotalPremium = findViewById(R.id.TotalPremium);
+        tvTotalInsureeOnline = findViewById(R.id.TotalInsureeOnline);
+        tvTotalPolicies = findViewById(R.id.TotalPolicies);
+        tvSumPremium = findViewById(R.id.PremiumAmount);
 
         navigationView.setNavigationItemSelectedListener(this);
-        wv = findViewById(R.id.webview);
-        WebSettings settings = wv.getSettings();
-        wv.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
-        settings.setJavaScriptEnabled(true);
-        //noinspection deprecation
-        settings.setRenderPriority(WebSettings.RenderPriority.HIGH);
-        settings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
-        settings.setDomStorageEnabled(true);
-        settings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.SINGLE_COLUMN);
-        settings.setUseWideViewPort(true);
-        settings.setSaveFormData(true);
-        settings.setAllowFileAccess(true);
-        //noinspection deprecation
-        settings.setEnableSmoothTransition(true);
-        settings.setLoadWithOverviewMode(true);
-        wv.addJavascriptInterface(new ClientAndroidInterface(this), "Android");
+//        wv = findViewById(R.id.webview);
+//        WebSettings settings = wv.getSettings();
+//        wv.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
+//        settings.setJavaScriptEnabled(true);
+//        //noinspection deprecation
+//        settings.setRenderPriority(WebSettings.RenderPriority.HIGH);
+//        settings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
+//        settings.setDomStorageEnabled(true);
+//        settings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.SINGLE_COLUMN);
+//        settings.setUseWideViewPort(true);
+//        settings.setSaveFormData(true);
+//        settings.setAllowFileAccess(true);
+//        //noinspection deprecation
+//        settings.setEnableSmoothTransition(true);
+//        settings.setLoadWithOverviewMode(true);
+//        wv.addJavascriptInterface(new ClientAndroidInterface(this), "Android");
 
         //Register for context acquire_menu
-        registerForContextMenu(wv);
+//        registerForContextMenu(wv);
 
-        wv.loadUrl("file:///android_asset/pages/Home.html");
-        wv.setWebViewClient(new MyWebViewClient(MainActivity.this));
+//        wv.loadUrl("file:///android_asset/pages/Home.html");
+//        wv.setWebViewClient(new MyWebViewClient(MainActivity.this));
 
-        wv.setWebChromeClient(new WebChromeClient() {
-            @Override
-            public void onReceivedTitle(WebView view, String title) {
-                super.onReceivedTitle(view, title);
-                //noinspection ConstantConditions
-                getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_TITLE);
-                getSupportActionBar().setSubtitle(title);
-            }
-        });
+//        wv.setWebChromeClient(new WebChromeClient() {
+//            @Override
+//            public void onReceivedTitle(WebView view, String title) {
+//                super.onReceivedTitle(view, title);
+//                //noinspection ConstantConditions
+//                getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_TITLE);
+//                getSupportActionBar().setSubtitle(title);
+//            }
+//        });
+
+        ca = new ClientAndroidInterface(this);
+
+        int Families = ca.getTotalFamily();
+        int Insuree = ca.getTotalInsuree();
+        int Policy = ca.getTotalPolicy();
+        int Premium = ca.getTotalPremium();
+        String SumPremium = ca.getSumPremium();
+
+        int FamiliesOnline = ca.getTotalFamilyOnline();
+        int InsureeOnline = ca.getTotalInsureeOnline();
+
+        tvTotalFamily.setText(String.valueOf(Families));
+        tvTotalInsuree.setText(String.valueOf(Insuree));
+        tvTotalPolicies.setText(String.valueOf(Policy));
+        tvTotalPremium.setText(String.valueOf(Premium));
+        tvSumPremium.setText(SumPremium);
+        tvTotalFamilyOnline.setText(String.valueOf(FamiliesOnline));
+        tvTotalInsureeOnline.setText(String.valueOf(InsureeOnline));
+
         NavigationView navigationView = findViewById(R.id.nav_view);
         View headerview = navigationView.getHeaderView(0);
         Login = headerview.findViewById(R.id.tvLogin);
@@ -311,7 +339,6 @@ public class MainActivity extends AppCompatActivity
             drawer.closeDrawer(GravityCompat.START);
             SetLoggedIn();
         });
-        ca = new ClientAndroidInterface(this);
         if (ca.isMasterDataAvailable() > 0) {
             loadLanguages();
         }
@@ -691,12 +718,14 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_home) {
-            wv.loadUrl("file:///android_asset/pages/Home.html");
+            //wv.loadUrl("file:///android_asset/pages/Home.html");
         } else if (id == R.id.nav_acquire) {
             Intent intent = new Intent(this, Acquire.class);
             startActivity(intent);
         } else if (id == R.id.nav_enrolment) {
-            wv.loadUrl("file:///android_asset/pages/Enrollment.html");
+            //wv.loadUrl("file:///android_asset/pages/Enrollment.html");
+            Intent intent = new Intent(this, Enrolment.class);
+            startActivity(intent);
         } else if (id == R.id.nav_modify_family) {
             global = (Global) getApplicationContext();
             if (global.isLoggedIn()) {
