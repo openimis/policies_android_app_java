@@ -125,6 +125,8 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 import javax.net.ssl.HttpsURLConnection;
 
+import io.sentry.Sentry;
+
 public class ClientAndroidInterface {
     private static final String LOG_TAG_RENEWAL = "RENEWAL";
     public static String filePath = null;
@@ -786,6 +788,7 @@ public class ClientAndroidInterface {
             return FamilyId;
 
         } catch (UserException e) {
+            Sentry.captureException(e);
             e.printStackTrace();
             if (InsureeId != 0)
                 sqlHandler.deleteData("tblInsuree", "InsureeId = ?", new String[]{String.valueOf(InsureeId)});
@@ -1045,6 +1048,7 @@ public class ClientAndroidInterface {
                 );
             }
         } catch (NumberFormatException | UserException e) {
+            Sentry.captureException(e);
             e.printStackTrace();
             throw new Exception(e.getMessage());
         }
@@ -1699,8 +1703,10 @@ public class ClientAndroidInterface {
             }
             inProgress = false;
         } catch (NumberFormatException e) {
+            Sentry.captureException(e);
             e.printStackTrace();
         } catch (UserException e) {
+            Sentry.captureException(e);
             e.printStackTrace();
             throw new Exception(e.getMessage());
         }
@@ -1891,8 +1897,10 @@ public class ClientAndroidInterface {
             }
             inProgress = false;
         } catch (NumberFormatException e) {
+            Sentry.captureException(e);
             e.printStackTrace();
         } catch (UserException e) {
+            Sentry.captureException(e);
             e.printStackTrace();
             throw new Exception(e.getMessage());
         }
@@ -3157,6 +3165,7 @@ public class ClientAndroidInterface {
             List<Family.Policy> policies = familyPolicyFromJSONObject(family.getUuid(), policiesArray);
             new UpdateFamily().execute(family, policies);
         } catch (Exception e) {
+            Sentry.captureException(e);
             e.printStackTrace();
             enrolMessages.add(Objects.requireNonNullElse(e.getMessage(), "Something went wrong updating the family"));
             return -400;
@@ -3582,9 +3591,9 @@ public class ClientAndroidInterface {
         }
     }
 
-    protected void DeleteUploadedData(final int FamilyId, ArrayList<String> FamilyIDs, int CallerId) {
-        if (FamilyIDs.size() == 0) {
-            FamilyIDs = new ArrayList<>() {{
+    private void DeleteUploadedData(final int FamilyId, ArrayList<String> FamilyIDs, int CallerId) {
+        if (FamilyIDs.isEmpty()) {
+            FamilyIDs = new ArrayList<String>() {{
                 add(String.valueOf(FamilyId));
             }};
         }
@@ -3675,6 +3684,7 @@ public class ClientAndroidInterface {
                     MoveFile(xmlFiles[i], 1);
                     MoveFile(jsonFiles[i], 1);
                 } catch (Exception e) {
+                    Sentry.captureException(e);
                     e.printStackTrace();
                     if (
                             e instanceof HttpException &&
@@ -3913,6 +3923,7 @@ public class ClientAndroidInterface {
                     ((MainActivity) activity).ShowEnrolmentOfficerDialog();
                 });
             } catch (JSONException e) {
+                Sentry.captureException(e);
                 Log.e("MASTERDATA", "Error while parsing master data", e);
             } catch (UserException e) {
                 Log.e("MASTERDATA", "Error while downloading master data", e);
@@ -3935,6 +3946,7 @@ public class ClientAndroidInterface {
         try {
             processOldFormat(new JSONArray(data));
         } catch (JSONException e) {
+            Sentry.captureException(e);
             try {
                 processNewFormat(new JSONObject(data));
             } catch (JSONException e2) {
@@ -3949,6 +3961,7 @@ public class ClientAndroidInterface {
         try {
             importMasterData(new FetchMasterData().execute());
         } catch (Exception e) {
+            Sentry.captureException(e);
             if (e instanceof UserNotAuthenticatedException) {
                 throw (UserNotAuthenticatedException) e;
             }
@@ -4066,6 +4079,7 @@ public class ClientAndroidInterface {
             insertPhoneDefaults(PhoneDefaults);
             insertGenders(Genders);
         } catch (JSONException e) {
+            Sentry.captureException(e);
             e.printStackTrace();
             throw new UserException(activity.getResources().getString(R.string.DownloadMasterDataFailed), e);
         }
@@ -4573,6 +4587,7 @@ public class ClientAndroidInterface {
                     ExpiryDate = PolicyObject2.getString("ExpiryDate");
                     EnrollDate = PolicyObject2.getString("EnrollDate");
                 } catch (JSONException e) {
+                    Sentry.captureException(e);
                     e.printStackTrace();
                 }
                 values.put("InsureePolicyId", MaxInsureePolicyId);

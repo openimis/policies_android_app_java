@@ -52,6 +52,7 @@ android {
         buildConfigField "boolean", "IS_PAYMENT_ENABLED", 'false'
         resValue "string", "app_name_policies", "Policies"
         resValue "string", "ReleaseDateValue", getDate()
+        resValue "string", "sentry_dsn", ""
     }
     buildTypes {
         release {
@@ -263,6 +264,7 @@ dependencies {
 
     // unit tests
     testImplementation 'junit:junit:4.13.2'
+    implementation 'io.sentry:sentry-android:8.25.0'
     testImplementation 'org.mockito:mockito-core:5.5.0'
     testImplementation 'org.robolectric:robolectric:4.11.1'
 }
