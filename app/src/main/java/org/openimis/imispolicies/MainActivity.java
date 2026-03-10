@@ -847,7 +847,7 @@ public class MainActivity extends AppCompatActivity
                 return;
             }
             if (exception instanceof UserNotAuthenticatedException) {
-                new ClientAndroidInterface(context).forceLoginDialogBox(() -> restart(context));
+                new ClientAndroidInterface(context).forceLoginDialogBox(() -> startDownloading());
                 return;
             }
             restart(context);
@@ -857,6 +857,10 @@ public class MainActivity extends AppCompatActivity
             Intent refresh = new Intent(activity, MainActivity.class);
             activity.startActivity(refresh);
             activity.finish();
+        }
+
+        private void startDownloading(){
+            new MasterDataAsync(activity.get()).execute();
         }
     }
 
