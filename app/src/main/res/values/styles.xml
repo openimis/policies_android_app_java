@@ -8,7 +8,7 @@
     <item name="colorAccent">@color/colorAccent</item>
     <item name="android:statusBarColor">@color/colorPrimary</item>
 
-    <item name="android:textColorHint">@color/colorPrimary</item>
+    <item name="android:textColorHint">@color/grey2</item>
 </style>
 
 <style name="AppTheme.NoActionBar">

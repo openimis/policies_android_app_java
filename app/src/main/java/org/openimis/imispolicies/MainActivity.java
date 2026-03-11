@@ -121,6 +121,7 @@ public class MainActivity extends AppCompatActivity
             tvSumPremium;
     TextView OfficerName;
     ClientAndroidInterface ca;
+    InsureeActivity insureeActivity;
     String aBuffer = "";
     String calledFrom = "java";
     public File f;
@@ -133,25 +134,7 @@ public class MainActivity extends AppCompatActivity
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == ClientAndroidInterface.RESULT_LOAD_IMG && resultCode == RESULT_OK) {
-            Uri selectedImage;
-            if (data == null || data.getData() == null ||
-                    (data.getData() != null
-                            && data.getAction() != null
-                            && data.getAction().equals(MediaStore.ACTION_IMAGE_CAPTURE))) {
-                Log.d("Main", "RESULT_LOAD_IMG got a camera result, in the predefined location");
-                selectedImage = ClientAndroidInterface.tempPhotoUri;
-            } else {
-                // File selection
-                selectedImage = data.getData();
-            }
-            wv.evaluateJavascript(String.format("selectImageCallback(\"%s\");", selectedImage), null);
-        } else if (requestCode == ClientAndroidInterface.RESULT_SCAN && resultCode == RESULT_OK && data != null) {
-            String insureeNumber = data.getStringExtra(Intents.Scan.RESULT);
-            if (!StringUtils.isEmpty(insureeNumber)) {
-                wv.evaluateJavascript(String.format("scanQrCallback(\"%s\");", insureeNumber), null);
-            }
-        } else if (requestCode == REQUEST_PICK_MD_FILE) {
+         if (requestCode == REQUEST_PICK_MD_FILE) {
             if (resultCode == RESULT_OK && data != null) {
                 Uri uri = data.getData();
                 if (uri != null) {

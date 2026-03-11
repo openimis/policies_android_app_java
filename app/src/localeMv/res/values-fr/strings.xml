@@ -482,4 +482,6 @@
     <string name="pay_type_cash">Cash</string>
     <string name="pay_type_mobile_phone">Téléphone portable</string>
     <string name="pay_type_bank_transfer">Virement banquaire</string>
+    <string name="tapToUpload">Cliquez pour changer la photo</string>
+    <string name="SelectBirthDate">Choisir votre date de naissance</string>
 </resources>

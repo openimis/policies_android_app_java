@@ -10,6 +10,6 @@
         android:color="@color/red"/>
 
     <!-- coins arrondis -->
-    <corners android:radius="2dp"/>
+    <corners android:radius="5dp"/>
 
 </shape>

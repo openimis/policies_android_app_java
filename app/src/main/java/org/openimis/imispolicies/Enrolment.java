@@ -28,6 +28,9 @@ public class Enrolment extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_enrolment);
         setTitle(getApplicationContext().getString(R.string.Families));
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
         ca = new ClientAndroidInterface(this);
 
         recyclerView = findViewById(R.id.recyclerFamilies);

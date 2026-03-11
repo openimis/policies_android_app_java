@@ -28,4 +28,5 @@
     <color name="black2">#00000000</color>
     <color name="sbc_header_text">#ff808080</color>
     <color name="help_button_view">#ffcccccc</color>
+    <color name="border_red">#FF0000</color>
 </resources>

@@ -19,7 +19,6 @@
 
             <TextView
                 android:text="@string/Region"
-                android:textStyle="bold"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="5dp"/>
@@ -28,11 +27,11 @@
                 android:id="@+id/spRegion"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
+                android:layout_marginBottom="10dp"
                 android:background="@drawable/spinner_required"/>
 
             <TextView
                 android:text="@string/District"
-                android:layout_marginTop="12dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="5dp"/>
@@ -41,11 +40,11 @@
                 android:id="@+id/spDistrict"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
+                android:layout_marginBottom="10dp"
                 android:background="@drawable/spinner_required"/>
 
             <TextView
                 android:text="@string/Ward"
-                android:layout_marginTop="12dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="5dp"/>
@@ -54,11 +53,11 @@
                 android:id="@+id/spWard"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
+                android:layout_marginBottom="10dp"
                 android:background="@drawable/spinner_required"/>
 
             <TextView
                 android:text="@string/Village"
-                android:layout_marginTop="12dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="5dp"/>
@@ -67,11 +66,11 @@
                 android:id="@+id/spVillage"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
+                android:layout_marginBottom="10dp"
                 android:background="@drawable/spinner_required"/>
 
             <TextView
                 android:text="@string/PovertyStatus"
-                android:layout_marginTop="12dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="5dp"/>
@@ -80,11 +79,11 @@
                 android:id="@+id/spPovertyStatus"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
+                android:layout_marginBottom="10dp"
                 android:background="@drawable/spinner_background"/>
 
             <TextView
                 android:text="@string/SelectFamilyType"
-                android:layout_marginTop="12dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="5dp"/>
@@ -93,11 +92,11 @@
                 android:id="@+id/spFamilyType"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
+                android:layout_marginBottom="10dp"
                 android:background="@drawable/spinner_background"/>
 
             <TextView
                 android:text="@string/ConfirmationType"
-                android:layout_marginTop="12dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="5dp"/>
@@ -106,11 +105,11 @@
                 android:id="@+id/spConfirmationType"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
+                android:layout_marginBottom="10dp"
                 android:background="@drawable/spinner_background"/>
 
             <TextView
                 android:text="@string/approvalOfSMS"
-                android:layout_marginTop="12dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="5dp"/>
@@ -119,11 +118,11 @@
                 android:id="@+id/spApprovalSMS"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
+                android:layout_marginBottom="10dp"
                 android:background="@drawable/spinner_background"/>
 
             <TextView
                 android:text="@string/languageOfSMS"
-                android:layout_marginTop="12dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="5dp"/>
@@ -132,6 +131,7 @@
                 android:id="@+id/spLanguageSMS"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
+                android:layout_marginBottom="10dp"
                 android:background="@drawable/spinner_background"/>
 
             <com.google.android.material.button.MaterialButton
