@@ -669,17 +669,12 @@ public class ClientAndroidInterface {
     private HashMap<String, String> jsonToTable(String jsonString) {
         HashMap<String, String> data = new HashMap<>();
         try {
-            JSONArray array = new JSONArray(jsonString);
-            for (int i = 0; i < array.length(); i++) {
-                JSONObject object = array.getJSONObject(i);
-                String ControlName = object.getString("id");
-                String ControlValue;
-                if (!"null".equals(object.getString("value"))) {
-                    ControlValue = object.getString("value");
-                } else {
-                    ControlValue = null;
-                }
-                data.put(ControlName, ControlValue);
+            JSONObject object = new JSONObject(jsonString);
+            Iterator<String> keys = object.keys();
+            while (keys.hasNext()) {
+                String key = keys.next();
+                String value = object.getString(key);
+                data.put(key, value);
             }
         } catch (JSONException e) {
             e.printStackTrace();

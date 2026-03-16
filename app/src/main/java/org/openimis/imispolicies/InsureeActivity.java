@@ -9,30 +9,25 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.util.SparseArray;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ImageView;
-import android.widget.Spinner;
 import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.FileProvider;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.datepicker.MaterialDatePicker;
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.zxing.client.android.Intents;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.openimis.imispolicies.tools.Log;
+import org.openimis.imispolicies.util.ActivityManager;
 import org.openimis.imispolicies.util.JsonDropdownHelper;
 import org.openimis.imispolicies.util.StringUtils;
 
@@ -40,21 +35,19 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
 import java.util.Locale;
 
 public class InsureeActivity extends AppCompatActivity {
 
     JSONObject familyObject;
-    JSONObject insureeObject;
+    private JSONObject insureeObject;
 
     private ImageView imgInsuree;
     private MaterialCardView cardImage;
     private TextInputEditText txtLastName, txtOtherNames, txtInsuranceNumber, txtBirthDate, txtCurrentAddress, txtPhoneNumber,
             txtEmail, txtIdentificationNumber;
+    private TextInputLayout layoutChfId, layoutOtherNames, layoutLastName, layoutBirthDate, layoutGender, layoutRelationships;
     private MaterialButton btnSave, btnScan;
     private MaterialAutoCompleteTextView ddlMaritalStatus, ddlBeneficiaryCard, ddlGenders, ddlRelationships, ddlCurrentRegion,
             ddlCurrenDistricts, ddlCurrentMunicipality, ddlCurrentVillage, ddlFSPRegion, ddlFSPDistrict, ddlFSPCategory, ddlFSP,
@@ -69,19 +62,12 @@ public class InsureeActivity extends AppCompatActivity {
     private Calendar calendar = Calendar.getInstance();
     private String hfImagePath;
     private String hfNewPhotoPath;
+    private int familyId;
 
     public static String filePath = null;
     public static Uri tempPhotoUri = null;
     public static int RESULT_LOAD_IMG = 1;
     public static int RESULT_SCAN = 100;
-
-    // Adapters
-    private JSONSpinnerAdapter relationAdapter;
-    private JSONSpinnerAdapter genderAdapter;
-
-    // Activity result launchers
-    private ActivityResultLauncher<Intent> cameraLauncher;
-    private ActivityResultLauncher<Intent> galleryLauncher;
 
     // Date picker
     private MaterialDatePicker<Long> datePicker;
@@ -124,24 +110,35 @@ public class InsureeActivity extends AppCompatActivity {
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
-        ca = new ClientAndroidInterface(this);
         insureeObject = new JSONObject();
+        ca = new ClientAndroidInterface(this);
+        insureeId = getIntent().getIntExtra("InsureeId", 0);
+        familyId = getIntent().getIntExtra("FamilyId", 0);
+
         initViews();
         setupPickers();
         setupDatePicker();
         setupListeners();
+        defineRequiredField();
+        canSave();
+
+        layoutRelationships.setVisibility(View.GONE);
 
         String jsonString = getIntent().getStringExtra("FamilyData");
         if (jsonString != null) {
             try {
                 familyObject = new JSONObject(jsonString);
+                isHead = 1;
             } catch (JSONException e) {
                 e.printStackTrace();
             }
         } else {
-            loadInitialData();
+            try {
+                loadInitialData();
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
         }
-
     }
 
     private void initViews() {
@@ -169,6 +166,24 @@ public class InsureeActivity extends AppCompatActivity {
         ddlIdentificationType = findViewById(R.id.ddlIdentificationType);
         ddlVulnerability = findViewById(R.id.ddlVulnerability);
         btnScan = findViewById(R.id.btnScan);
+        layoutChfId = findViewById(R.id.layoutChfID);
+        layoutOtherNames = findViewById(R.id.layoutOtherNames);
+        layoutLastName = findViewById(R.id.layoutLastName);
+        layoutBirthDate = findViewById(R.id.layoutBirthDate);
+        layoutGender = findViewById(R.id.layoutGenders);
+        txtPhoneNumber = findViewById(R.id.txtPhoneNumber);
+        txtEmail = findViewById(R.id.txtEmail);
+        txtCurrentAddress = findViewById(R.id.txtCurrentAddress);
+        txtIdentificationNumber = findViewById(R.id.txtIdentificationNumber);
+        layoutRelationships = findViewById(R.id.layoutRelationships);
+    }
+
+    private void defineRequiredField(){
+        layoutChfId.setError(" ");
+        layoutLastName.setError(" ");
+        layoutBirthDate.setError(" ");
+        layoutOtherNames.setError(" ");
+        layoutGender.setError(" ");
     }
 
     private void setupPickers() {
@@ -182,6 +197,19 @@ public class InsureeActivity extends AppCompatActivity {
         fillProfession();
         fillIdentificationTypes();
         fillVulnerability();
+    }
+
+    private void canSave(){
+        if(txtInsuranceNumber.getText().toString().isEmpty() ||
+                txtBirthDate.getText().toString().isEmpty() ||
+                txtLastName.getText().toString().isEmpty() ||
+                ddlGenders.getText().toString().isEmpty() ||
+                txtOtherNames.getText().toString().isEmpty()
+        ){
+            btnSave.setEnabled(false);
+        }else {
+            btnSave.setEnabled(true);
+        }
     }
 
     private void fillRelationships (){
@@ -205,6 +233,7 @@ public class InsureeActivity extends AppCompatActivity {
                             if (selectedItem != null) {
                                 try {
                                     String relationId = selectedItem.getString("RelationId");
+                                    insureeObject.put("ddlRelationships", relationId);
                                 } catch (JSONException e) {
                                     e.printStackTrace();
                                 }
@@ -212,6 +241,17 @@ public class InsureeActivity extends AppCompatActivity {
                         }
                     }
             );
+
+            if(insureeObject != null && insureeObject.has("Relation") && !insureeObject.getString("Relation").isEmpty()){
+                JsonDropdownHelper.selectValue(
+                        this,
+                        ddlRelationships,
+                        relationshipsArray,
+                        textLanguage,
+                        "RelationId",
+                        insureeObject.getString("Relation")
+                );
+            }
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
@@ -233,12 +273,9 @@ public class InsureeActivity extends AppCompatActivity {
                             if(selectedItem != null){
                                 try {
                                     String regionId = selectedItem.getString("LocationId");
-                                    ddlCurrenDistricts.setText("");
-                                    ddlCurrentMunicipality.setText("");
-                                    ddlCurrentVillage.setText("");
                                     fillCurrentDistricts(regionId);
-                                    fillCurrentWard(null);
-                                    fillCurrentVillage(null);
+                                    ddlCurrentMunicipality.setAdapter(null);
+                                    ddlCurrentVillage.setAdapter(null);
                                 } catch (JSONException e) {
                                     throw new RuntimeException(e);
                                 }
@@ -246,6 +283,17 @@ public class InsureeActivity extends AppCompatActivity {
                         }
                     }
             );
+
+            if(insureeObject != null && insureeObject.has("CurRegion") && !insureeObject.getString("CurRegion").isEmpty()){
+                JsonDropdownHelper.selectValue(
+                        this,
+                        ddlCurrentRegion,
+                        regionsArray,
+                        "LocationName",
+                        "LocationId",
+                        insureeObject.getString("CurRegion")
+                );
+            }
         } catch (JSONException e){
             throw new RuntimeException(e);
         }
@@ -279,6 +327,17 @@ public class InsureeActivity extends AppCompatActivity {
                         }
                     }
             );
+
+            if(insureeObject != null && insureeObject.has("FSPRegion") && !insureeObject.getString("FSPRegion").isEmpty()){
+                JsonDropdownHelper.selectValue(
+                        this,
+                        ddlFSPRegion,
+                        regionsArray,
+                        "LocationName",
+                        "LocationId",
+                        insureeObject.getString("FSPRegion")
+                );
+            }
         } catch (JSONException e){
             throw new RuntimeException(e);
         }
@@ -312,6 +371,17 @@ public class InsureeActivity extends AppCompatActivity {
                             }
                         }
                 );
+
+                if(insureeObject != null && insureeObject.has("CurDistrict") && !insureeObject.getString("CurDistrict").isEmpty()){
+                    JsonDropdownHelper.selectValue(
+                            this,
+                            ddlCurrenDistricts,
+                            districtsArray,
+                            "LocationName",
+                            "LocationId",
+                            insureeObject.getString("CurDistrict")
+                    );
+                }
             }
         } catch (JSONException e) {
             throw new RuntimeException(e);
@@ -348,6 +418,18 @@ public class InsureeActivity extends AppCompatActivity {
                             }
                         }
                 );
+
+                if(insureeObject != null && insureeObject.has("FSPDistrict") &&
+                        !insureeObject.getString("FSPDistrict").isEmpty()){
+                    JsonDropdownHelper.selectValue(
+                            this,
+                            ddlFSPDistrict,
+                            districtsArray,
+                            "LocationName",
+                            "LocationId",
+                            insureeObject.getString("FSPDistrict")
+                    );
+                }
             }
         } catch (JSONException e) {
             throw new RuntimeException(e);
@@ -380,6 +462,18 @@ public class InsureeActivity extends AppCompatActivity {
                             }
                         }
                 );
+
+                if(insureeObject != null && insureeObject.has("CurWard") &&
+                        !insureeObject.getString("CurWard").isEmpty()){
+                    JsonDropdownHelper.selectValue(
+                            this,
+                            ddlCurrentMunicipality,
+                            wardsArray,
+                            "LocationName",
+                            "LocationId",
+                            insureeObject.getString("CurWard")
+                    );
+                }
             }
         } catch (JSONException e) {
             throw new RuntimeException(e);
@@ -411,6 +505,18 @@ public class InsureeActivity extends AppCompatActivity {
                         }
                     }
             );
+
+            if(insureeObject != null && insureeObject.has("FSPCategory") &&
+                    !insureeObject.getString("FSPCategory").isEmpty()){
+                JsonDropdownHelper.selectValue(
+                        this,
+                        ddlFSPCategory,
+                        wardsArray,
+                        "HFLevel",
+                        "Code",
+                        insureeObject.getString("FSPCategory")
+                );
+            }
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
@@ -433,12 +539,25 @@ public class InsureeActivity extends AppCompatActivity {
                                 if(selectedItem != null){
                                     try {
                                         String villageId = selectedItem.getString("LocationId");
+                                        insureeObject.put("ddlCurrentVillage", villageId);
                                     } catch (JSONException e) {
                                         throw new RuntimeException(e);
                                     }
                                 }
                             }
                         });
+
+                if(insureeObject != null && insureeObject.has("CurVillage") &&
+                        !insureeObject.getString("CurVillage").isEmpty()){
+                    JsonDropdownHelper.selectValue(
+                            this,
+                            ddlCurrentVillage,
+                            villagesArray,
+                            "LocationName",
+                            "LocationId",
+                            insureeObject.getString("CurVillage")
+                    );
+                }
             } catch (JSONException e) {
                 throw new RuntimeException(e);
             }
@@ -462,12 +581,25 @@ public class InsureeActivity extends AppCompatActivity {
                                 if(selectedItem != null){
                                     try {
                                         String FSPId = selectedItem.getString("HFID");
+                                        insureeObject.put("ddlFSP", FSPId);
                                     } catch (JSONException e) {
                                         throw new RuntimeException(e);
                                     }
                                 }
                             }
                         });
+
+                if(insureeObject != null && insureeObject.has("HFID") &&
+                        !insureeObject.getString("HFID").isEmpty()){
+                    JsonDropdownHelper.selectValue(
+                            this,
+                            ddlFSP,
+                            villagesArray,
+                            "HF",
+                            "HFID",
+                            insureeObject.getString("HFID")
+                    );
+                }
             } catch (JSONException e) {
                 throw new RuntimeException(e);
             }
@@ -495,6 +627,8 @@ public class InsureeActivity extends AppCompatActivity {
                             if (selectedItem != null) {
                                 try {
                                     String code = selectedItem.getString("Code");
+                                    insureeObject.put("ddlGender", code);
+                                    canSave();
                                 } catch (JSONException e) {
                                     e.printStackTrace();
                                 }
@@ -502,6 +636,18 @@ public class InsureeActivity extends AppCompatActivity {
                         }
                     }
             );
+
+            if(insureeObject != null && insureeObject.has("Gender") &&
+                    !insureeObject.getString("Gender").isEmpty()){
+                JsonDropdownHelper.selectValue(
+                        this,
+                        ddlGenders,
+                        gendersArray,
+                        textLanguage,
+                        "Code",
+                        insureeObject.getString("Gender")
+                        );
+            }
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
@@ -525,11 +671,24 @@ public class InsureeActivity extends AppCompatActivity {
                         public void onItemSelected(JSONObject selectedItem, int position) {
                             try {
                                 String educationId = selectedItem.getString("EducationId");
+                                insureeObject.put("ddlEducation", educationId);
                             } catch (JSONException e) {
                                 throw new RuntimeException(e);
                             }
                         }
                     });
+
+            if(insureeObject != null && insureeObject.has("Education") &&
+                    !insureeObject.getString("Education").isEmpty()){
+                JsonDropdownHelper.selectValue(
+                        this,
+                        ddlEducation,
+                        educationsArray,
+                        textLanguage,
+                        "Code",
+                        insureeObject.getString("Education")
+                );
+            }
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
@@ -551,11 +710,24 @@ public class InsureeActivity extends AppCompatActivity {
                         public void onItemSelected(JSONObject selectedItem, int position) {
                             try {
                                 String professionId = selectedItem.getString("ProfessionId");
+                                insureeObject.put("ddlProfession", professionId);
                             } catch (JSONException e) {
                                 throw new RuntimeException(e);
                             }
                         }
                     });
+
+            if(insureeObject != null && insureeObject.has("Profession") &&
+                    !insureeObject.getString("Profession").isEmpty()){
+                JsonDropdownHelper.selectValue(
+                        this,
+                        ddlProfession,
+                        professionsArray,
+                        textLanguage,
+                        "Code",
+                        insureeObject.getString("Profession")
+                );
+            }
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
@@ -577,11 +749,24 @@ public class InsureeActivity extends AppCompatActivity {
                         public void onItemSelected(JSONObject selectedItem, int position) {
                             try {
                                 String identificationTypeId = selectedItem.getString("IdentificationCode");
+                                insureeObject.put("ddlIdentificationType", identificationTypeId);
                             } catch (JSONException e) {
                                 throw new RuntimeException(e);
                             }
                         }
                     });
+
+            if(insureeObject != null && insureeObject.has("typeOfId") &&
+                    !insureeObject.getString("TypeOfId").isEmpty()){
+                JsonDropdownHelper.selectValue(
+                        this,
+                        ddlIdentificationType,
+                        identificationTypesArray,
+                        textLanguage,
+                        "Code",
+                        insureeObject.getString("TypeOfId")
+                );
+            }
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
@@ -603,6 +788,7 @@ public class InsureeActivity extends AppCompatActivity {
                             if (selectedItem != null) {
                                 try {
                                     String vulnerabilityId = selectedItem.getString("value");
+                                    insureeObject.put("ddlVulnerability", vulnerabilityId);
                                 } catch (JSONException e) {
                                     e.printStackTrace();
                                 }
@@ -610,6 +796,18 @@ public class InsureeActivity extends AppCompatActivity {
                         }
                     }
             );
+
+            if(insureeObject != null && insureeObject.has("Vulnerability") &&
+                    !insureeObject.getString("Vulnerability").isEmpty()){
+                JsonDropdownHelper.selectValue(
+                        this,
+                        ddlVulnerability,
+                        vulnerabilityArray,
+                        "key",
+                        "value",
+                        insureeObject.getString("Vulnerability")
+                );
+            }
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
@@ -632,7 +830,7 @@ public class InsureeActivity extends AppCompatActivity {
                             if (selectedItem != null) {
                                 try {
                                     String code = selectedItem.getString("Code");
-                                    String status = selectedItem.getString("Status");
+                                    insureeObject.put("ddlMaritalStatus", code);
                                 } catch (JSONException e) {
                                     e.printStackTrace();
                                 }
@@ -640,6 +838,18 @@ public class InsureeActivity extends AppCompatActivity {
                         }
                     }
             );
+
+            if(insureeObject != null && insureeObject.has("Marital") &&
+                    !insureeObject.getString("Marital").isEmpty()){
+                JsonDropdownHelper.selectValue(
+                        this,
+                        ddlMaritalStatus,
+                        maritalStatusData,
+                        "Status",
+                        "Code",
+                        insureeObject.getString("Marital")
+                );
+            }
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
@@ -662,17 +872,26 @@ public class InsureeActivity extends AppCompatActivity {
                             if (selectedItem != null) {
                                 try {
                                     String value = selectedItem.getString("value");
-                                    String key = selectedItem.getString("key");
+                                    insureeObject.put("ddlBeneficiaryCard", value);
                                 } catch (JSONException e) {
                                     e.printStackTrace();
                                 }
-                            } else {
-                                // Texte par défaut sélectionné
-                                Log.d("BeneficiaryCard", "Default selected");
                             }
                         }
                     }
             );
+
+            if(insureeObject != null && insureeObject.has("CardIssued") &&
+                    !insureeObject.getString("CardIssued").isEmpty()){
+                JsonDropdownHelper.selectValue(
+                        this,
+                        ddlBeneficiaryCard,
+                        yesNoArray,
+                        "key",
+                        "value",
+                        insureeObject.getString("CardIssued")
+                );
+            }
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
@@ -774,13 +993,6 @@ public class InsureeActivity extends AppCompatActivity {
 
             loadImage(imageUri);
 
-            // Log pour débogage
-            Log.d("selectImageCallback", "Image loaded from URI: " + imageUri.toString());
-            Log.d("selectImageCallback", "Image path: " + imagePath);
-
-            // Afficher un message de confirmation
-            Toast.makeText(this, "Image selected successfully", Toast.LENGTH_SHORT).show();
-
         } else {
             Log.d("selectImageCallback", "No image selected");
             Toast.makeText(this, "No image selected", Toast.LENGTH_SHORT).show();
@@ -859,35 +1071,37 @@ public class InsureeActivity extends AppCompatActivity {
     }
 
 
-    private void loadInitialData() {
-        // Load any initial data from intent or database
+    private void loadInitialData() throws JSONException {
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
             insureeId = extras.getInt("insureeId", 0);
-            isOffline = extras.getString("isOffline", ".");
-            isHead = extras.getInt("isHead", -1);
-            photoPath = extras.getString("photoPath", "");
-            newPhotoPath = extras.getString("newPhotoPath", "");
-
-            // Populate fields with data if editing
             if (insureeId > 0) {
-                // Load existing insuree data
-                loadInsureeData(insureeId);
+                String insuree = ca.getInsuree(insureeId);
+                insureeObject = new JSONObject(insuree);
+                isOffline = insureeObject.getString("isOffline");
+                isHead = insureeObject.getInt("isHead");
+                if(isHead == 1){
+                    layoutRelationships.setVisibility(View.GONE);
+                } else {
+                    layoutRelationships.setVisibility(View.VISIBLE);
+                }
+                bindInsureeData(insureeObject);
+            } else {
+                layoutRelationships.setVisibility(View.VISIBLE);
             }
         }
     }
 
-    private void loadInsureeData(int id) {
-        // Implement loading data from database or repository
-        Toast.makeText(this, "Loading insuree data for ID: " + id, Toast.LENGTH_SHORT).show();
+    private void bindInsureeData(JSONObject object) throws JSONException {
 
-        // Example of setting data:
-        // txtInsuranceNumber.setText("123456");
-        // txtOtherNames.setText("John");
-        // txtLastName.setText("Doe");
-        // txtBirthDate.setText("1990-01-01");
-        // ddlGender.setText("Male", false);
-        // ddlRelationship.setText("Spouse", false);
+         txtInsuranceNumber.setText(object.getString("CHFID"));
+         txtOtherNames.setText(object.getString("OtherNames"));
+         txtLastName.setText(object.getString("LastName"));
+         txtBirthDate.setText(object.getString("DOB"));
+         txtIdentificationNumber.setText(object.getString("IdentificationNumber"));
+         txtPhoneNumber.setText(object.getString("PhoneNumber"));
+         txtEmail.setText(object.getString("Email"));
+         txtCurrentAddress.setText(object.getString("CurrentAddress"));
 
         // Load image if exists
         // if (photoPath != null && !photoPath.isEmpty()) {
@@ -895,52 +1109,68 @@ public class InsureeActivity extends AppCompatActivity {
         // }
     }
 
-    // Method to handle no image
-    public void onNoImage(ImageView imageView) {
-        // Set default image when loading fails
-        imageView.setImageResource(R.drawable.person);
-    }
-
-    private boolean validateForm() {
-        boolean isValid = true;
-
-        return isValid;
-    }
-
-    // Method to save the form data
     public void saveFormData() {
-        // Validate required fields
-        if (!validateForm()) {
-            return;
+
+        try {
+            insureeObject.put("isOffline", isOffline);
+            insureeObject.put("hfisHead", isHead);
+            insureeObject.put("hfImagePath", photoPath);
+            insureeObject.put("hfNewPhotoPath", hfNewPhotoPath);
+            insureeObject.put("txtInsuranceNumber", txtInsuranceNumber.getText().toString());
+            insureeObject.put("txtLastName", txtLastName.getText().toString());
+            insureeObject.put("txtOtherNames", txtOtherNames.getText().toString());
+            insureeObject.put("txtBirthDate", txtBirthDate.getText().toString());
+            insureeObject.put("txtIdentificationNumber", txtIdentificationNumber.getText().toString());
+            insureeObject.put("txtPhoneNumber", txtPhoneNumber.getText().toString());
+            insureeObject.put("txtEmail", txtEmail.getText().toString());
+            insureeObject.put("txtCurrentAddress", txtCurrentAddress.getText().toString());
+            insureeObject.put("hfInsureeId", String.valueOf(insureeId));
+
+            if(familyObject != null){
+                familyId = ca.SaveFamily(familyObject.toString(),insureeObject.toString());
+                if(familyId > 0){
+                    Intent intent = new Intent(this, FamilyInsurees.class);
+                    intent.putExtra("FamilyId", familyId);
+                    startActivity(intent);
+                    ActivityManager.addActivity(this);
+                    ActivityManager.finishCurrentAndPrevious();
+                }
+            } else {
+                // modification d'un assuré
+                String FamilyPolicy = ca.getFamilyPolicy(familyId);
+                JSONArray policies = new JSONArray(FamilyPolicy);
+                JSONObject policy = policies.getJSONObject(0);
+                int MemberCount = Integer.parseInt(policy.getString("MemberCount"));
+                int Threshold = Integer.parseInt(policy.getString("Threshold"));
+                int TotalIns = Integer.parseInt(policy.getString("Ins"));
+                int PolicyId = Integer.parseInt(policy.getString("PolicyId"));
+                int exceedThreshold = -1;
+
+                if (PolicyId > 0 && insureeId == 0) {
+
+                    if (TotalIns >= MemberCount) {
+                        exceedThreshold = 0;
+                        ca.ShowDialog(getResources().getString(R.string.ExceedMemberCount));
+                    } else if (TotalIns >= Threshold) {
+                        exceedThreshold = 1;
+                    } else {
+                        exceedThreshold = 0;
+                    }
+                }
+                try {
+                    ca.SaveInsuree(insureeObject.toString(),familyId, isHead, 0, 0);
+                    Intent intent = new Intent(this, FamilyInsurees.class);
+                    intent.putExtra("FamilyId", familyId);
+                    startActivity(intent);
+                    ActivityManager.addActivity(this);
+                    ActivityManager.finishCurrentAndPrevious();
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
         }
-
-        // Collect data
-//        String relation = ddRelationship.getSelectedItem().toString();
-//        String insuranceNumber = txtInsuranceNumber.getText().toString().trim();
-//        String otherNames = txtOtherNames.getText().toString().trim();
-//        String lastName = txtLastName.getText().toString().trim();
-//        String birthDate = txtBirthDate.getText().toString().trim();
-//        String gender = ddGender.getSelectedItem().toString();
-
-        // Create object or save to database
-        JSONObject insureeObj = new JSONObject();
-
-//        insuree.setInsureeId(insureeId);
-//        insuree.setChfid(insuranceNumber);
-//        insuree.setOtherNames(otherNames);
-//        insuree.setLastName(lastName);
-//        insuree.setDob(birthDate);
-//        insuree.setGender(gender);
-//        insuree.setPhotoPath(photoPath);
-//        insuree.setNewPhotoPath(newPhotoPath);
-//        insuree.setOffline(isOffline);
-//        insuree.setHead(isHead == 1);
-
-        // Save to database
-        // databaseHelper.insertOrUpdateInsuree(insuree);
-
-        ca.SaveFamily(familyObject.toString(),insureeObj.toString());
-        Toast.makeText(this, "Form saved successfully", Toast.LENGTH_SHORT).show();
-        finish();
     }
 }

@@ -10,41 +10,40 @@ import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class FamilyAdapter extends RecyclerView.Adapter<FamilyAdapter.ViewHolder> {
+public class InsureeAdapter extends RecyclerView.Adapter<InsureeAdapter.ViewHolder> {
 
     private Context context;
-    private JSONArray families;
+    private JSONArray insurees;
 
-    public FamilyAdapter(Context context, JSONArray families) {
+    public InsureeAdapter(Context context, JSONArray insurees) {
         this.context = context;
-        this.families = families;
+        this.insurees = insurees;
     }
 
-    @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
+    @NonNull
+    @Override
+    public InsureeAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(context)
-                .inflate(R.layout.item_family, parent, false);
+                .inflate(R.layout.list_item_insuree, parent, false);
 
-        return new ViewHolder(view);
+        return new InsureeAdapter.ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
-
+    public void onBindViewHolder(@NonNull InsureeAdapter.ViewHolder holder, int position) {
         try {
-            JSONObject family = families.getJSONObject(position);
+            JSONObject family = insurees.getJSONObject(position);
             holder.name.setText(family.getString("InsureeName"));
             holder.chfid.setText(family.getString("CHFID"));
-            holder.region.setText(family.getString("RegionName"));
-            holder.district.setText(family.getString("DistrictName"));
-            holder.village.setText(family.getString("VillageName"));
+            holder.dob.setText(family.getString("DOB"));
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
@@ -59,36 +58,35 @@ public class FamilyAdapter extends RecyclerView.Adapter<FamilyAdapter.ViewHolder
 
     @Override
     public int getItemCount() {
-        return families.length();
+        return insurees.length();
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder{
 
-        TextView name,chfid,region, district, village;
+        TextView name,chfid,dob;
         ImageView btnContextMenu;
 
         public ViewHolder(View itemView) {
             super(itemView);
-
-            name = itemView.findViewById(R.id.txtFamilyInsureeName);
-            chfid = itemView.findViewById(R.id.txtFamilyInsuranceNumber);
-            region = itemView.findViewById(R.id.txtRegion);
-            district = itemView.findViewById(R.id.txtDistrict);
-            village = itemView.findViewById(R.id.txtVillage);
-            btnContextMenu = itemView.findViewById(R.id.btnContextMenuFamily);
+            chfid = itemView.findViewById(R.id.CHFID);
+            name = itemView.findViewById(R.id.InsureeName);
+            dob = itemView.findViewById(R.id.item_dob);
+            btnContextMenu = itemView.findViewById(R.id.btnContextMenuInsuree);
         }
     }
 
     private void showContextMenu(View anchorView, int position) {
         PopupMenu popup = new PopupMenu(context, anchorView);
-        popup.getMenuInflater().inflate(R.menu.family_menu, popup.getMenu());
+        popup.getMenuInflater().inflate(R.menu.insuree_menu, popup.getMenu());
 
         popup.setOnMenuItemClickListener(item -> {
-            if(item.getItemId() == R.id.family_menu_edit){
+            if(item.getItemId() == R.id.insuree_menu_edit){
                 try {
-                    JSONObject family = families.getJSONObject(position);
-                    int familyId = family.getInt("FamilyId");
-                    Intent intent = new Intent(context, FamilyInsurees.class);
+                    JSONObject insuree = insurees.getJSONObject(position);
+                    int familyId = insuree.getInt("FamilyId");
+                    int insureeId = insuree.getInt("InsureeId");
+                    Intent intent = new Intent(context, InsureeActivity.class);
+                    intent.putExtra("InsureeId", insureeId);
                     intent.putExtra("FamilyId", familyId);
                     context.startActivity(intent);
                 } catch (JSONException e) {

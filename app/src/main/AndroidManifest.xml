@@ -49,6 +49,9 @@
         tools:ignore="GoogleAppIndexingWarning"
         tools:replace="android:icon,android:label">
         <activity
+            android:name=".FamilyInsurees"
+            android:exported="false" />
+        <activity
             android:name=".InsureeActivity"
             android:exported="false" />
         <activity

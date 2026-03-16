@@ -68,4 +68,29 @@ public class JsonDropdownHelper {
             }
         });
     }
+
+    /**
+     * Méthode utilitaire pour pré-sélectionner une valeur après le bind
+     */
+    public static void selectValue(Context context,
+                                   MaterialAutoCompleteTextView dropdown,
+                                   JSONArray jsonArray,
+                                   String displayField,
+                                   String valueField,
+                                   String savedValue) {
+        try {
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject item = jsonArray.getJSONObject(i);
+                String itemValue = item.getString(valueField);
+
+                if (itemValue.equals(savedValue)) {
+                    String displayValue = item.getString(displayField);
+                    dropdown.setText(displayValue, false);
+                    break;
+                }
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
 }

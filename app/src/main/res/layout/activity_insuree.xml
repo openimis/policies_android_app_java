@@ -33,17 +33,17 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
             android:orientation="horizontal">
 
             <!-- Insurance Number -->
             <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/layoutChfID"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:hint="@string/InsuranceNumber"
                 app:boxBackgroundMode="outline"
                 android:layout_weight="1"
-                app:boxStrokeColor="@color/border_red"
+                app:errorIconDrawable="@null"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -72,12 +72,12 @@
 
         <!-- Other Names -->
         <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/layoutOtherNames"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
             android:hint="@string/OtherNames"
             app:boxBackgroundMode="outline"
-            app:boxStrokeColor="@color/border_red"
+            app:errorIconDrawable="@null"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -90,12 +90,12 @@
 
         <!-- Last Name -->
         <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/layoutLastName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            app:boxStrokeColor="@color/border_red"
             android:hint="@string/LastName"
             app:boxBackgroundMode="outline"
+            app:errorIconDrawable="@null"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -147,15 +147,15 @@
 
         <!-- Birth Date -->
         <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/layoutBirthDate"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
             android:hint="@string/BirthDate"
             app:boxBackgroundMode="outline"
             app:endIconMode="custom"
-            app:boxStrokeColor="@color/red"
             app:endIconDrawable="@drawable/ic_calendar_24"
             app:endIconContentDescription="@string/SelectBirthDate"
+            app:errorIconDrawable="@null"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -173,11 +173,9 @@
             android:id="@+id/layoutGenders"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
             android:hint="@string/Gender"
             app:boxBackgroundMode="outline"
             app:endIconMode="dropdown_menu"
-            app:boxStrokeColor="@color/border_red"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
 
             <com.google.android.material.textfield.MaterialAutoCompleteTextView
@@ -569,7 +567,8 @@
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:text="@string/Save"
-            android:backgroundTint="@color/colorPrimary" />
+            android:enabled="false"
+            android:background="@drawable/button_background"/>
 
     </LinearLayout>
 </ScrollView>

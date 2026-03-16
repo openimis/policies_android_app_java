@@ -7,46 +7,96 @@
     android:layout_height="wrap_content"
     android:layout_marginBottom="8dp"
     app:cardCornerRadius="6dp"
-    app:cardElevation="3dp">
+    app:cardElevation="5dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="12dp"
-        android:orientation="vertical">
+        android:orientation="horizontal">
 
-        <TextView
-            android:id="@+id/txtFamilyInsureeName"
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="12dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/txtFamilyInsuranceNumber"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="20sp"
+                android:textColor="@color/colorAccent"
+                android:layout_marginBottom="5dp"
+                android:text="CHFID"/>
+
+            <TextView
+                android:id="@+id/txtFamilyInsureeName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Nom Assuré"
+                android:textStyle="bold"
+                android:textColor="@color/colorPrimary"
+                android:textSize="20sp"
+                android:layout_marginBottom="5dp"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/txtRegion"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="10dp"
+                    android:text="Region"/>
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="10dp"
+                    android:src="@drawable/arrow_forward"/>
+
+                <TextView
+                    android:id="@+id/txtDistrict"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="10dp"
+                    android:text="District"/>
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="10dp"
+                    android:src="@drawable/arrow_forward"/>
+
+                <TextView
+                    android:id="@+id/txtVillage"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Village"/>
+
+            </LinearLayout>
+        </LinearLayout>
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Nom Assuré"
-            android:textStyle="bold"
-            android:textSize="18sp"/>
+            android:layout_gravity="center_vertical"
+            android:gravity="end">
 
-        <TextView
-            android:id="@+id/txtFamilyInsuranceNumber"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="CHFID"/>
+            <ImageView
+                android:id="@+id/btnContextMenuFamily"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/context_menu"
+                android:background="?selectableItemBackgroundBorderless"
+                android:contentDescription="Menu"/>
+        </LinearLayout>
 
-        <TextView
-            android:id="@+id/txtRegion"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Region"/>
-
-        <TextView
-            android:id="@+id/txtDistrict"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="District"/>
-
-        <TextView
-            android:id="@+id/txtVillage"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Village"/>
 
     </LinearLayout>
+
+
 
 </androidx.cardview.widget.CardView>

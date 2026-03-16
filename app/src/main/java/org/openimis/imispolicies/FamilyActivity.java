@@ -5,17 +5,21 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
-import android.widget.Spinner;
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.google.android.material.textfield.MaterialAutoCompleteTextView;
+import com.google.android.material.textfield.TextInputLayout;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.openimis.imispolicies.util.JsonDropdownHelper;
 
 public class FamilyActivity extends AppCompatActivity {
 
-    Spinner spRegion, spDistrict, spWard, spVillage, spPovertyStatus, spFamilyType,
+    private MaterialAutoCompleteTextView spRegion, spDistrict, spWard, spVillage, spPovertyStatus, spFamilyType,
             spConfirmationType, spApprovalSMS, spLanguageSMS;
+    private TextInputLayout layoutRegion, layoutDistrict, layoutWard, layoutVillage;
     Button btnNext;
 
     int familyId = 0;
@@ -43,6 +47,10 @@ public class FamilyActivity extends AppCompatActivity {
         spApprovalSMS = findViewById(R.id.spApprovalSMS);
         spLanguageSMS = findViewById(R.id.spLanguageSMS);
         btnNext = findViewById(R.id.btnNext);
+        layoutRegion = findViewById(R.id.layoutRegion);
+        layoutDistrict = findViewById(R.id.layoutDistrict);
+        layoutWard = findViewById(R.id.layoutWard);
+        layoutVillage = findViewById(R.id.layoutVillage);
 
         Intent intent = getIntent();
         if (intent != null && intent.hasExtra("familyId")){
@@ -50,7 +58,8 @@ public class FamilyActivity extends AppCompatActivity {
         }
 
         try {
-            loadRegions();
+            defineRequiredField();
+            fillRegions();
             getPovertyStatus();
             getConfirmationTypes();
             getFamilyTypes();
@@ -60,154 +69,258 @@ public class FamilyActivity extends AppCompatActivity {
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
-        canSaveFamily();
+        canSave();
     }
 
-    private void loadRegions() throws JSONException {
+    private void defineRequiredField(){
+        layoutRegion.setError(" ");
+        layoutDistrict.setError(" ");
+        layoutWard.setError(" ");
+        layoutVillage.setError(" ");
+    }
+
+    private void fillRegions() throws JSONException {
         String regions = ca.getRegions();
         JSONArray regionsArray = new JSONArray(regions);
-        JSONObject emptyItem = new JSONObject();
-        emptyItem.put("LocationId", "");
-        emptyItem.put("LocationName", getApplicationContext().getResources().getString(R.string.SelectRegion));
-        JSONArray finalRegions = addFirst(regionsArray, emptyItem);
-        JSONSpinnerAdapter adapter =
-                new JSONSpinnerAdapter(this, finalRegions, "LocationName");
-        spRegion.setAdapter(adapter);
+        JsonDropdownHelper.bindDropdown(
+                this,
+                spRegion,
+                regionsArray,
+                "LocationName",
+                null,
+                new JsonDropdownHelper.OnJsonItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(JSONObject selectedItem, int position) {
+                        try {
+                            String regionId = selectedItem.getString("LocationId");
+                            fillDistricts(regionId);
+                            spDistrict.setText("");
+                            spWard.setText("");
+                            spVillage.setText("");
+                            spWard.setAdapter(null);
+                            spVillage.setAdapter(null);
+                            canSave();
+                            familyObj.put("ddlRegion", regionId);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+        );
     }
 
-    private void loadDistricts(int regionId) throws JSONException {
-        String districts = ca.getDistricts(regionId);
+    private void fillDistricts(String regionId) throws JSONException {
+        String districts = ca.getDistricts(Integer.parseInt(regionId));
         JSONArray districtArray = new JSONArray(districts);
-        JSONObject emptyItem = new JSONObject();
-        emptyItem.put("LocationId", "");
-        emptyItem.put("LocationName", getApplicationContext().getResources().getString(R.string.SelectDistrict));
-        JSONArray finalDistricts = addFirst(districtArray, emptyItem);
-        JSONSpinnerAdapter adapter = new JSONSpinnerAdapter(this, finalDistricts, "LocationName");
-        spDistrict.setAdapter(adapter);
+        JsonDropdownHelper.bindDropdown(
+                this,
+                spDistrict,
+                districtArray,
+                "LocationName",
+                null,
+                new JsonDropdownHelper.OnJsonItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(JSONObject selectedItem, int position) {
+                        try {
+                            String districtId = selectedItem.getString("LocationId");
+                            fillWards(Integer.parseInt(districtId));
+                            spWard.setText("");
+                            spVillage.setText("");
+                            spVillage.setAdapter(null);
+                            canSave();
+                            familyObj.put("ddlDistrict", districtId);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+        );
     }
 
-    private void loadWards(int districtId) throws JSONException {
+    private void fillWards(int districtId) throws JSONException {
         String wards = ca.getWards(districtId);
         JSONArray wardsArray = new JSONArray(wards);
-        JSONObject emptyObject = new JSONObject();
-        emptyObject.put("LocationId", "");
-        emptyObject.put("LocationName", getApplicationContext().getResources().getString(R.string.SelectWard));
-        JSONArray finalWards = addFirst(wardsArray, emptyObject);
-        JSONSpinnerAdapter adapter = new JSONSpinnerAdapter(this, finalWards, "LocationName");
-        spWard.setAdapter(adapter);
+        JsonDropdownHelper.bindDropdown(
+                this,
+                spWard,
+                wardsArray,
+                "LocationName",
+                null,
+                new JsonDropdownHelper.OnJsonItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(JSONObject selectedItem, int position) {
+                        try {
+                            String wardId = selectedItem.getString("LocationId");
+                            spVillage.setText("");
+                            fillVillages(Integer.parseInt(wardId));
+                            canSave();
+                            familyObj.put("ddlWard", wardId);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+        );
     }
 
-    private void loadVillages(int wardId) throws JSONException {
+    private void fillVillages(int wardId) throws JSONException {
         String villages = ca.getVillages(wardId);
         JSONArray villagesArray = new JSONArray(villages);
-        JSONObject emptyObject = new JSONObject();
-        emptyObject.put("LocationId", "");
-        emptyObject.put("LocationName", getApplicationContext().getResources().getString(R.string.SelectVillage));
-        JSONArray finalVillages = addFirst(villagesArray, emptyObject);
-        JSONSpinnerAdapter adapter = new JSONSpinnerAdapter(this, finalVillages, "LocationName");
-        spVillage.setAdapter(adapter);
+        JsonDropdownHelper.bindDropdown(
+                this,
+                spVillage,
+                villagesArray,
+                "LocationName",
+                null,
+                new JsonDropdownHelper.OnJsonItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(JSONObject selectedItem, int position) {
+                        try {
+                            familyObj.put("ddlVillage", selectedItem.getString("LocationId"));
+                            canSave();
+                        } catch (JSONException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                }
+        );
     }
 
     private void saveFamily() {
         try {
-            familyObj.put("FamilyId", familyId);
+            familyObj.put("hfFamilyId", String.valueOf(familyId));
             Intent intent = new Intent(this, InsureeActivity.class);
             intent.putExtra("FamilyData", familyObj.toString());
+            intent.putExtra("FamilyId", familyId);
             startActivity(intent);
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private void canSaveFamily() {
-
-        try {
-            JSONObject selectedVillage =
-                    (JSONObject) spVillage.getSelectedItem();
-            if(spVillage.getSelectedItem() == null || selectedVillage.getString("LocationId").isEmpty()){
-                btnNext.setEnabled(false);
-            } else {
-                btnNext.setEnabled(true);
-            }
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
+    private void canSave() {
+        if(spVillage.getText().toString().isEmpty()){
+            btnNext.setEnabled(false);
+        } else {
+            btnNext.setEnabled(true);
         }
     }
 
     private void getPovertyStatus() throws JSONException {
         String yesNoString = ca.getYesNo();
         JSONArray yesNoArray = new JSONArray(yesNoString);
-
-        JSONObject hint = new JSONObject();
-        hint.put("value", getString(R.string.SelectPovertyStatus));
-        hint.put("key", "");
-
-        JSONArray finalYesNoArray = addFirst(yesNoArray, hint);
-        JSONSpinnerAdapter adapter =
-                new JSONSpinnerAdapter(this, finalYesNoArray, "value");
-
-        spPovertyStatus.setAdapter(adapter);
+        JsonDropdownHelper.bindDropdown(
+                this,
+                spPovertyStatus,
+                yesNoArray,
+                "key",
+                null,
+                new JsonDropdownHelper.OnJsonItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(JSONObject selectedItem, int position) {
+                        try {
+                            familyObj.put("ddlPovertyStatus", selectedItem.getString("key"));
+                        } catch (JSONException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                }
+        );
     }
 
     private void getConfirmationTypes() throws JSONException {
         String textLanguage = "ConfirmationType";
         String confirmationString = ca.getConfirmationTypes();
         JSONArray confirmationArray = new JSONArray(confirmationString);
-
-        JSONObject hint = new JSONObject();
-        hint.put("ConfirmationTypeCode", "");
-        hint.put(textLanguage, getString(R.string.SelectConfirmationType));
-
-        JSONArray finalConfirmationArray = addFirst(confirmationArray, hint);
-
-        JSONSpinnerAdapter adapter =
-                new JSONSpinnerAdapter(this, finalConfirmationArray, textLanguage);
-        spConfirmationType.setAdapter(adapter);
+        JsonDropdownHelper.bindDropdown(
+                this,
+                spConfirmationType,
+                confirmationArray,
+                textLanguage,
+                null,
+                new JsonDropdownHelper.OnJsonItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(JSONObject selectedItem, int position) {
+                        try{
+                            familyObj.put("ddlConfirmationType", selectedItem.getString("ConfirmationTypeCode"));
+                        } catch (JSONException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                }
+        );
     }
 
     private void getFamilyTypes() throws JSONException {
         String textLanguage = "FamilyType";
         String familyTypesString = ca.getGroupTypes();
         JSONArray familyTypesArray = new JSONArray(familyTypesString);
-
-        JSONObject hint = new JSONObject();
-        hint.put("FamilyTypeCode", "");
-        hint.put(textLanguage, getString(R.string.SelectFamilyType));
-
-        JSONArray finaFamilyTypeArray = addFirst(familyTypesArray, hint);
-        JSONSpinnerAdapter adapter =
-                new JSONSpinnerAdapter(this, finaFamilyTypeArray, "FamilyType");
-        spFamilyType.setAdapter(adapter);
+        JsonDropdownHelper.bindDropdown(
+                this,
+                spFamilyType,
+                familyTypesArray,
+                textLanguage,
+                null,
+                new JsonDropdownHelper.OnJsonItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(JSONObject selectedItem, int position) {
+                        try {
+                            familyObj.put("ddlGroupType", selectedItem.getString("FamilyTypeCode"));
+                        } catch (JSONException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                }
+        );
     }
 
     private void getApprovalOfSMS() throws JSONException {
         String approvalString = ca.getApprovalOfSMS();
         JSONArray approvalArray = new JSONArray(approvalString);
-
-        JSONObject hint = new JSONObject();
-        hint.put("value", "");
-        hint.put("key", getString(R.string.approvalOfSMS));
-
-        JSONArray finalApprovalArray = addFirst(approvalArray, hint);
-        JSONSpinnerAdapter adapter =
-                new JSONSpinnerAdapter(this, finalApprovalArray, "key");
-        spApprovalSMS.setAdapter(adapter);
+        JsonDropdownHelper.bindDropdown(
+                this,
+                spApprovalSMS,
+                approvalArray,
+                "key",
+                null,
+                new JsonDropdownHelper.OnJsonItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(JSONObject selectedItem, int position) {
+                        try {
+                            familyObj.put("ddlApprovalOfSMS", selectedItem.getString("LanguageCode"));
+                        } catch (JSONException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                }
+        );
     }
 
     private void getLanguageOfSMS() throws JSONException {
         String textLanguage = "LanguageName";
         String languagesString = ca.getLanguagesOfSMS();
         JSONArray languagesArray = new JSONArray(languagesString);
-
         JSONObject hint = new JSONObject();
         hint.put("LanguageCode", "");
-        hint.put(textLanguage, getString(R.string.languageOfSMS));
-
+        hint.put(textLanguage, "");
         JSONArray finalLanguagesArray = addFirst(languagesArray, hint);
-
-        JSONSpinnerAdapter adapter =
-                new JSONSpinnerAdapter(this, finalLanguagesArray, "LanguageName");
-        spLanguageSMS.setAdapter(adapter);
+        JsonDropdownHelper.bindDropdown(
+                this,
+                spLanguageSMS,
+                finalLanguagesArray,
+                textLanguage,
+                null,
+                new JsonDropdownHelper.OnJsonItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(JSONObject selectedItem, int position) {
+                        try {
+                            familyObj.put("ddlLanguageOfSMS", selectedItem.getString("key"));
+                        } catch (JSONException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                }
+        );
     }
 
     public JSONArray addFirst(JSONArray array, JSONObject object) throws JSONException {
@@ -220,177 +333,6 @@ public class FamilyActivity extends AppCompatActivity {
     }
 
     public void setupListeners(){
-
-        spRegion.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                JSONObject selectedRegion = ((JSONObject) spRegion.getSelectedItem());
-                try {
-                    String regionId = selectedRegion.getString("LocationId");
-                    if(regionId.isEmpty()){
-                        spDistrict.setAdapter(null);
-                        spWard.setAdapter(null);
-                        spVillage.setAdapter(null);
-                    } else{
-                        loadDistricts(Integer.parseInt(regionId));
-                    }
-                    canSaveFamily();
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {}
-        });
-
-        spDistrict.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                JSONObject district = (JSONObject) spDistrict.getSelectedItem();
-                canSaveFamily();
-                try {
-                    String districtId = district.getString("LocationId");
-                    if (districtId.isEmpty()){
-                        spWard.setAdapter(null);
-                        spVillage.setAdapter(null);
-                    } else {
-                        loadWards(Integer.parseInt(districtId));
-                    }
-                    canSaveFamily();
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {}
-        });
-
-        spWard.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                JSONObject ward = (JSONObject) spWard.getSelectedItem();
-                canSaveFamily();
-                try {
-                    String wardId = ward.getString("LocationId");
-                    if(wardId.isEmpty()){
-                        spVillage.setAdapter(null);
-                    } else {
-                        loadVillages(Integer.parseInt(wardId));
-                    }
-                    canSaveFamily();
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {}
-        });
-
-        spVillage.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                try {
-                    JSONObject village = (JSONObject) spVillage.getSelectedItem();
-                    canSaveFamily();
-                    familyObj.put("LocationId", village.getString("LocationId"));
-                } catch (JSONException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-
-            }
-        });
-
-        spPovertyStatus.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                try {
-                    JSONObject selectedItem = (JSONObject) spPovertyStatus.getSelectedItem();
-                    familyObj.put("Poverty", selectedItem.getString("key"));
-                } catch (JSONException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-
-            }
-        });
-
-        spConfirmationType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                try{
-                    JSONObject selectedItem = (JSONObject) spConfirmationType.getSelectedItem();
-                    familyObj.put("ConfirmationType", selectedItem.getString("ConfirmationTypeCode"));
-                } catch (JSONException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-
-            }
-        });
-
-        spFamilyType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                try {
-                    JSONObject selectedItem = (JSONObject) spFamilyType.getSelectedItem();
-                    familyObj.put("FamilyType", selectedItem.getString("FamilyTypeCode"));
-                } catch (JSONException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-
-            }
-        });
-
-        spLanguageSMS.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                try {
-                    JSONObject selectedItem = (JSONObject) spLanguageSMS.getSelectedItem();
-                    familyObj.put("LanguageOfSMS", selectedItem.getString("LanguageCode"));
-                } catch (JSONException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-
-            }
-        });
-
-        spApprovalSMS.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                try {
-                    JSONObject selectedItem = (JSONObject) spApprovalSMS.getSelectedItem();
-                    familyObj.put("ApprovalOfSMS", selectedItem.getString("key"));
-                } catch (JSONException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-
-            }
-        });
 
         btnNext.setOnClickListener(v -> saveFamily());
 

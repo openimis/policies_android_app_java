@@ -17,122 +17,172 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <TextView
-                android:text="@string/Region"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="5dp"/>
-
-            <Spinner
-                android:id="@+id/spRegion"
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/layoutRegion"
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:layout_marginBottom="10dp"
-                android:background="@drawable/spinner_required"/>
-
-            <TextView
-                android:text="@string/District"
-                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="5dp"/>
+                android:hint="@string/Region"
+                app:boxBackgroundMode="outline"
+                app:endIconMode="dropdown_menu"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
 
-            <Spinner
-                android:id="@+id/spDistrict"
+                <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                    android:id="@+id/spRegion"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="none"
+                    android:padding="16dp"
+                    android:singleLine="true" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/layoutDistrict"
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:layout_marginBottom="10dp"
-                android:background="@drawable/spinner_required"/>
-
-            <TextView
-                android:text="@string/Ward"
-                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="5dp"/>
+                android:hint="@string/District"
+                app:boxBackgroundMode="outline"
+                app:endIconMode="dropdown_menu"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
 
-            <Spinner
-                android:id="@+id/spWard"
+                <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                    android:id="@+id/spDistrict"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="none"
+                    android:padding="16dp"
+                    android:singleLine="true" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/layoutWard"
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:layout_marginBottom="10dp"
-                android:background="@drawable/spinner_required"/>
-
-            <TextView
-                android:text="@string/Village"
-                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="5dp"/>
+                android:hint="@string/Ward"
+                app:boxBackgroundMode="outline"
+                app:endIconMode="dropdown_menu"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
 
-            <Spinner
-                android:id="@+id/spVillage"
+                <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                    android:id="@+id/spWard"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="none"
+                    android:padding="16dp"
+                    android:singleLine="true" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/layoutVillage"
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:layout_marginBottom="10dp"
-                android:background="@drawable/spinner_required"/>
-
-            <TextView
-                android:text="@string/PovertyStatus"
-                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="5dp"/>
+                android:hint="@string/Village"
+                app:boxBackgroundMode="outline"
+                app:endIconMode="dropdown_menu"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
 
-            <Spinner
-                android:id="@+id/spPovertyStatus"
+                <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                    android:id="@+id/spVillage"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="none"
+                    android:padding="16dp"
+                    android:singleLine="true" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/layoutPovertyStatus"
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:layout_marginBottom="10dp"
-                android:background="@drawable/spinner_background"/>
-
-            <TextView
-                android:text="@string/SelectFamilyType"
-                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="5dp"/>
+                android:layout_marginBottom="16dp"
+                android:hint="@string/PovertyStatus"
+                app:boxBackgroundMode="outline"
+                app:endIconMode="dropdown_menu"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
 
-            <Spinner
-                android:id="@+id/spFamilyType"
+                <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                    android:id="@+id/spPovertyStatus"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="none"
+                    android:padding="16dp"
+                    android:singleLine="true" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/layoutFamilyType"
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:layout_marginBottom="10dp"
-                android:background="@drawable/spinner_background"/>
-
-            <TextView
-                android:text="@string/ConfirmationType"
-                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="5dp"/>
+                android:layout_marginBottom="16dp"
+                android:hint="@string/SelectFamilyType"
+                app:boxBackgroundMode="outline"
+                app:endIconMode="dropdown_menu"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
 
-            <Spinner
-                android:id="@+id/spConfirmationType"
+                <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                    android:id="@+id/spFamilyType"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="none"
+                    android:padding="16dp"
+                    android:singleLine="true" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/layoutConfirmationType"
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:layout_marginBottom="10dp"
-                android:background="@drawable/spinner_background"/>
-
-            <TextView
-                android:text="@string/approvalOfSMS"
-                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="5dp"/>
+                android:layout_marginBottom="16dp"
+                android:hint="@string/ConfirmationType"
+                app:boxBackgroundMode="outline"
+                app:endIconMode="dropdown_menu"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
 
-            <Spinner
-                android:id="@+id/spApprovalSMS"
+                <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                    android:id="@+id/spConfirmationType"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="none"
+                    android:padding="16dp"
+                    android:singleLine="true" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/layoutApprovalSMS"
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:layout_marginBottom="10dp"
-                android:background="@drawable/spinner_background"/>
-
-            <TextView
-                android:text="@string/languageOfSMS"
-                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="5dp"/>
+                android:layout_marginBottom="16dp"
+                android:hint="@string/approvalOfSMS"
+                app:boxBackgroundMode="outline"
+                app:endIconMode="dropdown_menu"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
 
-            <Spinner
-                android:id="@+id/spLanguageSMS"
+                <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                    android:id="@+id/spApprovalSMS"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="none"
+                    android:padding="16dp"
+                    android:singleLine="true" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/layoutLanguageSMS"
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:layout_marginBottom="10dp"
-                android:background="@drawable/spinner_background"/>
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:hint="@string/languageOfSMS"
+                app:boxBackgroundMode="outline"
+                app:endIconMode="dropdown_menu"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+
+                <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                    android:id="@+id/spLanguageSMS"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="none"
+                    android:padding="16dp"
+                    android:singleLine="true" />
+            </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnNext"
