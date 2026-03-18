@@ -2,11 +2,13 @@ package org.openimis.imispolicies;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
@@ -39,17 +41,13 @@ public class FamilyInsurees extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_family_insurees);
         setTitle(getResources().getString(R.string.FamilyAndInsurees));
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
         ca = new ClientAndroidInterface(this);
         familyId = getIntent().getIntExtra("FamilyId", 0);
         initViews();
         recyclerInsurees.setLayoutManager(new LinearLayoutManager(this));
-        DividerItemDecoration divider = new DividerItemDecoration(
-                recyclerInsurees.getContext(),
-                LinearLayoutManager.VERTICAL
-        );
-
-        divider.setDrawable(ContextCompat.getDrawable(this, R.drawable.recycler_divider));
-        recyclerInsurees.addItemDecoration(divider);
 
         if(familyId != 0){
             LoadFamilyHeader(familyId);
@@ -67,7 +65,7 @@ public class FamilyInsurees extends AppCompatActivity {
         String Insurees = ca.getInsureesForFamily(familyId);
         try {
             JSONArray insureeArray = new JSONArray(Insurees);
-            InsureeAdapter adapter = new InsureeAdapter(this,insureeArray);
+            InsureeAdapter adapter = new InsureeAdapter(this,insureeArray, familyId);
             recyclerInsurees.setAdapter(adapter);
         } catch (JSONException e) {
             throw new RuntimeException(e);
@@ -101,5 +99,14 @@ public class FamilyInsurees extends AppCompatActivity {
             //intent.putExtra("InsureeId", insureeId);
             startActivity(intent);
         });
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            finish();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

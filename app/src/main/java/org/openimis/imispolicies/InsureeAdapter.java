@@ -13,6 +13,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.card.MaterialCardView;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -21,10 +23,12 @@ public class InsureeAdapter extends RecyclerView.Adapter<InsureeAdapter.ViewHold
 
     private Context context;
     private JSONArray insurees;
+    private int familyId;
 
-    public InsureeAdapter(Context context, JSONArray insurees) {
+    public InsureeAdapter(Context context, JSONArray insurees, int familyId) {
         this.context = context;
         this.insurees = insurees;
+        this.familyId = familyId;
     }
 
 
@@ -40,10 +44,14 @@ public class InsureeAdapter extends RecyclerView.Adapter<InsureeAdapter.ViewHold
     @Override
     public void onBindViewHolder(@NonNull InsureeAdapter.ViewHolder holder, int position) {
         try {
-            JSONObject family = insurees.getJSONObject(position);
-            holder.name.setText(family.getString("InsureeName"));
-            holder.chfid.setText(family.getString("CHFID"));
-            holder.dob.setText(family.getString("DOB"));
+            JSONObject insuree = insurees.getJSONObject(position);
+            holder.name.setText(insuree.getString("InsureeName"));
+            holder.chfid.setText(insuree.getString("CHFID"));
+            holder.dob.setText(insuree.getString("DOB"));
+
+            if(insuree.getString("isHead").equals("1")){
+                holder.insureeCard.setStrokeColor(context.getResources().getColor(R.color.colorAccent));
+            }
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
@@ -65,6 +73,7 @@ public class InsureeAdapter extends RecyclerView.Adapter<InsureeAdapter.ViewHold
 
         TextView name,chfid,dob;
         ImageView btnContextMenu;
+        MaterialCardView insureeCard;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -72,6 +81,7 @@ public class InsureeAdapter extends RecyclerView.Adapter<InsureeAdapter.ViewHold
             name = itemView.findViewById(R.id.InsureeName);
             dob = itemView.findViewById(R.id.item_dob);
             btnContextMenu = itemView.findViewById(R.id.btnContextMenuInsuree);
+            insureeCard = itemView.findViewById(R.id.family_insurees_card);
         }
     }
 
@@ -83,7 +93,6 @@ public class InsureeAdapter extends RecyclerView.Adapter<InsureeAdapter.ViewHold
             if(item.getItemId() == R.id.insuree_menu_edit){
                 try {
                     JSONObject insuree = insurees.getJSONObject(position);
-                    int familyId = insuree.getInt("FamilyId");
                     int insureeId = insuree.getInt("InsureeId");
                     Intent intent = new Intent(context, InsureeActivity.class);
                     intent.putExtra("InsureeId", insureeId);

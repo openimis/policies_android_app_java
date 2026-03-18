@@ -28,12 +28,14 @@
 
         <!-- Card 1 -->
 
-        <androidx.cardview.widget.CardView
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="12dp"
-            app:cardCornerRadius="8dp"
-            app:cardElevation="4dp">
+            app:cardCornerRadius="3dp"
+            app:cardElevation="4dp"
+            app:strokeColor="@android:color/darker_gray"
+            app:strokeWidth="1dp">
 
             <LinearLayout
                 android:orientation="vertical"
@@ -44,6 +46,7 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
                     android:orientation="horizontal">
 
                     <TextView
@@ -89,17 +92,19 @@
 
             </LinearLayout>
 
-        </androidx.cardview.widget.CardView>
+        </com.google.android.material.card.MaterialCardView>
 
 
         <!-- Card 2 -->
 
-        <androidx.cardview.widget.CardView
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="12dp"
-            app:cardCornerRadius="8dp"
-            app:cardElevation="4dp">
+            app:cardCornerRadius="3dp"
+            app:cardElevation="4dp"
+            app:strokeColor="@android:color/darker_gray"
+            app:strokeWidth="1dp">
 
             <LinearLayout
                 android:orientation="vertical"
@@ -110,6 +115,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
                 android:orientation="horizontal">
 
                 <TextView
@@ -155,17 +161,19 @@
 
             </LinearLayout>
 
-        </androidx.cardview.widget.CardView>
+        </com.google.android.material.card.MaterialCardView>
 
 
         <!-- Card 3 -->
 
-        <androidx.cardview.widget.CardView
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="12dp"
-            app:cardCornerRadius="8dp"
-            app:cardElevation="4dp">
+            app:cardCornerRadius="3dp"
+            app:cardElevation="4dp"
+            app:strokeColor="@android:color/darker_gray"
+            app:strokeWidth="1dp">
 
             <LinearLayout
                 android:orientation="horizontal"
@@ -191,16 +199,18 @@
 
             </LinearLayout>
 
-        </androidx.cardview.widget.CardView>
+        </com.google.android.material.card.MaterialCardView>
 
 
         <!-- Card 4 -->
 
-        <androidx.cardview.widget.CardView
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardCornerRadius="8dp"
-            app:cardElevation="4dp">
+            app:cardCornerRadius="3dp"
+            app:cardElevation="4dp"
+            app:strokeColor="@android:color/darker_gray"
+            app:strokeWidth="1dp">
 
             <LinearLayout
                 android:orientation="vertical"
@@ -211,6 +221,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
                 android:orientation="horizontal">
 
                 <TextView
@@ -256,7 +267,7 @@
 
             </LinearLayout>
 
-        </androidx.cardview.widget.CardView>
+        </com.google.android.material.card.MaterialCardView>
 
     </LinearLayout>
 

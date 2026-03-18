@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<androidx.cardview.widget.CardView
+<com.google.android.material.card.MaterialCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="8dp"
-    app:cardCornerRadius="6dp"
-    app:cardElevation="5dp">
+    app:cardCornerRadius="3dp"
+    app:cardElevation="4dp"
+    app:strokeColor="@color/silver"
+    app:strokeWidth="1dp">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -25,9 +27,9 @@
                 android:id="@+id/txtFamilyInsuranceNumber"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="20sp"
+                android:textSize="16sp"
                 android:textColor="@color/colorAccent"
-                android:layout_marginBottom="5dp"
+                android:layout_marginBottom="8dp"
                 android:text="CHFID"/>
 
             <TextView
@@ -37,38 +39,39 @@
                 android:text="Nom Assuré"
                 android:textStyle="bold"
                 android:textColor="@color/colorPrimary"
-                android:textSize="20sp"
-                android:layout_marginBottom="5dp"/>
+                android:textSize="18sp"
+                android:layout_marginBottom="8dp"/>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:gravity="center_vertical"
                 android:orientation="horizontal">
 
                 <TextView
                     android:id="@+id/txtRegion"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="10dp"
                     android:text="Region"/>
 
                 <ImageView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="10dp"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginStart="8dp"
                     android:src="@drawable/arrow_forward"/>
 
                 <TextView
                     android:id="@+id/txtDistrict"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="10dp"
                     android:text="District"/>
 
                 <ImageView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="10dp"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginStart="8dp"
                     android:src="@drawable/arrow_forward"/>
 
                 <TextView
@@ -99,4 +102,4 @@
 
 
 
-</androidx.cardview.widget.CardView>
+</com.google.android.material.card.MaterialCardView>

@@ -68,7 +68,7 @@
                     android:layout_weight="1"
                     android:textSize="16sp"
                     android:text="@string/Region"
-                    android:textColor="@color/colorAccent"
+                    android:textColor="@color/white"
                     android:tag="RegionName"/>
 
             </LinearLayout>
@@ -92,7 +92,7 @@
                     android:layout_height="wrap_content"
                     android:textSize="16sp"
                     android:text="@string/District"
-                    android:textColor="@color/colorAccent"
+                    android:textColor="@color/white"
                     android:gravity="end"
                     android:tag="DistrictName"/>
             </LinearLayout>
@@ -124,7 +124,7 @@
                     android:layout_height="wrap_content"
                     android:textSize="16sp"
                     android:text="@string/Ward"
-                    android:textColor="@color/colorAccent"
+                    android:textColor="@color/white"
                     android:tag="WardName"/>
             </LinearLayout>
 
@@ -147,7 +147,7 @@
                     android:layout_height="wrap_content"
                     android:textSize="16sp"
                     android:text="@string/Village"
-                    android:textColor="@color/colorAccent"
+                    android:textColor="@color/white"
                     android:gravity="end"/>
 
             </LinearLayout>
@@ -155,14 +155,11 @@
 
     </LinearLayout>
 
-    <com.google.android.material.divider.MaterialDivider
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"/>
-
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerInsurees"
         android:layout_width="match_parent"
+        android:layout_marginHorizontal="8dp"
+        android:layout_marginTop="8dp"
         android:layout_height="0dp"
         android:layout_weight="1"
         android:dividerHeight="3dp"/>

@@ -93,4 +93,29 @@ public class JsonDropdownHelper {
             e.printStackTrace();
         }
     }
+
+    public static void selectValueFromObject(MaterialAutoCompleteTextView dropdown,
+                                             JSONArray jsonArray,
+                                             String displayField,
+                                             String valueField,
+                                             JSONObject selectedObject) {
+
+        if (selectedObject == null) return;
+
+        try {
+            String selectedValue = selectedObject.getString(valueField);
+
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject item = jsonArray.getJSONObject(i);
+
+                if (item.getString(valueField).equals(selectedValue)) {
+                    dropdown.setText(item.getString(displayField), false);
+                    break;
+                }
+            }
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
 }

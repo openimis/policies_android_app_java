@@ -2,9 +2,10 @@ package org.openimis.imispolicies;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.widget.TextView;
 
-import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -30,6 +31,7 @@ public class Enrolment extends AppCompatActivity {
         setTitle(getApplicationContext().getString(R.string.Families));
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setHomeButtonEnabled(true);
         }
         ca = new ClientAndroidInterface(this);
 
@@ -55,7 +57,6 @@ public class Enrolment extends AppCompatActivity {
             Intent intent = new Intent(this, FamilyActivity.class);
             intent.putExtra("familyId",0);
             startActivity(intent);
-
         });
 
     }
@@ -63,5 +64,15 @@ public class Enrolment extends AppCompatActivity {
     private JSONArray loadFamilies() throws JSONException {
         String families = ca.getAllFamilies();
         return new JSONArray(families);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            // Option 2: Fermer l'activité directement
+            finish();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

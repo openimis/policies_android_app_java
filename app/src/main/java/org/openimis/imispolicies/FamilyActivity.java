@@ -2,9 +2,12 @@ package org.openimis.imispolicies;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
+
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.textfield.MaterialAutoCompleteTextView;
@@ -27,12 +30,21 @@ public class FamilyActivity extends AppCompatActivity {
     ClientAndroidInterface ca;
 
     @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 1 && resultCode == RESULT_OK) {
+            finish();
+        }
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_family);
         setTitle(getApplicationContext().getString(R.string.AddNewFamily));
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setHomeButtonEnabled(true);
         }
         ca = new ClientAndroidInterface(this);
         familyObj = new JSONObject();
@@ -192,7 +204,7 @@ public class FamilyActivity extends AppCompatActivity {
             Intent intent = new Intent(this, InsureeActivity.class);
             intent.putExtra("FamilyData", familyObj.toString());
             intent.putExtra("FamilyId", familyId);
-            startActivity(intent);
+            startActivityForResult(intent, 1);
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
@@ -287,7 +299,7 @@ public class FamilyActivity extends AppCompatActivity {
                     @Override
                     public void onItemSelected(JSONObject selectedItem, int position) {
                         try {
-                            familyObj.put("ddlApprovalOfSMS", selectedItem.getString("LanguageCode"));
+                            familyObj.put("ddlApprovalOfSMS", selectedItem.getString("value"));
                         } catch (JSONException e) {
                             throw new RuntimeException(e);
                         }
@@ -300,21 +312,17 @@ public class FamilyActivity extends AppCompatActivity {
         String textLanguage = "LanguageName";
         String languagesString = ca.getLanguagesOfSMS();
         JSONArray languagesArray = new JSONArray(languagesString);
-        JSONObject hint = new JSONObject();
-        hint.put("LanguageCode", "");
-        hint.put(textLanguage, "");
-        JSONArray finalLanguagesArray = addFirst(languagesArray, hint);
         JsonDropdownHelper.bindDropdown(
                 this,
                 spLanguageSMS,
-                finalLanguagesArray,
+                languagesArray,
                 textLanguage,
                 null,
                 new JsonDropdownHelper.OnJsonItemSelectedListener() {
                     @Override
                     public void onItemSelected(JSONObject selectedItem, int position) {
                         try {
-                            familyObj.put("ddlLanguageOfSMS", selectedItem.getString("key"));
+                            familyObj.put("ddlLanguageOfSMS", selectedItem.getString("LanguageCode"));
                         } catch (JSONException e) {
                             throw new RuntimeException(e);
                         }
@@ -323,13 +331,13 @@ public class FamilyActivity extends AppCompatActivity {
         );
     }
 
-    public JSONArray addFirst(JSONArray array, JSONObject object) throws JSONException {
-        JSONArray newArray = new JSONArray();
-        newArray.put(object);
-        for (int i = 0; i < array.length(); i++) {
-            newArray.put(array.get(i));
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            finish();
+            return true;
         }
-        return newArray;
+        return super.onOptionsItemSelected(item);
     }
 
     public void setupListeners(){
