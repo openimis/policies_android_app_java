@@ -484,4 +484,5 @@
     <string name="pay_type_bank_transfer">Virement banquaire</string>
     <string name="fieldRequired">Champs requis</string>
     <string name="connecting">Connexion</string>
+    <string name="Close">Fermer</string>
 </resources>

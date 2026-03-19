@@ -60,9 +60,14 @@ fastlane/test_output
 fastlane/readme.md
 
 app/release/output.json
-.DS_Store
 
 # Custom product flavours
 
 *custom-flavours.gradle
 *.aab
+
+#DS_Store files
+*.DS_Store
+.DS_Store
+./.DS_Store
+./.git/.DS_Store
