@@ -20,7 +20,6 @@ public class Enrolment extends AppCompatActivity {
 
     RecyclerView recyclerView;
     FloatingActionButton btnAdd;
-    JSONArray families = new JSONArray();
     ClientAndroidInterface ca;
     TextView tvEmpty;
 
@@ -38,32 +37,33 @@ public class Enrolment extends AppCompatActivity {
         recyclerView = findViewById(R.id.recyclerFamilies);
         btnAdd = findViewById(R.id.btnAddNew);
         tvEmpty = findViewById(R.id.tvEmptyFamily);
-
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        try {
-            families = loadFamilies();
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
-        }
-
-        tvEmpty.setVisibility(families.length() == 0 ? TextView.VISIBLE : TextView.GONE);
-
-        FamilyAdapter adapter = new FamilyAdapter(this,families);
-        recyclerView.setAdapter(adapter);
-
+        loadFamilies();
         btnAdd.setOnClickListener(v -> {
 
             Intent intent = new Intent(this, FamilyActivity.class);
             intent.putExtra("familyId",0);
             startActivity(intent);
         });
-
     }
 
-    private JSONArray loadFamilies() throws JSONException {
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadFamilies();
+    }
+
+    private void loadFamilies() {
         String families = ca.getAllFamilies();
-        return new JSONArray(families);
+        try {
+            JSONArray familyArray = new JSONArray(families);
+            tvEmpty.setVisibility(families.isEmpty() ? TextView.VISIBLE : TextView.GONE);
+            FamilyAdapter adapter = new FamilyAdapter(this,familyArray);
+            recyclerView.setAdapter(adapter);
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

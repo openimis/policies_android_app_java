@@ -1,7 +1,10 @@
 package org.openimis.imispolicies;
 
+import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,6 +27,7 @@ public class InsureeAdapter extends RecyclerView.Adapter<InsureeAdapter.ViewHold
     private Context context;
     private JSONArray insurees;
     private int familyId;
+    private ProgressDialog progressDialog;
 
     public InsureeAdapter(Context context, JSONArray insurees, int familyId) {
         this.context = context;
@@ -88,35 +92,72 @@ public class InsureeAdapter extends RecyclerView.Adapter<InsureeAdapter.ViewHold
     private void showContextMenu(View anchorView, int position) {
         PopupMenu popup = new PopupMenu(context, anchorView);
         popup.getMenuInflater().inflate(R.menu.insuree_menu, popup.getMenu());
-
-        popup.setOnMenuItemClickListener(item -> {
-            if(item.getItemId() == R.id.insuree_menu_edit){
-                try {
-                    JSONObject insuree = insurees.getJSONObject(position);
-                    int insureeId = insuree.getInt("InsureeId");
+        try {
+            JSONObject insuree = insurees.getJSONObject(position);
+            int insureeId = insuree.getInt("InsureeId");
+            int isOffline = insuree.getInt("isOffline");
+            if(insuree.getString("isHead").equals("1")){
+                popup.getMenu().findItem(R.id.insuree_menu_delete).setVisible(false);
+            } else {
+                popup.getMenu().findItem(R.id.insuree_menu_delete).setVisible(true);
+            }
+            popup.setOnMenuItemClickListener(item -> {
+                if(item.getItemId() == R.id.insuree_menu_edit){
                     Intent intent = new Intent(context, InsureeActivity.class);
                     intent.putExtra("InsureeId", insureeId);
                     intent.putExtra("FamilyId", familyId);
                     context.startActivity(intent);
-                } catch (JSONException e) {
-                    throw new RuntimeException(e);
+                } else if(item.getItemId() == R.id.insuree_menu_delete){
+                    AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                    builder.setTitle(R.string.Confirm)
+                            .setMessage(R.string.DeleteInsuree)
+                            .setPositiveButton(R.string.Yes, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    showLoadingDialog();
+                                    ClientAndroidInterface ca = new ClientAndroidInterface((Activity) context);
+                                    int deleteSuccess = 0;
+                                    if(isOffline == 0 || isOffline == 2){
+                                        showLoadingDialog();
+                                        deleteSuccess = ca.DeleteOnlineData(insureeId, "I");
+                                    } else {
+                                        deleteSuccess = ca.DeleteInsuree(insureeId);
+                                    }
+                                    if (deleteSuccess == 1) {
+                                        ca.ShowDialog(context.getResources().getString(R.string.InsureeDeleted));
+                                        dialogInterface.dismiss();
+                                        Intent intent = new Intent(context, FamilyInsurees.class);
+                                        intent.putExtra("FamilyId", familyId);
+                                        context.startActivity(intent);
+                                        ((Activity) context).finish();
+                                    } else if(deleteSuccess == 2){
+                                        dialogInterface.dismiss();
+                                        ca.ShowDialog(context.getResources().getString(R.string.IsHeadDelete));
+                                    } else if(deleteSuccess == -1){
+                                        dialogInterface.dismiss();
+                                        ca.ShowDialog(context.getResources().getString(R.string.LoginToDeleteOnlineData));
+                                    } else {
+                                        dialogInterface.dismiss();
+                                        ca.ShowDialog(context.getResources().getString(R.string.InsureeNotDeleted));
+                                    }
+                                }
+                            })
+                            .setNegativeButton(R.string.No, null)
+                            .show();
                 }
-
-            } else if(item.getItemId() == R.id.family_menu_delete){
-
-                new AlertDialog.Builder(context)
-                        .setTitle(R.string.Confirm)
-                        .setMessage(R.string.DeleteFamily)
-                        .setPositiveButton(R.string.Yes, (d,w)->{
-//                            families.remove(position);
-//                            notifyDataSetChanged();
-                        })
-                        .setNegativeButton(R.string.No, null)
-                        .show();
-            }
-            return false;
-        });
-
+                return false;
+            });
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
         popup.show();
+    }
+
+    private void showLoadingDialog() {
+        progressDialog = new ProgressDialog(context);
+        progressDialog.setMessage(context.getResources().getString(R.string.Pleasewait));
+        progressDialog.setTitle(context.getResources().getString(R.string.Delete));
+        progressDialog.setCancelable(false);
+        progressDialog.show();
     }
 }

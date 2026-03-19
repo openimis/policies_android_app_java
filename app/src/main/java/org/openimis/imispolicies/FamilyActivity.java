@@ -19,6 +19,7 @@ import org.json.JSONObject;
 import org.openimis.imispolicies.util.JsonDropdownHelper;
 
 public class FamilyActivity extends AppCompatActivity {
+    private static final int REQUEST_CODE_CLOSE = 14;
 
     private MaterialAutoCompleteTextView spRegion, spDistrict, spWard, spVillage, spPovertyStatus, spFamilyType,
             spConfirmationType, spApprovalSMS, spLanguageSMS;
@@ -32,7 +33,7 @@ public class FamilyActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == 1 && resultCode == RESULT_OK) {
+        if (requestCode == REQUEST_CODE_CLOSE && resultCode == RESULT_OK) {
             finish();
         }
     }
@@ -204,7 +205,7 @@ public class FamilyActivity extends AppCompatActivity {
             Intent intent = new Intent(this, InsureeActivity.class);
             intent.putExtra("FamilyData", familyObj.toString());
             intent.putExtra("FamilyId", familyId);
-            startActivityForResult(intent, 1);
+            startActivityForResult(intent, REQUEST_CODE_CLOSE);
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }

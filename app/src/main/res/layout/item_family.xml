@@ -27,9 +27,9 @@
                 android:id="@+id/txtFamilyInsuranceNumber"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="16sp"
-                android:textColor="@color/colorAccent"
-                android:layout_marginBottom="8dp"
+                android:textSize="20sp"
+                android:textColor="@color/colorPrimary"
+                android:layout_marginBottom="5dp"
                 android:text="CHFID"/>
 
             <TextView
@@ -38,9 +38,9 @@
                 android:layout_height="wrap_content"
                 android:text="Nom Assuré"
                 android:textStyle="bold"
-                android:textColor="@color/colorPrimary"
-                android:textSize="18sp"
-                android:layout_marginBottom="8dp"/>
+                android:textColor="@color/colorPrimaryDark"
+                android:textSize="20sp"
+                android:layout_marginBottom="5dp"/>
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -52,6 +52,7 @@
                     android:id="@+id/txtRegion"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:textColor="@color/colorAccent"
                     android:text="Region"/>
 
                 <ImageView
@@ -64,8 +65,9 @@
                 <TextView
                     android:id="@+id/txtDistrict"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="District"/>
+                    android:layout_height="match_parent"
+                    android:textColor="@color/colorAccent"
+                    android:text="District" />
 
                 <ImageView
                     android:layout_width="wrap_content"
@@ -78,6 +80,7 @@
                     android:id="@+id/txtVillage"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:textColor="@color/colorAccent"
                     android:text="Village"/>
 
             </LinearLayout>

@@ -56,6 +56,12 @@ public class FamilyInsurees extends AppCompatActivity {
 
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        LoadInsurees(familyId);
+    }
+
     private void LoadFamilyHeader(int familyId){
         String FamilyHeader = ca.getFamilyHeader(familyId);
         bindDataFromDatafield(FamilyHeader);

@@ -291,22 +291,7 @@ public class MainActivity extends AppCompatActivity
 
         ca = new ClientAndroidInterface(this);
 
-        int Families = ca.getTotalFamily();
-        int Insuree = ca.getTotalInsuree();
-        int Policy = ca.getTotalPolicy();
-        int Premium = ca.getTotalPremium();
-        String SumPremium = ca.getSumPremium();
-
-        int FamiliesOnline = ca.getTotalFamilyOnline();
-        int InsureeOnline = ca.getTotalInsureeOnline();
-
-        tvTotalFamily.setText(String.valueOf(Families));
-        tvTotalInsuree.setText(String.valueOf(Insuree));
-        tvTotalPolicies.setText(String.valueOf(Policy));
-        tvTotalPremium.setText(String.valueOf(Premium));
-        tvSumPremium.setText(SumPremium);
-        tvTotalFamilyOnline.setText(String.valueOf(FamiliesOnline));
-        tvTotalInsureeOnline.setText(String.valueOf(InsureeOnline));
+        LoadTotal();
 
         NavigationView navigationView = findViewById(R.id.nav_view);
         View headerview = navigationView.getHeaderView(0);
@@ -332,6 +317,25 @@ public class MainActivity extends AppCompatActivity
         setVisibilityOfPaymentMenu();
     }
 
+    private void LoadTotal(){
+        int Families = ca.getTotalFamily();
+        int Insuree = ca.getTotalInsuree();
+        int Policy = ca.getTotalPolicy();
+        int Premium = ca.getTotalPremium();
+        String SumPremium = ca.getSumPremium();
+
+        int FamiliesOnline = ca.getTotalFamilyOnline();
+        int InsureeOnline = ca.getTotalInsureeOnline();
+
+        tvTotalFamily.setText(String.valueOf(Families));
+        tvTotalInsuree.setText(String.valueOf(Insuree));
+        tvTotalPolicies.setText(String.valueOf(Policy));
+        tvTotalPremium.setText(String.valueOf(Premium));
+        tvSumPremium.setText(SumPremium);
+        tvTotalFamilyOnline.setText(String.valueOf(FamiliesOnline));
+        tvTotalInsureeOnline.setText(String.valueOf(InsureeOnline));
+    }
+
     private void setVisibilityOfPaymentMenu() {
         navigationView = findViewById(R.id.nav_view);
         MenuItem navPayment = navigationView.getMenu().findItem(R.id.nav_payment);
@@ -343,6 +347,7 @@ public class MainActivity extends AppCompatActivity
     protected void onResume() {
         super.onResume();
         OfficerName.setText(global.getOfficerName());
+        LoadTotal();
     }
 
     public static void SetLoggedIn() {
@@ -767,14 +772,15 @@ public class MainActivity extends AppCompatActivity
         if (event.getAction() == KeyEvent.ACTION_DOWN) {
             switch (keyCode) {
                 case KeyEvent.KEYCODE_BACK:
-                    if (wv.canGoBack()) {
-                        if (global.getCurrentUrl() != null)
-                            wv.loadUrl("file:///android_asset/pages/" + global.getCurrentUrl());
-                        else
-                            wv.goBack();
-                    } else {
-                        finish();
-                    }
+//                    if (wv.canGoBack()) {
+//                        if (global.getCurrentUrl() != null)
+//                            wv.loadUrl("file:///android_asset/pages/" + global.getCurrentUrl());
+//                        else
+//                            wv.goBack();
+//                    } else {
+//                        finish();
+//                    }
+                    finish();
                     return true;
             }
         }

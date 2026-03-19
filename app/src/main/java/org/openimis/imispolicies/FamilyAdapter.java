@@ -1,7 +1,10 @@
 package org.openimis.imispolicies;
 
+import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,6 +23,7 @@ public class FamilyAdapter extends RecyclerView.Adapter<FamilyAdapter.ViewHolder
 
     private Context context;
     private JSONArray families;
+    private ProgressDialog progressDialog;
 
     public FamilyAdapter(Context context, JSONArray families) {
         this.context = context;
@@ -84,32 +88,70 @@ public class FamilyAdapter extends RecyclerView.Adapter<FamilyAdapter.ViewHolder
         popup.getMenuInflater().inflate(R.menu.family_menu, popup.getMenu());
 
         popup.setOnMenuItemClickListener(item -> {
-            if(item.getItemId() == R.id.family_menu_edit){
-                try {
-                    JSONObject family = families.getJSONObject(position);
-                    int familyId = family.getInt("FamilyId");
+            try {
+                JSONObject family = families.getJSONObject(position);
+                int familyId = family.getInt("FamilyId");
+                int isOffline = family.getInt("isOffline");
+                if(item.getItemId() == R.id.family_menu_edit){
                     Intent intent = new Intent(context, FamilyInsurees.class);
                     intent.putExtra("FamilyId", familyId);
                     context.startActivity(intent);
-                } catch (JSONException e) {
-                    throw new RuntimeException(e);
+                } else if(item.getItemId() == R.id.family_menu_delete){
+                    AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                    builder.setTitle(R.string.Confirm)
+                            .setMessage(R.string.DeleteFamily)
+                            .setPositiveButton(R.string.Yes, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    showLoadingDialog();
+                                    ClientAndroidInterface ca = new ClientAndroidInterface((Activity) context);
+                                    if(isOffline == 0 || isOffline == 2){
+                                        int result = ca.DeleteOnlineDataF(familyId);
+                                        if (result == 1) {
+                                            ca.ShowDialog(context.getResources().getString(R.string.FamilyDeleted));
+                                            dialogInterface.dismiss();
+                                        }
+                                    } else {
+                                        int deleteSuccess = ca.DeleteFamily(familyId);
+                                        if (deleteSuccess == 1) {
+                                            ca.ShowDialog(context.getResources().getString(R.string.FamilyDeleted));
+                                            dialogInterface.dismiss();
+                                            Intent intent = new Intent(context, Enrolment.class);
+                                            context.startActivity(intent);
+                                            ((Activity) context).finish();
+                                        } else if(deleteSuccess == -1){
+                                            ca.ShowDialog(context.getResources().getString(R.string.LoginToDeleteOnlineData));
+                                        } else if(deleteSuccess == 3){
+                                            int result = ca.DeleteOnlineDataF(familyId);
+                                            if (result == 1) {
+                                                ca.ShowDialog(context.getResources().getString(R.string.FamilyDeleted));
+                                                dialogInterface.dismiss();
+                                            }
+                                        }
+                                    }
+                                    if (progressDialog != null && progressDialog.isShowing()) {
+                                        progressDialog.dismiss();
+                                    }
+                                }
+                            })
+                            .setNegativeButton(R.string.No, null)
+                            .show();
                 }
 
-            } else if(item.getItemId() == R.id.family_menu_delete){
-
-                new AlertDialog.Builder(context)
-                        .setTitle(R.string.Confirm)
-                        .setMessage(R.string.DeleteFamily)
-                        .setPositiveButton(R.string.Yes, (d,w)->{
-//                            families.remove(position);
-//                            notifyDataSetChanged();
-                        })
-                        .setNegativeButton(R.string.No, null)
-                        .show();
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
             }
             return false;
         });
 
         popup.show();
+    }
+
+    private void showLoadingDialog() {
+        progressDialog = new ProgressDialog(context);
+        progressDialog.setMessage(context.getResources().getString(R.string.Pleasewait));
+        progressDialog.setTitle(context.getResources().getString(R.string.Delete));
+        progressDialog.setCancelable(false);
+        progressDialog.show();
     }
 }

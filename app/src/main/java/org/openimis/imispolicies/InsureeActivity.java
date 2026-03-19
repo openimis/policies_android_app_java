@@ -1,5 +1,6 @@
 package org.openimis.imispolicies;
 
+import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -205,29 +206,17 @@ public class InsureeActivity extends AppCompatActivity {
     }
 
     private void canSave(){
-        try {
-            if(txtInsuranceNumber.getText().toString().isEmpty() ||
-                    txtBirthDate.getText().toString().isEmpty() ||
-                    txtLastName.getText().toString().isEmpty() ||
-                    !insureeObject.has("ddlGender") ||
-                            insureeObject.getString("ddlGender").isEmpty() ||
-                    txtOtherNames.getText().toString().isEmpty()
-            ){
-                btnSave.setEnabled(false);
-            } else if(
-                    !insureeObject.has("ddlGender") && !insureeObject.has("Gender") ||
-                            !insureeObject.has("ddlRelationship") && !insureeObject.has("Relation") ||
-                            insureeObject.has("ddlGender") && insureeObject.getString("")
-            ){
-                btnSave.setEnabled(false);
-            }
-            else if (isHead != 1 && ddlRelationships.getText().toString().isEmpty()) {
-                btnSave.setEnabled(false);
-            } else {
-                btnSave.setEnabled(true);
-            }
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
+        if(txtInsuranceNumber.getText().toString().isEmpty() ||
+                txtBirthDate.getText().toString().isEmpty() ||
+                txtLastName.getText().toString().isEmpty() ||
+                txtOtherNames.getText().toString().isEmpty() ||
+                ddlGenders.getText().toString().isEmpty()
+        ){
+            btnSave.setEnabled(false);
+        } else if (isHead != 1 && ddlRelationships.getText().toString().isEmpty()) {
+            btnSave.setEnabled(false);
+        } else {
+            btnSave.setEnabled(true);
         }
     }
 
@@ -262,13 +251,15 @@ public class InsureeActivity extends AppCompatActivity {
             );
 
             if(insureeObject != null && insureeObject.has("Relationship") && !insureeObject.getString("Relationship").isEmpty()){
+                String savedValue = insureeObject.getString("Relationship");
+                insureeObject.put("ddlRelationship", savedValue);
                 JsonDropdownHelper.selectValue(
                         this,
                         ddlRelationships,
                         relationshipsArray,
                         textLanguage,
                         "RelationId",
-                        insureeObject.getString("Relationship")
+                        savedValue
                 );
             }
         } catch (JSONException e) {
@@ -292,6 +283,7 @@ public class InsureeActivity extends AppCompatActivity {
                             if(selectedItem != null){
                                 try {
                                     String regionId = selectedItem.getString("LocationId");
+                                    insureeObject.put("ddlCurrentRegion", regionId);
                                     fillCurrentDistricts(regionId);
                                     ddlCurrentMunicipality.setAdapter(null);
                                     ddlCurrentVillage.setAdapter(null);
@@ -304,13 +296,15 @@ public class InsureeActivity extends AppCompatActivity {
             );
 
             if(insureeObject != null && insureeObject.has("CurRegion") && !insureeObject.getString("CurRegion").isEmpty()){
+                String savedValue = insureeObject.getString("CurRegion");
+                insureeObject.put("ddlCurrentRegion", savedValue);
                 JsonDropdownHelper.selectValue(
                         this,
                         ddlCurrentRegion,
                         regionsArray,
                         "LocationName",
                         "LocationId",
-                        insureeObject.getString("CurRegion")
+                        savedValue
                 );
             }
         } catch (JSONException e){
@@ -334,6 +328,7 @@ public class InsureeActivity extends AppCompatActivity {
                             if(selectedItem != null){
                                 try {
                                     String regionId = selectedItem.getString("LocationId");
+                                    insureeObject.put("ddlFSPRegion", regionId);
                                     ddlFSPDistrict.setText("");
                                     ddlFSP.setText("");
                                     ddlFSPCategory.setText("");
@@ -348,13 +343,15 @@ public class InsureeActivity extends AppCompatActivity {
             );
 
             if(insureeObject != null && insureeObject.has("FSPRegion") && !insureeObject.getString("FSPRegion").isEmpty()){
+                String savedValue = insureeObject.getString("FSPRegion");
+                insureeObject.put("ddlFSPRegion", savedValue);
                 JsonDropdownHelper.selectValue(
                         this,
                         ddlFSPRegion,
                         regionsArray,
                         "LocationName",
                         "LocationId",
-                        insureeObject.getString("FSPRegion")
+                        savedValue
                 );
             }
         } catch (JSONException e){
@@ -379,6 +376,7 @@ public class InsureeActivity extends AppCompatActivity {
                                 if(selectedItem != null){
                                     try {
                                         String districtId = selectedItem.getString("LocationId");
+                                        insureeObject.put("ddlCurrentDistrict", districtId);
                                         ddlCurrentMunicipality.setText("");
                                         ddlCurrentVillage.setText("");
                                         fillCurrentWard(districtId);
@@ -392,13 +390,15 @@ public class InsureeActivity extends AppCompatActivity {
                 );
 
                 if(insureeObject != null && insureeObject.has("CurDistrict") && !insureeObject.getString("CurDistrict").isEmpty()){
+                    String savedValue = insureeObject.getString("CurDistrict");
+                    insureeObject.put("ddlCurrentDistrict", savedValue);
                     JsonDropdownHelper.selectValue(
                             this,
                             ddlCurrenDistricts,
                             districtsArray,
                             "LocationName",
                             "LocationId",
-                            insureeObject.getString("CurDistrict")
+                            savedValue
                     );
                 }
             }
@@ -425,6 +425,7 @@ public class InsureeActivity extends AppCompatActivity {
                                     try {
                                         if(!selectedItem.getString("LocationId").isEmpty()){
                                             FSPDistrictId = selectedItem.getString("LocationId");
+                                            insureeObject.put("ddlFSPDistrict", FSPDistrictId);
                                             ddlFSPCategory.setText("");
                                             ddlFSP.setText("");
                                             fillFSPCategory();
@@ -440,13 +441,15 @@ public class InsureeActivity extends AppCompatActivity {
 
                 if(insureeObject != null && insureeObject.has("FSPDistrict") &&
                         !insureeObject.getString("FSPDistrict").isEmpty()){
+                    String savedValue = insureeObject.getString("FSPDistrict");
+                    insureeObject.put("ddlFSPDistrict", savedValue);
                     JsonDropdownHelper.selectValue(
                             this,
                             ddlFSPDistrict,
                             districtsArray,
                             "LocationName",
                             "LocationId",
-                            insureeObject.getString("FSPDistrict")
+                            savedValue
                     );
                 }
             }
@@ -472,6 +475,7 @@ public class InsureeActivity extends AppCompatActivity {
                                 if(selectedItem != null){
                                     try {
                                         String wardId = selectedItem.getString("LocationId");
+                                        insureeObject.put("ddlCurrentMunicipality", wardId);
                                         ddlCurrentVillage.setText("");
                                         fillCurrentVillage(wardId);
                                     } catch (JSONException e) {
@@ -484,13 +488,15 @@ public class InsureeActivity extends AppCompatActivity {
 
                 if(insureeObject != null && insureeObject.has("CurWard") &&
                         !insureeObject.getString("CurWard").isEmpty()){
+                    String savedValue = insureeObject.getString("CurWard");
+                    insureeObject.put("ddlCurrentMunicipality", savedValue);
                     JsonDropdownHelper.selectValue(
                             this,
                             ddlCurrentMunicipality,
                             wardsArray,
                             "LocationName",
                             "LocationId",
-                            insureeObject.getString("CurWard")
+                            savedValue
                     );
                 }
             }
@@ -515,6 +521,7 @@ public class InsureeActivity extends AppCompatActivity {
                             if(selectedItem != null){
                                 try {
                                     HFLevel = selectedItem.getString("Code");
+                                    insureeObject.put("ddlFSPCategory", HFLevel);
                                     ddlFSP.setText("");
                                     fillFSP(FSPDistrictId, HFLevel);
                                 } catch (JSONException e) {
@@ -527,13 +534,15 @@ public class InsureeActivity extends AppCompatActivity {
 
             if(insureeObject != null && insureeObject.has("FSPCategory") &&
                     !insureeObject.getString("FSPCategory").isEmpty()){
+                String savedValue = insureeObject.getString("FSPCategory");
+                insureeObject.put("ddlFSPCategory", savedValue);
                 JsonDropdownHelper.selectValue(
                         this,
                         ddlFSPCategory,
                         wardsArray,
                         "HFLevel",
                         "Code",
-                        insureeObject.getString("FSPCategory")
+                        savedValue
                 );
             }
         } catch (JSONException e) {
@@ -568,13 +577,15 @@ public class InsureeActivity extends AppCompatActivity {
 
                 if(insureeObject != null && insureeObject.has("CurVillage") &&
                         !insureeObject.getString("CurVillage").isEmpty()){
+                    String savedValue = insureeObject.getString("CurVillage");
+                    insureeObject.put("ddlCurrentVillage", savedValue);
                     JsonDropdownHelper.selectValue(
                             this,
                             ddlCurrentVillage,
                             villagesArray,
                             "LocationName",
                             "LocationId",
-                            insureeObject.getString("CurVillage")
+                            savedValue
                     );
                 }
             } catch (JSONException e) {
@@ -610,13 +621,15 @@ public class InsureeActivity extends AppCompatActivity {
 
                 if(insureeObject != null && insureeObject.has("HFID") &&
                         !insureeObject.getString("HFID").isEmpty()){
+                    String savedValue = insureeObject.getString("HFID");
+                    insureeObject.put("ddlFSP", savedValue);
                     JsonDropdownHelper.selectValue(
                             this,
                             ddlFSP,
                             villagesArray,
                             "HF",
                             "HFID",
-                            insureeObject.getString("HFID")
+                            savedValue
                     );
                 }
             } catch (JSONException e) {
@@ -658,13 +671,15 @@ public class InsureeActivity extends AppCompatActivity {
 
             if(insureeObject != null && insureeObject.has("Gender") &&
                     !insureeObject.getString("Gender").isEmpty()){
+                String savedValue = insureeObject.getString("Gender");
+                insureeObject.put("ddlGender", savedValue);
                 JsonDropdownHelper.selectValue(
                         this,
                         ddlGenders,
                         gendersArray,
                         textLanguage,
                         "Code",
-                        insureeObject.getString("Gender")
+                        savedValue
                         );
             }
         } catch (JSONException e) {
@@ -699,13 +714,15 @@ public class InsureeActivity extends AppCompatActivity {
 
             if(insureeObject != null && insureeObject.has("Education") &&
                     !insureeObject.getString("Education").isEmpty()){
+                String savedValue = insureeObject.getString("Education");
+                insureeObject.put("ddlEducation", savedValue);
                 JsonDropdownHelper.selectValue(
                         this,
                         ddlEducation,
                         educationsArray,
                         textLanguage,
                         "EducationId",
-                        insureeObject.getString("Education")
+                        savedValue
                 );
             }
         } catch (JSONException e) {
@@ -738,13 +755,15 @@ public class InsureeActivity extends AppCompatActivity {
 
             if(insureeObject != null && insureeObject.has("Profession") &&
                     !insureeObject.getString("Profession").isEmpty()){
+                String savedValue = insureeObject.getString("Profession");
+                insureeObject.put("ddlProfession", savedValue);
                 JsonDropdownHelper.selectValue(
                         this,
                         ddlProfession,
                         professionsArray,
                         textLanguage,
                         "ProfessionId",
-                        insureeObject.getString("Profession")
+                        savedValue
                 );
             }
         } catch (JSONException e) {
@@ -777,13 +796,15 @@ public class InsureeActivity extends AppCompatActivity {
 
             if(insureeObject != null && insureeObject.has("typeOfId") &&
                     !insureeObject.getString("TypeOfId").isEmpty()){
+                String savedValue = insureeObject.getString("TypeOfId");
+                insureeObject.put("ddlIdentificationType", savedValue);
                 JsonDropdownHelper.selectValue(
                         this,
                         ddlIdentificationType,
                         identificationTypesArray,
                         textLanguage,
                         "Code",
-                        insureeObject.getString("TypeOfId")
+                        savedValue
                 );
             }
         } catch (JSONException e) {
@@ -818,13 +839,15 @@ public class InsureeActivity extends AppCompatActivity {
 
             if(insureeObject != null && insureeObject.has("Vulnerability") &&
                     !insureeObject.getString("Vulnerability").isEmpty()){
+                String savedValue = insureeObject.getString("Vulnerability");
+                insureeObject.put("ddlVulnerability", savedValue);
                 JsonDropdownHelper.selectValue(
                         this,
                         ddlVulnerability,
                         vulnerabilityArray,
                         "key",
                         "value",
-                        insureeObject.getString("Vulnerability")
+                        savedValue
                 );
             }
         } catch (JSONException e) {
@@ -860,13 +883,15 @@ public class InsureeActivity extends AppCompatActivity {
 
             if(insureeObject != null && insureeObject.has("Marital") &&
                     !insureeObject.getString("Marital").isEmpty()){
+                String savedValue = insureeObject.getString("Marital");
+                insureeObject.put("ddlMaritalStatus", savedValue);
                 JsonDropdownHelper.selectValue(
                         this,
                         ddlMaritalStatus,
                         maritalStatusData,
                         "Status",
                         "Code",
-                        insureeObject.getString("Marital")
+                        savedValue
                 );
             }
         } catch (JSONException e) {
@@ -902,13 +927,15 @@ public class InsureeActivity extends AppCompatActivity {
 
             if(insureeObject != null && insureeObject.has("CardIssued") &&
                     !insureeObject.getString("CardIssued").isEmpty()){
+                String savedValue = insureeObject.getString("CardIssued");
+                insureeObject.put("ddlBeneficiaryCard", savedValue);
                 JsonDropdownHelper.selectValue(
                         this,
                         ddlBeneficiaryCard,
                         yesNoArray,
                         "key",
                         "value",
-                        insureeObject.getString("CardIssued")
+                        savedValue
                 );
             }
         } catch (JSONException e) {
@@ -937,15 +964,6 @@ public class InsureeActivity extends AppCompatActivity {
         });
     }
 
-    public JSONArray addFirst(JSONArray array, JSONObject object) throws JSONException {
-        JSONArray newArray = new JSONArray();
-        newArray.put(object);
-        for (int i = 0; i < array.length(); i++) {
-            newArray.put(array.get(i));
-        }
-        return newArray;
-    }
-
     private void setupListeners() {
 
         // Insurance number on text changed
@@ -954,11 +972,16 @@ public class InsureeActivity extends AppCompatActivity {
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
 
             @Override
             public void afterTextChanged(android.text.Editable s) {
-
+                String chfId = txtInsuranceNumber.getText().toString().trim();
+                boolean ans = ca.isValidInsuranceNumber(chfId);
+                if(ans != true){
+                    txtInsuranceNumber.setText("");
+                }
             }
         });
 
@@ -1179,12 +1202,10 @@ public class InsureeActivity extends AppCompatActivity {
                     }
                 }
                 try {
-                    ca.SaveInsuree(insureeObject.toString(),familyId, isHead, 0, 0);
-                    Intent intent = new Intent(this, FamilyInsurees.class);
-                    intent.putExtra("FamilyId", familyId);
-                    setResult(RESULT_OK);
-                    startActivity(intent);
-                    finish();
+                    int ans = ca.SaveInsuree(insureeObject.toString(),familyId, isHead, 0, 0);
+                    if(ans!=0 && ans != 7){
+                        finish();
+                    }
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
