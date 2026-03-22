@@ -3592,7 +3592,7 @@ public class ClientAndroidInterface {
         }
     }
 
-    private void DeleteUploadedData(final int FamilyId, ArrayList<String> FamilyIDs, int CallerId) {
+    public void DeleteUploadedData(final int FamilyId, ArrayList<String> FamilyIDs, int CallerId) {
         if (FamilyIDs.isEmpty()) {
             FamilyIDs = new ArrayList<String>() {{
                 add(String.valueOf(FamilyId));
