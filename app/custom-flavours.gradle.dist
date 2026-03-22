@@ -2,7 +2,7 @@
 android {
     productFlavors {
         example {
-            applicationId [APPLICATION_ID]
+            applicationId = [APPLICATION_ID]
             buildConfigField "String", "API_BASE_URL", [API_BASE_URL]
             buildConfigField "boolean", "SHOW_PAYMENT_MENU", [SHOW_PAYMENT_MENU]
             buildConfigField "boolean", "SHOW_BULK_CN_MENU", [SHOW_BULK_CN_MENU]
