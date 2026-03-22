@@ -71,6 +71,7 @@ import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.openimis.imispolicies.network.exception.HttpException;
 import org.openimis.imispolicies.network.exception.UserNotAuthenticatedException;
 import org.openimis.imispolicies.tools.LanguageManager;
 import org.openimis.imispolicies.tools.Log;
@@ -87,6 +88,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.lang.ref.WeakReference;
+
+import io.sentry.Sentry;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -161,6 +164,7 @@ public class MainActivity extends AppCompatActivity
                         if (f.exists() || f.createNewFile())
                             new FileOutputStream(f).write(bytes);
                     } catch (IOException e) {
+                        Sentry.captureException(e);
                         e.printStackTrace();
                     }
                     ShowDialogTex2();
@@ -230,100 +234,100 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         global = (Global) getApplicationContext();
         super.onCreate(savedInstanceState);
-        instance = this;
-        setContentView(R.layout.activity_main);
-        SQLHandler sqlHandler = new SQLHandler(this);
-        sqlHandler.isPrivate = true;
-        //Set the Image folder path
-        global.setImageFolder(global.getSubdirectory("Images"));
-        //Check if database exists
-        File database = global.getDatabasePath(SQLHandler.DBNAME);
-        if (!database.exists()) {
-            sqlHandler.getReadableDatabase();
-            if (copyDatabase(this)) {
-                Toast.makeText(this, "Copy database success", Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(this, "Copy database failed", Toast.LENGTH_SHORT).show();
-                return;
+        try {
+            instance = this;
+            setContentView(R.layout.activity_main);
+            SQLHandler sqlHandler = new SQLHandler(this);
+            sqlHandler.isPrivate = true;
+            //Set the Image folder path
+            global.setImageFolder(global.getSubdirectory("Images"));
+            //Check if database exists
+            File database = global.getDatabasePath(SQLHandler.DBNAME);
+            if (!database.exists()) {
+                sqlHandler.getReadableDatabase();
+                if (copyDatabase(this)) {
+                    Toast.makeText(this, "Copy database success", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, "Copy database failed", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+            } else
+                sqlHandler.getReadableDatabase();
+
+            //Create image folder
+            createImageFolder();
+
+            Toolbar toolbar = findViewById(R.id.toolbar);
+            setSupportActionBar(toolbar);
+
+            FloatingActionButton fab = findViewById(R.id.fab);
+            fab.setOnClickListener(view -> Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                    .setAction("Action", null).show());
+
+            DrawerLayout drawer = findViewById(R.id.drawer_layout);
+            ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                    this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+            //noinspection deprecation
+            drawer.setDrawerListener(toggle);
+            toggle.syncState();
+
+            navigationView = findViewById(R.id.nav_view);
+
+            navigationView.setNavigationItemSelectedListener(this);
+            wv = findViewById(R.id.webview);
+            WebSettings settings = wv.getSettings();
+            wv.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
+            settings.setJavaScriptEnabled(true);
+            //noinspection deprecation
+            settings.setRenderPriority(WebSettings.RenderPriority.HIGH);
+            settings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
+            settings.setDomStorageEnabled(true);
+            settings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.SINGLE_COLUMN);
+            settings.setUseWideViewPort(true);
+            settings.setSaveFormData(true);
+            settings.setAllowFileAccess(true);
+            //noinspection deprecation
+            settings.setEnableSmoothTransition(true);
+            settings.setLoadWithOverviewMode(true);
+            wv.addJavascriptInterface(new ClientAndroidInterface(this), "Android");
+
+            //Register for context acquire_menu
+            registerForContextMenu(wv);
+
+            wv.loadUrl("file:///android_asset/pages/Home.html");
+            wv.setWebViewClient(new MyWebViewClient(MainActivity.this));
+
+            wv.setWebChromeClient(new WebChromeClient() {
+                @Override
+                public void onReceivedTitle(WebView view, String title) {
+                    super.onReceivedTitle(view, title);
+                    //noinspection ConstantConditions
+                    getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_TITLE);
+                    getSupportActionBar().setSubtitle(title);
+                }
+            });
+            NavigationView navigationView = findViewById(R.id.nav_view);
+            View headerview = navigationView.getHeaderView(0);
+            Login = headerview.findViewById(R.id.tvLogin);
+            OfficerName = headerview.findViewById(R.id.tvOfficerName);
+
+            Login.setOnClickListener(v -> {
+                wv.loadUrl("file:///android_asset/pages/Login.html?s=3");
+                drawer.closeDrawer(GravityCompat.START);
+                SetLoggedIn();
+            });
+            ca = new ClientAndroidInterface(this);
+            if (ca.isMasterDataAvailable() > 0) {
+                loadLanguages();
             }
-        } else
-            sqlHandler.getReadableDatabase();
-
-        //Create image folder
-        createImageFolder();
-
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(view -> Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show());
-
-        DrawerLayout drawer = findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        //noinspection deprecation
-        drawer.setDrawerListener(toggle);
-        toggle.syncState();
-
-        navigationView = findViewById(R.id.nav_view);
-
-        navigationView.setNavigationItemSelectedListener(this);
-        wv = findViewById(R.id.webview);
-        WebSettings settings = wv.getSettings();
-        wv.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
-        settings.setJavaScriptEnabled(true);
-        //noinspection deprecation
-        settings.setRenderPriority(WebSettings.RenderPriority.HIGH);
-        settings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
-        settings.setDomStorageEnabled(true);
-        settings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.SINGLE_COLUMN);
-        settings.setUseWideViewPort(true);
-        settings.setSaveFormData(true);
-        settings.setAllowFileAccess(true);
-        //noinspection deprecation
-        settings.setEnableSmoothTransition(true);
-        settings.setLoadWithOverviewMode(true);
-        wv.addJavascriptInterface(new ClientAndroidInterface(this), "Android");
-
-        //Register for context acquire_menu
-        registerForContextMenu(wv);
-
-        wv.loadUrl("file:///android_asset/pages/Home.html");
-        wv.setWebViewClient(new MyWebViewClient(MainActivity.this));
-
-        wv.setWebChromeClient(new WebChromeClient() {
-            @Override
-            public void onReceivedTitle(WebView view, String title) {
-                super.onReceivedTitle(view, title);
-                //noinspection ConstantConditions
-                getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_TITLE);
-                getSupportActionBar().setSubtitle(title);
+            navigationView.setCheckedItem(R.id.nav_home);
+            if (checkRequirements()) {
+                onAllRequirementsMet();
             }
-        });
-        NavigationView navigationView = findViewById(R.id.nav_view);
-        View headerview = navigationView.getHeaderView(0);
-        Login = headerview.findViewById(R.id.tvLogin);
-        OfficerName = headerview.findViewById(R.id.tvOfficerName);
-
-        Login.setOnClickListener(v -> {
-            wv.loadUrl("file:///android_asset/pages/Login.html?s=3");
-            drawer.closeDrawer(GravityCompat.START);
-            SetLoggedIn();
-        });
-        ca = new ClientAndroidInterface(this);
-        if (ca.isMasterDataAvailable() > 0) {
-            loadLanguages();
+            setVisibilityOfPaymentMenu();
+        } catch (Exception e) {
+            Sentry.captureException(e);
         }
-
-
-        navigationView.setCheckedItem(R.id.nav_home);
-
-        if (checkRequirements()) {
-            onAllRequirementsMet();
-        }
-
-        setVisibilityOfPaymentMenu();
     }
 
     private void setVisibilityOfPaymentMenu() {
@@ -508,6 +512,7 @@ public class MainActivity extends AppCompatActivity
                                     //ShowDialogTex();
                                 }
                             } catch (JSONException e) {
+                                Sentry.captureException(e);
                                 e.printStackTrace();
                             }
                         })
@@ -567,6 +572,7 @@ public class MainActivity extends AppCompatActivity
                                     ConfirmDialogPage((f.getName()));
                                 }
                             } catch (Exception e) {
+                                Sentry.captureException(e);
                                 e.getMessage();
                             }
                         })
@@ -818,7 +824,7 @@ public class MainActivity extends AppCompatActivity
                 return;
             }
             if (exception instanceof UserNotAuthenticatedException) {
-                new ClientAndroidInterface(context).forceLoginDialogBox(() -> restart(context));
+                new ClientAndroidInterface(context).forceLoginDialogBox(() -> startDownloading());
                 return;
             }
             restart(context);
@@ -828,6 +834,10 @@ public class MainActivity extends AppCompatActivity
             Intent refresh = new Intent(activity, MainActivity.class);
             activity.startActivity(refresh);
             activity.finish();
+        }
+
+        private void startDownloading(){
+            new MasterDataAsync(activity.get()).execute();
         }
     }
 

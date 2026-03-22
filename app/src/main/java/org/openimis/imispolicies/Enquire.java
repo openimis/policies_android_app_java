@@ -73,10 +73,10 @@ import java.util.Objects;
 public class Enquire extends ImisActivity {
     private static final String LOG_TAG = "ENQUIRE";
     private static final int REQUEST_SCAN_QR_CODE = 1;
-    private Global global;
-    private Escape escape;
-    private Picasso picasso;
-    private ClientAndroidInterface ca;
+    protected Global global;
+    protected Escape escape;
+    protected Picasso picasso;
+    protected ClientAndroidInterface ca;
     private EditText etCHFID;
     private TextView tvCHFID;
     private TextView tvName;

@@ -63,6 +63,8 @@
                 android:resource="@xml/paths" />
         </provider>
 
+        <meta-data android:name="io.sentry.dsn" android:value="@string/sentry_dsn" />
+
         <activity
             android:name=".MainActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|locale"
