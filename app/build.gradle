@@ -21,25 +21,25 @@ static def getDate() {
 }
 
 android {
-    compileSdk = 36
+    compileSdk = 34
     namespace = "org.openimis.imispolicies"
     if (keystorePropertiesFile.exists()) {
         signingConfigs {
             releaseConfig {
-                storeFile file(keystoreProperties['storeFile'])
-                storePassword keystoreProperties['storePassword']
-                keyAlias keystoreProperties['keyAlias']
-                keyPassword keystoreProperties['keyPassword']
+                storeFile = file(keystoreProperties['storeFile'])
+                storePassword = keystoreProperties['storePassword']
+                keyAlias = keystoreProperties['keyAlias']
+                keyPassword = keystoreProperties['keyPassword']
             }
         }
     }
     defaultConfig {
-        applicationId "org.openimis.imispolicies"
-        minSdkVersion 26
-        targetSdkVersion 33
-        versionCode gitVersionCode
-        versionName gitVersionName
-        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+        applicationId = "org.openimis.imispolicies"
+        minSdkVersion = 21
+        targetSdkVersion = 33
+        versionCode = gitVersionCode
+        versionName = gitVersionName
+        testInstrumentationRunner = 'androidx.test.runner.AndroidJUnitRunner'
         vectorDrawables {
             useSupportLibrary = true
         }
@@ -56,8 +56,8 @@ android {
     }
     buildTypes {
         release {
-            minifyEnabled false
-            shrinkResources false
+            minifyEnabled = false
+            shrinkResources = false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             debuggable = false
             if (keystorePropertiesFile.exists()) {
@@ -82,19 +82,19 @@ android {
     flavorDimensions = ['std']
     productFlavors {
         demoProd {
-            applicationId "org.openimis.imispolicies.demoProd"
+            applicationId = "org.openimis.imispolicies.demoProd"
             buildConfigField "String", "API_BASE_URL", '"https://demo.openimis.org/"'
             resValue "string", "app_name_policies", "Policies Demo"
             dimension = 'std'
         }
         demoRelease {
-            applicationId "org.openimis.imispolicies.demoRelease"
+            applicationId = "org.openimis.imispolicies.demoRelease"
             buildConfigField "String", "API_BASE_URL", '"https://release.openimis.org/"'
             resValue "string", "app_name_policies", "Policies Release"
             dimension = 'std'
         }
         chfDev {
-            applicationId "org.openimis.imispolicies.chfdev"
+            applicationId = "org.openimis.imispolicies.chfdev"
             buildConfigField "String", "API_BASE_URL", '"http://chf-dev.swisstph-mis.ch/"'
             buildConfigField "boolean", "SHOW_PAYMENT_MENU", 'true'
             buildConfigField "boolean", "SHOW_BULK_CN_MENU", 'true'
@@ -103,7 +103,7 @@ android {
             dimension = 'std'
         }
         mvDev {
-            applicationId "org.openimis.imispolicies.mv"
+            applicationId = "org.openimis.imispolicies.mv"
             buildConfigField "String", "API_BASE_URL", '"http://imis-mv.swisstph-mis.ch/"'
             buildConfigField "boolean", "SHOW_PAYMENT_MENU", 'true'
             buildConfigField "String", "API_VERSION", '"3"'
@@ -111,20 +111,20 @@ android {
             dimension = 'std'
         }
         bephaDev {
-            applicationId "org.openimis.imispolicies.bepha"
+            applicationId = "org.openimis.imispolicies.bepha"
             buildConfigField "String", "API_BASE_URL", '"http://149.210.235.40/devupgrade/"'
             buildConfigField "String", "DEFAULT_LANGUAGE_CODE", '"en-cm"'
             resValue "string", "app_name_policies", "Policies BEPHA DEV"
             dimension = 'std'
         }
         tchadDev {
-            applicationId "org.openimis.imispolicies.tchadDev"
+            applicationId = "org.openimis.imispolicies.tchadDev"
             buildConfigField "String", "API_BASE_URL", '"http://imis-tchad-dev.swisstph-mis.ch/"'
             resValue "string", "app_name_policies", "Policies TCHAD DEV"
             dimension = 'std'
         }
         local {
-            applicationId "org.openimis.imispolicies.local"
+            applicationId = "org.openimis.imispolicies.local"
             buildConfigField "String", "API_BASE_URL", '"http://10.0.2.2:35787/"'
             buildConfigField "boolean", "SHOW_PAYMENT_MENU", 'true'
             resValue "string", "app_name_policies", "Policies Local"
@@ -132,7 +132,7 @@ android {
             versionCode = gitVersionCodeTime
         }
         niger {
-            applicationId "org.openimis.imispolicies.niger"
+            applicationId = "org.openimis.imispolicies.niger"
             buildConfigField "String", "API_BASE_URL", '"' + (System.getenv("API_BASE_URL") ?: 'http://192.168.0.100/') + '"'
             resValue "string", "app_name_policies", System.getenv("CLI_APP_NAME") ?: "Polices Niger"
             dimension = 'std'
@@ -141,10 +141,10 @@ android {
             applicationIdSuffix System.getenv("APPLICATION_ID") ?: "org.openimis.imispolicies.cli"
             buildConfigField "String", "API_BASE_URL", '"' + (System.getenv("API_BASE_URL") ?: 'http://10.0.2.2:35787/') + '"'
             resValue "string", "app_name_policies", System.getenv("CLI_APP_NAME") ?: "Policies CLI"
-            dimension 'std'
+            dimension = 'std'
         }
         mauritaniaTrain {
-            applicationId "org.openimis.policies.mauritaniaTrain"
+            applicationId = "org.openimis.policies.mauritaniaTrain"
             buildConfigField "String", "API_BASE_URL", '"https://formation.cnass-mauritanie.swisstph-mis.ch/"'
             buildConfigField "boolean", "SHOW_PAYMENT_MENU", 'false'
             buildConfigField "boolean", "SHOW_BULK_CN_MENU", 'false'
@@ -193,8 +193,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_11
-        targetCompatibility JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
 
     packagingOptions {
@@ -204,7 +204,7 @@ android {
     }
 
     buildFeatures {
-        buildConfig true
+        buildConfig = true
     }
 
     testOptions {
@@ -229,7 +229,7 @@ apollo {
 tasks.withType(Test).configureEach {
     testLogging {
         events "passed", "skipped", "failed"
-        exceptionFormat "full"
+        exceptionFormat = "full"
         showStandardStreams = false
     }
 }
