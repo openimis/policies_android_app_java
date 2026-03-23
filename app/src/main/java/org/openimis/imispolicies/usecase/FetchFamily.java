@@ -76,7 +76,6 @@ public class FetchFamily {
         Double fixIncomeVal = null;
         try {
             String fixIncomeStr = member.fixIncome();
-            Log.d("HAHA", member.fixIncome());
             if (fixIncomeStr != null && !fixIncomeStr.isEmpty()) {
                 fixIncomeVal = Double.parseDouble(fixIncomeStr);
             }

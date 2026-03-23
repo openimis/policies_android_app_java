@@ -3750,8 +3750,6 @@ public class ClientAndroidInterface {
         } else if (object.has("FixIncome") && !object.isNull("FixIncome")) {
             fixIncome = object.getDouble("FixIncome");
         }
-        Log.d("FIXINCOME_DEBUG", "fixIncome from JSON = " + fixIncome + " | keys available: " + object.toString());
-        
         // Optional field validation logs removed - these fields are not mandatory
         
 
@@ -5537,8 +5535,6 @@ public class ClientAndroidInterface {
     @NonNull
     private JSONObject toJSONObject(@NonNull Family.Member member) throws JSONException {
         JSONObject jsonObject = new JSONObject();
-        Log.d("FIXINCOME_DEBUG", "Member CHFID=" + member.getChfId()
-                + " fixIncome (JAVA)=" + member.getFixIncome());
 
         jsonObject.put("identificationNumber", member.getIdentificationNumber());
         jsonObject.put("familyId", member.getFamilyId());
@@ -5576,8 +5572,6 @@ public class ClientAndroidInterface {
         jsonObject.put("accountDetails", member.getAccountDetails());
         jsonObject.put("otherHousehold", member.getOtherHousehold());
         jsonObject.put("fixIncome", member.getFixIncome() != null ? member.getFixIncome() : 6.9);
-
-        Log.d("FIXINCOME_DEBUG", "JSON fixIncome=" + jsonObject.get("fixIncome"));
 
         return jsonObject;
     }

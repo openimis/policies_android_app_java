@@ -71,7 +71,6 @@ public class FetchSubFamilies {
     private Family.Member toMember(@NonNull GetSubFamiliesQuery.Edge1 edge, @NonNull GetSubFamiliesQuery.Node family) {
         GetSubFamiliesQuery.Node1 member = Objects.requireNonNull(edge.node());
 
-        Log.d("HAHA SUB", member.fixIncome());
         return new Family.Member(
                 /* chfId = */ Objects.requireNonNull(member.chfId()),
                 /* isHead = */ member.head(),

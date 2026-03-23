@@ -248,7 +248,6 @@ public class SQLHandler extends SQLiteOpenHelper {
                             "HousingType NUMERIC," +
                             "fixIncome REAL" + ")"
             );
-            Log.d("HAHA", "HAHA");
             sqLiteDatabase.execSQL(
                     "CREATE TABLE 'tblInsureePolicy' (" +
                             "InsureePolicyId INTEGER," +
