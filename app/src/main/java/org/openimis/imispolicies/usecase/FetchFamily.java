@@ -73,6 +73,16 @@ public class FetchFamily {
         Integer mutualInsuranceCoverageVal = getMutualInsuranceCoverageValue(member);
         String housingTypeVal = getHousingTypeValue(member);
 
+        Double fixIncomeVal = null;
+        try {
+            String fixIncomeStr = member.fixIncome();
+            Log.d("HAHA", member.fixIncome());
+            if (fixIncomeStr != null && !fixIncomeStr.isEmpty()) {
+                fixIncomeVal = Double.parseDouble(fixIncomeStr);
+            }
+        } catch (NumberFormatException e) {
+            Log.e("FETCHFAMILY_FIELDS", "fixIncome parse error: " + e.getMessage());
+        }
 
         return new Family.Member(
                 /* chfId = */ Objects.requireNonNull(member.chfId()),
@@ -108,6 +118,7 @@ public class FetchFamily {
                 /* nonDisablingDisease = */ nonDisablingDiseaseVal,
                 /* mutualInsuranceCoverage = */ mutualInsuranceCoverageVal,
                 /* housingType = */ housingTypeVal,
+                /* fixIncome = */ fixIncomeVal,
                 /* photoPath = */ downloadPhoto(member.photo()),
                 /* photoBytes = */ null, // We already saved them on disk, no need to pass them here.
                 /* isOffline = */ member.offline() != null ? Objects.requireNonNull(member.offline()) : false

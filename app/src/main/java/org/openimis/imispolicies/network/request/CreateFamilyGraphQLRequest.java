@@ -95,6 +95,7 @@ public class CreateFamilyGraphQLRequest extends BaseGraphQLRequest {
                                     .mutualInsuranceCoverageId(safeGetMutualInsuranceCoverage(head))
                                     .noDisabilityId(safeGetNoDisability(head))
                                     .nonDisablingDiseaseId(safeGetNonDisablingDisease(head))
+                                    .fixIncome(head.getFixIncome())
                                     .photo(photoInput)
                                     .build()
                     )

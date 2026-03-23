@@ -447,6 +447,7 @@ type InsureeGQLType implements Node {
     nonDisablingDisease: NondisablingDiseaseGQLType
     noDisability: NoDisabilityGQLType
     mutualInsuranceCoverage: MutualInsuranceCoverageGQLType
+    fixIncome: String
     clientMutationId: String
 }
 
@@ -6866,6 +6867,7 @@ input FamilyHeadInsureeInputType {
     # NEW REQUIRED FIELDS - Server requires these as Int! with *_Id naming
     residenceEnvironmentId: Int!
     housingTypeId: Int!
+    fixIncome: Float!
     mutualInsuranceCoverageId: Int!
     noDisabilityId: Int!
     nonDisablingDiseaseId: Int!
@@ -7005,6 +7007,7 @@ input CreateInsureeMutationInput {
     mutualInsuranceCoverageId: Int!
     noDisabilityId: Int!
     nonDisablingDiseaseId: Int!
+    fixIncome: Float!
     clientMutationId: String
 }
 
@@ -7079,6 +7082,7 @@ input UpdateInsureeMutationInput {
     mutualInsuranceCoverageId: Int!
     noDisabilityId: Int!
     nonDisablingDiseaseId: Int!
+    fixIncome: Float!
     clientMutationId: String
 }
 """

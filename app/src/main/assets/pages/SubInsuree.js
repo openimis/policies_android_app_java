@@ -149,7 +149,12 @@ $(document).ready(function () {
 
     if (parseInt(InsureeId) > 0 || parseInt(InsureeId) < 0) {
         var Insuree = Android.getInsuree(parseInt(InsureeId));
+        var insureeData = $.parseJSON(Insuree)[0];
         bindDataFromDatafield(Insuree);
+
+        // FixIncome
+        $("#txtFixIncome").val(insureeData["fixIncome"]);
+
         var PhotoPath = $.parseJSON(Insuree)[0]["PhotoPath"];
         var IsOffline = parseInt($.parseJSON(Insuree)[0]["isOffline"]);
         if ($.parseJSON(Insuree)[0]["isHead"] == "true" || $.parseJSON(Insuree)[0]["isHead"] == "false") {
