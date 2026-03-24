@@ -65,6 +65,7 @@ public class CreateSubFamilyGraphQLRequest extends BaseGraphQLRequest {
                                         .preferredPaymentMethod(head.getPaymentMethod())
                                         .coordinates(head.getOtherHousehold())
                                         .bankCoordinates(head.getAccountDetails())
+                                        .fixIncome(head.getFixIncome())
                                         .photo(
                                                 PhotoInputType.builder()
                                                         .filename(head.getPhotoPath())

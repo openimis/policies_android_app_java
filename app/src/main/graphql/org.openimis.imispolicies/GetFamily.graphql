@@ -93,6 +93,7 @@ query GetFamily($headChfId: String, $parentUuid: String) {
                             housingType {
                                 code
                             }
+                            fixIncome
                             professionalSituation
                             preferredPaymentMethod
                             bankCoordinates

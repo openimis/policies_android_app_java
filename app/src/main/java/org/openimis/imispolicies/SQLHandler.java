@@ -245,7 +245,8 @@ public class SQLHandler extends SQLiteOpenHelper {
                             "NoDisability NUMERIC," +
                             "NonDisablingDisease NUMERIC," +
                             "MutualInsuranceCoverage NUMERIC," +
-                            "HousingType NUMERIC" + ")"
+                            "HousingType NUMERIC," +
+                            "fixIncome REAL" + ")"
             );
             sqLiteDatabase.execSQL(
                     "CREATE TABLE 'tblInsureePolicy' (" +
@@ -568,6 +569,8 @@ public class SQLHandler extends SQLiteOpenHelper {
     public void onOpen(SQLiteDatabase db) {
         super.onOpen(db);
         db.disableWriteAheadLogging();
+        mDatabase = db;
+        ensureInsureeTableHasRequiredColumns();
     }
 
     private void openDatabase() {
@@ -673,6 +676,10 @@ public class SQLHandler extends SQLiteOpenHelper {
             
             if (!columnExists(mDatabase, "tblInsuree", "HousingType")) {
                 mDatabase.execSQL("ALTER TABLE tblInsuree ADD COLUMN HousingType NUMERIC");
+            }
+
+            if (!columnExists(mDatabase, "tblInsuree", "fixIncome")) {
+                mDatabase.execSQL("ALTER TABLE tblInsuree ADD COLUMN fixIncome REAL");
             }
             
         } catch (Exception e) {

@@ -68,6 +68,7 @@ public class UpdateFamilyGraphQLRequest extends BaseGraphQLRequest {
                                         .mutualInsuranceCoverageId(head.getMutualInsuranceCoverage() != null && head.getMutualInsuranceCoverage() != 0 ? head.getMutualInsuranceCoverage() : null)
                                         .noDisabilityId(head.getNoDisability() != null && head.getNoDisability() != 0 ? head.getNoDisability() : null)
                                         .nonDisablingDiseaseId(parseIntegerSafely(head.getNonDisablingDisease(), "NonDisablingDisease", head.getChfId()))
+                                        .fixIncome(head.getFixIncome())
                                         .incomeLevelId(head.getIncomeLevel() != null && head.getIncomeLevel() != 0 ? head.getIncomeLevel() : null)
                                         .preferredPaymentMethod(head.getPaymentMethod())
                                         .coordinates(head.getOtherHousehold())

@@ -1138,6 +1138,11 @@ public class ClientAndroidInterface {
 
             // Optional field validations removed - these fields are not mandatory
 
+            Double fixIncome = null;
+            if (!TextUtils.isEmpty(data.get("txtFixIncome"))) {
+                fixIncome = Double.valueOf(data.get("txtFixIncome"));
+            }
+
             String IdentificationType = "null";
             if (!TextUtils.isEmpty(data.get("ddlIdentificationType")) && !data.get("ddlIdentificationType").equals(""))
                 IdentificationType = (data.get("ddlIdentificationType"));
@@ -1189,6 +1194,7 @@ public class ClientAndroidInterface {
             values.put("NonDisablingDisease", NonDisablingDisease);
             values.put("MutualInsuranceCoverage", MutualInsuranceCoverage);
             values.put("HousingType", HousingType);
+            values.put("fixIncome", fixIncome);
 
             if (data.get("ddlVulnerability") != null && !data.get("ddlVulnerability").equals("")) {
                 values.put("Vulnerability", data.get("ddlVulnerability"));
@@ -1414,7 +1420,7 @@ public class ClientAndroidInterface {
     @SuppressWarnings("unused")
     public String getInsuree(int InsureeId) {
         @Language("SQL")
-        String Query = "SELECT InsureeId, FamilyId, CHFID, LastName, OtherNames, DOB, Gender, Marital, isHead, IdentificationNumber, Phone, isOffline , PhotoPath, CardIssued, Relationship, Profession, Education, Email, TypeOfId, I.HFID, CurrentAddress,R.LocationId CurRegion, D.LocationId CurDistrict, W.LocationId CurWard,  I.CurVillage, HFR.LocationId FSPRegion, HFD.LocationId FSPDistrict, HF.HFLevel FSPCategory, I.Vulnerability, ProfessionalSituation, IncomeLevel, ResidenceEnvironment, PaymentMethod, OtherHousehold, AccountDetails, NoDisability, NonDisablingDisease, MutualInsuranceCoverage, HousingType\n" +
+        String Query = "SELECT InsureeId, FamilyId, CHFID, LastName, OtherNames, DOB, Gender, Marital, isHead, IdentificationNumber, Phone, isOffline , PhotoPath, CardIssued, Relationship, Profession, Education, Email, TypeOfId, I.HFID, CurrentAddress,R.LocationId CurRegion, D.LocationId CurDistrict, W.LocationId CurWard,  I.CurVillage, HFR.LocationId FSPRegion, HFD.LocationId FSPDistrict, HF.HFLevel FSPCategory, I.Vulnerability, ProfessionalSituation, IncomeLevel, ResidenceEnvironment, PaymentMethod, OtherHousehold, AccountDetails, NoDisability, NonDisablingDisease, MutualInsuranceCoverage, HousingType, fixIncome\n" +
                 "FROM tblInsuree I\n" +
                 "LEFT OUTER JOIN tblLocations V ON V.LocationId = I.CurVillage\n" +
                 "LEFT OUTER JOIN tblLocations W ON W.LocationId = V.ParentLocationId\n" +
@@ -3265,7 +3271,7 @@ public class ClientAndroidInterface {
             //get Insureesf
             query = new StringBuilder(
                     "SELECT I.InsureeUUID AS InsureeUUID, I.InsureeId AS InsureeId, I.FamilyId AS FamilyId, I.CHFID, I.LastName, I.OtherNames, I.DOB, I.Gender, NULLIF(I.Marital,'') Marital, I.isHead, NULLIF(I.IdentificationNumber,'null') IdentificationNumber, NULLIF(I.Phone,'null') Phone, REPLACE(I.PhotoPath, RTRIM(PhotoPath, REPLACE(PhotoPath, '/', '')), '') PhotoPath, NULLIF(I.CardIssued,'null') CardIssued, NULLIF(I.Relationship,'null') Relationship, NULLIF(I.Profession,'null') Profession, NULLIF(I.Education,'null') Education, NULLIF(I.Email,'null') Email, CASE WHEN I.TypeOfId='null' THEN null ELSE I.TypeOfId END TypeOfId, NULLIF(I.HFID,'null') HFID, NULLIF(I.CurrentAddress,'null') CurrentAddress, NULLIF(I.GeoLocation,'null') GeoLocation, NULLIF(I.CurVillage,'null') CurVillage, I.isOffline, I.Vulnerability, I.ProfessionalSituation, I.IncomeLevel, I.PaymentMethod, I.OtherHousehold, I.AccountDetails, " +
-                    "I.ResidenceEnvironment, I.HousingType, I.MutualInsuranceCoverage, I.NoDisability, I.NonDisablingDisease FROM tblInsuree I WHERE "
+                    "I.ResidenceEnvironment, I.HousingType, I.fixIncome, I.MutualInsuranceCoverage, I.NoDisability, I.NonDisablingDisease FROM tblInsuree I WHERE "
             );
             if (CallerId != 2) {
                 query.append(" I.FamilyId = ").append(FamilyId).append(" \n");
@@ -3712,34 +3718,38 @@ public class ClientAndroidInterface {
         if (chfId == null || chfId.trim().isEmpty()) {
             throw new JSONException("Member CHFID is required and cannot be empty");
         }
-        
+
         String lastName = object.getString("LastName");
         if (lastName == null || lastName.trim().isEmpty()) {
             throw new JSONException("Member LastName is required and cannot be empty");
         }
-        
+
         String otherNames = object.getString("OtherNames");
         if (otherNames == null || otherNames.trim().isEmpty()) {
             throw new JSONException("Member OtherNames is required and cannot be empty");
         }
-        
+
         String gender = object.getString("Gender");
         if (gender == null || gender.trim().isEmpty()) {
             throw new JSONException("Member Gender is required and cannot be empty");
         }
-        
+
         // Log detailed values of mandatory fields before upload
 
-        
+
         // Extract and log mandatory fields
         Integer residenceEnvironment = JsonUtils.getIntegerOrDefault(object, "ResidenceEnvironment");
         Integer noDisability = JsonUtils.getIntegerOrDefault(object, "NoDisability");
         String nonDisablingDisease = JsonUtils.getStringOrDefault(object, "NonDisablingDisease");
         Integer mutualInsuranceCoverage = JsonUtils.getIntegerOrDefault(object, "MutualInsuranceCoverage");
         String housingType = JsonUtils.getStringOrDefault(object, "HousingType");
-        
+        Double fixIncome = null;
 
-        
+        if (object.has("fixIncome") && !object.isNull("fixIncome")) {
+            fixIncome = object.getDouble("fixIncome");
+        } else if (object.has("FixIncome") && !object.isNull("FixIncome")) {
+            fixIncome = object.getDouble("FixIncome");
+        }
         // Optional field validation logs removed - these fields are not mandatory
         
 
@@ -3778,6 +3788,7 @@ public class ClientAndroidInterface {
                 /* nonDisablingDisease = */ JsonUtils.getStringOrDefault(object, "NonDisablingDisease"),
                 /* mutualInsuranceCoverage = */ JsonUtils.getIntegerOrDefault(object, "MutualInsuranceCoverage"),
                 /* housingType = */ JsonUtils.getStringOrDefault(object, "HousingType"),
+                /* fixIncome = */ fixIncome,
                 /* photoPath = */ image != null ? image.first : null,
                 /* photoBytes = */ image != null ? image.second : null,
                 /* isOffline = */ JsonUtils.getBooleanOrDefault(object, "isOffline", false)
@@ -5467,7 +5478,7 @@ public class ClientAndroidInterface {
             }
         }
         String[] Columns = {"identificationNumber", "familyId", "insureeId", "insureeUUID", "familyUUID", "chfid", "lastName", "otherNames", "dob", "gender", "marital", "isHead", "phone", "photoPath", "cardIssued",
-                "isOffline", "relationship", "profession", "education", "email", "typeOfId", "hfid", "currentAddress", "geoLocation", "curVillage", "incomeLevel", "professionalSituation", "paymentMethod", "accountDetails", "noDisability", "otherHousehold", "residenceEnvironment", "nonDisablingDisease", "mutualInsuranceCoverage", "housingType"};
+                "isOffline", "relationship", "profession", "education", "email", "typeOfId", "hfid", "currentAddress", "geoLocation", "curVillage", "incomeLevel", "professionalSituation", "paymentMethod", "accountDetails", "noDisability", "otherHousehold", "residenceEnvironment", "nonDisablingDisease", "mutualInsuranceCoverage", "housingType" , "fixIncome"};
         sqlHandler.insertData("tblInsuree", Columns, array, "");
     }
 
@@ -5479,7 +5490,7 @@ public class ClientAndroidInterface {
             array.put(toJSONObject(member));
 
             String[] Columns = {"identificationNumber", "familyId", "insureeId", "insureeUUID", "familyUUID", "chfid", "lastName", "otherNames", "dob", "gender", "marital", "isHead", "phone", "photoPath", "cardIssued",
-                    "isOffline", "relationship", "profession", "education", "email", "typeOfId", "hfid", "currentAddress", "geoLocation", "curVillage", "incomeLevel", "professionalSituation", "paymentMethod", "accountDetails", "otherHousehold"};
+                    "isOffline", "relationship", "profession", "education", "email", "typeOfId", "hfid", "currentAddress", "geoLocation", "curVillage", "incomeLevel", "professionalSituation", "paymentMethod", "accountDetails", "otherHousehold", "fixIncome"};
             sqlHandler.insertData("tblInsuree", Columns, array, "");
         }
     }
@@ -5524,6 +5535,7 @@ public class ClientAndroidInterface {
     @NonNull
     private JSONObject toJSONObject(@NonNull Family.Member member) throws JSONException {
         JSONObject jsonObject = new JSONObject();
+
         jsonObject.put("identificationNumber", member.getIdentificationNumber());
         jsonObject.put("familyId", member.getFamilyId());
         jsonObject.put("insureeId", member.getId());
@@ -5559,6 +5571,8 @@ public class ClientAndroidInterface {
         jsonObject.put("paymentMethod", member.getPaymentMethod());
         jsonObject.put("accountDetails", member.getAccountDetails());
         jsonObject.put("otherHousehold", member.getOtherHousehold());
+        jsonObject.put("fixIncome", member.getFixIncome() != null ? member.getFixIncome() : 6.9);
+
         return jsonObject;
     }
 

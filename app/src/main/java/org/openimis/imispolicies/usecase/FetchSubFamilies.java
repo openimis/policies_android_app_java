@@ -70,6 +70,7 @@ public class FetchSubFamilies {
     @NonNull
     private Family.Member toMember(@NonNull GetSubFamiliesQuery.Edge1 edge, @NonNull GetSubFamiliesQuery.Node family) {
         GetSubFamiliesQuery.Node1 member = Objects.requireNonNull(edge.node());
+
         return new Family.Member(
                 /* chfId = */ Objects.requireNonNull(member.chfId()),
                 /* isHead = */ member.head(),
@@ -104,6 +105,7 @@ public class FetchSubFamilies {
                 /* nonDisablingDisease = */ getNonDisablingDiseaseValue(member),
                 /* mutualInsuranceCoverage = */ getMutualInsuranceCoverageValue(member),
                 /* housingType = */ getHousingTypeValue(member),
+                /* fixIncome = */ member.fixIncome() != null ? Double.parseDouble(member.fixIncome()) : null,
                 /* photoPath = */ downloadPhoto(member.photo()),
                 /* photoBytes = */ null, // We already saved them on disk, no need to pass them here.
                 /* isOffline = */ member.offline() != null ? Objects.requireNonNull(member.offline()) : false

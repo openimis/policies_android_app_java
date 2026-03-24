@@ -388,6 +388,9 @@ public class Family implements Parcelable {
         private final String housingType;
 
         @Nullable
+        private final Double fixIncome;
+
+        @Nullable
         private final String photoPath;
         @Nullable
         private final byte[] photoBytes;
@@ -427,6 +430,7 @@ public class Family implements Parcelable {
                 @Nullable String nonDisablingDisease,
                 @Nullable Integer mutualInsuranceCoverage,
                 @Nullable String housingType,
+                @Nullable Double fixIncome,
                 @Nullable String photoPath,
                 @Nullable byte[] photoBytes,
                 boolean isOffline
@@ -464,6 +468,7 @@ public class Family implements Parcelable {
             this.nonDisablingDisease = nonDisablingDisease;
             this.mutualInsuranceCoverage = mutualInsuranceCoverage;
             this.housingType = housingType;
+            this.fixIncome = fixIncome;
             this.photoPath = photoPath;
             this.photoBytes = photoBytes;
             this.isOffline = isOffline;
@@ -525,6 +530,7 @@ public class Family implements Parcelable {
                 mutualInsuranceCoverage = in.readInt();
             }
             housingType = in.readString();
+            fixIncome = (Double) in.readValue(Double.class.getClassLoader());
             photoPath = in.readString();
             int size = in.readInt();
             if (size >= 0) {
@@ -592,6 +598,7 @@ public class Family implements Parcelable {
                 dest.writeInt(mutualInsuranceCoverage);
             }
             dest.writeString(housingType);
+            dest.writeValue(fixIncome);
             dest.writeString(photoPath);
             if (photoBytes != null) {
                 dest.writeInt(photoBytes.length);
@@ -747,6 +754,9 @@ public class Family implements Parcelable {
 
         @Nullable
         public String getHousingType(){ return housingType;}
+
+        @Nullable
+        public Double getFixIncome() { return fixIncome; }
 
         @Nullable
         public String getPhotoPath() {

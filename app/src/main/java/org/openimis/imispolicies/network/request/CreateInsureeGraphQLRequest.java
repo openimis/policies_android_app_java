@@ -61,6 +61,7 @@ public class CreateInsureeGraphQLRequest extends BaseGraphQLRequest {
                             .preferredPaymentMethod(member.getPaymentMethod())
                             .coordinates(member.getOtherHousehold())
                             .bankCoordinates(member.getAccountDetails())
+                            .fixIncome(member.getFixIncome())
                             .photo(
                                 PhotoInputType.builder()
                                 .filename(member.getPhotoPath())

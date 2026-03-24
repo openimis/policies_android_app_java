@@ -217,7 +217,11 @@ $(document).ready(function () {
 
     if (parseInt(InsureeId) > 0 || parseInt(InsureeId) < 0) {
         var Insuree = Android.getInsuree(parseInt(InsureeId));
+        var insureeData = $.parseJSON(Insuree)[0];
         bindDataFromDatafield(Insuree);
+
+        $("#txtFixIncome").val(insureeData["fixIncome"]);
+
         // Store for later re-apply after dropdowns are populated
         try { window._loadedInsuree = $.parseJSON(Insuree)[0]; } catch(e) { console.log(e); }
         var PhotoPath = $.parseJSON(Insuree)[0]["PhotoPath"];

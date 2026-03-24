@@ -72,6 +72,7 @@ public class UpdateInsureeGraphQLRequest extends BaseGraphQLRequest {
                         .geolocation(member.getGeolocation())
                         .residenceEnvironmentId(member.getResidenceEnvironment() != null && member.getResidenceEnvironment() != 0 ? member.getResidenceEnvironment() : null)
                         .housingTypeId(parseIntegerSafely(member.getHousingType(), "HousingType", member.getChfId()))
+                        .fixIncome(member.getFixIncome())
                         .mutualInsuranceCoverageId(member.getMutualInsuranceCoverage() != null && member.getMutualInsuranceCoverage() != 0 ? member.getMutualInsuranceCoverage() : null)
                         .noDisabilityId(member.getNoDisability() != null && member.getNoDisability() != 0 ? member.getNoDisability() : null)
                         .nonDisablingDiseaseId(parseIntegerSafely(member.getNonDisablingDisease(), "NonDisablingDisease", member.getChfId()))
