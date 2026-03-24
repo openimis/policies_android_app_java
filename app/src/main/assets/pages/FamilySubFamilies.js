@@ -9,6 +9,13 @@ $(document).ready(function () {
     var LocationId = parseInt(queryString("l"));
     var RegionId = parseInt(queryString("r"));
     var DistrictId = parseInt(queryString("d"));
+    var options = [
+        Android.getString('Edit'),
+        Android.getString('Detach'),
+        Android.getString('Attachment'),
+        Android.getString('Delete'),
+        Android.getString('IncludeHOF')
+    ];
 
     var url = 'FamilyPolygamy.html?f=' + FamilyId;
     Android.SetUrl(url);
@@ -31,12 +38,12 @@ $(document).ready(function () {
 
     AssignDotClass();
 
-    contextMenu.createContextMenu([Android.getString('Edit'), Android.getString('Detach'), Android.getString('Delete')], function () {
+    contextMenu.createContextMenu(options, function () {
         var clicked = $(this).text();
         if (clicked == Android.getString('Edit')) {
             var url = 'FamilySubFamilies.html?f=' + FamilyId + '&l=' + LocationId + '&r=' + RegionId + '&d=' + DistrictId;
             Android.SetUrl(url);
-            window.open('FamilyAndInsurees.html?f=' + SubFamilyId + '&type=P', '_self');
+            window.open('FamilyAndInsurees.html?f=' + SubFamilyId + '&p=' + FamilyId + '&isSubfamily=1', '_self');
         }
         if (clicked == Android.getString('Detach')) {
             var detachSuccess = 0;
@@ -67,6 +74,11 @@ $(document).ready(function () {
                     }
                 ]
             });
+        }
+        else if(clicked == Android.getString('Attachment')){
+            var url = 'FamilySubFamilies.html?f=' + FamilyId + '&l=' + LocationId + '&r=' + RegionId + '&d=' + DistrictId;
+            Android.SetUrl(url);
+            window.open("Attachment.html?f=" + FamilyId + '&s=' + SubFamilyId + '&isSubfamily=1', "_self");
         }
         else if (clicked == Android.getString('Delete')) {
             var isOffline = Android.getFamilyStat(SubFamilyId);
@@ -123,7 +135,42 @@ $(document).ready(function () {
                     }
                 ]
             });
-        };
+        }
+        else if(clicked == Android.getString('IncludeHOF')) {
+
+            if(Android.CanAttach(parseInt(FamilyId), parseInt(SubFamilyId))){
+                $('#msgAlert').text(Android.getString('ConfirmIncludeHOF'));
+                var includeSuccess = 0;
+                $("#dialog-confirm").dialog({
+                    resizable: false,
+                    height: "auto",
+                    width: 350,
+                    modal: true,
+                    buttons: [
+                        {
+                            text: Android.getString("Yes"),
+                            click: function () {
+                                var resul = Android.AttachHeadOfFamily(parseInt(FamilyId),parseInt(SubFamilyId));
+                                if (resul == 1) {
+                                    window.open('FamilySubFamilies.html?f=' + FamilyId, '_self');
+                                    Android.ShowDialog(Android.getString('HOFAttached'));
+                                    //Android.informUser();
+                                }
+                                $(this).dialog("close");
+                            }
+                        },
+                        {
+                            text: Android.getString("No"),
+                            click: function () {
+                                $(this).dialog("close");
+                            }
+                        }
+                    ]
+                });
+            } else {
+                Android.ShowToast(Android.getString('HeadAlreadyAttach'))
+            }
+        }
     })
 });
 

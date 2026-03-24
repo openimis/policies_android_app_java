@@ -1,0 +1,5 @@
+mutation ChangeInsureeFamily($input: ChangeInsureeFamilyMutationInput!) {
+    changeInsureeFamily(input: $input) {
+        clientMutationId
+    }
+}

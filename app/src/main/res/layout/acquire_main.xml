@@ -30,8 +30,7 @@
                 android:background="@drawable/square_txt_bg"
                 android:hint="@string/InsuranceNumber"
                 android:ems="10"
-                android:inputType="number"
-                android:maxLength="12">
+                android:inputType="number">
                 <requestFocus/>
             </EditText>
             <!--android:inputType="textPersonName"-->

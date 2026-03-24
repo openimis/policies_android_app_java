@@ -65,6 +65,7 @@
     <string name="Single">Single</string>
     <string name="Divorced">Divorced</string>
     <string name="Widowed">Widowed</string>
+    <string name="Polygamy">Polygamy</string>
     <string name="NotSpecified">Not specified</string>
     <string name="SelectBeneficiary">Select card status</string>
     <string name="SelectProfession">Select profession</string>
@@ -209,6 +210,7 @@
     <string name="ReleaseDate">Release Date</string>
     <string name="TotalFamily">Total Families</string>
     <string name="TotalInsuree">Total Insurees</string>
+    <string name="TotalAttachments">Total Attachments</string>
     <string name="TotalPolicy">Total Policies</string>
     <string name="TotalPremium">Total Contributions</string>
     <string name="UploadEnrollment">Upload Enrolments</string>
@@ -485,4 +487,45 @@
     <string name="Detach">Detach</string>
     <string name="ErrorDetach">Error while detached family</string>
     <string name="DetachFamily">Detach family will make this sub-family to be a family</string>
+    <string name="InvalidIdentificationNumber">Identification number must have 7 or 9 characters</string>
+    <string name="SelectContribution">Select contribution plan</string>
+    <string name="ContributionPlan">Contribution Plan</string>
+    <string name="AccountDetails">Account Details</string>
+    <string name="MobileMoney">Mobile Payment</string>
+    <string name="BankDebit">Bank debit</string>
+    <string name="TiersPay">Unknow pay</string>
+    <string name="SelectPaymentMethod">Select payment method</string>
+    <string name="NonePayment">Bank transfer</string>
+    <string name="PaymentDay">Payment day</string>
+    <string name="Periodicity">Periodicity</string>
+    <string name="CheckUpdate">Checking for updates</string>
+    <string name="Update">Update</string>
+    <string name="UpdateAvailable">Update available</string>
+    <string name="Download">Download</string>
+    <string name="NoUpdateAvailable">No update available</string>
+    <string name="DownloadStart">Download Start</string>
+    <string name="Nothing">Nothing</string>
+    <string name="ConnectionReset">connection failure. Please try again</string>
+    <string name="FamilyAndAttachment">Families attachments</string>
+    <string name="invalidPeriodicity">For this contribution plan the periodicity must be greater than or equal to</string>
+    <string name="CannotAddAttachment">We cannot add attachment for polygamous family</string>
+    <string name="IncludeHOF">Include Head of family</string>
+    <string name="ConfirmIncludeHOF">Confirm include head of family in sub-family</string>
+    <string name="HOFAttached">Head of Family attached</string>
+    <string name="HeadAlreadyAttach">Head of Family already attached</string>
+    <string name="release_tag">v1.0.0</string>
+    
+    <!-- New Fields for Insuree Form -->
+    <string name="NoDisability">No Disability</string>
+    <string name="SelectNoDisability">Select No Disability</string>
+    <string name="NonDisablingDisease">Non-Disabling Disease</string>
+    <string name="SelectNonDisablingDisease">Select Non-Disabling Disease</string>
+    <string name="MutualInsuranceCoverage">Mutual Insurance Coverage</string>
+    <string name="SelectMutualInsuranceCoverage">Select Mutual Insurance Coverage</string>
+    <string name="HousingType">Housing Type</string>
+    <string name="SelectHousingType">Select Housing Type</string>
+
+    <string name="MonogamousFamilyMember">Members of the monogamous household</string>
+    <string name="PolygamousHead">Heads of polygamous sub-households</string>
+
 </resources>

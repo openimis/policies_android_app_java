@@ -20,6 +20,7 @@ import org.openimis.imispolicies.util.StringUtils;
 
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.util.Collections;
 import java.util.Objects;
 
 public class FetchFamily {
@@ -37,34 +38,57 @@ public class FetchFamily {
 
     @WorkerThread
     @NonNull
-    public Family execute(@NonNull String headChfId) throws Exception {
-        GetFamilyQuery.Node node = getFamilyGraphQLRequest.get(headChfId);
+    public Family execute(@NonNull String headChfId, @NonNull String parentUuid) throws Exception {
+        GetFamilyQuery.Node node = getFamilyGraphQLRequest.get(headChfId, parentUuid);
         return new Family(
-                /* headChfId = */ headChfId,
-                /* id = */ IdUtils.getIdFromGraphQLString(node.id()),
+                /* headChfId = */ node.headInsuree().chfId(),
+                /* id = */ node.id() != null ? IdUtils.getIdFromGraphQLString(node.id()) : 0,
                 /* uuid = */ node.uuid(),
                 /* sms = */ null,
-                /* locationId = */ node.location() != null ? IdUtils.getIdFromGraphQLString(Objects.requireNonNull(node.location()).id()) : null,
+                /* locationId = */ node.location() != null && node.location().id() != null ? IdUtils.getIdFromGraphQLString(Objects.requireNonNull(node.location()).id()) : null,
                 /* isPoor = */ node.poverty() != null ? Objects.requireNonNull(node.poverty()) : false,
                 /* type = */ node.familyType() != null ? Objects.requireNonNull(node.familyType()).code() : null,
-                /* address = */ node.address(),
+                /* address = */ node.address() != null ? node.address() : "",
                 /* ethnicity = */ node.ethnicity(),
-                /* confirmationNumber = */ node.confirmationNo(),
+                /* confirmationNumber = */ node.confirmationNo() != null ? node.confirmationNo() : "",
                 /* confirmationType = */ node.confirmationType() != null ? Objects.requireNonNull(node.confirmationType()).code() : null,
                 /* isOffline = */ node.isOffline() != null ? Objects.requireNonNull(node.isOffline()) : false,
-                /* insurees = */ Mapper.map(node.members().edges(), (edge) -> toMember(edge, node))
+                /* parentId = */ node.parent() != null && node.parent().id() != null ? IdUtils.getIdFromGraphQLString(node.parent().id()) : null,
+                /* parentUuid = */ node.parent() != null ? Objects.requireNonNull(node.parent()).uuid()  : null,
+                /* insurees = */ Mapper.map(node.members().edges(), (edge) -> toMember(edge, node)),
+                /* attachments = */ Mapper.map(Objects.requireNonNull(node.attachments()), (attachment) -> toAttachment(attachment)),
+                null,
+                null
         );
     }
 
     @NonNull
     private Family.Member toMember(@NonNull GetFamilyQuery.Edge1 edge, @NonNull GetFamilyQuery.Node family) {
         GetFamilyQuery.Node1 member = Objects.requireNonNull(edge.node());
+        // Compute mapped values once for logging and reuse
+        Integer incomeLevelVal = getIncomeLevelValue(member);
+        Integer residenceEnvironmentVal = getResidenceEnvironmentValue(member);
+        Integer noDisabilityVal = getNoDisabilityValue(member);
+        String nonDisablingDiseaseVal = getNonDisablingDiseaseValue(member);
+        Integer mutualInsuranceCoverageVal = getMutualInsuranceCoverageValue(member);
+        String housingTypeVal = getHousingTypeValue(member);
+
+        Double fixIncomeVal = null;
+        try {
+            String fixIncomeStr = member.fixIncome();
+            if (fixIncomeStr != null && !fixIncomeStr.isEmpty()) {
+                fixIncomeVal = Double.parseDouble(fixIncomeStr);
+            }
+        } catch (NumberFormatException e) {
+            Log.e("FETCHFAMILY_FIELDS", "fixIncome parse error: " + e.getMessage());
+        }
+
         return new Family.Member(
                 /* chfId = */ Objects.requireNonNull(member.chfId()),
                 /* isHead = */ member.head(),
-                /* id = */ IdUtils.getIdFromGraphQLString(member.id()),
+                /* id = */ member.id() != null ? IdUtils.getIdFromGraphQLString(member.id()) : 0,
                 /* uuid = */ member.uuid(),
-                /* familyId = */ IdUtils.getIdFromGraphQLString(family.id()),
+                /* familyId = */ family.id() != null ? IdUtils.getIdFromGraphQLString(family.id()) : 0,
                 /* familyUuid = */ family.uuid(),
                 /* identificationNumber = */ member.passport(),
                 /* lastName = */ member.lastName(),
@@ -72,17 +96,28 @@ public class FetchFamily {
                 /* dateOfBirth = */ member.dob(),
                 /* gender = */ Objects.requireNonNull(member.gender()).code(),
                 /* marital = */ member.marital(),
-                /* phone = */ member.phone(),
+                /* phone = */ member.phone() != null ? member.phone() : "",
                 /* cardIssued = */ member.cardIssued(),
                 /* relationship = */ member.relationship() != null ? Objects.requireNonNull(member.relationship()).id() : null,
                 /* profession = */ member.profession() != null ? Objects.requireNonNull(member.profession()).id() : null,
                 /* education = */ member.education() != null ? Objects.requireNonNull(member.education()).id() : null,
-                /* email = */ member.email(),
+                /* email = */ member.email() != null ? member.email() : "",
                 /* typeOfId = */ member.typeOfId() != null ? Objects.requireNonNull(member.typeOfId()).code() : null,
-                /* healthFacilityId = */ member.healthFacility() != null ? IdUtils.getIdFromGraphQLString(Objects.requireNonNull(member.healthFacility()).id()) : null,
+                /* healthFacilityId = */ member.healthFacility() != null && member.healthFacility().id() != null ? IdUtils.getIdFromGraphQLString(Objects.requireNonNull(member.healthFacility()).id()) : null,
                 /* currentAddress = */ member.currentAddress(),
-                /* currentVillage = */ member.currentVillage() != null ? IdUtils.getIdFromGraphQLString(Objects.requireNonNull(member.currentVillage()).id()) : null,
+                /* currentVillage = */ member.currentVillage() != null && member.currentVillage().id() != null ? IdUtils.getIdFromGraphQLString(Objects.requireNonNull(member.currentVillage()).id()) : null,
                 /* geolocation = */ member.geolocation(),
+                /* professional situation = */ member.professionalSituation(),
+                /* incomeLevel = */ incomeLevelVal,
+                /* residenceEnvironment = */ residenceEnvironmentVal,
+                /* payment method = */ member.preferredPaymentMethod(),
+                /* other household = */ member.coordinates() != null ? member.coordinates() : "",
+                /* account details = */ member.bankCoordinates() != null ? member.bankCoordinates() : "",
+                /* noDisability = */ noDisabilityVal,
+                /* nonDisablingDisease = */ nonDisablingDiseaseVal,
+                /* mutualInsuranceCoverage = */ mutualInsuranceCoverageVal,
+                /* housingType = */ housingTypeVal,
+                /* fixIncome = */ fixIncomeVal,
                 /* photoPath = */ downloadPhoto(member.photo()),
                 /* photoBytes = */ null, // We already saved them on disk, no need to pass them here.
                 /* isOffline = */ member.offline() != null ? Objects.requireNonNull(member.offline()) : false
@@ -133,5 +168,58 @@ public class FetchFamily {
             return null;
         }
         return PhotoUtils.getPhotoBytes(photo.photo());
+    }
+
+    @NonNull
+    private Family.Attachment toAttachment(@NonNull GetFamilyQuery.Attachment attachment){
+        return new Family.Attachment(
+                /* id */ Integer.parseInt(attachment.idAttachment()),
+                /* tittle */ attachment.title(),
+                /* mime */ attachment.mime(),
+                /* filename */ attachment.filename(),
+                /* content */ attachment.document()
+        );
+    }
+
+    private Integer getNoDisabilityValue(GetFamilyQuery.Node1 member) {
+        if (member.noDisability() != null) {
+            return member.noDisability().code();
+        }
+        return null;
+    }
+
+    private String getNonDisablingDiseaseValue(GetFamilyQuery.Node1 member) {
+        if (member.nonDisablingDisease() != null) {
+            return String.valueOf(member.nonDisablingDisease().code());
+        }
+        return null;
+    }
+
+    private Integer getMutualInsuranceCoverageValue(GetFamilyQuery.Node1 member) {
+        if (member.mutualInsuranceCoverage() != null) {
+            return member.mutualInsuranceCoverage().code();
+        }
+        return null;
+    }
+
+    private String getHousingTypeValue(GetFamilyQuery.Node1 member) {
+        if (member.housingType() != null) {
+            return String.valueOf(member.housingType().code());
+        }
+        return null;
+    }
+
+    private Integer getIncomeLevelValue(GetFamilyQuery.Node1 member) {
+        if (member.incomeLevel() != null && member.incomeLevel().id() != null) {
+            return Integer.valueOf(IdUtils.getIdFromGraphQLString(Objects.requireNonNull(member.incomeLevel()).id()));
+        }
+        return null;
+    }
+
+    private Integer getResidenceEnvironmentValue(GetFamilyQuery.Node1 member) {
+        if (member.residenceEnvironment() != null) {
+            return member.residenceEnvironment().code();
+        }
+        return null;
     }
 }

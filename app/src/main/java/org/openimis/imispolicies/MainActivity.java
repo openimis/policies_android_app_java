@@ -34,16 +34,20 @@ import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.provider.OpenableColumns;
 import android.text.TextUtils;
+import android.util.Base64;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -80,6 +84,7 @@ import org.openimis.imispolicies.util.UriUtils;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -96,6 +101,7 @@ public class MainActivity extends AppCompatActivity
     public static final int REQUEST_CREATE_ENROL_EXPORT = 3;
     public static final int REQUEST_CREATE_FEEDBACK_EXPORT = 4;
     public static final int REQUEST_CREATE_RENEWAL_EXPORT = 5;
+    private static final int REQUEST_PICK_ATTACH_FILE = 6;
     private NavigationView navigationView;
 
     // This is super ugly but I'm not fixing the app.
@@ -126,6 +132,9 @@ public class MainActivity extends AppCompatActivity
     private AlertDialog enrolmentOfficerDialog;
     private AlertDialog masterDataDialog;
     private AlertDialog permissionDialog;
+    private AlertDialog addAttachmentDialog;
+    private EditText fileInput;
+    public String fileContent = "";
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -137,7 +146,7 @@ public class MainActivity extends AppCompatActivity
                     (data.getData() != null
                             && data.getAction() != null
                             && data.getAction().equals(MediaStore.ACTION_IMAGE_CAPTURE))) {
-                Log.d("Main", "RESULT_LOAD_IMG got a camera result, in the predefined location");
+
                 selectedImage = ClientAndroidInterface.tempPhotoUri;
             } else {
                 // File selection
@@ -208,12 +217,44 @@ public class MainActivity extends AppCompatActivity
                 AndroidUtils.showToast(this, R.string.XmlCreated);
             }
 
-        } else {
+        } else if (requestCode == REQUEST_PICK_ATTACH_FILE && resultCode == RESULT_OK && data != null) {
+            Uri fileUri = data.getData();
+
+            Cursor cursor = getContentResolver()
+                    .query(fileUri, null, null, null, null, null);
+
+            try {
+                if (cursor != null && cursor.moveToFirst()) {
+                    @SuppressLint("Range") String displayName = cursor.getString(
+                            cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+
+                    byte[] bytes = IOUtils.toByteArray(getContentResolver().openInputStream(fileUri));
+
+                    fileContent = Base64.encodeToString(bytes, Base64.DEFAULT);
+
+                    wv.evaluateJavascript(String.format("selectAttachmentCallback(\"%s\");", displayName), null);
+                }
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                cursor.close();
+            }
+
+        }  else {
             //if user cancels
             ClientAndroidInterface.inProgress = false;
             this.InsureeNumber = null;
             this.ImagePath = null;
         }
+    }
+
+    public void PickAttachmentDialogFromPage() {
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("image/*");
+        startActivityForResult(intent, REQUEST_PICK_ATTACH_FILE);
     }
 
     @Override
@@ -500,6 +541,7 @@ public class MainActivity extends AppCompatActivity
                                     if (!global.isNetworkAvailable()) {
                                         PickMasterDataFileDialog();
                                     } else {
+                                        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
                                         new MasterDataAsync(this).execute();
                                     }
                                     //ca.downloadMasterData();
@@ -526,6 +568,7 @@ public class MainActivity extends AppCompatActivity
                             if (!global.isNetworkAvailable()) {
                                 PickMasterDataFileDialog();
                             } else {
+                                getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
                                 new MasterDataAsync(this).execute();
                             }
                         })

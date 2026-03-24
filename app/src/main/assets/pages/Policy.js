@@ -1,8 +1,13 @@
 $(document).ready(function () {
     document.title = Android.getString('AddEditPolicy');
+    fillDropdowns();
 
     if(!Android.IsBulkCNUsed()) {
         $('#ControlNumber').hide();
+    }
+
+    if(!Android.getRule("isVisibleSigningDate")){
+        $('#SigningDate').hide();
     }
 
     $("#dialog-confirm").attr("title", Android.getString('Confirm'));
@@ -18,6 +23,7 @@ $(document).ready(function () {
     var HasCycle = null;
     var fStartDate = null;
     $("#txtEffectiveDate").prop('disabled', true);
+    $("#txtExpiryDate").prop('disabled', true);
 
     $("#Officer").hide();
     var OfficerId = Android.getOfficerId();
@@ -25,18 +31,24 @@ $(document).ready(function () {
     $("#ddlOfficer").val(parseInt(OfficerId));
 
     //LoadOfficers(LocationId, null);
-    LoadProduct(RegionId, DistrictId, null);
+    //LoadProduct(RegionId, DistrictId, null);
+    LoadContributionPlan(null);
 
     if (policyId != 0) {
         var strPolicy = Android.getPolicy(policyId);
         var $Policy = $.parseJSON(strPolicy);
-        $("#ddlProduct").val($Policy[0]["ProdId"]);
+        //$("#ddlProduct").val($Policy[0]["ProdId"]);
+        $("#ddlContributionPlan").val($Policy[0]["ContributionPlanId"]);
+         $("#ddlPeriodicity").val($Policy[0]["Periodicity"]);
         $("#ddlOfficer").val($Policy[0]["OfficerId"]);
+        $("#ddlPaymentDay").val($Policy[0]["PaymentDay"]);
         var PolicyStage = $Policy[0]["PolicyStage"];
         var StartDate = $Policy[0]["StartDate"];
         var EnrolmentDate = $Policy[0]["EnrollDate"];
         var ExpiryDate = $Policy[0]["ExpiryDate"];
+        var SigningDate = $Policy[0]["SigningDate"];
         var ProdId = parseInt($Policy[0]["ProdId"]);
+        var CPId = parseInt($Policy[0]["ContributionPlanId"]);
         var CurrentPolicyValue = $Policy[0]["PolicyValue"];
         var isOffline = parseInt($Policy[0]["isOffline"]);
 
@@ -44,6 +56,7 @@ $(document).ready(function () {
 
         $('#txtStartDate').val((StartDate));
         $('#txtExpiryDate').val(ExpiryDate);
+        $('#txtSigningDate').val(SigningDate);
 
         if(Android.IsBulkCNUsed()) {
             if($Policy[0]["ControlNumber"]) {
@@ -56,18 +69,19 @@ $(document).ready(function () {
         var HSCycle = false;
         if ($('#hfHasCycle').val()) HSCycle = true;
 
-        var NewPolicyValue = Android.getPolicyValue(EnrolmentDate, ProdId, FamilyId, $('#hffStartDate').val(), HSCycle, parseInt(policyId), PolicyStage, isOffline);
+        //var NewPolicyValue = Android.getPolicyValue(EnrolmentDate, ProdId, FamilyId, $('#hffStartDate').val(), HSCycle, parseInt(policyId), PolicyStage, isOffline);
         var PolicyStatusValue = $("#hfPolicyStatus").val();
 
-        if (NewPolicyValue != CurrentPolicyValue) {
+        /*if (NewPolicyValue != CurrentPolicyValue) {
             var Vdate = new Date(EnrolmentDate);  //or your date here
             var NewDate = ((Vdate.getMonth() + 1) + '/' + Vdate.getDate() + '/' + Vdate.getFullYear());
             Android.ShowDialog(Android.getString('PolicyValueChange') + NewDate + ' ' + Android.getString('Changed'));
 
-        }
+        }*/
 
         $("#txtEnrolmentDate").prop('disabled', false);
         $("#ddlProduct").prop('disabled', false);
+        $("#ddlContributionPlan").prop('disabled', false);
         $("#txtStartDate").prop('disabled', true);
         if (PolicyStatusValue == 1) {
             $("#txtExpiryDate").prop('disabled', false);
@@ -79,15 +93,36 @@ $(document).ready(function () {
     $('#txtEnrolmentDate').change(function () {
         var EnrolmentDate = $('#txtEnrolmentDate').val();
         LoadProduct(RegionId, DistrictId, EnrolmentDate);
+        $("#txtSigningDate").prop('min',EnrolmentDate);
         //LoadOfficers(LocationId, EnrolmentDate);
-
     });
 
-    $('#txtEnrolmentDate, #ddlProduct').change(function () {
+    $('#ddlContributionPlan').change(function() {
+        var ContributionPlanCode = Android.getCPCode($('#ddlContributionPlan').val());
+        if(ContributionPlanCode == "AMS"){
+            $('#ddlPeriodicity').val("Y")
+        } else {
+            $('#ddlPeriodicity').val("M")
+        }
+    });
+
+    $('#ddlPeriodicity').change(function() {
+        if($('#ddlContributionPlan').val() != "0"){
+            var ContributionPlanCode = Android.getCPCode($('#ddlContributionPlan').val());
+            var periodicity = $('#ddlPeriodicity').val();
+            var ans = Android.isValidPeriodicity(ContributionPlanCode, periodicity);
+            if (ans != true) {
+                $('#ddlPeriodicity').val("");
+               $('#ddlPeriodicity').focus();
+            }
+        }
+    })
+
+    $('#txtEnrolmentDate, #ddlContributionPlan, #ddlPeriodicity').change(function () {
         var EnrolmentDate = $('#txtEnrolmentDate').val();
         var ProdId = $('#ddlProduct').val();
-        getPolicyPeriod(EnrolmentDate, parseInt(ProdId), parseInt(FamilyId), parseInt(policyId));
-
+        var ContributionPlanId = $('#ddlContributionPlan').val();
+        getPolicyPeriod(EnrolmentDate, ContributionPlanId, parseInt(FamilyId), parseInt(policyId));
     });
 
     $('#ddlProduct').change(function () {
@@ -106,6 +141,23 @@ $(document).ready(function () {
             }
         }
     });
+
+    /*$('#ddlContributionPlan').change(function () {
+           var CPId = $('#ddlContributionPlan').val();
+           var policyValue = Android.GetContributionPlanValue(parseInt(FamilyId),CPId);
+           var finalValue;
+
+           var fun = JSON.parse(policyValue);
+           with(fun) {
+                   // prints "foo"
+                   finalValue = eval(remoteFunction);
+           }
+
+           var periodicity = $('#ddlPeriodicity').val();
+
+           $('#spPolicyValue').text(finalValue);
+           $('#hfPolicyValue').val(finalValue);
+    });*/
 
     function savePolicy() {
         var jsonPolicy = createJSONString();
@@ -159,16 +211,28 @@ $(document).ready(function () {
 
     $('#txtStartDate').change(function () {
         var txtStartDate = $('#txtStartDate').val();
-        var ProdId = $('#ddlProduct').val();
-        getPolicyPeriod(txtStartDate, parseInt(ProdId), parseInt(FamilyId), parseInt(policyId));
+        var CPId = $('#ddlContributionPlan').val();
+        getPolicyPeriod(txtStartDate, CPId, parseInt(FamilyId), parseInt(policyId));
     });
+
+    $('#txtSigningDate').on('change', function() {
+        var signingDate = $(this).val();
+        if (signingDate) {
+            $('#ddlPaymentDay').attr('required', true);
+        } else {
+            $('#ddlPaymentDay').removeAttr('required');
+        }
+    });
+
 });
 
-function getPolicyPeriod(EnrolmentDate, ProdId, FamilyId, policyId) {
-    if (EnrolmentDate.length == 0 || ProdId == 0)
+function getPolicyPeriod(EnrolmentDate, CpId, FamilyId, policyId) {
+    if (EnrolmentDate.length == 0 || CpId == 0)
         return false;
 
-    var Period = $.parseJSON(Android.getPolicyPeriod(parseInt(ProdId), EnrolmentDate));
+    var ProdId = Android.getContributionPlanProduct(CpId);
+    var Periodicity = $('#ddlPeriodicity').val()
+    var Period = $.parseJSON(Android.getPolicyPeriod(parseInt(ProdId), EnrolmentDate, Periodicity));
 
     var StartDate = new Date(Period[0]["StartDate"]);
     var ExpiryDate = new Date(Period[0]["ExpiryDate"]);
@@ -183,10 +247,27 @@ function getPolicyPeriod(EnrolmentDate, ProdId, FamilyId, policyId) {
     fStartDate = getDateForJS(StartDate)
     //fStartDate = moment(fStartDate).toDate();
     var isOffline = $('#hfOffline').val();
-    var PolicyValue = Android.getPolicyValue(EnrolmentDate, parseInt(ProdId), FamilyId, fStartDate, HasCycle, 0, "N", isOffline);
+    //var PolicyValue = Android.getPolicyValue(EnrolmentDate, ProdId, FamilyId, fStartDate, HasCycle, 0, "N", isOffline);
+    var PolicyValue = Android.GetContributionPlanValue(parseInt(FamilyId),CpId)
+    var finalValue;
+    var fun = JSON.parse(PolicyValue);
+    with(fun) {
+        finalValue = eval(remoteFunction);
+    }
 
-    $('#spPolicyValue').text(PolicyValue);
-    $('#hfPolicyValue').val(PolicyValue);
+    var periodicity = $('#ddlPeriodicity').val();
+    if(periodicity == "M") {
+        finalValue = finalValue * 1;
+    } else if (periodicity == "Q") {
+        finalValue = finalValue * 3;
+    } else if (periodicity == "S") {
+        finalValue = finalValue * 6;
+    } else if (periodicity == "Y") {
+        finalValue = finalValue * 12;
+    }
+
+    $('#spPolicyValue').text(finalValue);
+    $('#hfPolicyValue').val(finalValue);
 
     $('#hfHasCycle').val(HasCycle);
     $('#hffStartDate').val(fStartDate);
@@ -207,7 +288,31 @@ function LoadProduct(RegionId, DistrictId, EnrolmentDate) {
     bindDropdown('ddlProduct', $Products, 'ProdId', 'ProductNameCombined', 0, Android.getString('SelectProduct'));
 }
 
+function LoadContributionPlan(EnrolmentDate) {
+    var $ContributionPlans = Android.getContributionPlans(EnrolmentDate);
+    bindDropdown('ddlContributionPlan', $ContributionPlans, 'CpId', 'CombinedName', 0, Android.getString('SelectContribution'));
+}
+
 function createJSONString() {
     var jsonPolicy = getControlsValuesJSON('li');
     return jsonPolicy;
+}
+
+function fillDropdowns() {
+    getPaymentDayValue();
+    getPeriodicityValue();
+}
+
+function getPeriodicityValue()  {
+    $textLanguage = "Name";
+    if (Android.getSelectedLanguage() != "en") {
+        $textLanguage = "AltLanguage";
+    }
+    var $Period= Android.getPeriodicity();
+    bindDropdown('ddlPeriodicity', $Period, 'Code', $textLanguage, Android.getString('Periodicity'));
+}
+
+function getPaymentDayValue() {
+    var PaymentDay = Android.getPaymentDay();
+    bindDropdown('ddlPaymentDay', PaymentDay, 'Value', 'Label', null);
 }

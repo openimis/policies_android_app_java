@@ -6,27 +6,23 @@ on:
       api_base_url:
         description: URL of the REST API
         required: true
-        default: https://release.openimis.org/rest/
+        default: ${{ secrets.API_BASE_URL }}
       app_name:
-        description: Display name of the application
-        required: false
-        default: Policies Manual
-      app_dir:
-        description: Name of the folder in Documents, default IMIS-CLI
-        required: false
-      application_id:
-        description: Fully qualified name of the app
+        description: Application name
         required: true
-        default: org.openimis.imispolicies.cli
-      cli_java_dir:
-        description: java source folder for custom functions. Only works with application_id_suffix .cli
+        default: Policies Comores Dev
+      app_version:
+        description: Version of the application
+        required: true
+        default: 1.0.0
+      release_tag:
+        description: Tag for application update
+        required: true
+        default: comores-dev
+      release_notes:
+        description: Release notes
         required: false
-      cli_res_dir:
-        description: Resources folder for icons. Only works with application_id_suffix .cli
-        required: false
-      cli_assets_dir:
-        description: Asserts folder for images, json files.... Only works with .cli
-        required: false
+        default: Correction des bugs et amélioration des performances
 # Branch is chosen by default in github manual actions
 
 jobs:
@@ -34,60 +30,73 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
-      - name: Setup JDK 17
-        uses: actions/setup-java@v2
+      # Set Repository Name As Env Variable
+      - name: Set repository name as env variable
+        run: echo "repository_name=$(echo '${{ github.repository }}' | awk -F '/' '{print $2}')" >> $GITHUB_ENV
+
+      - name: Setup JDK 21
+        uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
-          java-version: '17'
+          java-version: '21'
           cache: 'gradle'
           
-      - uses: actions/cache@v2
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-${{ github.event.inputs.application_id }}-${{ hashFiles('**/*.gradle*') }}-${{ hashFiles('**/gradle/wrapper/gradle-wrapper.properties') }}-${{ hashFiles('**/buildSrc/**/*.kt') }}
+#      - uses: actions/cache@v4
+#        with:
+#          path: |
+#            ~/.gradle/caches
+#            ~/.gradle/wrapper
+#          key: ${{ runner.os }}-${{ github.event.inputs.application_id }}-${{ hashFiles('**/*.gradle*') }}-${{ hashFiles('**/gradle/wrapper/gradle-wrapper.properties') }}-${{ hashFiles('**/buildSrc/**/*.kt') }}
 
-      - uses: actions/cache@v2
-        with:
-          path: |
-            ~/.android
-          key: ${{ runner.os }}-${{ github.event.inputs.application_id }}
+#      - uses: actions/cache@v4
+#        with:
+#          path: |
+#            ~/.android
+#          key: ${{ runner.os }}-${{ github.event.inputs.application_id }}
 
-      - name: Environment info
-        run: |
-          gradle --version
-          echo url ${{ github.event.inputs.api_base_url }}
-          echo app name ${{ github.event.inputs.app_name }}
+#      - name: Environment info
+#        run: |
+#          gradle --version
+#          echo url ${{ github.event.inputs.api_base_url }}
+#          echo app name ${{ github.event.inputs.app_name }}
 
-          echo app dir ${{ github.event.inputs.app_dir }}
-          echo CLI_JAVA_DIR "${{ github.event.inputs.cli_java_dir }}"
-          echo CLI_RES_DIR "${{ github.event.inputs.cli_res_dir }}"
-          echo CLI_ASSETS_DIR "${{ github.event.inputs.cli_assets_dir }}"
-          echo APPLICATION_ID "${{ github.event.inputs.application_id }}"
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
 
-      - name: build
-        run: |
-          ./gradlew assembleCliDebug --stacktrace
+      # Create APK Debug
+      - name: Build project
+        run: ./gradlew assembleComoresDevDebug
         env:
-          API_BASE_URL: "${{ github.event.inputs.api_base_url }}"
-          CLI_APP_NAME: "${{ github.event.inputs.app_name }}"
-          CLI_APP_DIR: "${{ github.event.inputs.app_dir }}"
-          CLI_JAVA_DIR: "${{ github.event.inputs.cli_java_dir }}"
-          CLI_RES_DIR: "${{ github.event.inputs.cli_res_dir }}"
-          CLI_ASSETS_DIR: "${{ github.event.inputs.cli_assets_dir }}"
-          APPLICATION_ID: "${{ github.event.inputs.application_id }}"
+          API_BASE_URL: ${{ github.event.inputs.api_base_url }}
+          app_name_policies: ${{ github.event.inputs.app_name }}
+          release_tag: ${{ github.event.inputs.release_tag }}
 
-      - name: Environment info
-        run: |
-          gradle --version
+#      - name: Environment info
+#        run: |
+#          gradle --version
 
-      - uses: actions/upload-artifact@v2
+      # Upload Artifact Build
+      - name: Upload APK file
+        uses: actions/upload-artifact@v4
         with:
-          name: openimis-policies-apk-${{github.run_number}}-${{github.sha}}
+          name: app-comoresDev-debug
           path: ./app/build/outputs/**/*.apk
+          overwrite: true
+
+      - name: Edit release ${{ github.event.inputs.release_tag }}
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.event.inputs.release_tag }} # Sets the release tag to the pushed tag name (e.g., v1.0.0)
+          name: ${{ github.event.inputs.app_version }} # Sets the release name to the pushed tag name (e.g., Release v1.0.0)
+          body: |
+            ${{ github.event.inputs.release_notes }}
+          files: ./app/build/outputs/**/*.apk
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 #      - name: build
 #        run: |

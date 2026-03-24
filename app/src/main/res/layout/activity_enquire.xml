@@ -22,7 +22,6 @@
             android:ems="10"
             android:inputType="text"
             android:hint="@string/InsuranceNumber"
-            android:maxLength="12"
             android:imeOptions="actionGo" >
 
             <requestFocus />
@@ -108,22 +107,36 @@
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/llListView"
-        android:visibility="invisible"
-        android:layout_height="fill_parent"
         android:layout_width="fill_parent"
-        android:background="@color/Green">
+        android:layout_height="fill_parent"
+        android:orientation="vertical">
 
         <ListView
             android:id="@+id/listView1"
+            android:visibility="invisible"
             android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
+            android:layout_height="70dp"
             android:layout_margin="2dp"
-            android:background="@android:color/background_dark"
+            android:background="@android:color/darker_gray"
             android:choiceMode="none"
             android:divider="@color/Orange"
             android:dividerHeight="2dp"
-            android:fadeScrollbars="true"></ListView>
-    </LinearLayout>
+            android:fadeScrollbars="true" />
 
+        <ScrollView
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent">
+
+            <LinearLayout
+                android:id="@+id/llListView"
+                android:visibility="invisible"
+                android:layout_height="wrap_content"
+                android:layout_width="fill_parent"
+                android:orientation="vertical">
+
+            </LinearLayout>
+
+        </ScrollView>
+
+    </LinearLayout>
 </LinearLayout>

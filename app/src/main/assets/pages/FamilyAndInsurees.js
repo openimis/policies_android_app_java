@@ -3,14 +3,20 @@ $(document).ready(function () {
     document.title = Android.getString('FamilyAndInsurees');
 
     var FamilyId = queryString("f");
+    var parentId = queryString("p");
+    var isPolygamy = queryString("isPolygamy");
+    var isSubfamily = queryString("isSubfamily");
     var LocationId = null;
     var RegionId = null;
     var DistrictId = null;
     var InsureeId = null;
     var Action = null;
 
-    var url = 'Enrollment.html?f=' + FamilyId;
-    if(queryString("type") != "P"){
+    if(isSubfamily != 1){
+        var url = 'Enrollment.html?f=' + FamilyId;
+        Android.SetUrl(url);
+    }else {
+        var url = 'FamilySubFamilies.html?f=' + parentId;
         Android.SetUrl(url);
     }
 
@@ -51,7 +57,7 @@ $(document).ready(function () {
         if (clicked == Android.getString('Edit')) {
             var url = 'FamilyAndInsurees.html?f=' + FamilyId;
             Android.SetUrl(url);
-            window.open("Insuree.html?i=" + InsureeId + "&f=" + FamilyId, "_self");
+            window.open("Insuree.html?i=" + InsureeId + "&f=" + FamilyId + "&isPolygamy=" + isPolygamy, "_self");
         }
         else if (clicked == Android.getString('Delete')) {
             //$("#divProgress").show();

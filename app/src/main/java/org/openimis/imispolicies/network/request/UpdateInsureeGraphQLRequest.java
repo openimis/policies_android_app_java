@@ -14,32 +14,47 @@ import org.openimis.imispolicies.type.PhotoInputType;
 import org.openimis.imispolicies.type.UpdateInsureeMutationInput;
 
 import java.util.Objects;
+import java.util.UUID;
+import android.util.Log;
 
 public class UpdateInsureeGraphQLRequest extends BaseGraphQLRequest {
 
     @WorkerThread
     @NonNull
-    public UpdateInsureeMutation.Data update(
-            @NonNull Family.Member member
-    ) throws Exception {
-        return update(member, member.getFamilyId());
-    }
-
-    @WorkerThread
-    @NonNull
-    public UpdateInsureeMutation.Data update(
+    public String update(
             @NonNull Family.Member member,
-            @Nullable Integer familyId
+            int officerId
         ) throws Exception {
+        java.sql.Date date = new java.sql.Date(System.currentTimeMillis());
+        
+        // Log des informations de l'assuré avant la mise à jour
+        Log.d("UpdateInsuree", "Mise à jour de l'assuré - CHID: " + member.getChfId());
+        Log.d("UpdateInsuree", "Nom: " + member.getLastName() + ", Prénoms: " + member.getOtherNames());
+        Log.d("UpdateInsuree", "Date de naissance: " + member.getDateOfBirth() + ", Genre: " + member.getGender());
+        Log.d("UpdateInsuree", "Téléphone: " + member.getPhone() + ", Email: " + member.getEmail());
+        Log.d(
+            "UpdateInsuree", 
+            "Type d'ID: " + member.getTypeOfId() + ", N° d'identification: " + member.getIdentificationNumber()
+        );
+        Log.d(
+            "UpdateInsuree", 
+            "Membre chef de famille: " + member.isHead() + ", Carte émise: " + member.isCardIssued()
+        );
+        Log.d(
+            "UpdateInsuree", 
+            "Profession: " + member.getProfession() + ", Éducation: " + member.getEducation()
+        );
+        
+        try {
         Response<UpdateInsureeMutation.Data> response = makeSynchronous(new UpdateInsureeMutation(
                 UpdateInsureeMutationInput.builder()
-                        .id(member.getId())
-                        .chfId(member.getChfId())
+                        .clientMutationId("Update insuree '" + member.getChfId() + "'") 
                         .uuid(member.getUuid())
-                        .familyId(member.getFamilyId())
-                        .head(member.isHead())
+                        .chfId(member.getChfId())
+                        .familyId(member.getFamilyId()) 
+                        .head(member.isHead()) 
                         .passport(member.getIdentificationNumber())
-                        .typeOfIdId(member.getTypeOfId())
+                        .typeOfIdId(member.getTypeOfId()) 
                         .lastName(member.getLastName())
                         .otherNames(member.getOtherNames())
                         .dob(member.getDateOfBirth())
@@ -48,13 +63,24 @@ public class UpdateInsureeGraphQLRequest extends BaseGraphQLRequest {
                         .phone(member.getPhone())
                         .email(member.getEmail())
                         .cardIssued(member.isCardIssued())
-                        .relationshipId(member.getRelationship())
-                        .professionId(member.getProfession())
-                        .educationId(member.getEducation())
-                        .healthFacilityId(member.getHealthFacilityId())
+                        .relationshipId(member.getRelationship() != null && member.getRelationship() != 0 ? member.getRelationship() : null)
+                        .professionId(member.getProfession() != null && member.getProfession() != 0 ? member.getProfession() : null)
+                        .educationId(member.getEducation() != null && member.getEducation() != 0 ? member.getEducation() : null)
+                        .healthFacilityId(member.getHealthFacilityId() != null && member.getHealthFacilityId() != 0 ? member.getHealthFacilityId() : null)
                         .currentAddress(member.getCurrentAddress())
-                        .currentVillageId(member.getCurrentVillage())
+                        .currentVillageId(member.getCurrentVillage() != null && member.getCurrentVillage() != 0 ? member.getCurrentVillage() : null)
                         .geolocation(member.getGeolocation())
+                        .residenceEnvironmentId(member.getResidenceEnvironment() != null && member.getResidenceEnvironment() != 0 ? member.getResidenceEnvironment() : null)
+                        .housingTypeId(parseIntegerSafely(member.getHousingType(), "HousingType", member.getChfId()))
+                        .fixIncome(member.getFixIncome())
+                        .mutualInsuranceCoverageId(member.getMutualInsuranceCoverage() != null && member.getMutualInsuranceCoverage() != 0 ? member.getMutualInsuranceCoverage() : null)
+                        .noDisabilityId(member.getNoDisability() != null && member.getNoDisability() != 0 ? member.getNoDisability() : null)
+                        .nonDisablingDiseaseId(parseIntegerSafely(member.getNonDisablingDisease(), "NonDisablingDisease", member.getChfId()))
+                        .incomeLevelId(member.getIncomeLevel() != null && member.getIncomeLevel() != 0 ? member.getIncomeLevel() : null)
+                        .preferredPaymentMethod(member.getPaymentMethod())
+                        .coordinates(member.getOtherHousehold())
+                        .bankCoordinates(member.getAccountDetails())
+                        .professionalSituation(member.getProfessionalSituation())
                         .photo(
                                 PhotoInputType.builder()
                                         .filename(member.getPhotoPath())
@@ -63,10 +89,63 @@ public class UpdateInsureeGraphQLRequest extends BaseGraphQLRequest {
                                                         Base64.encodeToString(member.getPhotoBytes(), Base64.DEFAULT) :
                                                         null
                                         )
+                                        .officerId(officerId)
+                                        .date(date)
                                         .build()
                         )
                         .build()
         ));
-        return Objects.requireNonNull(response.getData());
+        String mutationId = response.getData().updateInsuree().clientMutationId();
+        Log.d("UpdateInsuree", "Mise à jour réussie - ID de mutation: " + mutationId);
+        return mutationId;
+        } catch (Exception e) {
+            Log.e("UpdateInsuree", "Erreur lors de la mise à jour de l'assuré " + 
+                (member != null ? member.getChfId() : "inconnu"), e);
+            throw e;
+        }
+    }
+    
+    /**
+     * Convertit une chaîne en entier de manière sécurisée
+     * @param value La valeur à convertir
+     * @param defaultValue La valeur par défaut à retourner en cas d'erreur ou si la valeur est nulle/vide
+     * @return L'entier converti ou la valeur par défaut
+     */
+    private Integer parseIntSafe(String value, Integer defaultValue) {
+        if (value == null || value.isEmpty() || "null".equalsIgnoreCase(value)) {
+            return defaultValue;
+        }
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
+    }
+    
+    /**
+     * Safely parse a string to Integer with detailed logging to prevent NullPointerException
+     * @param value The string value to parse
+     * @param fieldName The name of the field for logging
+     * @param chfId The CHFID for context in logging
+     * @return Integer value or null if parsing fails or value is null/empty
+     */
+    private Integer parseIntegerSafely(String value, String fieldName, String chfId) {
+        try {
+            if (value == null) {
+                Log.w("UpdateInsuree", "[" + chfId + "] " + fieldName + " is null, sending null to server");
+                return null;
+            }
+            
+            if (value.trim().isEmpty() || value.equals("0")) {
+                Log.w("UpdateInsuree", "[" + chfId + "] " + fieldName + " is empty or zero (" + value + "), sending null to server");
+                return null;
+            }
+            
+            return Integer.parseInt(value.trim());
+            
+        } catch (NumberFormatException e) {
+            Log.e("UpdateInsuree", "[" + chfId + "] Failed to parse " + fieldName + " value: '" + value + "' - sending null to server", e);
+            return null;
+        }
     }
 }

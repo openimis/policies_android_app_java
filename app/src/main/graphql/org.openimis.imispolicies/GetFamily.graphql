@@ -1,8 +1,7 @@
-query GetFamily($headChfId: String) {
-    families(headInsuree_ChfId: $headChfId, first:1) {
+query GetFamily($headChfId: String, $parentUuid: String) {
+    families(headInsuree_ChfId_Icontains: $headChfId, uuid: $parentUuid first:1) {
         edges {
             node {
-                legacyId
                 id
                 uuid
                 headInsuree {
@@ -76,8 +75,43 @@ query GetFamily($headChfId: String) {
                                 folder
                             }
                             offline
+                            incomeLevel {
+                                id
+                            }
+                            residenceEnvironment {
+                                code
+                            }
+                            noDisability {
+                                code
+                            }
+                            nonDisablingDisease {
+                                code
+                            }
+                            mutualInsuranceCoverage {
+                                code
+                            }
+                            housingType {
+                                code
+                            }
+                            fixIncome
+                            professionalSituation
+                            preferredPaymentMethod
+                            bankCoordinates
+                            coordinates
                         }
                     }
+                }
+                parent{
+                    uuid
+                    id
+                }
+                attachments{
+                    idAttachment,
+                    filename,
+                    document,
+                    title,
+                    date,
+                    mime
                 }
             }
         }

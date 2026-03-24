@@ -11,24 +11,34 @@ import org.openimis.imispolicies.domain.entity.Family;
 import org.openimis.imispolicies.type.CreatePolicyMutationInput;
 
 import java.util.Objects;
+import java.util.UUID;
 
 public class CreatePolicyGraphQLRequest extends BaseGraphQLRequest {
 
     @WorkerThread
     @NonNull
-    public CreatePolicyMutation.Data create(@NonNull Family.Policy policy) throws Exception {
+    public String create(@NonNull Family.Policy policy, int familyId) throws Exception {
         Response<CreatePolicyMutation.Data> response = makeSynchronous(new CreatePolicyMutation(
                 CreatePolicyMutationInput.builder()
-                        .uuid(policy.getUuid())
-                        .familyId(policy.getFamilyId())
+                        .clientMutationId(UUID.randomUUID().toString())
+                        .clientMutationId("Create policy '" + policy.getUuid() + "'")
+                        .familyId(familyId)
                         .enrollDate(policy.getEnrollDate())
                         .startDate(policy.getStartDate())
                         .expiryDate(policy.getExpiryDate())
                         .value(policy.getValue())
                         .productId(policy.getProductId())
                         .officerId(policy.getOfficerId())
+                        .contributionPlanId(policy.getContributionPlanId())
+                        .paymentDay(policy.getPaymentDay())
+                        .signatureDate(policy.getSigningDate())
+                        .periodicity(policy.getPeriodicity())
                         .build()
         ));
-        return Objects.requireNonNull(response.getData());
+        return Objects.requireNonNull(
+                Objects.requireNonNull(
+                                Objects.requireNonNull(response.getData(), "data is null")
+                                        .createPolicy(), "create policy is null")
+                        .clientMutationId(), "clientMutationId is null");
     }
 }

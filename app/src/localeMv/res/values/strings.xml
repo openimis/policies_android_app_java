@@ -207,6 +207,7 @@
     <string name="ReleaseDate">Release Date</string>
     <string name="TotalFamily">Total Families</string>
     <string name="TotalInsuree">Total Insurees</string>
+    <string name="TotalAttachments">Total Attachments</string>
     <string name="TotalPolicy">Total Policies</string>
     <string name="TotalPremium">Total Contributions</string>
     <string name="UploadEnrollment">Upload Enrolments</string>
@@ -483,6 +484,21 @@
     <string name="SelectPaymentMethod">Select payment method</string>
     <string name="PaymentMethod">Payment method</string>
     <string name="ProfessionalSituation">Professional Situation</string>
+    <string name="OtherHousehold">Other Household</string>
     <string name="SelectIncomeLevel">Select Income Level</string>
     <string name="IncomeLevel">Income Level</string>
+    <string name="SelectResidenceEnvironment">Select Residence Environment</string>
+    <string name="ResidenceEnvironment">Residence Environment</string>
+    <string name="Periodicity">Periodicity</string>
+    <string name="SigningDate">Signing Date</string>
+    <string name="Attachment">Attachment</string>
+    <string name="NoneFile">No File</string>
+    <string name="AttachmentTitle">Title</string>
+    <string name="AttachmentFile">File</string>
+    <string name="NoFileAdded">No file added</string>
+    <string name="DeleteAttachment">Deleting of Attachment</string>
+    <string name="AttachmentDeleted">Attachment deleted successfully</string>
+    <string name="AttachmentNotFound">No attachment added. Please add attachment to continue</string>
+    <string name="FamilyPolygamy">Polygamous family</string>
+    <string name="CheckUpdate">Check for updates</string>
 </resources>

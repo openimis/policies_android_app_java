@@ -21,7 +21,7 @@ static def getDate() {
 }
 
 android {
-    compileSdk 34
+    compileSdk = 34
     namespace = "org.openimis.imispolicies"
     if (keystorePropertiesFile.exists()) {
         signingConfigs {
@@ -37,8 +37,8 @@ android {
         applicationId "org.openimis.imispolicies"
         minSdkVersion 21
         targetSdkVersion 33
-        versionCode gitVersionCode
-        versionName gitVersionName
+        versionCode 1
+        versionName "1.4.2"
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         vectorDrawables {
             useSupportLibrary = true
@@ -91,6 +91,13 @@ android {
             buildConfigField "String", "API_BASE_URL", '"https://release.openimis.org/"'
             resValue "string", "app_name_policies", "Policies Release"
             dimension = 'std'
+        }
+        comoresDev {
+            applicationId "org.openimis.imispolicies.comoresDev"
+            buildConfigField "String", "API_BASE_URL", '"https://dev.amg.km/"'
+            resValue "string", "app_name_policies", "Policies Comores Dev"
+            dimension = 'std'
+            resValue "string", "release_tag", "comores-dev"
         }
         chfDev {
             applicationId "org.openimis.imispolicies.chfdev"
@@ -152,6 +159,9 @@ android {
         }
     }
     sourceSets {
+        comoresDev.java.srcDir 'src/master/java'
+        comoresDev.res.srcDirs = ['src/master/res', 'src/localeMv/res']
+
         chfDev.java.srcDir 'src/chf/java'
         chfDev.res.srcDirs = ['src/chf/res', 'src/localeChf/res']
 
@@ -240,9 +250,10 @@ dependencies {
     implementation 'androidx.recyclerview:recyclerview:1.3.2'
     implementation 'org.apache.commons:commons-lang3:3.12.0'
     implementation 'cz.msebera.android:httpclient:4.5.8'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    testImplementation 'junit:junit:4.13.2'
 
     androidTestImplementation('androidx.test.espresso:espresso-core:3.1.0', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    testImplementation 'junit:junit:4.13.2'
 }

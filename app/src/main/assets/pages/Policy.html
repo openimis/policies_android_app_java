@@ -50,9 +50,13 @@ In case of dispute arising out or in relation to the use of the program, it is s
             <span strName="EnrolmentDate">Enrolment date</span>
             <input datafield="EnrollDate" type="date" id="txtEnrolmentDate" required/>
         </li>
-        <li id="Product">
+        <li style="display:none;">
             <span strName="Product">Product</span>
-            <select datafield="ProdId" id="ddlProduct" required></select>
+            <select datafield="ProdId" id="ddlProduct"></select>
+        </li>
+        <li id="ContributionPlan">
+            <span strName="ContributionPlan">ContributionPlan</span>
+            <select datafield="ContributionPlanId" id="ddlContributionPlan" required></select>
         </li>
         <li id="ControlNumber">
             <span strName="controlNumberLabel">Control Number :</span>
@@ -71,9 +75,25 @@ In case of dispute arising out or in relation to the use of the program, it is s
             <span strName="ExpireDate">Expire date</span>
             <input datafield="ExpiryDate" type="date" id="txtExpiryDate" required/>
         </li>
+        <li id="SigningDate">
+            <span strName="SigningDate">Signing date</span>
+            <input datafield="SigningDate" type="date" id="txtSigningDate"/>
+        </li>
+        <li id="PaymentDay">
+            <span strName="PaymentDay">Payment day</span>
+            <select datafield="PaymentDay" id="ddlPaymentDay">
+
+            </select>
+        </li>
         <li id="Officer">
             <span strName="Officer">Officer</span>
             <input type='hidden' datafield="OfficerId" type="date" id="ddlOfficer" required/>
+        </li>
+        <li id="Periodicity">
+            <span strName="Periodicity">Périodicité</span>
+            <select datafield="Periodicity" id="ddlPeriodicity" required>
+
+            </select>
         </li>
         <li>
             <span strName="PolicyStatus">Policy Status :</span>

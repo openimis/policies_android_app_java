@@ -1,0 +1,91 @@
+package org.openimis.imispolicies.network.request;
+
+import android.util.Base64;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.WorkerThread;
+
+import com.apollographql.apollo.api.Response;
+
+import org.openimis.imispolicies.CreateFamilyMutation;
+import org.openimis.imispolicies.domain.entity.Family;
+import org.openimis.imispolicies.network.util.Mapper;
+import org.openimis.imispolicies.type.CreateFamilyMutationInput;
+import org.openimis.imispolicies.type.FamilyAttachmentInputType;
+import org.openimis.imispolicies.type.FamilyHeadInsureeInputType;
+import org.openimis.imispolicies.type.PhotoInputType;
+import org.openimis.imispolicies.util.DateUtils;
+
+import java.util.ArrayList;
+import java.util.Objects;
+import java.util.UUID;
+
+public class CreateSubFamilyGraphQLRequest extends BaseGraphQLRequest {
+
+    @WorkerThread
+    @NonNull
+    public String create(@NonNull Family family, @NonNull int officerId) throws Exception {
+        Family.Member head = family.getHead();
+        java.sql.Date date = new java.sql.Date(System.currentTimeMillis());
+        Response<CreateFamilyMutation.Data> response = makeSynchronous(new CreateFamilyMutation(
+                CreateFamilyMutationInput.builder()
+                        .clientMutationId(UUID.randomUUID().toString())
+                        .clientMutationId("Create family '" + family.getHeadChfId() + "'")
+                        .locationId(family.getLocationId())
+                        .poverty(family.isPoor())
+                        .familyTypeId(family.getType())
+                        .address(family.getAddress())
+                        .ethnicity(family.getEthnicity())
+                        .confirmationNo(family.getConfirmationNumber())
+                        .confirmationTypeId(family.getConfirmationType())
+                        .isOffline(family.isOffline())
+                        .parentId(family.getParentId())
+                        .headInsuree(
+                                FamilyHeadInsureeInputType.builder()
+                                        .lastName(head.getLastName())
+                                        .otherNames(head.getOtherNames())
+                                        .genderId(head.getGender())
+                                        .dob(head.getDateOfBirth())
+                                        .passport(head.getIdentificationNumber())
+                                        .cardIssued(head.isCardIssued())
+                                        .typeOfIdId(head.getTypeOfId())
+                                        .marital(head.getMarital())
+                                        .phone(head.getPhone())
+                                        .email(head.getEmail())
+                                        .professionId(head.getProfession())
+                                        .educationId(head.getEducation() == 0 ? null:head.getEducation())
+                                        .professionalSituation(head.getProfessionalSituation())
+                                        .incomeLevelId(head.getIncomeLevel() != null && head.getIncomeLevel() != 0 ? head.getIncomeLevel() : null)
+                                        // Optional fields - send user-selected values or null
+                                        .residenceEnvironmentId(head.getResidenceEnvironment() != null && head.getResidenceEnvironment() != 0 ? head.getResidenceEnvironment() : null)
+                                        .mutualInsuranceCoverageId(head.getMutualInsuranceCoverage() != null && head.getMutualInsuranceCoverage() != 0 ? head.getMutualInsuranceCoverage() : null)
+                                        .housingTypeId(head.getHousingType() != null && !head.getHousingType().equals("0") && !head.getHousingType().isEmpty() ? Integer.parseInt(head.getHousingType()) : null)
+                                        .noDisabilityId(head.getNoDisability() != null && head.getNoDisability() != 0 ? head.getNoDisability() : null)
+                                        .nonDisablingDiseaseId(head.getNonDisablingDisease() != null && !head.getNonDisablingDisease().equals("0") && !head.getNonDisablingDisease().isEmpty() ? Integer.parseInt(head.getNonDisablingDisease()) : null)
+                                        .preferredPaymentMethod(head.getPaymentMethod())
+                                        .coordinates(head.getOtherHousehold())
+                                        .bankCoordinates(head.getAccountDetails())
+                                        .fixIncome(head.getFixIncome())
+                                        .photo(
+                                                PhotoInputType.builder()
+                                                        .filename(head.getPhotoPath())
+                                                        .photo(
+                                                                head.getPhotoBytes() != null ?
+                                                                        Base64.encodeToString(head.getPhotoBytes(), Base64.DEFAULT) :
+                                                                        null
+                                                        )
+                                                        .date(date)
+                                                        .officerId(officerId)
+                                                        .build()
+                                        )
+                                        .build()
+                        )
+                        .build()
+        ));
+        return Objects.requireNonNull(
+                Objects.requireNonNull(
+                                Objects.requireNonNull(response.getData(), "data is null")
+                                        .createFamily(), "create family is null")
+                        .clientMutationId(), "clientMutationId is null");
+    }
+}

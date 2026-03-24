@@ -128,12 +128,12 @@ function getVillages(WardId) {
     var $Villages = Android.getVillages(parseInt(WardId.toString()));
     var rows = JSON.parse($Villages).length;
     if (rows == 1) SelectText = null;
-    bindDropdown('ddlVillage', $Villages, 'LocationId', 'LocationName', 0, SelectText);
+    bindDropdown('ddlVillage', $Villages, 'LocationId', 'LocationName', null, SelectText);
 }
 
 function getPovertyStatus() {
     var $YesNo = Android.getYesNo();
-    bindDropdown('ddlPovertyStatus', $YesNo, 'value', 'key', null, Android.getString('SelectPovertyStatus'));
+    bindDropdown('ddlPovertyStatus', $YesNo, 'value', 'key', null, "");
 }
 
 function getConfirmationTypes() {
@@ -151,7 +151,7 @@ function getFamilyTypes() {
         $textLanguage = "AltLanguage";
     }
     var $FamilyTypes = Android.getGroupTypes();
-    bindDropdown('ddlGroupType', $FamilyTypes, 'FamilyTypeCode', $textLanguage, 0, Android.getString('SelectFamilyType'));
+    bindDropdown('ddlGroupType', $FamilyTypes, 'FamilyTypeCode', $textLanguage, null, "");
 }
 
 function getApprovalOfSMS() {

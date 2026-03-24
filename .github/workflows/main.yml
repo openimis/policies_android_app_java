@@ -3,7 +3,7 @@ name: CI
 on:
   push:
     branches:
-      - '*'
+      - 'develop-comores'
 #    tags:
 #      - '!v*'
 
@@ -27,26 +27,26 @@ jobs:
 
       - name: build
         run: |
-          ./gradlew assembleDebug --stacktrace
+          ./gradlew assemblecomoresDevDebug --stacktrace
 
       - name: Environment info
         run: |
           gradle --version
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
-          name: openimis-policies-apk-${{github.run_number}}-${{github.sha}}
+          name: policies-comores-apk-${{github.run_number}}.apk
           path: ./app/build/outputs/**/*.apk
 
       - name: build
         run: |
-          ./gradlew bundleDebug --stacktrace
+          ./gradlew bundlecomoresDevDebug --stacktrace
 
       - name: Environment info
         run: |
           gradle --version
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
-          name: openimis-policies-aab-${{github.run_number}}-${{github.sha}}
+          name: policies-comores-aab-${{github.run_number}}.aab
           path: ./app/build/outputs/**/*.aab

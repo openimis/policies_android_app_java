@@ -42,11 +42,11 @@ In case of dispute arising out or in relation to the use of the program, it is s
     <ul class="ulEntry">
         <li id="Relationship">
             <span strName="Relation">Relation</span>
-            <select id="ddlRelationship" dataField="Relationship"></select>
+            <select id="ddlRelationship" dataField="Relationship" required></select>
         </li>
         <li style="display:none;">
             <input type="hidden" datafield="InsureeId" id="hfInsureeId" value="0"/>
-            <input type="hidden" datafld="isOffline" id="hfIsOffline" value="."/>
+            <input type="hidden" datafield="isOffline" id="hfIsOffline" value="."/>
             <input type="hidden" datafield="isHead" id="hfisHead" value="-1"/>
             <span strName="InsuranceNumber">Insurance Number</span>
             <div style="display:flex">
@@ -55,16 +55,16 @@ In case of dispute arising out or in relation to the use of the program, it is s
             </div>
         </li>
         <li>
-            <span strName="OtherNames">Other Names</span>
-            <input type="text" maxlength="50" id="txtOtherNames" dataField="OtherNames" required/>
-        </li>
-        <li>
             <span strName="LastName">Last Name</span>
             <input type="text" maxlength="50" id="txtLastName" dataField="LastName" required/>
         </li>
         <li>
-            <input type="hidden" id="hfImagePath" datafield="PhotoPath" />
-            <input type="hidden" id="hfNewPhotoPath" datafield="newPhotoPath" />
+            <span strName="OtherNames">Other Names</span>
+            <input type="text" maxlength="50" id="txtOtherNames" dataField="OtherNames" required/>
+        </li>
+        <li>
+            <input type="hidden" id="hfImagePath" datafield="PhotoPath"/>
+            <input type="hidden" id="hfNewPhotoPath" datafield="newPhotoPath"/>
             <div id="imgDiv">
                 <img src="" alt="Image" onerror="noImage(this);" id="imgInsuree"/>
             </div>
@@ -80,6 +80,10 @@ In case of dispute arising out or in relation to the use of the program, it is s
         <li id="MaritalStatus">
             <span strName="MaritalStatus">Marital Status</span>
             <select id="ddlMaritalStatus" datafield="Marital"></select>
+        </li>
+        <li id="OtherHousehold">
+            <span strName="OtherHousehold">Other Household</span>
+            <input type="text" maxlength="200" id="txtOtherHousehold" datafield="OtherHousehold"/>
         </li>
         <li id="BeneficiaryCard">
             <span strName="BeneficiaryCard">Beneficiary Card</span>
@@ -131,7 +135,7 @@ In case of dispute arising out or in relation to the use of the program, it is s
         </li>
         <li id="IdentificationNumber">
             <span strName="IdentificationNumber">Identification Number</span>
-            <input type="text" id="txtIdentificationNumber" maxlength="7" datafield="IdentificationNumber" required/>
+            <input type="text" id="txtIdentificationNumber" maxlength="9" datafield="IdentificationNumber" />
         </li>
 		<li style="display:none;">
             <span strName="Vulnerability">Vulnerability</span>
@@ -157,9 +161,37 @@ In case of dispute arising out or in relation to the use of the program, it is s
             <span strName="IncomeLevel">Income Level</span>
             <select id="ddlIncomeLevel" datafield="IncomeLevel" required></select>
         </li>
+        <li id="ResidenceEnvironment">
+            <span strName="ResidenceEnvironment">Residence Environment</span>
+            <select id="ddlResidenceEnvironment" datafield="ResidenceEnvironment" required></select>
+        </li>
+        <li id="NoDisability">
+            <span strName="NoDisability">No Disability</span>
+            <select id="ddlNoDisability" datafield="NoDisability" required></select>
+        </li>
+        <li id="NonDisablingDisease">
+            <span strName="NonDisablingDisease">Non-Disabling Disease</span>
+            <select id="ddlNonDisablingDisease" datafield="NonDisablingDisease" required></select>
+        </li>
+        <li id="MutualInsuranceCoverage">
+            <span strName="MutualInsuranceCoverage">Mutual Insurance Coverage</span>
+            <select id="ddlMutualInsuranceCoverage" datafield="MutualInsuranceCoverage" required></select>
+        </li>
+        <li id="HousingType">
+            <span strName="HousingType">Housing Type</span>
+            <select id="ddlHousingType" datafield="HousingType" required></select>
+        </li>
+        <li>
+            <label for="txtFixIncome">Fix Income</label>
+            <input type="text" id="txtFixIncome" name="FixIncome" />
+        </li>
         <li id="PaymentMethod">
             <span strName="PaymentMethod">Payment Method</span>
             <select id="ddlPaymentMethod" datafield="PaymentMethod"></select>
+        </li>
+        <li id="AccountDetails">
+            <span strName="AccountDetails">Other Household</span>
+            <input type="text" maxlength="200" id="txtAccountDetails" datafield="AccountDetails"/>
         </li>
     </ul>
 </div>

@@ -7,6 +7,8 @@ import android.os.Parcelable;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import org.json.JSONArray;
+
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -34,14 +36,30 @@ public class Family implements Parcelable {
     @Nullable
     private final String confirmationType;
     private final boolean isOffline;
+
+    @Nullable
+    private final Integer parentId;
+
+    @Nullable
+    private final String parentUuid;
+
     @NonNull
     private final List<Member> members;
 
     @Nullable
+    private final List<Attachment> attachments;
+
+    @Nullable
+    private final List<Policy> policies;
+
+    @Nullable
     private Member head = null;
 
+    @Nullable
+    private String hofUuid;
+
     public Family(
-            @NonNull String headChfId,
+            @Nullable String headChfId,
             int id,
             @NonNull String uuid,
             @Nullable SMS sms,
@@ -53,7 +71,12 @@ public class Family implements Parcelable {
             @Nullable String confirmationNumber,
             @Nullable String confirmationType,
             boolean isOffline,
-            @NonNull List<Member> members
+            @Nullable Integer parentId,
+            @Nullable String parentUuid,
+            @NonNull List<Member> members,
+            @Nullable List<Attachment> attachments,
+            @Nullable List<Policy> policies,
+            @Nullable String hofUuid
     ) {
         this.headChfId = headChfId;
         this.id = id;
@@ -67,7 +90,12 @@ public class Family implements Parcelable {
         this.confirmationNumber = confirmationNumber;
         this.confirmationType = confirmationType;
         this.isOffline = isOffline;
+        this.parentId = parentId;
+        this.parentUuid = parentUuid;
         this.members = members;
+        this.attachments = attachments;
+        this.policies = policies;
+        this.hofUuid = hofUuid;
     }
 
     protected Family(Parcel in) {
@@ -88,7 +116,13 @@ public class Family implements Parcelable {
         confirmationNumber = in.readString();
         confirmationType = in.readString();
         isOffline = in.readByte() != 0;
+        int pId = in.readInt();
+        parentId = pId;
+        parentUuid = in.readString();
         members = Objects.requireNonNull(in.createTypedArrayList(Member.CREATOR));
+        attachments = in.createTypedArrayList(Attachment.CREATOR);
+        policies = in.createTypedArrayList(Policy.CREATOR);
+        hofUuid = in.readString();
     }
 
     @Override
@@ -105,7 +139,12 @@ public class Family implements Parcelable {
         dest.writeString(confirmationNumber);
         dest.writeString(confirmationType);
         dest.writeByte((byte) (isOffline ? 1 : 0));
+        dest.writeInt(parentId);
+        dest.writeString(parentUuid);
         dest.writeTypedList(members);
+        dest.writeTypedList(attachments);
+        dest.writeTypedList(policies);
+        dest.writeString(hofUuid);
     }
 
     @Override
@@ -113,10 +152,13 @@ public class Family implements Parcelable {
         return 0;
     }
 
-    @NonNull
+    @Nullable
     public Member getHead() {
         if (head != null) {
             return head;
+        }
+        if(members.isEmpty()){
+            return null;
         }
         for (Member member : members) {
             if (headChfId.equals(member.getChfId())) {
@@ -126,6 +168,9 @@ public class Family implements Parcelable {
         }
         throw new IllegalStateException("The members list (size: '" + members.size() + "') didn't contain an insuree with the head chfId: '" + headChfId + "'");
     }
+
+    @NonNull
+    public String getHeadChfId(){ return headChfId; }
 
     public int getId() {
         return id;
@@ -179,10 +224,27 @@ public class Family implements Parcelable {
         return isOffline;
     }
 
+    @Nullable
+    public Integer getParentId() {
+        return parentId;
+    }
+
+    @Nullable
+    public String getParentUuid(){ return parentUuid; }
+
     @NonNull
     public List<Member> getMembers() {
         return members;
     }
+
+    @Nullable
+    public List<Attachment> getAttachments (){ return attachments;}
+
+    @Nullable
+    public List<Policy> getPolicies (){ return policies; }
+
+    @Nullable
+    public String getHofUuid(){ return hofUuid; }
 
     public static final Creator<Family> CREATOR = new Creator<>() {
         @Override
@@ -293,6 +355,41 @@ public class Family implements Parcelable {
         private final Integer currentVillage;
         @Nullable
         private final String geolocation;
+
+        @Nullable
+        private final String professionalSituation;
+
+        @Nullable
+        private final Integer incomeLevel;
+
+        @Nullable
+        private final Integer residenceEnvironment;
+
+        @Nullable
+        private final String paymentMethod;
+
+        @Nullable
+        private final String otherHousehold;
+
+        @Nullable
+        private final String accountDetails;
+
+        // New fields added
+        @Nullable
+        private final Integer noDisability;
+
+        @Nullable
+        private final String nonDisablingDisease;
+
+        @Nullable
+        private final Integer mutualInsuranceCoverage;
+
+        @Nullable
+        private final String housingType;
+
+        @Nullable
+        private final Double fixIncome;
+
         @Nullable
         private final String photoPath;
         @Nullable
@@ -323,6 +420,17 @@ public class Family implements Parcelable {
                 @Nullable String currentAddress,
                 @Nullable Integer currentVillage,
                 @Nullable String geolocation,
+                @Nullable String professionalSituation,
+                @Nullable Integer incomeLevel,
+                @Nullable Integer residenceEnvironment,
+                @Nullable String paymentMethod,
+                @Nullable String otherHousehold,
+                @Nullable String accountDetails,
+                @Nullable Integer noDisability,
+                @Nullable String nonDisablingDisease,
+                @Nullable Integer mutualInsuranceCoverage,
+                @Nullable String housingType,
+                @Nullable Double fixIncome,
                 @Nullable String photoPath,
                 @Nullable byte[] photoBytes,
                 boolean isOffline
@@ -350,6 +458,17 @@ public class Family implements Parcelable {
             this.currentAddress = currentAddress;
             this.currentVillage = currentVillage;
             this.geolocation = geolocation;
+            this.professionalSituation = professionalSituation;
+            this.incomeLevel = incomeLevel;
+            this.residenceEnvironment = residenceEnvironment;
+            this.paymentMethod = paymentMethod;
+            this.otherHousehold = otherHousehold;
+            this.accountDetails = accountDetails;
+            this.noDisability = noDisability;
+            this.nonDisablingDisease = nonDisablingDisease;
+            this.mutualInsuranceCoverage = mutualInsuranceCoverage;
+            this.housingType = housingType;
+            this.fixIncome = fixIncome;
             this.photoPath = photoPath;
             this.photoBytes = photoBytes;
             this.isOffline = isOffline;
@@ -393,6 +512,25 @@ public class Family implements Parcelable {
             int villageId = in.readInt();
             currentVillage = villageId != -1 ? villageId : null;
             geolocation = in.readString();
+            professionalSituation = in.readString();
+            incomeLevel = in.readInt();
+            residenceEnvironment = in.readInt();
+            paymentMethod = in.readString();
+            otherHousehold = in.readString();
+            accountDetails = in.readString();
+            if (in.readByte() == 0) {
+                noDisability = null;
+            } else {
+                noDisability = in.readInt();
+            }
+            nonDisablingDisease = in.readString();
+            if (in.readByte() == 0) {
+                mutualInsuranceCoverage = null;
+            } else {
+                mutualInsuranceCoverage = in.readInt();
+            }
+            housingType = in.readString();
+            fixIncome = (Double) in.readValue(Double.class.getClassLoader());
             photoPath = in.readString();
             int size = in.readInt();
             if (size >= 0) {
@@ -444,6 +582,23 @@ public class Family implements Parcelable {
             dest.writeString(currentAddress);
             dest.writeInt(currentVillage != null ? currentVillage : -1);
             dest.writeString(geolocation);
+            dest.writeString(professionalSituation);
+            dest.writeInt(incomeLevel);
+            dest.writeInt(residenceEnvironment);
+            dest.writeString(paymentMethod);
+            dest.writeString(otherHousehold);
+            dest.writeString(accountDetails);
+            dest.writeByte((byte) (noDisability != null ? 1 : 0));
+            if (noDisability != null) {
+                dest.writeInt(noDisability);
+            }
+            dest.writeString(nonDisablingDisease);
+            dest.writeByte((byte) (mutualInsuranceCoverage != null ? 1 : 0));
+            if (mutualInsuranceCoverage != null) {
+                dest.writeInt(mutualInsuranceCoverage);
+            }
+            dest.writeString(housingType);
+            dest.writeValue(fixIncome);
             dest.writeString(photoPath);
             if (photoBytes != null) {
                 dest.writeInt(photoBytes.length);
@@ -571,6 +726,39 @@ public class Family implements Parcelable {
         }
 
         @Nullable
+        public String getProfessionalSituation(){ return professionalSituation; }
+
+        @Nullable
+        public Integer getIncomeLevel(){ return incomeLevel;}
+
+        @Nullable
+        public Integer getResidenceEnvironment(){ return residenceEnvironment;}
+
+        @Nullable
+        public String getPaymentMethod(){ return paymentMethod;}
+
+        @Nullable
+        public String getOtherHousehold(){ return otherHousehold;}
+
+        @Nullable
+        public String getAccountDetails(){ return accountDetails;}
+
+        @Nullable
+        public Integer getNoDisability(){ return noDisability;}
+
+        @Nullable
+        public String getNonDisablingDisease(){ return nonDisablingDisease;}
+
+        @Nullable
+        public Integer getMutualInsuranceCoverage(){ return mutualInsuranceCoverage;}
+
+        @Nullable
+        public String getHousingType(){ return housingType;}
+
+        @Nullable
+        public Double getFixIncome() { return fixIncome; }
+
+        @Nullable
         public String getPhotoPath() {
             return photoPath;
         }
@@ -621,7 +809,15 @@ public class Family implements Parcelable {
         private final int officerId;
         @Nullable
         private final String policyStage;
+        @Nullable
+        private final String contributionPlanId;
         private final boolean isOffline;
+        @Nullable
+        private final String periodicity;
+         @Nullable
+        private final Date signingDate;
+         @Nullable
+        private final String paymentDay;
         @Nullable
         private final String controlNumber;
         @NonNull
@@ -641,6 +837,10 @@ public class Family implements Parcelable {
                 @Nullable Integer productId,
                 int officerId,
                 @Nullable String policyStage,
+                @Nullable String contributionPlanId,
+                @Nullable String periodicity,
+                @Nullable Date signingDate,
+                @Nullable String paymentDay,
                 boolean isOffline,
                 @Nullable String controlNumber,
                 @NonNull List<Premium> premiums
@@ -658,6 +858,10 @@ public class Family implements Parcelable {
             this.productId = productId;
             this.officerId = officerId;
             this.policyStage = policyStage;
+            this.contributionPlanId = contributionPlanId;
+            this.periodicity = periodicity;
+            this.signingDate = signingDate;
+            this.paymentDay = paymentDay;
             this.isOffline = isOffline;
             this.controlNumber = controlNumber;
             this.premiums = premiums;
@@ -686,6 +890,10 @@ public class Family implements Parcelable {
             }
             officerId = in.readInt();
             policyStage = in.readString();
+            contributionPlanId = in.readString();
+            periodicity = in.readString();
+            signingDate = new Date(in.readLong());
+            paymentDay = in.readString();
             isOffline = in.readByte() != 0;
             controlNumber = in.readString();
             premiums = in.createTypedArrayList(Premium.CREATOR);
@@ -716,6 +924,10 @@ public class Family implements Parcelable {
             }
             dest.writeInt(officerId);
             dest.writeString(policyStage);
+            dest.writeString(contributionPlanId);
+            dest.writeString(periodicity);
+            dest.writeLong(signingDate.getTime());
+            dest.writeString(paymentDay);
             dest.writeByte((byte) (isOffline ? 1 : 0));
             dest.writeString(controlNumber);
             dest.writeTypedList(premiums);
@@ -788,8 +1000,26 @@ public class Family implements Parcelable {
             return policyStage;
         }
 
+        @Nullable
+        public String getContributionPlanId(){ return contributionPlanId; }
+
         public boolean isOffline() {
             return isOffline;
+        }
+
+         @Nullable
+        public String getPeriodicity(){
+            return periodicity;
+        }
+
+         @Nullable
+        public Date getSigningDate(){
+            return signingDate;
+        }
+
+         @Nullable
+        public String getPaymentDay(){
+            return paymentDay;
         }
 
         @Nullable
@@ -966,4 +1196,87 @@ public class Family implements Parcelable {
             };
         }
     }
+
+    public static class Attachment implements Parcelable {
+        @NonNull
+        private final int idAttachment;
+        @NonNull
+        private final String title;
+        @NonNull
+        private final String mime;
+        @NonNull
+        private final String filename;
+        @Nullable
+        private final String content;
+
+        public Attachment(
+                int idAttachment,
+                @NonNull String title,
+                @NonNull String mime,
+                @NonNull String filename,
+                @Nullable String content
+        ) {
+            this.idAttachment = idAttachment;
+            this.title = title;
+            this.mime = mime;
+            this.filename = filename;
+            this.content = content;
+        }
+
+        protected Attachment(Parcel in) {
+            idAttachment = in.readInt();
+            title = in.readString();
+            mime = in.readString();
+            filename = in.readString();
+            content = in.readString();
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(idAttachment);
+            dest.writeString(title);
+            dest.writeString(mime);
+            dest.writeString(filename);
+            dest.writeString(content);
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @NonNull
+        public int getIdAttachment(){ return idAttachment; }
+
+        @NonNull
+        public String getTitle() {
+            return title;
+        }
+
+        @NonNull
+        public String getFilename() {
+            return filename;
+        }
+
+        @Nullable
+        public String getContent() {
+            return content;
+        }
+
+        @NonNull
+        public  String getMime() { return mime; }
+
+        public static final Creator<Attachment> CREATOR = new Creator<>() {
+            @Override
+            public Attachment createFromParcel(Parcel in) {
+                return new Attachment(in);
+            }
+
+            @Override
+            public Attachment[] newArray(int size) {
+                return new Attachment[size];
+            }
+        };
+    }
+
 }

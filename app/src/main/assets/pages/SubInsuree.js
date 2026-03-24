@@ -60,6 +60,19 @@ $(document).ready(function () {
         $("#hfNewPhotoPath").val("");
     });
 
+    $('#txtBirthDate').change(function () {
+        fillAge($(this).val());
+    });
+
+    $("#txtIdentificationNumber").change(function(){
+        var Ins = $('#txtIdentificationNumber').val();
+        var ans = Android.isValidIdentificationNumber(Ins);
+        if (ans != true) {
+            $('#txtIdentificationNumber').val("");
+            $('#txtInsuranceNumber').focus();
+        }
+    })
+
 
     $('#spPleaseWait').text(Android.getString('saving'));
 
@@ -136,7 +149,12 @@ $(document).ready(function () {
 
     if (parseInt(InsureeId) > 0 || parseInt(InsureeId) < 0) {
         var Insuree = Android.getInsuree(parseInt(InsureeId));
+        var insureeData = $.parseJSON(Insuree)[0];
         bindDataFromDatafield(Insuree);
+
+        // FixIncome
+        $("#txtFixIncome").val(insureeData["fixIncome"]);
+
         var PhotoPath = $.parseJSON(Insuree)[0]["PhotoPath"];
         var IsOffline = parseInt($.parseJSON(Insuree)[0]["isOffline"]);
         if ($.parseJSON(Insuree)[0]["isHead"] == "true" || $.parseJSON(Insuree)[0]["isHead"] == "false") {
@@ -215,6 +233,11 @@ function fillDropdowns() {
     fillVulnerability();
     fillPaymentMethods();
     fillIncomeLevels();
+    fillResidenceEnvironments();
+    fillNoDisabilities();
+    fillNonDisablingDiseases();
+    fillMutualInsuranceCoverages();
+    fillHousingTypes();
 }
 
 // called from java after the image was selected by the user
@@ -344,12 +367,12 @@ function fillPaymentMethods(){
 }
 
 function fillIncomeLevels(){
-    $textLanguage = "FrenchVersion";
+    $textLanguage = "FirstLanguage";
     if (Android.getSelectedLanguage() != "en") {
-        $textLanguage = "EnglishVersion";
+        $textLanguage = "SecondLanguage";
     }
     var $IncomeLevels = Android.getIncomeLevels();
-    bindDropdown('ddlIncomeLevel', $IncomeLevels, 'Id', $textLanguage, null, Android.getString('SelectIncomeLevel'));
+    bindDropdown('ddlIncomeLevel', $IncomeLevels, 'IncomeLevelID', $textLanguage, null, Android.getString('SelectIncomeLevel'));
 }
 
 function createJSONString() {
@@ -367,4 +390,62 @@ function getImage() {
         $('#imgInsuree').attr('src', '');
     }
     $("#hfImagePath").val($('#imgInsuree').attr('src'));
+}
+
+function fillAge(Birthday){
+    var today = new Date ();
+    var birthDate = new Date (Birthday)
+
+    var age = today.getFullYear() - birthDate.getFullYear();
+
+    if(age < 21){
+        $("#Education").show();
+    }else{
+        $("#Education").hide();
+    }
+}
+
+function fillResidenceEnvironments() {
+    $textLanguage = "ResidenceEnvironment";
+    if (Android.getSelectedLanguage() != "en") {
+        $textLanguage = "AltLanguage";
+    }
+    var $ResidenceEnvironments = Android.getResidenceEnvironments();
+    bindDropdown('ddlResidenceEnvironment', $ResidenceEnvironments, 'Code', $textLanguage, null, Android.getString('SelectResidenceEnvironment'));
+}
+
+function fillNoDisabilities() {
+    $textLanguage = "NoDisabilityLabel";
+    if (Android.getSelectedLanguage() != "en") {
+        $textLanguage = "AltLanguage";
+    }
+    var $NoDisabilities = Android.getNoDisabilities();
+    bindDropdown('ddlNoDisability', $NoDisabilities, 'Code', $textLanguage, null, Android.getString('SelectNoDisability'));
+}
+
+function fillNonDisablingDiseases() {
+    $textLanguage = "NonDisablingDisease";
+    if (Android.getSelectedLanguage() != "en") {
+        $textLanguage = "AltLanguage";
+    }
+    var $NonDisablingDiseases = Android.getNonDisablingDiseases();
+    bindDropdown('ddlNonDisablingDisease', $NonDisablingDiseases, 'Code', $textLanguage, null, Android.getString('SelectNonDisablingDisease'));
+}
+
+function fillMutualInsuranceCoverages() {
+    $textLanguage = "MutualInsuranceCoverage";
+    if (Android.getSelectedLanguage() != "en") {
+        $textLanguage = "AltLanguage";
+    }
+    var $MutualInsuranceCoverages = Android.getMutualInsuranceCoverages();
+    bindDropdown('ddlMutualInsuranceCoverage', $MutualInsuranceCoverages, 'Code', $textLanguage, null, Android.getString('SelectMutualInsuranceCoverage'));
+}
+
+function fillHousingTypes() {
+    $textLanguage = "HousingType";
+    if (Android.getSelectedLanguage() != "en") {
+        $textLanguage = "AltLanguage";
+    }
+    var $HousingTypes = Android.getHousingTypes();
+    bindDropdown('ddlHousingType', $HousingTypes, 'Code', $textLanguage, null, Android.getString('SelectHousingType'));
 }

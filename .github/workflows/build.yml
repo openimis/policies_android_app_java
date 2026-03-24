@@ -1,0 +1,50 @@
+name: develop-comores
+
+on:
+  push:
+    branches: [ "develop-comores" ]
+  pull_request:
+    branches: [ "develop-comores" ]
+
+jobs:
+  build:
+    name: Build APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: 17
+
+      - name: Decode keystore
+        run: |
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > policies_comores.jks
+
+      - name: Set up Gradle
+        uses: gradle/gradle-build-action@v2
+        with:
+          cache-disabled: true
+
+      - name: Build release APK
+        run: ./gradlew assembleComoresDevDebug
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+
+      - name: Rename APK
+        run: mv app/build/outputs/apk/comoresDev/debug/app-comoresDev-debug.apk policies-comores-test.apk
+
+      - name: List APK files
+        run: ls -l policies-comores-test.apk
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: policies-comores-test.apk
+          path: policies-comores-test.apk
