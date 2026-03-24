@@ -21,7 +21,6 @@ public class Enrolment extends AppCompatActivity {
     RecyclerView recyclerView;
     FloatingActionButton btnAdd;
     ClientAndroidInterface ca;
-    TextView tvEmpty;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,7 +35,6 @@ public class Enrolment extends AppCompatActivity {
 
         recyclerView = findViewById(R.id.recyclerFamilies);
         btnAdd = findViewById(R.id.btnAddNew);
-        tvEmpty = findViewById(R.id.tvEmptyFamily);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         loadFamilies();
@@ -58,7 +56,6 @@ public class Enrolment extends AppCompatActivity {
         String families = ca.getAllFamilies();
         try {
             JSONArray familyArray = new JSONArray(families);
-            tvEmpty.setVisibility(families.isEmpty() ? TextView.VISIBLE : TextView.GONE);
             FamilyAdapter adapter = new FamilyAdapter(this,familyArray);
             recyclerView.setAdapter(adapter);
         } catch (JSONException e) {

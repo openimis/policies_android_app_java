@@ -50,6 +50,7 @@
                     android:layout_height="wrap_content"
                     android:maxLength="12"
                     android:inputType="number"
+                    android:cursorVisible="true"
                     android:digits="0123456789" />
             </com.google.android.material.textfield.TextInputLayout>
 

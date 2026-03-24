@@ -17,8 +17,11 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.tabs.TabLayoutMediator;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -30,10 +33,10 @@ import java.util.HashMap;
 public class FamilyInsurees extends AppCompatActivity {
 
     private int familyId;
-    RecyclerView recyclerInsurees;
-    FloatingActionButton btnAddInsuree;
     TextView regionName, districtName, wardName, villageName;
     ClientAndroidInterface ca;
+    private ViewPager2 viewPager;
+    private TabLayout tabLayout;
 
 
     @Override
@@ -44,38 +47,31 @@ public class FamilyInsurees extends AppCompatActivity {
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
+        viewPager = findViewById(R.id.viewPager);
+        tabLayout = findViewById(R.id.tabLayout);
         ca = new ClientAndroidInterface(this);
         familyId = getIntent().getIntExtra("FamilyId", 0);
         initViews();
-        recyclerInsurees.setLayoutManager(new LinearLayoutManager(this));
-
         if(familyId != 0){
             LoadFamilyHeader(familyId);
-            LoadInsurees(familyId);
         }
 
+        PagerAdapter adapter = new PagerAdapter(this);
+        viewPager.setAdapter(adapter);
+        viewPager.setOrientation(ViewPager2.ORIENTATION_HORIZONTAL);
+        new TabLayoutMediator(tabLayout, viewPager,
+                (tab, position) -> tab.setText(adapter.getTitle(position))
+        ).attach();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        LoadInsurees(familyId);
     }
 
     private void LoadFamilyHeader(int familyId){
         String FamilyHeader = ca.getFamilyHeader(familyId);
         bindDataFromDatafield(FamilyHeader);
-    }
-
-    private void LoadInsurees(int familyId) {
-        String Insurees = ca.getInsureesForFamily(familyId);
-        try {
-            JSONArray insureeArray = new JSONArray(Insurees);
-            InsureeAdapter adapter = new InsureeAdapter(this,insureeArray, familyId);
-            recyclerInsurees.setAdapter(adapter);
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     private void bindDataFromDatafield(String data){
@@ -92,19 +88,10 @@ public class FamilyInsurees extends AppCompatActivity {
     }
 
     private void initViews() {
-        recyclerInsurees = findViewById(R.id.recyclerInsurees);
         regionName = findViewById(R.id.RegionName);
         districtName = findViewById(R.id.DistrictName);
         wardName = findViewById(R.id.WardName);
         villageName = findViewById(R.id.VillageName);
-
-        btnAddInsuree = findViewById(R.id.btnNewInsuree);
-        btnAddInsuree.setOnClickListener(v -> {
-            Intent intent = new Intent(this, InsureeActivity.class);
-            intent.putExtra("FamilyId", familyId);
-            //intent.putExtra("InsureeId", insureeId);
-            startActivity(intent);
-        });
     }
 
     @Override

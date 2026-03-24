@@ -58,6 +58,7 @@
                     android:layout_height="0dp"
                     android:layout_weight="1"
                     android:textSize="12sp"
+                    android:textColor="@color/colorAccent"
                     android:text="@string/Region"
                     android:tag="RegionName"/>
 
@@ -84,6 +85,7 @@
                     android:layout_height="wrap_content"
                     android:textSize="12sp"
                     android:text="@string/District"
+                    android:textColor="@color/colorAccent"
                     android:gravity="end"/>
 
                 <TextView
@@ -116,6 +118,7 @@
                     android:layout_height="wrap_content"
                     android:textSize="12sp"
                     android:text="@string/Ward"
+                    android:textColor="@color/colorAccent"
                     android:gravity="start"/>
 
                 <TextView
@@ -139,6 +142,7 @@
                     android:layout_height="wrap_content"
                     android:textSize="12sp"
                     android:text="@string/Village"
+                    android:textColor="@color/colorAccent"
                     android:gravity="end"/>
 
                 <TextView
@@ -155,23 +159,14 @@
 
     </LinearLayout>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerInsurees"
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tabLayout"
         android:layout_width="match_parent"
-        android:layout_marginHorizontal="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:dividerHeight="3dp"/>
+        android:layout_height="wrap_content"/>
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/btnNewInsuree"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:contentDescription="Add new insuree"
-        android:src="@drawable/ic_add_24"
-        android:layout_margin="16dp"
-        app:backgroundTint="@color/colorPrimaryDark"
-        android:layout_gravity="bottom|end" />
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/viewPager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
 
 </LinearLayout>

@@ -973,15 +973,16 @@ public class InsureeActivity extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
+//                String chfId = txtInsuranceNumber.getText().toString().trim();
+//                boolean ans = ca.isValidInsuranceNumber(chfId);
+//                if(ans != true){
+//                    txtInsuranceNumber.setText("");
+//                }
             }
 
             @Override
             public void afterTextChanged(android.text.Editable s) {
-                String chfId = txtInsuranceNumber.getText().toString().trim();
-                boolean ans = ca.isValidInsuranceNumber(chfId);
-                if(ans != true){
-                    txtInsuranceNumber.setText("");
-                }
+
             }
         });
 
