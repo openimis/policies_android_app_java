@@ -27,7 +27,6 @@
                 android:id="@+id/txtFamilyInsuranceNumber"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="20sp"
                 android:textColor="@color/colorPrimary"
                 android:layout_marginBottom="5dp"
                 android:text="CHFID"/>
@@ -39,7 +38,6 @@
                 android:text="Nom Assuré"
                 android:textStyle="bold"
                 android:textColor="@color/colorPrimaryDark"
-                android:textSize="20sp"
                 android:layout_marginBottom="5dp"/>
 
             <LinearLayout

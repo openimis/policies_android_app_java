@@ -1,9 +1,7 @@
 package org.openimis.imispolicies;
 
-import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -14,7 +12,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
-import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -30,7 +27,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.openimis.imispolicies.tools.Log;
-import org.openimis.imispolicies.util.ActivityManager;
 import org.openimis.imispolicies.util.JsonDropdownHelper;
 import org.openimis.imispolicies.util.StringUtils;
 
@@ -60,15 +56,13 @@ public class InsureeActivity extends AppCompatActivity {
     private String isOffline = ".";
     private int isHead = -1;
     private String photoPath = "";
-    private String newPhotoPath = "";
-    private Uri photoUri;
-    private Calendar calendar = Calendar.getInstance();
     private String hfImagePath;
     private String hfNewPhotoPath;
     private int familyId;
+    public Uri tempPhotoUri = null;
 
     public static String filePath = null;
-    public static Uri tempPhotoUri = null;
+
     public static int RESULT_LOAD_IMG = 1;
     public static int RESULT_SCAN = 100;
 
@@ -94,6 +88,7 @@ public class InsureeActivity extends AppCompatActivity {
             } else {
                 // File selection
                 selectedImage = data.getData();
+                ca.setTempPhotoUri(selectedImage);
             }
             selectImageCallback(selectedImage);
         } else if (requestCode == ClientAndroidInterface.RESULT_SCAN && resultCode == RESULT_OK && data != null) {
@@ -1010,32 +1005,19 @@ public class InsureeActivity extends AppCompatActivity {
 
     public void selectImageCallback(Uri imageUri) {
         if (imageUri != null) {
-
-            // Afficher l'URI dans les logs pour déboguer
-            Log.d("DEBUG_URI", "URI reçue: " + imageUri.toString());
-            Log.d("DEBUG_URI", "Scheme: " + imageUri.getScheme());
-            Log.d("DEBUG_URI", "Path: " + imageUri.getPath());
-
-
-            // Vérifier si l'URI est accessible
             try {
                 InputStream testStream = getContentResolver().openInputStream(imageUri);
                 if (testStream != null) {
                     testStream.close();
-                    Log.d("DEBUG_URI", "L'URI est accessible");
                 }
+                hfNewPhotoPath = getPathFromUri(imageUri);
+                Log.d("DEBUG_URI", "L'URI est accessible: " + hfNewPhotoPath);
+                loadImage(imageUri);
             } catch (Exception e) {
                 Log.e("DEBUG_URI", "L'URI n'est pas accessible: " + e.getMessage());
                 Toast.makeText(this, "Image non accessible", Toast.LENGTH_SHORT).show();
                 return;
             }
-
-            String imagePath = getPathFromUri(imageUri);
-            hfNewPhotoPath = imagePath;
-            saveImagePath(imagePath);
-
-            loadImage(imageUri);
-
         } else {
             Log.d("selectImageCallback", "No image selected");
             Toast.makeText(this, "No image selected", Toast.LENGTH_SHORT).show();
@@ -1064,32 +1046,20 @@ public class InsureeActivity extends AppCompatActivity {
         return path != null ? path : "";
     }
 
-    private String getSavedImagePath() {
-        SharedPreferences prefs = getSharedPreferences("MyApp", MODE_PRIVATE);
-        return prefs.getString("hfNewPhotoPath", "");
-    }
-
     private void getImage() {
         String insuranceNumber = txtInsuranceNumber.getText().toString().trim();
         String imagePath = ca.GetListOfImagesContain(insuranceNumber);
 
         if (imagePath != null && !imagePath.isEmpty()) {
-            loadImage(imagePath);
             hfImagePath = "file://" + imagePath;
+            loadImage(hfImagePath);
         } else {
             imgInsuree.setImageResource(android.R.color.transparent);
             imgInsuree.setImageDrawable(null);
             hfImagePath = "";
         }
-        saveImagePath(hfImagePath);
-
         // Log pour débogage
         Log.d("getImage", "Insurance Number: " + insuranceNumber + ", Image Path: " + hfImagePath);
-    }
-
-    private void saveImagePath(String path) {
-        SharedPreferences prefs = getSharedPreferences("MyApp", MODE_PRIVATE);
-        prefs.edit().putString("hfImagePath", path).apply();
     }
 
     private void loadImage(String imagePath) {
@@ -1097,6 +1067,8 @@ public class InsureeActivity extends AppCompatActivity {
         if (imgFile.exists()) {
             Bitmap bitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
             imgInsuree.setImageBitmap(bitmap);
+        }else{
+            imgInsuree.setImageResource(R.drawable.image_not_supported);
         }
     }
 
@@ -1121,9 +1093,9 @@ public class InsureeActivity extends AppCompatActivity {
                 String insuree = ca.getInsuree(insureeId);
                 JSONArray array = new JSONArray(insuree);
                 insureeObject = array.getJSONObject(0);
-                Log.e("insuree object", insureeObject.toString());
                 isOffline = insureeObject.getString("isOffline");
                 isHead = insureeObject.getInt("isHead");
+                photoPath = insureeObject.getString("PhotoPath");
                 if(isHead == 1){
                     layoutRelationships.setVisibility(View.GONE);
                 } else {
@@ -1148,18 +1120,25 @@ public class InsureeActivity extends AppCompatActivity {
          txtEmail.setText(object.getString("Email"));
          txtCurrentAddress.setText(object.getString("CurrentAddress"));
 
-        // Load image if exists
-        // if (photoPath != null && !photoPath.isEmpty()) {
-        //     imgInsuree.setImageBitmap(BitmapFactory.decodeFile(photoPath));
-        // }
+         if(photoPath.isEmpty()){
+             getImage();
+         }
+
+         //Load image if exists
+         if (photoPath != null && !photoPath.isEmpty()) {
+             var photoFolder = ca.GetSystemImageFolder();
+             if (photoPath.indexOf(photoFolder) == -1) {
+                 photoPath = photoFolder + photoPath;
+                 loadImage(photoPath);
+             }
+         }
     }
 
     public void saveFormData() {
-
         try {
             insureeObject.put("isOffline", isOffline);
             insureeObject.put("hfisHead", isHead);
-            insureeObject.put("hfImagePath", photoPath);
+            insureeObject.put("hfImagePath", hfImagePath);
             insureeObject.put("hfNewPhotoPath", hfNewPhotoPath);
             insureeObject.put("txtInsuranceNumber", txtInsuranceNumber.getText().toString());
             insureeObject.put("txtLastName", txtLastName.getText().toString());

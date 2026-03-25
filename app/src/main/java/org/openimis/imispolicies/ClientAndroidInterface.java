@@ -924,6 +924,7 @@ public class ClientAndroidInterface {
 
             String PhotoPath = data.get("hfImagePath");
             String newPhotoPath = data.get("hfNewPhotoPath");
+            Log.d("new photopath", newPhotoPath);
 
             if (!"".equals(newPhotoPath)) {
                 PhotoPath = copyImageFromGalleryToApplication(newPhotoPath, data.get("txtInsuranceNumber"));
@@ -1060,7 +1061,7 @@ public class ClientAndroidInterface {
             FileOutputStream outputStream = new FileOutputStream(outputFile);
             Target imageTarget = new OutputStreamImageTarget(outputStream, global.getIntKey("image_jpeg_quality", 40), deleteOldFiles);
             try {
-                activity.runOnUiThread(() -> picassoInstance.load(selectedPath)
+                activity.runOnUiThread(() -> picassoInstance.load(tempPhotoUri)
                         .resize(global.getIntKey("image_width_limit", 400),
                                 global.getIntKey("image_height_limit", 400))
                         .centerInside()
@@ -1327,6 +1328,10 @@ public class ClientAndroidInterface {
         period.put(o);
 
         return period.toString();
+    }
+
+    public void setTempPhotoUri(Uri uri){
+        tempPhotoUri = uri;
     }
 
     @JavascriptInterface

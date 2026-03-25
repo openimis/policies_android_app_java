@@ -14,7 +14,6 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.openimis.imispolicies.tools.Log;
 
 public class InsureesFragment extends Fragment {
 
