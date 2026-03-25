@@ -71,6 +71,7 @@ import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.openimis.imispolicies.network.exception.HttpException;
 import org.openimis.imispolicies.network.exception.UserNotAuthenticatedException;
 import org.openimis.imispolicies.tools.LanguageManager;
 import org.openimis.imispolicies.tools.Log;
@@ -87,6 +88,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.lang.ref.WeakReference;
+
+import io.sentry.Sentry;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -145,6 +148,7 @@ public class MainActivity extends AppCompatActivity
                         if (f.exists() || f.createNewFile())
                             new FileOutputStream(f).write(bytes);
                     } catch (IOException e) {
+                        Sentry.captureException(e);
                         e.printStackTrace();
                     }
                     ShowDialogTex2();
@@ -214,48 +218,49 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         global = (Global) getApplicationContext();
         super.onCreate(savedInstanceState);
-        instance = this;
-        setContentView(R.layout.activity_main);
-        SQLHandler sqlHandler = new SQLHandler(this);
-        sqlHandler.isPrivate = true;
-        //Set the Image folder path
-        global.setImageFolder(global.getSubdirectory("Images"));
-        //Check if database exists
-        File database = global.getDatabasePath(SQLHandler.DBNAME);
-        if (!database.exists()) {
-            sqlHandler.getReadableDatabase();
-            if (copyDatabase(this)) {
-                Toast.makeText(this, "Copy database success", Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(this, "Copy database failed", Toast.LENGTH_SHORT).show();
-                return;
-            }
-        } else
-            sqlHandler.getReadableDatabase();
+        try {
+            instance = this;
+            setContentView(R.layout.activity_main);
+            SQLHandler sqlHandler = new SQLHandler(this);
+            sqlHandler.isPrivate = true;
+            //Set the Image folder path
+            global.setImageFolder(global.getSubdirectory("Images"));
+            //Check if database exists
+            File database = global.getDatabasePath(SQLHandler.DBNAME);
+            if (!database.exists()) {
+                sqlHandler.getReadableDatabase();
+                if (copyDatabase(this)) {
+                    Toast.makeText(this, "Copy database success", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, "Copy database failed", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+            } else
+                sqlHandler.getReadableDatabase();
 
-        //Create image folder
-        createImageFolder();
+            //Create image folder
+            createImageFolder();
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+            Toolbar toolbar = findViewById(R.id.toolbar);
+            setSupportActionBar(toolbar);
 
-        DrawerLayout drawer = findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        //noinspection deprecation
-        drawer.setDrawerListener(toggle);
-        toggle.syncState();
+            DrawerLayout drawer = findViewById(R.id.drawer_layout);
+            ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                    this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+            //noinspection deprecation
+            drawer.setDrawerListener(toggle);
+            toggle.syncState();
 
-        navigationView = findViewById(R.id.nav_view);
-        tvTotalFamily = findViewById(R.id.TotalFamily);
-        tvTotalFamilyOnline = findViewById(R.id.TotalFamilyOnline);
-        tvTotalInsuree = findViewById(R.id.TotalInsuree);
-        tvTotalPremium = findViewById(R.id.TotalPremium);
-        tvTotalInsureeOnline = findViewById(R.id.TotalInsureeOnline);
-        tvTotalPolicies = findViewById(R.id.TotalPolicies);
-        tvSumPremium = findViewById(R.id.PremiumAmount);
+            navigationView = findViewById(R.id.nav_view);
+            tvTotalFamily = findViewById(R.id.TotalFamily);
+            tvTotalFamilyOnline = findViewById(R.id.TotalFamilyOnline);
+            tvTotalInsuree = findViewById(R.id.TotalInsuree);
+            tvTotalPremium = findViewById(R.id.TotalPremium);
+            tvTotalInsureeOnline = findViewById(R.id.TotalInsureeOnline);
+            tvTotalPolicies = findViewById(R.id.TotalPolicies);
+            tvSumPremium = findViewById(R.id.PremiumAmount);
 
-        navigationView.setNavigationItemSelectedListener(this);
+            navigationView.setNavigationItemSelectedListener(this);
 //        wv = findViewById(R.id.webview);
 //        WebSettings settings = wv.getSettings();
 //        wv.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
@@ -273,7 +278,7 @@ public class MainActivity extends AppCompatActivity
 //        settings.setLoadWithOverviewMode(true);
 //        wv.addJavascriptInterface(new ClientAndroidInterface(this), "Android");
 
-        //Register for context acquire_menu
+            //Register for context acquire_menu
 //        registerForContextMenu(wv);
 
 //        wv.loadUrl("file:///android_asset/pages/Home.html");
@@ -289,32 +294,26 @@ public class MainActivity extends AppCompatActivity
 //            }
 //        });
 
-        ca = new ClientAndroidInterface(this);
+            ca = new ClientAndroidInterface(this);
 
-        LoadTotal();
+            LoadTotal();
 
-        NavigationView navigationView = findViewById(R.id.nav_view);
-        View headerview = navigationView.getHeaderView(0);
-        Login = headerview.findViewById(R.id.tvLogin);
-        OfficerName = headerview.findViewById(R.id.tvOfficerName);
+            NavigationView navigationView = findViewById(R.id.nav_view);
+            View headerview = navigationView.getHeaderView(0);
+            Login = headerview.findViewById(R.id.tvLogin);
+            OfficerName = headerview.findViewById(R.id.tvOfficerName);
 
-        Login.setOnClickListener(v -> {
-            wv.loadUrl("file:///android_asset/pages/Login.html?s=3");
-            drawer.closeDrawer(GravityCompat.START);
-            SetLoggedIn();
-        });
-        if (ca.isMasterDataAvailable() > 0) {
-            loadLanguages();
+            Login.setOnClickListener(v -> {
+                wv.loadUrl("file:///android_asset/pages/Login.html?s=3");
+                drawer.closeDrawer(GravityCompat.START);
+                SetLoggedIn();
+            });
+            if (ca.isMasterDataAvailable() > 0) {
+                loadLanguages();
+            }
+        } catch (Exception e) {
+            Sentry.captureException(e);
         }
-
-
-        navigationView.setCheckedItem(R.id.nav_home);
-
-        if (checkRequirements()) {
-            onAllRequirementsMet();
-        }
-
-        setVisibilityOfPaymentMenu();
     }
 
     private void LoadTotal(){
@@ -519,6 +518,7 @@ public class MainActivity extends AppCompatActivity
                                     //ShowDialogTex();
                                 }
                             } catch (JSONException e) {
+                                Sentry.captureException(e);
                                 e.printStackTrace();
                             }
                         })
@@ -578,6 +578,7 @@ public class MainActivity extends AppCompatActivity
                                     ConfirmDialogPage((f.getName()));
                                 }
                             } catch (Exception e) {
+                                Sentry.captureException(e);
                                 e.getMessage();
                             }
                         })

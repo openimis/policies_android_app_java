@@ -485,4 +485,5 @@
     <string name="tapToUpload">Cliquez pour changer la photo</string>
     <string name="SelectBirthDate">Choisir votre date de naissance</string>
     <string name="DeleteInsuree">Êtes-vous sure de vouloir supprimer cet assuré ?</string>
+    <string name="Close">Fermer</string>
 </resources>
