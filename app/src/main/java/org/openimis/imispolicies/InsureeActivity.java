@@ -85,12 +85,13 @@ public class InsureeActivity extends AppCompatActivity {
                             && data.getAction().equals(MediaStore.ACTION_IMAGE_CAPTURE))) {
                 Log.d("Main", "RESULT_LOAD_IMG got a camera result, in the predefined location");
                 selectedImage = ClientAndroidInterface.tempPhotoUri;
+                captureImageCallback(selectedImage);
             } else {
                 // File selection
                 selectedImage = data.getData();
                 ca.setTempPhotoUri(selectedImage);
+                selectImageCallback(selectedImage);
             }
-            selectImageCallback(selectedImage);
         } else if (requestCode == ClientAndroidInterface.RESULT_SCAN && resultCode == RESULT_OK && data != null) {
             String insureeNumber = data.getStringExtra(Intents.Scan.RESULT);
             if (!StringUtils.isEmpty(insureeNumber)) {
@@ -1024,6 +1025,27 @@ public class InsureeActivity extends AppCompatActivity {
         }
     }
 
+    public void captureImageCallback(Uri imageUri) {
+        if (imageUri != null) {
+            try {
+                InputStream testStream = getContentResolver().openInputStream(imageUri);
+                if (testStream != null) {
+                    testStream.close();
+                }
+                hfNewPhotoPath = imageUri.toString();
+                Log.d("DEBUG_URI", "L'URI est accessible: " + hfNewPhotoPath);
+                loadImage(imageUri);
+            } catch (Exception e) {
+                Log.e("DEBUG_URI", "L'URI n'est pas accessible: " + e.getMessage());
+                Toast.makeText(this, "Image non accessible", Toast.LENGTH_SHORT).show();
+                return;
+            }
+        } else {
+            Log.d("selectImageCallback", "No image selected");
+            Toast.makeText(this, "No image selected", Toast.LENGTH_SHORT).show();
+        }
+    }
+
     private String getPathFromUri(Uri uri) {
         String path = null;
 
@@ -1136,6 +1158,7 @@ public class InsureeActivity extends AppCompatActivity {
 
     public void saveFormData() {
         try {
+            getImage();
             insureeObject.put("isOffline", isOffline);
             insureeObject.put("hfisHead", isHead);
             insureeObject.put("hfImagePath", hfImagePath);
