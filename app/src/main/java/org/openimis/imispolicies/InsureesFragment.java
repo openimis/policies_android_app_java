@@ -39,7 +39,6 @@ public class InsureesFragment extends Fragment {
         btnAddInsuree.setOnClickListener(v -> {
             Intent intent = new Intent(getActivity(), InsureeActivity.class);
             intent.putExtra("FamilyId", familyId);
-            //intent.putExtra("InsureeId", insureeId);
             startActivity(intent);
         });
 
