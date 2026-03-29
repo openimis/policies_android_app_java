@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/policy_menu_edit"
+        android:title="@string/Edit"/>
+
+    <item
+        android:id="@+id/policy_menu_delete"
+        android:title="@string/Delete"/>
+
+    <item
+        android:id="@+id/policy_menu_payment"
+        android:title="@string/Payment"/>
+
+</menu>

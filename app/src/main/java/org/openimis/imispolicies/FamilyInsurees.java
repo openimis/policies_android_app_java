@@ -32,11 +32,13 @@ import java.util.HashMap;
 
 public class FamilyInsurees extends AppCompatActivity {
 
-    private int familyId;
+    public static int familyId;
     TextView regionName, districtName, wardName, villageName;
     ClientAndroidInterface ca;
     private ViewPager2 viewPager;
     private TabLayout tabLayout;
+    public static int regionId;
+    public static int districtId;
 
 
     @Override
@@ -78,6 +80,8 @@ public class FamilyInsurees extends AppCompatActivity {
         try {
             JSONArray array = new JSONArray(data);
             JSONObject object = array.getJSONObject(0);
+            regionId = object.getInt("RegionId");
+            districtId = object.getInt("DistrictId");
             regionName.setText(object.getString("RegionName"));
             districtName.setText(object.getString("DistrictName"));
             wardName.setText(object.getString("WardName"));

@@ -90,9 +90,9 @@
     <string name="SelectMonth">Select Month</string>
     <string name="EnrolmentDate">Enrolment date</string>
     <string name="Product">Product</string>
-    <string name="EffectiveDate">Effective Date</string>
+    <string name="EffectiveDate">Effective Date:</string>
     <string name="StartDate">Start Date</string>
-    <string name="ExpireDate">Expire Date</string>
+    <string name="ExpireDate">Expire Date:</string>
     <string name="Officer">Enrolment Officer</string>
     <string name="PolicyStatus">Policy Status : </string>
     <string name="PolicyValue">Policy Value : </string>

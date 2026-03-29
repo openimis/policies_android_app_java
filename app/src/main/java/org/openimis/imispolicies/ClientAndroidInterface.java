@@ -1693,6 +1693,7 @@ public class ClientAndroidInterface {
                 if (IsBulkCNUsed()) {
                     sqlHandler.assignCnToPolicy(rtPolicyId, controlNumber);
                 }
+                Log.e("familyId", String.valueOf(FamilyId));
                 InsertRecordedPolicies("new", String.valueOf(FamilyId), data.get("ddlProduct"), data.get("hfPolicyValue"), MaxPolicyId);
             } else {
                 int Online = 2;

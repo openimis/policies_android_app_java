@@ -20,7 +20,7 @@ import java.text.ParseException;
 public class PoliciesFragment extends Fragment {
 
     FloatingActionButton btnAddPolicy;
-    private int familyId = 0;
+    private int familyId;
     RecyclerView recyclerPolicies;
     private ClientAndroidInterface ca;
 
@@ -30,6 +30,13 @@ public class PoliciesFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.policies_fragment, container, false);
+        getParentFragmentManager().setFragmentResultListener("requestKey", this, (requestKey, bundle) -> {
+            boolean refresh = bundle.getBoolean("refresh");
+            if (refresh) {
+                loadPolicies();
+            }
+        });
+        familyId = FamilyInsurees.familyId;
         btnAddPolicy = view.findViewById(R.id.btnNewPolicy);
         recyclerPolicies = view.findViewById(R.id.recyclerPolicies);
         ca = new ClientAndroidInterface(getActivity());
@@ -39,11 +46,12 @@ public class PoliciesFragment extends Fragment {
         btnAddPolicy.setOnClickListener(v -> {
             Intent intent = new Intent(getActivity(), PolicyActivity.class);
             intent.putExtra("FamilyId", familyId);
+            intent.putExtra("RegionId", FamilyInsurees.regionId);
+            intent.putExtra("DistrictId", FamilyInsurees.districtId);
             startActivity(intent);
         });
 
         return view;
-
 
     }
 
@@ -57,7 +65,7 @@ public class PoliciesFragment extends Fragment {
         try {
             String policies = ca.getFamilyPolicies(familyId);
             JSONArray policiesArray = new JSONArray(policies);
-            InsureeAdapter adapter = new PolicyAdapter(getContext(),policiesArray, familyId);
+            PolicyAdapter adapter = new PolicyAdapter(getContext(),policiesArray, familyId);
             recyclerPolicies.setAdapter(adapter);
         } catch (JSONException e) {
             throw new RuntimeException(e);
