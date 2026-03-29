@@ -6,6 +6,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +15,8 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.card.MaterialCardView;
@@ -124,17 +127,21 @@ public class InsureeAdapter extends RecyclerView.Adapter<InsureeAdapter.ViewHold
                                         deleteSuccess = ca.DeleteInsuree(insureeId);
                                     }
                                     if (deleteSuccess == 1) {
-                                        ca.ShowDialog(context.getResources().getString(R.string.InsureeDeleted));
                                         dialogInterface.dismiss();
-                                        Intent intent = new Intent(context, FamilyInsurees.class);
-                                        intent.putExtra("FamilyId", familyId);
-                                        context.startActivity(intent);
-                                        ((Activity) context).finish();
+                                        progressDialog.dismiss();
+                                        FragmentActivity activity = (FragmentActivity) context;
+                                        FragmentManager fm = activity.getSupportFragmentManager();
+                                        Bundle result = new Bundle();
+                                        result.putBoolean("refresh_insurees", true);
+                                        fm.setFragmentResult("requestKey", result);
+                                        ca.ShowDialog(context.getResources().getString(R.string.InsureeDeleted));
                                     } else if(deleteSuccess == 2){
                                         dialogInterface.dismiss();
+                                        progressDialog.dismiss();
                                         ca.ShowDialog(context.getResources().getString(R.string.IsHeadDelete));
                                     } else if(deleteSuccess == -1){
                                         dialogInterface.dismiss();
+                                        progressDialog.dismiss();
                                         ca.ShowDialog(context.getResources().getString(R.string.LoginToDeleteOnlineData));
                                     } else {
                                         dialogInterface.dismiss();

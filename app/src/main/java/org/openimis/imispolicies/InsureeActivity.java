@@ -14,6 +14,8 @@ import android.widget.ImageView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
@@ -1182,6 +1184,17 @@ public class InsureeActivity extends AppCompatActivity {
                     startActivity(intent);
                     finish();
                 }
+            } else if(insureeId == 0){
+                // ajout d'un membre
+                int ans = ca.SaveInsuree(insureeObject.toString(),familyId, isHead, 0, 0);
+                if(ans!=0 && ans != 7){
+                    FragmentActivity activity = (FragmentActivity) this;
+                    FragmentManager fm = activity.getSupportFragmentManager();
+                    Bundle result = new Bundle();
+                    result.putBoolean("refresh_insurees", true);
+                    fm.setFragmentResult("requestKey", result);
+                    finish();
+                }
             } else {
                 // modification d'un assuré
                 String FamilyPolicy = ca.getFamilyPolicy(familyId);
@@ -1215,6 +1228,8 @@ public class InsureeActivity extends AppCompatActivity {
             }
 
         } catch (JSONException e) {
+            throw new RuntimeException(e);
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }

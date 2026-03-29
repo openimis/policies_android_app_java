@@ -134,7 +134,7 @@ public class PolicyAdapter extends RecyclerView.Adapter<PolicyAdapter.ViewHolder
                                         dialogInterface.dismiss();
                                         progressDialog.dismiss();
                                         Bundle result = new Bundle();
-                                        result.putBoolean("refresh", true);
+                                        result.putBoolean("refresh_policies", true);
                                         fm.setFragmentResult("requestKey", result);
                                         ca.ShowDialog(context.getResources().getString(R.string.PolicyDeleted));
                                     } else if(deleteSuccess == -1){

@@ -31,7 +31,7 @@ public class PoliciesFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.policies_fragment, container, false);
         getParentFragmentManager().setFragmentResultListener("requestKey", this, (requestKey, bundle) -> {
-            boolean refresh = bundle.getBoolean("refresh");
+            boolean refresh = bundle.getBoolean("refresh_policies");
             if (refresh) {
                 loadPolicies();
             }

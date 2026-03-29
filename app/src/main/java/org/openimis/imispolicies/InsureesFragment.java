@@ -28,6 +28,12 @@ public class InsureesFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.insurees_fragment, container, false);
+        getParentFragmentManager().setFragmentResultListener("requestKey", this, (requestKey, bundle) -> {
+            boolean refresh = bundle.getBoolean("refresh_insurees");
+            if (refresh) {
+                LoadInsurees();
+            }
+        });
         btnAddInsuree = view.findViewById(R.id.btnNewInsuree);
         recyclerInsurees = view.findViewById(R.id.recyclerInsurees);
         ca = new ClientAndroidInterface(getActivity());

@@ -245,7 +245,7 @@ public class PolicyActivity extends AppCompatActivity {
                 FragmentActivity activity = (FragmentActivity) this;
                 FragmentManager fm = activity.getSupportFragmentManager();
                 Bundle result = new Bundle();
-                result.putBoolean("refresh", true);
+                result.putBoolean("refresh_policies", true);
                 fm.setFragmentResult("requestKey", result);
                 finish();
             }
