@@ -49,6 +49,7 @@ public class PolicyActivity extends AppCompatActivity {
     private int officerId, regionId, districtId, productId;
     private MaterialDatePicker<Long> datePicker;
     private int isOffline = 1;
+    private String policyStatus = "1";
 
 
     @Override
@@ -63,7 +64,7 @@ public class PolicyActivity extends AppCompatActivity {
         setupListeners();
         setupDatePicker();
         defineRequiredField();
-        canSave();
+
         policyObject = new JSONObject();
         ca = new ClientAndroidInterface(this);
         policyId = getIntent().getIntExtra("PolicyId", 0);
@@ -78,7 +79,11 @@ public class PolicyActivity extends AppCompatActivity {
         txtExpiryDate.setEnabled(false);
         officerId = ca.getOfficerId();
 
+        if(policyId != 0){
+            loadInitialData();
+        }
         loadProducts(regionId, districtId, null);
+        canSave();
     }
 
     private void initViews(){
@@ -173,6 +178,19 @@ public class PolicyActivity extends AppCompatActivity {
                         }
                     }
             );
+
+            if(policyObject != null && policyObject.has("ProdId") && policyObject.getInt("ProdId") != 0){
+                productId = policyObject.getInt("ProdId");
+                policyObject.put("ddlProduct", productId);
+                JsonDropdownHelper.selectValue(
+                        this,
+                        ddlProduct,
+                        productsArray,
+                        "ProductNameCombined",
+                        "ProdId",
+                        String.valueOf(productId)
+                );
+            }
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
@@ -239,6 +257,7 @@ public class PolicyActivity extends AppCompatActivity {
             policyObject.put("txtEnrolmentDate", txtEnrolmentDate.getText());
             policyObject.put("txtStartDate", txtStartDate.getText());
             policyObject.put("txtEffectiveDate", txtEffectiveDate.getText());
+            policyObject.put("hfPolicyStatus", policyStatus);
 
             policyId = ca.SavePolicy(policyObject.toString(), familyId, policyId);
             if(policyId > 0){
@@ -261,5 +280,49 @@ public class PolicyActivity extends AppCompatActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void loadInitialData(){
+        try {
+            String policy = ca.getPolicy(policyId);
+            JSONArray array = new JSONArray(policy);
+            policyObject = array.getJSONObject(0);
+            productId = policyObject.getInt("ProdId");
+            officerId = policyObject.getInt("OfficerId");
+            txtStartDate.setText(policyObject.getString("StartDate"));
+            txtEnrolmentDate.setText(policyObject.getString("EnrollDate"));
+            txtExpiryDate.setText(policyObject.getString("ExpiryDate"));
+            isOffline = policyObject.getInt("isOffline");
+            txtPolicyStatus.setText(policyObject.getString("PolicyStatus"));
+            spBalance.setText(policyObject.getString("Balance"));
+            spContribution.setText(policyObject.getString("Contribution"));
+            policyStatus = policyObject.getString("PolicyStatusValue");
+            double currentPolicyValue = policyObject.getDouble("PolicyValue");
+            spPolicyValue.setText(String.valueOf(currentPolicyValue));
+            String policyStage = policyObject.getString("PolicyStage");
+            Log.d("policy object", policyObject.toString());
+            if(ca.IsBulkCNUsed()){
+                if(!policyObject.getString("ControlNumber").isEmpty()){
+                    AssignedControlNumber.setText(policyObject.getString("ControlNumber"));
+                } else {
+                    AssignedControlNumber.setText("");
+                }
+            }
+
+            double NewPolicyValue = ca.getPolicyValue(txtEnrolmentDate.getText().toString(), productId, familyId, txtStartDate.getText().toString(), hasCycle, policyId, policyStage, isOffline);
+            if (NewPolicyValue != currentPolicyValue) {
+                Date Vdate = new Date(txtEnrolmentDate.getText().toString());  //or your date here
+                var NewDate = ((Vdate.getMonth() + 1) + '/' + Vdate.getDate() + '/' + Vdate.getYear());
+                ca.ShowDialog(ca.getString("PolicyValueChange") + NewDate + ' ' + ca.getString("Changed"));
+            }
+
+            if (policyStatus.equals("1")) {
+                layoutExpiryDate.setEnabled(true);
+            } else {
+                layoutExpiryDate.setEnabled(false);
+            }
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

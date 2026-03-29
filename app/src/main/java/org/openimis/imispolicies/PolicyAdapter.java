@@ -50,14 +50,14 @@ public class PolicyAdapter extends RecyclerView.Adapter<PolicyAdapter.ViewHolder
     @Override
     public void onBindViewHolder(@NonNull PolicyAdapter.ViewHolder holder, int position) {
         try {
-            JSONObject insuree = policies.getJSONObject(position);
-            holder.productCode.setText(insuree.getString("ProductCode"));
-            holder.productName.setText(insuree.getString("ProductName"));
-            holder.startDate.setText(insuree.getString("StartDate"));
-            holder.expiryDate.setText(insuree.getString("ExpiryDate"));
-            holder.value.setText(insuree.getString("PolicyValue"));
-            holder.policyStatus.setText(insuree.getString("PolicyStatus"));
-            holder.effectiveDate.setText(insuree.getString("EffectiveDate"));
+            JSONObject policy = policies.getJSONObject(position);
+            holder.productCode.setText(policy.getString("ProductCode"));
+            holder.productName.setText(policy.getString("ProductName"));
+            holder.startDate.setText(policy.getString("StartDate"));
+            holder.expiryDate.setText(policy.getString("ExpiryDate"));
+            holder.value.setText(policy.getString("PolicyValue"));
+            holder.policyStatus.setText(policy.getString("PolicyStatus"));
+            holder.effectiveDate.setText(policy.getString("EffectiveDate"));
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
