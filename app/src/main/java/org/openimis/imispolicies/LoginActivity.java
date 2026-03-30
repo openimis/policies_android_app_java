@@ -65,24 +65,31 @@ public class LoginActivity extends AppCompatActivity {
                     boolean loggedIn = ca.LoginJI(username, password);
                     if(loggedIn){
                         if(page == 0){
-                            Intent intent = new Intent(LoginActivity.this, SyncActivity.class);
-                            startActivity(intent);
+                            finish();
                         } else if (page == 1) {
+                            progressBar.setVisibility(View.GONE);
                             Intent intent = new Intent(LoginActivity.this, SearchActivity.class);
                             startActivity(intent);
+                            finish();
                         } else if (page == 2) {
+                            progressBar.setVisibility(View.GONE);
                             Intent intent = new Intent(LoginActivity.this, Enrolment.class);
                             startActivity(intent);
+                            finish();
                         } else if (page == 4) {
+                            progressBar.setVisibility(View.GONE);
                             ca.launchActivity("Reports");
+                            finish();
                         } else if (page == 5) {
+                            progressBar.setVisibility(View.GONE);
                             ca.launchActivity("Enquire");
+                            finish();
                         } else {
+                            progressBar.setVisibility(View.GONE);
                             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                             startActivity(intent);
+                            finish();
                         }
-                        progressBar.setVisibility(View.GONE);
-                        finish();
                     } else {
                         progressDialog.dismiss();
                         ca.ShowDialog(getResources().getString(R.string.LoginFail));
