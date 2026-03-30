@@ -49,6 +49,18 @@
         tools:ignore="GoogleAppIndexingWarning"
         tools:replace="android:icon,android:label">
         <activity
+            android:name=".SearchActivity"
+            android:exported="false" />
+        <activity
+            android:name=".AboutActivity"
+            android:exported="false" />
+        <activity
+            android:name=".SyncActivity"
+            android:exported="false" />
+        <activity
+            android:name=".LoginActivity"
+            android:exported="false" />
+        <activity
             android:name=".PolicyActivity"
             android:exported="false" />
         <activity

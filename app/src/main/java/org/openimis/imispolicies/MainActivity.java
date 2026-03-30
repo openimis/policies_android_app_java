@@ -714,9 +714,14 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_modify_family) {
             global = (Global) getApplicationContext();
             if (global.isLoggedIn()) {
-                wv.loadUrl("file:///android_asset/pages/Search.html");
+                //wv.loadUrl("file:///android_asset/pages/Search.html");
+                Intent intent = new Intent(this, SearchActivity.class);
+                startActivity(intent);
             } else {
-                wv.loadUrl("file:///android_asset/pages/Login.html?s=1");
+                //wv.loadUrl("file:///android_asset/pages/Login.html?s=1");
+                Intent i = new Intent(this, LoginActivity.class);
+                i.putExtra("Page", 1);
+                startActivity(i);
             }
 
         } else if (id == R.id.nav_renewal) {
@@ -729,15 +734,22 @@ public class MainActivity extends AppCompatActivity
                 Intent i = new Intent(this, Reports.class);
                 startActivity(i);
             } else {
-                wv.loadUrl("file:///android_asset/pages/Login.html?s=4");
+                //wv.loadUrl("file:///android_asset/pages/Login.html?s=4");
+                Intent i = new Intent(this, LoginActivity.class);
+                i.putExtra("Page", 4);
+                startActivity(i);
             }
         } else if (id == R.id.nav_feedback) {
             Intent intent = new Intent(this, FeedbackList.class);
             startActivity(intent);
         } else if (id == R.id.nav_sync) {
-            wv.loadUrl("file:///android_asset/pages/Sync.html");
+            //wv.loadUrl("file:///android_asset/pages/Sync.html");
+            Intent intent = new Intent(this, SyncActivity.class);
+            startActivity(intent);
         } else if (id == R.id.nav_about) {
-            wv.loadUrl("file:///android_asset/pages/About.html");
+            //wv.loadUrl("file:///android_asset/pages/About.html");
+            Intent intent = new Intent(this, AboutActivity.class);
+            startActivity(intent);
         } else if (id == R.id.nav_settings) {
             wv.loadUrl("file:///android_asset/pages/Settings.html");
         } else if (id == R.id.nav_quit) {
@@ -756,7 +768,10 @@ public class MainActivity extends AppCompatActivity
                 Intent intent = new Intent(this, Enquire.class);
                 startActivity(intent);
             } else {
-                wv.loadUrl("file:///android_asset/pages/Login.html?s=5");
+                //wv.loadUrl("file:///android_asset/pages/Login.html?s=5");
+                Intent i = new Intent(this, LoginActivity.class);
+                i.putExtra("Page", 5);
+                startActivity(i);
             }
         } else if (id == R.id.nav_payment) {
             ClientAndroidInterface ca = new ClientAndroidInterface(this);
