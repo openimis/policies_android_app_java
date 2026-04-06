@@ -751,7 +751,9 @@ public class MainActivity extends AppCompatActivity
             Intent intent = new Intent(this, AboutActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_settings) {
-            wv.loadUrl("file:///android_asset/pages/Settings.html");
+            //wv.loadUrl("file:///android_asset/pages/Settings.html");
+            Intent intent = new Intent(this, SettingsActivity.class);
+            startActivity(intent);
         } else if (id == R.id.nav_quit) {
             new AlertDialog.Builder(this)
                     .setMessage(getResources().getString(R.string.QuitAppQuestion))

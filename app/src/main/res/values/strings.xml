@@ -486,4 +486,7 @@
     <string name="Empty">Empty</string>
     <string name="tapToUpload">Tap to change photo</string>
     <string name="SelectBirthDate">Select birth date</string>
+    <string name="ChangeRarPassword">Change RAR Password</string>
+    <string name="PasswordChanged">Password changed</string>
+    <string name="ResetRarPwd">Password has been changed to the default rar password</string>
 </resources>
