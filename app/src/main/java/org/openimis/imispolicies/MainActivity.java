@@ -304,7 +304,10 @@ public class MainActivity extends AppCompatActivity
             OfficerName = headerview.findViewById(R.id.tvOfficerName);
 
             Login.setOnClickListener(v -> {
-                wv.loadUrl("file:///android_asset/pages/Login.html?s=3");
+                //wv.loadUrl("file:///android_asset/pages/Login.html?s=3");
+                Intent intent = new Intent(this, LoginActivity.class);
+                intent.putExtra("Page", 3);
+                startActivity(intent);
                 drawer.closeDrawer(GravityCompat.START);
                 SetLoggedIn();
             });

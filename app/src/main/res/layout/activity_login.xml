@@ -13,7 +13,7 @@
         android:hint="@string/LoginName"
         app:boxBackgroundMode="outline"
         app:errorIconDrawable="@null"
-        android:layout_marginBottom="10dp"
+        android:layout_marginTop="10dp"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
         <com.google.android.material.textfield.TextInputEditText
@@ -31,7 +31,8 @@
         android:hint="@string/Password"
         app:boxBackgroundMode="outline"
         app:errorIconDrawable="@null"
-        android:layout_marginBottom="20dp"
+        android:layout_marginTop="10dp"
+        app:endIconMode="password_toggle"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
         <com.google.android.material.textfield.TextInputEditText
@@ -45,7 +46,7 @@
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnLogin"
         style="@style/Widget.MaterialComponents.Button"
-        android:layout_marginBottom="20dp"
+        android:layout_marginTop="30dp"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:text="@string/Login"
@@ -56,6 +57,7 @@
         android:id="@+id/loginProgressBar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
         android:visibility="gone"
         android:layout_gravity="center" />
 

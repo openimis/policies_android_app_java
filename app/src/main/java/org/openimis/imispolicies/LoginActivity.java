@@ -1,6 +1,5 @@
 package org.openimis.imispolicies;
 
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
@@ -9,20 +8,16 @@ import android.text.TextWatcher;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 
-import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
 import org.openimis.imispolicies.util.AndroidUtils;
+
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -32,8 +27,6 @@ public class LoginActivity extends AppCompatActivity {
     String officerCode;
     ClientAndroidInterface ca;
     int page;
-    private ProgressDialog progressDialog;
-    ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,60 +37,11 @@ public class LoginActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
         ca = new ClientAndroidInterface(this);
-        progressDialog = new ProgressDialog(this);
         officerCode = ca.getOfficerCode();
         page = getIntent().getIntExtra("Page",0);
         initViews();
         canSave();
         setupListenners();
-
-        btnLogin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String username = txtLoginName.getText().toString();
-                String password = txtPassword.getText().toString();
-
-                boolean hasInternet = ca.CheckInternetAvailable();
-                if(!hasInternet){
-                    ca.ShowDialog(getResources().getString(R.string.NoInternet));
-                } else {
-                    progressBar.setVisibility(View.VISIBLE);
-                    boolean loggedIn = ca.LoginJI(username, password);
-                    if(loggedIn){
-                        if(page == 0){
-                            finish();
-                        } else if (page == 1) {
-                            progressBar.setVisibility(View.GONE);
-                            Intent intent = new Intent(LoginActivity.this, SearchActivity.class);
-                            startActivity(intent);
-                            finish();
-                        } else if (page == 2) {
-                            progressBar.setVisibility(View.GONE);
-                            Intent intent = new Intent(LoginActivity.this, Enrolment.class);
-                            startActivity(intent);
-                            finish();
-                        } else if (page == 4) {
-                            progressBar.setVisibility(View.GONE);
-                            ca.launchActivity("Reports");
-                            finish();
-                        } else if (page == 5) {
-                            progressBar.setVisibility(View.GONE);
-                            ca.launchActivity("Enquire");
-                            finish();
-                        } else {
-                            progressBar.setVisibility(View.GONE);
-                            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                            startActivity(intent);
-                            finish();
-                        }
-                    } else {
-                        progressDialog.dismiss();
-                        ca.ShowDialog(getResources().getString(R.string.LoginFail));
-                    }
-                }
-
-            }
-        });
     }
 
     @Override
@@ -115,7 +59,6 @@ public class LoginActivity extends AppCompatActivity {
         btnLogin = findViewById(R.id.btnLogin);
         txtLoginName = findViewById(R.id.txtLoginName);
         txtPassword = findViewById(R.id.txtPassword);
-        progressBar = findViewById(R.id.loginProgressBar);
 
         txtLoginName.setText(officerCode);
     }
@@ -162,6 +105,60 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable editable) {
 
+            }
+        });
+
+        btnLogin.setOnClickListener(v ->  {
+            boolean hasInternet = ca.CheckInternetAvailable();
+            if(!hasInternet){
+                AndroidUtils.showDialog(LoginActivity.this, getResources().getString(R.string.NoInternet));
+            } else {
+                try {
+                    String username = txtLoginName.getText().toString();
+                    String password = txtPassword.getText().toString();
+                    ProgressBar loginProgressBar = findViewById(R.id.loginProgressBar);
+                    loginProgressBar.setVisibility(View.VISIBLE);
+                    new Thread(() ->{
+                        boolean loggedIn = ca.LoginJI(username, password);
+                        runOnUiThread(() -> {
+                            if (loggedIn) {
+                                if (page == 0) {
+                                    finish();
+                                } else if (page == 1) {
+                                    loginProgressBar.setVisibility(View.GONE);
+                                    Intent intent = new Intent(LoginActivity.this, SearchActivity.class);
+                                    startActivity(intent);
+                                    finish();
+                                } else if (page == 2) {
+                                    loginProgressBar.setVisibility(View.GONE);
+                                    Intent intent = new Intent(LoginActivity.this, Enrolment.class);
+                                    startActivity(intent);
+                                    finish();
+                                } else if (page == 4) {
+                                    loginProgressBar.setVisibility(View.GONE);
+                                    ca.launchActivity("Reports");
+                                    finish();
+                                } else if (page == 5) {
+                                    loginProgressBar.setVisibility(View.GONE);
+                                    ca.launchActivity("Enquire");
+                                    finish();
+                                } else {
+                                    loginProgressBar.setVisibility(View.GONE);
+                                    Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                                    startActivity(intent);
+                                    finish();
+                                }
+                            } else {
+                                loginProgressBar.setVisibility(View.GONE);
+                                AndroidUtils.showDialog(LoginActivity.this, getResources().getString(R.string.LoginFail));
+                            }
+                        });
+                    }).start();
+
+
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
             }
         });
     }

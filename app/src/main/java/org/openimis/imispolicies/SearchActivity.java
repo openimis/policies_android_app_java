@@ -18,6 +18,8 @@ import androidx.core.view.WindowInsetsCompat;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 
+import org.openimis.imispolicies.util.AndroidUtils;
+
 public class SearchActivity extends AppCompatActivity {
 
     private TextInputEditText txtSearchInsuranceNumber;
@@ -56,15 +58,26 @@ public class SearchActivity extends AppCompatActivity {
         btnSearch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                progressBar.setVisibility(View.VISIBLE);
-                String InsuranceNumber = txtSearchInsuranceNumber.getText().toString();
-                if (ca.ModifyFamily(InsuranceNumber) == 1) {
-                    progressBar.setVisibility(View.GONE);
-                    Intent intent = new Intent(SearchActivity.this, Enrolment.class);
-                    startActivity(intent);
-                    finish();
+                boolean hasInternet = ca.CheckInternetAvailable();
+                if(!hasInternet){
+                    AndroidUtils.showDialog(SearchActivity.this, getResources().getString(R.string.NoInternet));
                 } else {
-                    progressBar.setVisibility(View.GONE);
+                    progressBar = findViewById(R.id.loadingProgressBar);
+                    String InsuranceNumber = txtSearchInsuranceNumber.getText().toString();
+                    progressBar.setVisibility(View.VISIBLE);
+                    new Thread(() -> {
+                        int result = ca.ModifyFamily(InsuranceNumber);
+                        runOnUiThread(()->{
+                            if ( result == 1) {
+                                progressBar.setVisibility(View.GONE);
+                                Intent intent = new Intent(SearchActivity.this, Enrolment.class);
+                                startActivity(intent);
+                                finish();
+                            } else {
+                                progressBar.setVisibility(View.GONE);
+                            }
+                        });
+                    }).start();
                 }
             }
         });
@@ -84,7 +97,6 @@ public class SearchActivity extends AppCompatActivity {
     private void initViews(){
         btnSearch = findViewById(R.id.btnSearch);
         txtSearchInsuranceNumber = findViewById(R.id.txtSearchInsuranceNumber);
-        progressBar = findViewById(R.id.loadingProgressBar);
     }
 
     private void canSearch (){

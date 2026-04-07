@@ -1,5 +1,8 @@
 package org.openimis.imispolicies;
 
+import static androidx.core.app.ActivityCompat.recreate;
+import static org.openimis.imispolicies.util.AndroidUtils.showDialog;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -18,6 +21,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.openimis.imispolicies.tools.Log;
 
 public class FamilyAdapter extends RecyclerView.Adapter<FamilyAdapter.ViewHolder> {
 
@@ -91,7 +95,7 @@ public class FamilyAdapter extends RecyclerView.Adapter<FamilyAdapter.ViewHolder
             try {
                 JSONObject family = families.getJSONObject(position);
                 int familyId = family.getInt("FamilyId");
-                int isOffline = family.getInt("isOffline");
+                String isOffline = family.getString("isOffline");
                 if(item.getItemId() == R.id.family_menu_edit){
                     Intent intent = new Intent(context, FamilyInsurees.class);
                     intent.putExtra("FamilyId", familyId);
@@ -105,27 +109,27 @@ public class FamilyAdapter extends RecyclerView.Adapter<FamilyAdapter.ViewHolder
                                 public void onClick(DialogInterface dialogInterface, int i) {
                                     showLoadingDialog();
                                     ClientAndroidInterface ca = new ClientAndroidInterface((Activity) context);
-                                    if(isOffline == 0 || isOffline == 2){
+                                    if(isOffline.equals("0") || isOffline.equals("2") || isOffline.equals("false")){
                                         int result = ca.DeleteOnlineDataF(familyId);
                                         if (result == 1) {
-                                            ca.ShowDialog(context.getResources().getString(R.string.FamilyDeleted));
+                                            showDialog(context, context.getResources().getString(R.string.FamilyDeleted));
                                             dialogInterface.dismiss();
+                                            recreate((Activity) context);
                                         }
                                     } else {
                                         int deleteSuccess = ca.DeleteFamily(familyId);
                                         if (deleteSuccess == 1) {
-                                            ca.ShowDialog(context.getResources().getString(R.string.FamilyDeleted));
+                                            showDialog(context, context.getResources().getString(R.string.FamilyDeleted));
                                             dialogInterface.dismiss();
-                                            Intent intent = new Intent(context, Enrolment.class);
-                                            context.startActivity(intent);
-                                            ((Activity) context).finish();
+                                            recreate((Activity) context);
                                         } else if(deleteSuccess == -1){
-                                            ca.ShowDialog(context.getResources().getString(R.string.LoginToDeleteOnlineData));
+                                            showDialog(context, context.getResources().getString(R.string.LoginToDeleteOnlineData));
                                         } else if(deleteSuccess == 3){
                                             int result = ca.DeleteOnlineDataF(familyId);
                                             if (result == 1) {
-                                                ca.ShowDialog(context.getResources().getString(R.string.FamilyDeleted));
+                                                showDialog(context, context.getResources().getString(R.string.FamilyDeleted));
                                                 dialogInterface.dismiss();
+                                                recreate((Activity) context);
                                             }
                                         }
                                     }

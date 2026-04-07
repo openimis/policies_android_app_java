@@ -4809,7 +4809,7 @@ public class ClientAndroidInterface {
         jsonObject.put("insureeUUID", family.getHead().getUuid());
         jsonObject.put("locationId", family.getLocationId());
         jsonObject.put("poverty", family.isPoor());
-        jsonObject.put("isOffline", family.isOffline());
+        jsonObject.put("isOffline", family.isOffline() ? 1 : 0);
         jsonObject.put("familyType", family.getType());
         jsonObject.put("familyAddress", family.getAddress());
         jsonObject.put("ethnicity", family.getEthnicity());
