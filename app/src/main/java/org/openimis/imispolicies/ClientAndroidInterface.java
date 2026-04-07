@@ -936,7 +936,6 @@ public class ClientAndroidInterface {
 
             String PhotoPath = data.get("hfImagePath");
             String newPhotoPath = data.get("hfNewPhotoPath");
-            Log.d("new photopath", newPhotoPath);
 
             if (!"".equals(newPhotoPath)) {
                 PhotoPath = copyImageFromGalleryToApplication(newPhotoPath, data.get("txtInsuranceNumber"));

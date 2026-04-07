@@ -1,6 +1,8 @@
 package org.openimis.imispolicies;
 
+import static android.content.Intent.getIntent;
 import static androidx.core.app.ActivityCompat.recreate;
+import static androidx.core.content.ContextCompat.startActivity;
 import static org.openimis.imispolicies.util.AndroidUtils.showDialog;
 
 import android.app.Activity;
@@ -9,6 +11,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;

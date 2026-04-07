@@ -1082,8 +1082,6 @@ public class InsureeActivity extends AppCompatActivity {
             imgInsuree.setImageDrawable(null);
             hfImagePath = "";
         }
-        // Log pour débogage
-        Log.d("getImage", "Insurance Number: " + insuranceNumber + ", Image Path: " + hfImagePath);
     }
 
     private void loadImage(String imagePath) {
@@ -1118,7 +1116,11 @@ public class InsureeActivity extends AppCompatActivity {
                 JSONArray array = new JSONArray(insuree);
                 insureeObject = array.getJSONObject(0);
                 isOffline = insureeObject.getString("isOffline");
-                isHead = insureeObject.getInt("isHead");
+                if(insureeObject.getString("isHead").equals("true") || insureeObject.getString("isHead").equals("1")){
+                    isHead = 1;
+                } else {
+                    isHead = 0;
+                }
                 photoPath = insureeObject.getString("PhotoPath");
                 if(isHead == 1){
                     layoutRelationships.setVisibility(View.GONE);
@@ -1161,7 +1163,12 @@ public class InsureeActivity extends AppCompatActivity {
     public void saveFormData() {
         try {
             getImage();
-            insureeObject.put("isOffline", isOffline);
+            if(isOffline.equals("true")||isOffline.equals("1")){
+                isOffline = "1";
+            } else {
+                isOffline = "0";
+            }
+            insureeObject.put("isOffline", Integer.parseInt(isOffline));
             insureeObject.put("hfisHead", isHead);
             insureeObject.put("hfImagePath", hfImagePath);
             insureeObject.put("hfNewPhotoPath", hfNewPhotoPath);

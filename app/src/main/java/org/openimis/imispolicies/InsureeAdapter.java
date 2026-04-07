@@ -98,7 +98,7 @@ public class InsureeAdapter extends RecyclerView.Adapter<InsureeAdapter.ViewHold
         try {
             JSONObject insuree = insurees.getJSONObject(position);
             int insureeId = insuree.getInt("InsureeId");
-            int isOffline = insuree.getInt("isOffline");
+            String isOffline = insuree.getString("isOffline");
             if(insuree.getString("isHead").equals("1")){
                 popup.getMenu().findItem(R.id.insuree_menu_delete).setVisible(false);
             } else {
@@ -120,7 +120,7 @@ public class InsureeAdapter extends RecyclerView.Adapter<InsureeAdapter.ViewHold
                                     showLoadingDialog();
                                     ClientAndroidInterface ca = new ClientAndroidInterface((Activity) context);
                                     int deleteSuccess = 0;
-                                    if(isOffline == 0 || isOffline == 2){
+                                    if(isOffline.equals("0") || isOffline.equals("false") || isOffline.equals("2")){
                                         showLoadingDialog();
                                         deleteSuccess = ca.DeleteOnlineData(insureeId, "I");
                                     } else {
