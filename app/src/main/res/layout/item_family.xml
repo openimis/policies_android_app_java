@@ -27,7 +27,9 @@
                 android:id="@+id/txtFamilyInsuranceNumber"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/colorPrimary"
+                android:textColor="@color/colorAccent"
+                android:textStyle="bold"
+                android:textSize="18sp"
                 android:layout_marginBottom="5dp"
                 android:text="CHFID"/>
 
@@ -37,6 +39,7 @@
                 android:layout_height="wrap_content"
                 android:text="Nom Assuré"
                 android:textStyle="bold"
+                android:textSize="16sp"
                 android:textColor="@color/colorPrimaryDark"
                 android:layout_marginBottom="5dp"/>
 
@@ -50,7 +53,7 @@
                     android:id="@+id/txtRegion"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textColor="@color/colorAccent"
+                    android:textColor="@color/grey"
                     android:text="Region"/>
 
                 <ImageView
@@ -64,7 +67,7 @@
                     android:id="@+id/txtDistrict"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:textColor="@color/colorAccent"
+                    android:textColor="@color/grey"
                     android:text="District" />
 
                 <ImageView
@@ -78,7 +81,7 @@
                     android:id="@+id/txtVillage"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textColor="@color/colorAccent"
+                    android:textColor="@color/grey"
                     android:text="Village"/>
 
             </LinearLayout>
