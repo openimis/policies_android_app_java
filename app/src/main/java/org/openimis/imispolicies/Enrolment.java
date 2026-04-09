@@ -39,7 +39,6 @@ public class Enrolment extends AppCompatActivity {
 
         loadFamilies();
         btnAdd.setOnClickListener(v -> {
-
             Intent intent = new Intent(this, FamilyActivity.class);
             intent.putExtra("familyId",0);
             startActivity(intent);

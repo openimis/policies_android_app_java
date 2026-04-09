@@ -49,6 +49,12 @@
         tools:ignore="GoogleAppIndexingWarning"
         tools:replace="android:icon,android:label">
         <activity
+            android:name=".PremiumActivity"
+            android:exported="false" />
+        <activity
+            android:name=".PolicyPremiumsActivity"
+            android:exported="false" />
+        <activity
             android:name=".SettingsActivity"
             android:exported="false" />
         <activity

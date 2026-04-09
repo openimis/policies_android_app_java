@@ -1,8 +1,6 @@
 package org.openimis.imispolicies;
 
-import static android.content.Intent.getIntent;
 import static androidx.core.app.ActivityCompat.recreate;
-import static androidx.core.content.ContextCompat.startActivity;
 import static org.openimis.imispolicies.util.AndroidUtils.showDialog;
 
 import android.app.Activity;
@@ -11,7 +9,6 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,7 +21,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.openimis.imispolicies.tools.Log;
 
 public class FamilyAdapter extends RecyclerView.Adapter<FamilyAdapter.ViewHolder> {
 
@@ -80,7 +76,6 @@ public class FamilyAdapter extends RecyclerView.Adapter<FamilyAdapter.ViewHolder
 
         public ViewHolder(View itemView) {
             super(itemView);
-
             name = itemView.findViewById(R.id.txtFamilyInsureeName);
             chfid = itemView.findViewById(R.id.txtFamilyInsuranceNumber);
             region = itemView.findViewById(R.id.txtRegion);

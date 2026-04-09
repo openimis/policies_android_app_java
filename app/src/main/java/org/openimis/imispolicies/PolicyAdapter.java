@@ -108,10 +108,12 @@ public class PolicyAdapter extends RecyclerView.Adapter<PolicyAdapter.ViewHolder
                     intent.putExtra("DistrictId", FamilyInsurees.districtId);
                     context.startActivity(intent);
                 } else if(item.getItemId() == R.id.policy_menu_payment){
-//                    Intent intent = new Intent(context, PolicyPremiumActivity.class);
-//                    intent.putExtra("PolicyId", policyId);
-//                    intent.putExtra("FamilyId", familyId);
-//                    context.startActivity(intent);
+                    Intent intent = new Intent(context, PolicyPremiumsActivity.class);
+                    intent.putExtra("PolicyId", policyId);
+                    intent.putExtra("FamilyId", familyId);
+                    intent.putExtra("RegionId", FamilyInsurees.regionId);
+                    intent.putExtra("DistrictId", FamilyInsurees.districtId);
+                    context.startActivity(intent);
                 } else if(item.getItemId() == R.id.policy_menu_delete){
                     AlertDialog.Builder builder = new AlertDialog.Builder(context);
                     builder.setTitle(R.string.Confirm)
