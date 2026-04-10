@@ -4887,7 +4887,7 @@ public class ClientAndroidInterface {
         policyObject.put("FamilyId",policy.getFamilyId());
         policyObject.put("EnrollDate",policy.getEnrollDate());
         policyObject.put("StartDate",DateUtils.toDateString(Objects.requireNonNull(policy.getStartDate())));
-        policyObject.put("EffectiveDate",  DateUtils.toDateString(Objects.requireNonNull(policy.getEffectiveDate())));
+        policyObject.put("EffectiveDate", policy.getEffectiveDate() != null ?  DateUtils.toDateString(policy.getEffectiveDate()): "");
         policyObject.put("ExpiryDate", DateUtils.toDateString(Objects.requireNonNull(policy.getExpiryDate())));
         policyObject.put("PolicyStatus",policy.getStatus());
         policyObject.put("PolicyValue",policy.getValue());

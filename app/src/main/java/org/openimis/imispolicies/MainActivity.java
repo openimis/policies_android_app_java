@@ -314,6 +314,10 @@ public class MainActivity extends AppCompatActivity
             if (ca.isMasterDataAvailable() > 0) {
                 loadLanguages();
             }
+            navigationView.setCheckedItem(R.id.nav_home);
+            if (checkRequirements()) {
+                onAllRequirementsMet();
+            }
         } catch (Exception e) {
             Sentry.captureException(e);
         }
@@ -728,9 +732,13 @@ public class MainActivity extends AppCompatActivity
             }
 
         } else if (id == R.id.nav_renewal) {
-            Intent i = new Intent(this, RenewList.class);
-            startActivity(i);
-
+            String officerCode = global.getOfficerCode();
+            if (officerCode == null) {
+                ShowEnrolmentOfficerDialog();
+            } else {
+                Intent i = new Intent(this, RenewList.class);
+                startActivity(i);
+            }
         } else if (id == R.id.nav_reports) {
             Global global = (Global) getApplicationContext();
             if (global.isLoggedIn()) {
@@ -819,10 +827,12 @@ public class MainActivity extends AppCompatActivity
         @Override
         protected void onPreExecute() {
             Context context = activity.get();
-            if (context == null) {
-                return;
-            }
-            pd = new WeakReference<>(AndroidUtils.showProgressDialog(context, R.string.Sync, R.string.DownloadingMasterData));
+            if (context == null) return;
+            ((Activity) context).runOnUiThread(() -> {
+                pd = new WeakReference<>(
+                        AndroidUtils.showProgressDialog(context, R.string.Sync, R.string.DownloadingMasterData)
+                );
+            });
         }
 
         @Override
