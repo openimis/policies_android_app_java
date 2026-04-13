@@ -2,16 +2,13 @@ package org.openimis.imispolicies;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -19,8 +16,8 @@ import org.json.JSONException;
 public class Enrolment extends AppCompatActivity {
 
     RecyclerView recyclerView;
-    FloatingActionButton btnAdd;
     ClientAndroidInterface ca;
+    String page = "families";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,15 +31,9 @@ public class Enrolment extends AppCompatActivity {
         ca = new ClientAndroidInterface(this);
 
         recyclerView = findViewById(R.id.recyclerFamilies);
-        btnAdd = findViewById(R.id.btnAddNew);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         loadFamilies();
-        btnAdd.setOnClickListener(v -> {
-            Intent intent = new Intent(this, FamilyActivity.class);
-            intent.putExtra("familyId",0);
-            startActivity(intent);
-        });
     }
 
     @Override
@@ -63,11 +54,22 @@ public class Enrolment extends AppCompatActivity {
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_add, menu);
+        return true;
+    }
+
+    @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
             // Option 2: Fermer l'activité directement
             finish();
             return true;
+        }
+        if (item.getItemId() == R.id.action_add && page.equals("families")) {
+            Intent intent = new Intent(this, FamilyActivity.class);
+            intent.putExtra("familyId",0);
+            startActivity(intent);
         }
         return super.onOptionsItemSelected(item);
     }

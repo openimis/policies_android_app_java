@@ -27,9 +27,8 @@
             android:id="@+id/CHFID"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@color/colorAccent"
+            android:textColor="@color/colorPrimary"
             android:text="insuree CHFID"
-            android:textStyle="bold"
             android:layout_alignParentStart="true"
             android:layout_marginBottom="5dp"/>
 
@@ -49,21 +48,6 @@
             android:layout_height="wrap_content"
             android:textColor="@color/grey"
             android:text="date of birthday"/>
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:gravity="end">
-
-        <ImageView
-            android:id="@+id/btnContextMenuInsuree"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/context_menu"
-            android:background="?selectableItemBackgroundBorderless"
-            android:contentDescription="Menu"/>
     </LinearLayout>
 
     </LinearLayout>

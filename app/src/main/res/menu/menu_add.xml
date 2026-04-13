@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/action_add"
+        android:title="@string/Add"
+        android:icon="@drawable/ic_add_24"
+        app:showAsAction="always"
+        />
+    <!-- ifRoom    = affiche l'icône si la place le permet -->
+    <!-- withText  = affiche aussi le texte à côté -->
+    <!-- always    = toujours visible -->
+    <!-- never     = toujours dans le menu déroulant ⋮ -->
+
+</menu>

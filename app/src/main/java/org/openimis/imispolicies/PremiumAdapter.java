@@ -1,6 +1,8 @@
 package org.openimis.imispolicies;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,22 +15,35 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.openimis.imispolicies.tools.Log;
+import org.openimis.imispolicies.util.AndroidUtils;
 
 public class PremiumAdapter extends RecyclerView.Adapter<PremiumAdapter.ViewHolder> {
 
-    private Context context;
-    private JSONArray premiums;
+    private final Context context;
+    private final JSONArray premiums;
+    private final int policyId;
+    private final int familyId;
+    private final int regionId;
+    private final int districtId;
 
-    public PremiumAdapter(Context context, JSONArray premiums) {
+
+    public PremiumAdapter(Context context, JSONArray premiums, int policyId, int familyId, int regionId, int districtId) {
         this.context = context;
         this.premiums = premiums;
+        this.policyId = policyId;
+        this.familyId = familyId;
+        this.regionId = regionId;
+        this.districtId = districtId;
     }
 
     @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public PremiumAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(context)
                 .inflate(R.layout.item_premium, parent, false);
+
+        Log.e("premium", premiums.toString());
 
         return new PremiumAdapter.ViewHolder(view);
     }
@@ -44,9 +59,7 @@ public class PremiumAdapter extends RecyclerView.Adapter<PremiumAdapter.ViewHold
         } catch (Exception e){
             e.printStackTrace();
         }
-        holder.btnContextMenu.setOnClickListener(v ->{
-            showContextMenu(v, position);
-        });
+        holder.itemView.setOnClickListener((v)-> showContextMenu(v,position));
     }
 
     @Override
@@ -56,7 +69,6 @@ public class PremiumAdapter extends RecyclerView.Adapter<PremiumAdapter.ViewHold
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         TextView date,payMode,amount,receipt;
-        ImageView btnContextMenu;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -64,7 +76,6 @@ public class PremiumAdapter extends RecyclerView.Adapter<PremiumAdapter.ViewHold
             payMode = itemView.findViewById(R.id.tvPremiumPayMode);
             amount = itemView.findViewById(R.id.tvPremiumAmount);
             receipt = itemView.findViewById(R.id.tvPremiumReceiptNo);
-            btnContextMenu = itemView.findViewById(R.id.btnContextMenuPremium);
         }
     }
 
@@ -78,8 +89,31 @@ public class PremiumAdapter extends RecyclerView.Adapter<PremiumAdapter.ViewHold
                 int premiumId = premium.getInt("PremiumId");
                 String isOffline = premium.getString("isOffline");
                 if(item.getItemId() == R.id.premium_menu_edit){
-
+                    Intent intent = new Intent(context.getApplicationContext(), PremiumActivity.class);
+                    intent.putExtra("PremiumId", premiumId);
+                    intent.putExtra("PolicyId", policyId);
+                    intent.putExtra("FamilyId", familyId);
+                    intent.putExtra("RegionId", regionId);
+                    intent.putExtra("DistrictId", districtId);
+                    context.startActivity(intent);
                 } else if(item.getItemId() == R.id.premium_menu_delete){
+
+                    ClientAndroidInterface ca = new ClientAndroidInterface((Activity) context);
+                    AndroidUtils.showConfirmDialog(context, R.string.ConfirmDeletePremium, (dialog, i)->{
+                        int deletedSuccess = -1;
+                        if (isOffline.equals("0") || isOffline.equals("2")) {
+                            deletedSuccess = ca.DeleteOnlineData(premiumId, "PR");
+                        } else {
+                            deletedSuccess = ca.DeletePremium(premiumId, policyId);
+                        }
+                        if (deletedSuccess == 1) {
+                            ((Activity) context).recreate();
+                            AndroidUtils.showDialog(context, R.string.PremiumDeleted);
+                        }
+                        else if (deletedSuccess == -1) {
+                            ca.ShowDialog(context.getResources().getString(R.string.LoginToDeleteOnlineData));
+                        }
+                    });
 
                 }
             } catch (Exception e){
@@ -87,8 +121,6 @@ public class PremiumAdapter extends RecyclerView.Adapter<PremiumAdapter.ViewHold
             }
             return false;
         });
-
         popup.show();
-
     }
 }

@@ -490,4 +490,5 @@
     <string name="ChangeRarPassword">Changer le mot de passe RAR</string>
     <string name="PasswordChanged">Mot de passe changé avec succès</string>
     <string name="ResetRarPwd">Le mot de passe RAR par défaut a été défini</string>
+    <string name="ConfirmDeletePremium">Êtes-vous sure de vouloir supprimer cette contribution?</string>
 </resources>

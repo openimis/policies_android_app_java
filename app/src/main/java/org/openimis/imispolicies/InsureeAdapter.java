@@ -10,7 +10,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 
@@ -62,13 +61,7 @@ public class InsureeAdapter extends RecyclerView.Adapter<InsureeAdapter.ViewHold
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
-
-        holder.btnContextMenu.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                showContextMenu(view, position);
-            }
-        });
+        holder.itemView.setOnClickListener((v)-> showContextMenu(v,position));
     }
 
     @Override
@@ -79,7 +72,6 @@ public class InsureeAdapter extends RecyclerView.Adapter<InsureeAdapter.ViewHold
     public class ViewHolder extends RecyclerView.ViewHolder{
 
         TextView name,chfid,dob;
-        ImageView btnContextMenu;
         MaterialCardView insureeCard;
 
         public ViewHolder(View itemView) {
@@ -87,7 +79,6 @@ public class InsureeAdapter extends RecyclerView.Adapter<InsureeAdapter.ViewHold
             chfid = itemView.findViewById(R.id.CHFID);
             name = itemView.findViewById(R.id.InsureeName);
             dob = itemView.findViewById(R.id.item_dob);
-            btnContextMenu = itemView.findViewById(R.id.btnContextMenuInsuree);
             insureeCard = itemView.findViewById(R.id.family_insurees_card);
         }
     }

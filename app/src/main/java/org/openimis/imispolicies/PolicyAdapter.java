@@ -61,13 +61,7 @@ public class PolicyAdapter extends RecyclerView.Adapter<PolicyAdapter.ViewHolder
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
-
-        holder.btnContextMenu.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                showContextMenu(view, position);
-            }
-        });
+        holder.itemView.setOnClickListener((v) -> showContextMenu(v, position));
     }
 
     @Override
@@ -77,7 +71,6 @@ public class PolicyAdapter extends RecyclerView.Adapter<PolicyAdapter.ViewHolder
 
     public class ViewHolder extends RecyclerView.ViewHolder{
         TextView productCode,productName,policyStatus, expiryDate, startDate, value, effectiveDate;
-        ImageView btnContextMenu;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -88,7 +81,6 @@ public class PolicyAdapter extends RecyclerView.Adapter<PolicyAdapter.ViewHolder
             effectiveDate = itemView.findViewById(R.id.policyEffectiveDate);
             startDate = itemView.findViewById(R.id.policyStartDate);
             value = itemView.findViewById(R.id.policyValue);
-            btnContextMenu = itemView.findViewById(R.id.btnContextMenuPolicy);
         }
     }
 

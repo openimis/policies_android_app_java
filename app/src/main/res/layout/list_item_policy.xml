@@ -36,7 +36,6 @@
                 android:layout_weight="1"
                 android:textColor="@color/colorAccent"
                 android:text="Product Code"
-                android:textStyle="bold"
                 android:layout_alignParentStart="true"/>
 
             <TextView
@@ -44,18 +43,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/colorAccent"
-                android:textStyle="bold"
                 android:text="Status"
                 android:layout_marginEnd="10dp"
                 android:layout_alignParentStart="true"/>
-
-            <ImageView
-                android:id="@+id/btnContextMenuPolicy"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/context_menu"
-                android:background="?selectableItemBackgroundBorderless"
-                android:contentDescription="Menu"/>
         </LinearLayout>
 
         <TextView

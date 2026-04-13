@@ -55,13 +55,7 @@ public class FamilyAdapter extends RecyclerView.Adapter<FamilyAdapter.ViewHolder
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
-
-        holder.btnContextMenu.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                showContextMenu(view, position);
-            }
-        });
+        holder.itemView.setOnClickListener((v)-> showContextMenu(v,position));
     }
 
     @Override
@@ -72,7 +66,6 @@ public class FamilyAdapter extends RecyclerView.Adapter<FamilyAdapter.ViewHolder
     public class ViewHolder extends RecyclerView.ViewHolder{
 
         TextView name,chfid,region, district, village;
-        ImageView btnContextMenu;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -81,7 +74,6 @@ public class FamilyAdapter extends RecyclerView.Adapter<FamilyAdapter.ViewHolder
             region = itemView.findViewById(R.id.txtRegion);
             district = itemView.findViewById(R.id.txtDistrict);
             village = itemView.findViewById(R.id.txtVillage);
-            btnContextMenu = itemView.findViewById(R.id.btnContextMenuFamily);
         }
     }
 

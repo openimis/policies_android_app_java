@@ -2,13 +2,14 @@ package org.openimis.imispolicies;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
 import android.view.MenuItem;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -17,8 +18,8 @@ public class PolicyPremiumsActivity extends AppCompatActivity {
 
     ClientAndroidInterface ca;
     RecyclerView recyclerView;
-    FloatingActionButton btnAdd;
     private int familyId, policyId, regionId, districtId;
+    String page = "premiums";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,12 +32,17 @@ public class PolicyPremiumsActivity extends AppCompatActivity {
         ca = new ClientAndroidInterface(this);
         familyId = getIntent().getIntExtra("FamilyId", 0);
         policyId = getIntent().getIntExtra("PolicyId", 0);
-        policyId = getIntent().getIntExtra("RegionId", 0);
-        policyId = getIntent().getIntExtra("DistrictId", 0);
+        regionId = getIntent().getIntExtra("RegionId", 0);
+        districtId = getIntent().getIntExtra("DistrictId", 0);
         initViews();
-        setupListenners();
         loadPremiums();
 
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_add, menu);
+        return true;
     }
 
     @Override
@@ -45,34 +51,31 @@ public class PolicyPremiumsActivity extends AppCompatActivity {
             finish();
             return true;
         }
-        return super.onOptionsItemSelected(item);
-    }
-
-    private void initViews(){
-        btnAdd = findViewById(R.id.btnAddNewPremiums);
-        recyclerView = findViewById(R.id.recyclerPremiums);
-    }
-
-    private void setupListenners(){
-        btnAdd.setOnClickListener(v -> {
+        if (item.getItemId() == R.id.action_add && page.equals("premiums")) {
             Intent intent = new Intent(this, PremiumActivity.class);
             intent.putExtra("FamilyId", familyId);
             intent.putExtra("PolicyId", policyId);
             intent.putExtra("RegionId", regionId);
-            intent.putExtra("DistrictId", regionId);
+            intent.putExtra("DistrictId", districtId);
             intent.putExtra("PremiumId", 0);
             startActivity(intent);
-        });
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void initViews(){
+        recyclerView = findViewById(R.id.recyclerPremiums);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
     }
 
     private void loadPremiums() {
         String premiums = ca.getPremiums(policyId);
         try{
             JSONArray premiumArray = new JSONArray(premiums);
-            PremiumAdapter adapter = new PremiumAdapter(this,premiumArray);
+            PremiumAdapter adapter = new PremiumAdapter(this,premiumArray, policyId, familyId, regionId, districtId);
             recyclerView.setAdapter(adapter);
         } catch(JSONException e){
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
 
     }
