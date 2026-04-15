@@ -310,6 +310,8 @@ public class MainActivity extends AppCompatActivity
             View headerview = navigationView.getHeaderView(0);
             Login = headerview.findViewById(R.id.tvLogin);
             OfficerName = headerview.findViewById(R.id.tvOfficerName);
+            SetLoggedIn();
+            OfficerName.setText(global.getOfficerName());
 
             Login.setOnClickListener(v -> {
                 wv.loadUrl("file:///android_asset/pages/Login.html?s=3");
@@ -320,6 +322,7 @@ public class MainActivity extends AppCompatActivity
             if (ca.isMasterDataAvailable() > 0) {
                 loadLanguages();
             }
+            ensureOfficerNameLoaded();
             navigationView.setCheckedItem(R.id.nav_home);
             if (checkRequirements()) {
                 onAllRequirementsMet();
@@ -340,7 +343,22 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
+        ensureOfficerNameLoaded();
         OfficerName.setText(global.getOfficerName());
+        SetLoggedIn();
+    }
+
+    private void ensureOfficerNameLoaded() {
+        String officerCode = global.getOfficerCode();
+        String officerName = global.getOfficerName();
+        if (ca == null || TextUtils.isEmpty(officerCode) || !TextUtils.isEmpty(officerName)) {
+            return;
+        }
+        try {
+            ca.isOfficerCodeValid(officerCode);
+        } catch (JSONException e) {
+            Log.w(LOG_TAG, "Failed to resolve officer name from officer code", e);
+        }
     }
 
     public static void SetLoggedIn() {
@@ -349,6 +367,9 @@ public class MainActivity extends AppCompatActivity
             return;
         }
         activity.runOnUiThread(() -> {
+            if (activity.Login == null) {
+                return;
+            }
             if (global.isLoggedIn()) {
                 activity.Login.setText(R.string.Logout);
             } else {
