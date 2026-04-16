@@ -3,6 +3,7 @@ package org.openimis.imispolicies.network.okhttp;
 import androidx.annotation.NonNull;
 
 import org.apache.commons.lang3.StringUtils;
+import org.openimis.imispolicies.Global;
 import org.openimis.imispolicies.MainActivity;
 import org.openimis.imispolicies.repository.LoginRepository;
 
@@ -12,6 +13,7 @@ import java.net.HttpURLConnection;
 import okhttp3.Interceptor;
 import okhttp3.Request;
 import okhttp3.Response;
+import okhttp3.ResponseBody;
 
 public class AuthorizationInterceptor implements Interceptor {
     private static final String USER_AGENT = "mobile_app";
@@ -38,8 +40,14 @@ public class AuthorizationInterceptor implements Interceptor {
             builder.addHeader("X-Csrftoken", csrfToken);
         }
         Response response = chain.proceed(builder.build());
-        if (response.code() == HttpURLConnection.HTTP_UNAUTHORIZED) {
+        ResponseBody body = response.peekBody(Long.MAX_VALUE);
+        String bodyString = body.string();
+        if (bodyString.contains("'csrftoken'") || response.code() == HttpURLConnection.HTTP_UNAUTHORIZED) {
             repository.saveFhirToken(null, null, null);
+            repository.saveCsrfToken(null);
+            if (Global.getGlobal().getCookieJar() != null) {
+                Global.getGlobal().getCookieJar().clear();
+            }
             MainActivity.SetLoggedIn();
         }
         return response;
