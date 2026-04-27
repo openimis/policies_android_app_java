@@ -490,4 +490,5 @@
     <string name="PasswordChanged">Password changed</string>
     <string name="ResetRarPwd">Password has been changed to the default rar password</string>
     <string name="ConfirmDeletePremium">Are you sure you want to delete this contribution?</string>
+    <string name="Close">Close</string>
 </resources>
