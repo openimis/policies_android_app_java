@@ -35,8 +35,8 @@ android {
     }
     defaultConfig {
         applicationId = "org.openimis.imispolicies"
-        minSdkVersion 21
-        targetSdkVersion 33
+        minSdkVersion = 21
+        targetSdkVersion = 33
         versionCode = gitVersionCode
         versionName = gitVersionName
         testInstrumentationRunner = 'androidx.test.runner.AndroidJUnitRunner'
@@ -89,7 +89,7 @@ android {
         }
         demoRelease {
             applicationId = "org.openimis.imispolicies.demoRelease"
-            buildConfigField "String", "API_BASE_URL", '"https://develop.openimis.org/"'
+            buildConfigField "String", "API_BASE_URL", '"https://release.openimis.org/"'
             resValue "string", "app_name_policies", "Policies Release"
             dimension = 'std'
         }
