@@ -1,5 +1,6 @@
 package org.openimis.imispolicies;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
@@ -25,7 +26,6 @@ public class SearchActivity extends AppCompatActivity {
     private TextInputEditText txtSearchInsuranceNumber;
     MaterialButton btnSearch;
     ClientAndroidInterface ca;
-    ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,19 +62,19 @@ public class SearchActivity extends AppCompatActivity {
                 if(!hasInternet){
                     AndroidUtils.showDialog(SearchActivity.this, getResources().getString(R.string.NoInternet));
                 } else {
-                    progressBar = findViewById(R.id.loadingProgressBar);
                     String InsuranceNumber = txtSearchInsuranceNumber.getText().toString();
-                    progressBar.setVisibility(View.VISIBLE);
+                    ProgressDialog pd = AndroidUtils.showProgressDialog(SearchActivity.this, R.string.Search, R.string.Pleasewait);
+                    pd.show();
                     new Thread(() -> {
                         int result = ca.ModifyFamily(InsuranceNumber);
                         runOnUiThread(()->{
                             if ( result == 1) {
-                                progressBar.setVisibility(View.GONE);
                                 Intent intent = new Intent(SearchActivity.this, Enrolment.class);
                                 startActivity(intent);
                                 finish();
                             } else {
-                                progressBar.setVisibility(View.GONE);
+                                pd.dismiss();
+                                AndroidUtils.showDialog(SearchActivity.this, getResources().getString(R.string.InsuranceNumberNotFound));
                             }
                         });
                     }).start();
