@@ -2,7 +2,6 @@ package org.openimis.imispolicies;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -29,7 +28,6 @@ public class InsureeAdapter extends RecyclerView.Adapter<InsureeAdapter.ViewHold
     private Context context;
     private JSONArray insurees;
     private int familyId;
-    private ProgressDialog progressDialog;
 
     public InsureeAdapter(Context context, JSONArray insurees, int familyId) {
         this.context = context;
@@ -108,18 +106,15 @@ public class InsureeAdapter extends RecyclerView.Adapter<InsureeAdapter.ViewHold
                             .setPositiveButton(R.string.Yes, new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
-                                    showLoadingDialog();
                                     ClientAndroidInterface ca = new ClientAndroidInterface((Activity) context);
                                     int deleteSuccess = 0;
                                     if(isOffline.equals("0") || isOffline.equals("false") || isOffline.equals("2")){
-                                        showLoadingDialog();
                                         deleteSuccess = ca.DeleteOnlineData(insureeId, "I");
                                     } else {
                                         deleteSuccess = ca.DeleteInsuree(insureeId);
                                     }
                                     if (deleteSuccess == 1) {
                                         dialogInterface.dismiss();
-                                        progressDialog.dismiss();
                                         FragmentActivity activity = (FragmentActivity) context;
                                         FragmentManager fm = activity.getSupportFragmentManager();
                                         Bundle result = new Bundle();
@@ -128,11 +123,9 @@ public class InsureeAdapter extends RecyclerView.Adapter<InsureeAdapter.ViewHold
                                         ca.ShowDialog(context.getResources().getString(R.string.InsureeDeleted));
                                     } else if(deleteSuccess == 2){
                                         dialogInterface.dismiss();
-                                        progressDialog.dismiss();
                                         ca.ShowDialog(context.getResources().getString(R.string.IsHeadDelete));
                                     } else if(deleteSuccess == -1){
                                         dialogInterface.dismiss();
-                                        progressDialog.dismiss();
                                         ca.ShowDialog(context.getResources().getString(R.string.LoginToDeleteOnlineData));
                                     } else {
                                         dialogInterface.dismiss();
@@ -149,13 +142,5 @@ public class InsureeAdapter extends RecyclerView.Adapter<InsureeAdapter.ViewHold
             throw new RuntimeException(e);
         }
         popup.show();
-    }
-
-    private void showLoadingDialog() {
-        progressDialog = new ProgressDialog(context);
-        progressDialog.setMessage(context.getResources().getString(R.string.Pleasewait));
-        progressDialog.setTitle(context.getResources().getString(R.string.Delete));
-        progressDialog.setCancelable(false);
-        progressDialog.show();
     }
 }

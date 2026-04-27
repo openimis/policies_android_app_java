@@ -104,14 +104,20 @@ public class FamilyAdapter extends RecyclerView.Adapter<FamilyAdapter.ViewHolder
                                         if (result == 1) {
                                             showDialog(context, context.getResources().getString(R.string.FamilyDeleted));
                                             dialogInterface.dismiss();
-                                            recreate((Activity) context);
+                                            Activity activity = (Activity) context;
+                                            if (activity instanceof Enrolment) {
+                                                ((Enrolment) activity).onRefresh();
+                                            }
                                         }
                                     } else {
                                         int deleteSuccess = ca.DeleteFamily(familyId);
                                         if (deleteSuccess == 1) {
                                             showDialog(context, context.getResources().getString(R.string.FamilyDeleted));
                                             dialogInterface.dismiss();
-                                            recreate((Activity) context);
+                                            Activity activity = (Activity) context;
+                                            if (activity instanceof Enrolment) {
+                                                ((Enrolment) activity).onRefresh();
+                                            }
                                         } else if(deleteSuccess == -1){
                                             showDialog(context, context.getResources().getString(R.string.LoginToDeleteOnlineData));
                                         } else if(deleteSuccess == 3){
@@ -119,7 +125,10 @@ public class FamilyAdapter extends RecyclerView.Adapter<FamilyAdapter.ViewHolder
                                             if (result == 1) {
                                                 showDialog(context, context.getResources().getString(R.string.FamilyDeleted));
                                                 dialogInterface.dismiss();
-                                                recreate((Activity) context);
+                                                Activity activity = (Activity) context;
+                                                if (activity instanceof Enrolment) {
+                                                    ((Enrolment) activity).onRefresh();
+                                                }
                                             }
                                         }
                                     }

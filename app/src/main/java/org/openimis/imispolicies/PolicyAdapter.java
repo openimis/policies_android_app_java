@@ -90,7 +90,7 @@ public class PolicyAdapter extends RecyclerView.Adapter<PolicyAdapter.ViewHolder
         try {
             JSONObject policy = policies.getJSONObject(position);
             int policyId = policy.getInt("PolicyId");
-            int isOffline = policy.getInt("isOffline");
+            String isOffline = policy.getString("isOffline");
             popup.setOnMenuItemClickListener(item -> {
                 if(item.getItemId() == R.id.policy_menu_edit){
                     Intent intent = new Intent(context, PolicyActivity.class);
@@ -116,7 +116,7 @@ public class PolicyAdapter extends RecyclerView.Adapter<PolicyAdapter.ViewHolder
                                     showLoadingDialog();
                                     ClientAndroidInterface ca = new ClientAndroidInterface((Activity) context);
                                     int deleteSuccess = -1;
-                                    if(isOffline == 0 || isOffline == 2){
+                                    if(isOffline.equals("0") || isOffline.equals("2") || isOffline.equals("falsej")){
                                         showLoadingDialog();
                                         deleteSuccess = ca.DeleteOnlineData(policyId, "PO");
                                     } else {

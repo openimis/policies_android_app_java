@@ -240,6 +240,7 @@ public class InsureeActivity extends AppCompatActivity {
                                 try {
                                     String relationId = selectedItem.getString("RelationId");
                                     insureeObject.put("ddlRelationship", relationId);
+                                    canSave();
                                 } catch (JSONException e) {
                                     e.printStackTrace();
                                 }
@@ -1208,7 +1209,10 @@ public class InsureeActivity extends AppCompatActivity {
                 JSONArray policies = new JSONArray(FamilyPolicy);
                 JSONObject policy = policies.getJSONObject(0);
                 int MemberCount = Integer.parseInt(policy.getString("MemberCount"));
-                int Threshold = Integer.parseInt(policy.getString("Threshold"));
+                int Threshold = 0;
+                if(!policy.getString("Threshold").equals("null") && !policy.getString("Threshold").equals("")) {
+                    Threshold = Integer.parseInt(policy.getString("Threshold"));
+                }
                 int TotalIns = Integer.parseInt(policy.getString("Ins"));
                 int PolicyId = Integer.parseInt(policy.getString("PolicyId"));
                 int exceedThreshold = -1;

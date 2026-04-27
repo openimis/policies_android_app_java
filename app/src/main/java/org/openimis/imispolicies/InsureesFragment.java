@@ -57,6 +57,10 @@ public class InsureesFragment extends Fragment {
         LoadInsurees();
     }
 
+    public void onRefresh(){
+        LoadInsurees();
+    }
+
     private void LoadInsurees() {
         try {
             String insurees = ca.getInsureesForFamily(familyId);

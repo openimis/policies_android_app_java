@@ -48,7 +48,7 @@ public class PolicyActivity extends AppCompatActivity {
     boolean hasCycle;
     private int officerId, regionId, districtId, productId;
     private MaterialDatePicker<Long> datePicker;
-    private int isOffline = 1;
+    private String isOffline = "1";
     private String policyStatus = "1";
 
 
@@ -287,12 +287,27 @@ public class PolicyActivity extends AppCompatActivity {
             String policy = ca.getPolicy(policyId);
             JSONArray array = new JSONArray(policy);
             policyObject = array.getJSONObject(0);
+            String EnrollDate = policyObject.getString("EnrollDate");
+            isOffline = policyObject.getString("isOffline");
+            String formattedDate = "";
+            try {
+                if(isOffline.equals("0") || isOffline.equals("2") || isOffline.equals("false")){
+                    SimpleDateFormat inputFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy", Locale.ENGLISH);
+                    Date date = inputFormat.parse(EnrollDate);
+
+                    SimpleDateFormat outputFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
+                    formattedDate = outputFormat.format(date);
+                } else {
+                    formattedDate = EnrollDate;
+                }
+            } catch (ParseException e){
+                e.printStackTrace();
+            }
             productId = policyObject.getInt("ProdId");
             officerId = policyObject.getInt("OfficerId");
             txtStartDate.setText(policyObject.getString("StartDate"));
-            txtEnrolmentDate.setText(policyObject.getString("EnrollDate"));
+            txtEnrolmentDate.setText(formattedDate);
             txtExpiryDate.setText(policyObject.getString("ExpiryDate"));
-            isOffline = policyObject.getInt("isOffline");
             txtPolicyStatus.setText(policyObject.getString("PolicyStatus"));
             spBalance.setText(policyObject.getString("Balance"));
             spContribution.setText(policyObject.getString("Contribution"));
@@ -300,7 +315,6 @@ public class PolicyActivity extends AppCompatActivity {
             double currentPolicyValue = policyObject.getDouble("PolicyValue");
             spPolicyValue.setText(String.valueOf(currentPolicyValue));
             String policyStage = policyObject.getString("PolicyStage");
-            Log.d("policy object", policyObject.toString());
             if(ca.IsBulkCNUsed()){
                 if(!policyObject.getString("ControlNumber").isEmpty()){
                     AssignedControlNumber.setText(policyObject.getString("ControlNumber"));

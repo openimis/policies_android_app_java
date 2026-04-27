@@ -1257,9 +1257,17 @@ public class ClientAndroidInterface {
     @JavascriptInterface
     @SuppressWarnings("unused")
     public String getPolicyPeriod(int ProdId, String EnrollDate) throws ParseException, JSONException {
+        Date dEnrollDate;
 
-        SimpleDateFormat format = AppInformation.DateTimeInfo.getDefaultDateFormatter();
-        Date dEnrollDate = format.parse(EnrollDate);
+        try {
+            SimpleDateFormat format = AppInformation.DateTimeInfo.getDefaultDateFormatter();
+            dEnrollDate = format.parse(EnrollDate);
+        } catch (ParseException e) {
+            SimpleDateFormat fallbackFormat = new SimpleDateFormat(
+                    "EEE MMM dd HH:mm:ss z yyyy", Locale.ENGLISH
+            );
+            dEnrollDate = fallbackFormat.parse(EnrollDate);
+        }
 
         @Language("SQL")
         String sSQL = "SELECT IFNULL(AdministrationPeriod, 0) AdministrationPeriod, StartCycle1, StartCycle2, StartCycle3, StartCycle4, InsurancePeriod, IFNULL(GracePeriod, 0)GracePeriod\n" +
@@ -1367,7 +1375,7 @@ public class ClientAndroidInterface {
 
     @JavascriptInterface
     @SuppressWarnings("unused")
-    public double getPolicyValue(String enrollDate, int ProductId, int FamilyId, String startDate, boolean HasCycle, int PolicyId, String PolicyStage, int IsOffline) throws JSONException {
+    public double getPolicyValue(String enrollDate, int ProductId, int FamilyId, String startDate, boolean HasCycle, int PolicyId, String PolicyStage, String IsOffline) throws JSONException {
         Date ExpiryDate = null;
         String expiryDate = null;
         int PreviousPolicyId = 0;
@@ -1383,7 +1391,7 @@ public class ClientAndroidInterface {
             enrollDate = object.getString("EnrollDate");
             PolicyStage = object.getString("PolicyStage");
             expiryDate = object.getString("ExpiryDate");
-            IsOffline = Integer.parseInt(object.getString("isOffline"));
+            IsOffline = object.getString("isOffline");
         }
 
 
@@ -1735,7 +1743,7 @@ public class ClientAndroidInterface {
         boolean HasCycle = false;
         int PolicyId;
         String PolicyStage;
-        int IsOffline;
+        String IsOffline;
         String getCycle;
         String PolicyValue = null;
         Double NewPolicyValue = null;
@@ -1749,7 +1757,7 @@ public class ClientAndroidInterface {
                 PolicyId = ValueObject.getInt("PolicyId");
                 PolicyStage = ValueObject.getString("StartDate");
                 startDate = ValueObject.getString("PolicyStage");
-                IsOffline = ValueObject.getInt("isOffline");
+                IsOffline = ValueObject.getString("isOffline");
                 PolicyValue = ValueObject.getString("PolicyValue");
 
                 getCycle = getPolicyPeriod(ProductId, enrollDate);
@@ -4886,9 +4894,12 @@ public class ClientAndroidInterface {
         policyObject.put("PolicyId",policy.getId());
         policyObject.put("FamilyId",policy.getFamilyId());
         policyObject.put("EnrollDate",policy.getEnrollDate());
-        policyObject.put("StartDate",DateUtils.toDateString(Objects.requireNonNull(policy.getStartDate())));
-        policyObject.put("EffectiveDate", policy.getEffectiveDate() != null ?  DateUtils.toDateString(policy.getEffectiveDate()): "");
-        policyObject.put("ExpiryDate", DateUtils.toDateString(Objects.requireNonNull(policy.getExpiryDate())));
+        policyObject.put("StartDate",
+                policy.getStartDate() != null ? DateUtils.toDateString(policy.getStartDate()) : JSONObject.NULL);
+        policyObject.put("EffectiveDate",
+                policy.getEffectiveDate() != null ? DateUtils.toDateString(policy.getEffectiveDate()) : JSONObject.NULL);
+        policyObject.put("ExpiryDate",
+                policy.getExpiryDate() != null ? DateUtils.toDateString(policy.getExpiryDate()) : JSONObject.NULL);
         policyObject.put("PolicyStatus",policy.getStatus());
         policyObject.put("PolicyValue",policy.getValue());
         policyObject.put("ProdId",policy.getProductId());

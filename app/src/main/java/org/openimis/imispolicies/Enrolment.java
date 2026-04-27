@@ -53,6 +53,10 @@ public class Enrolment extends AppCompatActivity {
         }
     }
 
+    public void onRefresh() {
+        loadFamilies();
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_add, menu);
