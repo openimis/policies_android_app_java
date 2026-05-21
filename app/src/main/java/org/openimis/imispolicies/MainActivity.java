@@ -308,6 +308,7 @@ public class MainActivity extends AppCompatActivity
             });
             NavigationView navigationView = findViewById(R.id.nav_view);
             View headerview = navigationView.getHeaderView(0);
+            navigationView.setItemIconTintList(null);
             Login = headerview.findViewById(R.id.tvLogin);
             OfficerName = headerview.findViewById(R.id.tvOfficerName);
 
