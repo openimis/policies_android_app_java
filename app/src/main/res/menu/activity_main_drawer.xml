@@ -47,11 +47,11 @@
         android:title="@string/Sync" />
     <item
         android:id="@+id/nav_quit"
-        android:icon="@drawable/ic_quit"
+        android:icon="@drawable/ic_quit1"
         android:title="@string/Quit" />
     <item
         android:id="@+id/nav_about"
-        android:icon="@drawable/ic_about"
+        android:icon="@drawable/ic_about1"
         android:title="@string/About" />
     <item
         android:id="@+id/nav_settings"
