@@ -1,5 +1,8 @@
 package org.openimis.imispolicies.repository;
 
+import static android.content.Context.MODE_PRIVATE;
+import static org.openimis.imispolicies.Global.PREF_NAME;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Base64;
@@ -13,6 +16,7 @@ import org.json.JSONObject;
 import org.openimis.imispolicies.BuildConfig;
 import org.openimis.imispolicies.Global;
 import org.openimis.imispolicies.Token;
+import org.openimis.imispolicies.network.util.PersistentCookieJar;
 import org.openimis.imispolicies.tools.Log;
 
 import java.util.Date;
@@ -37,7 +41,7 @@ public class LoginRepository {
 
     public LoginRepository(@NonNull Context context, boolean isPaymentEnabled) {
         this.isPaymentEnabled = isPaymentEnabled;
-        prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        prefs = context.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         if (!prefs.getBoolean(HAS_MIGRATED, false)) {
             migrateOldTokens();
         }
@@ -167,7 +171,21 @@ public class LoginRepository {
         if (isPaymentEnabled && getRestToken() == null) {
             return false;
         }
-        return getFhirToken() != null;
+
+        PersistentCookieJar cookieJar = Global.getGlobal().getCookieJar();
+        long expiry = Global.getGlobal().getSharedPreferences(PREF_NAME, MODE_PRIVATE)
+                .getLong("session_expiry", 0);
+
+        boolean isLoggedIn = getFhirToken() != null
+                && expiry > System.currentTimeMillis();
+
+        if (!isLoggedIn) {
+            if (cookieJar != null) {
+                cookieJar.clear();
+            }
+        }
+
+        return isLoggedIn;
     }
 
     public void logout() {
