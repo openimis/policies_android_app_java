@@ -46,6 +46,7 @@ import androidx.annotation.Nullable;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.openimis.imispolicies.network.util.PersistentCookieJar;
 import org.openimis.imispolicies.repository.LoginRepository;
 import org.openimis.imispolicies.tools.Log;
 import org.openimis.imispolicies.util.StreamUtils;
@@ -99,6 +100,7 @@ public class Global extends Application {
     private String AppDirectory;
     private Map<String,
             String> SubDirectories;
+    private PersistentCookieJar cookieJar;
     private volatile LoginRepository loginRepository;
     public static Global getGlobal() {
         return GlobalContext;
@@ -116,6 +118,13 @@ public class Global extends Application {
         initSharedPrefsInts();
     }
 
+    public void setCookieJar(PersistentCookieJar jar) {
+        this.cookieJar = jar;
+    }
+
+    public PersistentCookieJar getCookieJar() {
+        return cookieJar;
+    }
     protected boolean isRunningTest() {
         try {
             Class.forName("org.robolectric.RobolectricTestRunner");
