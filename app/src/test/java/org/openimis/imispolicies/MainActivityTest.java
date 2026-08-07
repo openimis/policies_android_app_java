@@ -29,7 +29,6 @@ import java.util.Locale;
 @RunWith(RobolectricTestRunner.class)
 public class MainActivityTest {
 
-    // Tests de la branche feature-36746
     static class TestActivity extends MainActivity {}
     
     private void createActivity() {
@@ -56,7 +55,6 @@ public class MainActivityTest {
         assertEquals("en", Locale.getDefault().getLanguage());
     }
 
-    // Tests de la branche develop
     private MainActivity activity;
     private Global global;
 
