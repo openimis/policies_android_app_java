@@ -70,7 +70,7 @@ public class LanguageManager {
      * @param withRestart should the current context be restarted (if it's Activity).
      */
     public void restoreLanguage(boolean withRestart) {
-        String language = getStoredLanguage();
+        String language = resolveStartupLanguage();
         setLanguage(language, withRestart);
     }
 
@@ -182,6 +182,14 @@ public class LanguageManager {
             defaultLanguage = BuildConfig.DEFAULT_LANGUAGE_CODE;
         }
         return global.getStringKey(Global.PREF_LANGUAGE_KEY, defaultLanguage);
+    }
+
+    private String resolveStartupLanguage() {
+        String language = getCurrentLocale().getLanguage();
+        if ("fr".equalsIgnoreCase(language)) {
+            return "fr";
+        }
+        return "en";
     }
 
     /**

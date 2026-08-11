@@ -24,9 +24,36 @@ import org.robolectric.Shadows;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Locale;
 
 @RunWith(RobolectricTestRunner.class)
 public class MainActivityTest {
+
+    static class TestActivity extends MainActivity {}
+    
+    private void createActivity() {
+        Robolectric.buildActivity(TestActivity.class)
+                .create()
+                .get();
+    }
+
+    @Test
+    public void french_locale_restored() {
+        createActivity();
+        assertEquals("fr", Locale.getDefault().getLanguage());
+    }
+
+    @Test
+    public void english_locale_restored() {
+        createActivity();
+        assertEquals("en", Locale.getDefault().getLanguage());
+    }
+
+    @Test
+    public void unsupported_locale_defaults_en() {
+        createActivity();
+        assertEquals("en", Locale.getDefault().getLanguage());
+    }
 
     private MainActivity activity;
     private Global global;

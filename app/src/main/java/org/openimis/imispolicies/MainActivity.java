@@ -234,6 +234,7 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         global = (Global) getApplicationContext();
         super.onCreate(savedInstanceState);
+        new LanguageManager(this).restoreLanguage(false);
         try {
             instance = this;
             setContentView(R.layout.activity_main);
@@ -604,7 +605,7 @@ public class MainActivity extends AppCompatActivity
                             finish();
                         });
 
-         alertDialogBuilder.show();
+        alertDialogBuilder.show();
     }
 
     public String getMasterDataText2(String fileName, String password) {
