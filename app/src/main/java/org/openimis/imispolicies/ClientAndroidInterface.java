@@ -680,17 +680,12 @@ public class ClientAndroidInterface {
     protected HashMap<String, String> jsonToTable(String jsonString) {
         HashMap<String, String> data = new HashMap<>();
         try {
-            JSONArray array = new JSONArray(jsonString);
-            for (int i = 0; i < array.length(); i++) {
-                JSONObject object = array.getJSONObject(i);
-                String ControlName = object.getString("id");
-                String ControlValue;
-                if (!"null".equals(object.getString("value"))) {
-                    ControlValue = object.getString("value");
-                } else {
-                    ControlValue = null;
-                }
-                data.put(ControlName, ControlValue);
+            JSONObject object = new JSONObject(jsonString);
+            Iterator<String> keys = object.keys();
+            while (keys.hasNext()) {
+                String key = keys.next();
+                String value = object.getString(key);
+                data.put(key, value);
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -1078,7 +1073,7 @@ public class ClientAndroidInterface {
             FileOutputStream outputStream = new FileOutputStream(outputFile);
             Target imageTarget = new OutputStreamImageTarget(outputStream, global.getIntKey("image_jpeg_quality", 40), deleteOldFiles);
             try {
-                activity.runOnUiThread(() -> picassoInstance.load(selectedPath)
+                activity.runOnUiThread(() -> picassoInstance.load(tempPhotoUri)
                         .resize(global.getIntKey("image_width_limit", 400),
                                 global.getIntKey("image_height_limit", 400))
                         .centerInside()
@@ -1262,9 +1257,17 @@ public class ClientAndroidInterface {
     @JavascriptInterface
     @SuppressWarnings("unused")
     public String getPolicyPeriod(int ProdId, String EnrollDate) throws ParseException, JSONException {
+        Date dEnrollDate;
 
-        SimpleDateFormat format = AppInformation.DateTimeInfo.getDefaultDateFormatter();
-        Date dEnrollDate = format.parse(EnrollDate);
+        try {
+            SimpleDateFormat format = AppInformation.DateTimeInfo.getDefaultDateFormatter();
+            dEnrollDate = format.parse(EnrollDate);
+        } catch (ParseException e) {
+            SimpleDateFormat fallbackFormat = new SimpleDateFormat(
+                    "EEE MMM dd HH:mm:ss z yyyy", Locale.ENGLISH
+            );
+            dEnrollDate = fallbackFormat.parse(EnrollDate);
+        }
 
         @Language("SQL")
         String sSQL = "SELECT IFNULL(AdministrationPeriod, 0) AdministrationPeriod, StartCycle1, StartCycle2, StartCycle3, StartCycle4, InsurancePeriod, IFNULL(GracePeriod, 0)GracePeriod\n" +
@@ -1347,6 +1350,10 @@ public class ClientAndroidInterface {
         return period.toString();
     }
 
+    public void setTempPhotoUri(Uri uri){
+        tempPhotoUri = uri;
+    }
+
     @JavascriptInterface
     @SuppressWarnings("unused")
     public void selectPicture() {
@@ -1368,7 +1375,7 @@ public class ClientAndroidInterface {
 
     @JavascriptInterface
     @SuppressWarnings("unused")
-    public double getPolicyValue(String enrollDate, int ProductId, int FamilyId, String startDate, boolean HasCycle, int PolicyId, String PolicyStage, int IsOffline) throws JSONException {
+    public double getPolicyValue(String enrollDate, int ProductId, int FamilyId, String startDate, boolean HasCycle, int PolicyId, String PolicyStage, String IsOffline) throws JSONException {
         Date ExpiryDate = null;
         String expiryDate = null;
         int PreviousPolicyId = 0;
@@ -1384,7 +1391,7 @@ public class ClientAndroidInterface {
             enrollDate = object.getString("EnrollDate");
             PolicyStage = object.getString("PolicyStage");
             expiryDate = object.getString("ExpiryDate");
-            IsOffline = Integer.parseInt(object.getString("isOffline"));
+            IsOffline = object.getString("isOffline");
         }
 
 
@@ -1693,6 +1700,7 @@ public class ClientAndroidInterface {
                 if (IsBulkCNUsed()) {
                     sqlHandler.assignCnToPolicy(rtPolicyId, controlNumber);
                 }
+                Log.e("familyId", String.valueOf(FamilyId));
                 InsertRecordedPolicies("new", String.valueOf(FamilyId), data.get("ddlProduct"), data.get("hfPolicyValue"), MaxPolicyId);
             } else {
                 int Online = 2;
@@ -1735,7 +1743,7 @@ public class ClientAndroidInterface {
         boolean HasCycle = false;
         int PolicyId;
         String PolicyStage;
-        int IsOffline;
+        String IsOffline;
         String getCycle;
         String PolicyValue = null;
         Double NewPolicyValue = null;
@@ -1749,7 +1757,7 @@ public class ClientAndroidInterface {
                 PolicyId = ValueObject.getInt("PolicyId");
                 PolicyStage = ValueObject.getString("StartDate");
                 startDate = ValueObject.getString("PolicyStage");
-                IsOffline = ValueObject.getInt("isOffline");
+                IsOffline = ValueObject.getString("isOffline");
                 PolicyValue = ValueObject.getString("PolicyValue");
 
                 getCycle = getPolicyPeriod(ProductId, enrollDate);
@@ -4812,7 +4820,7 @@ public class ClientAndroidInterface {
         jsonObject.put("insureeUUID", family.getHead().getUuid());
         jsonObject.put("locationId", family.getLocationId());
         jsonObject.put("poverty", family.isPoor());
-        jsonObject.put("isOffline", family.isOffline());
+        jsonObject.put("isOffline", family.isOffline() ? 1 : 0);
         jsonObject.put("familyType", family.getType());
         jsonObject.put("familyAddress", family.getAddress());
         jsonObject.put("ethnicity", family.getEthnicity());
@@ -4890,9 +4898,12 @@ public class ClientAndroidInterface {
         policyObject.put("PolicyId",policy.getId());
         policyObject.put("FamilyId",policy.getFamilyId());
         policyObject.put("EnrollDate",policy.getEnrollDate());
-        policyObject.put("StartDate",DateUtils.toDateString(Objects.requireNonNull(policy.getStartDate())));
-        policyObject.put("EffectiveDate",  DateUtils.toDateString(Objects.requireNonNull(policy.getEffectiveDate())));
-        policyObject.put("ExpiryDate", DateUtils.toDateString(Objects.requireNonNull(policy.getExpiryDate())));
+        policyObject.put("StartDate",
+                policy.getStartDate() != null ? DateUtils.toDateString(policy.getStartDate()) : JSONObject.NULL);
+        policyObject.put("EffectiveDate",
+                policy.getEffectiveDate() != null ? DateUtils.toDateString(policy.getEffectiveDate()) : JSONObject.NULL);
+        policyObject.put("ExpiryDate",
+                policy.getExpiryDate() != null ? DateUtils.toDateString(policy.getExpiryDate()) : JSONObject.NULL);
         policyObject.put("PolicyStatus",policy.getStatus());
         policyObject.put("PolicyValue",policy.getValue());
         policyObject.put("ProdId",policy.getProductId());
@@ -4985,7 +4996,7 @@ public class ClientAndroidInterface {
         return TotalPremiums;
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
+    //@RequiresApi(api = Build.VERSION_CODES.N)
     @JavascriptInterface
     @SuppressWarnings("unused")
     public String getSumPremium() {

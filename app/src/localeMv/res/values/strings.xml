@@ -477,5 +477,7 @@
     <string name="CurrentResourceLanguage">Current resource language: %1$s</string>
     <string name="SystemLanguageNotSupported">Current system language is not supported. The app will use the default language.</string>
     <string name="SupportedLanguages">Supported languages:\n%1$s</string>
+    <string name="DeleteInsuree">Are you sure you want to delete this insuree?</string>
+    <string name="DeletePolicy">Are you sure you want to delete this policy?</string>
     <string name="Close">Close</string>
 </resources>

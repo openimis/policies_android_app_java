@@ -90,7 +90,7 @@
     <string name="SelectMonth">Sél. Mois</string>
     <string name="EnrolmentDate">Date d\'adhésion</string>
     <string name="Product">Paquet de bénéfice</string>
-    <string name="EffectiveDate">Date d\'entrée en vigueur</string>
+    <string name="EffectiveDate">Date d\'entrée en vigueur:</string>
     <string name="StartDate">Date de début</string>
     <string name="ExpireDate">Date d\'expiration</string>
     <string name="Officer">Agent</string>
@@ -120,7 +120,7 @@
     <string name="Suspended">Suspendu</string>
     <string name="ReceiptNotUnique">Le numéro de reçu doit être unique.</string>
     <string name="PleaseDeletePremium">Le contrat a une contribution. Veuillez d\'abord supprimer les contributions</string>
-    <string name="PolicyDeleted">Contrat avec succès</string>
+    <string name="PolicyDeleted">Contrat supprimé avec succès</string>
     <string name="PremiumDeleted">Contribution supprimée avec succès</string>
     <string name="InsureeDeleted">Assuré supprimé avec succès</string>
     <string name="IsHeadDelete">Vous ne pouvez pas supprimer le chef de famille.</string>
@@ -482,5 +482,13 @@
     <string name="pay_type_cash">Cash</string>
     <string name="pay_type_mobile_phone">Téléphone portable</string>
     <string name="pay_type_bank_transfer">Virement banquaire</string>
+    <string name="tapToUpload">Cliquez pour changer la photo</string>
+    <string name="SelectBirthDate">Choisir votre date de naissance</string>
+    <string name="DeleteInsuree">Êtes-vous sûre de vouloir supprimer cet assuré ?</string>
+    <string name="DeletePolicy">Êtes-vous sûre de vouloir supprimer cette police ?</string>
     <string name="Close">Fermer</string>
+    <string name="ChangeRarPassword">Changer le mot de passe RAR</string>
+    <string name="PasswordChanged">Mot de passe changé avec succès</string>
+    <string name="ResetRarPwd">Le mot de passe RAR par défaut a été défini</string>
+    <string name="ConfirmDeletePremium">Êtes-vous sure de vouloir supprimer cette contribution?</string>
 </resources>

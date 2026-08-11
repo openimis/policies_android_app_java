@@ -2,4 +2,8 @@
     <files-path name="images" path="../Images/"/>
     <cache-path name="cache" path="."/>
     <external-cache-path name="external_cache" path="."/>
+    <external-files-path name="external_files" path="." />
+    <external-path name="external" path="." />
+    <external-files-path name="pictures" path="Pictures/" />
+    <files-path name="files" path="." />
 </paths>
