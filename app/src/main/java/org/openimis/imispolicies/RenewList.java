@@ -284,7 +284,6 @@ public class RenewList extends AppCompatActivity {
 
         ClientAndroidInterface ca = new ClientAndroidInterface(this);
         String result = ca.OfflineRenewals(OfficerCode);
-        Log.e("policy renewals", result);
         JSONObject object;
 
         try {
@@ -358,7 +357,6 @@ public class RenewList extends AppCompatActivity {
 
                     try {
                         List<PolicyRenewal> renewals = new FetchPolicyRenewals().execute(OfficerCode);
-                        Log.e("renewals", toJson(renewals).toString());
                         ca.InsertRenewalsFromApi(toJson(renewals));
                         runOnUiThread(this::fillRenewals);
                     } catch (Exception e) {
