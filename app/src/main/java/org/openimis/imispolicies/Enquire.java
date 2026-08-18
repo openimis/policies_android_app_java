@@ -73,10 +73,10 @@ import java.util.Objects;
 public class Enquire extends ImisActivity {
     private static final String LOG_TAG = "ENQUIRE";
     private static final int REQUEST_SCAN_QR_CODE = 1;
-    private Global global;
-    private Escape escape;
-    private Picasso picasso;
-    private ClientAndroidInterface ca;
+    protected Global global;
+    protected Escape escape;
+    protected Picasso picasso;
+    protected ClientAndroidInterface ca;
     private EditText etCHFID;
     private TextView tvCHFID;
     private TextView tvName;
@@ -269,96 +269,98 @@ public class Enquire extends ImisActivity {
                 }
 
                 for (Policy policy : insuree.getPolicies()) {
-                    HashMap<String, String> policyMap = new HashMap<>();
+                    if(policy.getValidityTo() == null) {
+                        HashMap<String, String> policyMap = new HashMap<>();
 
-                    double iDedType = policy.getDeductibleType() == null ? 0 : policy.getDeductibleType();
+                        double iDedType = policy.getDeductibleType() == null ? 0 : policy.getDeductibleType();
 
-                    String Ded = "", Ded1 = "", Ded2 = "";
-                    String Ceiling = "", Ceiling1 = "", Ceiling2 = "";
+                        String Ded = "", Ded1 = "", Ded2 = "";
+                        String Ceiling = "", Ceiling1 = "", Ceiling2 = "";
 
-                    //Get the type
-                    if (iDedType == 1 | iDedType == 2 | iDedType == 3) {
-                        if (policy.getDeductibleIp() != null)
-                            Ded1 = String.valueOf(policy.getDeductibleIp());
-                        if (policy.getCeilingIp() != null)
-                            Ceiling1 = String.valueOf(policy.getCeilingIp());
+                        //Get the type
+                        if (iDedType == 1 | iDedType == 2 | iDedType == 3) {
+                            if (policy.getDeductibleIp() != null)
+                                Ded1 = String.valueOf(policy.getDeductibleIp());
+                            if (policy.getCeilingIp() != null)
+                                Ceiling1 = String.valueOf(policy.getCeilingIp());
 
-                        if (!Ded1.equals("")) Ded = "Deduction: " + Ded1;
-                        if (!Ceiling1.equals("")) Ceiling = "Ceiling: " + Ceiling1;
+                            if (!Ded1.equals("")) Ded = "Deduction: " + Ded1;
+                            if (!Ceiling1.equals("")) Ceiling = "Ceiling: " + Ceiling1;
 
-                    } else if (iDedType == 1.1 | iDedType == 2.1 | iDedType == 3.1) {
+                        } else if (iDedType == 1.1 | iDedType == 2.1 | iDedType == 3.1) {
 
-                        if (policy.getDeductibleIp() != null)
-                            Ded1 = " IP:" + policy.getDeductibleIp();
-                        if (policy.getDeductibleOp() != null)
-                            Ded2 = " OP:" + policy.getDeductibleOp();
-                        if (policy.getCeilingIp() != null)
-                            Ceiling1 = " IP:" + policy.getCeilingIp();
-                        if (policy.getCeilingOp() != null)
-                            Ceiling2 = " OP:" + policy.getCeilingOp();
+                            if (policy.getDeductibleIp() != null)
+                                Ded1 = " IP:" + policy.getDeductibleIp();
+                            if (policy.getDeductibleOp() != null)
+                                Ded2 = " OP:" + policy.getDeductibleOp();
+                            if (policy.getCeilingIp() != null)
+                                Ceiling1 = " IP:" + policy.getCeilingIp();
+                            if (policy.getCeilingOp() != null)
+                                Ceiling2 = " OP:" + policy.getCeilingOp();
 
-                        if (!(Ded1 + Ded2).equals("")) Ded = "Deduction: " + Ded1 + Ded2;
-                        if (!(Ceiling1 + Ceiling2).equals(""))
-                            Ceiling = "Ceiling: " + Ceiling1 + Ceiling2;
+                            if (!(Ded1 + Ded2).equals("")) Ded = "Deduction: " + Ded1 + Ded2;
+                            if (!(Ceiling1 + Ceiling2).equals(""))
+                                Ceiling = "Ceiling: " + Ceiling1 + Ceiling2;
 
-                    }
-
-                    if (policy.getExpiryDate() == null) {
-                        policyMap.put("Heading", getResources().getString(R.string.EnquireNoPolicies));
-                    } else {
-                        String expiryDate = policy.getExpiryDate() != null ?
-                                DateUtils.toDateString(policy.getExpiryDate()) : null;
-                        String status = policy.getStatus().name();
-                        String heading1;
-                        if (expiryDate != null) {
-                            heading1 = expiryDate + " " + status;
-                        } else {
-                            heading1 = status;
                         }
-                        policyMap.put("Heading", policy.getCode());
-                        policyMap.put("Heading1", heading1);
-                        policyMap.put("SubItem1", policy.getName());
-                        policyMap.put("SubItem2", Ded);
-                        policyMap.put("SubItem3", Ceiling);
-                    }
 
-                    if (!ca.getSpecificControl("TotalAdmissionsLeft").equals("N")) {
-                        policyMap.put("SubItem4", buildEnquireValue(policy.getTotalAdmissionsLeft(), R.string.totalAdmissionsLeft));
-                    }
-                    if (!ca.getSpecificControl("TotalVisitsLeft").equals("N")) {
-                        policyMap.put("SubItem5", buildEnquireValue(policy.getTotalVisitsLeft(), R.string.totalVisitsLeft));
-                    }
-                    if (!ca.getSpecificControl("TotalConsultationsLeft").equals("N")) {
-                        policyMap.put("SubItem6", buildEnquireValue(policy.getTotalConsultationsLeft(), R.string.totalConsultationsLeft));
-                    }
-                    if (!ca.getSpecificControl("TotalSurgeriesLeft").equals("N")) {
-                        policyMap.put("SubItem7", buildEnquireValue(policy.getTotalSurgeriesLeft(), R.string.totalSurgeriesLeft));
-                    }
-                    if (!ca.getSpecificControl("TotalDelivieriesLeft").equals("N")) {
-                        policyMap.put("SubItem8", buildEnquireValue(policy.getTotalDeliveriesLeft(), R.string.totalDeliveriesLeft));
-                    }
-                    if (!ca.getSpecificControl("TotalAntenatalLeft").equals("N")) {
-                        policyMap.put("SubItem9", buildEnquireValue(policy.getTotalAntenatalLeft(), R.string.totalAntenatalLeft));
-                    }
-                    if (!ca.getSpecificControl("ConsultationAmountLeft").equals("N")) {
-                        policyMap.put("SubItem10", buildEnquireValue(policy.getConsultationAmountLeft(), R.string.consultationAmountLeft));
-                    }
-                    if (!ca.getSpecificControl("SurgeryAmountLeft").equals("N")) {
-                        policyMap.put("SubItem11", buildEnquireValue(policy.getSurgeryAmountLeft(), R.string.surgeryAmountLeft));
-                    }
-                    if (!ca.getSpecificControl("HospitalizationAmountLeft").equals("N")) {
-                        policyMap.put("SubItem12", buildEnquireValue(policy.getHospitalizationAmountLeft(), R.string.hospitalizationAmountLeft));
-                    }
-                    if (!ca.getSpecificControl("AntenatalAmountLeft").equals("N")) {
-                        policyMap.put("SubItem13", buildEnquireValue(policy.getAntenatalAmountLeft(), R.string.antenatalAmountLeft));
-                    }
-                    if (!ca.getSpecificControl("DeliveryAmountLeft").equals("N")) {
-                        policyMap.put("SubItem14", buildEnquireValue(policy.getDeliveryAmountLeft(), R.string.deliveryAmountLeft));
-                    }
+                        if (policy.getExpiryDate() == null) {
+                            policyMap.put("Heading", getResources().getString(R.string.EnquireNoPolicies));
+                        } else {
+                            String expiryDate = policy.getExpiryDate() != null ?
+                                    DateUtils.toDateString(policy.getExpiryDate()) : null;
+                            String status = policy.getStatus().name();
+                            String heading1;
+                            if (expiryDate != null) {
+                                heading1 = expiryDate + " " + status;
+                            } else {
+                                heading1 = status;
+                            }
+                            policyMap.put("Heading", policy.getCode());
+                            policyMap.put("Heading1", heading1);
+                            policyMap.put("SubItem1", policy.getName());
+                            policyMap.put("SubItem2", Ded);
+                            policyMap.put("SubItem3", Ceiling);
+                        }
 
-                    PolicyList.add(policyMap);
-                    etCHFID.setText("");
-                    //break;
+                        if (!ca.getSpecificControl("TotalAdmissionsLeft").equals("N")) {
+                            policyMap.put("SubItem4", buildEnquireValue(policy.getTotalAdmissionsLeft(), R.string.totalAdmissionsLeft));
+                        }
+                        if (!ca.getSpecificControl("TotalVisitsLeft").equals("N")) {
+                            policyMap.put("SubItem5", buildEnquireValue(policy.getTotalVisitsLeft(), R.string.totalVisitsLeft));
+                        }
+                        if (!ca.getSpecificControl("TotalConsultationsLeft").equals("N")) {
+                            policyMap.put("SubItem6", buildEnquireValue(policy.getTotalConsultationsLeft(), R.string.totalConsultationsLeft));
+                        }
+                        if (!ca.getSpecificControl("TotalSurgeriesLeft").equals("N")) {
+                            policyMap.put("SubItem7", buildEnquireValue(policy.getTotalSurgeriesLeft(), R.string.totalSurgeriesLeft));
+                        }
+                        if (!ca.getSpecificControl("TotalDelivieriesLeft").equals("N")) {
+                            policyMap.put("SubItem8", buildEnquireValue(policy.getTotalDeliveriesLeft(), R.string.totalDeliveriesLeft));
+                        }
+                        if (!ca.getSpecificControl("TotalAntenatalLeft").equals("N")) {
+                            policyMap.put("SubItem9", buildEnquireValue(policy.getTotalAntenatalLeft(), R.string.totalAntenatalLeft));
+                        }
+                        if (!ca.getSpecificControl("ConsultationAmountLeft").equals("N")) {
+                            policyMap.put("SubItem10", buildEnquireValue(policy.getConsultationAmountLeft(), R.string.consultationAmountLeft));
+                        }
+                        if (!ca.getSpecificControl("SurgeryAmountLeft").equals("N")) {
+                            policyMap.put("SubItem11", buildEnquireValue(policy.getSurgeryAmountLeft(), R.string.surgeryAmountLeft));
+                        }
+                        if (!ca.getSpecificControl("HospitalizationAmountLeft").equals("N")) {
+                            policyMap.put("SubItem12", buildEnquireValue(policy.getHospitalizationAmountLeft(), R.string.hospitalizationAmountLeft));
+                        }
+                        if (!ca.getSpecificControl("AntenatalAmountLeft").equals("N")) {
+                            policyMap.put("SubItem13", buildEnquireValue(policy.getAntenatalAmountLeft(), R.string.antenatalAmountLeft));
+                        }
+                        if (!ca.getSpecificControl("DeliveryAmountLeft").equals("N")) {
+                            policyMap.put("SubItem14", buildEnquireValue(policy.getDeliveryAmountLeft(), R.string.deliveryAmountLeft));
+                        }
+
+                        PolicyList.add(policyMap);
+                        etCHFID.setText("");
+                        //break;
+                    }
                 }
             }
             ListAdapter adapter = new SimpleAdapter(Enquire.this,
@@ -449,7 +451,8 @@ public class Enquire extends ImisActivity {
                         /* totalConsultationsLeft = */ null,
                         /* totalDeliveriesLeft = */ null,
                         /* totalSurgeriesLeft = */ null,
-                        /* totalVisitsLeft = */ null
+                        /* totalVisitsLeft = */ null,
+                        /* validityTo = */ null
                 ));
             }
             c.close();

@@ -90,9 +90,9 @@
     <string name="SelectMonth">Select Month</string>
     <string name="EnrolmentDate">Enrolment date</string>
     <string name="Product">Product</string>
-    <string name="EffectiveDate">Effective Date</string>
+    <string name="EffectiveDate">Effective Date:</string>
     <string name="StartDate">Start Date</string>
-    <string name="ExpireDate">Expire Date</string>
+    <string name="ExpireDate">Expire Date:</string>
     <string name="Officer">Enrolment Officer</string>
     <string name="PolicyStatus">Policy Status : </string>
     <string name="PolicyValue">Policy Value : </string>
@@ -483,4 +483,12 @@
     <string name="pay_type_cash">Cash</string>
     <string name="pay_type_mobile_phone">Mobile Phone</string>
     <string name="pay_type_bank_transfer">Bank Transfer</string>
+    <string name="Empty">Empty</string>
+    <string name="tapToUpload">Tap to change photo</string>
+    <string name="SelectBirthDate">Select birth date</string>
+    <string name="ChangeRarPassword">Change RAR Password</string>
+    <string name="PasswordChanged">Password changed</string>
+    <string name="ResetRarPwd">Password has been changed to the default rar password</string>
+    <string name="ConfirmDeletePremium">Are you sure you want to delete this contribution?</string>
+    <string name="Close">Close</string>
 </resources>

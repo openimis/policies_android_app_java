@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    tools:context=".SyncActivity">
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnUploadEnrolment"
+        style="@style/Widget.MaterialComponents.Button"
+        android:layout_marginBottom="20dp"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:text="@string/UploadEnrollment"
+        android:background="@drawable/button_background"/>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnUploadRenewals"
+        style="@style/Widget.MaterialComponents.Button"
+        android:layout_marginBottom="20dp"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:text="@string/UploadRenewals"
+        android:background="@drawable/button_background"/>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnUploadFeedBack"
+        style="@style/Widget.MaterialComponents.Button"
+        android:layout_marginBottom="20dp"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:text="@string/UploadFeedBack"
+        android:background="@drawable/button_background"/>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnEnrollmentXML"
+        style="@style/Widget.MaterialComponents.Button"
+        android:layout_marginBottom="20dp"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:text="@string/EnrollmentXML"
+        android:background="@drawable/button_background"/>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnCreateRenewalXML"
+        style="@style/Widget.MaterialComponents.Button"
+        android:layout_marginBottom="20dp"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:text="@string/CreateRenewalXML"
+        android:background="@drawable/button_background"/>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnCreateFeedbackXML"
+        style="@style/Widget.MaterialComponents.Button"
+        android:layout_marginBottom="20dp"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:text="@string/CreateFeedbackXML"
+        android:background="@drawable/button_background"/>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnDownloadMaster"
+        style="@style/Widget.MaterialComponents.Button"
+        android:layout_marginBottom="20dp"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:text="@string/DownloadMaster"
+        android:background="@drawable/button_background"/>
+
+</LinearLayout>

@@ -49,6 +49,7 @@ Parameters:
 * ```RAR_PASSWORD``` represents the password to be used for the offline extract. 
 * ```SHOW_CONTROL_NUMBER_MENU``` allow to show or hide the Control Number menu item in case the implementation does not implement the ePayment module. 
 * ```app_name_policies``` is a resource string allowing to change the name of the application.
+* ```sentry_dsn``` allow to define the sentry dsn of your project where error and exception events from your application will be sent
 
 Escape procedures can be configured and language resource files can be changed. Please follow the ```sourceSets``` record. Look in ```app\src\demo``` folder for an example. 
 

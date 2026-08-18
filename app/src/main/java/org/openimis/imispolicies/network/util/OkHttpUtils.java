@@ -1,6 +1,11 @@
 package org.openimis.imispolicies.network.util;
 
+import static android.content.Context.MODE_PRIVATE;
+
+import static org.openimis.imispolicies.Global.PREF_NAME;
+
 import android.annotation.SuppressLint;
+import android.content.SharedPreferences;
 
 import androidx.annotation.NonNull;
 
@@ -30,6 +35,10 @@ public class OkHttpUtils {
             synchronized (OkHttpUtils.class) {
                 if (client == null) {
                     OkHttpClient.Builder builder = new OkHttpClient.Builder();
+                    PersistentCookieJar cookieJar =
+                            new PersistentCookieJar(Global.getGlobal().getSharedPreferences(PREF_NAME, MODE_PRIVATE));
+                    Global.getGlobal().setCookieJar(cookieJar);
+                    builder.cookieJar(cookieJar);
                     HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
                     interceptor.setLevel(BuildConfig.DEBUG ? HttpLoggingInterceptor.Level.BODY : HttpLoggingInterceptor.Level.BASIC);
                     builder.addInterceptor(interceptor);

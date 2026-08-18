@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingVertical="8dp">
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_change_rar_pwd"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:backgroundTint="@color/white"
+        android:textColor="@color/black"
+        android:textAlignment="textStart"
+        android:text="@string/ChangeRarPassword" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_rar_pass_default"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:backgroundTint="@color/white"
+        android:textColor="@color/black"
+        android:textAlignment="textStart"
+        android:text="@string/BackToDefaultPassword" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_export_logs"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:backgroundTint="@color/white"
+        android:textColor="@color/black"
+        android:textAlignment="textStart"
+        android:text="@string/ExportLogs" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_clear_logs"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:backgroundTint="@color/white"
+        android:textColor="@color/black"
+        android:textAlignment="textStart"
+        android:text="@string/ClearLogs" />
+
+</LinearLayout>

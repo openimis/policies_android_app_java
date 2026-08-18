@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/layoutRegion"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/Region"
+                app:boxBackgroundMode="outline"
+                app:endIconMode="dropdown_menu"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+
+                <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                    android:id="@+id/spRegion"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="none"
+                    android:padding="16dp"
+                    android:singleLine="true" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/layoutDistrict"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/District"
+                app:boxBackgroundMode="outline"
+                app:endIconMode="dropdown_menu"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+
+                <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                    android:id="@+id/spDistrict"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="none"
+                    android:padding="16dp"
+                    android:singleLine="true" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/layoutWard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/Ward"
+                app:boxBackgroundMode="outline"
+                app:endIconMode="dropdown_menu"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+
+                <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                    android:id="@+id/spWard"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="none"
+                    android:padding="16dp"
+                    android:singleLine="true" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/layoutVillage"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/Village"
+                app:boxBackgroundMode="outline"
+                app:endIconMode="dropdown_menu"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+
+                <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                    android:id="@+id/spVillage"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="none"
+                    android:padding="16dp"
+                    android:singleLine="true" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/layoutPovertyStatus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:hint="@string/PovertyStatus"
+                app:boxBackgroundMode="outline"
+                app:endIconMode="dropdown_menu"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+
+                <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                    android:id="@+id/spPovertyStatus"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="none"
+                    android:padding="16dp"
+                    android:singleLine="true" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/layoutFamilyType"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:hint="@string/SelectFamilyType"
+                app:boxBackgroundMode="outline"
+                app:endIconMode="dropdown_menu"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+
+                <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                    android:id="@+id/spFamilyType"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="none"
+                    android:padding="16dp"
+                    android:singleLine="true" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/layoutConfirmationType"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:hint="@string/ConfirmationType"
+                app:boxBackgroundMode="outline"
+                app:endIconMode="dropdown_menu"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+
+                <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                    android:id="@+id/spConfirmationType"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="none"
+                    android:padding="16dp"
+                    android:singleLine="true" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/layoutApprovalSMS"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:hint="@string/approvalOfSMS"
+                app:boxBackgroundMode="outline"
+                app:endIconMode="dropdown_menu"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+
+                <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                    android:id="@+id/spApprovalSMS"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="none"
+                    android:padding="16dp"
+                    android:singleLine="true" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/layoutLanguageSMS"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:hint="@string/languageOfSMS"
+                app:boxBackgroundMode="outline"
+                app:endIconMode="dropdown_menu"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+
+                <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                    android:id="@+id/spLanguageSMS"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="none"
+                    android:padding="16dp"
+                    android:singleLine="true" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnNext"
+                android:text="@string/Next"
+                android:layout_marginTop="20dp"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:textColor="@color/white"
+                android:enabled="false"
+                android:background="@drawable/button_background"/>
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</LinearLayout>

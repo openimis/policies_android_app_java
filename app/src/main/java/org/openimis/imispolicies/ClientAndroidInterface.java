@@ -50,6 +50,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.webkit.JavascriptInterface;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -125,6 +126,8 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 import javax.net.ssl.HttpsURLConnection;
 
+import io.sentry.Sentry;
+
 public class ClientAndroidInterface {
     private static final String LOG_TAG_RENEWAL = "RENEWAL";
     public static String filePath = null;
@@ -136,7 +139,7 @@ public class ClientAndroidInterface {
     @NonNull
     private final Activity activity;
     @NonNull
-    private final SQLHandler sqlHandler;
+    protected final SQLHandler sqlHandler;
     @NonNull
     private final HashMap<String, String> controls = new HashMap<>();
     @NonNull
@@ -144,7 +147,7 @@ public class ClientAndroidInterface {
     @NonNull
     private final ArrayList<String> enrolMessages = new ArrayList<>();
     @NonNull
-    private final Global global;
+    protected final Global global;
     @NonNull
     private final StorageManager storageManager;
     @NonNull
@@ -165,6 +168,14 @@ public class ClientAndroidInterface {
                         Log.e("Images", String.format("Image load failed: %s", path.toString()), exception))
                 .loggingEnabled(BuildConfig.LOGGING_ENABLED)
                 .build();
+    }
+
+    public ClientAndroidInterface(Activity activity, SQLHandler sqlHandler, Global global, Picasso picasso, StorageManager storageManager) {
+        this.activity = activity;
+        this.sqlHandler = sqlHandler;
+        this.global = global;
+        this.storageManager = storageManager;
+        this.picassoInstance = picasso;
     }
 
     @JavascriptInterface
@@ -666,20 +677,15 @@ public class ClientAndroidInterface {
         return HFs.toString();
     }
 
-    private HashMap<String, String> jsonToTable(String jsonString) {
+    protected HashMap<String, String> jsonToTable(String jsonString) {
         HashMap<String, String> data = new HashMap<>();
         try {
-            JSONArray array = new JSONArray(jsonString);
-            for (int i = 0; i < array.length(); i++) {
-                JSONObject object = array.getJSONObject(i);
-                String ControlName = object.getString("id");
-                String ControlValue;
-                if (!"null".equals(object.getString("value"))) {
-                    ControlValue = object.getString("value");
-                } else {
-                    ControlValue = null;
-                }
-                data.put(ControlName, ControlValue);
+            JSONObject object = new JSONObject(jsonString);
+            Iterator<String> keys = object.keys();
+            while (keys.hasNext()) {
+                String key = keys.next();
+                String value = object.getString(key);
+                data.put(key, value);
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -778,6 +784,7 @@ public class ClientAndroidInterface {
             return FamilyId;
 
         } catch (UserException e) {
+            Sentry.captureException(e);
             e.printStackTrace();
             if (InsureeId != 0)
                 sqlHandler.deleteData("tblInsuree", "InsureeId = ?", new String[]{String.valueOf(InsureeId)});
@@ -849,7 +856,7 @@ public class ClientAndroidInterface {
         }
     }
 
-    private int isValidInsureeData(HashMap<String, String> data) {
+    protected int isValidInsureeData(HashMap<String, String> data) {
         int Result;
 
         String InsuranceNumber = data.get("txtInsuranceNumber");
@@ -1037,6 +1044,7 @@ public class ClientAndroidInterface {
                 );
             }
         } catch (NumberFormatException | UserException e) {
+            Sentry.captureException(e);
             e.printStackTrace();
             throw new Exception(e.getMessage());
         }
@@ -1044,7 +1052,7 @@ public class ClientAndroidInterface {
         return rtInsureeId;
     }
 
-    private String copyImageFromGalleryToApplication(String selectedPath, String InsuranceNumber) {
+    protected String copyImageFromGalleryToApplication(String selectedPath, String InsuranceNumber) {
         String result = "";
 
         try {
@@ -1065,7 +1073,7 @@ public class ClientAndroidInterface {
             FileOutputStream outputStream = new FileOutputStream(outputFile);
             Target imageTarget = new OutputStreamImageTarget(outputStream, global.getIntKey("image_jpeg_quality", 40), deleteOldFiles);
             try {
-                activity.runOnUiThread(() -> picassoInstance.load(selectedPath)
+                activity.runOnUiThread(() -> picassoInstance.load(tempPhotoUri)
                         .resize(global.getIntKey("image_width_limit", 400),
                                 global.getIntKey("image_height_limit", 400))
                         .centerInside()
@@ -1249,9 +1257,17 @@ public class ClientAndroidInterface {
     @JavascriptInterface
     @SuppressWarnings("unused")
     public String getPolicyPeriod(int ProdId, String EnrollDate) throws ParseException, JSONException {
+        Date dEnrollDate;
 
-        SimpleDateFormat format = AppInformation.DateTimeInfo.getDefaultDateFormatter();
-        Date dEnrollDate = format.parse(EnrollDate);
+        try {
+            SimpleDateFormat format = AppInformation.DateTimeInfo.getDefaultDateFormatter();
+            dEnrollDate = format.parse(EnrollDate);
+        } catch (ParseException e) {
+            SimpleDateFormat fallbackFormat = new SimpleDateFormat(
+                    "EEE MMM dd HH:mm:ss z yyyy", Locale.ENGLISH
+            );
+            dEnrollDate = fallbackFormat.parse(EnrollDate);
+        }
 
         @Language("SQL")
         String sSQL = "SELECT IFNULL(AdministrationPeriod, 0) AdministrationPeriod, StartCycle1, StartCycle2, StartCycle3, StartCycle4, InsurancePeriod, IFNULL(GracePeriod, 0)GracePeriod\n" +
@@ -1334,6 +1350,10 @@ public class ClientAndroidInterface {
         return period.toString();
     }
 
+    public void setTempPhotoUri(Uri uri){
+        tempPhotoUri = uri;
+    }
+
     @JavascriptInterface
     @SuppressWarnings("unused")
     public void selectPicture() {
@@ -1355,7 +1375,7 @@ public class ClientAndroidInterface {
 
     @JavascriptInterface
     @SuppressWarnings("unused")
-    public double getPolicyValue(String enrollDate, int ProductId, int FamilyId, String startDate, boolean HasCycle, int PolicyId, String PolicyStage, int IsOffline) throws JSONException {
+    public double getPolicyValue(String enrollDate, int ProductId, int FamilyId, String startDate, boolean HasCycle, int PolicyId, String PolicyStage, String IsOffline) throws JSONException {
         Date ExpiryDate = null;
         String expiryDate = null;
         int PreviousPolicyId = 0;
@@ -1371,7 +1391,7 @@ public class ClientAndroidInterface {
             enrollDate = object.getString("EnrollDate");
             PolicyStage = object.getString("PolicyStage");
             expiryDate = object.getString("ExpiryDate");
-            IsOffline = Integer.parseInt(object.getString("isOffline"));
+            IsOffline = object.getString("isOffline");
         }
 
 
@@ -1680,6 +1700,7 @@ public class ClientAndroidInterface {
                 if (IsBulkCNUsed()) {
                     sqlHandler.assignCnToPolicy(rtPolicyId, controlNumber);
                 }
+                Log.e("familyId", String.valueOf(FamilyId));
                 InsertRecordedPolicies("new", String.valueOf(FamilyId), data.get("ddlProduct"), data.get("hfPolicyValue"), MaxPolicyId);
             } else {
                 int Online = 2;
@@ -1691,8 +1712,10 @@ public class ClientAndroidInterface {
             }
             inProgress = false;
         } catch (NumberFormatException e) {
+            Sentry.captureException(e);
             e.printStackTrace();
         } catch (UserException e) {
+            Sentry.captureException(e);
             e.printStackTrace();
             throw new Exception(e.getMessage());
         }
@@ -1720,7 +1743,7 @@ public class ClientAndroidInterface {
         boolean HasCycle = false;
         int PolicyId;
         String PolicyStage;
-        int IsOffline;
+        String IsOffline;
         String getCycle;
         String PolicyValue = null;
         Double NewPolicyValue = null;
@@ -1734,7 +1757,7 @@ public class ClientAndroidInterface {
                 PolicyId = ValueObject.getInt("PolicyId");
                 PolicyStage = ValueObject.getString("StartDate");
                 startDate = ValueObject.getString("PolicyStage");
-                IsOffline = ValueObject.getInt("isOffline");
+                IsOffline = ValueObject.getString("isOffline");
                 PolicyValue = ValueObject.getString("PolicyValue");
 
                 getCycle = getPolicyPeriod(ProductId, enrollDate);
@@ -1883,8 +1906,10 @@ public class ClientAndroidInterface {
             }
             inProgress = false;
         } catch (NumberFormatException e) {
+            Sentry.captureException(e);
             e.printStackTrace();
         } catch (UserException e) {
+            Sentry.captureException(e);
             e.printStackTrace();
             throw new Exception(e.getMessage());
         }
@@ -2538,10 +2563,14 @@ public class ClientAndroidInterface {
         return 1;//Update Success
     }
 
+    protected ProgressDialog createProgressDialog(String title, String message) {
+        return ProgressDialog.show(activity, title, message);
+    }
+
     @JavascriptInterface
     @SuppressWarnings("unused")
     public void uploadEnrolment() throws Exception {
-        final ProgressDialog finalPd = ProgressDialog.show(activity, activity.getResources().getString(R.string.Sync), activity.getResources().getString(R.string.SyncProcessing));
+        final ProgressDialog finalPd = createProgressDialog(activity.getResources().getString(R.string.Sync), activity.getResources().getString(R.string.SyncProcessing));
         activity.runOnUiThread(() -> {
             activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         });
@@ -2790,7 +2819,7 @@ public class ClientAndroidInterface {
         return result;
     }
 
-    private int Enrol(int CallerId) throws UserException, JSONException, IOException {
+    protected int Enrol(int CallerId) throws UserException, JSONException, IOException {
         ArrayList<String> verifiedId = new ArrayList<>();
         myList.clear();
         int rtEnrolledId = 0;
@@ -3121,7 +3150,7 @@ public class ClientAndroidInterface {
         return EnrolResult;
     }
 
-    private int uploadEnrols(
+    protected int uploadEnrols(
             @NonNull JSONArray familyArray,
             @NonNull JSONArray insureesArray,
             @NonNull JSONArray policiesArray,
@@ -3145,6 +3174,7 @@ public class ClientAndroidInterface {
             List<Family.Policy> policies = familyPolicyFromJSONObject(family.getUuid(), policiesArray);
             new UpdateFamily().execute(family, policies);
         } catch (Exception e) {
+            Sentry.captureException(e);
             e.printStackTrace();
             enrolMessages.add(Objects.requireNonNullElse(e.getMessage(), "Something went wrong updating the family"));
             return -400;
@@ -3570,9 +3600,9 @@ public class ClientAndroidInterface {
         }
     }
 
-    private void DeleteUploadedData(final int FamilyId, ArrayList<String> FamilyIDs, int CallerId) {
-        if (FamilyIDs.size() == 0) {
-            FamilyIDs = new ArrayList<>() {{
+    public void DeleteUploadedData(final int FamilyId, ArrayList<String> FamilyIDs, int CallerId) {
+        if (FamilyIDs.isEmpty()) {
+            FamilyIDs = new ArrayList<String>() {{
                 add(String.valueOf(FamilyId));
             }};
         }
@@ -3663,6 +3693,7 @@ public class ClientAndroidInterface {
                     MoveFile(xmlFiles[i], 1);
                     MoveFile(jsonFiles[i], 1);
                 } catch (Exception e) {
+                    Sentry.captureException(e);
                     e.printStackTrace();
                     if (
                             e instanceof HttpException &&
@@ -3901,6 +3932,7 @@ public class ClientAndroidInterface {
                     ((MainActivity) activity).ShowEnrolmentOfficerDialog();
                 });
             } catch (JSONException e) {
+                Sentry.captureException(e);
                 Log.e("MASTERDATA", "Error while parsing master data", e);
             } catch (UserException e) {
                 Log.e("MASTERDATA", "Error while downloading master data", e);
@@ -3923,6 +3955,7 @@ public class ClientAndroidInterface {
         try {
             processOldFormat(new JSONArray(data));
         } catch (JSONException e) {
+            Sentry.captureException(e);
             try {
                 processNewFormat(new JSONObject(data));
             } catch (JSONException e2) {
@@ -3937,10 +3970,15 @@ public class ClientAndroidInterface {
         try {
             importMasterData(new FetchMasterData().execute());
         } catch (Exception e) {
+            Sentry.captureException(e);
             if (e instanceof UserNotAuthenticatedException) {
                 throw (UserNotAuthenticatedException) e;
             }
             throw new UserException("Error while downloading the master data", e);
+        } catch (OutOfMemoryError e){
+            Sentry.captureException(e);
+            activity.runOnUiThread(() ->
+                    AndroidUtils.showToast(activity,e.getMessage()));
         }
     }
 
@@ -4054,6 +4092,7 @@ public class ClientAndroidInterface {
             insertPhoneDefaults(PhoneDefaults);
             insertGenders(Genders);
         } catch (JSONException e) {
+            Sentry.captureException(e);
             e.printStackTrace();
             throw new UserException(activity.getResources().getString(R.string.DownloadMasterDataFailed), e);
         }
@@ -4561,6 +4600,7 @@ public class ClientAndroidInterface {
                     ExpiryDate = PolicyObject2.getString("ExpiryDate");
                     EnrollDate = PolicyObject2.getString("EnrollDate");
                 } catch (JSONException e) {
+                    Sentry.captureException(e);
                     e.printStackTrace();
                 }
                 values.put("InsureePolicyId", MaxInsureePolicyId);
@@ -4713,6 +4753,10 @@ public class ClientAndroidInterface {
         }
     }
 
+    protected Family newFetchFamilyExecute(String insuranceNumber) throws Exception {
+        return new FetchFamily().execute(insuranceNumber);
+    }
+
     @JavascriptInterface
     @SuppressWarnings("unused")
     public int ModifyFamily(final String insuranceNumber) {
@@ -4724,7 +4768,7 @@ public class ClientAndroidInterface {
             return 0;
         } else {
             try {
-                Family family = new FetchFamily().execute(insuranceNumber);
+                Family family = newFetchFamilyExecute(insuranceNumber);
                 InsertFamilyDataFromOnline(family);
                 InsertInsureeDataFromOnline(family.getMembers());
                 InsertPolicyDataFromOnline(family.getPolicies());
@@ -4752,6 +4796,7 @@ public class ClientAndroidInterface {
 
             if (family.getSms() != null) {
                 try {
+                    System.out.println("Family SMS: " + family.getSms().isApproval() + ", " + family.getSms().getLanguage());
                     addOrUpdateFamilySms(family.getId(),
                             family.getSms().isApproval(),
                             family.getSms().getLanguage()
@@ -4759,6 +4804,7 @@ public class ClientAndroidInterface {
                 } catch (Exception e) {
                     e.printStackTrace();
                     Log.w("ModifyFamily", "No familySMS data in family payload");
+                    System.out.println("problem in try block, handling in catch block");
                 }
             }
         }
@@ -4774,7 +4820,7 @@ public class ClientAndroidInterface {
         jsonObject.put("insureeUUID", family.getHead().getUuid());
         jsonObject.put("locationId", family.getLocationId());
         jsonObject.put("poverty", family.isPoor());
-        jsonObject.put("isOffline", family.isOffline());
+        jsonObject.put("isOffline", family.isOffline() ? 1 : 0);
         jsonObject.put("familyType", family.getType());
         jsonObject.put("familyAddress", family.getAddress());
         jsonObject.put("ethnicity", family.getEthnicity());
@@ -4853,11 +4899,11 @@ public class ClientAndroidInterface {
         policyObject.put("FamilyId",policy.getFamilyId());
         policyObject.put("EnrollDate",policy.getEnrollDate());
         policyObject.put("StartDate",
-            policy.getStartDate() != null ? DateUtils.toDateString(policy.getStartDate()) : JSONObject.NULL);
+                policy.getStartDate() != null ? DateUtils.toDateString(policy.getStartDate()) : JSONObject.NULL);
         policyObject.put("EffectiveDate",
-            policy.getEffectiveDate() != null ? DateUtils.toDateString(policy.getEffectiveDate()) : JSONObject.NULL);
+                policy.getEffectiveDate() != null ? DateUtils.toDateString(policy.getEffectiveDate()) : JSONObject.NULL);
         policyObject.put("ExpiryDate",
-            policy.getExpiryDate() != null ? DateUtils.toDateString(policy.getExpiryDate()) : JSONObject.NULL);
+                policy.getExpiryDate() != null ? DateUtils.toDateString(policy.getExpiryDate()) : JSONObject.NULL);
         policyObject.put("PolicyStatus",policy.getStatus());
         policyObject.put("PolicyValue",policy.getValue());
         policyObject.put("ProdId",policy.getProductId());
@@ -4950,7 +4996,7 @@ public class ClientAndroidInterface {
         return TotalPremiums;
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
+    //@RequiresApi(api = Build.VERSION_CODES.N)
     @JavascriptInterface
     @SuppressWarnings("unused")
     public String getSumPremium() {
@@ -5024,7 +5070,7 @@ public class ClientAndroidInterface {
         return status;
     }
 
-    private int getFamilyStatus(int FamilyId) throws JSONException {
+    protected int getFamilyStatus(int FamilyId) throws JSONException {
         if (FamilyId < 0) return 0;
         @Language("SQL")
         String Query = "SELECT isOffline FROM tblFamilies WHERE FamilyId = " + FamilyId;
@@ -5037,7 +5083,7 @@ public class ClientAndroidInterface {
         else return 0;
     }
 
-    private int getInsureeStatus(int InsureeId) throws JSONException {//herman
+    protected int getInsureeStatus(int InsureeId) throws JSONException {//herman
         if (InsureeId == 0) return 1;
         @Language("SQL")
         String Query = "SELECT isOffline FROM tblInsuree WHERE InsureeId = " + InsureeId;
@@ -5149,32 +5195,44 @@ public class ClientAndroidInterface {
         alertDialogBuilder.setView(promptsView);
         alertDialogBuilder
                 .setCancelable(false)
-                .setPositiveButton(
-                        R.string.Ok,
-                        (dialog, id) -> {
-                            if (!username.getText().toString().equals("") || !password.getText().toString().equals("")) {
-                                boolean isUserLogged = LoginToken(username.getText().toString(), password.getText().toString());
-                                if (isUserLogged) {
-                                    if (onSuccess != null) {
-                                        onSuccess.run();
-                                    }
-                                } else {
-                                    AndroidUtils.showConfirmDialog(
-                                            activity, R.string.LoginFail,
-                                            (d, w) -> {
-                                                if (onError != null) {
-                                                    onError.run();
-                                                }
-                                            }
-                                    );
-                                }
-                            } else {
-                                Toast.makeText(activity, "Please enter user name and password", Toast.LENGTH_LONG).show();
-                            }
-                        });
+                .setPositiveButton(R.string.Ok,null)
+                .setNegativeButton(R.string.Close, (d, which) -> {
+                    activity.finish();
+                });
 
         // create alert dialog
         AlertDialog alertDialog = alertDialogBuilder.create();
+        alertDialog.setOnShowListener(d -> {
+            Button okButton = alertDialog.getButton(AlertDialog.BUTTON_POSITIVE);
+            okButton.setOnClickListener(v -> {
+                String user = username.getText().toString().trim();
+                String pass = password.getText().toString().trim();
+                if (user.isEmpty() || pass.isEmpty()) {
+                    Toast.makeText(activity,
+                            "Please enter user name and password",
+                            Toast.LENGTH_LONG).show();
+                    return;
+                }
+
+                boolean isUserLogged = LoginToken(user, pass);
+                if (isUserLogged) {
+                    alertDialog.dismiss();
+                    if (onSuccess != null) {
+                        onSuccess.run();
+                    }
+                } else {
+                    AndroidUtils.showConfirmDialog(
+                            activity,
+                            R.string.LoginFail,
+                            (d2, w) -> {
+                                if (onError != null) {
+                                    onError.run();
+                                }
+                            }
+                    );
+                }
+            });
+        });
 
         // show it
         alertDialog.show();
@@ -5255,7 +5313,7 @@ public class ClientAndroidInterface {
         return getMaxIdFromTable("PolicyId", "tblPolicy");
     }
 
-    private int getNextAvailableInsureeId() {
+    protected int getNextAvailableInsureeId() {
         return getMaxIdFromTable("InsureeId", "tblInsuree");
     }
 

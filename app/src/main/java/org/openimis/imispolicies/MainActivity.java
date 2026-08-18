@@ -27,7 +27,6 @@ package org.openimis.imispolicies;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.app.ActionBar;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
@@ -37,7 +36,6 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -45,8 +43,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
-import android.webkit.WebChromeClient;
-import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -62,10 +58,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
-import com.google.android.material.snackbar.Snackbar;
-import com.google.zxing.client.android.Intents;
 
 import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
@@ -75,7 +68,6 @@ import org.openimis.imispolicies.network.exception.UserNotAuthenticatedException
 import org.openimis.imispolicies.tools.LanguageManager;
 import org.openimis.imispolicies.tools.Log;
 import org.openimis.imispolicies.util.AndroidUtils;
-import org.openimis.imispolicies.util.StringUtils;
 import org.openimis.imispolicies.util.UriUtils;
 
 import java.io.BufferedReader;
@@ -87,6 +79,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.lang.ref.WeakReference;
+
+import io.sentry.Sentry;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -117,9 +111,11 @@ public class MainActivity extends AppCompatActivity
     private String selectedLanguage;
     public String ImagePath;
     public String InsureeNumber;
-    TextView Login;
+    TextView Login, tvTotalFamily, tvTotalInsuree, tvTotalPolicies, tvTotalPremium, tvTotalFamilyOnline, tvTotalInsureeOnline,
+            tvSumPremium;
     TextView OfficerName;
     ClientAndroidInterface ca;
+    InsureeActivity insureeActivity;
     String aBuffer = "";
     String calledFrom = "java";
     public File f;
@@ -132,25 +128,7 @@ public class MainActivity extends AppCompatActivity
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == ClientAndroidInterface.RESULT_LOAD_IMG && resultCode == RESULT_OK) {
-            Uri selectedImage;
-            if (data == null || data.getData() == null ||
-                    (data.getData() != null
-                            && data.getAction() != null
-                            && data.getAction().equals(MediaStore.ACTION_IMAGE_CAPTURE))) {
-                Log.d("Main", "RESULT_LOAD_IMG got a camera result, in the predefined location");
-                selectedImage = ClientAndroidInterface.tempPhotoUri;
-            } else {
-                // File selection
-                selectedImage = data.getData();
-            }
-            wv.evaluateJavascript(String.format("selectImageCallback(\"%s\");", selectedImage), null);
-        } else if (requestCode == ClientAndroidInterface.RESULT_SCAN && resultCode == RESULT_OK && data != null) {
-            String insureeNumber = data.getStringExtra(Intents.Scan.RESULT);
-            if (!StringUtils.isEmpty(insureeNumber)) {
-                wv.evaluateJavascript(String.format("scanQrCallback(\"%s\");", insureeNumber), null);
-            }
-        } else if (requestCode == REQUEST_PICK_MD_FILE) {
+         if (requestCode == REQUEST_PICK_MD_FILE) {
             if (resultCode == RESULT_OK && data != null) {
                 Uri uri = data.getData();
                 if (uri != null) {
@@ -161,6 +139,7 @@ public class MainActivity extends AppCompatActivity
                         if (f.exists() || f.createNewFile())
                             new FileOutputStream(f).write(bytes);
                     } catch (IOException e) {
+                        Sentry.captureException(e);
                         e.printStackTrace();
                     }
                     ShowDialogTex2();
@@ -230,100 +209,133 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         global = (Global) getApplicationContext();
         super.onCreate(savedInstanceState);
-        instance = this;
-        setContentView(R.layout.activity_main);
-        SQLHandler sqlHandler = new SQLHandler(this);
-        sqlHandler.isPrivate = true;
-        //Set the Image folder path
-        global.setImageFolder(global.getSubdirectory("Images"));
-        //Check if database exists
-        File database = global.getDatabasePath(SQLHandler.DBNAME);
-        if (!database.exists()) {
-            sqlHandler.getReadableDatabase();
-            if (copyDatabase(this)) {
-                Toast.makeText(this, "Copy database success", Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(this, "Copy database failed", Toast.LENGTH_SHORT).show();
-                return;
-            }
-        } else
-            sqlHandler.getReadableDatabase();
+        new LanguageManager(this).restoreLanguage(false);
+        try {
+            instance = this;
+            setContentView(R.layout.activity_main);
+            SQLHandler sqlHandler = new SQLHandler(this);
+            sqlHandler.isPrivate = true;
+            //Set the Image folder path
+            global.setImageFolder(global.getSubdirectory("Images"));
+            //Check if database exists
+            File database = global.getDatabasePath(SQLHandler.DBNAME);
+            if (!database.exists()) {
+                sqlHandler.getReadableDatabase();
+                if (copyDatabase(this)) {
+                    Toast.makeText(this, "Copy database success", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, "Copy database failed", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+            } else
+                sqlHandler.getReadableDatabase();
 
-        //Create image folder
-        createImageFolder();
+            //Create image folder
+            createImageFolder();
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+            Toolbar toolbar = findViewById(R.id.toolbar);
+            setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(view -> Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show());
+            DrawerLayout drawer = findViewById(R.id.drawer_layout);
+            ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                    this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+            //noinspection deprecation
+            drawer.setDrawerListener(toggle);
+            toggle.syncState();
 
-        DrawerLayout drawer = findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        //noinspection deprecation
-        drawer.setDrawerListener(toggle);
-        toggle.syncState();
+            navigationView = findViewById(R.id.nav_view);
+            tvTotalFamily = findViewById(R.id.TotalFamily);
+            tvTotalFamilyOnline = findViewById(R.id.TotalFamilyOnline);
+            tvTotalInsuree = findViewById(R.id.TotalInsuree);
+            tvTotalPremium = findViewById(R.id.TotalPremium);
+            tvTotalInsureeOnline = findViewById(R.id.TotalInsureeOnline);
+            tvTotalPolicies = findViewById(R.id.TotalPolicies);
+            tvSumPremium = findViewById(R.id.PremiumAmount);
 
-        navigationView = findViewById(R.id.nav_view);
+            navigationView.setNavigationItemSelectedListener(this);
+//        wv = findViewById(R.id.webview);
+//        WebSettings settings = wv.getSettings();
+//        wv.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
+//        settings.setJavaScriptEnabled(true);
+//        //noinspection deprecation
+//        settings.setRenderPriority(WebSettings.RenderPriority.HIGH);
+//        settings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
+//        settings.setDomStorageEnabled(true);
+//        settings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.SINGLE_COLUMN);
+//        settings.setUseWideViewPort(true);
+//        settings.setSaveFormData(true);
+//        settings.setAllowFileAccess(true);
+//        //noinspection deprecation
+//        settings.setEnableSmoothTransition(true);
+//        settings.setLoadWithOverviewMode(true);
+//        wv.addJavascriptInterface(new ClientAndroidInterface(this), "Android");
 
-        navigationView.setNavigationItemSelectedListener(this);
-        wv = findViewById(R.id.webview);
-        WebSettings settings = wv.getSettings();
-        wv.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
-        settings.setJavaScriptEnabled(true);
-        //noinspection deprecation
-        settings.setRenderPriority(WebSettings.RenderPriority.HIGH);
-        settings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
-        settings.setDomStorageEnabled(true);
-        settings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.SINGLE_COLUMN);
-        settings.setUseWideViewPort(true);
-        settings.setSaveFormData(true);
-        settings.setAllowFileAccess(true);
-        //noinspection deprecation
-        settings.setEnableSmoothTransition(true);
-        settings.setLoadWithOverviewMode(true);
-        wv.addJavascriptInterface(new ClientAndroidInterface(this), "Android");
+            //Register for context acquire_menu
+//        registerForContextMenu(wv);
 
-        //Register for context acquire_menu
-        registerForContextMenu(wv);
+//        wv.loadUrl("file:///android_asset/pages/Home.html");
+//        wv.setWebViewClient(new MyWebViewClient(MainActivity.this));
 
-        wv.loadUrl("file:///android_asset/pages/Home.html");
-        wv.setWebViewClient(new MyWebViewClient(MainActivity.this));
+//        wv.setWebChromeClient(new WebChromeClient() {
+//            @Override
+//            public void onReceivedTitle(WebView view, String title) {
+//                super.onReceivedTitle(view, title);
+//                //noinspection ConstantConditions
+//                getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_TITLE);
+//                getSupportActionBar().setSubtitle(title);
+//            }
+//        });
 
-        wv.setWebChromeClient(new WebChromeClient() {
-            @Override
-            public void onReceivedTitle(WebView view, String title) {
-                super.onReceivedTitle(view, title);
-                //noinspection ConstantConditions
-                getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_TITLE);
-                getSupportActionBar().setSubtitle(title);
-            }
-        });
-        NavigationView navigationView = findViewById(R.id.nav_view);
-        View headerview = navigationView.getHeaderView(0);
-        Login = headerview.findViewById(R.id.tvLogin);
-        OfficerName = headerview.findViewById(R.id.tvOfficerName);
+            ca = new ClientAndroidInterface(this);
 
-        Login.setOnClickListener(v -> {
-            wv.loadUrl("file:///android_asset/pages/Login.html?s=3");
-            drawer.closeDrawer(GravityCompat.START);
+            LoadTotal();
+
+            NavigationView navigationView = findViewById(R.id.nav_view);
+            View headerview = navigationView.getHeaderView(0);
+            navigationView.setItemIconTintList(null);
+            Login = headerview.findViewById(R.id.tvLogin);
+            OfficerName = headerview.findViewById(R.id.tvOfficerName);
             SetLoggedIn();
-        });
-        ca = new ClientAndroidInterface(this);
-        if (ca.isMasterDataAvailable() > 0) {
-            loadLanguages();
+            OfficerName.setText(global.getOfficerName());
+
+            Login.setOnClickListener(v -> {
+                //wv.loadUrl("file:///android_asset/pages/Login.html?s=3");
+                Intent intent = new Intent(this, LoginActivity.class);
+                intent.putExtra("Page", 3);
+                startActivity(intent);
+                drawer.closeDrawer(GravityCompat.START);
+                SetLoggedIn();
+            });
+            if (ca.isMasterDataAvailable() > 0) {
+                loadLanguages();
+            }
+            ensureOfficerNameLoaded();
+            navigationView.setCheckedItem(R.id.nav_home);
+            if (checkRequirements()) {
+                onAllRequirementsMet();
+            }
+        } catch (Exception e) {
+            Sentry.captureException(e);
         }
+    }
 
+    private void LoadTotal(){
+        int Families = ca.getTotalFamily();
+        int Insuree = ca.getTotalInsuree();
+        int Policy = ca.getTotalPolicy();
+        int Premium = ca.getTotalPremium();
+        String SumPremium = ca.getSumPremium();
 
-        navigationView.setCheckedItem(R.id.nav_home);
+        int FamiliesOnline = ca.getTotalFamilyOnline();
+        int InsureeOnline = ca.getTotalInsureeOnline();
 
-        if (checkRequirements()) {
-            onAllRequirementsMet();
-        }
-
-        setVisibilityOfPaymentMenu();
+        tvTotalFamily.setText(String.valueOf(Families));
+        tvTotalInsuree.setText(String.valueOf(Insuree));
+        tvTotalPolicies.setText(String.valueOf(Policy));
+        tvTotalPremium.setText(String.valueOf(Premium));
+        tvSumPremium.setText(SumPremium);
+        tvTotalFamilyOnline.setText(String.valueOf(FamiliesOnline));
+        tvTotalInsureeOnline.setText(String.valueOf(InsureeOnline));
     }
 
     private void setVisibilityOfPaymentMenu() {
@@ -336,7 +348,23 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
+        ensureOfficerNameLoaded();
         OfficerName.setText(global.getOfficerName());
+        LoadTotal();
+        SetLoggedIn();
+    }
+
+    private void ensureOfficerNameLoaded() {
+        String officerCode = global.getOfficerCode();
+        String officerName = global.getOfficerName();
+        if (ca == null || TextUtils.isEmpty(officerCode) || !TextUtils.isEmpty(officerName)) {
+            return;
+        }
+        try {
+            ca.isOfficerCodeValid(officerCode);
+        } catch (JSONException e) {
+            Log.w(LOG_TAG, "Failed to resolve officer name from officer code", e);
+        }
     }
 
     public static void SetLoggedIn() {
@@ -345,6 +373,9 @@ public class MainActivity extends AppCompatActivity
             return;
         }
         activity.runOnUiThread(() -> {
+            if (activity.Login == null) {
+                return;
+            }
             if (global.isLoggedIn()) {
                 activity.Login.setText(R.string.Logout);
             } else {
@@ -508,6 +539,7 @@ public class MainActivity extends AppCompatActivity
                                     //ShowDialogTex();
                                 }
                             } catch (JSONException e) {
+                                Sentry.captureException(e);
                                 e.printStackTrace();
                             }
                         })
@@ -567,6 +599,7 @@ public class MainActivity extends AppCompatActivity
                                     ConfirmDialogPage((f.getName()));
                                 }
                             } catch (Exception e) {
+                                Sentry.captureException(e);
                                 e.getMessage();
                             }
                         })
@@ -576,7 +609,7 @@ public class MainActivity extends AppCompatActivity
                             finish();
                         });
 
-         alertDialogBuilder.show();
+        alertDialogBuilder.show();
     }
 
     public String getMasterDataText2(String fileName, String password) {
@@ -691,41 +724,61 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_home) {
-            wv.loadUrl("file:///android_asset/pages/Home.html");
+            //wv.loadUrl("file:///android_asset/pages/Home.html");
         } else if (id == R.id.nav_acquire) {
             Intent intent = new Intent(this, Acquire.class);
             startActivity(intent);
         } else if (id == R.id.nav_enrolment) {
-            wv.loadUrl("file:///android_asset/pages/Enrollment.html");
+            //wv.loadUrl("file:///android_asset/pages/Enrollment.html");
+            Intent intent = new Intent(this, Enrolment.class);
+            startActivity(intent);
         } else if (id == R.id.nav_modify_family) {
             global = (Global) getApplicationContext();
             if (global.isLoggedIn()) {
-                wv.loadUrl("file:///android_asset/pages/Search.html");
+                //wv.loadUrl("file:///android_asset/pages/Search.html");
+                Intent intent = new Intent(this, SearchActivity.class);
+                startActivity(intent);
             } else {
-                wv.loadUrl("file:///android_asset/pages/Login.html?s=1");
+                //wv.loadUrl("file:///android_asset/pages/Login.html?s=1");
+                Intent i = new Intent(this, LoginActivity.class);
+                i.putExtra("Page", 1);
+                startActivity(i);
             }
 
         } else if (id == R.id.nav_renewal) {
-            Intent i = new Intent(this, RenewList.class);
-            startActivity(i);
-
+            String officerCode = global.getOfficerCode();
+            if (officerCode == null) {
+                ShowEnrolmentOfficerDialog();
+            } else {
+                Intent i = new Intent(this, RenewList.class);
+                startActivity(i);
+            }
         } else if (id == R.id.nav_reports) {
             Global global = (Global) getApplicationContext();
             if (global.isLoggedIn()) {
                 Intent i = new Intent(this, Reports.class);
                 startActivity(i);
             } else {
-                wv.loadUrl("file:///android_asset/pages/Login.html?s=4");
+                //wv.loadUrl("file:///android_asset/pages/Login.html?s=4");
+                Intent i = new Intent(this, LoginActivity.class);
+                i.putExtra("Page", 4);
+                startActivity(i);
             }
         } else if (id == R.id.nav_feedback) {
             Intent intent = new Intent(this, FeedbackList.class);
             startActivity(intent);
         } else if (id == R.id.nav_sync) {
-            wv.loadUrl("file:///android_asset/pages/Sync.html");
+            //wv.loadUrl("file:///android_asset/pages/Sync.html");
+            Intent intent = new Intent(this, SyncActivity.class);
+            startActivity(intent);
         } else if (id == R.id.nav_about) {
-            wv.loadUrl("file:///android_asset/pages/About.html");
+            //wv.loadUrl("file:///android_asset/pages/About.html");
+            Intent intent = new Intent(this, AboutActivity.class);
+            startActivity(intent);
         } else if (id == R.id.nav_settings) {
-            wv.loadUrl("file:///android_asset/pages/Settings.html");
+            //wv.loadUrl("file:///android_asset/pages/Settings.html");
+            Intent intent = new Intent(this, SettingsActivity.class);
+            startActivity(intent);
         } else if (id == R.id.nav_quit) {
             new AlertDialog.Builder(this)
                     .setMessage(getResources().getString(R.string.QuitAppQuestion))
@@ -742,7 +795,10 @@ public class MainActivity extends AppCompatActivity
                 Intent intent = new Intent(this, Enquire.class);
                 startActivity(intent);
             } else {
-                wv.loadUrl("file:///android_asset/pages/Login.html?s=5");
+                //wv.loadUrl("file:///android_asset/pages/Login.html?s=5");
+                Intent i = new Intent(this, LoginActivity.class);
+                i.putExtra("Page", 5);
+                startActivity(i);
             }
         } else if (id == R.id.nav_payment) {
             ClientAndroidInterface ca = new ClientAndroidInterface(this);
@@ -759,14 +815,15 @@ public class MainActivity extends AppCompatActivity
         if (event.getAction() == KeyEvent.ACTION_DOWN) {
             switch (keyCode) {
                 case KeyEvent.KEYCODE_BACK:
-                    if (wv.canGoBack()) {
-                        if (global.getCurrentUrl() != null)
-                            wv.loadUrl("file:///android_asset/pages/" + global.getCurrentUrl());
-                        else
-                            wv.goBack();
-                    } else {
-                        finish();
-                    }
+//                    if (wv.canGoBack()) {
+//                        if (global.getCurrentUrl() != null)
+//                            wv.loadUrl("file:///android_asset/pages/" + global.getCurrentUrl());
+//                        else
+//                            wv.goBack();
+//                    } else {
+//                        finish();
+//                    }
+                    finish();
                     return true;
             }
         }
@@ -784,10 +841,12 @@ public class MainActivity extends AppCompatActivity
         @Override
         protected void onPreExecute() {
             Context context = activity.get();
-            if (context == null) {
-                return;
-            }
-            pd = new WeakReference<>(AndroidUtils.showProgressDialog(context, R.string.Sync, R.string.DownloadingMasterData));
+            if (context == null) return;
+            ((Activity) context).runOnUiThread(() -> {
+                pd = new WeakReference<>(
+                        AndroidUtils.showProgressDialog(context, R.string.Sync, R.string.DownloadingMasterData)
+                );
+            });
         }
 
         @Override
@@ -818,7 +877,7 @@ public class MainActivity extends AppCompatActivity
                 return;
             }
             if (exception instanceof UserNotAuthenticatedException) {
-                new ClientAndroidInterface(context).forceLoginDialogBox(() -> restart(context));
+                new ClientAndroidInterface(context).forceLoginDialogBox(() -> startDownloading());
                 return;
             }
             restart(context);
@@ -828,6 +887,10 @@ public class MainActivity extends AppCompatActivity
             Intent refresh = new Intent(activity, MainActivity.class);
             activity.startActivity(refresh);
             activity.finish();
+        }
+
+        private void startDownloading(){
+            new MasterDataAsync(activity.get()).execute();
         }
     }
 

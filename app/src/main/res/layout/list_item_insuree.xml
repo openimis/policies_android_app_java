@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_marginBottom="8dp"
+    app:cardCornerRadius="3dp"
+    app:cardElevation="4dp"
+    app:strokeColor="@color/silver"
+    app:strokeWidth="1dp"
+    android:id="@+id/family_insurees_card">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <!-- Ligne 1: CHFID -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="8dp"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/CHFID"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/colorPrimary"
+            android:text="insuree CHFID"
+            android:layout_alignParentStart="true"
+            android:layout_marginBottom="5dp"/>
+
+        <TextView
+            android:id="@+id/InsureeName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/colorPrimaryDark"
+            android:text="Insuree name"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="5dp"/>
+
+        <TextView
+            android:id="@+id/item_dob"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/grey"
+            android:text="date of birthday"/>
+    </LinearLayout>
+
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>
