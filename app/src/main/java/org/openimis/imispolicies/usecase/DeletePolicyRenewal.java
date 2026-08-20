@@ -3,6 +3,7 @@ package org.openimis.imispolicies.usecase;
 import androidx.annotation.NonNull;
 import androidx.annotation.WorkerThread;
 
+import org.openimis.imispolicies.Global;
 import org.openimis.imispolicies.ToRestApi;
 import org.openimis.imispolicies.domain.entity.PolicyRenewal;
 import org.openimis.imispolicies.network.exception.HttpException;
@@ -19,28 +20,32 @@ public class DeletePolicyRenewal {
     private final DeletePolicyRenewalGraphQLRequest deletePolicyRenewalGraphQLRequest;
     @NonNull
     private final CheckMutation checkMutation;
+    private final Global global;
 
     public DeletePolicyRenewal() {
         this(
                 new FetchPolicyRenewals(),
                 new DeletePolicyRenewalGraphQLRequest(),
-                new CheckMutation()
+                new CheckMutation(),
+                new Global()
         );
     }
 
     public DeletePolicyRenewal(
             @NonNull FetchPolicyRenewals fetchPolicyRenewals,
             @NonNull DeletePolicyRenewalGraphQLRequest deletePolicyRenewalGraphQLRequest,
-            @NonNull CheckMutation checkMutation
+            @NonNull CheckMutation checkMutation,
+            @NonNull Global global
     ) {
         this.fetchPolicyRenewals = fetchPolicyRenewals;
         this.deletePolicyRenewalGraphQLRequest = deletePolicyRenewalGraphQLRequest;
         this.checkMutation = checkMutation;
+        this.global = global;
     }
 
     @WorkerThread
     public int execute(int id) throws Exception {
-        List<PolicyRenewal> renewals = fetchPolicyRenewals.execute();
+        List<PolicyRenewal> renewals = fetchPolicyRenewals.execute(global.getOfficerCode());
         for (PolicyRenewal renewal : renewals) {
             if (renewal.getId() == id) {
                 return execute(renewal.getUuid());

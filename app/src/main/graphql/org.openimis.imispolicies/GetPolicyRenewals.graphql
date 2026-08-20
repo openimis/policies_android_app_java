@@ -1,0 +1,32 @@
+query GetPolicyRenewals($officerCode: String) {
+    policies(stage: "R", officer_Code: $officerCode,  orderBy: ["-enrollDate"]){
+        edges {
+            node {
+                id
+                uuid
+                startDate
+                product {
+                    id
+                    code
+                    name
+                }
+                officer {
+                    id
+                    code
+                }
+                family {
+                    headInsuree {
+                        id
+                        chfId
+                        lastName
+                        otherNames
+                        phone
+                        currentVillage {
+                            name
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

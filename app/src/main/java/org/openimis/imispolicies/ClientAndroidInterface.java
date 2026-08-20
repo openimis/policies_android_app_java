@@ -2281,8 +2281,8 @@ public class ClientAndroidInterface {
     public String OfflineRenewals(String OfficerCode) {
         @Language("SQL")
         String Query = "SELECT RenewalId, PolicyId, OfficerId, OfficerCode, CHFID, LastName, OtherNames, ProductCode, ProductName, VillageName, RenewalPromptDate, IMEI, Phone,LocationId,PolicyValue, EnrollDate, RenewalUUID " +
-                " FROM tblRenewals WHERE LOWER(OfficerCode)=? AND isDone = ? ";
-        String[] arg = {OfficerCode.toLowerCase(), "N"};
+                " FROM tblRenewals WHERE isDone = ? ";
+        String[] arg = {"N"};
         JSONArray Renews = sqlHandler.getResult(Query, arg);
         return Renews.toString();
     }

@@ -57,16 +57,20 @@ import org.openimis.imispolicies.domain.entity.PolicyRenewal;
 import org.openimis.imispolicies.network.exception.HttpException;
 import org.openimis.imispolicies.tools.Log;
 import org.openimis.imispolicies.usecase.FetchPolicyRenewals;
+import org.openimis.imispolicies.util.DateUtils;
 import org.openimis.imispolicies.util.FileUtils;
 import org.openimis.imispolicies.util.UriUtils;
 
 import java.io.File;
 import java.net.HttpURLConnection;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class RenewList extends AppCompatActivity {
@@ -312,13 +316,16 @@ public class RenewList extends AppCompatActivity {
             for (int i = 0; i < jsonArray.length(); i++) {
 
                 object = jsonArray.getJSONObject(i);
+                SimpleDateFormat inputFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy", Locale.ENGLISH);
+                SimpleDateFormat outputFormat = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH);
+                Date promptDate = inputFormat.parse(object.getString("RenewalPromptDate"));
                 HashMap<String, String> renewal = new HashMap<>();
                 renewal.put("RenewalId", object.getString("RenewalId"));
                 renewal.put("CHFID", object.getString("CHFID"));
                 renewal.put("FullName", object.getString("LastName") + " " + object.getString("OtherNames"));
                 renewal.put("Product", object.getString("ProductCode") + " : " + object.getString("ProductName"));
                 renewal.put("VillageName", object.getString("VillageName"));
-                renewal.put("RenewalPromptDate", object.getString("RenewalPromptDate"));
+                renewal.put("RenewalPromptDate", format.format(promptDate));
                 renewal.put("PolicyId", object.getString("PolicyId"));
                 renewal.put("ProductCode", object.getString("ProductCode"));
                 renewal.put("LocationId", object.getString("LocationId"));
@@ -337,6 +344,8 @@ public class RenewList extends AppCompatActivity {
 
         } catch (JSONException e) {
             e.printStackTrace();
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
         }
 
     }
@@ -347,7 +356,7 @@ public class RenewList extends AppCompatActivity {
                 new Thread(() -> {
 
                     try {
-                        List<PolicyRenewal> renewals = new FetchPolicyRenewals().execute();
+                        List<PolicyRenewal> renewals = new FetchPolicyRenewals().execute(OfficerCode);
                         ca.InsertRenewalsFromApi(toJson(renewals));
                         runOnUiThread(this::fillRenewals);
                     } catch (Exception e) {
