@@ -4255,7 +4255,7 @@ public class ClientAndroidInterface {
     @SuppressWarnings("unused")
     public int getTotalFamily() {
         @Language("SQL")
-        String FamilyQuery = "SELECT count(1) Families  FROM  tblfamilies WHERE isoffline = 1 OR isoffline = 0"; // WHERE isoffline = 1 OR isoffline = 0
+        String FamilyQuery = "SELECT count(1) Families  FROM  tblfamilies WHERE isOffline = 1 or isOffline = 0 or isOffline = \"false\" or isOffline = \"true\""; // WHERE isoffline = 1 OR isoffline = 0
         JSONArray Families = sqlHandler.getResult(FamilyQuery, null);
         JSONObject object = null;
         int TotalFamilies = 0;
