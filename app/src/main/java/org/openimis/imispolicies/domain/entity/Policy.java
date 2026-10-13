@@ -77,6 +77,37 @@ public class Policy implements Parcelable {
             @Nullable Integer totalConsultationsLeft,
             @Nullable Integer totalDeliveriesLeft,
             @Nullable Integer totalSurgeriesLeft,
+            @Nullable Integer totalVisitsLeft
+    ) {
+        this(code, name, value, expiryDate, status, deductibleType, deductibleIp,
+                deductibleOp, ceilingIp, ceilingOp, antenatalAmountLeft,
+                consultationAmountLeft, deliveryAmountLeft, hospitalizationAmountLeft,
+                surgeryAmountLeft, totalAdmissionsLeft, totalAntenatalLeft,
+                totalConsultationsLeft, totalDeliveriesLeft, totalSurgeriesLeft,
+                totalVisitsLeft, null);
+    }
+
+    public Policy(
+            @NonNull String code,
+            @NonNull String name,
+            @Nullable Double value,
+            @Nullable Date expiryDate,
+            @NonNull Status status,
+            @Nullable Double deductibleType,
+            @Nullable Double deductibleIp,
+            @Nullable Double deductibleOp,
+            @Nullable Double ceilingIp,
+            @Nullable Double ceilingOp,
+            @Nullable Double antenatalAmountLeft,
+            @Nullable Double consultationAmountLeft,
+            @Nullable Double deliveryAmountLeft,
+            @Nullable Double hospitalizationAmountLeft,
+            @Nullable Double surgeryAmountLeft,
+            @Nullable Integer totalAdmissionsLeft,
+            @Nullable Integer totalAntenatalLeft,
+            @Nullable Integer totalConsultationsLeft,
+            @Nullable Integer totalDeliveriesLeft,
+            @Nullable Integer totalSurgeriesLeft,
             @Nullable Integer totalVisitsLeft,
             @Nullable Date validityTo
     ) {
