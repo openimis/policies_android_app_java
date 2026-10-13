@@ -21,6 +21,7 @@ import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.Shadows;
+import org.robolectric.annotation.Config;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -38,6 +39,7 @@ public class MainActivityTest {
     }
 
     @Test
+    @Config(qualifiers = "fr")
     public void french_locale_restored() {
         createActivity();
         assertEquals("fr", Locale.getDefault().getLanguage());
